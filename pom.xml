@@ -57,12 +57,24 @@
                 <version>2.2</version>
             </dependency>
 
+
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-bytes</artifactId>
+                <version>1.0.0-alapha-SNAPSHOT</version>
+            </dependency>
+
         </dependencies>
 
     </dependencyManagement>
 
     <dependencies>
 
+
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-bytes</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
