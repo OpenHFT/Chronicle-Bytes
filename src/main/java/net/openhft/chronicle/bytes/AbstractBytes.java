@@ -1,7 +1,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounter;
-import sun.jvm.hotspot.runtime.Bytes;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
