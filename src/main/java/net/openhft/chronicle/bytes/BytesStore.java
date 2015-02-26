@@ -43,6 +43,9 @@ public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>,
         return 0L;
     }
 
+    /**
+     * @return The maximum limit you can set.
+     */
     long capacity();
 
     /**
