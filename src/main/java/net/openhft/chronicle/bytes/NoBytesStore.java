@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
+
 import java.nio.ByteBuffer;
 
 /**
@@ -7,6 +9,9 @@ import java.nio.ByteBuffer;
  */
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
+
+    public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
+    public static final Bytes NO_BYTES = new BytesStoreBytes(NO_BYTES_STORE);
 
     @Override
     public void reserve() throws IllegalStateException {
@@ -123,6 +128,11 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public long address() throws UnsupportedOperationException {
+        return NO_PAGE;
+    }
+
+    @Override
     public void storeFence() {
         throw new UnsupportedOperationException();
     }
@@ -131,6 +141,7 @@ public enum NoBytesStore implements BytesStore {
     public void loadFence() {
         throw new UnsupportedOperationException();
     }
+
 
     @Override
     public void copyTo(BytesStore store) {

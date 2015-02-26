@@ -195,6 +195,11 @@ public class NativeStore implements BytesStore<NativeStore> {
         return this;
     }
 
+    @Override
+    public long address() {
+        return address;
+    }
+
     protected void performRelease() {
         cleaner.clean();
     }

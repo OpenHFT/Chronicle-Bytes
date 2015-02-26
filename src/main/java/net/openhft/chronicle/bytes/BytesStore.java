@@ -10,6 +10,10 @@ import java.util.function.Consumer;
  * A reference to some bytes with fixed extents.  Only offset access within the capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
+    static BytesStore wrap(byte[] bytes) {
+        return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
+    }
+
     static BytesStore wrap(ByteBuffer bb) {
         return bb.isDirect()
                 ? NativeStore.wrap(bb)

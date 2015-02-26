@@ -20,4 +20,5 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     default boolean skipTo(StopCharTester tester) {
         return BytesUtil.skipTo(this, tester);
     }
+
 }

@@ -1,11 +1,13 @@
 package net.openhft.chronicle.bytes;
 
+import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.function.Consumer;
 
 public interface Bytes extends BytesStore<Bytes>,
         StreamingDataInput<Bytes>, StreamingDataOutput<Bytes>,
-        ByteStringParser<Bytes>, ByteStringAppender<Bytes> {
+        ByteStringParser<Bytes>, ByteStringAppender<Bytes>,
+        CharSequence {
 
     long position();
 
@@ -14,6 +16,14 @@ public interface Bytes extends BytesStore<Bytes>,
     long limit();
 
     Bytes limit(long limit);
+
+    static Bytes wrap(ByteBuffer byteBuffer) {
+        return BytesStore.wrap(byteBuffer).bytes();
+    }
+
+    static Bytes wrap(byte[] byteArray) {
+        return BytesStore.wrap(byteArray).bytes();
+    }
 
     default Bytes writeLength8(Consumer<Bytes> writer) {
         long position = position();
@@ -42,6 +52,21 @@ public interface Bytes extends BytesStore<Bytes>,
         return ByteOrder.nativeOrder();
     }
 
+    @Override
+    default int length() {
+        return (int) Math.min(remaining(), Integer.MAX_VALUE);
+    }
+
+    @Override
+    default char charAt(int offset) {
+        return (char) readUnsignedByte(position() + offset);
+    }
+
+    @Override
+    default String subSequence(int start, int end) {
+        throw new UnsupportedOperationException();
+    }
+    
 /*
     Bytes writeLength16(Consumer<Bytes> writer);
 

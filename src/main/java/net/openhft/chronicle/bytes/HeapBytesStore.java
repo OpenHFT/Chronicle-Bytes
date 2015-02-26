@@ -183,6 +183,11 @@ public class HeapBytesStore implements BytesStore<HeapBytesStore> {
         return this;
     }
 
+    @Override
+    public long address() throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
     public Object getRetainedObject() {
         return retainedObject;
     }

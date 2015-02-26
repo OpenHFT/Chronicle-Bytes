@@ -398,6 +398,11 @@ public abstract class AbstractBytes implements Bytes {
         return bytesStore.compareAndSwapLong(offset2, expected, value);
     }
 
+    @Override
+    public long address() {
+        return bytesStore.address();
+    }
+
     protected long checkOffset(long offset, int adding) {
         if (offset < start()) throw new BufferUnderflowException();
         if (offset + adding > maximumLimit()) throw new BufferOverflowException();
@@ -408,5 +413,27 @@ public abstract class AbstractBytes implements Bytes {
     protected void finalize() throws Throwable {
         super.finalize();
         refCount.releaseAll();
+    }
+
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Bytes)) return false;
+        Bytes b2 = (Bytes) obj;
+        long remaining = remaining();
+        if (b2.remaining() != remaining) return false;
+        long i;
+        for (i = 0; i < remaining - 7; i += 8)
+            if (readLong(i) != b2.readLong(i))
+                return false;
+        for (i = 0; i < remaining; i++)
+            if (readByte(i) != b2.readByte(i))
+                return false;
+        return true;
     }
 }
