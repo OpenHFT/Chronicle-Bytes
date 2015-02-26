@@ -64,7 +64,7 @@ public abstract class AbstractBytes implements Bytes {
     @Override
     public Bytes position(long position) {
         if (position < start()) throw new BufferUnderflowException();
-        if (position >= limit())
+        if (position > limit())
             throw new BufferOverflowException();
         this.position = position;
         return this;

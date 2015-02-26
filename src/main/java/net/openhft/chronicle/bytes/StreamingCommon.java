@@ -31,8 +31,8 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
             limit(limit);
             bytesConsumer.accept((S) this);
         } finally {
-            position(limit);
             limit(limit0);
+            position(limit);
         }
         return (S) this;
     }
