@@ -55,7 +55,7 @@ public class NativeStore implements BytesStore<NativeStore> {
     }
 
     @Override
-    public long maximumLimit() {
+    public long capacity() {
         return maximumLimit;
     }
 
@@ -106,7 +106,7 @@ public class NativeStore implements BytesStore<NativeStore> {
 
     private long translate(long offset) {
         long offset2 = offset - start();
-        if (offset2 < 0 || offset2 >= maximumLimit())
+        if (offset2 < 0 || offset2 >= capacity())
             throw new IllegalArgumentException("Offset out of bounds");
         return offset2;
     }

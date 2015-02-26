@@ -35,7 +35,7 @@ public class NativeBytes extends AbstractBytes {
             throw new IllegalArgumentException();
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
-        long size = (Math.max(offset, bytesStore.maximumLimit() * 3 / 2) + ps) & ~(ps - 1);
+        long size = (Math.max(offset, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
         NativeStore store = NativeStore.lazyNativeStore(size);
         bytesStore.copyTo(store);
         bytesStore.release();
@@ -43,7 +43,7 @@ public class NativeBytes extends AbstractBytes {
     }
 
     @Override
-    public long maximumLimit() {
+    public long capacity() {
         return 1L << 40;
     }
 }

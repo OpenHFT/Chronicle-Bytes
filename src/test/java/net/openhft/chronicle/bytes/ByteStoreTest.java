@@ -35,7 +35,7 @@ import java.util.zip.GZIPOutputStream;
 
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  * User: peter.lawrey
@@ -60,24 +60,24 @@ public class ByteStoreTest {
 
     @Test
     public void testRead() throws Exception {
-        for (int i = 0; i < bytes.maximumLimit(); i++)
+        for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte(i, i);
         bytes.position(0);
-        for (int i = 0; i < bytes.maximumLimit(); i++)
+        for (int i = 0; i < bytes.capacity(); i++)
             assertEquals((byte) i, bytes.readByte());
-        for (int i = (int) (bytes.maximumLimit() - 1); i >= 0; i--) {
+        for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
             assertEquals((byte) i, bytes.readByte(i));
         }
     }
 
     @Test
     public void testReadFully() throws Exception {
-        for (int i = 0; i < bytes.maximumLimit(); i++)
+        for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
         bytes.position(0);
-        byte[] bytes = new byte[(int) this.bytes.maximumLimit()];
+        byte[] bytes = new byte[(int) this.bytes.capacity()];
         this.bytes.read(bytes);
-        for (int i = 0; i < this.bytes.maximumLimit(); i++)
+        for (int i = 0; i < this.bytes.capacity(); i++)
             Assert.assertEquals((byte) i, bytes[i]);
     }
 
@@ -91,9 +91,9 @@ public class ByteStoreTest {
 
     @Test
     public void testPosition() throws Exception {
-        for (int i = 0; i < bytes.maximumLimit(); i++)
+        for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
-        for (int i = (int) (bytes.maximumLimit() - 1); i >= 0; i--) {
+        for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
             bytes.position(i);
             assertEquals((byte) i, bytes.readByte());
         }
@@ -101,8 +101,8 @@ public class ByteStoreTest {
 
     @Test
     public void testCapacity() throws Exception {
-        assertEquals(SIZE, bytes.maximumLimit());
-        assertEquals(10, NativeStore.nativeStore(10).maximumLimit());
+        assertEquals(SIZE, bytes.capacity());
+        assertEquals(10, NativeStore.nativeStore(10).capacity());
     }
 
     @Test

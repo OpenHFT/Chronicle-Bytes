@@ -43,13 +43,13 @@ public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>,
         return 0L;
     }
 
-    long maximumLimit();
+    long capacity();
 
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
     default BytesStore with(long position, long length, Consumer<Bytes> bytesConsumer) {
-        if (position + length > maximumLimit())
+        if (position + length > capacity())
             throw new BufferUnderflowException();
         BytesStoreBytes bsb = new BytesStoreBytes(this);
         bsb.position(position);
@@ -66,7 +66,7 @@ public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>,
     }
 
     default long safeLimit() {
-        return maximumLimit();
+        return capacity();
     }
 
     void storeFence();

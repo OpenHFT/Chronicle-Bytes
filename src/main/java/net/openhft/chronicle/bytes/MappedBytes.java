@@ -31,7 +31,7 @@ public class MappedBytes extends AbstractBytes {
     }
 
     @Override
-    public long maximumLimit() {
+    public long capacity() {
         return mappedFile == null ? 0L : mappedFile.capacity();
     }
 

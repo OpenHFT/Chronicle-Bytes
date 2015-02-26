@@ -108,7 +108,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long maximumLimit() {
+    public long capacity() {
         return 0;
     }
 

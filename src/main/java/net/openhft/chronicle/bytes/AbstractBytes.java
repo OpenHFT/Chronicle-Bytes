@@ -37,7 +37,7 @@ public abstract class AbstractBytes implements Bytes {
 
     public Bytes clear() {
         position = start();
-        limit = maximumLimit();
+        limit = capacity();
         return this;
     }
 
@@ -47,8 +47,8 @@ public abstract class AbstractBytes implements Bytes {
     }
 
     @Override
-    public long maximumLimit() {
-        return bytesStore.maximumLimit();
+    public long capacity() {
+        return bytesStore.capacity();
     }
 
     @Override
@@ -73,7 +73,7 @@ public abstract class AbstractBytes implements Bytes {
     @Override
     public Bytes limit(long limit) {
         if (limit < start()) throw new BufferUnderflowException();
-        if (limit >= maximumLimit())
+        if (limit >= capacity())
             throw new BufferOverflowException();
         this.limit = limit;
         return this;
@@ -405,7 +405,7 @@ public abstract class AbstractBytes implements Bytes {
 
     protected long checkOffset(long offset, int adding) {
         if (offset < start()) throw new BufferUnderflowException();
-        if (offset + adding > maximumLimit()) throw new BufferOverflowException();
+        if (offset + adding > capacity()) throw new BufferOverflowException();
         return offset;
     }
 
