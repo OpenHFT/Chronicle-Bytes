@@ -8,6 +8,15 @@ public interface RandomCommon<S extends RandomCommon<S>> {
         return capacity();
     }
 
+    default long readLimit() {
+        return Math.min(realCapacity(), limit());
+    }
+
+    /**
+     * @return the actual amount of data which can be read.
+     */
+    long realCapacity();
+
     /**
      * @return the highest limit allowed for this buffer.
      */

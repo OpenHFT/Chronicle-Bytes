@@ -8,7 +8,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class MappedFileTest {
 
@@ -21,6 +21,7 @@ public class MappedFileTest {
 
         MappedBytesStore bs = mf.acquireByteStore(5 << 10);
         assertEquals(4 << 10, bs.start());
+        assertEquals(8 << 10, bs.capacity());
         Bytes bytes = bs.bytes();
         assertEquals(4 << 10, bytes.start());
         assertEquals(0L, bs.readLong(5 << 10));

@@ -501,22 +501,22 @@ public class ByteStoreTest {
     @Test
     public void testToString() {
         Bytes bytes = NativeStore.nativeStore(32).bytes();
-        assertEquals("[pos: 0, lim: 32, cap: 32 ] ٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 0, lim: 32, cap: 1099511627776 ] ٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(1);
-        assertEquals("[pos: 1, lim: 32, cap: 32 ] ⒈‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 1, lim: 32, cap: 1099511627776 ] ⒈‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(2);
-        assertEquals("[pos: 2, lim: 32, cap: 32 ] ⒈⒉‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 2, lim: 32, cap: 1099511627776 ] ⒈⒉‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(3);
-        assertEquals("[pos: 3, lim: 32, cap: 32 ] ⒈⒉⒊‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 3, lim: 32, cap: 1099511627776 ] ⒈⒉⒊‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(4);
-        assertEquals("[pos: 4, lim: 32, cap: 32 ] ⒈⒉⒊⒋‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 4, lim: 32, cap: 1099511627776 ] ⒈⒉⒊⒋‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(5);
-        assertEquals("[pos: 5, lim: 32, cap: 32 ] ⒈⒉⒊⒋⒌‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 5, lim: 32, cap: 1099511627776 ] ⒈⒉⒊⒋⒌‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(6);
-        assertEquals("[pos: 6, lim: 32, cap: 32 ] ⒈⒉⒊⒋⒌⒍‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 6, lim: 32, cap: 1099511627776 ] ⒈⒉⒊⒋⒌⒍‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(7);
-        assertEquals("[pos: 7, lim: 32, cap: 32 ] ⒈⒉⒊⒋⒌⒍⒎‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 7, lim: 32, cap: 1099511627776 ] ⒈⒉⒊⒋⒌⒍⒎‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(8);
-        assertEquals("[pos: 8, lim: 32, cap: 32 ] ⒈⒉⒊⒋⒌⒍⒎⒏‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
+        assertEquals("[pos: 8, lim: 32, cap: 1099511627776 ] ⒈⒉⒊⒋⒌⒍⒎⒏‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 }

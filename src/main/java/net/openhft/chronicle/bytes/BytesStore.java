@@ -9,7 +9,7 @@ import java.util.function.Consumer;
 /**
  * A reference to some bytes with fixed extents.  Only offset access within the capacity is possible.
  */
-public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
+public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
     static BytesStore wrap(byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
@@ -41,6 +41,13 @@ public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>,
      */
     default long start() {
         return 0L;
+    }
+
+    /**
+     * @return the actual capacity available before resizing.
+     */
+    default long realCapacity() {
+        return capacity();
     }
 
     /**
@@ -79,9 +86,12 @@ public interface BytesStore<B extends BytesStore<B>> extends RandomDataInput<B>,
 
     default void copyTo(BytesStore store) {
         Bytes b1 = bytes();
+        b1.limit(b1.realCapacity());
         Bytes b2 = store.bytes();
         b2.write(b1);
         b2.release();
         b1.release();
     }
+
+    Underlying underlyingObject();
 }

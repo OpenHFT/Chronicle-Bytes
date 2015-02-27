@@ -15,7 +15,7 @@ public class MappedBytes extends AbstractBytes {
 
     // assume the mapped file is reserved already.
     MappedBytes(MappedFile mappedFile) {
-        super(NoBytesStore.NO_BYTES_STORE);
+        super(NoBytesStore.noBytesStore());
         this.mappedFile = mappedFile;
         clear();
     }
@@ -51,7 +51,16 @@ public class MappedBytes extends AbstractBytes {
     }
 
     @Override
-    protected long checkOffset(long offset, int adding) {
+    protected long readCheckOffset(long offset, int adding) {
+        return checkOffset(offset);
+    }
+
+    @Override
+    protected long writeCheckOffset(long offset, int adding) {
+        return checkOffset(offset);
+    }
+
+    private long checkOffset(long offset) {
         if (!bytesStore.inStore(offset)) {
             BytesStore oldBS = bytesStore;
             try {
@@ -83,5 +92,10 @@ public class MappedBytes extends AbstractBytes {
     @Override
     public Bytes bytes() {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isElastic() {
+        return true;
     }
 }

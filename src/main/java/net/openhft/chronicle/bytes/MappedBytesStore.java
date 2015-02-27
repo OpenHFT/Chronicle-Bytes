@@ -8,9 +8,14 @@ public class MappedBytesStore extends NativeStore {
     private final long safeLimit;
 
     protected MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) {
-        super(address, start + capacity, new OS.Unmapper(address, capacity, owner));
+        super(address, start + capacity, new OS.Unmapper(address, capacity, owner), false);
         this.start = start;
         this.safeLimit = start + safeCapacity;
+    }
+
+    @Override
+    public Bytes<Void> bytes() {
+        return new BytesStoreBytes<>(this);
     }
 
     @Override

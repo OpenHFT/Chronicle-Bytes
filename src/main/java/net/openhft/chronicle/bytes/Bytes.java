@@ -4,28 +4,33 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.function.Consumer;
 
-public interface Bytes extends BytesStore<Bytes>,
-        StreamingDataInput<Bytes>, StreamingDataOutput<Bytes>,
-        ByteStringParser<Bytes>, ByteStringAppender<Bytes>,
+public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
+        StreamingDataInput<Bytes<Underlying>>, StreamingDataOutput<Bytes<Underlying>>,
+        ByteStringParser<Bytes<Underlying>>, ByteStringAppender<Bytes<Underlying>>,
         CharSequence {
 
     long position();
 
-    Bytes position(long position);
+    Bytes<Underlying> position(long position);
 
     long limit();
 
-    Bytes limit(long limit);
+    Bytes<Underlying> limit(long limit);
 
-    static Bytes wrap(ByteBuffer byteBuffer) {
+    static Bytes<ByteBuffer> elasticByteBuffer() {
+        return NativeStore.elasticByteBuffer().bytes();
+
+    }
+
+    static Bytes<ByteBuffer> wrap(ByteBuffer byteBuffer) {
         return BytesStore.wrap(byteBuffer).bytes();
     }
 
-    static Bytes wrap(byte[] byteArray) {
+    static Bytes<byte[]> wrap(byte[] byteArray) {
         return BytesStore.wrap(byteArray).bytes();
     }
 
-    default Bytes writeLength8(Consumer<Bytes> writer) {
+    default Bytes<Underlying> writeLength8(Consumer<Bytes<Underlying>> writer) {
         long position = position();
         writeUnsignedByte(0);
 
@@ -40,7 +45,7 @@ public interface Bytes extends BytesStore<Bytes>,
     }
 
 
-    default Bytes readLength8(Consumer<Bytes> reader) {
+    default Bytes<Underlying> readLength8(Consumer<Bytes<Underlying>> reader) {
         loadFence();
         int length = readUnsignedByte() - 1;
         if (length < 0)
@@ -66,7 +71,12 @@ public interface Bytes extends BytesStore<Bytes>,
     default String subSequence(int start, int end) {
         throw new UnsupportedOperationException();
     }
-    
+
+    /**
+     * @return can the Bytes resize when more data is written than it's realCapacity()
+     */
+    boolean isElastic();
+
 /*
     Bytes writeLength16(Consumer<Bytes> writer);
 

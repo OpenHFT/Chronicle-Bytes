@@ -10,8 +10,12 @@ import java.nio.ByteBuffer;
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 
+    public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
+        return NO_BYTES_STORE;
+    }
+
     public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
-    public static final Bytes NO_BYTES = new BytesStoreBytes(NO_BYTES_STORE);
+    public static final Bytes NO_BYTES = new BytesStoreBytes(noBytesStore());
 
     @Override
     public void reserve() throws IllegalStateException {
@@ -147,4 +151,10 @@ public enum NoBytesStore implements BytesStore {
     public void copyTo(BytesStore store) {
         // nothing to copy.
     }
+
+    @Override
+    public Void underlyingObject() {
+        return null;
+    }
+
 }

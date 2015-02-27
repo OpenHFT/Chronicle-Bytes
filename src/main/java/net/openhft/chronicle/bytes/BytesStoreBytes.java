@@ -1,6 +1,6 @@
 package net.openhft.chronicle.bytes;
 
-public class BytesStoreBytes extends AbstractBytes {
+public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> {
     public BytesStoreBytes(BytesStore bytesStore) {
         super(bytesStore);
     }
@@ -12,4 +12,8 @@ public class BytesStoreBytes extends AbstractBytes {
         clear();
     }
 
+    @Override
+    public boolean isElastic() {
+        return false;
+    }
 }

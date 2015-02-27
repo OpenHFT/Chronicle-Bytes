@@ -187,7 +187,7 @@ public enum BytesUtil {
 
     public static <IN extends RandomDataInput & StreamingCommon> String toDebugString(IN bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
-        sb.append("[pos: ").append(bytes.position()).append(", lim: ").append(bytes.limit()).append(", cap: ")
+        sb.append("[pos: ").append(bytes.position()).append(", lim: ").append(bytes.readLimit()).append(", cap: ")
                 .append(bytes.capacity()).append(" ] ");
         toString(bytes, sb, bytes.position() - maxLength, bytes.position(), bytes.position() + maxLength);
 
@@ -210,8 +210,8 @@ public enum BytesUtil {
                 }
                 sb.append('\u2016');
             }
-            if (end > bytes.limit())
-                end = bytes.limit();
+            if (end > bytes.readLimit())
+                end = bytes.readLimit();
             // after
             for (long i = position; i < end; i++) {
                 sb.append(bytes.printable(i));
@@ -226,7 +226,7 @@ public enum BytesUtil {
     }
 
     public static <IN extends RandomDataInput & StreamingCommon> void toString(IN bytes, StringBuilder sb) {
-        for (long i = bytes.position(); i < bytes.limit(); i++) {
+        for (long i = bytes.position(); i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
         }
     }
