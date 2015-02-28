@@ -77,6 +77,20 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     boolean isElastic();
 
+    /**
+     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not
+     * enough capacity then this method will throws {@link java.nio.BufferOverflowException}
+     *
+     * @param size the capacity that you required
+     * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough
+     *                                          space
+     */
+    default void ensureCapacity(long size) {
+        if (size > capacity())
+            // for the elastic buffer this will grow the buffer
+            writeByte(size, 0);
+    }
+
 /*
     Bytes writeLength16(Consumer<Bytes> writer);
 
