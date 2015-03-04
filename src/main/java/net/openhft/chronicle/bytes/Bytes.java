@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.function.Consumer;
@@ -100,4 +102,39 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     Bytes readLength32(Consumer<Bytes> writer);
 */
+
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @param buffer the buffer you wish to toString()
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
+    public static String toHex(@NotNull final Bytes buffer) {
+
+        if (buffer.remaining() == 0)
+            return "";
+
+        long position = buffer.position();
+        long limit = buffer.limit();
+
+        try {
+
+            final StringBuilder builder = new StringBuilder("[");
+
+            while (buffer.remaining() > 0) {
+                byte b = buffer.readByte();
+                char c = (char) b;
+                builder.append(c + "(" + String.format("%02X ", b).trim() + ")");
+                builder.append(",");
+            }
+
+            // remove the last comma
+            builder.deleteCharAt(builder.length() - 1);
+            builder.append("]");
+            return builder.toString();
+        } finally {
+            buffer.limit(limit);
+            buffer.position(position);
+        }
+    }
 }
