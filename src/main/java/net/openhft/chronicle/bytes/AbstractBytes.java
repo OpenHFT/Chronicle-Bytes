@@ -79,7 +79,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes limit(long limit) {
         if (limit < start()) throw new BufferUnderflowException();
-        if (limit >= capacity())
+        if (limit > capacity())
             throw new BufferOverflowException();
         this.limit = limit;
         return this;
