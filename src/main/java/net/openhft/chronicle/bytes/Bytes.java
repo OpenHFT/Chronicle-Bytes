@@ -137,4 +137,67 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             buffer.position(position);
         }
     }
+
+    /**
+     * Creates a string from the {@code position} to the  {@code limit}, The buffer is not modified
+     * by this call
+     *
+     * @param buffer the buffer to use
+     * @return a string contain the text from the {@code position}  to the  {@code limit}
+     */
+    public static String toDebugString(@NotNull final Bytes buffer) {
+
+        if (buffer.remaining() == 0)
+            return "";
+
+        long position = buffer.position();
+        long limit = buffer.limit();
+
+        try {
+
+            final StringBuilder builder = new StringBuilder();
+            while (buffer.remaining() > 0) {
+                builder.append((char) buffer.readByte());
+            }
+
+            // remove the last comma
+            return builder.toString();
+        } finally {
+            buffer.limit(limit);
+            buffer.position(position);
+        }
+    }
+
+    /**
+     * The buffer is not modified by this call
+     *
+     * @param buffer   the buffer to use
+     * @param position the position to create the string from
+     * @param len      the number of characters to show in the string
+     * @return a string contain the text from offset {@code position}
+     */
+    public static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
+
+        if (buffer.remaining() == 0)
+            return "";
+
+        long pos = buffer.position();
+        long limit = buffer.limit();
+        buffer.position(pos);
+        buffer.limit(position + len);
+
+        try {
+
+            final StringBuilder builder = new StringBuilder();
+            while (buffer.remaining() > 0) {
+                builder.append((char) buffer.readByte());
+            }
+
+            // remove the last comma
+            return builder.toString();
+        } finally {
+            buffer.limit(limit);
+            buffer.position(pos);
+        }
+    }
 }
