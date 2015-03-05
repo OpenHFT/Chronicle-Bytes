@@ -178,12 +178,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     public static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
 
-        if (buffer.remaining() == 0)
-            return "";
-
-        long pos = buffer.position();
-        long limit = buffer.limit();
-        buffer.position(pos);
+        final long pos = buffer.position();
+        final long limit = buffer.limit();
+        buffer.position(position);
         buffer.limit(position + len);
 
         try {
