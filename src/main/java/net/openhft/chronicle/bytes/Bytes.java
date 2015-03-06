@@ -4,6 +4,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.InvalidMarkException;
 import java.util.function.Consumer;
 
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
@@ -12,6 +13,25 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         CharSequence {
 
     long position();
+
+    long mark = -1;
+
+    /**
+     * Sets this buffer's mark at its position.
+     *
+     * @return This buffer
+     */
+    Bytes mark();
+
+    /**
+     * Resets this buffer's position to the previously-marked position.
+     *
+     * Invoking this method neither changes nor discards the mark's value.
+     *
+     * @return This buffer
+     * @throws InvalidMarkException If the mark has not been set
+     */
+    Bytes reset() throws InvalidMarkException;
 
     Bytes<Underlying> position(long position);
 

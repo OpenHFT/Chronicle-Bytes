@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.ReferenceCounter;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.InvalidMarkException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
@@ -15,11 +16,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     private long position, limit;
 
+    long mark = -1;
+
     public AbstractBytes(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         this.bytesStore = bytesStore;
         bytesStore.reserve();
         clear();
     }
+
 
     @Override
     public long realCapacity() {
@@ -454,4 +458,21 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Underlying underlyingObject() {
         return bytesStore.underlyingObject();
     }
+
+
+    @Override
+    public final Bytes mark() {
+        mark = position;
+        return this;
+    }
+
+    @Override
+    public final Bytes reset() {
+        long m = mark;
+        if (m < 0)
+            throw new InvalidMarkException();
+        position = m;
+        return this;
+    }
+
 }
