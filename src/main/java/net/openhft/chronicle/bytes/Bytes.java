@@ -189,6 +189,36 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
+     * Creates a string from the {@code position} to the  {@code limit}, The buffer is not modified
+     * by this call
+     *
+     * @param buffer the buffer to use
+     * @return a string contain the text from the {@code position}  to the  {@code limit}
+     */
+    public static String toDebugString(@NotNull final ByteBuffer buffer) {
+
+        if (buffer.remaining() == 0)
+            return "";
+
+        int position = buffer.position();
+        int limit = buffer.limit();
+
+        try {
+
+            final StringBuilder builder = new StringBuilder();
+            while (buffer.remaining() > 0) {
+                builder.append((char) buffer.get());
+            }
+
+            // remove the last comma
+            return builder.toString();
+        } finally {
+            buffer.limit(limit);
+            buffer.position(position);
+        }
+    }
+
+    /**
      * The buffer is not modified by this call
      *
      * @param buffer   the buffer to use
