@@ -98,4 +98,6 @@ public class MappedBytes extends AbstractBytes {
     public boolean isElastic() {
         return true;
     }
+
+
 }

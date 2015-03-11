@@ -305,6 +305,23 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+
+    @Override
+    public Bytes<Underlying> write(Bytes buffer, long offset, long length) {
+        long position = buffer.position();
+        long limit = buffer.limit();
+        try {
+            buffer.position(offset);
+            buffer.limit(offset + length);
+            write(buffer);
+        } finally {
+            buffer.limit(limit);
+            buffer.position(position);
+        }
+        return this;
+    }
+
+
     @Override
     public Bytes<Underlying> skip(long bytesToSkip) {
         position += bytesToSkip;

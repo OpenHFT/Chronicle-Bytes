@@ -55,11 +55,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     S write(Bytes bytes);
 
+    S write(Bytes buffer, long offset, long length);
+
     default S write(byte[] bytes) {
         return write(bytes, 0, bytes.length);
     }
 
     S write(byte[] bytes, int offset, int length);
+
 
     S write(ByteBuffer buffer);
 
