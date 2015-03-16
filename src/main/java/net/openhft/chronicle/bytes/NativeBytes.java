@@ -66,4 +66,9 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
     public boolean isElastic() {
         return true;
     }
+
+    @Override
+    public void ensureCapacity(long size) {
+        writeCheckOffset(size, 0);
+    }
 }

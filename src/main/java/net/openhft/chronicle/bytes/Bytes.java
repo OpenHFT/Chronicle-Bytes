@@ -108,9 +108,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *                                          space
      */
     default void ensureCapacity(long size) {
-        if (size > capacity())
-            // for the elastic buffer this will grow the buffer
-            writeByte(size, 0);
+        throw new UnsupportedOperationException("todo");
     }
 
 /*
