@@ -188,7 +188,7 @@ public enum BytesUtil {
     public static <IN extends RandomDataInput & StreamingCommon> String toDebugString(IN bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
         sb.append("[pos: ").append(bytes.position()).append(", lim: ").append(bytes.readLimit()).append(", cap: ")
-                .append(bytes.capacity()).append(" ] ");
+                .append(bytes.capacity() == 1L << 40 ? "1TiB" : bytes.capacity()).append(" ] ");
         toString(bytes, sb, bytes.position() - maxLength, bytes.position(), bytes.position() + maxLength);
 
         return sb.toString();
