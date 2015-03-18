@@ -82,6 +82,11 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public RandomDataOutput write(long offsetInRDO, Bytes bytes, long offset, long length) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public byte readByte(long offset) {
         throw new UnsupportedOperationException();
     }

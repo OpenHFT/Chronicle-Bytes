@@ -213,6 +213,16 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     @Override
+    public NativeStore<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+        if (bytes.isNative()) {
+            MEMORY.copyMemory(bytes.address(), address + translate(offsetInRDO), length);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+        return this;
+    }
+
+    @Override
     public long address() {
         return address;
     }

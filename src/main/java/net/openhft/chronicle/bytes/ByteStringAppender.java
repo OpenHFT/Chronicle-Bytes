@@ -15,6 +15,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    default B append(long offset, long value, int digits) {
+        BytesUtil.append((RandomDataOutput & ByteStringAppender) this, offset, value, digits);
+        return (B) this;
+    }
+
     default B append(float f) {
         BytesUtil.append(this, f);
         return (B) this;

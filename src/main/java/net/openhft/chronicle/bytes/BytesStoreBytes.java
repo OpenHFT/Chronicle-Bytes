@@ -12,6 +12,12 @@ public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> {
         clear();
     }
 
+    public void setByteStore(BytesStore byteStore, long position, long length) {
+        setBytesStore(byteStore);
+        limit(position + length);
+        position(position);
+    }
+
     @Override
     public boolean isElastic() {
         return false;

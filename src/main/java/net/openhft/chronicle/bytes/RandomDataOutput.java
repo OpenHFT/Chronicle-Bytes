@@ -48,4 +48,10 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> {
     R write(long offsetInRDO, byte[] bytes, int offset, int length);
 
     R write(long offsetInRDO, ByteBuffer bytes, int offset, int length);
+
+    default R write(long offsetInRDO, Bytes bytes) {
+        return write(offsetInRDO, bytes, bytes.position(), bytes.remaining());
+    }
+
+    R write(long offsetInRDO, Bytes bytes, long offset, long length);
 }

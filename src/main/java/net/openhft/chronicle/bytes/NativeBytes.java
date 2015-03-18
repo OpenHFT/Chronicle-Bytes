@@ -27,7 +27,7 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
     }
 
     @Override
-    protected long writeCheckOffset(long offset, int adding) {
+    protected long writeCheckOffset(long offset, long adding) {
         if (!bytesStore.inStore(offset))
             checkResize(offset);
         return offset;
@@ -70,5 +70,10 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
     @Override
     public void ensureCapacity(long size) {
         writeCheckOffset(size, 0);
+    }
+
+    @Override
+    public boolean isNative() {
+        return true;
     }
 }

@@ -5,7 +5,6 @@ import net.openhft.chronicle.core.OS;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 
 /**
  * Created by peter.lawrey on 24/02/15.
@@ -25,7 +24,7 @@ public class MappedBytes extends AbstractBytes {
     }
 
     public static MappedBytes mappedBytes(File file, long chunkSize) throws FileNotFoundException {
-        MappedFile rw = new MappedFile(new RandomAccessFile(file, "rw"), chunkSize, OS.pageSize());
+        MappedFile rw = new MappedFile(file, chunkSize, OS.pageSize());
         MappedBytes bytes = new MappedBytes(rw);
         return bytes;
     }
@@ -56,7 +55,7 @@ public class MappedBytes extends AbstractBytes {
     }
 
     @Override
-    protected long writeCheckOffset(long offset, int adding) {
+    protected long writeCheckOffset(long offset, long adding) {
         return checkOffset(offset);
     }
 

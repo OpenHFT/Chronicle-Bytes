@@ -275,6 +275,28 @@ public enum BytesUtil {
         }
     }
 
+    public static <S extends RandomDataOutput & ByteStringAppender> void append(S out, long offset, long num, int digits) {
+        boolean negative = num < 0;
+        num = Math.abs(num);
+        while (digits > 1) {
+            out.writeByte(offset + digits, (byte) (num % 10 + '0'));
+            num /= 10;
+        }
+        if (negative) {
+            if (num != 0)
+                numberTooLarge(digits);
+            out.writeByte(offset, '-');
+        } else {
+            if (num > 9)
+                numberTooLarge(digits);
+            out.writeByte(offset + digits, (byte) (num % 10 + '0'));
+        }
+    }
+
+    public static void numberTooLarge(int digits) {
+        throw new IllegalArgumentException("Number too large for " + digits + "digits");
+    }
+
     private static void appendLong0(StreamingDataOutput out, long num) {
         byte[] numberBuffer = NUMBER_BUFFER.get();
         // Extract digits into the end of the numberBuffer
@@ -683,6 +705,22 @@ public enum BytesUtil {
         boolean negative = false;
         while (true) {
             int b = in.readUnsignedByte();
+            // if (b >= '0' && b <= '9')
+            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
+                num = num * 10 + b - '0';
+            else if (b == '-')
+                negative = true;
+            else
+                break;
+        }
+        return negative ? -num : num;
+    }
+
+    public static long parseLong(RandomDataInput in, long offset) {
+        long num = 0;
+        boolean negative = false;
+        while (true) {
+            int b = in.readUnsignedByte(offset++);
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
                 num = num * 10 + b - '0';

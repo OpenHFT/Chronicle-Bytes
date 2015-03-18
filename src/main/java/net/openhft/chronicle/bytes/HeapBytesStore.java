@@ -186,6 +186,11 @@ public class HeapBytesStore<Underlying> implements BytesStore<HeapBytesStore<Und
     }
 
     @Override
+    public HeapBytesStore<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public long address() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
@@ -193,5 +198,10 @@ public class HeapBytesStore<Underlying> implements BytesStore<HeapBytesStore<Und
     @Override
     public Underlying underlyingObject() {
         return underlyingObject;
+    }
+
+    @Override
+    public boolean isNative() {
+        return false;
     }
 }

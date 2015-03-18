@@ -362,6 +362,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public Bytes<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+        long offsetInRDO1 = writeCheckOffset(offsetInRDO, length);
+        bytesStore.write(offsetInRDO1, bytes, offset, length);
+        return this;
+    }
+
+    @Override
     public Bytes<Underlying> writeOrderedLong(long offset, long i) {
         long offset2 = writeCheckOffset(offset, 8);
         bytesStore.writeOrderedLong(offset2, i);
@@ -436,7 +443,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return offset;
     }
 
-    protected long writeCheckOffset(long offset, int adding) {
+    protected long writeCheckOffset(long offset, long adding) {
         if (offset < start()) throw new BufferUnderflowException();
         if (offset + adding > capacity()) throw new BufferOverflowException();
         return offset;

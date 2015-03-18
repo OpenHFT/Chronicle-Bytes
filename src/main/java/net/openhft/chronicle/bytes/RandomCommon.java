@@ -33,4 +33,6 @@ public interface RandomCommon<S extends RandomCommon<S>> {
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
      */
     long address() throws UnsupportedOperationException;
+
+    boolean isNative();
 }

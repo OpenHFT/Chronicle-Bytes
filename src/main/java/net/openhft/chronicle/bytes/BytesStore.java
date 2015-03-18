@@ -94,4 +94,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> ext
     }
 
     Underlying underlyingObject();
+
+    @Override
+    default boolean isNative() {
+        return underlyingObject() == null;
+    }
 }

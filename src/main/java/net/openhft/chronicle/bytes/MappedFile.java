@@ -19,18 +19,20 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MappedFile implements ReferenceCounted {
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
 
+    private final File file;
     private final RandomAccessFile raf;
-
     private final FileChannel fileChannel;
     private final long chunkSize;
     private final long overlapSize;
+
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
     private final AtomicBoolean closed = new AtomicBoolean();
     private final ThreadLocal<WeakReference<Bytes>> threadLocalBytes = new ThreadLocal<>();
     private final long capacity;
 
-    MappedFile(RandomAccessFile raf, long chunkSize, long overlapSize) {
-        this.raf = raf;
+    MappedFile(File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+        this.file = file;
+        this.raf = new RandomAccessFile(file, "rw");
         this.fileChannel = raf.getChannel();
         this.chunkSize = Maths.nextPower2(chunkSize, OS.pageSize());
         this.overlapSize = overlapSize == 0 ? 0 : Maths.nextPower2(overlapSize, OS.pageSize());
@@ -46,7 +48,7 @@ public class MappedFile implements ReferenceCounted {
     }
 
     public static MappedFile mappedFile(File file, long chunkSize, long overlapSize) throws FileNotFoundException {
-        return new MappedFile(new RandomAccessFile(file, "rw"), chunkSize, overlapSize);
+        return new MappedFile(file, chunkSize, overlapSize);
     }
 
     public MappedBytesStore acquireByteStore(long position) throws IOException {
@@ -175,5 +177,9 @@ public class MappedFile implements ReferenceCounted {
 
     public long capacity() {
         return capacity;
+    }
+
+    public String name() {
+        return file.getName();
     }
 }
