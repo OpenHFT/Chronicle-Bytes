@@ -453,9 +453,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long readCheckOffset(long offset, int adding) {
         if (offset < start())
             throw new BufferUnderflowException();
-        long limit1 = limit();
-        if (offset + adding > limit1) {
-            assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit + ",offset=" + offset + ",adding=" + adding;
+        long limit0 = limit();
+        if (offset + adding > limit0) {
+            assert false : "cant add bytes past the limit : limit=" + limit0 + ",offset=" + offset +
+                    ",adding=" + adding;
             throw new BufferOverflowException();
         }
         return offset;

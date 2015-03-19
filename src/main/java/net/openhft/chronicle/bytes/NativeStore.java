@@ -47,11 +47,15 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     public static NativeStore<Void> nativeStore(long capacity) {
-        return of(capacity, true);
+        return of(capacity, true, false);
+    }
+
+    public static NativeStore<Void> nativeElasticStore(long capacity) {
+        return of(capacity, true, true);
     }
 
     public static NativeStore<Void> lazyNativeStore(long capacity) {
-        return of(capacity, false);
+        return of(capacity, false, false);
     }
 
     public static NativeStore<ByteBuffer> elasticByteBuffer() {
@@ -62,14 +66,14 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
         return new NativeStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
-    private static NativeStore<Void> of(long capacity, boolean zeroOut) {
+    private static NativeStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
         long address = MEMORY.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
             MEMORY.setMemory(address, capacity, (byte) 0);
             MEMORY.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
-        return new NativeStore<>(address, capacity, deallocator, false);
+        return new NativeStore<>(address, capacity, deallocator, elastic);
     }
 
     @Override

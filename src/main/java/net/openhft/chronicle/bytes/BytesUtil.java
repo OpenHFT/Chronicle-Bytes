@@ -280,7 +280,7 @@ public enum BytesUtil {
         boolean negative = num < 0;
         num = Math.abs(num);
         while (digits > 1) {
-            out.writeByte(offset + digits, (byte) (num % 10 + '0'));
+            out.writeByte(offset + digits--, (byte) (num % 10 + '0'));
             num /= 10;
         }
         if (negative) {
@@ -704,7 +704,7 @@ public enum BytesUtil {
     public static long parseLong(StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
-        while (true) {
+        while (in.remaining() >0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
