@@ -18,14 +18,51 @@
 
 package net.openhft.chronicle.bytes;
 
-import junit.framework.TestCase;
 import org.junit.Assert;
+import org.junit.Test;
 
-public class ByteStringParserTest extends TestCase {
+public class ByteStringParserTest   {
 
+    @Test
     public void testParseLong() throws Exception {
         Bytes b = Bytes.elasticByteBuffer();
         long expected = 123L;
+        b.append(expected);
+        b.flip();
+        Assert.assertEquals(expected,BytesUtil.parseLong(b));
+    }
+
+    @Test
+    public void testParseInt() throws Exception {
+        Bytes b = Bytes.elasticByteBuffer();
+        int expected = 123;
+        b.append(expected);
+        b.flip();
+        Assert.assertEquals(expected,BytesUtil.parseLong(b));
+    }
+
+    @Test
+    public void testParseDouble() throws Exception {
+        Bytes b = Bytes.elasticByteBuffer();
+        double expected = 123.1234;
+        b.append(expected);
+        b.flip();
+        Assert.assertEquals(expected,BytesUtil.parseDouble(b));
+    }
+
+    @Test
+    public void testParseFloat() throws Exception {
+        Bytes b = Bytes.elasticByteBuffer();
+        float expected = 123;
+        b.append(expected);
+        b.flip();
+        Assert.assertEquals(expected,BytesUtil.parseDouble(b));
+    }
+
+    @Test
+    public void testParseShort() throws Exception {
+        Bytes b = Bytes.elasticByteBuffer();
+        short expected = 123;
         b.append(expected);
         b.flip();
         Assert.assertEquals(expected,BytesUtil.parseLong(b));
