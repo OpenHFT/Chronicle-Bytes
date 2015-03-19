@@ -99,4 +99,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> ext
     default boolean isNative() {
         return underlyingObject() == null;
     }
+
+
+    default B zeroOut(long start, long end) {
+        throw new UnsupportedOperationException();
+    }
 }

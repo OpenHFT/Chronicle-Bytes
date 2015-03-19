@@ -14,7 +14,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore = NoBytesStore.noBytesStore();
 
-    private long position, limit;
+    private long position;
+    private long limit;
 
     long mark = -1;
 
@@ -47,7 +48,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     public Bytes clear() {
         position = start();
-        limit = capacity();
+        limit = isElastic() ? capacity() : realCapacity();
         return this;
     }
 
@@ -82,9 +83,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public Bytes limit(long limit) {
-        if (limit < start()) throw new BufferUnderflowException();
-        if (limit > capacity())
+
+        if (limit < start()) throw
+                new BufferUnderflowException();
+        long capacity = capacity();
+        if (limit > capacity) {
+            assert false : "cant set limit=" + limit + " > " + "capacity=" + capacity;
             throw new BufferOverflowException();
+        }
         this.limit = limit;
         return this;
     }
@@ -237,12 +243,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long writeOffsetPositionMoved(int adding) {
         long offset = writeCheckOffset(position, adding);
         position += adding;
+        assert position <= limit();
         return offset;
     }
 
     protected long readOffsetPositionMoved(int adding) {
         long offset = readCheckOffset(position, adding);
         position += adding;
+        assert position <= limit();
         return offset;
     }
 
@@ -311,8 +319,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long position = buffer.position();
         long limit = buffer.limit();
         try {
-            buffer.position(offset);
             buffer.limit(offset + length);
+            buffer.position(offset);
             write(buffer);
         } finally {
             buffer.limit(limit);
@@ -325,6 +333,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> skip(long bytesToSkip) {
         position += bytesToSkip;
+        assert position <= limit();
         readOffsetPositionMoved(0);
         return this;
     }
@@ -333,11 +342,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> flip() {
         limit = position;
         position = start();
+        assert limit >= start();
         return this;
     }
 
+    @Override
     public String toString() {
-        return remaining() > 1 << 30 ? "[Bytes too large]" : BytesUtil.toString(this);
+        return "position=" + position() + ",limit=" + limit() + ",realCapacity=" +
+                realCapacity() + " capacity=" + capacity() + ", remaining=" + remaining();
     }
 
     @Override
@@ -403,6 +415,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> write(ByteBuffer buffer) {
         bytesStore.write(position, buffer, buffer.position(), buffer.limit());
         position += buffer.remaining();
+        assert position <= limit();
         return this;
     }
 
@@ -438,14 +451,26 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     protected long readCheckOffset(long offset, int adding) {
-        if (offset < start()) throw new BufferUnderflowException();
-        if (offset + adding > capacity()) throw new BufferOverflowException();
+        if (offset < start())
+            throw new BufferUnderflowException();
+        long limit1 = limit();
+        if (offset + adding > limit1) {
+            assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit + ",offset=" + offset + ",adding=" + adding;
+            throw new BufferOverflowException();
+        }
         return offset;
     }
 
     protected long writeCheckOffset(long offset, long adding) {
-        if (offset < start()) throw new BufferUnderflowException();
-        if (offset + adding > capacity()) throw new BufferOverflowException();
+        if (offset < start())
+            throw new BufferUnderflowException();
+        if (offset + adding > limit()) {
+            assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit +
+                    ",offset=" +
+                    offset +
+                    ",adding=" + adding;
+            throw new BufferOverflowException();
+        }
         return offset;
     }
 
@@ -495,6 +520,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long m = mark;
         if (m < 0)
             throw new InvalidMarkException();
+        assert position <= limit();
         position = m;
         return this;
     }

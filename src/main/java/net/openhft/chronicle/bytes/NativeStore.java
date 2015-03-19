@@ -9,7 +9,8 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
-public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlying>, Underlying> {
+public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlying>, Underlying>,
+        AutoCloseable {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -68,7 +69,7 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
             MEMORY.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
-        return new NativeStore<>(address, capacity, deallocator, true);
+        return new NativeStore<>(address, capacity, deallocator, false);
     }
 
     @Override
@@ -89,6 +90,11 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     @Override
     public void reserve() {
         refCount.reserve();
+    }
+
+    @Override
+    public long realCapacity() {
+        return maximumLimit;
     }
 
     @Override
@@ -205,7 +211,7 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     @Override
     public NativeStore<Underlying> write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            MEMORY.copyMemory(((DirectBuffer) bytes).address(), address + translate(offsetInRDO), length);
+            MEMORY.copyMemory(((DirectBuffer) bytes).address()+offset, address + translate(offsetInRDO), length);
         } else {
             MEMORY.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
         }
@@ -215,7 +221,7 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     @Override
     public NativeStore<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
         if (bytes.isNative()) {
-            MEMORY.copyMemory(bytes.address(), address + translate(offsetInRDO), length);
+            MEMORY.copyMemory(bytes.address()+offset, address + translate(offsetInRDO), length);
         } else {
             throw new UnsupportedOperationException();
         }
@@ -238,6 +244,35 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
 
     public boolean isElastic() {
         return elastic;
+    }
+
+    /**
+     * calls release
+     *
+     * @throws Exception
+     */
+    @Override
+    public void close() throws Exception {
+        release();
+    }
+
+    @Override
+    public NativeStore<Underlying> zeroOut(long start, long end) {
+
+        if (start < 0 || end > limit())
+            throw new IllegalArgumentException("start: " + start + ", end: " + end);
+        if (start >= end)
+            return this;
+
+        MEMORY.setMemory(address + translate(start), end - start, (byte) 0);
+        return this;
+
+    }
+
+    @Override
+    public String toString() {
+        return "limit=" + limit() + ",realCapacity=" + realCapacity() + ", capacity=" +
+                capacity();
     }
 
     static class Deallocator implements Runnable {

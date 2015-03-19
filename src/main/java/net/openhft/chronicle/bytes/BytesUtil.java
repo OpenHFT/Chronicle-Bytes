@@ -20,6 +20,7 @@ public enum BytesUtil {
 
     public static void parseUTF(StreamingDataInput bytes, StringBuilder appendable, int utflen) throws UTFDataFormatRuntimeException {
         int count = 0;
+        assert bytes.remaining() >= utflen;
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {

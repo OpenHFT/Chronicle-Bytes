@@ -128,8 +128,18 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     public static String toHex(@NotNull final Bytes buffer) {
+        return toHex(buffer, buffer.position(), buffer.remaining());
+    }
 
-        if (buffer.remaining() == 0)
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @param buffer the buffer you wish to toString()
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
+    public static String toHex(@NotNull final Bytes buffer, long offset, long len) {
+
+        if (len == 0)
             return "";
 
         long position = buffer.position();
@@ -137,12 +147,17 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
         try {
 
+            buffer.limit(offset + len);
+            buffer.position(offset);
+
             final StringBuilder builder = new StringBuilder("[");
 
             while (buffer.remaining() > 0) {
+
+                long pos = buffer.position();
                 byte b = buffer.readByte();
                 char c = (char) b;
-                builder.append(c + "(" + String.format("%02X ", b).trim() + ")");
+                builder.append(c + "(" + String.format("%02X ", b).trim() + ")[" + pos + "]");
                 builder.append(",");
             }
 
@@ -153,6 +168,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         } finally {
             buffer.limit(limit);
             buffer.position(position);
+
         }
     }
 

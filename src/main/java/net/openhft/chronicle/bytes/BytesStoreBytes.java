@@ -22,4 +22,10 @@ public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> {
     public boolean isElastic() {
         return false;
     }
+
+    @Override
+    public long realCapacity() {
+        return bytesStore.realCapacity();
+    }
+
 }

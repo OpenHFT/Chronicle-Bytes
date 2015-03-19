@@ -54,4 +54,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> {
     }
 
     R write(long offsetInRDO, Bytes bytes, long offset, long length);
+
+    R zeroOut(long start, long end) ;
 }
