@@ -276,21 +276,39 @@ public enum BytesUtil {
         }
     }
 
-    public static <S extends RandomDataOutput & ByteStringAppender> void append(S out, long offset, long num, int digits) {
+
+    // Requires positive x
+    static int longStringSize(long x) {
+        long p = 10;
+        for (int i = 1; i < 19; i++) {
+            if (x < p)
+                return i;
+            p = 10 * p;
+        }
+        return 19;
+    }
+
+    public static <S extends RandomDataOutput & ByteStringAppender>
+    void append(S out, long offset, long num) {
+
+        int digests = (num < 0) ? longStringSize(-num) + 1 : longStringSize(num);
+
         boolean negative = num < 0;
         num = Math.abs(num);
-        while (digits > 1) {
-            out.writeByte(offset + digits--, (byte) (num % 10 + '0'));
+
+
+        while (digests > 0) {
+            out.writeByte(offset + digests--, (byte) (num % 10 + '0'));
             num /= 10;
         }
         if (negative) {
             if (num != 0)
-                numberTooLarge(digits);
+                numberTooLarge(digests);
             out.writeByte(offset, '-');
         } else {
             if (num > 9)
-                numberTooLarge(digits);
-            out.writeByte(offset + digits, (byte) (num % 10 + '0'));
+                numberTooLarge(digests);
+            out.writeByte(offset + digests, (byte) (num % 10 + '0'));
         }
     }
 

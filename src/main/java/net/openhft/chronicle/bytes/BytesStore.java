@@ -100,8 +100,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> ext
         return underlyingObject() == null;
     }
 
-
     default B zeroOut(long start, long end) {
-        throw new UnsupportedOperationException();
+        return (B) bytes().zeroOut(start, end);
     }
+
 }
