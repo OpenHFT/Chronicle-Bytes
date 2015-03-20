@@ -77,9 +77,5 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
         return true;
     }
 
-    @Override
-    public Bytes<Underlying> zeroOut(long start, long end) {
-        bytesStore.zeroOut(start, end);
-        return this;
-    }
+
 }

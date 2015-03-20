@@ -243,7 +243,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     public static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
 
         final long pos = buffer.position();
-        final long limit = buffer.limit();
+        final long limit = buffer.readLimit();
         buffer.position(position);
         buffer.limit(position + len);
 
