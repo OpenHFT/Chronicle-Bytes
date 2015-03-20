@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounter;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -19,7 +20,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     long mark = -1;
 
-    public AbstractBytes(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    public AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         this.bytesStore = bytesStore;
         bytesStore.reserve();
         clear();
