@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes;
 
+import java.nio.ByteOrder;
+
 public interface RandomCommon<S extends RandomCommon<S>> {
     /**
      * @return the highest offset or position allowed for this buffer.
@@ -22,10 +24,6 @@ public interface RandomCommon<S extends RandomCommon<S>> {
      */
     long capacity();
 
-    boolean compareAndSwapInt(long offset, int expected, int value);
-
-    boolean compareAndSwapLong(long offset, long expected, long value);
-
     /**
      * Obtain the underlying address.  This is for expert users only.
      *
@@ -35,4 +33,8 @@ public interface RandomCommon<S extends RandomCommon<S>> {
     long address() throws UnsupportedOperationException;
 
     boolean isNative();
+
+    default ByteOrder byteOrder() {
+        return ByteOrder.nativeOrder();
+    }
 }

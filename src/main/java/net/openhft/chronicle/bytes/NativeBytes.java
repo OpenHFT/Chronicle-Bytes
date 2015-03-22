@@ -6,7 +6,7 @@ import net.openhft.chronicle.core.OS;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.bytes.NativeStore.nativeStore;
+import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStore;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 /**
@@ -46,11 +46,11 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
         long size = (Math.max(offset, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
-        NativeStore store;
+        NativeBytesStore store;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
-            store = NativeStore.elasticByteBuffer(Maths.toInt32(size));
+            store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));
         } else {
-            store = NativeStore.lazyNativeStore(size);
+            store = NativeBytesStore.lazyNativeStore(size);
         }
         bytesStore.copyTo(store);
         bytesStore.release();

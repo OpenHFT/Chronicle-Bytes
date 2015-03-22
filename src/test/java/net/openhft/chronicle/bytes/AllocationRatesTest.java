@@ -73,9 +73,9 @@ public class AllocationRatesTest {
     private long timeDirectStoreAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            NativeStore[] ds = new NativeStore[BATCH];
+            NativeBytesStore[] ds = new NativeBytesStore[BATCH];
             for (int j = 0; j < BATCH; j++)
-                ds[j] = NativeStore.lazyNativeStore(BUFFER_SIZE);
+                ds[j] = NativeBytesStore.lazyNativeStore(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
                 ds[j].release();
                 assertEquals(0, ds[j].refCount());

@@ -9,8 +9,8 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
-public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlying>, Underlying>,
-        AutoCloseable {
+public class NativeBytesStore<Underlying>
+        implements BytesStore<NativeBytesStore<Underlying>, Underlying>, AutoCloseable {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -21,7 +21,7 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     protected long address;
     private long maximumLimit;
 
-    private NativeStore(ByteBuffer bb, boolean elastic) {
+    private NativeBytesStore(ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
         this.address = ((DirectBuffer) bb).address();
@@ -29,11 +29,12 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
         cleaner = ((DirectBuffer) bb).cleaner();
     }
 
-    static NativeStore<ByteBuffer> wrap(ByteBuffer bb) {
-        return new NativeStore<>(bb, false);
+    static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+        return new NativeBytesStore<>(bb, false);
     }
 
-    protected NativeStore(long address, long maximumLimit, Runnable deallocator, boolean elastic) {
+    protected NativeBytesStore(
+            long address, long maximumLimit, Runnable deallocator, boolean elastic) {
         this.address = address;
         this.maximumLimit = maximumLimit;
         cleaner = Cleaner.create(this, deallocator);
@@ -46,34 +47,30 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
         return elastic ? new NativeBytes<>(this) : new BytesStoreBytes<>(this);
     }
 
-    public static NativeStore<Void> nativeStore(long capacity) {
-        return of(capacity, true, false);
+    public static NativeBytesStore<Void> nativeStore(long capacity) {
+        return of(capacity, true);
     }
 
-    public static NativeStore<Void> nativeElasticStore(long capacity) {
-        return of(capacity, true, true);
+    public static NativeBytesStore<Void> lazyNativeStore(long capacity) {
+        return of(capacity, false);
     }
 
-    public static NativeStore<Void> lazyNativeStore(long capacity) {
-        return of(capacity, false, false);
-    }
-
-    public static NativeStore<ByteBuffer> elasticByteBuffer() {
+    public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(OS.pageSize());
     }
 
-    public static NativeStore<ByteBuffer> elasticByteBuffer(int size) {
-        return new NativeStore<>(ByteBuffer.allocateDirect(size), true);
+    public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size) {
+        return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
-    private static NativeStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
+    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut) {
         long address = MEMORY.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
             MEMORY.setMemory(address, capacity, (byte) 0);
             MEMORY.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
-        return new NativeStore<>(address, capacity, deallocator, elastic);
+        return new NativeBytesStore<>(address, capacity, deallocator, true);
     }
 
     @Override
@@ -149,49 +146,50 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     @Override
-    public NativeStore<Underlying> writeByte(long offset, byte i8) {
+    public NativeBytesStore<Underlying> writeByte(long offset, byte i8) {
         MEMORY.writeByte(address + translate(offset), i8);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeShort(long offset, short i16) {
+    public NativeBytesStore<Underlying> writeShort(long offset, short i16) {
         MEMORY.writeShort(address + translate(offset), i16);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeInt(long offset, int i32) {
+    public NativeBytesStore<Underlying> writeInt(long offset, int i32) {
         MEMORY.writeInt(address + translate(offset), i32);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeOrderedInt(long offset, int i) {
+    public NativeBytesStore<Underlying> writeOrderedInt(long offset, int i) {
         MEMORY.writeOrderedInt(address + translate(offset), i);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeLong(long offset, long i64) {
+    public NativeBytesStore<Underlying> writeLong(long offset, long i64) {
         MEMORY.writeLong(address + translate(offset), i64);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeFloat(long offset, float f) {
+    public NativeBytesStore<Underlying> writeFloat(long offset, float f) {
         MEMORY.writeFloat(address + translate(offset), f);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> writeDouble(long offset, double d) {
+    public NativeBytesStore<Underlying> writeDouble(long offset, double d) {
         MEMORY.writeDouble(address + translate(offset), d);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) {
+    public NativeBytesStore<Underlying> write(
+            long offsetInRDO, byte[] bytes, int offset, int length) {
         MEMORY.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
         return this;
     }
@@ -207,15 +205,17 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     @Override
-    public NativeStore<Underlying> writeOrderedLong(long offset, long i) {
+    public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
         MEMORY.writeOrderedLong(address + translate(offset), i);
         return this;
     }
 
     @Override
-    public NativeStore<Underlying> write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public NativeBytesStore<Underlying> write(
+            long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            MEMORY.copyMemory(((DirectBuffer) bytes).address()+offset, address + translate(offsetInRDO), length);
+            MEMORY.copyMemory(((DirectBuffer) bytes).address(),
+                    address + translate(offsetInRDO), length);
         } else {
             MEMORY.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
         }
@@ -223,7 +223,8 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     @Override
-    public NativeStore<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+    public NativeBytesStore<Underlying> write(
+            long offsetInRDO, Bytes bytes, long offset, long length) {
         if (bytes.isNative()) {
             MEMORY.copyMemory(bytes.address()+offset, address + translate(offsetInRDO), length);
         } else {
@@ -261,7 +262,7 @@ public class NativeStore<Underlying> implements BytesStore<NativeStore<Underlyin
     }
 
     @Override
-    public NativeStore<Underlying> zeroOut(long start, long end) {
+    public NativeBytesStore<Underlying> zeroOut(long start, long end) {
 
         if (start < 0 || end > limit())
             throw new IllegalArgumentException("start: " + start + ", end: " + end);

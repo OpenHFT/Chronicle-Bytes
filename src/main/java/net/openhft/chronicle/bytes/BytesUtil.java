@@ -760,7 +760,7 @@ public enum BytesUtil {
         return false;
     }
 
-    public static int getAndAddInt(RandomDataInput in, long offset, int adding) {
+    public static int getAndAddInt(Bytes in, long offset, int adding) {
         for (; ; ) {
             int value = in.readVolatileInt(offset);
             if (in.compareAndSwapInt(offset, value, value + adding))
@@ -768,7 +768,7 @@ public enum BytesUtil {
         }
     }
 
-    public static long getAndAddLong(RandomDataInput in, long offset, long adding) {
+    public static long getAndAddLong(Bytes in, long offset, long adding) {
         for (; ; ) {
             long value = in.readVolatileLong(offset);
             if (in.compareAndSwapLong(offset, value, value + adding))

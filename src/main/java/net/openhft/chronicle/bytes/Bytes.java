@@ -3,7 +3,6 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
-import java.nio.ByteOrder;
 import java.nio.InvalidMarkException;
 import java.util.function.Consumer;
 
@@ -40,7 +39,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     Bytes<Underlying> limit(long limit);
 
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        return NativeStore.elasticByteBuffer().bytes();
+        return NativeBytesStore.elasticByteBuffer().bytes();
 
     }
 
@@ -75,10 +74,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return withLength(length, reader);
     }
 
-    default ByteOrder byteOrder() {
-        return ByteOrder.nativeOrder();
-    }
-
     @Override
     default int length() {
         return (int) Math.min(remaining(), Integer.MAX_VALUE);
@@ -109,6 +104,23 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     default void ensureCapacity(long size) {
         throw new UnsupportedOperationException("todo");
+    }
+
+
+    default int addAndGetInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
+    }
+
+    default int getAndAddInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding);
+    }
+
+    default long addAndGetLong(long offset, long adding) {
+        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
+    }
+
+    default long getAndAddLong(long offset, long adding) {
+        return BytesUtil.getAndAddLong(this, offset, adding);
     }
 
 /*

@@ -4,7 +4,7 @@ import net.openhft.chronicle.core.Maths;
 
 import java.nio.ByteBuffer;
 
-public interface RandomDataOutput<R extends RandomDataOutput<R>> {
+public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon<R> {
     default R writeByte(long offset, int i) {
         return writeByte(offset, Maths.toInt8(i));
     }

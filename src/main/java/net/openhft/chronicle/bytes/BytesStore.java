@@ -7,16 +7,18 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 /**
- * A reference to some bytes with fixed extents.  Only offset access within the capacity is possible.
+ * A reference to some bytes with fixed extents.
+ * Only offset access within the capacity is possible.
  */
-public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
+public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
+        extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
     static BytesStore wrap(byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
 
     static BytesStore wrap(ByteBuffer bb) {
         return bb.isDirect()
-                ? NativeStore.wrap(bb)
+                ? NativeBytesStore.wrap(bb)
                 : HeapBytesStore.wrap(bb);
     }
 
@@ -104,4 +106,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying> ext
         return (B) bytes().zeroOut(start, end);
     }
 
+    boolean compareAndSwapInt(long offset, int expected, int value);
+
+    boolean compareAndSwapLong(long offset, long expected, long value);
 }

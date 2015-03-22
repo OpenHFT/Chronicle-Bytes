@@ -8,7 +8,7 @@ public class BytesTest {
 
     @Test
     public void testName() throws Exception {
-        try (NativeStore<Void> nativeStore = NativeStore.nativeStore(30)) {
+        try (NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStore(30)) {
             Bytes<Void> bytes = nativeStore.bytes();
 
             long expected = 12345L;

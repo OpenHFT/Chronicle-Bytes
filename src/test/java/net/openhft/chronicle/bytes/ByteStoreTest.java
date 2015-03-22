@@ -102,7 +102,7 @@ public class ByteStoreTest {
     @Test
     public void testCapacity() throws Exception {
         assertEquals(SIZE, bytes.capacity());
-        assertEquals(10, NativeStore.nativeStore(10).capacity());
+        assertEquals(10, NativeBytesStore.nativeStore(10).capacity());
     }
 
     @Test
@@ -500,7 +500,7 @@ public class ByteStoreTest {
 
     @Test
     public void testToString() {
-        Bytes bytes = NativeStore.nativeElasticStore(32).bytes();
+        Bytes bytes = NativeBytesStore.nativeStore(32).bytes();
         assertEquals("[pos: 0, lim: 32, cap: 1TiB ] ٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(1);
         assertEquals("[pos: 1, lim: 32, cap: 1TiB ] ⒈‖٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
