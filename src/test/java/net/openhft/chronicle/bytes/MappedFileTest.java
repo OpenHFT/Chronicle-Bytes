@@ -40,7 +40,7 @@ public class MappedFileTest {
         try {
             bytes.readLong(9 << 10);
             Assert.fail();
-        } catch (BufferOverflowException e) {
+        } catch (BufferUnderflowException e) {
             // expected
         }
         assertEquals(2, mf.refCount());

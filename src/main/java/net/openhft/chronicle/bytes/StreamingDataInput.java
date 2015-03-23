@@ -12,6 +12,8 @@ import java.nio.ByteBuffer;
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     UnderflowMode underflowMode();
 
+    S underflowMode(UnderflowMode underflowMode);
+
     default ObjectInput objectInput() {
         throw new UnsupportedOperationException();
     }

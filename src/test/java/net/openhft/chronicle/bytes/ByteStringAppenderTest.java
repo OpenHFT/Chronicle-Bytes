@@ -37,18 +37,20 @@ public class ByteStringAppenderTest {
     public void testAppendWithOffset() throws Exception {
         Bytes bytes = Bytes.elasticByteBuffer();
         bytes.limit(20);
-        long expected = 1234;
-        bytes.append(10, expected);
-        Assert.assertEquals(expected, bytes.parseLong(10));
+        for (long expected : new long[]{123456, 12345, 1234, 123, 12, 1, 0}) {
+            bytes.append(10, expected, 6);
+            Assert.assertEquals(expected, bytes.parseLong(10));
+        }
     }
 
     @Test
     public void testAppendWithOffsetNeg() throws Exception {
         Bytes bytes = Bytes.elasticByteBuffer();
         bytes.limit(20);
-        long expected = -1234;
-        bytes.append(10, expected);
-        Assert.assertEquals(expected, bytes.parseLong(10));
+        for (long expected : new long[]{-123456, 12345, -1234, 123, -12, 1, 0}) {
+            bytes.append(10, expected, 7);
+            Assert.assertEquals(expected, bytes.parseLong(10));
+        }
     }
 
 

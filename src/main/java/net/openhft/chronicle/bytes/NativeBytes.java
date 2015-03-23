@@ -12,10 +12,10 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 /**
  * Created by peter.lawrey on 24/02/15.
  */
-public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
+public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     NativeBytes(BytesStore store) {
-        super(store);
+        super(store, UnderflowMode.PADDED);
     }
 
     public static NativeBytes nativeBytes() {
@@ -76,6 +76,4 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
     public boolean isNative() {
         return true;
     }
-
-
 }

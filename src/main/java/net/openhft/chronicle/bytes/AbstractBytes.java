@@ -17,6 +17,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     private long position;
     private long limit;
+    private UnderflowMode underflowMode;
 
     long mark = -1;
 
@@ -98,7 +99,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public UnderflowMode underflowMode() {
-        return UnderflowMode.BOUNDED;
+        return underflowMode;
+    }
+
+    @Override
+    public Bytes<Underlying> underflowMode(UnderflowMode underflowMode) {
+        this.underflowMode = underflowMode;
+        return this;
     }
 
     @Override
@@ -201,8 +208,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public byte readByte() {
-        long offset = readOffsetPositionMoved(1);
-        return bytesStore.readByte(offset);
+
+        try {
+            long offset = readOffsetPositionMoved(1);
+            return bytesStore.readByte(offset);
+        } catch (BufferOverflowException e) {
+
+            return 0;
+        }
     }
 
     @Override
@@ -455,9 +468,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         long limit0 = limit();
         if (offset + adding > limit0) {
-//            assert false : "cant add bytes past the limit : limit=" + limit0 + ",offset=" + offset +
+//            assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" + offset +
 //                    ",adding=" + adding;
-            throw new BufferOverflowException();
+            throw new BufferUnderflowException();
         }
         return offset;
     }

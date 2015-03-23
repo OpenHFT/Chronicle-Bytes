@@ -1,6 +1,6 @@
 package net.openhft.chronicle.bytes;
 
-public class ZeroedBytes extends BytesStoreBytes {
+public class ZeroedBytes<Underlying> extends BytesStoreBytes<Underlying> {
     private final UnderflowMode underflowMode;
 
     public ZeroedBytes(BytesStore store, UnderflowMode underflowMode) {

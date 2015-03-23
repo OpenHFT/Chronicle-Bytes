@@ -23,7 +23,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     default Bytes<Underlying> bytes() {
-        return bytes(UnderflowMode.BOUNDED);
+        return bytes(UnderflowMode.PADDED);
     }
 
     default Bytes bytes(UnderflowMode underflowMode) {

@@ -277,39 +277,25 @@ public enum BytesUtil {
         }
     }
 
-
-    // Requires positive x
-    static int longStringSize(long x) {
-        long p = 10;
-        for (int i = 1; i < 19; i++) {
-            if (x < p)
-                return i;
-            p = 10 * p;
-        }
-        return 19;
-    }
-
-    public static <S extends RandomDataOutput & ByteStringAppender>
-    void append(S out, long offset, long num) {
-
-        int digests = (num < 0) ? longStringSize(-num) + 1 : longStringSize(num);
-
+    /**
+     * The length of the number must be fixed otherwise short numbers will not overwrite longer numbers
+     */
+    public static void append(RandomDataOutput out, long offset, long num, int digits) {
         boolean negative = num < 0;
         num = Math.abs(num);
 
-
-        while (digests > 0) {
-            out.writeByte(offset + digests--, (byte) (num % 10 + '0'));
+        for (int i = digits-1; i > 0; i--) {
+            out.writeByte(offset + i, (byte) (num % 10 + '0'));
             num /= 10;
         }
         if (negative) {
             if (num != 0)
-                numberTooLarge(digests);
+                numberTooLarge(digits);
             out.writeByte(offset, '-');
         } else {
             if (num > 9)
-                numberTooLarge(digests);
-            out.writeByte(offset + digests, (byte) (num % 10 + '0'));
+                numberTooLarge(digits);
+            out.writeByte(offset, (byte) (num % 10 + '0'));
         }
     }
 
@@ -723,7 +709,7 @@ public enum BytesUtil {
     public static long parseLong(StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
-        while (in.remaining() >0) {
+        while (in.remaining() > 0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
