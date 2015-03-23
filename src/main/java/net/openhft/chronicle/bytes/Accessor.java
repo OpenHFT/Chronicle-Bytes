@@ -128,7 +128,7 @@ public interface Accessor<S, T, A extends AccessCommon<T>> {
     /**
      * Convert size (length) in the source domain to size in bytes.
      *
-     * @implSpec the default implementation returns the given {@code size} back, i. e. assuming
+     * The default implementation returns the given {@code size} back, i. e. assuming
      * byte-indexed source.
      *
      * @param size size (length) in the source type domain

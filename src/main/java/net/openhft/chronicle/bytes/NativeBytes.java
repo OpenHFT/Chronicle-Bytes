@@ -50,7 +50,7 @@ public class NativeBytes<Underlying> extends AbstractBytes<Underlying> {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));
         } else {
-            store = NativeBytesStore.lazyNativeStore(size);
+            store = NativeBytesStore.lazyNativeByteStore(size);
         }
         bytesStore.copyTo(store);
         bytesStore.release();

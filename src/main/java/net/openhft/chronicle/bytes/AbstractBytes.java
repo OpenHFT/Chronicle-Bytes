@@ -349,8 +349,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public String toString() {
-        return "position=" + position() + ",limit=" + limit() + ",realCapacity=" +
-                realCapacity() + " capacity=" + capacity() + ", remaining=" + remaining();
+        return BytesUtil.toString(this);
     }
 
     @Override
@@ -456,8 +455,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         long limit0 = limit();
         if (offset + adding > limit0) {
-            assert false : "cant add bytes past the limit : limit=" + limit0 + ",offset=" + offset +
-                    ",adding=" + adding;
+//            assert false : "cant add bytes past the limit : limit=" + limit0 + ",offset=" + offset +
+//                    ",adding=" + adding;
             throw new BufferOverflowException();
         }
         return offset;
@@ -467,10 +466,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (offset < start())
             throw new BufferUnderflowException();
         if (offset + adding > limit()) {
-            assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit +
-                    ",offset=" +
-                    offset +
-                    ",adding=" + adding;
+//            assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit +
+//                    ",offset=" +
+//                    offset +
+//                    ",adding=" + adding;
             throw new BufferOverflowException();
         }
         return offset;

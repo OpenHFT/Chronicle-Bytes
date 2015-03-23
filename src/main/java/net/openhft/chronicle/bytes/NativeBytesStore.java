@@ -51,7 +51,7 @@ public class NativeBytesStore<Underlying>
         return of(capacity, true);
     }
 
-    public static NativeBytesStore<Void> lazyNativeStore(long capacity) {
+    public static NativeBytesStore<Void> lazyNativeByteStore(long capacity) {
         return of(capacity, false);
     }
 
