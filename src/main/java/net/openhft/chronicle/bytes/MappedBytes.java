@@ -89,11 +89,6 @@ public class MappedBytes extends AbstractBytes {
     }
 
     @Override
-    public Bytes bytes() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public boolean isElastic() {
         return true;
     }
