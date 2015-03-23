@@ -195,13 +195,13 @@ public enum BytesUtil {
         return sb.toString();
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> String toString(IN bytes) {
+    public static String toString(RandomDataInput bytes) {
         StringBuilder sb = new StringBuilder(200);
         toString(bytes, sb);
         return sb.toString();
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> void toString(IN bytes, Appendable sb, long start, long position, long end) {
+    public static void toString(RandomDataInput bytes, Appendable sb, long start, long position, long end) {
         try {
             // before
             if (start < 0) start = 0;
@@ -226,8 +226,9 @@ public enum BytesUtil {
         }
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> void toString(IN bytes, StringBuilder sb) {
-        for (long i = bytes.position(); i < bytes.readLimit(); i++) {
+    public static void toString(RandomDataInput bytes, StringBuilder sb) {
+        long start = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0;
+        for (long i = start; i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
         }
     }
@@ -760,7 +761,7 @@ public enum BytesUtil {
         return false;
     }
 
-    public static int getAndAddInt(Bytes in, long offset, int adding) {
+    public static int getAndAddInt(BytesStore in, long offset, int adding) {
         for (; ; ) {
             int value = in.readVolatileInt(offset);
             if (in.compareAndSwapInt(offset, value, value + adding))
@@ -768,7 +769,7 @@ public enum BytesUtil {
         }
     }
 
-    public static long getAndAddLong(Bytes in, long offset, long adding) {
+    public static long getAndAddLong(BytesStore in, long offset, long adding) {
         for (; ; ) {
             long value = in.readVolatileLong(offset);
             if (in.compareAndSwapLong(offset, value, value + adding))

@@ -48,30 +48,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<byte[]> wrap(byte[] byteArray) {
-        return BytesStore.wrap(byteArray).bytes();
-    }
-
-    default Bytes<Underlying> writeLength8(Consumer<Bytes<Underlying>> writer) {
-        long position = position();
-        writeUnsignedByte(0);
-
-        writer.accept(this);
-        long length = position() - position;
-        if (length >= 1 << 8)
-            throw new IllegalStateException("Cannot have an 8-bit length of " + length);
-        writeUnsignedByte(position, (short) length);
-        storeFence();
-
-        return this;
-    }
-
-
-    default Bytes<Underlying> readLength8(Consumer<Bytes<Underlying>> reader) {
-        loadFence();
-        int length = readUnsignedByte() - 1;
-        if (length < 0)
-            throw new IllegalStateException("Unset length");
-        return withLength(length, reader);
+        return BytesStore.<byte[]>wrap(byteArray).bytes();
     }
 
     @Override
@@ -105,33 +82,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default void ensureCapacity(long size) {
         throw new UnsupportedOperationException("todo");
     }
-
-
-    default int addAndGetInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
-    }
-
-    default int getAndAddInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding);
-    }
-
-    default long addAndGetLong(long offset, long adding) {
-        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
-    }
-
-    default long getAndAddLong(long offset, long adding) {
-        return BytesUtil.getAndAddLong(this, offset, adding);
-    }
-
-/*
-    Bytes writeLength16(Consumer<Bytes> writer);
-
-    Bytes readLength16(Consumer<Bytes> writer);
-
-    Bytes writeLength32(Consumer<Bytes> writer);
-
-    Bytes readLength32(Consumer<Bytes> writer);
-*/
 
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()

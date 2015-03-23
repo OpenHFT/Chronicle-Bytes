@@ -24,17 +24,25 @@ package net.openhft.chronicle.bytes;
  * Time: 21:38
  */
 public interface Byteable {
-    void bytes(Bytes bytes, long offset, long length);
+    /**
+     * This setter for a data type which points to an underlying ByteStore.
+     *
+     * @param bytes the fix point ByteStore
+     * @param offset the offset within the ByteStore
+     * @param length the length in the ByteStore
+     */
+    void bytes(BytesStore bytes, long offset, long length);
 
-    Bytes bytes();
+    /**
+     * @return the underlying ByteStore
+     */
+    BytesStore bytes();
 
     long offset();
 
     default long length() {
         return maxSize();
     }
-
-    ;
 
     long maxSize();
 }

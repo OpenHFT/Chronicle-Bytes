@@ -54,4 +54,8 @@ public interface RandomDataInput<S extends RandomDataInput<S>> extends RandomCom
         UnsafeMemory.MEMORY.loadFence();
         return readLong(offset);
     }
+
+    default long parseLong(long offset) {
+        return BytesUtil.parseLong(this, offset);
+    }
 }

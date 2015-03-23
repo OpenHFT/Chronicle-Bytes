@@ -13,10 +13,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         return BytesUtil.parseLong(this);
     }
 
-    default long parseLong(long offset) {
-        return BytesUtil.parseLong(((RandomDataInput) this), offset);
-    }
-
     default double parseDouble() {
         return BytesUtil.parseDouble(this);
     }

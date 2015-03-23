@@ -276,8 +276,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public String toString() {
-        return "limit=" + limit() + ",realCapacity=" + realCapacity() + ", capacity=" +
-                capacity();
+        return BytesUtil.toString(this);
     }
 
     static class Deallocator implements Runnable {

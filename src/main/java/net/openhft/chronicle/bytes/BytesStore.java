@@ -22,7 +22,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 : HeapBytesStore.wrap(bb);
     }
 
-    default Bytes bytes() {
+    default Bytes<Underlying> bytes() {
         return bytes(UnderflowMode.BOUNDED);
     }
 
@@ -109,4 +109,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     boolean compareAndSwapInt(long offset, int expected, int value);
 
     boolean compareAndSwapLong(long offset, long expected, long value);
+
+    default int addAndGetInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
+    }
+
+    default int getAndAddInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding);
+    }
+
+    default long addAndGetLong(long offset, long adding) {
+        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
+    }
+
+    default long getAndAddLong(long offset, long adding) {
+        return BytesUtil.getAndAddLong(this, offset, adding);
+    }
+
 }
