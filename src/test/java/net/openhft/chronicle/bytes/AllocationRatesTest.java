@@ -75,7 +75,7 @@ public class AllocationRatesTest {
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
             NativeBytesStore[] ds = new NativeBytesStore[BATCH];
             for (int j = 0; j < BATCH; j++)
-                ds[j] = NativeBytesStore.lazyNativeByteStore(BUFFER_SIZE);
+                ds[j] = NativeBytesStore.lazyNativeBytesStore(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
                 ds[j].release();
                 assertEquals(0, ds[j].refCount());

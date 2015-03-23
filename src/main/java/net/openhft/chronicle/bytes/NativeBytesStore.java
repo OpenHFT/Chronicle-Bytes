@@ -51,7 +51,7 @@ public class NativeBytesStore<Underlying>
         return of(capacity, true);
     }
 
-    public static NativeBytesStore<Void> lazyNativeByteStore(long capacity) {
+    public static NativeBytesStore<Void> lazyNativeBytesStore(long capacity) {
         return of(capacity, false);
     }
 
@@ -276,7 +276,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public String toString() {
-        return BytesUtil.toString(this);
+        return BytesUtil.toDebugString(this, 1024);
     }
 
     static class Deallocator implements Runnable {

@@ -50,7 +50,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));
         } else {
-            store = NativeBytesStore.lazyNativeByteStore(size);
+            store = NativeBytesStore.lazyNativeBytesStore(size);
         }
         bytesStore.copyTo(store);
         bytesStore.release();
