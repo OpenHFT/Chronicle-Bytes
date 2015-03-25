@@ -253,11 +253,9 @@ public class NativeBytesStore<Underlying>
 
     /**
      * calls release
-     *
-     * @throws Exception
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         release();
     }
 
