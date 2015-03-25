@@ -10,7 +10,7 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class NativeBytesStore<Underlying>
-        implements BytesStore<NativeBytesStore<Underlying>, Underlying>, AutoCloseable {
+        implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
