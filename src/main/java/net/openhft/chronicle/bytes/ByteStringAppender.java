@@ -29,4 +29,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         BytesUtil.appendUTF(this, cs, start, end - start);
         return (B) this;
     }
+
+    default B append(long value, int digits) {
+        BytesUtil.append((RandomDataOutput) this, position(), value, digits);
+        this.skip(digits);
+        return (B) this;
+    }
+
 }
