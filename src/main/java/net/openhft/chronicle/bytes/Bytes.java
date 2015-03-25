@@ -4,7 +4,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
-import java.util.function.Consumer;
 
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
         StreamingDataInput<Bytes<Underlying>>, StreamingDataOutput<Bytes<Underlying>>,
@@ -13,13 +12,13 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     long position();
 
-    long mark = -1;
-
     /**
      * Sets this buffer's mark at its position.
      *
      * @return This buffer
+     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
      */
+    @Deprecated
     Bytes mark();
 
     /**
@@ -29,7 +28,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *
      * @return This buffer
      * @throws InvalidMarkException If the mark has not been set
+     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
      */
+    @Deprecated
     Bytes reset() throws InvalidMarkException;
 
     Bytes<Underlying> position(long position);
