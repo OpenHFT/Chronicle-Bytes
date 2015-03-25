@@ -226,11 +226,8 @@ public class NativeBytesStore<Underlying>
     @Override
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, Bytes bytes, long offset, long length) {
-        if (bytes.isNative()) {
-            MEMORY.copyMemory(bytes.address()+offset, address + translate(offsetInRDO), length);
-        } else {
-            throw new UnsupportedOperationException();
-        }
+        Access.copy(bytes.access(), bytes.accessHandle(), bytes.accessOffset(offset),
+                access(), accessHandle(), accessOffset(offsetInRDO), length);
         return this;
     }
 

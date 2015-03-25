@@ -6,6 +6,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
+import static java.lang.Math.min;
+
 /**
  * A reference to some bytes with fixed extents.
  * Only offset access within the capacity is possible.
@@ -88,12 +90,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
 
     default void copyTo(BytesStore store) {
-        Bytes b1 = bytes();
-        b1.limit(b1.realCapacity());
-        Bytes b2 = store.bytes();
-        b2.write(b1);
-        b2.release();
-        b1.release();
+        long copy = min(capacity(), store.capacity());
+        Access.copy(access(), accessHandle(), accessOffset(start()),
+                store.access(), store.accessHandle(), store.accessOffset(store.start()), copy);
     }
 
     Underlying underlyingObject();
@@ -104,7 +103,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     default B zeroOut(long start, long end) {
-        return (B) bytes().zeroOut(start, end);
+        if (start < start() || end > capacity() || end > start)
+            throw new IllegalArgumentException();
+        access().zeroOut(accessHandle(), accessOffset(start), end - start);
+        return (B) this;
     }
 
     boolean compareAndSwapInt(long offset, int expected, int value);

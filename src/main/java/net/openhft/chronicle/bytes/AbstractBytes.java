@@ -8,6 +8,10 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static java.lang.Math.min;
+import static net.openhft.chronicle.bytes.Accessor.byteArrayAccessor;
+import static net.openhft.chronicle.bytes.Accessor.uncheckedByteBufferAccessor;
+
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     private static final AtomicBoolean MEMORY_BARRIER = new AtomicBoolean();
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -316,26 +320,20 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public Bytes<Underlying> write(Bytes bytes) {
-        while (bytes.remaining() > 7 && remaining() > 7)
-            writeLong(bytes.readLong());
-        while (bytes.remaining() > 0 && remaining() > 0)
-            writeByte(bytes.readByte());
-        return this;
+        long write = min(remaining(), bytes.remaining());
+        long offset = bytes.position();
+        bytes.skip(write);
+        return write(bytes, offset, write);
     }
 
 
     @Override
-    public Bytes<Underlying> write(Bytes buffer, long offset, long length) {
-        long position = buffer.position();
-        long limit = buffer.limit();
-        try {
-            buffer.limit(offset + length);
-            buffer.position(offset);
-            write(buffer);
-        } finally {
-            buffer.limit(limit);
-            buffer.position(position);
-        }
+    public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
+        long write = min(remaining(), length);
+        long targetOffset = accessPositionOffset();
+        skip(write);
+        Access.copy(bytes.access(), bytes.accessHandle(), bytes.accessOffset(offset),
+                access(), accessHandle(), targetOffset, write);
         return this;
     }
 
@@ -396,16 +394,25 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    private <S, T> void read(Accessor.Full<S, T> accessor, S target, long off, long len) {
+        long sourceOffset = accessPositionOffset();
+        long size = accessor.size(len);
+        skip(size);
+        Access.copy(access(), accessHandle(), sourceOffset,
+                accessor.access(target), accessor.handle(target), accessor.offset(target, off),
+                size);
+    }
+
     @Override
     public void read(byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++)
-            bytes[i] = readByte();
+        read(byteArrayAccessor(), bytes, 0, bytes.length);
     }
 
     @Override
     public void read(ByteBuffer buffer) {
-        while (remaining() > 0 && buffer.remaining() > 0)
-            buffer.put(readByte());
+        long read = min(remaining(), buffer.remaining());
+        read(uncheckedByteBufferAccessor(buffer), buffer, buffer.position(), read);
+        buffer.position((int) (buffer.position() + read));
     }
 
     @Override
@@ -502,14 +509,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         Bytes b2 = (Bytes) obj;
         long remaining = remaining();
         if (b2.remaining() != remaining) return false;
-        long i;
-        for (i = 0; i < remaining - 7; i += 8)
-            if (readLong(i) != b2.readLong(i))
-                return false;
-        for (i = 0; i < remaining; i++)
-            if (readByte(i) != b2.readByte(i))
-                return false;
-        return true;
+        return Access.compare(access(), accessHandle(), accessPositionOffset(),
+                b2.access(), b2.accessHandle(), b2.accessPositionOffset(), remaining);
     }
 
 
@@ -530,29 +531,15 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     public Bytes<Underlying> zeroOut(long start, long end) {
-
-        long position1 = position();
-        long limit1 = limit();
-        try {
-            limit(end);
-            position(start);
-
-            while (remaining() >= 8) {
-                writeLong(0L);
-            }
-
-            while (remaining() > 0) {
-                writeByte((byte) 0);
-            }
-
-        } finally {
-            position(position1);
-            limit(limit1);
-        }
-
+        bytesStore.zeroOut(start, end);
         return this;
     }
-    
+
+
+
+
+
+
     @Override
     public long accessOffset(long randomOffset) {
         return bytesStore.accessOffset(randomOffset);
