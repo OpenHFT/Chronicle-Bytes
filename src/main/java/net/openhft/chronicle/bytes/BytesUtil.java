@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 
 public enum BytesUtil {
     ;
@@ -762,5 +765,16 @@ public enum BytesUtil {
             if (in.compareAndSwapLong(offset, value, value + adding))
                 return value;
         }
+    }
+
+
+    public static long asLong(@NotNull String str) {
+        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        return bb.getLong();
+    }
+
+    public static int asInt(@NotNull String str) {
+        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        return bb.getInt();
     }
 }
