@@ -251,14 +251,6 @@ public class NativeBytesStore<Underlying>
         return elastic;
     }
 
-    /**
-     * calls release
-     */
-    @Override
-    public void close() {
-        release();
-    }
-
     @Override
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
 
