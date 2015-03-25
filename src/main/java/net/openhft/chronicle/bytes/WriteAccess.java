@@ -69,6 +69,11 @@ public interface WriteAccess<T> extends AccessCommon<T> {
 
     void writeDouble(T handle, long offset, double d);
 
+
+    /**
+     * @deprecated use {@link Access#copy} instead
+     */
+    @Deprecated
     default <S> void writeFrom(
             T handle, long offset,
             ReadAccess<S> sourceAccess, S source, long sourceOffset, long len) {
@@ -95,10 +100,8 @@ public interface WriteAccess<T> extends AccessCommon<T> {
         long l;
         switch (b) {
             case 0:
-                c = 0;
-                i = 0;
-                l = 0;
-                break;
+                zeroOut(handle, offset, len);
+                return;
             case -1:
                 c = Character.MAX_VALUE;
                 i = -1;
@@ -127,6 +130,24 @@ public interface WriteAccess<T> extends AccessCommon<T> {
         }
         if (index < len)
             writeByte(handle, offset + index, b);
+    }
+
+    default void zeroOut(T handle, long offset, long len) {
+        long index = 0;
+        while (len - index >= 8L) {
+            writeLong(handle, offset + index, 0L);
+            index += 8L;
+        }
+        if (len - index >= 4L) {
+            writeInt(handle, offset + index, 0);
+            index += 4L;
+        }
+        if (len - index >= 2L) {
+            writeChar(handle, offset + index, (char) 0);
+            index += 2L;
+        }
+        if (index < len)
+            writeByte(handle, offset + index, (byte) 0);
     }
 
 }

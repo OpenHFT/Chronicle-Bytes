@@ -18,7 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteOrder;
 
-public interface RandomDataOutputAccess<R extends RandomDataOutput<R>> extends WriteAccess<R> {
+public interface RandomDataOutputAccess<R extends RandomDataOutput<R, ?, ?>>
+        extends WriteAccess<R> {
     @Override
     default void writeByte(R handle, long offset, int i) {
         handle.writeByte(offset, i);

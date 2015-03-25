@@ -6,7 +6,8 @@ import net.openhft.chronicle.core.UnsafeMemory;
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
  * The thread safety of the underlying data depends on how the methods are used.
  */
-public interface RandomDataInput<S extends RandomDataInput<S>> extends RandomCommon<S> {
+public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends ReadAccess<AT>, AT>
+        extends RandomCommon<S, A, AT> {
     default boolean readBoolean(long offset) {
         return readByte(offset) != 0;
     }
@@ -58,4 +59,8 @@ public interface RandomDataInput<S extends RandomDataInput<S>> extends RandomCom
     default long parseLong(long offset) {
         return BytesUtil.parseLong(this, offset);
     }
+
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    A access();
 }

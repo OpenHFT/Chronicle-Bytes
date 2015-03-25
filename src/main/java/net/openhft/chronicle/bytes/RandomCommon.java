@@ -2,7 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteOrder;
 
-public interface RandomCommon<S extends RandomCommon<S>> {
+public interface RandomCommon<S extends RandomCommon<S, A, AT>, A extends AccessCommon<AT>, AT> {
     /**
      * @return the highest offset or position allowed for this buffer.
      */
@@ -37,4 +37,10 @@ public interface RandomCommon<S extends RandomCommon<S>> {
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
     }
+
+    A access();
+
+    AT accessHandle();
+
+    long accessOffset(long randomOffset);
 }

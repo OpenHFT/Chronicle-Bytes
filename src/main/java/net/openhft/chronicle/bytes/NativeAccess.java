@@ -166,4 +166,9 @@ public final class NativeAccess<T> implements Access<T> {
     public void writeBytes(T handle, long offset, long len, byte b) {
         U.setMemory(handle, offset, len, b);
     }
+
+    @Override
+    public void zeroOut(T handle, long offset, long len) {
+        U.setMemory(handle, offset, len, (byte) 0);
+    }
 }

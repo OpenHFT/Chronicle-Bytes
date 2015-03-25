@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteOrder;
 
-interface RandomDataInputAccess<S extends RandomDataInput<S>> extends ReadAccess<S> {
+interface RandomDataInputAccess<S extends RandomDataInput<S, ?, ?>> extends ReadAccess<S> {
     @Override
     default boolean readBoolean(S handle, long offset) {
         return handle.readBoolean(offset);

@@ -25,21 +25,8 @@ public interface Accessor<S, T, A extends AccessCommon<T>> {
     interface Full<S, T> extends Accessor<S, T, Access<T>> {}
 
 
-    static <B extends BytesStore<B, U>, U> Accessor.Full<B, ?> uncheckedBytesStoreAccessor(
-            B bytesStore) {
-        return BytesAccessors.unchecked(bytesStore);
-    }
-
-    static <U> Accessor.Full<NativeBytesStore<U>, Void> uncheckedNativeBytesStoreAccessor() {
-        return BytesAccessors.Native.INSTANCE;
-    }
-
-    static <U> Accessor.Full<HeapBytesStore<U>, Void> uncheckedHeapBytesStoreAccessor() {
-        return BytesAccessors.Heap.INSTANCE;
-    }
-
-    static <U> Accessor.Full<AbstractBytes<U>, Void> uncheckedAbstractBytesAccessor() {
-        return BytesAccessors.StoreBasedBytes.INSTANCE;
+    static <B extends BytesStore<B, U>, U> Accessor.Full<B, ?> uncheckedBytesStoreAccessor() {
+        return BytesAccessors.Unchecked.INSTANCE;
     }
 
     static <B extends BytesStore<B, U>, U> Accessor.Full<B, ?> checkedBytesStoreAccessor() {

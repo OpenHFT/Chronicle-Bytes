@@ -7,6 +7,7 @@ import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.Access.nativeAccess;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class NativeBytesStore<Underlying>
@@ -284,5 +285,20 @@ public class NativeBytesStore<Underlying>
             address = 0;
             MEMORY.freeMemory(address);
         }
+    }
+
+    @Override
+    public long accessOffset(long randomOffset) {
+        return address + translate(randomOffset);
+    }
+
+    @Override
+    public Access<Underlying> access() {
+        return nativeAccess();
+    }
+
+    @Override
+    public Underlying accessHandle() {
+        return null;
     }
 }

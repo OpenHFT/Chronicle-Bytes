@@ -82,4 +82,33 @@ public interface ReadAccess<T> extends AccessCommon<T> {
     default long readVolatileLong(T handle, long offset) {
         throw new UnsupportedOperationException();
     }
+
+    /**
+     * @deprecated use {@link Access#compare} instead
+     */
+    @Deprecated
+    default <S> boolean compareTo(
+            T handle, long offset, ReadAccess<S> sourceAccess, S source, long sourceOffset,
+            long len) {
+        long i = 0;
+        while (len - i >= 8L) {
+            if (readLong(handle, offset + i) != sourceAccess.readLong(source, sourceOffset + i))
+                return false;
+            i += 8L;
+        }
+        if (len - i >= 4L) {
+            if (readInt(handle, offset + i) != sourceAccess.readInt(source, sourceOffset + i))
+                return false;
+            i += 4L;
+        }
+        if (len - i >= 2L) {
+            if (readShort(handle, offset + i) != sourceAccess.readShort(source, sourceOffset + i))
+                return false;
+            i += 2L;
+        }
+        if (i < len)
+            if (readByte(handle, offset + i) != sourceAccess.readByte(source, sourceOffset + i))
+                return false;
+        return true;
+    }
 }

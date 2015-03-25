@@ -137,6 +137,21 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public Access access() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Object accessHandle() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long accessOffset(long randomOffset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public long address() throws UnsupportedOperationException {
         return NO_PAGE;
     }

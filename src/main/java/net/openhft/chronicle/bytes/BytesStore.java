@@ -11,7 +11,8 @@ import java.util.function.Consumer;
  * Only offset access within the capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
-        extends RandomDataInput<B>, RandomDataOutput<B>, ReferenceCounted {
+        extends RandomDataInput<B, Access<Underlying>, Underlying>,
+        RandomDataOutput<B, Access<Underlying>, Underlying>, ReferenceCounted {
     static BytesStore wrap(byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
@@ -126,4 +127,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return BytesUtil.getAndAddLong(this, offset, adding);
     }
 
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    Access<Underlying> access();
 }

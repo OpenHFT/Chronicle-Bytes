@@ -6,8 +6,10 @@ import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
 
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
-        StreamingDataInput<Bytes<Underlying>>, StreamingDataOutput<Bytes<Underlying>>,
-        ByteStringParser<Bytes<Underlying>>, ByteStringAppender<Bytes<Underlying>>,
+        StreamingDataInput<Bytes<Underlying>, Access<Underlying>, Underlying>,
+        StreamingDataOutput<Bytes<Underlying>, Access<Underlying>, Underlying>,
+        ByteStringParser<Bytes<Underlying>, Access<Underlying>, Underlying>,
+        ByteStringAppender<Bytes<Underlying>, Access<Underlying>, Underlying>,
         CharSequence {
 
     long position();
@@ -224,4 +226,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             buffer.position(pos);
         }
     }
+
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    Access<Underlying> access();
 }

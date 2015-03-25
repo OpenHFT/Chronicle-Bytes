@@ -32,6 +32,18 @@ public interface Access<T> extends ReadAccess<T>, WriteAccess<T> {
         return BytesAccesses.Full.INSTANCE;
     }
 
+    static <S, T> void copy(ReadAccess<S> sourceAccess, S source, long sourceOffset,
+                            WriteAccess<T> targetAccess, T target, long targetOffset,
+                            long len) {
+        targetAccess.writeFrom(target, targetOffset, sourceAccess, source, sourceOffset, len);
+    }
+
+    static <T, U> boolean compare(ReadAccess<T> access1, T handle1, long offset1,
+                               ReadAccess<U> access2, U handle2, long offset2,
+                               long len) {
+        return access1.compareTo(handle1, offset1, access2, handle2, offset2, len);
+    }
+
     /**
      * Default implementation: throws {@code UnsupportedOperationException}.
      */

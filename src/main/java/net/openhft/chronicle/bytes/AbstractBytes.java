@@ -552,6 +552,21 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
         return this;
     }
+    
+    @Override
+    public long accessOffset(long randomOffset) {
+        return bytesStore.accessOffset(randomOffset);
+    }
+
+    @Override
+    public Access<Underlying> access() {
+        return bytesStore.access();
+    }
+
+    @Override
+    public Underlying accessHandle() {
+        return bytesStore.accessHandle();
+    }
 }
 
 

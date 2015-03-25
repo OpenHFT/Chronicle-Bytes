@@ -20,11 +20,11 @@ import java.nio.ByteOrder;
 
 final class BytesAccesses {
 
-    static class Read<R extends RandomDataInput<R>> implements RandomDataInputAccess<R> {
+    static class Read<R extends RandomDataInput<R, ?, ?>> implements RandomDataInputAccess<R> {
         static final Read INSTANCE = new Read();
     }
 
-    static class Write<R extends RandomDataOutput<R>> implements RandomDataOutputAccess<R> {
+    static class Write<R extends RandomDataOutput<R, ?, ?>> implements RandomDataOutputAccess<R> {
         static final Write INSTANCE = new Write();
     }
 

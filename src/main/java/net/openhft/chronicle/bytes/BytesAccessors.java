@@ -18,73 +18,22 @@ package net.openhft.chronicle.bytes;
 
 final class BytesAccessors {
 
-    static <B extends BytesStore<B, U>, U> Accessor.Full<B, ?> unchecked(B bytesStore) {
-        if (bytesStore instanceof NativeBytesStore)
-            return (Accessor.Full<B, ?>) Native.INSTANCE;
-        if (bytesStore instanceof HeapBytesStore)
-            return (Accessor.Full<B, ?>) Heap.INSTANCE;
-        if (bytesStore instanceof AbstractBytes)
-            return (Accessor.Full<B, ?>) StoreBasedBytes.INSTANCE;
-        return (Accessor.Full<B, ?>) Generic.INSTANCE;
-    }
-
-    static class Native<S extends BytesStore> implements Accessor.Full<S, Void> {
-        static final Native INSTANCE = new Native();
+    static class Unchecked<S extends BytesStore<S, U>, U> implements Accessor.Full<S, U> {
+        static final Generic INSTANCE = new Generic();
 
         @Override
-        public Access<Void> access(S source) {
-            return NativeAccess.instance();
+        public Access<U> access(S source) {
+            return source.access();
         }
 
         @Override
-        public Void handle(S source) {
-            return null;
+        public U handle(S source) {
+            return source.accessHandle();
         }
 
         @Override
         public long offset(S source, long index) {
-            return ((NativeBytesStore) source).address() + index;
-        }
-    }
-
-    static class Heap<S extends BytesStore> implements Accessor.Full<S, Object> {
-        static final Heap INSTANCE = new Heap();
-
-        @Override
-        public Access<Object> access(S source) {
-            return NativeAccess.instance();
-        }
-
-        @Override
-        public Object handle(S source) {
-            return ((HeapBytesStore) source).realUnderlyingObject;
-        }
-
-        @Override
-        public long offset(S source, long index) {
-            return ((HeapBytesStore) source).dataOffset + index;
-        }
-    }
-
-    static class StoreBasedBytes<S extends BytesStore> implements Accessor.Full<S, Object> {
-        static final StoreBasedBytes INSTANCE = new StoreBasedBytes();
-
-        @Override
-        public Access<Object> access(S source) {
-            BytesStore bytesStore = ((AbstractBytes) source).bytesStore;
-            return (Access<Object>) unchecked(bytesStore).access(bytesStore);
-        }
-
-        @Override
-        public Object handle(S source) {
-            BytesStore bytesStore = ((AbstractBytes) source).bytesStore;
-            return unchecked(bytesStore).handle(bytesStore);
-        }
-
-        @Override
-        public long offset(S source, long index) {
-            BytesStore bytesStore = ((AbstractBytes) source).bytesStore;
-            return unchecked(bytesStore).offset(bytesStore, index);
+            return source.accessOffset(index);
         }
     }
 

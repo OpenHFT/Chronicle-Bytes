@@ -3,7 +3,8 @@ package net.openhft.chronicle.bytes;
 import java.nio.BufferUnderflowException;
 import java.util.function.Consumer;
 
-public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon<S> {
+public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
+        A extends AccessCommon<AT>, AT> extends RandomCommon<S, A, AT> {
     /**
      * @return the number of bytes between the position and the limit.
      */
@@ -47,5 +48,9 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
 
     default String toDebugString() {
         return toDebugString(128);
+    }
+
+    default long accessPositionOffset() {
+        return accessOffset(position());
     }
 }
