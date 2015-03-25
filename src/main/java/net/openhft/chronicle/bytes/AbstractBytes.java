@@ -14,7 +14,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
 
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore = NoBytesStore.noBytesStore();
-
     private long position;
     private long limit;
     private UnderflowMode underflowMode;

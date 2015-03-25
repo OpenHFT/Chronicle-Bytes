@@ -23,26 +23,22 @@ package net.openhft.chronicle.bytes;
  * Date: 07/10/13
  * Time: 21:38
  */
-public interface Byteable {
+public interface Byteable<Underlying> {
     /**
      * This setter for a data type which points to an underlying ByteStore.
      *
-     * @param bytes the fix point ByteStore
+     * @param bytesStore the fix point ByteStore
      * @param offset the offset within the ByteStore
      * @param length the length in the ByteStore
      */
-    void bytes(BytesStore bytes, long offset, long length);
+    void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length);
 
     /**
      * @return the underlying ByteStore
      */
-    BytesStore bytes();
+    BytesStore<Bytes<Underlying>, Underlying> bytesStore();
 
     long offset();
-
-    default long length() {
-        return maxSize();
-    }
 
     long maxSize();
 }
