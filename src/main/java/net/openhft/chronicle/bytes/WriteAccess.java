@@ -90,7 +90,6 @@ public interface WriteAccess<T> extends AccessCommon<T> {
     }
 
     default void writeBytes(T handle, long offset, long len, byte b) {
-        int ic;
         char c;
         int i;
         long l;
@@ -106,10 +105,12 @@ public interface WriteAccess<T> extends AccessCommon<T> {
                 l = -1;
                 break;
             default:
-                ic = b | ((b & 0xFF) << 8);
+                int ub = b & 0xFF;
+                int ic = ub | (ub << 8);
                 c = (char) ic;
                 i = ic | (ic << 16);
-                l = i | ((i & 0xFFFFFFFFL) << 32);
+                long ui = i & 0xFFFFFFFFL;
+                l = ui | (ui << 32);
         }
         long index = 0;
         while (len - index >= 8L) {
