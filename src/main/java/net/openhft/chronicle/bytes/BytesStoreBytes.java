@@ -2,23 +2,38 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> {
+public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
     public BytesStoreBytes(@NotNull BytesStore bytesStore) {
         super(bytesStore);
     }
 
-    public void setBytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         BytesStore oldBS = this.bytesStore;
         this.bytesStore = bytesStore;
         oldBS.release();
         clear();
     }
 
-    public void setByteStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore,
-                             long position, long length) {
-        setBytesStore(byteStore);
-        limit(position + length);
-        position(position);
+    @Override
+    public void bytesStore(BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) {
+        bytesStore(byteStore);
+        limit(offset + length);
+        position(offset);
+    }
+
+    @Override
+    public BytesStore<Bytes<Underlying>, Underlying> bytesStore() {
+        return bytesStore;
+    }
+
+    @Override
+    public long offset() {
+        return position();
+    }
+
+    @Override
+    public long maxSize() {
+        return remaining();
     }
 
     @Override

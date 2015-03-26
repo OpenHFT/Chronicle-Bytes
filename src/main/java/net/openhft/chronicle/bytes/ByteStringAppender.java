@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
-public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B> {
+public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
+        A extends WriteAccess<AT>, AT> extends StreamingDataOutput<B, A, AT> {
     default B append(char ch) {
         BytesUtil.appendUTF(this, ch);
         return (B) this;
@@ -12,11 +13,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     default B append(long value) {
         BytesUtil.append(this, value);
-        return (B) this;
-    }
-
-    default B append(long offset, long value) {
-        BytesUtil.append((RandomDataOutput & ByteStringAppender) this, offset, value);
         return (B) this;
     }
 
@@ -34,4 +30,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         BytesUtil.appendUTF(this, cs, start, end - start);
         return (B) this;
     }
+
+    default B append(long value, int digits) {
+        BytesUtil.append((RandomDataOutput) this, position(), value, digits);
+        this.skip(digits);
+        return (B) this;
+    }
+
 }

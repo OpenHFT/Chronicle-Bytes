@@ -118,7 +118,7 @@ public class MappedFile implements ReferenceCounted {
         synchronized (stores) {
             ReferenceCounted.releaseAll((List) stores);
         }
-        refCount.release();
+        release();
     }
 
     void performRelease() {

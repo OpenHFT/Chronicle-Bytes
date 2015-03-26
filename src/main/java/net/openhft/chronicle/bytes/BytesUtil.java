@@ -6,6 +6,9 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 
 public enum BytesUtil {
     ;
@@ -186,22 +189,23 @@ public enum BytesUtil {
         }
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> String toDebugString(IN bytes, long maxLength) {
+    public static String toDebugString(RandomDataInput bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
-        sb.append("[pos: ").append(bytes.position()).append(", lim: ").append(bytes.readLimit()).append(", cap: ")
+        long position = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0L;
+        sb.append("[pos: ").append(position).append(", lim: ").append(bytes.readLimit()).append(", cap: ")
                 .append(bytes.capacity() == 1L << 40 ? "1TiB" : bytes.capacity()).append(" ] ");
-        toString(bytes, sb, bytes.position() - maxLength, bytes.position(), bytes.position() + maxLength);
+        toString(bytes, sb, position - maxLength, position, position + maxLength);
 
         return sb.toString();
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> String toString(IN bytes) {
+    public static String toString(RandomDataInput bytes) {
         StringBuilder sb = new StringBuilder(200);
         toString(bytes, sb);
         return sb.toString();
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> void toString(IN bytes, Appendable sb, long start, long position, long end) {
+    public static void toString(RandomDataInput bytes, Appendable sb, long start, long position, long end) {
         try {
             // before
             if (start < 0) start = 0;
@@ -226,8 +230,9 @@ public enum BytesUtil {
         }
     }
 
-    public static <IN extends RandomDataInput & StreamingCommon> void toString(IN bytes, StringBuilder sb) {
-        for (long i = bytes.position(); i < bytes.readLimit(); i++) {
+    public static void toString(RandomDataInput bytes, StringBuilder sb) {
+        long start = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0;
+        for (long i = start; i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
         }
     }
@@ -276,39 +281,25 @@ public enum BytesUtil {
         }
     }
 
-
-    // Requires positive x
-    static int longStringSize(long x) {
-        long p = 10;
-        for (int i = 1; i < 19; i++) {
-            if (x < p)
-                return i;
-            p = 10 * p;
-        }
-        return 19;
-    }
-
-    public static <S extends RandomDataOutput & ByteStringAppender>
-    void append(S out, long offset, long num) {
-
-        int digests = (num < 0) ? longStringSize(-num) + 1 : longStringSize(num);
-
+    /**
+     * The length of the number must be fixed otherwise short numbers will not overwrite longer numbers
+     */
+    public static void append(RandomDataOutput out, long offset, long num, int digits) {
         boolean negative = num < 0;
         num = Math.abs(num);
 
-
-        while (digests > 0) {
-            out.writeByte(offset + digests--, (byte) (num % 10 + '0'));
+        for (int i = digits-1; i > 0; i--) {
+            out.writeByte(offset + i, (byte) (num % 10 + '0'));
             num /= 10;
         }
         if (negative) {
             if (num != 0)
-                numberTooLarge(digests);
+                numberTooLarge(digits);
             out.writeByte(offset, '-');
         } else {
             if (num > 9)
-                numberTooLarge(digests);
-            out.writeByte(offset + digests, (byte) (num % 10 + '0'));
+                numberTooLarge(digits);
+            out.writeByte(offset, (byte) (num % 10 + '0'));
         }
     }
 
@@ -722,7 +713,7 @@ public enum BytesUtil {
     public static long parseLong(StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
-        while (in.remaining() >0) {
+        while (in.remaining() > 0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
@@ -760,7 +751,7 @@ public enum BytesUtil {
         return false;
     }
 
-    public static int getAndAddInt(RandomDataInput in, long offset, int adding) {
+    public static int getAndAddInt(BytesStore in, long offset, int adding) {
         for (; ; ) {
             int value = in.readVolatileInt(offset);
             if (in.compareAndSwapInt(offset, value, value + adding))
@@ -768,11 +759,22 @@ public enum BytesUtil {
         }
     }
 
-    public static long getAndAddLong(RandomDataInput in, long offset, long adding) {
+    public static long getAndAddLong(BytesStore in, long offset, long adding) {
         for (; ; ) {
             long value = in.readVolatileLong(offset);
             if (in.compareAndSwapLong(offset, value, value + adding))
                 return value;
         }
+    }
+
+
+    public static long asLong(@NotNull String str) {
+        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        return bb.getLong();
+    }
+
+    public static int asInt(@NotNull String str) {
+        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+        return bb.getInt();
     }
 }

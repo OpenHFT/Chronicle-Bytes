@@ -4,7 +4,8 @@ import net.openhft.chronicle.core.Maths;
 
 import java.nio.ByteBuffer;
 
-public interface RandomDataOutput<R extends RandomDataOutput<R>> {
+public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
+        A extends WriteAccess<AT>, AT> extends RandomCommon<R, A, AT> {
     default R writeByte(long offset, int i) {
         return writeByte(offset, Maths.toInt8(i));
     }
@@ -56,4 +57,13 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> {
     R write(long offsetInRDO, Bytes bytes, long offset, long length);
 
     R zeroOut(long start, long end) ;
+
+    default R append(long offset, long value, int digits) {
+        BytesUtil.append(this, offset, value, digits);
+        return (R) this;
+    }
+
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    A access();
 }

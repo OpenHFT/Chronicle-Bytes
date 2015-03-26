@@ -10,7 +10,8 @@ import java.nio.ByteBuffer;
  * Position based access.  Once data has been read, the position() moves.
  * <p>The use of this instance is single threaded, though the use of the data
  */
-public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
+        A extends WriteAccess<AT>, AT> extends StreamingCommon<S, A, AT> {
     default public ObjectOutput objectStream() {
         throw new UnsupportedOperationException();
     }
@@ -73,4 +74,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeOrderedInt(int i);
 
     S writeOrderedLong(long i);
+
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    A access();
 }

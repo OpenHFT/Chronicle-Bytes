@@ -9,8 +9,11 @@ import java.nio.ByteBuffer;
 /**
  * This data input has a a position() and a limit()
  */
-public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
+public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
+        A extends ReadAccess<AT>, AT> extends StreamingCommon<S, A, AT> {
     UnderflowMode underflowMode();
+
+    S underflowMode(UnderflowMode underflowMode);
 
     default ObjectInput objectInput() {
         throw new UnsupportedOperationException();
@@ -75,4 +78,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     int readVolatileInt();
 
     long readVolatileLong();
+
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
+    @Override
+    A access();
 }

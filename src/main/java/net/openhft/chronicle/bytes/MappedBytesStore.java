@@ -3,7 +3,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 
-public class MappedBytesStore extends NativeStore {
+public class MappedBytesStore extends NativeBytesStore {
     private final long start;
     private final long safeLimit;
 

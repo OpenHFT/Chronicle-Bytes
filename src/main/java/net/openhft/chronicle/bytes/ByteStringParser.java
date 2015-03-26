@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
-public interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
+public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
+        A extends ReadAccess<AT>, AT> extends StreamingDataInput<B, A, AT> {
     default String parseUTF(StopCharTester stopCharTester) {
         return BytesUtil.parseUTF(this, stopCharTester);
     }
@@ -11,10 +12,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
 
     default long parseLong() {
         return BytesUtil.parseLong(this);
-    }
-
-    default long parseLong(long offset) {
-        return BytesUtil.parseLong(((RandomDataInput) this), offset);
     }
 
     default double parseDouble() {
