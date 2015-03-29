@@ -30,4 +30,5 @@ public class ByteStringParserTest extends TestCase {
         b.flip();
         Assert.assertEquals(expected,BytesUtil.parseLong(b));
     }
+
 }
