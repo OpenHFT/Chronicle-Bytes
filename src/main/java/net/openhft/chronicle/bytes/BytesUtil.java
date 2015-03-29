@@ -691,6 +691,8 @@ public enum BytesUtil {
             } else {
                 break;
             }
+            if (in.remaining() ==0)
+                break;
             ch = in.readUnsignedByte();
         }
 

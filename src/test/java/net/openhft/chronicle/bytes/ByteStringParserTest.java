@@ -47,7 +47,7 @@ public class ByteStringParserTest   {
         double expected = 123.1234;
         b.append(expected);
         b.flip();
-        Assert.assertEquals(expected,BytesUtil.parseDouble(b));
+        Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ByteStringParserTest   {
         float expected = 123;
         b.append(expected);
         b.flip();
-        Assert.assertEquals(expected,BytesUtil.parseDouble(b));
+        Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
     }
 
     @Test
