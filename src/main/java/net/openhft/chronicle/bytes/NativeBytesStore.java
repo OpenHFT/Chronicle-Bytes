@@ -71,7 +71,7 @@ public class NativeBytesStore<Underlying>
             MEMORY.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
-        return new NativeBytesStore<>(address, capacity, deallocator, true);
+        return new NativeBytesStore<>(address, capacity, deallocator, false);
     }
 
     @Override
@@ -131,7 +131,7 @@ public class NativeBytesStore<Underlying>
 
     private long translate(long offset) {
         long offset2 = offset - start();
-        if (offset2 < 0 || offset2 >= capacity())
+        if (offset2 < 0 || offset2 > capacity())
             throw new IllegalArgumentException("Offset out of bounds");
         return offset2;
     }
