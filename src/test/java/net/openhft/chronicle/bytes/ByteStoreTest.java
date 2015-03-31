@@ -102,7 +102,7 @@ public class ByteStoreTest {
     @Test
     public void testCapacity() throws Exception {
         assertEquals(SIZE, bytes.capacity());
-        assertEquals(10, NativeBytesStore.nativeStore(10).capacity());
+        assertEquals(10, NativeBytesStore.nativeStoreWithFixedCapacity(10).capacity());
     }
 
     @Test
@@ -500,7 +500,7 @@ public class ByteStoreTest {
         assertEquals(11 * 11, bytes.readInt(4L));
     }
 
-    @Ignore("the store has been set to 32 cap bytes and is not elastic, please review test")
+
     @Test
     public void testToString() {
         Bytes bytes = NativeBytesStore.nativeStore(32).bytes();

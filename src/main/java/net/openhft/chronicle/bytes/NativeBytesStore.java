@@ -48,12 +48,22 @@ public class NativeBytesStore<Underlying>
         return elastic ? new NativeBytes<>(this) : new BytesStoreBytes<>(this);
     }
 
+
+    /**
+     * this is an elastic native store
+     * @param capacity
+     * @return
+     */
     public static NativeBytesStore<Void> nativeStore(long capacity) {
-        return of(capacity, true);
+        return of(capacity, true, true);
     }
 
-    public static NativeBytesStore<Void> lazyNativeBytesStore(long capacity) {
-        return of(capacity, false);
+    public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity) {
+        return of(capacity, true, false);
+    }
+
+    public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
+        return of(capacity, false, false);
     }
 
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
@@ -64,14 +74,14 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
-    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut) {
+    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
         long address = MEMORY.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
             MEMORY.setMemory(address, capacity, (byte) 0);
             MEMORY.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
-        return new NativeBytesStore<>(address, capacity, deallocator, false);
+        return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
     @Override
