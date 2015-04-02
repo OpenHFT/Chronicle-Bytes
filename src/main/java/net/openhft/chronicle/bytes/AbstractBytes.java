@@ -491,8 +491,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         long limit0 = limit();
         if (offset + adding > limit0) {
-          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" + offset +
-                    ",adding=" + adding;
+//          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
+  //                  offset +
+    //                ",adding=" + adding;
             throw new BufferUnderflowException();
         }
         return offset;
