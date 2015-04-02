@@ -92,7 +92,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
-    public static String toHex(@NotNull final Bytes buffer) {
+    static String toHex(@NotNull final Bytes buffer) {
         return toHex(buffer, buffer.position(), buffer.remaining());
     }
 
@@ -102,7 +102,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
-    public static String toHex(@NotNull final Bytes buffer, long offset, long len) {
+    static String toHex(@NotNull final Bytes buffer, long offset, long len) {
 
         if (len == 0)
             return "";

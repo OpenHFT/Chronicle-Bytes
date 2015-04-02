@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.InvalidMarkException;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static java.lang.Math.min;
@@ -20,6 +21,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     private long position;
     private long limit;
     private UnderflowMode underflowMode;
+    long mark = -1;
 
     public AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         this.bytesStore = bytesStore;
@@ -471,8 +473,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         long limit0 = limit();
         if (offset + adding > limit0) {
-//            assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" + offset +
-//                    ",adding=" + adding;
+          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" + offset +
+                    ",adding=" + adding;
             throw new BufferUnderflowException();
         }
         return offset;
@@ -522,12 +524,18 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public final Bytes mark() {
-        throw new UnsupportedOperationException();
+        mark = position;
+        return this;
     }
 
     @Override
     public final Bytes reset() {
-        throw new UnsupportedOperationException();
+        long m = mark;
+        if (m < 0)
+            throw new InvalidMarkException();
+        assert position <= limit();
+        position = m;
+        return this;
     }
 
     public Bytes<Underlying> zeroOut(long start, long end) {

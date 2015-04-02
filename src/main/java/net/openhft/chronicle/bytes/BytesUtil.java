@@ -597,6 +597,8 @@ public enum BytesUtil {
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
+            if (bytes.remaining() ==0)
+                return;
         }
 
         while (true) {
