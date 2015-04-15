@@ -277,7 +277,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long writeOffsetPositionMoved(int adding) {
         long offset = writeCheckOffset(position, adding);
         position += adding;
-        assert position <= limit();
+        assert position <= limit() : " limit=" + limit() + ",position=" + position;
         return offset;
     }
 
@@ -361,7 +361,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> skip(long bytesToSkip) {
         position += bytesToSkip;
-        assert position <= limit();
+        assert position <= limit() : "position=" + position() + ", limit=" + limit();
         readOffsetPositionMoved(0);
         return this;
     }
@@ -492,8 +492,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long limit0 = limit();
         if (offset + adding > limit0) {
 //          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-  //                  offset +
-    //                ",adding=" + adding;
+            //                  offset +
+            //                ",adding=" + adding;
             throw new BufferUnderflowException();
         }
         return offset;
@@ -504,9 +504,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         if (offset + adding > limit()) {
             assert offset + adding <= limit() : "cant add bytes past the limit : limit=" + limit +
-                  ",offset=" +
-                offset +
-                 ",adding=" + adding;
+                    ",offset=" +
+                    offset +
+                    ",adding=" + adding;
             throw new BufferOverflowException();
         }
         return offset;
@@ -561,10 +561,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.zeroOut(start, end);
         return this;
     }
-
-
-
-
 
 
     @Override
