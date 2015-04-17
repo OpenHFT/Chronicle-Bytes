@@ -60,13 +60,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @return The smallest position allowed in this buffer.
-     */
-    default long start() {
-        return 0L;
-    }
-
-    /**
      * @return the actual capacity available before resizing.
      */
     default long realCapacity() {
@@ -77,6 +70,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return The maximum limit you can set.
      */
     long capacity();
+
+    @Override
+    default boolean isNative() {
+        return underlyingObject() == null;
+    }
+
+    Underlying underlyingObject();
 
     /**
      * Perform a set of actions with a temporary bounds mode.
@@ -102,10 +102,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return capacity();
     }
 
-    void storeFence();
-
-    void loadFence();
-
+    /**
+     * @return The smallest position allowed in this buffer.
+     */
+    default long start() {
+        return 0L;
+    }
 
     default void copyTo(BytesStore store) {
         long copy = min(capacity(), store.capacity());
@@ -113,12 +115,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 store.access(), store.accessHandle(), store.accessOffset(store.start()), copy);
     }
 
-    Underlying underlyingObject();
-
+    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
-    default boolean isNative() {
-        return underlyingObject() == null;
-    }
+    Access<Underlying> access();
 
     default B zeroOut(long start, long end) {
         if (start < start() || end > capacity() || end > start)
@@ -146,8 +145,4 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default long getAndAddLong(long offset, long adding) {
         return BytesUtil.getAndAddLong(this, offset, adding);
     }
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    Access<Underlying> access();
 }

@@ -23,7 +23,6 @@ import sun.nio.ch.DirectBuffer;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static net.openhft.chronicle.bytes.Access.nativeAccess;
@@ -31,11 +30,10 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
-    private static final AtomicBoolean MEMORY_BARRIER = new AtomicBoolean();
-    private final AtomicLong refCount = new AtomicLong(1);
-    private final Underlying underlyingObject;
     final Object realUnderlyingObject;
     final int dataOffset, capacity;
+    private final AtomicLong refCount = new AtomicLong(1);
+    private final Underlying underlyingObject;
 
     private HeapBytesStore(ByteBuffer byteBuffer) {
         //noinspection unchecked
@@ -47,16 +45,6 @@ public class HeapBytesStore<Underlying>
 
     static HeapBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
         return new HeapBytesStore<>(bb);
-    }
-
-    @Override
-    public void storeFence() {
-        MEMORY_BARRIER.lazySet(true);
-    }
-
-    @Override
-    public void loadFence() {
-        MEMORY_BARRIER.get();
     }
 
     @Override
@@ -80,6 +68,16 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
+    public Underlying underlyingObject() {
+        return underlyingObject;
+    }
+
+    @Override
+    public boolean isNative() {
+        return false;
+    }
+
+    @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
         return MEMORY.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
     }
@@ -88,6 +86,11 @@ public class HeapBytesStore<Underlying>
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return MEMORY.compareAndSwapLong(
                 realUnderlyingObject, dataOffset + offset, expected, value);
+    }
+
+    @Override
+    public Access<Underlying> access() {
+        return nativeAccess();
     }
 
     @Override
@@ -126,6 +129,12 @@ public class HeapBytesStore<Underlying>
         return MEMORY.readDouble(realUnderlyingObject, dataOffset + offset);
     }
 
+    public void checkOffset(long offset, int size) {
+        if (offset < start() || offset + size > capacity) {
+            throw new BufferOverflowException();
+        }
+    }
+
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b) {
         checkOffset(offset, 1);
@@ -144,6 +153,13 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore writeInt(long offset, int i32) {
         checkOffset(offset, 4);
         MEMORY.writeInt(realUnderlyingObject, dataOffset + offset, i32);
+        return this;
+    }
+
+    @Override
+    public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32) {
+        checkOffset(offset, 4);
+        MEMORY.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
     }
 
@@ -172,19 +188,6 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> writeDouble(long offset, double d) {
         checkOffset(offset, 8);
         MEMORY.writeDouble(realUnderlyingObject, dataOffset + offset, d);
-        return this;
-    }
-
-    public void checkOffset(long offset, int size) {
-        if (offset < start() || offset + size > capacity) {
-            throw new BufferOverflowException();
-        }
-    }
-
-    @Override
-    public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32) {
-        checkOffset(offset, 4);
-        MEMORY.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
     }
 
@@ -222,27 +225,12 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public Underlying underlyingObject() {
-        return underlyingObject;
-    }
-
-    @Override
-    public boolean isNative() {
-        return false;
+    public Underlying accessHandle() {
+        return (Underlying) realUnderlyingObject;
     }
 
     @Override
     public long accessOffset(long randomOffset) {
         return dataOffset + randomOffset;
-    }
-
-    @Override
-    public Access<Underlying> access() {
-        return nativeAccess();
-    }
-
-    @Override
-    public Underlying accessHandle() {
-        return (Underlying) realUnderlyingObject;
     }
 }

@@ -34,10 +34,8 @@ public class NativeBytesStore<Underlying>
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
-
-    private volatile Underlying underlyingObject;
-
     protected long address;
+    private volatile Underlying underlyingObject;
     private long maximumLimit;
 
     private NativeBytesStore(ByteBuffer bb, boolean elastic) {
@@ -46,10 +44,6 @@ public class NativeBytesStore<Underlying>
         this.address = ((DirectBuffer) bb).address();
         this.maximumLimit = bb.capacity();
         cleaner = ((DirectBuffer) bb).cleaner();
-    }
-
-    static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
-        return new NativeBytesStore<>(bb, false);
     }
 
     protected NativeBytesStore(
@@ -61,19 +55,28 @@ public class NativeBytesStore<Underlying>
         this.elastic = elastic;
     }
 
-    @Override
-    public Bytes<Underlying> bytes() {
-        return elastic ? new NativeBytes<>(this) : new BytesStoreBytes<>(this);
+    static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+        return new NativeBytesStore<>(bb, false);
     }
-
 
     /**
      * this is an elastic native store
+     *
      * @param capacity
      * @return
      */
     public static NativeBytesStore<Void> nativeStore(long capacity) {
         return of(capacity, true, true);
+    }
+
+    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
+        long address = MEMORY.allocate(capacity);
+        if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
+            MEMORY.setMemory(address, capacity, (byte) 0);
+            MEMORY.storeFence();
+        }
+        Deallocator deallocator = new Deallocator(address);
+        return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
     public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity) {
@@ -92,14 +95,14 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
-    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
-        long address = MEMORY.allocate(capacity);
-        if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
-            MEMORY.setMemory(address, capacity, (byte) 0);
-            MEMORY.storeFence();
-        }
-        Deallocator deallocator = new Deallocator(address);
-        return new NativeBytesStore<>(address, capacity, deallocator, elastic);
+    @Override
+    public Bytes<Underlying> bytes() {
+        return elastic ? new NativeBytes<>(this) : new BytesStoreBytes<>(this);
+    }
+
+    @Override
+    public long realCapacity() {
+        return maximumLimit;
     }
 
     @Override
@@ -108,23 +111,41 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public void storeFence() {
-        MEMORY.storeFence();
+    public Underlying underlyingObject() {
+        return underlyingObject;
     }
 
     @Override
-    public void loadFence() {
-        MEMORY.loadFence();
+    public Access<Underlying> access() {
+        return nativeAccess();
+    }
+
+    @Override
+    public NativeBytesStore<Underlying> zeroOut(long start, long end) {
+
+        if (start < 0 || end > limit())
+            throw new IllegalArgumentException("start: " + start + ", end: " + end + ", limit=" + limit());
+        if (start >= end)
+            return this;
+
+        MEMORY.setMemory(address + translate(start), end - start, (byte) 0);
+        return this;
+
+    }
+
+    @Override
+    public boolean compareAndSwapInt(long offset, int expected, int value) {
+        return MEMORY.compareAndSwapInt(address + translate(offset), expected, value);
+    }
+
+    @Override
+    public boolean compareAndSwapLong(long offset, long expected, long value) {
+        return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
     @Override
     public void reserve() {
         refCount.reserve();
-    }
-
-    @Override
-    public long realCapacity() {
-        return maximumLimit;
     }
 
     @Override
@@ -157,13 +178,6 @@ public class NativeBytesStore<Underlying>
         return MEMORY.readLong(address + translate(offset));
     }
 
-    private long translate(long offset) {
-        long offset2 = offset - start();
-        if (offset2 < 0 || offset2 > capacity())
-            throw new IllegalArgumentException("Offset out of bounds");
-        return offset2;
-    }
-
     @Override
     public float readFloat(long offset) {
         return MEMORY.readFloat(address + translate(offset));
@@ -172,6 +186,23 @@ public class NativeBytesStore<Underlying>
     @Override
     public double readDouble(long offset) {
         return MEMORY.readDouble(address + translate(offset));
+    }
+
+    @Override
+    public int readVolatileInt(long offset) {
+        return MEMORY.readVolatileInt(address + translate(offset));
+    }
+
+    @Override
+    public long readVolatileLong(long offset) {
+        return MEMORY.readVolatileLong(address + translate(offset));
+    }
+
+    private long translate(long offset) {
+        long offset2 = offset - start();
+        if (offset2 < 0 || offset2 > capacity())
+            throw new IllegalArgumentException("Offset out of bounds");
+        return offset2;
     }
 
     @Override
@@ -205,6 +236,12 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
+        MEMORY.writeOrderedLong(address + translate(offset), i);
+        return this;
+    }
+
+    @Override
     public NativeBytesStore<Underlying> writeFloat(long offset, float f) {
         MEMORY.writeFloat(address + translate(offset), f);
         return this;
@@ -220,22 +257,6 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length) {
         MEMORY.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
-        return this;
-    }
-
-    @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
-        return MEMORY.compareAndSwapInt(address + translate(offset), expected, value);
-    }
-
-    @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
-        return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
-    }
-
-    @Override
-    public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
-        MEMORY.writeOrderedLong(address + translate(offset), i);
         return this;
     }
 
@@ -265,8 +286,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public Underlying underlyingObject() {
-        return underlyingObject;
+    public Underlying accessHandle() {
+        return null;
+    }
+
+    @Override
+    public long accessOffset(long randomOffset) {
+        return address + translate(randomOffset);
     }
 
     protected void performRelease() {
@@ -275,19 +301,6 @@ public class NativeBytesStore<Underlying>
 
     public boolean isElastic() {
         return elastic;
-    }
-
-    @Override
-    public NativeBytesStore<Underlying> zeroOut(long start, long end) {
-
-        if (start < 0 || end > limit())
-            throw new IllegalArgumentException("start: " + start + ", end: " + end+", limit="+limit());
-        if (start >= end)
-            return this;
-
-        MEMORY.setMemory(address + translate(start), end - start, (byte) 0);
-        return this;
-
     }
 
     @Override
@@ -310,20 +323,5 @@ public class NativeBytesStore<Underlying>
             address = 0;
             MEMORY.freeMemory(address);
         }
-    }
-
-    @Override
-    public long accessOffset(long randomOffset) {
-        return address + translate(randomOffset);
-    }
-
-    @Override
-    public Access<Underlying> access() {
-        return nativeAccess();
-    }
-
-    @Override
-    public Underlying accessHandle() {
-        return null;
     }
 }

@@ -45,10 +45,20 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     @Override
+    public long capacity() {
+        return 1L << 40;
+    }
+
+    @Override
     protected long writeCheckOffset(long offset, long adding) {
-        if (!bytesStore.inStore(offset))
+        if (!bytesStore.inStore(offset + adding))
             checkResize(offset);
         return offset;
+    }
+
+    @Override
+    public void ensureCapacity(long size) {
+        writeCheckOffset(size, 0);
     }
 
     private void checkResize(long offset) {
@@ -56,6 +66,11 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
             resize(offset);
         else
             throw new BufferOverflowException();
+    }
+
+    @Override
+    public boolean isElastic() {
+        return true;
     }
 
     private void resize(long offset) {
@@ -73,21 +88,6 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         bytesStore.copyTo(store);
         bytesStore.release();
         bytesStore = store;
-    }
-
-    @Override
-    public long capacity() {
-        return 1L << 40;
-    }
-
-    @Override
-    public boolean isElastic() {
-        return true;
-    }
-
-    @Override
-    public void ensureCapacity(long size) {
-        writeCheckOffset(size, 0);
     }
 
     @Override

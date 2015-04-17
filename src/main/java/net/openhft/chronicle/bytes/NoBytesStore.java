@@ -28,12 +28,12 @@ import java.nio.ByteBuffer;
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 
+    public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
+    public static final Bytes NO_BYTES = new BytesStoreBytes(noBytesStore());
+
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return NO_BYTES_STORE;
     }
-
-    public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
-    public static final Bytes NO_BYTES = new BytesStoreBytes(noBytesStore());
 
     @Override
     public void reserve() throws IllegalStateException {
@@ -140,8 +140,23 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public Void underlyingObject() {
+        return null;
+    }
+
+    @Override
     public boolean inStore(long offset) {
         return false;
+    }
+
+    @Override
+    public void copyTo(BytesStore store) {
+        // nothing to copy.
+    }
+
+    @Override
+    public Access access() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -155,8 +170,8 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public Access access() {
-        throw new UnsupportedOperationException();
+    public long address() throws UnsupportedOperationException {
+        return NO_PAGE;
     }
 
     @Override
@@ -167,32 +182,6 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public long accessOffset(long randomOffset) {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long address() throws UnsupportedOperationException {
-        return NO_PAGE;
-    }
-
-    @Override
-    public void storeFence() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public void loadFence() {
-        throw new UnsupportedOperationException();
-    }
-
-
-    @Override
-    public void copyTo(BytesStore store) {
-        // nothing to copy.
-    }
-
-    @Override
-    public Void underlyingObject() {
-        return null;
     }
 
 }

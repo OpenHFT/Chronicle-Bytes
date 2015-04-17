@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 import java.nio.InvalidMarkException;
+import java.nio.charset.StandardCharsets;
 
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
         StreamingDataInput<Bytes<Underlying>, Access<Underlying>, Underlying>,
@@ -29,35 +30,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         ByteStringParser<Bytes<Underlying>, Access<Underlying>, Underlying>,
         ByteStringAppender<Bytes<Underlying>, Access<Underlying>, Underlying>,
         CharSequence {
-
-    long position();
-
-    /**
-     * Sets this buffer's mark at its position.
-     *
-     * @return This buffer
-     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
-     */
-    @Deprecated
-    Bytes mark();
-
-    /**
-     * Resets this buffer's position to the previously-marked position.
-     *
-     * Invoking this method neither changes nor discards the mark's value.
-     *
-     * @return This buffer
-     * @throws InvalidMarkException If the mark has not been set
-     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
-     */
-    @Deprecated
-    Bytes reset() throws InvalidMarkException;
-
-    Bytes<Underlying> position(long position);
-
-    long limit();
-
-    Bytes<Underlying> limit(long limit);
 
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return NativeBytesStore.elasticByteBuffer().bytes();
@@ -68,40 +40,16 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.wrap(byteBuffer).bytes();
     }
 
+    static Bytes<byte[]> expect(String text) {
+        return expect(wrap(text.getBytes(StandardCharsets.ISO_8859_1)));
+    }
+
+    static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
+        return new BytesStoreBytes<>(new ExpectedBytesStore<>(bytesStore));
+    }
+
     static Bytes<byte[]> wrap(byte[] byteArray) {
         return BytesStore.<byte[]>wrap(byteArray).bytes();
-    }
-
-    @Override
-    default int length() {
-        return (int) Math.min(remaining(), Integer.MAX_VALUE);
-    }
-
-    @Override
-    default char charAt(int offset) {
-        return (char) readUnsignedByte(position() + offset);
-    }
-
-    @Override
-    default String subSequence(int start, int end) {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
-     * @return can the Bytes resize when more data is written than it's realCapacity()
-     */
-    boolean isElastic();
-
-    /**
-     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not
-     * enough capacity then this method will throws {@link java.nio.BufferOverflowException}
-     *
-     * @param size the capacity that you required
-     * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough
-     *                                          space
-     */
-    default void ensureCapacity(long size) {
-        throw new UnsupportedOperationException("todo");
     }
 
     /**
@@ -154,6 +102,14 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
         }
     }
+
+    long limit();
+
+    Bytes<Underlying> position(long position);
+
+    long position();
+
+    Bytes<Underlying> limit(long limit);
 
     /**
      * Creates a string from the {@code position} to the  {@code limit}, The buffer is not modified
@@ -243,6 +199,58 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             buffer.limit(limit);
             buffer.position(pos);
         }
+    }
+
+    /**
+     * Sets this buffer's mark at its position.
+     *
+     * @return This buffer
+     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
+     */
+    @Deprecated
+    Bytes mark();
+
+    /**
+     * Resets this buffer's position to the previously-marked position.
+     *
+     * Invoking this method neither changes nor discards the mark's value.
+     *
+     * @return This buffer
+     * @throws InvalidMarkException If the mark has not been set
+     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
+     */
+    @Deprecated
+    Bytes reset() throws InvalidMarkException;
+
+    @Override
+    default int length() {
+        return (int) Math.min(remaining(), Integer.MAX_VALUE);
+    }
+
+    @Override
+    default char charAt(int offset) {
+        return (char) readUnsignedByte(position() + offset);
+    }
+
+    @Override
+    default String subSequence(int start, int end) {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * @return can the Bytes resize when more data is written than it's realCapacity()
+     */
+    boolean isElastic();
+
+    /**
+     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not enough capacity then this
+     * method will throws {@link java.nio.BufferOverflowException}
+     *
+     * @param size the capacity that you required
+     * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough space
+     */
+    default void ensureCapacity(long size) {
+        throw new UnsupportedOperationException("todo");
     }
 
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
