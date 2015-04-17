@@ -281,7 +281,7 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
 
         if (start < 0 || end > limit())
-            throw new IllegalArgumentException("start: " + start + ", end: " + end);
+            throw new IllegalArgumentException("start: " + start + ", end: " + end+", limit="+limit());
         if (start >= end)
             return this;
 
