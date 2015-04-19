@@ -43,6 +43,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 : HeapBytesStore.wrap(bb);
     }
 
+    /**
+     * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
+     */
+
     default Bytes<Underlying> bytes() {
         return bytes(UnderflowMode.PADDED);
     }

@@ -253,6 +253,13 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         throw new UnsupportedOperationException("todo");
     }
 
+    /**
+     * Creates a slice of the current Bytes based on its position() and limit().  As a sub-section of a Bytes it cannot
+     * be elastic.
+     *
+     * @return a slice of the existing Bytes where the start is moved to the position and the current limit determines
+     * the capacity.
+     */
     @Override
     default Bytes<Underlying> bytes() {
         boolean isClear = start() == position() && limit() == capacity();

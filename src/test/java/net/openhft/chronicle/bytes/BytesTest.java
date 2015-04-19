@@ -23,10 +23,9 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class BytesTest {
-
-
     @Test
     public void testName() throws Exception {
         NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
@@ -53,6 +52,7 @@ public class BytesTest {
         bytes.limit(bytes.limit() - 1);
 
         Bytes bytes1 = bytes.bytes();
+        assertFalse(bytes1.isElastic());
         assertEquals(1, bytes1.start());
         assertEquals(bytes.capacity() - 1 - 1, bytes1.capacity());
         assertEquals(bytes1.limit(), bytes1.capacity());
@@ -90,6 +90,8 @@ public class BytesTest {
         bytes.limit(bytes.limit() - 1);
 
         Bytes bytes1 = bytes.bytes();
+        assertFalse(bytes1.isElastic());
+        
         assertEquals(1, bytes1.start());
         // capacity is notional in this case.
 //        assertEquals(bytes.capacity() - 1, bytes1.capacity());
