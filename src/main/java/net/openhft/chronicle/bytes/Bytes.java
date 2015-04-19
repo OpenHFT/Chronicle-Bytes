@@ -253,6 +253,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         throw new UnsupportedOperationException("todo");
     }
 
+    @Override
+    default Bytes<Underlying> bytes() {
+        boolean isClear = start() == position() && limit() == capacity();
+        return isClear ? BytesStore.super.bytes() : new SubBytesStoreBytes<>(this, position(), limit() + start());
+    }
+
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     Access<Underlying> access();
