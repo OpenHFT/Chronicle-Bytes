@@ -20,16 +20,9 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
-    public BytesStoreBytes(@NotNull BytesStore bytesStore) {
+public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
+    public VanillaBytes(@NotNull BytesStore bytesStore) {
         super(bytesStore);
-    }
-
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
-        BytesStore oldBS = this.bytesStore;
-        this.bytesStore = bytesStore;
-        oldBS.release();
-        clear();
     }
 
     @Override
@@ -37,6 +30,13 @@ public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> imple
         bytesStore(byteStore);
         limit(offset + length);
         position(offset);
+    }
+    
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+        BytesStore oldBS = this.bytesStore;
+        this.bytesStore = bytesStore;
+        oldBS.release();
+        clear();
     }
 
     @Override
@@ -57,6 +57,12 @@ public class BytesStoreBytes<Underlying> extends AbstractBytes<Underlying> imple
     @Override
     public boolean isElastic() {
         return false;
+    }
+
+    @Override
+    public Bytes<Underlying> bytes() {
+        boolean isClear = start() == position() && limit() == capacity();
+        return isClear ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, position(), limit() + start());
     }
 
     @Override

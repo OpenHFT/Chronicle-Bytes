@@ -33,16 +33,16 @@ public class MappedBytesStore extends NativeBytesStore {
 
     @Override
     public Bytes<Void> bytes() {
-        return new BytesStoreBytes<>(this);
-    }
-
-    @Override
-    public long start() {
-        return start;
+        return new VanillaBytes<>(this);
     }
 
     @Override
     public long safeLimit() {
         return safeLimit;
+    }
+
+    @Override
+    public long start() {
+        return start;
     }
 }

@@ -97,7 +97,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public Bytes<Underlying> bytes() {
-        return elastic ? new NativeBytes<>(this) : new BytesStoreBytes<>(this);
+        return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
     }
 
     @Override
@@ -141,6 +141,13 @@ public class NativeBytesStore<Underlying>
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
+    }
+
+    private long translate(long offset) {
+        long offset2 = offset - start();
+        if (offset2 < 0 || offset2 > capacity())
+            throw new IllegalArgumentException("Offset out of bounds");
+        return offset2;
     }
 
     @Override
@@ -196,13 +203,6 @@ public class NativeBytesStore<Underlying>
     @Override
     public long readVolatileLong(long offset) {
         return MEMORY.readVolatileLong(address + translate(offset));
-    }
-
-    private long translate(long offset) {
-        long offset2 = offset - start();
-        if (offset2 < 0 || offset2 > capacity())
-            throw new IllegalArgumentException("Offset out of bounds");
-        return offset2;
     }
 
     @Override

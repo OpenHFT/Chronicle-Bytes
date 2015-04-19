@@ -37,7 +37,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<ByteBuffer> wrap(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer).bytes();
+        return BytesStore.wrap(byteBuffer).bytes(UnderflowMode.BOUNDED);
     }
 
     static Bytes<byte[]> expect(String text) {
@@ -45,11 +45,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
-        return new BytesStoreBytes<>(new ExpectedBytesStore<>(bytesStore));
+        return new VanillaBytes<>(new ExpectedBytesStore<>(bytesStore));
     }
 
     static Bytes<byte[]> wrap(byte[] byteArray) {
-        return BytesStore.<byte[]>wrap(byteArray).bytes();
+        return BytesStore.<byte[]>wrap(byteArray).bytes(UnderflowMode.BOUNDED);
     }
 
     /**
@@ -256,7 +256,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     @Override
     default Bytes<Underlying> bytes() {
         boolean isClear = start() == position() && limit() == capacity();
-        return isClear ? BytesStore.super.bytes() : new SubBytesStoreBytes<>(this, position(), limit() + start());
+        return isClear ? BytesStore.super.bytes() : new SubBytes<>(this, position(), limit() + start());
     }
 
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore

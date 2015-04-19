@@ -5,12 +5,12 @@ import org.jetbrains.annotations.NotNull;
 /**
  * Created by peter.lawrey on 19/04/15.
  */
-public class SubBytesStoreBytes<Underlying> extends BytesStoreBytes<Underlying> {
+public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
     private long start;
     private long capacity;
 
-    public SubBytesStoreBytes(@NotNull BytesStore bytesStore, long start, long limit) {
-        super(bytesStore);
+    public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long limit) {
+        super(bytesStore, underflowMode);
         this.start = start;
         this.capacity = limit - start;
         clear();

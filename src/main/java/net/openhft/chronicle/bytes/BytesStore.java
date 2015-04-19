@@ -50,7 +50,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default Bytes bytes(UnderflowMode underflowMode) {
         switch (underflowMode) {
             case BOUNDED:
-                return new BytesStoreBytes(this);
+                return new VanillaBytes(this);
             case ZERO_EXTEND:
             case PADDED:
                 return new ZeroedBytes(this, underflowMode);
@@ -84,7 +84,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default BytesStore with(long position, long length, Consumer<Bytes> bytesConsumer) {
         if (position + length > capacity())
             throw new BufferUnderflowException();
-        BytesStoreBytes bsb = new BytesStoreBytes(this);
+        VanillaBytes bsb = new VanillaBytes(this);
         bsb.position(position);
         bsb.limit(position + length);
         bytesConsumer.accept(bsb);
