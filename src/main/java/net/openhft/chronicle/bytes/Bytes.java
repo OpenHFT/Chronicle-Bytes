@@ -118,7 +118,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-    public static String toDebugString(@NotNull final Bytes buffer) {
+     static String toDebugString(@NotNull final Bytes buffer) {
 
         if (buffer.remaining() == 0)
             return "";
@@ -148,7 +148,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-    public static String toDebugString(@NotNull final ByteBuffer buffer) {
+     static String toDebugString(@NotNull final ByteBuffer buffer) {
 
         if (buffer.remaining() == 0)
             return "";
@@ -179,7 +179,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
-    public static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
+     static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
 
         final long pos = buffer.position();
         final long limit = buffer.readLimit();
@@ -269,4 +269,5 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     Access<Underlying> access();
+
 }
