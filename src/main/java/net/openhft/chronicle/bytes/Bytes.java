@@ -112,7 +112,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     Bytes<Underlying> limit(long limit);
 
     /**
-     * Creates a string from the {@code position} to the  {@code limit}, The buffer is not modified
+     * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call
      *
      * @param buffer the buffer to use

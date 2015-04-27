@@ -32,6 +32,11 @@ public enum StopCharTesters implements StopCharTester {
         public boolean isStopChar(int ch) {
             return ch < ' ';
         }
+    }, NEW_LINE_STOP {
+        @Override
+        public boolean isStopChar(int ch) {
+            return ch == '\n';
+        }
     },
     SPACE_STOP {
         @Override
