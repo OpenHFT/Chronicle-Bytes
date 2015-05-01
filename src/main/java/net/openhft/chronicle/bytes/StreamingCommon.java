@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.BufferUnderflowException;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
         A extends AccessCommon<AT>, AT> extends RandomCommon<S, A, AT> {
@@ -56,6 +57,21 @@ public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
         return (S) this;
     }
 
+
+    default <S,R> R reply(long length, Function<S, R> bytesConsumer) {
+        if (length > remaining())
+            throw new BufferUnderflowException();
+        long limit0 = limit();
+        long limit = position() + length;
+        try {
+            limit(limit);
+            return bytesConsumer.apply((S) this);
+        } finally {
+            limit(limit0);
+            position(limit);
+        }
+
+    }
     S skip(long bytesToSkip);
 
     S flip();
