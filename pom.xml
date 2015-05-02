@@ -47,7 +47,7 @@
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
                 <type>pom</type>
-                <version>1.0.4</version>
+                <version>1.0.5</version>
                 <scope>import</scope>
             </dependency>
         </dependencies>
@@ -64,7 +64,7 @@
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
         </dependency>
-        
+
         <dependency>
             <groupId>com.intellij</groupId>
             <artifactId>annotations</artifactId>
