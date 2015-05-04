@@ -57,6 +57,10 @@ public class MappedFile implements ReferenceCounted {
         capacity = 1L << 40;
     }
 
+    public static MappedFile mappedFile(File file, long chunkSize) throws FileNotFoundException {
+        return mappedFile(file, chunkSize, OS.pageSize());
+    }
+
     public static MappedFile mappedFile(String filename, long chunkSize) throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
