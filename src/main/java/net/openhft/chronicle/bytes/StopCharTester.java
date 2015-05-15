@@ -26,7 +26,7 @@ public interface StopCharTester {
      * Detect which byte stops the string to be parsed
      *
      * <p>This should be changed to support char instead.
-     * 
+     *
      * <p>Note: for safety reasons, you should stop on a 0 byte or throw an IllegalStateException.
      *
      * @param ch to test, 0 should return true or throw an exception.
@@ -34,4 +34,8 @@ public interface StopCharTester {
      * @throws IllegalStateException if an invalid character like 0 was detected.
      */
     boolean isStopChar(int ch) throws IllegalStateException;
+
+    default StopCharTester escaping() {
+        return new EscapingStopCharTester(this);
+    }
 }

@@ -56,6 +56,12 @@ public enum StopCharTesters implements StopCharTester {
             return ch <= 1;
         }
     },
+    QUOTES {
+        @Override
+        public boolean isStopChar(int ch) throws IllegalStateException {
+            return ch == '"';
+        }
+    },
     ALL {
         @Override
         public boolean isStopChar(int ch) {

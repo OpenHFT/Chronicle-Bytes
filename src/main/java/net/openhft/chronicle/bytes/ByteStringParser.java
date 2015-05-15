@@ -28,6 +28,10 @@ public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
         BytesUtil.parseUTF(this, sb, stopCharTester);
     }
 
+    default void parseUTF(StringBuilder sb, StopCharsTester stopCharsTester) {
+        BytesUtil.parseUTF(this, sb, stopCharsTester);
+    }
+
     default long parseLong() {
         return BytesUtil.parseLong(this);
     }

@@ -100,4 +100,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     A access();
+
+    int peekUnsignedByte();
 }

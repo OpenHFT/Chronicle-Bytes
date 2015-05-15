@@ -29,10 +29,6 @@ public class EscapingStopCharTester implements StopCharTester {
         this.sct = sct;
     }
 
-    public static StopCharTester escaping(StopCharTester sct) {
-        return new EscapingStopCharTester(sct);
-    }
-
     @Override
     public boolean isStopChar(int ch) throws IllegalStateException {
         if (escaped) {

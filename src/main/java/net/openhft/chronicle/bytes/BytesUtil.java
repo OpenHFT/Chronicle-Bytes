@@ -228,7 +228,7 @@ public enum BytesUtil {
             // before
             if (start < 0) start = 0;
             if (position > start) {
-                for (long i = start; i < position; i++) {
+                for (long i = start; i < position && position< bytes.limit(); i++) {
                     sb.append(bytes.printable(i));
                 }
                 sb.append('\u2016');
@@ -662,6 +662,83 @@ public enum BytesUtil {
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
                     if (tester.isStopChar(c3))
+                        return;
+                    appendable.append((char) c3);
+                    break;
+                }
+                default:
+                /* 10xx xxxx, 1111 xxxx */
+                    throw new UTFDataFormatException(
+                            "malformed input around byte ");
+            }
+        }
+    }
+    public static void parseUTF(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
+        builder.setLength(0);
+        try {
+            readUTF0(bytes, builder, tester);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void readUTF0(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            if (c >= 128) {
+                bytes.skip(-1);
+                break;
+            }
+            if (tester.isStopChar(c, bytes.peekUnsignedByte()))
+                return;
+            appendable.append((char) c);
+            if (bytes.remaining() ==0)
+                return;
+        }
+
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            switch (c >> 4) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                /* 0xxxxxxx */
+                    if (tester.isStopChar(c, bytes.peekUnsignedByte()))
+                        return;
+                    appendable.append((char) c);
+                    break;
+                case 12:
+                case 13: {
+                /* 110x xxxx 10xx xxxx */
+                    int char2 = bytes.readUnsignedByte();
+                    if ((char2 & 0xC0) != 0x80)
+                        throw new UTFDataFormatException(
+                                "malformed input around byte");
+                    int c2 = (char) (((c & 0x1F) << 6) |
+                            (char2 & 0x3F));
+                    if (tester.isStopChar(c2, bytes.peekUnsignedByte()))
+                        return;
+                    appendable.append((char) c2);
+                    break;
+                }
+                case 14: {
+                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+
+                    int char2 = bytes.readUnsignedByte();
+                    int char3 = bytes.readUnsignedByte();
+
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                        throw new UTFDataFormatException(
+                                "malformed input around byte ");
+                    int c3 = (char) (((c & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            (char3 & 0x3F));
+                    if (tester.isStopChar(c3, bytes.peekUnsignedByte()))
                         return;
                     appendable.append((char) c3);
                     break;

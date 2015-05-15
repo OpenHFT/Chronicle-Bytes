@@ -154,13 +154,20 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public byte readByte() {
-
         try {
             long offset = readOffsetPositionMoved(1);
             return bytesStore.readByte(offset);
         } catch (BufferOverflowException e) {
-
             return 0;
+        }
+    }
+
+    @Override
+    public int peekUnsignedByte() {
+        try {
+            return remaining() > 0 ? bytesStore.readUnsignedByte(position) : -1;
+        } catch (BufferOverflowException e) {
+            return -1;
         }
     }
 
@@ -537,10 +544,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         refCount.releaseAll();
     }
 
-
-
-
-
     @Override
     public final Bytes mark() {
         mark = position;
@@ -557,13 +560,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-
     @Override
     public Access<Underlying> access() {
         return bytesStore.access();
     }
-
-
 }
 
 
