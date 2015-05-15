@@ -155,6 +155,23 @@ public enum BytesUtil {
         }
     }
 
+    public static <T> void appendUTF(WriteAccess<T> access, T handle, long offset,
+                                     @NotNull CharSequence str, int strOff, int length) {
+        int i;
+        for (i = 0; i < length; i++) {
+            char c = str.charAt(strOff + i);
+            if (c > 0x007F)
+                break;
+            access.writeByte(handle, offset, (byte) c);
+            offset++;
+        }
+
+        for (; i < length; i++) {
+            char c = str.charAt(strOff + i);
+            offset = appendUTF(access, handle, offset, c);
+        }
+    }
+
     public static void appendUTF(StreamingDataOutput bytes, int c) {
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
@@ -170,6 +187,28 @@ public enum BytesUtil {
             bytes.writeByte((byte) (0x80 | ((c >> 12) & 0x3F)));
             bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
             bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+        }
+    }
+
+    public static <T> long appendUTF(WriteAccess<T> access, T handle, long offset, int c) {
+        if (c <= 0x007F) {
+            access.writeByte(handle, offset, (byte) c);
+            return offset + 1;
+        } else if (c <= 0x07FF) {
+            access.writeByte(handle, offset,     (byte) (0xC0 | ((c >> 6) & 0x1F)));
+            access.writeByte(handle, offset + 1, (byte) (0x80 | c & 0x3F));
+            return offset + 2;
+        } else if (c <= 0xFFFF) {
+            access.writeByte(handle, offset,     (byte) (0xE0 | ((c >> 12) & 0x0F)));
+            access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 6) & 0x3F)));
+            access.writeByte(handle, offset + 2, (byte) (0x80 | (c & 0x3F)));
+            return offset + 3;
+        } else {
+            access.writeByte(handle, offset,     (byte) (0xF0 | ((c >> 18) & 0x07)));
+            access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 12) & 0x3F)));
+            access.writeByte(handle, offset + 2, (byte) (0x80 | ((c >> 6) & 0x3F)));
+            access.writeByte(handle, offset + 3, (byte) (0x80 | (c & 0x3F)));
+            return offset + 4;
         }
     }
 
