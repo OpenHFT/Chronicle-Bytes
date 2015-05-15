@@ -84,7 +84,7 @@ public interface ReadAccess<T> extends AccessCommon<T> {
     }
 
     /**
-     * @deprecated use {@link Access#compare} instead
+     * @deprecated use {@link Access#equivalent} instead
      */
     @Deprecated
     default <S> boolean compareTo(

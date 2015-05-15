@@ -529,7 +529,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         Bytes b2 = (Bytes) obj;
         long remaining = remaining();
         if (b2.remaining() != remaining) return false;
-        return Access.compare(access(), accessHandle(), accessPositionOffset(),
+        return Access.equivalent(access(), accessHandle(), accessPositionOffset(),
                 b2.access(), b2.accessHandle(), b2.accessPositionOffset(), remaining);
     }
 

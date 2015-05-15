@@ -38,9 +38,35 @@ public interface Access<T> extends ReadAccess<T>, WriteAccess<T> {
         targetAccess.writeFrom(target, targetOffset, sourceAccess, source, sourceOffset, len);
     }
 
-    static <T, U> boolean compare(ReadAccess<T> access1, T handle1, long offset1,
-                               ReadAccess<U> access2, U handle2, long offset2,
-                               long len) {
+    static <S, ST, SA extends ReadAccess<ST>, T> void copy(
+            Accessor<S, ST, SA> sourceAccessor, S source, long sourceIndex,
+            WriteAccess<T> targetAccess, T target, long targetOffset, long size) {
+        copy(sourceAccessor.access(source), sourceAccessor.handle(source),
+                sourceAccessor.offset(source, sourceIndex),
+                targetAccess, target, targetOffset, sourceAccessor.size(size));
+    }
+
+    static <S, T, TT, TA extends WriteAccess<TT>> void copy(
+            ReadAccess<S> sourceAccess, S source, long sourceOffset,
+            Accessor<T, TT, TA> targetAccessor, T target, long targetIndex,
+            long len) {
+        copy(sourceAccess, source, sourceOffset,
+                targetAccessor.access(target), targetAccessor.handle(target),
+                targetAccessor.offset(target, targetIndex), len);
+    }
+
+    static <T, TT, TA extends ReadAccess<TT>, U> boolean equivalent(
+            Accessor<T, TT, TA> accessor1, T source1, long index1,
+            ReadAccess<U> access2, U handle2, long offset2,
+            long size) {
+        return equivalent(accessor1.access(source1), accessor1.handle(source1),
+                accessor1.offset(source1, index1), access2, handle2, offset2,
+                accessor1.size(size));
+    }
+
+    static <T, U> boolean equivalent(ReadAccess<T> access1, T handle1, long offset1,
+                                     ReadAccess<U> access2, U handle2, long offset2,
+                                     long len) {
         return access1.compareTo(handle1, offset1, access2, handle2, offset2, len);
     }
 
