@@ -45,33 +45,65 @@ public interface Accessor<S, T, A extends AccessCommon<T>> {
     static Accessor.Full<boolean[], boolean[]> booleanArrayAccessor() {
         return ArrayAccessors.Boolean.INSTANCE;
     }
+    
+    static Accessor.Read<Boolean, Boolean> booleanAccessor() {
+        return PrimitiveAccessors.BooleanAccessor.INSTANCE;
+    }
 
     static Accessor.Full<byte[], byte[]> byteArrayAccessor() {
         return ArrayAccessors.Byte.INSTANCE;
+    }
+    
+    static Accessor.Read<Byte, Byte> byteAccessor() {
+        return PrimitiveAccessors.ByteAccessor.INSTANCE;
     }
 
     static Accessor.Full<char[], char[]> charArrayAccessor() {
         return ArrayAccessors.Char.INSTANCE;
     }
+    
+    static Accessor.Read<Character, Character> characterAccessor() {
+        return PrimitiveAccessors.CharacterAccessor.INSTANCE;
+    }
 
     static Accessor.Full<short[], short[]> shortArrayAccessor() {
         return ArrayAccessors.Short.INSTANCE;
+    }
+    
+    static Accessor.Read<Short, Short> shortAccessor() {
+        return PrimitiveAccessors.ShortAccessor.INSTANCE;
     }
 
     static Accessor.Full<int[], int[]> intArrayAccessor() {
         return ArrayAccessors.Int.INSTANCE;
     }
+    
+    static Accessor.Read<Integer, Integer> integerAccessor() {
+        return PrimitiveAccessors.IntegerAccessor.INSTANCE;
+    }
 
     static Accessor.Full<long[], long[]> longArrayAccessor() {
         return ArrayAccessors.Long.INSTANCE;
+    }
+    
+    static Accessor.Read<Long, Long> longAccessor() {
+        return PrimitiveAccessors.LongAccessor.INSTANCE;
     }
 
     static Accessor.Full<float[], float[]> floatArrayAccessor() {
         return ArrayAccessors.Float.INSTANCE;
     }
+    
+    static Accessor.Read<Float, Float> floatAccessor() {
+        return PrimitiveAccessors.FloatAccessor.INSTANCE;
+    }
 
     static Accessor.Full<double[], double[]> doubleArrayAccessor() {
         return ArrayAccessors.Double.INSTANCE;
+    }
+    
+    static Accessor.Read<Double, Double> doubleAccessor() {
+        return PrimitiveAccessors.DoubleAccessor.INSTANCE;
     }
 
     static Accessor.Read<? super String, ?> stringAccessor() {
