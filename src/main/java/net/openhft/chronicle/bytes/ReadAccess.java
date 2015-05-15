@@ -17,6 +17,11 @@
 package net.openhft.chronicle.bytes;
 
 public interface ReadAccess<T> extends AccessCommon<T> {
+    
+    static ReadAccess<Void> zeros() {
+        return ZeroAccess.INSTANCE;
+    }
+    
     default boolean readBoolean(T handle, long offset) {
         return readByte(handle, offset) != 0;
     }
