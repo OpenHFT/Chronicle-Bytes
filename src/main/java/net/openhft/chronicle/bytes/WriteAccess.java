@@ -77,6 +77,8 @@ public interface WriteAccess<T> extends AccessCommon<T> {
     default <S> void writeFrom(
             T handle, long offset,
             ReadAccess<S> sourceAccess, S source, long sourceOffset, long len) {
+        if (this == sourceAccess && handle == source && offset == sourceOffset)
+            return;
         long i = 0;
         while (len - i >= 8L) {
             writeLong(handle, offset + i, sourceAccess.readLong(source, sourceOffset + i));
