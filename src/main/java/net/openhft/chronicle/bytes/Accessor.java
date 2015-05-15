@@ -106,8 +106,8 @@ public interface Accessor<S, T, A extends AccessCommon<T>> {
         return PrimitiveAccessors.DoubleAccessor.INSTANCE;
     }
 
-    static Accessor.Read<? super String, ?> stringAccessor() {
-        return CharSequenceAccessor.stringAccessor;
+    static Accessor.Read<String, ?> stringAccessor() {
+        return (Read<String, ?>) CharSequenceAccessor.stringAccessor;
     }
 
     static Accessor.Read<CharSequence, CharSequence> checkedNativeCharSequenceAccessor() {
