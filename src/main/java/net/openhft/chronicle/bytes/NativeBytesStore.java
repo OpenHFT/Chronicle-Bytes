@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounter;
 import sun.misc.Cleaner;
@@ -26,11 +27,11 @@ import sun.nio.ch.DirectBuffer;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.Access.nativeAccess;
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
+    private static final Memory MEMORY = OS.memory();
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;

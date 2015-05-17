@@ -18,7 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.OS;
 
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
@@ -65,12 +65,12 @@ public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends 
     }
 
     default int readVolatileInt(long offset) {
-        UnsafeMemory.MEMORY.loadFence();
+        OS.memory().loadFence();
         return readInt(offset);
     }
 
     default long readVolatileLong(long offset) {
-        UnsafeMemory.MEMORY.loadFence();
+        OS.memory().loadFence();
         return readLong(offset);
     }
 

@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.OS;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
@@ -26,10 +28,10 @@ import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static net.openhft.chronicle.bytes.Access.nativeAccess;
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
+    private static final Memory MEMORY = OS.memory();
     final Object realUnderlyingObject;
     final int dataOffset, capacity;
     private final AtomicLong refCount = new AtomicLong(1);

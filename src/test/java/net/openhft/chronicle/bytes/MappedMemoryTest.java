@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.UnsafeMemory;
 import org.junit.Test;
 
 import java.io.File;
@@ -50,10 +49,10 @@ public class MappedMemoryTest {
                 long address = bytesStore.address;
 
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    UnsafeMemory.MEMORY.writeLong(address + i, i);
+                    OS.memory().writeLong(address + i, i);
                 }
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    UnsafeMemory.MEMORY.writeLong(address + i, i);
+                    OS.memory().writeLong(address + i, i);
                 }
 
                 bytesStore.release();
