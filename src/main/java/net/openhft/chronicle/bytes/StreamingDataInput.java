@@ -41,8 +41,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
         throw new UnsupportedOperationException();
     }
 
-    default boolean readUTFΔ(StringBuilder sb) throws UTFDataFormatRuntimeException {
-        sb.setLength(0);
+    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(ACS sb) throws UTFDataFormatRuntimeException {
+        BytesUtil.setLength(sb, 0);
         long len0 = BytesUtil.readStopBit(this);
         if (len0 == -1)
             return false;

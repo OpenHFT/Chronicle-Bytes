@@ -52,7 +52,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     @Override
     protected long writeCheckOffset(long offset, long adding) {
         if (!bytesStore.inStore(offset + adding))
-            checkResize(offset);
+            checkResize(offset + adding);
         return offset;
     }
 
@@ -61,9 +61,9 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         writeCheckOffset(size, 0);
     }
 
-    private void checkResize(long offset) {
+    private void checkResize(long endOfBuffer) {
         if (isElastic())
-            resize(offset);
+            resize(endOfBuffer);
         else
             throw new BufferOverflowException();
     }
@@ -73,12 +73,12 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         return true;
     }
 
-    private void resize(long offset) {
-        if (offset < 0)
+    private void resize(long endOfBuffer) {
+        if (endOfBuffer < 0)
             throw new IllegalArgumentException();
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
-        long size = (Math.max(offset, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
+        long size = (Math.max(endOfBuffer, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
         NativeBytesStore store;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));

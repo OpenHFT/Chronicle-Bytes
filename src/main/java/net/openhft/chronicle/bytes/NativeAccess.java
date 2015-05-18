@@ -151,7 +151,7 @@ public final class NativeAccess<T> implements Access<T> {
         return ByteOrder.nativeOrder();
     }
 
-    @Override
+/*    @Override
     public <S> void writeFrom(
             T handle, long offset,
             ReadAccess<S> sourceAccess, S source, long sourceOffset, long len) {
@@ -160,7 +160,7 @@ public final class NativeAccess<T> implements Access<T> {
         } else {
             Access.super.writeFrom(handle, offset, sourceAccess, source, sourceOffset, len);
         }
-    }
+    }*/
 
     @Override
     public void writeBytes(T handle, long offset, long len, byte b) {

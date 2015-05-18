@@ -39,25 +39,30 @@ public enum BytesUtil {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
 
-    public static void parseUTF(StreamingDataInput bytes, StringBuilder appendable, int utflen) throws UTFDataFormatRuntimeException {
-        int count = 0;
-        assert bytes.remaining() >= utflen;
-        while (count < utflen) {
-            int c = bytes.readUnsignedByte();
-            if (c >= 128) {
-                bytes.position(bytes.position() - 1);
-                break;
-            } else if (c < 0) {
+    public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        try {
+            int count = 0;
+            assert bytes.remaining() >= utflen;
+            while (count < utflen) {
+                int c = bytes.readUnsignedByte();
+                if (c >= 128) {
+                    bytes.position(bytes.position() - 1);
+                    break;
+                } else if (c < 0) {
+                    break;
+                }
+                count++;
+                appendable.append((char) c);
             }
-            count++;
-            appendable.append((char) c);
-        }
 
-        if (utflen > count)
-            parseUTF2(bytes, appendable, utflen, count);
+            if (utflen > count)
+                parseUTF2(bytes, appendable, utflen, count);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    static void parseUTF2(StreamingDataInput bytes, StringBuilder appendable, int utflen, int count) throws UTFDataFormatRuntimeException {
+    static void parseUTF2(StreamingDataInput bytes, Appendable appendable, int utflen, int count) throws IOException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -141,6 +146,10 @@ public enum BytesUtil {
     }
 
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+        if (bytes instanceof NativeBytes && str instanceof NativeBytes) {
+            ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
+            return;
+        }
         int i;
         for (i = 0; i < length; i++) {
             char c = str.charAt(offset + i);
@@ -635,8 +644,8 @@ public enum BytesUtil {
         return SI.intern(utfReader);
     }
 
-    public static void parseUTF(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharTester tester) {
-        builder.setLength(0);
+    public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
+        setLength(builder, 0);
         try {
             readUTF0(bytes, builder, tester);
         } catch (IOException e) {
@@ -713,8 +722,8 @@ public enum BytesUtil {
         }
     }
 
-    public static void parseUTF(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
-        builder.setLength(0);
+    public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) {
+        setLength(builder, 0);
         try {
             readUTF0(bytes, builder, tester);
         } catch (IOException e) {
@@ -979,5 +988,23 @@ public enum BytesUtil {
             bytes.limit(limit);
             bytes.position(position);
         }
+    }
+
+    public static void setCharAt(@NotNull Appendable sb, int index, char ch) {
+        if (sb instanceof StringBuilder)
+            ((StringBuilder) sb).setCharAt(index, ch);
+        else if (sb instanceof Bytes)
+            ((Bytes) sb).writeByte(index, ch);
+        else
+            throw new IllegalArgumentException("" + sb.getClass());
+    }
+
+    public static void setLength(@NotNull Appendable sb, int newLength) {
+        if (sb instanceof StringBuilder)
+            ((StringBuilder) sb).setLength(newLength);
+        else if (sb instanceof Bytes)
+            ((Bytes) sb).position(newLength);
+        else
+            throw new IllegalArgumentException("" + sb.getClass());
     }
 }

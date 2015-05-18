@@ -24,11 +24,11 @@ public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
         return BytesUtil.parseUTF(this, stopCharTester);
     }
 
-    default void parseUTF(StringBuilder sb, StopCharTester stopCharTester) {
+    default void parseUTF(Appendable sb, StopCharTester stopCharTester) {
         BytesUtil.parseUTF(this, sb, stopCharTester);
     }
 
-    default void parseUTF(StringBuilder sb, StopCharsTester stopCharsTester) {
+    default void parseUTF(Appendable sb, StopCharsTester stopCharsTester) {
         BytesUtil.parseUTF(this, sb, stopCharsTester);
     }
 

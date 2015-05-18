@@ -19,7 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
-        A extends WriteAccess<AT>, AT> extends StreamingDataOutput<B, A, AT> {
+        A extends WriteAccess<AT>, AT>
+        extends StreamingDataOutput<B, A, AT>, Appendable {
     default B append(char ch) {
         BytesUtil.appendUTF(this, ch);
         return (B) this;
