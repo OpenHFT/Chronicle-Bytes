@@ -195,16 +195,16 @@ public enum BytesUtil {
             access.writeByte(handle, offset, (byte) c);
             return offset + 1;
         } else if (c <= 0x07FF) {
-            access.writeByte(handle, offset,     (byte) (0xC0 | ((c >> 6) & 0x1F)));
+            access.writeByte(handle, offset, (byte) (0xC0 | ((c >> 6) & 0x1F)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | c & 0x3F));
             return offset + 2;
         } else if (c <= 0xFFFF) {
-            access.writeByte(handle, offset,     (byte) (0xE0 | ((c >> 12) & 0x0F)));
+            access.writeByte(handle, offset, (byte) (0xE0 | ((c >> 12) & 0x0F)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 6) & 0x3F)));
             access.writeByte(handle, offset + 2, (byte) (0x80 | (c & 0x3F)));
             return offset + 3;
         } else {
-            access.writeByte(handle, offset,     (byte) (0xF0 | ((c >> 18) & 0x07)));
+            access.writeByte(handle, offset, (byte) (0xF0 | ((c >> 18) & 0x07)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 12) & 0x3F)));
             access.writeByte(handle, offset + 2, (byte) (0x80 | ((c >> 6) & 0x3F)));
             access.writeByte(handle, offset + 3, (byte) (0x80 | (c & 0x3F)));
@@ -267,7 +267,7 @@ public enum BytesUtil {
             // before
             if (start < 0) start = 0;
             if (position > start) {
-                for (long i = start; i < position && position< bytes.limit(); i++) {
+                for (long i = start; i < position && position < bytes.limit(); i++) {
                     sb.append(bytes.printable(i));
                 }
                 sb.append('\u2016');
@@ -345,7 +345,7 @@ public enum BytesUtil {
         boolean negative = num < 0;
         num = Math.abs(num);
 
-        for (int i = digits-1; i > 0; i--) {
+        for (int i = digits - 1; i > 0; i--) {
             out.writeByte(offset + i, (byte) (num % 10 + '0'));
             num /= 10;
         }
@@ -654,7 +654,7 @@ public enum BytesUtil {
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
-            if (bytes.remaining() ==0)
+            if (bytes.remaining() == 0)
                 return;
         }
 
@@ -712,6 +712,7 @@ public enum BytesUtil {
             }
         }
     }
+
     public static void parseUTF(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
         try {
@@ -731,7 +732,7 @@ public enum BytesUtil {
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
                 return;
             appendable.append((char) c);
-            if (bytes.remaining() ==0)
+            if (bytes.remaining() == 0)
                 return;
         }
 
@@ -827,7 +828,7 @@ public enum BytesUtil {
             } else {
                 break;
             }
-            if (in.remaining() ==0)
+            if (in.remaining() == 0)
                 break;
             ch = in.readUnsignedByte();
         }
@@ -914,5 +915,69 @@ public enum BytesUtil {
     public static int asInt(@NotNull String str) {
         ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
+    }
+
+    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
+
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @param bytes the buffer you wish to toString()
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
+    public static String toHexString(@NotNull final Bytes bytes, long offset, long len) {
+        if (len == 0)
+            return "";
+
+        int width = 16;
+
+        long position = bytes.position();
+        long limit = bytes.limit();
+
+        try {
+
+            bytes.limit(offset + len);
+            bytes.position(offset);
+
+            final StringBuilder builder = new StringBuilder();
+            long start = offset / width * width;
+            long end = (offset + len + width - 1) / width * width;
+            for (long i = start; i < end; i += width) {
+                String str = Long.toHexString(i);
+                for (int j = str.length(); j < 8; j++)
+                    builder.append('0');
+                builder.append(str);
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append("   ");
+                    } else {
+                        builder.append(' ');
+                        int ch = bytes.readUnsignedByte(i + j);
+                        builder.append(HEXI_DECIMAL[ch >> 4]);
+                        builder.append(HEXI_DECIMAL[ch & 15]);
+                    }
+                }
+                builder.append(' ');
+                for (int j = 0; j < width; j++) {
+                    if (j == width / 2)
+                        builder.append(' ');
+                    if (i + j < start || i + j >= offset + len) {
+                        builder.append(' ');
+                    } else {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        if (ch < ' ' || ch > 126)
+                            ch = '\u00B7';
+                        builder.append((char) ch);
+                    }
+                }
+                builder.append("\n");
+            }
+            return builder.toString();
+        } finally {
+            bytes.limit(limit);
+            bytes.position(position);
+        }
     }
 }
