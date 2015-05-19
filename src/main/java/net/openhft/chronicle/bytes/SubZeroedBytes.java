@@ -12,7 +12,7 @@ public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
     public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long limit) {
         super(bytesStore, underflowMode);
         this.start = start;
-        this.capacity = limit - start;
+        this.capacity = limit;
         clear();
     }
 

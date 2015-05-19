@@ -37,7 +37,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<ByteBuffer> wrap(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer).bytes(UnderflowMode.BOUNDED);
+        return BytesStore.wrap(byteBuffer)
+                .bytes(UnderflowMode.BOUNDED);
     }
 
     static Bytes<byte[]> expect(String text) {

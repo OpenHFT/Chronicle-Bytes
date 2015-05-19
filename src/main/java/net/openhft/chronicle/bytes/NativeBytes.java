@@ -94,4 +94,16 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     public boolean isNative() {
         return true;
     }
+
+    @Override
+    public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
+        if (bytes instanceof NativeBytes) {
+            long len = Math.min(remaining(), Math.min(bytes.remaining(), length));
+            NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), len);
+            skip(len);
+            return this;
+        } else {
+            return super.write(bytes, offset, length);
+        }
+    }
 }

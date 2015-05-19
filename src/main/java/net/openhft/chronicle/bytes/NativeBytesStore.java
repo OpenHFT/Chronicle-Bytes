@@ -102,6 +102,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    public Bytes bytes(UnderflowMode underflowMode) {
+        return underflowMode == UnderflowMode.BOUNDED
+                ? new NativeBytes<>(this)
+                : BytesStore.super.bytes(underflowMode);
+    }
+
+    @Override
     public long realCapacity() {
         return maximumLimit;
     }
