@@ -800,6 +800,55 @@ public enum BytesUtil {
         }
     }
 
+    public static void parse8bit(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
+        builder.setLength(0);
+        try {
+            read8bit0(bytes, builder, tester);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public static void parse8bit(StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
+        builder.position(0);
+
+        try {
+            read8bit0(bytes, builder, tester);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void read8bit0(StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) throws IOException {
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            if (tester.isStopChar(c, bytes.peekUnsignedByte()))
+                return;
+            appendable.append((char) c);
+            if (bytes.remaining() == 0)
+                return;
+        }
+    }
+
+    private static void read8bit0(StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) throws IOException {
+        int ch = bytes.readUnsignedByte();
+        do {
+            int next = bytes.readUnsignedByte();
+            if (tester.isStopChar(ch, next)) {
+                bytes.skip(-1);
+                return;
+            }
+            bytes2.writeUnsignedByte(ch);
+            ch = next;
+        } while (bytes.remaining() > 1);
+
+        if (tester.isStopChar(ch, -1)) {
+            bytes.skip(-1);
+            return;
+        }
+        bytes2.writeUnsignedByte(ch);
+    }
+
     public static double parseDouble(StreamingDataInput in) {
         long value = 0;
         int exp = 0;

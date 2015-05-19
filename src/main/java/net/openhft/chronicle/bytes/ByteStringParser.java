@@ -32,6 +32,13 @@ public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
         BytesUtil.parseUTF(this, sb, stopCharsTester);
     }
 
+    default void parse8bit(Appendable sb, StopCharsTester stopCharsTester) {
+        if (sb instanceof StringBuilder)
+            BytesUtil.parse8bit(this, (StringBuilder) sb, stopCharsTester);
+        else
+            BytesUtil.parse8bit(this, (Bytes) sb, stopCharsTester);
+    }
+
     default long parseLong() {
         return BytesUtil.parseLong(this);
     }
