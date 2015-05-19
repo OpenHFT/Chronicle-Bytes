@@ -99,6 +99,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
         if (bytes instanceof NativeBytes) {
             long len = Math.min(remaining(), Math.min(bytes.remaining(), length));
+            writeCheckOffset(position(), len);
             NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), len);
             skip(len);
             return this;
