@@ -49,23 +49,25 @@ public class BytesTest {
         // move the position by 1
         bytes.readByte();
         // and reduce the limit
-        bytes.limit(bytes.limit() - 1);
+        long limit1 = bytes.limit() - 1;
+        bytes.limit(limit1);
 
         Bytes bytes1 = bytes.bytes();
         assertFalse(bytes1.isElastic());
         assertEquals(1, bytes1.start());
-        assertEquals(bytes.capacity() - 1 - 1, bytes1.capacity());
+        assertEquals(limit1, bytes1.capacity());
         assertEquals(bytes1.limit(), bytes1.capacity());
         assertEquals(1, bytes1.position());
 
         // move the position by 8 more
         bytes1.readLong();
         // reduce the limit by 8
-        bytes1.limit(bytes1.limit() - 8);
+        long limit9 = bytes1.limit() - 8;
+        bytes1.limit(limit9);
 
         Bytes bytes9 = bytes1.bytes();
         assertEquals(1 + 8, bytes9.start());
-        assertEquals(bytes1.capacity() - 8 - 8, bytes9.capacity());
+        assertEquals(limit9, bytes9.capacity());
         assertEquals(bytes9.limit(), bytes9.capacity());
         assertEquals(9, bytes9.position());
 

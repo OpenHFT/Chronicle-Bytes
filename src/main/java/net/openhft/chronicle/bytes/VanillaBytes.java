@@ -62,7 +62,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     @Override
     public Bytes<Underlying> bytes() {
         boolean isClear = start() == position() && limit() == capacity();
-        return isClear ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, position(), limit() + start());
+        return isClear ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, position(), limit());
     }
 
     @Override

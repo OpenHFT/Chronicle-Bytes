@@ -9,10 +9,10 @@ public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
     private long start;
     private long capacity;
 
-    public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long limit) {
+    public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long capacity) {
         super(bytesStore, underflowMode);
         this.start = start;
-        this.capacity = limit;
+        this.capacity = capacity;
         clear();
     }
 

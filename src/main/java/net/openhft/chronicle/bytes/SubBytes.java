@@ -9,10 +9,10 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private long start;
     private long capacity;
 
-    public SubBytes(@NotNull BytesStore bytesStore, long start, long limit) {
+    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity) {
         super(bytesStore);
         this.start = start;
-        this.capacity = limit - start;
+        this.capacity = capacity;
         clear();
     }
 

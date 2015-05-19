@@ -31,7 +31,7 @@ public class ZeroedBytes<Underlying> extends VanillaBytes<Underlying> {
         boolean isClear = start() == position() && limit() == capacity();
         return isClear
                 ? new ZeroedBytes(bytesStore, underflowMode)
-                : new SubZeroedBytes<>(bytesStore, underflowMode, position(), limit() + start());
+                : new SubZeroedBytes<>(bytesStore, underflowMode, position(), limit());
     }
 
     @Override
