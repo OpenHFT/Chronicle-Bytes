@@ -102,4 +102,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
     A access();
 
     int peekUnsignedByte();
+
+    /**
+     * This is an expert level method for copying raw native memory in bulk.
+     *
+     * @param address of the memory.
+     * @param size    in bytes.
+     */
+    void nativeRead(long address, long size);
 }

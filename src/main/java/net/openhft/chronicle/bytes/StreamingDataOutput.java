@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ObjectOutput;
 import java.io.OutputStream;
@@ -110,4 +109,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     A access();
+
+    /**
+     * This is an expert level method for writing out data to native memory.
+     *
+     * @param address to write to.
+     * @param size    in bytes.
+     */
+    void nativeWrite(long address, long size);
 }

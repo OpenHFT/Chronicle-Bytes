@@ -81,4 +81,13 @@ public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends 
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     A access();
+
+    /**
+     * expert level method for copying data to native memory.
+     *
+     * @param position within the ByteStore to copy.
+     * @param address  in native memory
+     * @param size     in bytes
+     */
+    void nativeRead(long position, long address, long size);
 }

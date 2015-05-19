@@ -29,6 +29,16 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
+    public void nativeWrite(long address, long position, long size) {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
+    public void nativeRead(long position, long address, long size) {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
         throw new UnsupportedOperationException();
     }

@@ -564,6 +564,28 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Access<Underlying> access() {
         return bytesStore.access();
     }
+
+    @Override
+    public void nativeRead(long address, long size) {
+        bytesStore.nativeRead(position(), address, size);
+        skip(size);
+    }
+
+    @Override
+    public void nativeWrite(long address, long size) {
+        bytesStore.nativeWrite(address, position(), size);
+        skip(size);
+    }
+
+    @Override
+    public void nativeRead(long position, long address, long size) {
+        bytesStore.nativeRead(position, address, size);
+    }
+
+    @Override
+    public void nativeWrite(long address, long position, long size) {
+        bytesStore.nativeWrite(address, position, size);
+    }
 }
 
 

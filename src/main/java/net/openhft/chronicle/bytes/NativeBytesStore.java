@@ -309,6 +309,30 @@ public class NativeBytesStore<Underlying>
         return BytesUtil.toDebugString(this, 1024);
     }
 
+    @Override
+    public void nativeRead(long position, long address, long size) {
+        // TODO add bounds checking.
+        NativeAccess.U.copyMemory(address() + position, address, size);
+/*
+        Access.copy(
+                access(), accessHandle(), accessOffset(position),
+                NativeAccess.INSTANCE, null, address,
+                size);
+*/
+    }
+
+    @Override
+    public void nativeWrite(long address, long position, long size) {
+        // TODO add bounds checking.
+        NativeAccess.U.copyMemory(address, address() + position, size);
+/*
+        Access.copy(
+                NativeAccess.INSTANCE, null, address,
+                access(), accessHandle(), accessOffset(position),
+                size);
+*/
+    }
+
     static class Deallocator implements Runnable {
         private volatile long address;
 

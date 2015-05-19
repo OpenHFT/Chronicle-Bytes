@@ -84,4 +84,13 @@ public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
     @Override
     A access();
+
+    /**
+     * expert level method to copy data from native memory into the BytesStore
+     *
+     * @param address  in native memory to copy from
+     * @param position in BytesStore to copy to
+     * @param size     in bytes
+     */
+    void nativeWrite(long address, long position, long size);
 }
