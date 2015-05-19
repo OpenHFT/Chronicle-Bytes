@@ -68,16 +68,16 @@ public class MappedBytes extends AbstractBytes {
     }
 
     @Override
-    protected long readCheckOffset(long offset, int adding) {
-        return checkOffset(offset);
+    protected void readCheckOffset(long offset, long adding) {
+        checkOffset(offset);
     }
 
     @Override
-    protected long writeCheckOffset(long offset, long adding) {
-        return checkOffset(offset);
+    protected void writeCheckOffset(long offset, long adding) {
+        checkOffset(offset);
     }
 
-    private long checkOffset(long offset) {
+    private void checkOffset(long offset) {
         if (!bytesStore.inStore(offset)) {
             BytesStore oldBS = bytesStore;
             try {
@@ -87,7 +87,6 @@ public class MappedBytes extends AbstractBytes {
                 throw new IORuntimeException(e);
             }
         }
-        return offset;
     }
 
     @Override

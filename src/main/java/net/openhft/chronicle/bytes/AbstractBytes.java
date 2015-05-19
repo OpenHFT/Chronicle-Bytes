@@ -83,8 +83,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
-        long offset2 = writeCheckOffset(offset, 4);
-        return bytesStore.compareAndSwapInt(offset2, expected, value);
+        writeCheckOffset(offset, 4);
+        return bytesStore.compareAndSwapInt(offset, expected, value);
     }
 
     @Override
@@ -94,8 +94,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
-        long offset2 = writeCheckOffset(offset, 8);
-        return bytesStore.compareAndSwapLong(offset2, expected, value);
+        writeCheckOffset(offset, 8);
+        return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
     @Override
@@ -109,9 +109,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public Bytes<Underlying> skip(long bytesToSkip) {
-        position += bytesToSkip;
-        assert position <= limit() : "position=" + position() + ", limit=" + limit();
-        readOffsetPositionMoved(0);
+        readOffsetPositionMoved(bytesToSkip);
         return this;
     }
 
@@ -203,8 +201,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int peakVolatileInt() {
-        long offset = readCheckOffset(position, 4);
-        return bytesStore.readVolatileInt(offset);
+        readCheckOffset(position, 4);
+        return bytesStore.readVolatileInt(position);
     }
 
     @Override
@@ -240,8 +238,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.readVolatileLong(offset);
     }
 
-    protected long readOffsetPositionMoved(int adding) {
-        long offset = readCheckOffset(position, adding);
+    protected long readOffsetPositionMoved(long adding) {
+        long offset = position;
+        readCheckOffset(position, adding);
         position += adding;
         assert position <= limit();
         return offset;
@@ -264,80 +263,86 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public Bytes writeByte(long offset, byte i) {
-        long offset2 = writeCheckOffset(offset, 1);
-        bytesStore.writeByte(offset2, i);
+        writeCheckOffset(offset, 1);
+        bytesStore.writeByte(offset, i);
         return this;
     }
 
     @Override
     public Bytes writeShort(long offset, short i) {
-        long offset2 = writeCheckOffset(offset, 2);
-        bytesStore.writeShort(offset2, i);
+        writeCheckOffset(offset, 2);
+        bytesStore.writeShort(offset, i);
         return this;
     }
 
     @Override
     public Bytes writeInt(long offset, int i) {
-        bytesStore.writeInt(writeCheckOffset(offset, 4), i);
+        writeCheckOffset(offset, 4);
+        bytesStore.writeInt(offset, i);
         return this;
     }
 
     @Override
     public Bytes writeOrderedInt(long offset, int i) {
-        bytesStore.writeOrderedInt(writeCheckOffset(offset, 4), i);
+        writeCheckOffset(offset, 4);
+        bytesStore.writeOrderedInt(offset, i);
         return this;
     }
 
     @Override
     public Bytes writeLong(long offset, long i) {
-        long offset2 = writeCheckOffset(offset, 8);
-        bytesStore.writeLong(offset2, i);
+        writeCheckOffset(offset, 8);
+        bytesStore.writeLong(offset, i);
         return this;
     }
 
     @Override
     public Bytes<Underlying> writeOrderedLong(long offset, long i) {
-        long offset2 = writeCheckOffset(offset, 8);
-        bytesStore.writeOrderedLong(offset2, i);
+        writeCheckOffset(offset, 8);
+        bytesStore.writeOrderedLong(offset, i);
         return this;
     }
 
     @Override
     public Bytes writeFloat(long offset, float d) {
-        long offset2 = writeCheckOffset(offset, 4);
-        bytesStore.writeFloat(offset2, d);
+        writeCheckOffset(offset, 4);
+        bytesStore.writeFloat(offset, d);
         return this;
     }
 
     @Override
     public Bytes writeDouble(long offset, double d) {
-        long offset2 = writeCheckOffset(offset, 8);
-        bytesStore.writeDouble(offset2, d);
+        writeCheckOffset(offset, 8);
+        bytesStore.writeDouble(offset, d);
         return this;
     }
 
     @Override
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) {
-        long offsetInRDO1 = writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO1, bytes, offset, length);
+        writeCheckOffset(offsetInRDO, length);
+        bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
     }
 
     @Override
     public Bytes<Underlying> write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
-        long offsetInRDO1 = writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO1, bytes, offset, length);
+        writeCheckOffset(offsetInRDO, length);
+        bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
     }
 
     @Override
     public Bytes<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
-        long offsetInRDO1 = writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO1, bytes, offset, length);
+        writeCheckOffset(offsetInRDO, length);
+        bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
     }
 
-    protected long writeCheckOffset(long offset, long adding) {
+    protected void writeCheckOffset(long offset, long adding) {
+        assert writeCheckOffset0(offset, adding);
+    }
+
+    private boolean writeCheckOffset0(long offset, long adding) {
         if (offset < start())
             throw new BufferUnderflowException();
         if (offset + adding > limit()) {
@@ -347,46 +352,50 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
                     ",adding=" + adding;
             throw new BufferOverflowException();
         }
-        return offset;
+        return true;
     }
 
     @Override
     public byte readByte(long offset) {
-        long offset2 = readCheckOffset(offset, 1);
-        return bytesStore.readByte(offset2);
+        readCheckOffset(offset, 1);
+        return bytesStore.readByte(offset);
     }
 
     @Override
     public short readShort(long offset) {
-        long offset2 = readCheckOffset(offset, 2);
-        return bytesStore.readShort(offset2);
+        readCheckOffset(offset, 2);
+        return bytesStore.readShort(offset);
     }
 
     @Override
     public int readInt(long offset) {
-        long offset2 = readCheckOffset(offset, 4);
-        return bytesStore.readInt(offset2);
+        readCheckOffset(offset, 4);
+        return bytesStore.readInt(offset);
     }
 
     @Override
     public long readLong(long offset) {
-        long offset2 = readCheckOffset(offset, 8);
-        return bytesStore.readLong(offset2);
+        readCheckOffset(offset, 8);
+        return bytesStore.readLong(offset);
     }
 
     @Override
     public float readFloat(long offset) {
-        long offset2 = readCheckOffset(offset, 4);
-        return bytesStore.readFloat(offset2);
+        readCheckOffset(offset, 4);
+        return bytesStore.readFloat(offset);
     }
 
     @Override
     public double readDouble(long offset) {
-        long offset2 = readCheckOffset(offset, 8);
-        return bytesStore.readDouble(offset2);
+        readCheckOffset(offset, 8);
+        return bytesStore.readDouble(offset);
     }
 
-    protected long readCheckOffset(long offset, int adding) {
+    protected void readCheckOffset(long offset, long adding) {
+        assert readCheckOffset0(offset, adding);
+    }
+
+    protected boolean readCheckOffset0(long offset, long adding) {
         if (offset < start())
             throw new BufferUnderflowException();
         long limit0 = limit();
@@ -396,7 +405,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             //                ",adding=" + adding;
             throw new BufferUnderflowException();
         }
-        return offset;
+        return true;
     }
 
     @Override
@@ -407,10 +416,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     protected long writeOffsetPositionMoved(long adding) {
-        long offset = writeCheckOffset(position, adding);
+        long oldPosition = position;
+        writeCheckOffset(position, adding);
         position += adding;
-        assert position <= limit() : " limit=" + limit() + ",position=" + position;
-        return offset;
+        return oldPosition;
     }
 
     @Override

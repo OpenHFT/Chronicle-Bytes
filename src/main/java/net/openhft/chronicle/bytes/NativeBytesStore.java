@@ -154,7 +154,7 @@ public class NativeBytesStore<Underlying>
     private long translate(long offset) {
         long offset2 = offset - start();
         if (offset2 < 0 || offset2 > capacity())
-            throw new IllegalArgumentException("Offset out of bounds");
+            throw new IllegalArgumentException("Offset out of bounds " + offset2 + " cap: " + capacity());
         return offset2;
     }
 

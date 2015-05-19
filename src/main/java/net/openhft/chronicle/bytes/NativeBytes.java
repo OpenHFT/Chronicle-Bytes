@@ -50,10 +50,9 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     @Override
-    protected long writeCheckOffset(long offset, long adding) {
+    protected void writeCheckOffset(long offset, long adding) {
         if (!bytesStore.inStore(offset + adding))
             checkResize(offset + adding);
-        return offset;
     }
 
     @Override
