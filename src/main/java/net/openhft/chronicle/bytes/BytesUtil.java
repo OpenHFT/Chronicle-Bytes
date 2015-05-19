@@ -276,10 +276,14 @@ public enum BytesUtil {
             // before
             if (start < 0) start = 0;
             if (position > start) {
-                for (long i = start; i < position && position < bytes.limit(); i++) {
+                long last = Math.min(position, bytes.limit());
+                for (long i = start; i < last; i++) {
                     sb.append(bytes.printable(i));
                 }
                 sb.append('\u2016');
+                if (position >= bytes.limit()) {
+                    return;
+                }
             }
             if (end > bytes.readLimit())
                 end = bytes.readLimit();
