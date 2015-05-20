@@ -1061,6 +1061,24 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
+    public static void append(@NotNull Appendable sb, double value) {
+        if (sb instanceof StringBuilder)
+            ((StringBuilder) sb).append(value);
+        else if (sb instanceof Bytes)
+            ((Bytes) sb).append(value);
+        else
+            throw new IllegalArgumentException("" + sb.getClass());
+    }
+
+    public static void append(@NotNull Appendable sb, long value) {
+        if (sb instanceof StringBuilder)
+            ((StringBuilder) sb).append(value);
+        else if (sb instanceof Bytes)
+            ((Bytes) sb).append(value);
+        else
+            throw new IllegalArgumentException("" + sb.getClass());
+    }
+
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *
@@ -1102,4 +1120,11 @@ public enum BytesUtil {
         }
     }
 
+    public static <ACS extends Appendable & CharSequence> void append(ACS sb, String str) {
+        try {
+            sb.append(str);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
 }
