@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
@@ -52,8 +51,8 @@ public class MappedFile implements ReferenceCounted {
         this.file = file;
         this.raf = new RandomAccessFile(file, "rw");
         this.fileChannel = raf.getChannel();
-        this.chunkSize = Maths.nextPower2(chunkSize, OS.pageSize());
-        this.overlapSize = overlapSize == 0 ? 0 : Maths.nextPower2(overlapSize, OS.pageSize());
+        this.chunkSize = OS.mapAlign(chunkSize);
+        this.overlapSize = overlapSize == 0 ? 0 : OS.mapAlign(overlapSize);
         capacity = 1L << 40;
     }
 
