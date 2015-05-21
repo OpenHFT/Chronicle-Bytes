@@ -335,7 +335,7 @@ public enum BytesUtil {
         }
     }
 
-    public static <S extends StreamingDataOutput & ByteStringAppender> void append(S out, long num) {
+    public static <S extends ByteStringAppender> void append(S out, long num) {
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
                 out.write(MIN_VALUE_TEXT);
@@ -1077,6 +1077,12 @@ public enum BytesUtil {
             ((Bytes) sb).append(value);
         else
             throw new IllegalArgumentException("" + sb.getClass());
+    }
+
+
+    public static String toHex(@NotNull final Bytes buffer) {
+        return toHex(buffer, buffer.position(), buffer.limit());
+
     }
 
     /**
