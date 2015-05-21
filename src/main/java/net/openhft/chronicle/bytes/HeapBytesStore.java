@@ -50,6 +50,11 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
+    public BytesStore<HeapBytesStore<Underlying>, Underlying> copy() {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public void reserve() {
         refCount.incrementAndGet();
     }

@@ -119,4 +119,17 @@ public class BytesTest {
         long num9 = bytes9.readLong(bytes9.start());
         assertEquals(Long.toHexString(num9), num, num9);
     }
+
+    @Test
+    public void testCopy() {
+        Bytes<ByteBuffer> bbb = Bytes.wrap(ByteBuffer.allocateDirect(1024));
+        for (int i = 'a'; i <= 'z'; i++)
+            bbb.writeUnsignedByte(i);
+        bbb.position(4);
+        bbb.limit(16);
+        BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
+        bbb.writeUnsignedByte(10, '0');
+        assertEquals("[pos: 0, lim: 12, cap: 12 ] efghijklmnop", copy.toString());
+
+    }
 }

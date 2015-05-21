@@ -14,6 +14,11 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
+    public BytesStore<B, Underlying> copy() {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    @Override
     public long capacity() {
         return underlyingBytesStore.capacity();
     }

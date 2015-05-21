@@ -54,6 +54,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
+     * @return a copy of this Bytes from position() to limit().
+     */
+    BytesStore<Bytes<Underlying>, Underlying> copy();
+
+    /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *
      * @return hex representation of the buffer, from example [0D ,OA, FF]
@@ -214,7 +219,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough space
      */
     default void ensureCapacity(long size) {
-        throw new UnsupportedOperationException("todo");
+        if (size > capacity())
+            throw new UnsupportedOperationException(isElastic() ? "todo" : "not elastic");
     }
 
     /**

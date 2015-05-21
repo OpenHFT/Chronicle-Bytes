@@ -18,7 +18,10 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.ByteBuffer;
 
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
     public VanillaBytes(@NotNull BytesStore bytesStore) {
@@ -70,4 +73,20 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return bytesStore.realCapacity();
     }
 
+
+    @Override
+    public BytesStore<Bytes<Underlying>, Underlying> copy() {
+        if (bytesStore.underlyingObject() instanceof ByteBuffer) {
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(remaining()));
+            ByteBuffer slice = ((ByteBuffer) bytesStore.underlyingObject()).slice();
+            slice.position((int) position());
+            slice.limit((int) limit());
+            bb.put(slice);
+            bb.clear();
+            return (BytesStore) BytesStore.wrap(bb);
+
+        } else {
+            return (BytesStore) NativeBytes.copyOf(this);
+        }
+    }
 }

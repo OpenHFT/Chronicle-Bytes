@@ -49,6 +49,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
 
+
     @Override
     public RandomDataOutput writeByte(long offset, byte i8) {
         throw new UnsupportedOperationException();
@@ -132,6 +133,11 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public double readDouble(long offset) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public BytesStore copy() {
+        return this;
     }
 
     @Override

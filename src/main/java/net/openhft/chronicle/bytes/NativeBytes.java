@@ -36,12 +36,12 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         super(store, UnderflowMode.PADDED);
     }
 
-    public static NativeBytes nativeBytes() {
-        return new NativeBytes(noBytesStore());
+    public static NativeBytes<Void> nativeBytes() {
+        return new NativeBytes<Void>(noBytesStore());
     }
 
-    public static NativeBytes nativeBytes(long initialCapacity) {
-        return new NativeBytes(nativeStoreWithFixedCapacity(initialCapacity));
+    public static NativeBytes<Void> nativeBytes(long initialCapacity) {
+        return new NativeBytes<Void>(nativeStoreWithFixedCapacity(initialCapacity));
     }
 
     @Override
@@ -105,5 +105,13 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         } else {
             return super.write(bytes, offset, length);
         }
+    }
+
+    public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
+        long remaining = bytes.remaining();
+        NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
+        bytes2.write(bytes, 0, remaining);
+        bytes2.flip();
+        return bytes2;
     }
 }

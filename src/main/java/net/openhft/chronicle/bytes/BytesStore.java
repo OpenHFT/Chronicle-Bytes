@@ -44,6 +44,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * @return a copy of this BytesStore.
+     */
+    BytesStore<B, Underlying> copy();
+
+    /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
 

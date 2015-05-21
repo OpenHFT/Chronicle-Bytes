@@ -27,7 +27,7 @@ import java.io.IOException;
 /**
  * Created by peter.lawrey on 24/02/15.
  */
-public class MappedBytes extends AbstractBytes {
+public class MappedBytes extends AbstractBytes<Void> {
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
@@ -45,6 +45,11 @@ public class MappedBytes extends AbstractBytes {
         MappedFile rw = new MappedFile(file, chunkSize, OS.pageSize());
         MappedBytes bytes = new MappedBytes(rw);
         return bytes;
+    }
+
+    @Override
+    public BytesStore<Bytes<Void>, Void> copy() {
+        return NativeBytes.copyOf(this);
     }
 
     @Override

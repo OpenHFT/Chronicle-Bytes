@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounter;
@@ -60,11 +61,27 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(bb, false);
     }
 
+
+    @Override
+    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
+        if (underlyingObject == null) {
+            NativeBytesStore<Void> copy = of(realCapacity(), false, true);
+            OS.memory().copyMemory(address, copy.address, capacity());
+            return (BytesStore) copy;
+        } else if (underlyingObject instanceof ByteBuffer) {
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
+            bb.put((ByteBuffer) underlyingObject);
+            bb.clear();
+            return (BytesStore) wrap(bb);
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
     /**
      * this is an elastic native store
      *
-     * @param capacity
-     * @return
+     * @param capacity of the buffer.
      */
     public static NativeBytesStore<Void> nativeStore(long capacity) {
         return of(capacity, true, true);
