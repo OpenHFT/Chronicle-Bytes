@@ -40,7 +40,6 @@ abstract class CharSequenceAccessor
     }
 
     static final CharSequenceAccessor LITTLE_ENDIAN = new CharSequenceAccessor() {
-
         @Override
         public ReadAccess<CharSequence> access(CharSequence source) {
             return CharSequenceAccess.LittleEndianCharSequenceAccess.INSTANCE;
@@ -48,7 +47,6 @@ abstract class CharSequenceAccessor
     };
 
     static final CharSequenceAccessor BIG_ENDIAN = new CharSequenceAccessor() {
-
         @Override
         public ReadAccess<CharSequence> access(CharSequence source) {
             return CharSequenceAccess.BigEndianCharSequenceAccess.INSTANCE;

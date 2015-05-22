@@ -81,6 +81,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         NativeBytesStore store;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));
+
         } else {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
         }
@@ -102,6 +103,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
             NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), len);
             skip(len);
             return this;
+
         } else {
             return super.write(bytes, offset, length);
         }

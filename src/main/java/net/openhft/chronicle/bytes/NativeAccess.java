@@ -42,9 +42,7 @@ public final class NativeAccess<T> implements Access<T> {
         }
     }
 
-
     private NativeAccess() {}
-
 
     @Override
     public byte readByte(T handle, long offset) {
@@ -157,6 +155,7 @@ public final class NativeAccess<T> implements Access<T> {
             ReadAccess<S> sourceAccess, S source, long sourceOffset, long len) {
         if (sourceAccess instanceof NativeAccess) {
             U.copyMemory(source, sourceOffset, handle, offset, len);
+
         } else {
             Access.super.writeFrom(handle, offset, sourceAccess, source, sourceOffset, len);
         }

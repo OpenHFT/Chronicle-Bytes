@@ -235,9 +235,7 @@ public class ByteStoreTest {
         Assert.assertTrue(bytes.skipTo(CONTROL_STOP));
         assertEquals(24, bytes.position());
         Assert.assertFalse(bytes.skipTo(CONTROL_STOP));
-
     }
-
 
     @Test
     public void testWriteReadByteBuffer() {
@@ -499,7 +497,6 @@ public class ByteStoreTest {
         assertEquals(100, bytes.readInt(0L));
         assertEquals(11 * 11, bytes.readInt(4L));
     }
-
 
     @Test
     public void testToString() {

@@ -39,6 +39,7 @@ final class ArrayAccessors {
             LONG_BASE = U.arrayBaseOffset(long[].class);
             FLOAT_BASE = U.arrayBaseOffset(float[].class);
             DOUBLE_BASE = U.arrayBaseOffset(double[].class);
+
         } catch (Exception e) {
             throw new AssertionError(e);
         }

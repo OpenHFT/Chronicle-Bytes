@@ -114,6 +114,4 @@ public class MappedBytes extends AbstractBytes<Void> {
     public boolean isElastic() {
         return true;
     }
-
-
 }

@@ -81,13 +81,15 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public double readDouble(long offset) {
         throw new UnsupportedOperationException();
-    }    @Override
+    }
+
+    @Override
     public B writeByte(long offset, byte i8) {
         byte i8a = underlyingBytesStore.readByte(offset);
         if (i8a != i8) {
             Bytes<Underlying> bytes = underlyingBytesStore.bytes();
             bytes.position(offset);
-            throw new AssertionError(bytes.toDebugString()+"\nExpected: " + i8a + "\nActual: " + i8);
+            throw new AssertionError(bytes.toDebugString() + "\nExpected: " + i8a + "\nActual: " + i8);
         }
         return (B) this;
     }
@@ -95,7 +97,9 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public long address() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
-    }    @Override
+    }
+
+    @Override
     public B writeShort(long offset, short i) {
         short ia = underlyingBytesStore.readShort(offset);
         if (ia != i)
@@ -106,7 +110,9 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public Underlying accessHandle() {
         throw new UnsupportedOperationException();
-    }    @Override
+    }
+
+    @Override
     public B writeInt(long offset, int i) {
         int ia = underlyingBytesStore.readInt(offset);
         if (ia != i)
@@ -121,19 +127,23 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @Override
     public void reserve() throws IllegalStateException {
-    }    @Override
+    }
+
+    @Override
     public B writeOrderedInt(long offset, int i) {
         int ia = underlyingBytesStore.readInt(offset);
         if (ia != i) {
             if ((i & NOT_READY) == 0)
-                throw new AssertionError("Expected: " + ia +" <" + Integer.toHexString(ia) + ">\nActual: " + i +" <" + Integer.toHexString(i) + ">");
+                throw new AssertionError("Expected: " + ia + " <" + Integer.toHexString(ia) + ">\nActual: " + i + " <" + Integer.toHexString(i) + ">");
         }
         return (B) this;
     }
 
     @Override
     public void release() throws IllegalStateException {
-    }    @Override
+    }
+
+    @Override
     public B writeLong(long offset, long i) {
         long ia = underlyingBytesStore.readLong(offset);
         if (ia != i)
@@ -144,7 +154,9 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public long refCount() {
         throw new UnsupportedOperationException();
-    }    @Override
+    }
+
+    @Override
     public B writeOrderedLong(long offset, long i) {
         long ia = underlyingBytesStore.readLong(offset);
         if (ia != i)
@@ -184,16 +196,4 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     public B write(long offsetInRDO, Bytes bytes, long offset, long length) {
         throw new UnsupportedOperationException();
     }
-
-
-
-
-
-
-
-
-
-
-
-
 }

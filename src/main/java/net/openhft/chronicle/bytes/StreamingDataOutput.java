@@ -82,7 +82,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
 
     S write(byte[] bytes, int offset, int length);
 
-
     S write(ByteBuffer buffer);
 
     default <T> S write(ReadAccess<T> access, T handle, long offset, long len) {

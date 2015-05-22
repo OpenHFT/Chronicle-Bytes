@@ -22,7 +22,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
         A extends WriteAccess<AT>, AT>
         extends StreamingDataOutput<B, A, AT>, Appendable {
 
-
     default B append(char ch) {
         BytesUtil.appendUTF(this, ch);
         return (B) this;
@@ -57,5 +56,4 @@ public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
         this.skip(digits);
         return (B) this;
     }
-
 }

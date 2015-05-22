@@ -52,6 +52,4 @@ public class ByteStringAppenderTest {
             Assert.assertEquals(expected, bytes.parseLong(10));
         }
     }
-
-
 }

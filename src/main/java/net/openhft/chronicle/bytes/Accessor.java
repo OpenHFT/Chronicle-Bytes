@@ -24,7 +24,6 @@ public interface Accessor<S, T, A extends AccessCommon<T>> {
     interface Read<S, T> extends Accessor<S, T, ReadAccess<T>> {}
     interface Full<S, T> extends Accessor<S, T, Access<T>> {}
 
-
     static <B extends BytesStore<B, U>, U> Accessor.Full<B, ?> uncheckedBytesStoreAccessor() {
         return BytesAccessors.Unchecked.INSTANCE;
     }

@@ -130,6 +130,5 @@ public class BytesTest {
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
         bbb.writeUnsignedByte(10, '0');
         assertEquals("[pos: 0, lim: 12, cap: 12 ] efghijklmnop", copy.toString());
-
     }
 }

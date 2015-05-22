@@ -73,7 +73,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return bytesStore.realCapacity();
     }
 
-
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {

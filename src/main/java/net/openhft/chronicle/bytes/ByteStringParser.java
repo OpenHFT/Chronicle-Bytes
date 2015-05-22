@@ -50,5 +50,4 @@ public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
     default boolean skipTo(StopCharTester tester) {
         return BytesUtil.skipTo(this, tester);
     }
-
 }

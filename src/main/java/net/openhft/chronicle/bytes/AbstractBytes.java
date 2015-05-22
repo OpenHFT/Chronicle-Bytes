@@ -155,6 +155,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         try {
             long offset = readOffsetPositionMoved(1);
             return bytesStore.readByte(offset);
+
         } catch (BufferOverflowException e) {
             return 0;
         }
@@ -164,6 +165,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public int peekUnsignedByte() {
         try {
             return remaining() > 0 ? bytesStore.readUnsignedByte(position) : -1;
+
         } catch (BufferOverflowException e) {
             return -1;
         }
@@ -530,7 +532,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public int hashCode() {
         return super.hashCode();
-
     }
 
     @Override
@@ -597,5 +598,4 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.nativeWrite(address, position, size);
     }
 }
-
 

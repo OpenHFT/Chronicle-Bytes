@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-
 import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
@@ -29,7 +28,6 @@ import java.util.Arrays;
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
-
 
 public class MappedMemoryTest {
 
@@ -82,7 +80,6 @@ public class MappedMemoryTest {
                 bytes.release();
                 assertEquals(0, bytes.refCount());
                 System.out.println("With MappedNativeBytes,\t avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
-
             } finally {
                 tempFile.delete();
             }

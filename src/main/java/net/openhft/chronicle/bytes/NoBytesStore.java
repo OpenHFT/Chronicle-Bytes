@@ -48,8 +48,6 @@ public enum NoBytesStore implements BytesStore {
         return 1L;
     }
 
-
-
     @Override
     public RandomDataOutput writeByte(long offset, byte i8) {
         throw new UnsupportedOperationException();
@@ -199,5 +197,4 @@ public enum NoBytesStore implements BytesStore {
     public long accessOffset(long randomOffset) {
         throw new UnsupportedOperationException();
     }
-
 }

@@ -61,18 +61,19 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(bb, false);
     }
 
-
     @Override
     public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
         if (underlyingObject == null) {
             NativeBytesStore<Void> copy = of(realCapacity(), false, true);
             OS.memory().copyMemory(address, copy.address, capacity());
             return (BytesStore) copy;
+
         } else if (underlyingObject instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
             bb.put((ByteBuffer) underlyingObject);
             bb.clear();
             return (BytesStore) wrap(bb);
+
         } else {
             throw new UnsupportedOperationException();
         }
@@ -147,7 +148,6 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
-
         if (start < 0 || end > limit())
             throw new IllegalArgumentException("start: " + start + ", end: " + end + ", limit=" + limit());
         if (start >= end)
@@ -155,7 +155,6 @@ public class NativeBytesStore<Underlying>
 
         MEMORY.setMemory(address + translate(start), end - start, (byte) 0);
         return this;
-
     }
 
     @Override
@@ -291,6 +290,7 @@ public class NativeBytesStore<Underlying>
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(),
                     address + translate(offsetInRDO), length);
+
         } else {
             MEMORY.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
         }

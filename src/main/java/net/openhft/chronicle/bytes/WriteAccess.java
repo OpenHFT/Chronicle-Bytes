@@ -69,7 +69,6 @@ public interface WriteAccess<T> extends AccessCommon<T> {
 
     void writeDouble(T handle, long offset, double d);
 
-
     /**
      * @deprecated use {@link Access#copy} instead
      */
@@ -151,5 +150,4 @@ public interface WriteAccess<T> extends AccessCommon<T> {
         if (index < len)
             writeByte(handle, offset + index, (byte) 0);
     }
-
 }

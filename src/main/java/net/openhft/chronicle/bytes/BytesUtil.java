@@ -48,6 +48,7 @@ public enum BytesUtil {
                 if (c >= 128) {
                     bytes.position(bytes.position() - 1);
                     break;
+
                 } else if (c < 0) {
                     break;
                 }
@@ -78,6 +79,7 @@ public enum BytesUtil {
                     count++;
                     appendable.append((char) c);
                     break;
+
                 case 12:
                 case 13: {
                 /* 110x xxxx 10xx xxxx */
@@ -94,6 +96,7 @@ public enum BytesUtil {
                     appendable.append((char) c2);
                     break;
                 }
+
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     count += 3;
@@ -124,6 +127,7 @@ public enum BytesUtil {
     public static void writeUTF(StreamingDataOutput bytes, CharSequence str) {
         if (str == null) {
             bytes.writeStopBit(-1);
+
         } else {
             bytes.writeStopBit(findUTFLength(str));
             appendUTF(bytes, str, 0, str.length());
@@ -136,8 +140,10 @@ public enum BytesUtil {
             char c = str.charAt(i);
             if (c <= 0x007F) {
                 utflen++;
+
             } else if (c <= 0x07FF) {
                 utflen += 2;
+
             } else {
                 utflen += 3;
             }
@@ -184,13 +190,16 @@ public enum BytesUtil {
     public static void appendUTF(StreamingDataOutput bytes, int c) {
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
+
         } else if (c <= 0x07FF) {
             bytes.writeByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
             bytes.writeByte((byte) (0x80 | c & 0x3F));
+
         } else if (c <= 0xFFFF) {
             bytes.writeByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
             bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
             bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+
         } else {
             bytes.writeByte((byte) (0xF0 | ((c >> 18) & 0x07)));
             bytes.writeByte((byte) (0x80 | ((c >> 12) & 0x3F)));
@@ -203,15 +212,18 @@ public enum BytesUtil {
         if (c <= 0x007F) {
             access.writeByte(handle, offset, (byte) c);
             return offset + 1;
+
         } else if (c <= 0x07FF) {
             access.writeByte(handle, offset, (byte) (0xC0 | ((c >> 6) & 0x1F)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | c & 0x3F));
             return offset + 2;
+
         } else if (c <= 0xFFFF) {
             access.writeByte(handle, offset, (byte) (0xE0 | ((c >> 12) & 0x0F)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 6) & 0x3F)));
             access.writeByte(handle, offset + 2, (byte) (0x80 | (c & 0x3F)));
             return offset + 3;
+
         } else {
             access.writeByte(handle, offset, (byte) (0xF0 | ((c >> 18) & 0x07)));
             access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 12) & 0x3F)));
@@ -249,6 +261,7 @@ public enum BytesUtil {
         // final byte
         if (!neg) {
             out.writeByte((byte) n);
+
         } else {
             out.writeByte((byte) (0x80L | n));
             out.writeByte((byte) 0);
@@ -327,6 +340,7 @@ public enum BytesUtil {
                 throw new IllegalStateException(
                         "Cannot read more than 9 stop bits of positive value");
             return l | (b << count);
+
         } else {
             if (count > 63)
                 throw new IllegalStateException(
@@ -346,6 +360,7 @@ public enum BytesUtil {
         }
         if (num == 0) {
             out.writeByte((byte) '0');
+
         } else {
             appendLong0(out, num);
         }
@@ -366,6 +381,7 @@ public enum BytesUtil {
             if (num != 0)
                 numberTooLarge(digits);
             out.writeByte(offset, '-');
+
         } else {
             if (num > 9)
                 numberTooLarge(digits);
@@ -474,13 +490,16 @@ public enum BytesUtil {
         if (exp == 0 && mantissa == 0) {
             out.writeByte((byte) '0');
             return;
+
         } else if (exp == 2047) {
             if (mantissa == 0) {
                 out.write(Infinity);
+
             } else {
                 out.write(NaN);
             }
             return;
+
         } else if (exp > 0) {
             mantissa += 1L << 52;
         }
@@ -516,6 +535,7 @@ public enum BytesUtil {
                     }
                 }
                 return;
+
             } else {
                 // faction.
                 out.writeByte((byte) '0');
@@ -687,6 +707,7 @@ public enum BytesUtil {
                         return;
                     appendable.append((char) c);
                     break;
+
                 case 12:
                 case 13: {
                 /* 110x xxxx 10xx xxxx */
@@ -701,6 +722,7 @@ public enum BytesUtil {
                     appendable.append((char) c2);
                     break;
                 }
+
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
 
@@ -718,6 +740,7 @@ public enum BytesUtil {
                     appendable.append((char) c3);
                     break;
                 }
+
                 default:
                 /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
@@ -765,6 +788,7 @@ public enum BytesUtil {
                         return;
                     appendable.append((char) c);
                     break;
+
                 case 12:
                 case 13: {
                 /* 110x xxxx 10xx xxxx */
@@ -779,6 +803,7 @@ public enum BytesUtil {
                     appendable.append((char) c2);
                     break;
                 }
+
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
 
@@ -796,6 +821,7 @@ public enum BytesUtil {
                     appendable.append((char) c3);
                     break;
                 }
+
                 default:
                 /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
@@ -885,8 +911,10 @@ public enum BytesUtil {
                 }
                 value = value * 10 + (ch - '0');
                 decimalPlaces++;
+
             } else if (ch == '.') {
                 decimalPlaces = 0;
+
             } else {
                 break;
             }
@@ -968,7 +996,6 @@ public enum BytesUtil {
         }
     }
 
-
     public static long asLong(@NotNull String str) {
         ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getLong();
@@ -1014,6 +1041,7 @@ public enum BytesUtil {
                         builder.append(' ');
                     if (i + j < start || i + j >= offset + len) {
                         builder.append("   ");
+
                     } else {
                         builder.append(' ');
                         int ch = bytes.readUnsignedByte(i + j);
@@ -1027,6 +1055,7 @@ public enum BytesUtil {
                         builder.append(' ');
                     if (i + j < start || i + j >= offset + len) {
                         builder.append(' ');
+
                     } else {
                         int ch = bytes.readUnsignedByte(i + j);
                         if (ch < ' ' || ch > 126)
@@ -1079,10 +1108,8 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-
     public static String toHex(@NotNull final Bytes buffer) {
         return toHex(buffer, buffer.position(), buffer.limit());
-
     }
 
     /**
@@ -1092,7 +1119,6 @@ public enum BytesUtil {
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     public static String toHex(@NotNull final Bytes buffer, long offset, long len) {
-
         if (len == 0)
             return "";
 
@@ -1107,7 +1133,6 @@ public enum BytesUtil {
             final StringBuilder builder = new StringBuilder("[");
 
             while (buffer.remaining() > 0) {
-
                 long pos = buffer.position();
                 byte b = buffer.readByte();
                 char c = (char) b;
@@ -1122,7 +1147,6 @@ public enum BytesUtil {
         } finally {
             buffer.limit(limit);
             buffer.position(position);
-
         }
     }
 

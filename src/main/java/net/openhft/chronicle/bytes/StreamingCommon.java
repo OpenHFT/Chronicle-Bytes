@@ -57,7 +57,6 @@ public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
         return (S) this;
     }
 
-
     default <S,R> R reply(long length, Function<S, R> bytesConsumer) {
         if (length > remaining())
             throw new BufferUnderflowException();

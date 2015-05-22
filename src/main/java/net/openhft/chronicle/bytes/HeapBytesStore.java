@@ -214,6 +214,7 @@ public class HeapBytesStore<Underlying>
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
+
         } else {
             MEMORY.copyMemory(bytes.array(), offset, realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
