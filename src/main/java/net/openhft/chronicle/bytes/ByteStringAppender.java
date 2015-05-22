@@ -38,12 +38,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
     }
 
     default B append(float f) {
-        BytesUtil.append((Appendable)this, f);
+        BytesUtil.append((StreamingDataOutput) this, f);
         return (B) this;
     }
 
     default B append(double d) {
-        BytesUtil.append((Appendable)this, d);
+        BytesUtil.append((StreamingDataOutput) this, d);
         return (B) this;
     }
 
