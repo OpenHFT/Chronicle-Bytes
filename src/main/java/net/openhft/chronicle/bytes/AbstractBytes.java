@@ -460,11 +460,25 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public Bytes<Underlying> write(BytesStore bytes) {
+        write(bytes, 0, bytes.capacity());
+        return this;
+    }
+
+    @Override
     public Bytes<Underlying> write(Bytes bytes) {
         long write = min(remaining(), bytes.remaining());
         long offset = bytes.position();
         bytes.skip(write);
         write(bytes, offset, write);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+        long targetOffset = writeOffsetPositionMoved(length);
+        Access.copy(bytes.access(), bytes.accessHandle(), bytes.accessOffset(offset),
+                access(), accessHandle(), accessOffset(targetOffset), length);
         return this;
     }
 

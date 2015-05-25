@@ -77,7 +77,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(remaining()));
-            ByteBuffer slice = ((ByteBuffer) bytesStore.underlyingObject()).slice();
+            ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
+            ByteBuffer slice = bbu.slice();
             slice.position((int) position());
             slice.limit((int) limit());
             bb.put(slice);

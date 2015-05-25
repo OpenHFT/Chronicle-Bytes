@@ -72,7 +72,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
 
     S writeDouble(double d);
 
+    S write(BytesStore bytes);
+
     S write(Bytes bytes);
+
+    S write(BytesStore buffer, long offset, long length);
 
     S write(Bytes buffer, long offset, long length);
 
