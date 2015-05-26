@@ -109,6 +109,19 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         }
     }
 
+    @Override
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+        if (bytes instanceof NativeBytesStore) {
+            writeCheckOffset(position(), length);
+            NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), length);
+            skip(length);
+            return this;
+
+        } else {
+            return super.write(bytes, offset, length);
+        }
+    }
+
     public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
         long remaining = bytes.remaining();
         NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
