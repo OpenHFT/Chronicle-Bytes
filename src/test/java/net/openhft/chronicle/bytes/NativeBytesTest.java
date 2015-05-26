@@ -1,6 +1,5 @@
 package net.openhft.chronicle.bytes;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,7 +8,7 @@ import static org.junit.Assert.assertEquals;
  * Created by daniel on 17/04/15.
  */
 public class NativeBytesTest {
-    @Ignore
+
     @Test
     public void testWriteBytesWhereResizeNeeded0() {
         Bytes bytes0 = NativeBytes.nativeBytes();
@@ -19,7 +18,7 @@ public class NativeBytesTest {
         assertEquals("Hello", bytes0.toString());
     }
 
-    @Ignore
+
     @Test
     public void testWriteBytesWhereResizeNeeded() {
         Bytes bytes1 = NativeBytes.nativeBytes(1);
