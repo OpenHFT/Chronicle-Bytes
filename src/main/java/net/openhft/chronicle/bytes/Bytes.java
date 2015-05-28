@@ -52,6 +52,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.<byte[]>wrap(byteArray).bytes(UnderflowMode.BOUNDED);
     }
 
+    static Bytes<byte[]> from(String text) {
+        return wrap(text.getBytes(StandardCharsets.UTF_8));
+    }
+
     /**
      * @return a copy of this Bytes from position() to limit().
      */
