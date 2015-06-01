@@ -284,7 +284,7 @@ public class ByteStoreTest {
         long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
-//            System.out.println(i + " " + bytes.position());
+//            LOG.info(i + " " + bytes.position());
         }
         assertEquals(9 + 10, +5 + 6, bytes.position());
 
@@ -384,7 +384,7 @@ public class ByteStoreTest {
         bytes.position(32);
         for (long i = 32; i < 64; i += 8)
             bytes.writeOrderedLong(i);
-//        System.out.println(bytes.bytes().toDebugString());
+//        LOG.info(bytes.bytes().toDebugString());
         bytes.position(0);
         for (long i = 0; i < 32; i += 8)
             assertEquals(i, bytes.readVolatileLong());

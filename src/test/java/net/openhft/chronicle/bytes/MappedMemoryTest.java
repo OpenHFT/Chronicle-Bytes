@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import org.junit.Test;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
@@ -31,6 +32,7 @@ import static org.junit.Assert.assertEquals;
 
 public class MappedMemoryTest {
 
+    private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MappedMemoryTest.class);
     private static final long SHIFT = 27L;
     private static long BLOCK_SIZE = 1L << SHIFT;
 
@@ -56,7 +58,7 @@ public class MappedMemoryTest {
                 bytesStore.release();
                 mappedFile.close();
                 assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
-                System.out.println("With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                LOG.info("With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 tempFile.delete();
             }
@@ -79,7 +81,7 @@ public class MappedMemoryTest {
                 }
                 bytes.release();
                 assertEquals(0, bytes.refCount());
-                System.out.println("With MappedNativeBytes,\t avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                LOG.info("With MappedNativeBytes,\t avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 tempFile.delete();
             }
@@ -110,7 +112,7 @@ public class MappedMemoryTest {
 
                 mappedFile.close();
                 assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
-                System.out.println("With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                LOG.info("With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 tempFile.delete();
             }
