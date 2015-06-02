@@ -67,7 +67,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     default String toHexString() {
-        return BytesUtil.toHexString(this, position(), remaining());
+        return BytesUtil.toHexString(this, position(), realCapacity() - position());
+    }
+
+    default String toHexString(long maxLength) {
+        if (realCapacity() - position() < maxLength) return toHexString();
+        return BytesUtil.toHexString(this, position(), maxLength) + ".... truncated";
     }
 
     long limit();
@@ -85,7 +90,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-     static String toDebugString(@NotNull final Bytes buffer) {
+    static String toDebugString(@NotNull final Bytes buffer) {
         if (buffer.remaining() == 0)
             return "";
 
@@ -114,7 +119,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-     static String toDebugString(@NotNull final ByteBuffer buffer) {
+    static String toDebugString(@NotNull final ByteBuffer buffer) {
         if (buffer.remaining() == 0)
             return "";
 
@@ -144,7 +149,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
-     static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
+    static String toDebugString(@NotNull final Bytes buffer, long position, long len) {
         final long pos = buffer.position();
         final long limit = buffer.readLimit();
         buffer.position(position);
@@ -176,7 +181,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     /**
      * Resets this buffer's position to the previously-marked position.
-     *
+     * <p>
      * Invoking this method neither changes nor discards the mark's value.
      *
      * @return This buffer

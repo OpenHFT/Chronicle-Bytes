@@ -131,4 +131,14 @@ public class BytesTest {
         bbb.writeUnsignedByte(10, '0');
         assertEquals("[pos: 0, lim: 12, cap: 12 ] efghijklmnop", copy.toString());
     }
+
+    @Test
+    public void toHexString() {
+        Bytes bytes = NativeBytes.nativeBytes(1020);
+        bytes.append("Hello World").position(0);
+        assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+                "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                "........\n" +
+                "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
+    }
 }

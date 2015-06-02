@@ -1019,7 +1019,8 @@ public enum BytesUtil {
             return "";
 
         int width = 16;
-
+        int[] lastLine = new int[width];
+        String sep = "";
         long position = bytes.position();
         long limit = bytes.limit();
 
@@ -1032,6 +1033,27 @@ public enum BytesUtil {
             long start = offset / width * width;
             long end = (offset + len + width - 1) / width * width;
             for (long i = start; i < end; i += width) {
+                // check for duplicate rows
+                if (i == start) {
+                    for (int j = 0; j < width && i + j < end; j++) {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        lastLine[j] = ch;
+                    }
+                } else if (i + width < end) {
+                    boolean same = true;
+
+                    for (int j = 0; j < width && i + j < end; j++) {
+                        int ch = bytes.readUnsignedByte(i + j);
+                        same &= (ch == lastLine[j]);
+                        lastLine[j] = ch;
+                    }
+                    if (same) {
+                        sep = "........\n";
+                        continue;
+                    }
+                }
+                builder.append(sep);
+                sep = "";
                 String str = Long.toHexString(i);
                 for (int j = str.length(); j < 8; j++)
                     builder.append('0');
