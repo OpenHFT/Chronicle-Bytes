@@ -43,6 +43,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 : HeapBytesStore.wrap(bb);
     }
 
+    static PointerBytesStore nativePointer() {
+        return new PointerBytesStore();
+    }
+
     /**
      * @return a copy of this BytesStore.
      */

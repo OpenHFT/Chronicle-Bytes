@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounter;
+import org.jetbrains.annotations.Nullable;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
 
@@ -33,12 +34,13 @@ public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Memory MEMORY = OS.memory();
+    @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
     protected long address;
+    protected long maximumLimit;
     private volatile Underlying underlyingObject;
-    private long maximumLimit;
 
     private NativeBytesStore(ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
@@ -52,7 +54,7 @@ public class NativeBytesStore<Underlying>
             long address, long maximumLimit, Runnable deallocator, boolean elastic) {
         this.address = address;
         this.maximumLimit = maximumLimit;
-        cleaner = Cleaner.create(this, deallocator);
+        cleaner = deallocator == null ? null : Cleaner.create(this, deallocator);
         underlyingObject = null;
         this.elastic = elastic;
     }
@@ -321,7 +323,8 @@ public class NativeBytesStore<Underlying>
     }
 
     protected void performRelease() {
-        cleaner.clean();
+        if (cleaner != null)
+            cleaner.clean();
     }
 
     public boolean isElastic() {
