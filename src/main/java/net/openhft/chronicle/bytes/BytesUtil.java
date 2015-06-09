@@ -152,9 +152,11 @@ public enum BytesUtil {
     }
 
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        if (bytes instanceof NativeBytes && str instanceof NativeBytes) {
-            ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
-            return;
+        if (bytes instanceof NativeBytes) {
+            if (str instanceof NativeBytes) {
+                ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
+                return;
+            }
         }
         int i;
         for (i = 0; i < length; i++) {
