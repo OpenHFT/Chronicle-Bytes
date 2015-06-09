@@ -51,6 +51,16 @@ public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
         return (B) this;
     }
 
+    default B append8bit(CharSequence cs) {
+        BytesUtil.append8bit(this, cs, 0, cs.length());
+        return (B) this;
+    }
+
+    default B append8bit(CharSequence cs, int start, int end) {
+        BytesUtil.append8bit(this, cs, start, end - start);
+        return (B) this;
+    }
+
     default B append(long value, int digits) {
         BytesUtil.append((RandomDataOutput) this, position(), value, digits);
         this.skip(digits);

@@ -109,6 +109,16 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         }
     }
 
+    public Bytes<Underlying> write(String str, int offset, int length) {
+        char[] chars = HotSpotStringAccessor.INSTANCE.handle(str);
+        long position = position();
+        ensureCapacity(position + length);
+        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
+        nbs.write8bit(position, chars, offset, length);
+        skip(length);
+        return this;
+    }
+
     @Override
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
         if (bytes instanceof NativeBytesStore) {
@@ -128,5 +138,12 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         bytes2.write(bytes, 0, remaining);
         bytes2.flip();
         return bytes2;
+    }
+
+    public void read8Bit(char[] chars, int length) {
+        long position = position();
+        skip(length);
+        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
+        nbs.read8bit(position, chars, length);
     }
 }

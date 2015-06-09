@@ -33,7 +33,7 @@ import static net.openhft.chronicle.bytes.Access.nativeAccess;
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    private static final Memory MEMORY = OS.memory();
+    static final Memory MEMORY = OS.memory();
     @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -358,6 +358,20 @@ public class NativeBytesStore<Underlying>
                 access(), accessHandle(), accessOffset(position),
                 size);
 */
+    }
+
+    void write8bit(long position, char[] chars, int offset, int length) {
+        long addr = address + translate(position);
+        Memory memory = NativeBytesStore.MEMORY;
+        for (int i = 0; i < length; i++)
+            memory.writeByte(addr + i, (byte) chars[offset + i]);
+    }
+
+    void read8bit(long position, char[] chars, int length) {
+        long addr = address + translate(position);
+        Memory memory = NativeBytesStore.MEMORY;
+        for (int i = 0; i < length; i++)
+            chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
     }
 
     static class Deallocator implements Runnable {

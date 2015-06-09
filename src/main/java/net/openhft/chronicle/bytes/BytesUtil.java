@@ -18,12 +18,14 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -38,6 +40,16 @@ public enum BytesUtil {
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
+    private static final Constructor<String> STRING_CONSTRUCTOR;
+
+    static {
+        try {
+            STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
+            STRING_CONSTRUCTOR.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
@@ -172,6 +184,24 @@ public enum BytesUtil {
         }
     }
 
+    public static void append8bit(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+        if (bytes instanceof NativeBytes) {
+            if (str instanceof NativeBytes) {
+                ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
+                return;
+            }
+            if (str instanceof String) {
+                ((NativeBytes) bytes).write((String) str, offset, length);
+                return;
+            }
+        }
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(offset + i);
+            if (c > 255) c = '?';
+            bytes.writeUnsignedByte(c);
+        }
+    }
+
     public static <T> void appendUTF(WriteAccess<T> access, T handle, long offset,
                                      @NotNull CharSequence str, int strOff, int length) {
         int i;
@@ -278,6 +308,34 @@ public enum BytesUtil {
         toString(bytes, sb, position - maxLength, position, position + maxLength);
 
         return sb.toString();
+    }
+
+    public static String to8bitString(StreamingDataInput bytes) {
+        int len = Maths.toInt32(bytes.remaining());
+        char[] chars = new char[len];
+        if (bytes instanceof NativeBytes) {
+            ((NativeBytes) bytes).read8Bit(chars, len);
+        } else {
+            for (int i = 0; i < len; i++)
+                chars[i] = (char) bytes.readUnsignedByte();
+        }
+        return newString(chars);
+    }
+
+    public static String to8bitString(RandomDataInput bytes) {
+        int len = Maths.toInt32(bytes.realCapacity());
+        char[] chars = new char[len];
+        for (int i = 0; i < len; i++)
+            chars[i] = (char) bytes.readUnsignedByte(i);
+        return newString(chars);
+    }
+
+    private static String newString(char[] chars) {
+        try {
+            return STRING_CONSTRUCTOR.newInstance(chars, true);
+        } catch (Exception e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static String toString(RandomDataInput bytes) {
