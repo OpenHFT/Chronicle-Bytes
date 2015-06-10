@@ -84,6 +84,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     long capacity();
 
+    default long position() {
+        return 0L;
+    }
+
+    default long remaining() {
+        return realCapacity();
+    }
+
     @Override
     default boolean isNative() {
         return underlyingObject() == null;

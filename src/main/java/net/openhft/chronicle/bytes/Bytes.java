@@ -61,6 +61,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     BytesStore<Bytes<Underlying>, Underlying> copy();
 
+    @Override
+    default long remaining() {
+        return limit() - position();
+    }
+
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *

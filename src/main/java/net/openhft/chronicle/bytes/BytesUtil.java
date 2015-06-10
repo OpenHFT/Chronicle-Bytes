@@ -32,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 
 public enum BytesUtil {
     ;
+    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes();
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final StringInterner SI = new StringInterner(1024);
@@ -41,7 +42,6 @@ public enum BytesUtil {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final Constructor<String> STRING_CONSTRUCTOR;
-
     static {
         try {
             STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
@@ -49,6 +49,26 @@ public enum BytesUtil {
         } catch (NoSuchMethodException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public static boolean contentEqual(Bytes a, Bytes b) {
+        if (a == null) return b == null;
+        if (b == null) return false;
+        if (a.start() != b.start() || a.remaining() != b.remaining())
+            return false;
+        long aPos = a.position();
+        long bPos = b.position();
+        long length = a.remaining();
+        long i;
+        for (i = 0; i < length - 7; i += 8) {
+            if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                return false;
+        }
+        for (i = 0; i < length; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        return true;
     }
 
     public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
@@ -310,23 +330,16 @@ public enum BytesUtil {
         return sb.toString();
     }
 
-    public static String to8bitString(StreamingDataInput bytes) {
+    public static String to8bitString(BytesStore bytes) {
+        long pos = bytes.position();
         int len = Maths.toInt32(bytes.remaining());
         char[] chars = new char[len];
         if (bytes instanceof NativeBytes) {
             ((NativeBytes) bytes).read8Bit(chars, len);
         } else {
             for (int i = 0; i < len; i++)
-                chars[i] = (char) bytes.readUnsignedByte();
+                chars[i] = (char) bytes.readUnsignedByte(pos + i);
         }
-        return newString(chars);
-    }
-
-    public static String to8bitString(RandomDataInput bytes) {
-        int len = Maths.toInt32(bytes.realCapacity());
-        char[] chars = new char[len];
-        for (int i = 0; i < len; i++)
-            chars[i] = (char) bytes.readUnsignedByte(i);
         return newString(chars);
     }
 
@@ -1065,8 +1078,6 @@ public enum BytesUtil {
         ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
-
-    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
 
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
