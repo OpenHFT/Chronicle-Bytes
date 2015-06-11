@@ -40,7 +40,7 @@ public class NativeBytesStore<Underlying>
     private final boolean elastic;
     protected long address;
     protected long maximumLimit;
-    private volatile Underlying underlyingObject;
+    private final Underlying underlyingObject;
 
     private NativeBytesStore(ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;

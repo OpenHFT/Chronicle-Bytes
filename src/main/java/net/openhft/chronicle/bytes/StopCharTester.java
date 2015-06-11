@@ -34,8 +34,4 @@ public interface StopCharTester {
      * @throws IllegalStateException if an invalid character like 0 was detected.
      */
     boolean isStopChar(int ch) throws IllegalStateException;
-
-    default StopCharTester escaping() {
-        return new EscapingStopCharTester(this);
-    }
 }

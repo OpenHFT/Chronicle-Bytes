@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
  * Created by peter.lawrey on 19/04/15.
  */
 public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
-    private long start;
-    private long capacity;
+    private final long start;
+    private final long capacity;
 
     public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity) {
         super(bytesStore);
