@@ -18,7 +18,6 @@ public class NativeBytesTest {
         assertEquals("Hello", bytes0.toString());
     }
 
-
     @Test
     public void testWriteBytesWhereResizeNeeded() {
         Bytes bytes1 = NativeBytes.nativeBytes(1);

@@ -69,7 +69,6 @@ public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
             limit(limit0);
             position(limit);
         }
-
     }
     S skip(long bytesToSkip);
 

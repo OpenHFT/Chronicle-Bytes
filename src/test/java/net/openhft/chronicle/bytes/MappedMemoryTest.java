@@ -140,7 +140,6 @@ public class MappedMemoryTest {
         } finally {
             tempFile.delete();
         }
-
     }
 }
 
