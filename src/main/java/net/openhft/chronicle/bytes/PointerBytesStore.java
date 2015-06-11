@@ -23,7 +23,8 @@ public class PointerBytesStore extends NativeBytesStore {
         super(NoBytesStore.NO_PAGE, 0, null, false);
     }
 
-    public void wrap(long address, long capacity) {
+
+    public void set(long address, long capacity) {
         this.address = address;
         this.maximumLimit = capacity;
     }

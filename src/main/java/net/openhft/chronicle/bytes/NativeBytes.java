@@ -55,6 +55,8 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
             checkResize(offset + adding);
     }
 
+
+
     @Override
     public void ensureCapacity(long size) {
         writeCheckOffset(size, 0);
