@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Maths;
 
 import java.io.ObjectOutput;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**
@@ -43,7 +44,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
         return (S) this;
     }
 
-    default S writeUTFΔ(CharSequence cs) {
+    /**
+     * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded
+     * i.e. one byte longer for short strings, but is not limited in length. 2) The string can be null.
+     *
+     * @param cs the string value to be written. Can be null.
+     * @throws BufferOverflowException if there is not enough space left
+     */
+    default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         BytesUtil.writeUTF(this, cs);
         return (S) this;
     }

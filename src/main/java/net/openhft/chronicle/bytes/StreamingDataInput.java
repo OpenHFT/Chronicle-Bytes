@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
 import java.io.ObjectInput;
@@ -39,16 +40,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
 
     default InputStream inputStream() {
         throw new UnsupportedOperationException();
-    }
-
-    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(ACS sb) throws UTFDataFormatRuntimeException {
-        BytesUtil.setLength(sb, 0);
-        long len0 = BytesUtil.readStopBit(this);
-        if (len0 == -1)
-            return false;
-        int len = Maths.toUInt31(len0);
-        BytesUtil.parseUTF(this, sb, len);
-        return true;
     }
 
     default long readStopBit() {
@@ -85,8 +76,31 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
 
     int peakVolatileInt();
 
+    /**
+     * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
+     * chars.  <code>null</code> values are also supported
+     *
+     * @return a Unicode string or <code>null</code> if <code>writeUTFΔ(null)</code> was called
+     */
+    @Nullable
     default String readUTFΔ() {
         return BytesUtil.readUTFΔ(this);
+    }
+
+    /**
+     * The same as readUTFΔ() except the chars are copied to a truncated StringBuilder.
+     *
+     * @param sb to copy chars to
+     * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
+     */
+    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(ACS sb) throws UTFDataFormatRuntimeException {
+        BytesUtil.setLength(sb, 0);
+        long len0 = BytesUtil.readStopBit(this);
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        BytesUtil.parseUTF(this, sb, len);
+        return true;
     }
 
     void read(byte[] bytes);

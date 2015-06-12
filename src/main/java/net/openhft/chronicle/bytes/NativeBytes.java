@@ -144,7 +144,6 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     public void read8Bit(char[] chars, int length) {
         long position = position();
-        skip(length);
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.read8bit(position, chars, length);
     }

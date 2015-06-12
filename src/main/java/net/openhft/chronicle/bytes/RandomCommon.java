@@ -61,4 +61,7 @@ public interface RandomCommon<S extends RandomCommon<S, A, AT>, A extends Access
     AT accessHandle();
 
     long accessOffset(long randomOffset);
+
+    // get a streaming bytes.
+    Bytes bytes();
 }

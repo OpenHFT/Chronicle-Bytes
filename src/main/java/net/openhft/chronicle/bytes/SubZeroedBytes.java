@@ -6,8 +6,8 @@ import org.jetbrains.annotations.NotNull;
  * Created by peter.lawrey on 19/04/15.
  */
 public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
-    private long start;
-    private long capacity;
+    private final long start;
+    private final long capacity;
 
     public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long capacity) {
         super(bytesStore, underflowMode);

@@ -58,16 +58,6 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    public void reserve() throws IllegalStateException {
-        super.reserve();
-    }
-
-    @Override
-    public void release() throws IllegalStateException {
-        super.release();
-    }
-
-    @Override
     public long refCount() {
         return Math.max(super.refCount(), mappedFile.refCount());
     }
@@ -97,11 +87,6 @@ public class MappedBytes extends AbstractBytes<Void> {
     @Override
     public long start() {
         return 0L;
-    }
-
-    @Override
-    public Bytes writeLong(long offset, long i) {
-        return super.writeLong(offset, i);
     }
 
     @Override

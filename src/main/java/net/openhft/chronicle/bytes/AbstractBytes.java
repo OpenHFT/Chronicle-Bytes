@@ -545,7 +545,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int hashCode() {
-        return super.hashCode();
+        throw new UnsupportedOperationException("todo");
     }
 
     @Override

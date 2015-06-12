@@ -42,6 +42,7 @@ public enum BytesUtil {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final Constructor<String> STRING_CONSTRUCTOR;
+
     static {
         try {
             STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
@@ -181,6 +182,39 @@ public enum BytesUtil {
             }
         }
         return utflen;
+    }
+
+    public static void writeUTF(long offsetInRDO, int maxLen, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+        if (length > maxLen)
+            throw new IllegalArgumentException();
+
+        if (bytes instanceof NativeBytes) {
+            if (str instanceof NativeBytes) {
+                ((NativeBytes) bytes).write(offsetInRDO, (NativeBytes) str, offset, length);
+                return;
+            }
+        }
+        int i;
+        for (i = 0; i < length; i++) {
+            char c = str.charAt(offset + i);
+            if (c > 0x007F)
+                break;
+            bytes.writeByte(offsetInRDO + i, (byte) c);
+        }
+
+        Bytes sbytes = asBytes(bytes, offsetInRDO + i, offsetInRDO + maxLen);
+        for (; i < length; i++) {
+            char c = str.charAt(offset + i);
+            appendUTF(sbytes, c);
+        }
+    }
+
+    @NotNull
+    public static Bytes asBytes(RandomDataOutput bytes, long position, long limit) {
+        Bytes sbytes = bytes.bytes();
+        sbytes.position(position);
+        sbytes.limit(limit);
+        return sbytes;
     }
 
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
@@ -905,24 +939,16 @@ public enum BytesUtil {
 
     public static void parse8bit(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
-        try {
-            read8bit0(bytes, builder, tester);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        read8bit0(bytes, builder, tester);
     }
 
     public static void parse8bit(StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
         builder.position(0);
 
-        try {
-            read8bit0(bytes, builder, tester);
-        } catch (IOException e) {
-            throw new AssertionError(e);
-        }
+        read8bit0(bytes, builder, tester);
     }
 
-    private static void read8bit0(StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) throws IOException {
+    private static void read8bit0(StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -933,7 +959,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void read8bit0(StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) throws IOException {
+    private static void read8bit0(StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) {
         int ch = bytes.readUnsignedByte();
         do {
             int next = bytes.readUnsignedByte();

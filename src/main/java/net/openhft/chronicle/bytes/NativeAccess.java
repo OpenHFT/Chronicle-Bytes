@@ -23,7 +23,7 @@ import java.nio.ByteOrder;
 
 public final class NativeAccess<T> implements Access<T> {
 
-    static NativeAccess<Object> INSTANCE = new NativeAccess<>();
+    static final NativeAccess<Object> INSTANCE = new NativeAccess<>();
 
     public static <T> NativeAccess<T> instance() {
         //noinspection unchecked
