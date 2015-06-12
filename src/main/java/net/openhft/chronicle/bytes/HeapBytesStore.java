@@ -45,6 +45,11 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
+    @Override
+    public String toString() {
+        return BytesUtil.toDebugString(this, 1024);
+    }
+
     static HeapBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
         return new HeapBytesStore<>(bb);
     }

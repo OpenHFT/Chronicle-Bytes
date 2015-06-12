@@ -184,6 +184,39 @@ public enum BytesUtil {
         return utflen;
     }
 
+    public static void writeUTF(long offsetInRDO, int maxLen, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+        if (length > maxLen)
+            throw new IllegalArgumentException();
+
+        if (bytes instanceof NativeBytes) {
+            if (str instanceof NativeBytes) {
+                ((NativeBytes) bytes).write(offsetInRDO, (NativeBytes) str, offset, length);
+                return;
+            }
+        }
+        int i;
+        for (i = 0; i < length; i++) {
+            char c = str.charAt(offset + i);
+            if (c > 0x007F)
+                break;
+            bytes.writeByte(offsetInRDO + i, (byte) c);
+        }
+
+        Bytes sbytes = asBytes(bytes, offsetInRDO + i, offsetInRDO + maxLen);
+        for (; i < length; i++) {
+            char c = str.charAt(offset + i);
+            appendUTF(sbytes, c);
+        }
+    }
+
+    @NotNull
+    public static Bytes asBytes(RandomDataOutput bytes, long position, long limit) {
+        Bytes sbytes = bytes.bytes();
+        sbytes.position(position);
+        sbytes.limit(limit);
+        return sbytes;
+    }
+
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
         if (bytes instanceof NativeBytes) {
             if (str instanceof NativeBytes) {

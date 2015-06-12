@@ -19,7 +19,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
@@ -79,6 +81,27 @@ public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
     default R append(long offset, long value, int digits) {
         BytesUtil.append(this, offset, value, digits);
         return (R) this;
+    }
+
+    /**
+     * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded
+     * i.e. one byte longer for short strings, but is not limited in length. 2) The string can be null.
+     *
+     * @param offset  to write to
+     * @param maxSize maximum number of bytes to use
+     * @param s       the string value to be written. Can be null.
+     * @throws IllegalStateException if the size is too large.
+     */
+    default void writeUTFΔ(long offset, int maxSize, @Nullable CharSequence s) throws BufferOverflowException {
+        // todo optimise this.
+        Bytes bytes = BytesUtil.asBytes(this, offset, offset + maxSize);
+        if (s == null) {
+            bytes.writeStopBit(-1);
+            return;
+        }
+        bytes.writeStopBit(s.length());
+
+        BytesUtil.writeUTF(bytes.position(), (int) (maxSize - (bytes.position() - offset)), this, s, 0, s.length());
     }
 
     // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
