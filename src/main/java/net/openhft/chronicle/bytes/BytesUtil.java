@@ -52,7 +52,7 @@ public enum BytesUtil {
         }
     }
 
-    public static boolean contentEqual(Bytes a, Bytes b) {
+    public static boolean contentEqual(BytesStore a, BytesStore b) {
         if (a == null) return b == null;
         if (b == null) return false;
         if (a.start() != b.start() || a.remaining() != b.remaining())

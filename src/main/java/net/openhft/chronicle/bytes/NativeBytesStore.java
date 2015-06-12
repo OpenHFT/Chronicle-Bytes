@@ -390,4 +390,9 @@ public class NativeBytesStore<Underlying>
             MEMORY.freeMemory(address);
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
+    }
 }

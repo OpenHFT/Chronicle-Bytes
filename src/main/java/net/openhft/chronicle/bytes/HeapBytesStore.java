@@ -256,4 +256,9 @@ public class HeapBytesStore<Underlying>
     public void nativeWrite(long address, long position, long size) {
         throw new UnsupportedOperationException("todo");
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
+    }
 }
