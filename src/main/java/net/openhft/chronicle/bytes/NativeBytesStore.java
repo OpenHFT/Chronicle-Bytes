@@ -59,7 +59,7 @@ public class NativeBytesStore<Underlying>
         this.elastic = elastic;
     }
 
-    static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+    public static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
     }
 

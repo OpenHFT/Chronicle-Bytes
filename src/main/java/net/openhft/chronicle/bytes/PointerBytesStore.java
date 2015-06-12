@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 public class PointerBytesStore extends NativeBytesStore {
-    protected PointerBytesStore() {
+    public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false);
     }
 
