@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteOrder;
 
+@FunctionalInterface
 public interface AccessCommon<T> {
     ByteOrder byteOrder(T handle);
 }

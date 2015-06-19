@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 /**
  * @author peter.lawrey
  */
+@FunctionalInterface
 public interface StopCharsTester {
     /**
      * Detect which byte or bytes stops the string to be parsed

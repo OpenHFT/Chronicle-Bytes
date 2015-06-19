@@ -44,7 +44,8 @@ final class PrimitiveAccessors {
             throw new RuntimeException(e);
         }
     }
-    
+
+    @FunctionalInterface
     interface PrimitiveAccessor<P> extends Accessor.Read<P, P> {
         @Override
         default ReadAccess<P> access(P source) {
@@ -56,7 +57,8 @@ final class PrimitiveAccessors {
             return source;
         }
     }
-    
+
+    @FunctionalInterface
     interface Size1PrimitiveAccessor<P> extends PrimitiveAccessor<P> {
         @Override
         default long size(long size) {
@@ -65,6 +67,7 @@ final class PrimitiveAccessors {
         }
     }
 
+    @FunctionalInterface
     interface Size2PrimitiveAccessor<P> extends PrimitiveAccessor<P> {
         @Override
         default long size(long size) {
@@ -73,6 +76,7 @@ final class PrimitiveAccessors {
         }
     }
 
+    @FunctionalInterface
     interface Size4PrimitiveAccessor<P> extends PrimitiveAccessor<P> {
         @Override
         default long size(long size) {
@@ -81,6 +85,7 @@ final class PrimitiveAccessors {
         }
     }
 
+    @FunctionalInterface
     interface Size8PrimitiveAccessor<P> extends PrimitiveAccessor<P> {
         @Override
         default long size(long size) {
