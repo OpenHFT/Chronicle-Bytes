@@ -70,7 +70,7 @@ interface RandomDataInputAccess<S extends RandomDataInput<S, ?, ?>> extends Read
     }
 
     @Override
-    default char printable(S handle, long offset) {
+    default String printable(S handle, long offset) {
         return handle.printable(offset);
     }
 

@@ -468,7 +468,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long write = min(remaining(), bytes.remaining());
         long offset = bytes.position();
         bytes.skip(write);
-        write(bytes, offset, write);
+        write(offset, bytes, position(), write);
+        skip(write);
         return this;
     }
 

@@ -77,8 +77,8 @@ enum ZeroAccess implements ReadAccess<Void> {
     }
 
     @Override
-    public char printable(Void handle, long offset) {
-        return 0;
+    public String printable(Void handle, long offset) {
+        return "\u0660";
     }
 
     @Override

@@ -64,14 +64,14 @@ public interface ReadAccess<T> extends AccessCommon<T> {
         return Double.longBitsToDouble(readLong(handle, offset));
     }
 
-    default char printable(T handle, long offset) {
+    default String printable(T handle, long offset) {
         int b = readUnsignedByte(handle, offset);
         if (b == 0)
-            return '\u0660';
+            return "\u0660";
         else if (b < 21)
-            return (char) (b + 0x2487);
+            return String.valueOf((char) (b + 0x2487));
         else
-            return (char) b;
+            return String.valueOf((char) b);
     }
 
     /**

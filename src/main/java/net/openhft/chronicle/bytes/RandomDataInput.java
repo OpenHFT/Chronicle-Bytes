@@ -24,6 +24,20 @@ import net.openhft.chronicle.core.OS;
  */
 public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends ReadAccess<AT>, AT>
         extends RandomCommon<S, A, AT> {
+    String[] charToString = createCharToString();
+
+    static String[] createCharToString() {
+        String[] charToString = new String[256];
+        charToString[0] = "\u0660";
+        for (int i = 1; i < 21; i++)
+            charToString[i] = Character.toString((char) (i + 0x2487));
+        for (int i = 21; i < 256; i++)
+            charToString[i] = Character.toString((char) i);
+        for (int i = 0x80; i < 0xA0; i++)
+            charToString[i] = "\\u00" + Integer.toHexString(i);
+        return charToString;
+    }
+
     default boolean readBoolean(long offset) {
         return readByte(offset) != 0;
     }
@@ -52,14 +66,8 @@ public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends 
 
     double readDouble(long offset);
 
-    default char printable(long offset) {
-        int b = readUnsignedByte(offset);
-        if (b == 0)
-            return '\u0660';
-        else if (b < 21)
-            return (char) (b + 0x2487);
-        else
-            return (char) b;
+    default String printable(long offset) {
+        return charToString[readUnsignedByte(offset)];
     }
 
     default int readVolatileInt(long offset) {

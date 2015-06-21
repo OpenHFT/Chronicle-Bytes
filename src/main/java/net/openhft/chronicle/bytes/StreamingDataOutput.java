@@ -29,11 +29,11 @@ import java.nio.ByteBuffer;
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
         A extends WriteAccess<AT>, AT> extends StreamingCommon<S, A, AT> {
-    default public ObjectOutput objectStream() {
+    default ObjectOutput objectStream() {
         throw new UnsupportedOperationException();
     }
 
-    default public OutputStream outputStream() {
+    default OutputStream outputStream() {
         throw new UnsupportedOperationException();
     }
 
