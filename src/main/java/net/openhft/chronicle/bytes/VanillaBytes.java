@@ -29,8 +29,10 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     @Override
     public void bytesStore(BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) {
         bytesStore(byteStore);
-        limit(offset + length);
-        position(offset);
+        // assume its read-only
+        readLimit(offset + length);
+        writeLimit(offset + length);
+        readPosition(offset);
     }
 
     private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
@@ -41,7 +43,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
     @Override
     public long maxSize() {
-        return remaining();
+        return readRemaining();
     }
 
     @Override
@@ -51,8 +53,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @Override
     public Bytes<Underlying> bytes() {
-        boolean isClear = start() == position() && limit() == capacity();
-        return isClear ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, position(), limit());
+        return isClear() ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, readPosition(), readLimit());
     }
 
     @Override
@@ -63,11 +64,11 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
-            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(remaining()));
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
-            slice.position((int) position());
-            slice.limit((int) limit());
+            slice.position((int) readPosition());
+            slice.limit((int) readLimit());
             bb.put(slice);
             bb.clear();
             return (BytesStore) BytesStore.wrap(bb);

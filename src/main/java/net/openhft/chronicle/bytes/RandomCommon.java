@@ -26,30 +26,39 @@ interface RandomCommon {
         return 0L;
     }
 
-    default long position() {
+    /**
+     * @return the highest limit allowed for this buffer.
+     */
+    default long capacity() {
+        return 1L << 40;
+    }
+
+    default long readPosition() {
         return start();
+    }
+
+    default long writePosition() {
+        return start();
+    }
+
+    default long readRemaining() {
+        return readLimit() - readPosition();
+    }
+
+    default long writeRemaining() {
+        return writeLimit() - writePosition();
     }
 
     /**
      * @return the highest offset or position allowed for this buffer.
      */
-    default long limit() {
+    default long readLimit() {
         return capacity();
     }
 
-    default long readLimit() {
-        return Math.min(realCapacity(), limit());
+    default long writeLimit() {
+        return capacity();
     }
-
-    /**
-     * @return the actual amount of data which can be read.
-     */
-    long realCapacity();
-
-    /**
-     * @return the highest limit allowed for this buffer.
-     */
-    long capacity();
 
     /**
      * Obtain the underlying address.  This is for expert users only.

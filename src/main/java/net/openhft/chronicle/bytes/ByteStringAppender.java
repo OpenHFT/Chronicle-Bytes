@@ -53,8 +53,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     default B append(long value, int digits) {
-        BytesUtil.append((RandomDataOutput) this, position(), value, digits);
-        this.skip(digits);
+        BytesUtil.append((RandomDataOutput) this, writePosition(), value, digits);
+        this.writeSkip(digits);
         return (B) this;
     }
 }

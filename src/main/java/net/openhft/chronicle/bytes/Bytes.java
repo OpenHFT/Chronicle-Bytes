@@ -60,26 +60,18 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-    static String toString(@NotNull final Bytes buffer) {
-        if (buffer.remaining() == 0)
+    static String toString(@NotNull final Bytes<?> buffer) {
+        if (buffer.readRemaining() == 0)
             return "";
-
-        long position = buffer.position();
-        long limit = buffer.limit();
-
-        try {
-
+        return buffer.parseWithLength(buffer.readRemaining(), b -> {
             final StringBuilder builder = new StringBuilder();
-            while (buffer.remaining() > 0) {
+            while (buffer.readRemaining() > 0) {
                 builder.append((char) buffer.readByte());
             }
 
             // remove the last comma
             return builder.toString();
-        } finally {
-            buffer.limit(limit);
-            buffer.position(position);
-        }
+        });
     }
 
     /**
@@ -91,24 +83,28 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a string contain the text from offset {@code position}
      */
     static String toString(@NotNull final Bytes buffer, long position, long len) {
-        final long pos = buffer.position();
+        final long pos = buffer.readPosition();
         final long limit = buffer.readLimit();
-        buffer.position(position);
-        buffer.limit(position + len);
+        buffer.readPosition(position);
+        buffer.readLimit(position + len);
 
         try {
 
             final StringBuilder builder = new StringBuilder();
-            while (buffer.remaining() > 0) {
+            while (buffer.readRemaining() > 0) {
                 builder.append((char) buffer.readByte());
             }
 
             // remove the last comma
             return builder.toString();
         } finally {
-            buffer.limit(limit);
-            buffer.position(pos);
+            buffer.readLimit(limit);
+            buffer.readPosition(pos);
         }
+    }
+
+    default boolean isClear() {
+        return start() == readPosition() && writeLimit() == capacity();
     }
 
     default long realCapacity() {
@@ -120,41 +116,23 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     BytesStore<Bytes<Underlying>, Underlying> copy();
 
-    @Override
-    default long remaining() {
-        return limit() - position();
-    }
-
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     default String toHexString() {
-        return BytesUtil.toHexString(this, position(), realCapacity() - position());
+        return BytesUtil.toHexString(this, readPosition(), readRemaining());
     }
 
     default String toHexString(long maxLength) {
-        if (realCapacity() - position() < maxLength) return toHexString();
-        return BytesUtil.toHexString(this, position(), maxLength) + ".... truncated";
+        if (readRemaining() < maxLength) return toHexString();
+        return BytesUtil.toHexString(this, readPosition(), maxLength) + ".... truncated";
     }
-
-    long limit();
-
-    Bytes<Underlying> position(long position);
-
-    long position();
-
-    Bytes<Underlying> limit(long limit);
 
     @Override
     default int length() {
-        if (position() == 0)
-            return (int) Math.min(limit(), Integer.MAX_VALUE);
-        else if (position() == limit() || limit() == capacity())
-            return (int) Math.min(position(), Integer.MAX_VALUE);
-        else
-            throw new IllegalStateException();
+        return (int) Math.min(readLimit(), Integer.MAX_VALUE);
     }
 
     @Override
@@ -193,7 +171,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     @Override
     default Bytes<Underlying> bytes() {
-        boolean isClear = start() == position() && limit() == capacity();
-        return isClear ? BytesStore.super.bytes() : new SubBytes<>(this, position(), limit() + start());
+        return isClear() ? BytesStore.super.bytes() : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
 }

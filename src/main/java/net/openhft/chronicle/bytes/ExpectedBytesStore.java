@@ -96,7 +96,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         byte i8a = underlyingBytesStore.readByte(offset);
         if (i8a != i8) {
             Bytes<Underlying> bytes = underlyingBytesStore.bytes();
-            bytes.position(offset);
+            bytes.readPosition(offset);
             throw new AssertionError(bytes.toDebugString() + "\nExpected: " + i8a + "\nActual: " + i8);
         }
         return (B) this;

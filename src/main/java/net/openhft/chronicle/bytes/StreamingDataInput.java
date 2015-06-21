@@ -20,12 +20,43 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * This data input has a a position() and a limit()
  */
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
+    S readPosition(long position);
+
+    S readLimit(long limit);
+
+    /**
+     * Perform a set of actions with a temporary bounds mode.
+     */
+    default void readWithLength(long length, Consumer<S> bytesConsumer) {
+        parseWithLength(length, (Function<S, Void>) s -> {
+            bytesConsumer.accept(s);
+            return null;
+        });
+    }
+
+    default <R> R parseWithLength(long length, Function<S, R> bytesConsumer) {
+        if (length > readRemaining())
+            throw new BufferUnderflowException();
+        long limit0 = readLimit();
+        long limit = readPosition() + length;
+        try {
+            readLimit(limit);
+            return bytesConsumer.apply((S) this);
+        } finally {
+            readLimit(limit0);
+            readPosition(limit);
+        }
+    }
+
     default InputStream inputStream() {
         throw new UnsupportedOperationException();
     }
@@ -95,7 +126,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default void read(ByteBuffer buffer) {
-        for (int i = (int) Math.min(remaining(), buffer.remaining()); i > 0; i--)
+        for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }
 

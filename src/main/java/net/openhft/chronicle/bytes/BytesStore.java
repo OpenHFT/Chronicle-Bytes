@@ -58,13 +58,17 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default Bytes bytes(UnderflowMode underflowMode) {
         switch (underflowMode) {
             case BOUNDED:
-                return new VanillaBytes(this);
+                return new VanillaBytes(this).readLimit(writeLimit());
             case ZERO_EXTEND:
             case PADDED:
-                return new ZeroedBytes(this, underflowMode);
+                return new ZeroedBytes(this, underflowMode).readLimit(writeLimit());
             default:
                 throw new UnsupportedOperationException("Unknown known mode " + underflowMode);
         }
+    }
+
+    default boolean isClear() {
+        return true;
     }
 
     /**
@@ -78,14 +82,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return The maximum limit you can set.
      */
     long capacity();
-
-    default long position() {
-        return 0L;
-    }
-
-    default long remaining() {
-        return realCapacity();
-    }
 
     Underlying underlyingObject();
 

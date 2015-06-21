@@ -36,6 +36,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    S writePosition(long position);
+
+    S writeLimit(long limit);
+
     /**
      * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded
      * i.e. one byte longer for short strings, but is not limited in length. 2) The string can be null.
@@ -73,7 +77,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeDouble(double d);
 
     default S write(BytesStore bytes) {
-        return write(bytes, bytes.position(), bytes.readLimit() - bytes.position());
+        return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     S write(BytesStore buffer, long offset, long length);

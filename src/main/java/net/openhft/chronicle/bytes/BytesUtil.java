@@ -53,11 +53,11 @@ public enum BytesUtil {
     public static boolean contentEqual(BytesStore a, BytesStore b) {
         if (a == null) return b == null;
         if (b == null) return false;
-        if (a.start() != b.start() || a.remaining() != b.remaining())
+        if (a.start() != b.start() || a.readRemaining() != b.readRemaining())
             return false;
-        long aPos = a.position();
-        long bPos = b.position();
-        long length = a.remaining();
+        long aPos = a.readPosition();
+        long bPos = b.readPosition();
+        long length = a.readRemaining();
         long i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
@@ -73,11 +73,11 @@ public enum BytesUtil {
     public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
-            assert bytes.remaining() >= utflen;
+            assert bytes.readRemaining() >= utflen;
             while (count < utflen) {
                 int c = bytes.readUnsignedByte();
                 if (c >= 128) {
-                    bytes.position(bytes.position() - 1);
+                    bytes.readSkip(-1);
                     break;
 
                 } else if (c < 0) {
@@ -210,8 +210,9 @@ public enum BytesUtil {
     @NotNull
     public static Bytes asBytes(RandomDataOutput bytes, long position, long limit) {
         Bytes sbytes = bytes.bytes();
-        sbytes.position(position);
-        sbytes.limit(limit);
+        sbytes.writeLimit(limit);
+        sbytes.readLimit(limit);
+        sbytes.readPosition(position);
         return sbytes;
     }
 
@@ -312,17 +313,25 @@ public enum BytesUtil {
 
     public static String toDebugString(RandomDataInput bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
-        long position = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0L;
-        sb.append("[pos: ").append(position).append(", lim: ").append(bytes.readLimit()).append(", cap: ")
-                .append(bytes.capacity() == 1L << 40 ? "1TiB" : bytes.capacity()).append(" ] ");
+        long position = bytes.readPosition();
+        sb.append("[")
+                .append("pos: ").append(position)
+                .append(", rlim: ").append(bytes.readLimit())
+                .append(", wlim: ").append(asSize(bytes.writeLimit()))
+                .append(", cap: ").append(asSize(bytes.capacity()))
+                .append(" ] ");
         toString(bytes, sb, position - maxLength, position, position + maxLength);
 
         return sb.toString();
     }
 
+    public static Object asSize(long size) {
+        return size == 1L << 40 ? "1TiB" : size;
+    }
+
     public static String to8bitString(BytesStore bytes) {
-        long pos = bytes.position();
-        int len = Maths.toInt32(bytes.remaining());
+        long pos = bytes.readPosition();
+        int len = Maths.toInt32(bytes.readRemaining());
         char[] chars = new char[len];
         if (bytes instanceof NativeBytes) {
             ((NativeBytes) bytes).read8Bit(chars, len);
@@ -352,12 +361,12 @@ public enum BytesUtil {
             // before
             if (start < 0) start = 0;
             if (position > start) {
-                long last = Math.min(position, bytes.limit());
+                long last = Math.min(position, bytes.readLimit());
                 for (long i = start; i < last; i++) {
                     sb.append(bytes.printable(i));
                 }
                 sb.append('\u2016');
-                if (position >= bytes.limit()) {
+                if (position >= bytes.readLimit()) {
                     return;
                 }
             }
@@ -377,8 +386,7 @@ public enum BytesUtil {
     }
 
     private static void toString(RandomDataInput bytes, StringBuilder sb) {
-        long start = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0;
-        for (long i = start; i < bytes.readLimit(); i++) {
+        for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
         }
     }
@@ -744,13 +752,13 @@ public enum BytesUtil {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
-                bytes.skip(-1);
+                bytes.readSkip(-1);
                 break;
             }
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
-            if (bytes.remaining() == 0)
+            if (bytes.readRemaining() == 0)
                 return;
         }
 
@@ -825,13 +833,13 @@ public enum BytesUtil {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
-                bytes.skip(-1);
+                bytes.readSkip(-1);
                 break;
             }
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
                 return;
             appendable.append((char) c);
-            if (bytes.remaining() == 0)
+            if (bytes.readRemaining() == 0)
                 return;
         }
 
@@ -899,7 +907,7 @@ public enum BytesUtil {
     }
 
     public static void parse8bit(StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
-        builder.position(0);
+        builder.readPosition(0);
 
         read8bit0(bytes, builder, tester);
     }
@@ -910,7 +918,7 @@ public enum BytesUtil {
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
                 return;
             appendable.append((char) c);
-            if (bytes.remaining() == 0)
+            if (bytes.readRemaining() == 0)
                 return;
         }
     }
@@ -920,15 +928,15 @@ public enum BytesUtil {
         do {
             int next = bytes.readUnsignedByte();
             if (tester.isStopChar(ch, next)) {
-                bytes.skip(-1);
+                bytes.readSkip(-1);
                 return;
             }
             bytes2.writeUnsignedByte(ch);
             ch = next;
-        } while (bytes.remaining() > 1);
+        } while (bytes.readRemaining() > 1);
 
         if (tester.isStopChar(ch, -1)) {
-            bytes.skip(-1);
+            bytes.readSkip(-1);
             return;
         }
         bytes2.writeUnsignedByte(ch);
@@ -944,13 +952,13 @@ public enum BytesUtil {
             case 'N':
                 if (compareRest(in, "aN"))
                     return Double.NaN;
-                in.skip(-1);
+                in.readSkip(-1);
                 return Double.NaN;
             case 'I':
                 //noinspection SpellCheckingInspection
                 if (compareRest(in, "nfinity"))
                     return Double.POSITIVE_INFINITY;
-                in.skip(-1);
+                in.readSkip(-1);
                 return Double.NaN;
             case '-':
                 if (compareRest(in, "Infinity"))
@@ -974,7 +982,7 @@ public enum BytesUtil {
             } else {
                 break;
             }
-            if (in.remaining() == 0)
+            if (in.readRemaining() == 0)
                 break;
             ch = in.readUnsignedByte();
         }
@@ -983,12 +991,12 @@ public enum BytesUtil {
     }
 
     static boolean compareRest(StreamingDataInput in, String s) {
-        if (s.length() > in.remaining())
+        if (s.length() > in.readRemaining())
             return false;
-        long position = in.position();
+        long position = in.readPosition();
         for (int i = 0; i < s.length(); i++) {
             if (in.readUnsignedByte() != s.charAt(i)) {
-                in.position(position);
+                in.readPosition(position);
                 return false;
             }
         }
@@ -998,7 +1006,7 @@ public enum BytesUtil {
     public static long parseLong(StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
-        while (in.remaining() > 0) {
+        while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
@@ -1028,7 +1036,7 @@ public enum BytesUtil {
     }
 
     public static boolean skipTo(ByteStringParser parser, StopCharTester tester) {
-        while (parser.remaining() > 0) {
+        while (parser.readRemaining() > 0) {
             int ch = parser.readUnsignedByte();
             if (tester.isStopChar(ch))
                 return true;
@@ -1070,13 +1078,13 @@ public enum BytesUtil {
         int width = 16;
         int[] lastLine = new int[width];
         String sep = "";
-        long position = bytes.position();
-        long limit = bytes.limit();
+        long position = bytes.readPosition();
+        long limit = bytes.readLimit();
 
         try {
 
-            bytes.limit(offset + len);
-            bytes.position(offset);
+            bytes.readLimit(offset + len);
+            bytes.readPosition(offset);
 
             final StringBuilder builder = new StringBuilder();
             long start = offset / width * width;
@@ -1084,14 +1092,14 @@ public enum BytesUtil {
             for (long i = start; i < end; i += width) {
                 // check for duplicate rows
                 if (i == start) {
-                    for (int j = 0; j < width && i + j < end; j++) {
+                    for (int j = 0; j < width && i + j < offset + len; j++) {
                         int ch = bytes.readUnsignedByte(i + j);
                         lastLine[j] = ch;
                     }
                 } else if (i + width < end) {
                     boolean same = true;
 
-                    for (int j = 0; j < width && i + j < end; j++) {
+                    for (int j = 0; j < width && i + j < offset + len; j++) {
                         int ch = bytes.readUnsignedByte(i + j);
                         same &= (ch == lastLine[j]);
                         lastLine[j] = ch;
@@ -1138,8 +1146,8 @@ public enum BytesUtil {
             }
             return builder.toString();
         } finally {
-            bytes.limit(limit);
-            bytes.position(position);
+            bytes.readLimit(limit);
+            bytes.readPosition(position);
         }
     }
 
@@ -1156,7 +1164,7 @@ public enum BytesUtil {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
-            ((Bytes) sb).position(newLength);
+            ((Bytes) sb).readPosition(newLength);
         else
             throw new IllegalArgumentException("" + sb.getClass());
     }

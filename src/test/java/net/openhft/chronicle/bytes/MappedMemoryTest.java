@@ -130,7 +130,6 @@ public class MappedMemoryTest {
             String text = "hello this is some very long text";
             bytes.writeUTFΔ(text);
 
-            bytes.flip();
             bytes.readUTFΔ();
             assertEquals(text, bytes.readUTFΔ());
             bytes.release();

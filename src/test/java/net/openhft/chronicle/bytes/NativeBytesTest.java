@@ -30,7 +30,6 @@ public class NativeBytesTest {
         Bytes bytes0 = NativeBytes.nativeBytes();
         Bytes<byte[]> wrap0 = Bytes.wrap("Hello World, Have a great day!".getBytes());
         bytes0.write(wrap0);
-        bytes0.flip();
         assertEquals("Hello World, Have a great day!", bytes0.toString());
     }
 
@@ -39,7 +38,6 @@ public class NativeBytesTest {
         Bytes bytes1 = NativeBytes.nativeBytes(1);
         Bytes<byte[]> wrap1 = Bytes.wrap("Hello World, Have a great day!".getBytes());
         bytes1.write(wrap1);
-        bytes1.flip();
         assertEquals("Hello World, Have a great day!", bytes1.toString());
     }
 }

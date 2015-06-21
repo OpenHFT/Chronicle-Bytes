@@ -25,21 +25,26 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class MappedFileTest {
 
     @Test
     public void testReferenceCounts() throws IOException {
-        File tmp = File.createTempFile("testReferenceCounts", ".bin");
+        File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
         tmp.deleteOnExit();
         int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
-        MappedFile mf = MappedFile.mappedFile(tmp.getName(), chunkSize, 0);
+        MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0);
         assertEquals("refCount: 1", mf.referenceCounts());
 
         MappedBytesStore bs = mf.acquireByteStore(chunkSize + (1 << 10));
         assertEquals(chunkSize, bs.start());
         assertEquals(chunkSize * 2, bs.capacity());
         Bytes bytes = bs.bytes();
+        // read everything which is there.
+        bytes.readLimit(bytes.capacity());
+
+        assertNotNull(bytes.toString()); // show it doesn't blow up.
         assertEquals(chunkSize, bytes.start());
         assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
         assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));

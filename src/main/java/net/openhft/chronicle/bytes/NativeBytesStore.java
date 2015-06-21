@@ -141,8 +141,8 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
-        if (start < 0 || end > limit())
-            throw new IllegalArgumentException("start: " + start + ", end: " + end + ", limit=" + limit());
+        if (start < writePosition() || end > writeLimit())
+            throw new IllegalArgumentException("position: " + writePosition() + ", start: " + start + ", end: " + end + ", limit: " + writeLimit());
         if (start >= end)
             return this;
 

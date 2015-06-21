@@ -66,7 +66,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length);
 
     default R write(long offsetInRDO, Bytes bytes) {
-        return write(offsetInRDO, bytes, bytes.position(), bytes.remaining());
+        return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     R write(long offsetInRDO, Bytes bytes, long offset, long length);
