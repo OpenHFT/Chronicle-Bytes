@@ -31,10 +31,12 @@ public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends 
         charToString[0] = "\u0660";
         for (int i = 1; i < 21; i++)
             charToString[i] = Character.toString((char) (i + 0x2487));
-        for (int i = 21; i < 256; i++)
+        for (int i = ' '; i < 256; i++)
             charToString[i] = Character.toString((char) i);
+        for (int i = 21; i < ' '; i++)
+            charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
         for (int i = 0x80; i < 0xA0; i++)
-            charToString[i] = "\\u00" + Integer.toHexString(i);
+            charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
         return charToString;
     }
 
