@@ -31,12 +31,5 @@ public interface Byteable<Underlying> {
      */
     void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length);
 
-    /**
-     * @return the underlying ByteStore
-     */
-    BytesStore<Bytes<Underlying>, Underlying> bytesStore();
-
-    long offset();
-
     long maxSize();
 }

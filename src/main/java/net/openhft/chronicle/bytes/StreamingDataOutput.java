@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 
-import java.io.ObjectOutput;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -27,12 +26,7 @@ import java.nio.ByteBuffer;
  * Position based access.  Once data has been read, the position() moves.
  * <p>The use of this instance is single threaded, though the use of the data
  */
-public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
-        A extends WriteAccess<AT>, AT> extends StreamingCommon<S, A, AT> {
-    default ObjectOutput objectStream() {
-        throw new UnsupportedOperationException();
-    }
-
+public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     default OutputStream outputStream() {
         throw new UnsupportedOperationException();
     }
@@ -94,19 +88,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
 
     S write(ByteBuffer buffer);
 
-    default <T> S write(ReadAccess<T> access, T handle, long offset, long len) {
-        long targetOffset = accessPositionOffset();
-        skip(len);
-        Access.copy(access, handle, offset, access(), accessHandle(), targetOffset, len);
-        return (S) this;
-    }
-
-    default <T, H> S write(Accessor<T, H, ? extends ReadAccess<H>> accessor,
-                           T source, long offset, long len) {
-        return write(accessor.access(source), accessor.handle(source),
-                accessor.offset(source, offset), accessor.size(len));
-    }
-
     default S writeBoolean(boolean flag) {
         return writeByte(flag ? (byte) 'Y' : 0);
     }
@@ -114,10 +95,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S, A, AT>,
     S writeOrderedInt(int i);
 
     S writeOrderedLong(long i);
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    A access();
 
     /**
      * This is an expert level method for writing out data to native memory.

@@ -22,8 +22,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
-public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
-        A extends WriteAccess<AT>, AT> extends RandomCommon<R, A, AT> {
+public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     default R writeByte(long offset, int i) {
         return writeByte(offset, Maths.toInt8(i));
     }
@@ -66,7 +65,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
 
     R write(long offsetInRDO, byte[] bytes, int offset, int length);
 
-    R write(long offsetInRDO, ByteBuffer bytes, int offset, int length);
+    void write(long offsetInRDO, ByteBuffer bytes, int offset, int length);
 
     default R write(long offsetInRDO, Bytes bytes) {
         return write(offsetInRDO, bytes, bytes.position(), bytes.remaining());
@@ -99,12 +98,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R, A, AT>,
         }
         bytes.writeStopBit(s.length());
 
-        BytesUtil.writeUTF(bytes.position(), (int) (maxSize - (bytes.position() - offset)), this, s, 0, s.length());
+        BytesUtil.writeUTF(bytes.position(), (int) (maxSize - (bytes.position() - offset)), this, s, s.length());
     }
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    A access();
 
     /**
      * expert level method to copy data from native memory into the BytesStore

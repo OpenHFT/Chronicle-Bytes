@@ -16,8 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-public interface ByteStringParser<B extends ByteStringParser<B, A, AT>,
-        A extends ReadAccess<AT>, AT> extends StreamingDataInput<B, A, AT> {
+interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
     default String parseUTF(StopCharTester stopCharTester) {
         return BytesUtil.parseUTF(this, stopCharTester);
     }

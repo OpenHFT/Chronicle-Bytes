@@ -25,13 +25,12 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static net.openhft.chronicle.bytes.Access.nativeAccess;
-
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();
-    final Object realUnderlyingObject;
-    final int dataOffset, capacity;
+    private final Object realUnderlyingObject;
+    private final int dataOffset;
+    private final int capacity;
     private final AtomicLong refCount = new AtomicLong(1);
     private final Underlying underlyingObject;
 
@@ -43,13 +42,13 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
+    static HeapBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+        return new HeapBytesStore<>(bb);
+    }
+
     @Override
     public String toString() {
         return BytesUtil.toDebugString(this, 1024);
-    }
-
-    static HeapBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
-        return new HeapBytesStore<>(bb);
     }
 
     @Override
@@ -83,11 +82,6 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public boolean isNative() {
-        return false;
-    }
-
-    @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
         return MEMORY.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
     }
@@ -96,11 +90,6 @@ public class HeapBytesStore<Underlying>
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return MEMORY.compareAndSwapLong(
                 realUnderlyingObject, dataOffset + offset, expected, value);
-    }
-
-    @Override
-    public Access<Underlying> access() {
-        return nativeAccess();
     }
 
     @Override
@@ -139,7 +128,7 @@ public class HeapBytesStore<Underlying>
         return MEMORY.readDouble(realUnderlyingObject, dataOffset + offset);
     }
 
-    public void checkOffset(long offset, int size) {
+    private void checkOffset(long offset, int size) {
         if (offset < start() || offset + size > capacity) {
             throw new BufferOverflowException();
         }
@@ -211,7 +200,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public HeapBytesStore<Underlying> write(
+    public void write(
             long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         checkOffset(offset, length);
         if (bytes.isDirect()) {
@@ -222,7 +211,6 @@ public class HeapBytesStore<Underlying>
             MEMORY.copyMemory(bytes.array(), offset, realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
         }
-        return this;
     }
 
     @Override
@@ -233,11 +221,6 @@ public class HeapBytesStore<Underlying>
     @Override
     public long address() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public Underlying accessHandle() {
-        return (Underlying) realUnderlyingObject;
     }
 
     @Override

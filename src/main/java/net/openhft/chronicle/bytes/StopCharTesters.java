@@ -78,15 +78,15 @@ public enum StopCharTesters implements StopCharTester {
     }
 
     static class CSCSTester implements StopCharTester {
-        private final String seperators;
+        private final String separators;
 
         public CSCSTester(CharSequence cs) {
-            seperators = cs.toString();
+            separators = cs.toString();
         }
 
         @Override
         public boolean isStopChar(int ch) {
-            return seperators.indexOf(ch) >= 0;
+            return separators.indexOf(ch) >= 0;
         }
     }
 

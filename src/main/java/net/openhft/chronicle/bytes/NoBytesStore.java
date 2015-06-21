@@ -20,9 +20,6 @@ import net.openhft.chronicle.core.OS;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by peter.lawrey on 24/02/15.
- */
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 
@@ -92,7 +89,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public RandomDataOutput write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         throw new UnsupportedOperationException();
     }
 
@@ -157,11 +154,6 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public Access access() {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void nativeWrite(long address, long position, long size) {
         throw new UnsupportedOperationException("todo");
     }
@@ -184,11 +176,6 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public long address() throws UnsupportedOperationException {
         return NO_PAGE;
-    }
-
-    @Override
-    public Object accessHandle() {
-        throw new UnsupportedOperationException();
     }
 
     @Override

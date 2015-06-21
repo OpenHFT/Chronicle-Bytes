@@ -25,9 +25,6 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
-/**
- * Created by peter.lawrey on 24/02/15.
- */
 public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     NativeBytes(BytesStore store) {
@@ -35,11 +32,19 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     public static NativeBytes<Void> nativeBytes() {
-        return new NativeBytes<Void>(noBytesStore());
+        return new NativeBytes<>(noBytesStore());
     }
 
     public static NativeBytes<Void> nativeBytes(long initialCapacity) {
-        return new NativeBytes<Void>(nativeStoreWithFixedCapacity(initialCapacity));
+        return new NativeBytes<>(nativeStoreWithFixedCapacity(initialCapacity));
+    }
+
+    public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
+        long remaining = bytes.remaining();
+        NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
+        bytes2.write(bytes, 0, remaining);
+        bytes2.flip();
+        return bytes2;
     }
 
     @Override
@@ -52,8 +57,6 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         if (!bytesStore.inStore(offset + adding))
             checkResize(offset + adding);
     }
-
-
 
     @Override
     public void ensureCapacity(long size) {
@@ -91,16 +94,11 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     @Override
-    public boolean isNative() {
-        return true;
-    }
-
-    @Override
     public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
         if (bytes instanceof NativeBytes) {
             long len = Math.min(remaining(), Math.min(bytes.remaining(), length));
             writeCheckOffset(position(), len);
-            NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), len);
+            OS.memory().copyMemory(bytes.address() + offset, address() + position(), len);
             skip(len);
             return this;
 
@@ -109,35 +107,27 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         }
     }
 
-    public Bytes<Underlying> write(String str, int offset, int length) {
-        char[] chars = HotSpotStringAccessor.INSTANCE.handle(str);
+    public void write(String str, int offset, int length) {
+        // todo optimise
+        char[] chars = str.toCharArray();
         long position = position();
         ensureCapacity(position + length);
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.write8bit(position, chars, offset, length);
         skip(length);
-        return this;
     }
 
     @Override
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
         if (bytes instanceof NativeBytesStore) {
             writeCheckOffset(position(), length);
-            NativeAccess.U.copyMemory(bytes.address() + offset, address() + position(), length);
+            OS.memory().copyMemory(bytes.address() + offset, address() + position(), length);
             skip(length);
             return this;
 
         } else {
             return super.write(bytes, offset, length);
         }
-    }
-
-    public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
-        long remaining = bytes.remaining();
-        NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
-        bytes2.write(bytes, 0, remaining);
-        bytes2.flip();
-        return bytes2;
     }
 
     public void read8Bit(char[] chars, int length) {

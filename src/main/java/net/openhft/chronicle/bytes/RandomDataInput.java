@@ -22,8 +22,7 @@ import net.openhft.chronicle.core.OS;
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
  * The thread safety of the underlying data depends on how the methods are used.
  */
-public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends ReadAccess<AT>, AT>
-        extends RandomCommon<S, A, AT> {
+public interface RandomDataInput extends RandomCommon {
     String[] charToString = createCharToString();
 
     static String[] createCharToString() {
@@ -85,10 +84,6 @@ public interface RandomDataInput<S extends RandomDataInput<S, A, AT>, A extends 
     default long parseLong(long offset) {
         return BytesUtil.parseLong(this, offset);
     }
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    A access();
 
     /**
      * expert level method for copying data to native memory.

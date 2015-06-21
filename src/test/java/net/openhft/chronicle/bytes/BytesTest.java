@@ -24,25 +24,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
 public class BytesTest {
-    @Test
-    public void testName() throws Exception {
-        NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
-        Bytes<Void> bytes = nativeStore.bytes();
-
-        long expected = 12345L;
-        int offset = 5;
-
-        bytes.writeLong(offset, expected);
-        assertEquals(expected, bytes.readLong(offset));
-    }
-
-    @Test
-    public void testSliceOfBytes() {
-        testSliceOfBytes(Bytes.wrap(new byte[1024]));
-        testSliceOfBytes(Bytes.wrap(ByteBuffer.allocate(1024)));
-        testSliceOfBytes(Bytes.wrap(ByteBuffer.allocateDirect(1024)));
-    }
-
     public static void testSliceOfBytes(Bytes bytes) {
         // move the position by 1
         bytes.readByte();
@@ -78,11 +59,6 @@ public class BytesTest {
         assertEquals(Long.toHexString(num9), num, num9);
     }
 
-    @Test
-    public void testSliceOfZeroedBytes() {
-        testSliceOfZeroedBytes(NativeBytes.nativeBytes(1024));
-    }
-
     public static void testSliceOfZeroedBytes(Bytes bytes) {
         // move the position by 1
         bytes.readByte();
@@ -91,7 +67,7 @@ public class BytesTest {
 
         Bytes bytes1 = bytes.bytes();
         assertFalse(bytes1.isElastic());
-        
+
         assertEquals(1, bytes1.start());
         // capacity is notional in this case.
 //        assertEquals(bytes.capacity() - 1, bytes1.capacity());
@@ -119,6 +95,30 @@ public class BytesTest {
     }
 
     @Test
+    public void testName() throws Exception {
+        NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
+        Bytes<Void> bytes = nativeStore.bytes();
+
+        long expected = 12345L;
+        int offset = 5;
+
+        bytes.writeLong(offset, expected);
+        assertEquals(expected, bytes.readLong(offset));
+    }
+
+    @Test
+    public void testSliceOfBytes() {
+        testSliceOfBytes(Bytes.wrap(new byte[1024]));
+        testSliceOfBytes(Bytes.wrap(ByteBuffer.allocate(1024)));
+        testSliceOfBytes(Bytes.wrap(ByteBuffer.allocateDirect(1024)));
+    }
+
+    @Test
+    public void testSliceOfZeroedBytes() {
+        testSliceOfZeroedBytes(NativeBytes.nativeBytes(1024));
+    }
+
+    @Test
     public void testCopy() {
         Bytes<ByteBuffer> bbb = Bytes.wrap(ByteBuffer.allocateDirect(1024));
         for (int i = 'a'; i <= 'z'; i++)
@@ -138,5 +138,12 @@ public class BytesTest {
                 "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                 "........\n" +
                 "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
+
+        assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+                "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                "........\n" +
+                "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                ".... truncated", bytes.toHexString(256));
     }
+
 }

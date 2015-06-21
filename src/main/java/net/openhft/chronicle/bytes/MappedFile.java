@@ -32,15 +32,13 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MappedFile implements ReferenceCounted {
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
-
     private final File file;
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
     private final long chunkSize;
     private final long overlapSize;
-
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
+    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
     private final ThreadLocal<WeakReference<Bytes>> threadLocalBytes = new ThreadLocal<>();
     private final long capacity;
@@ -140,7 +138,7 @@ public class MappedFile implements ReferenceCounted {
         release();
     }
 
-    void performRelease() {
+    private void performRelease() {
         for (int i = 0; i < stores.size(); i++) {
             WeakReference<MappedBytesStore> storeRef = stores.get(i);
             if (storeRef == null)
@@ -178,27 +176,11 @@ public class MappedFile implements ReferenceCounted {
         return sb.toString();
     }
 
-    public Bytes bytes() {
+    private Bytes bytes() {
         return new MappedBytes(this);
-    }
-
-    public Bytes bytesThreadLocal() {
-        WeakReference<Bytes> bytesRef = threadLocalBytes.get();
-        if (bytesRef != null) {
-            Bytes bytes = bytesRef.get();
-            if (bytes != null)
-                return bytes;
-        }
-        Bytes bytes = bytes();
-        threadLocalBytes.set(new WeakReference<>(bytes));
-        return bytes;
     }
 
     public long capacity() {
         return capacity;
-    }
-
-    public String name() {
-        return file.getName();
     }
 }

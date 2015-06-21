@@ -26,19 +26,17 @@ import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.bytes.Access.nativeAccess;
-
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    static final Memory MEMORY = OS.memory();
+    private static final Memory MEMORY = OS.memory();
     @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
-    protected long address;
-    protected long maximumLimit;
     private final Underlying underlyingObject;
+    protected long address;
+    long maximumLimit;
 
     private NativeBytesStore(ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
@@ -48,7 +46,7 @@ public class NativeBytesStore<Underlying>
         cleaner = ((DirectBuffer) bb).cleaner();
     }
 
-    protected NativeBytesStore(
+    NativeBytesStore(
             long address, long maximumLimit, Runnable deallocator, boolean elastic) {
         this.address = address;
         this.maximumLimit = maximumLimit;
@@ -59,24 +57,6 @@ public class NativeBytesStore<Underlying>
 
     public static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
-    }
-
-    @Override
-    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
-        if (underlyingObject == null) {
-            NativeBytesStore<Void> copy = of(realCapacity(), false, true);
-            OS.memory().copyMemory(address, copy.address, capacity());
-            return (BytesStore) copy;
-
-        } else if (underlyingObject instanceof ByteBuffer) {
-            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
-            bb.put((ByteBuffer) underlyingObject);
-            bb.clear();
-            return (BytesStore) wrap(bb);
-
-        } else {
-            throw new UnsupportedOperationException();
-        }
     }
 
     /**
@@ -115,6 +95,24 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
+        if (underlyingObject == null) {
+            NativeBytesStore<Void> copy = of(realCapacity(), false, true);
+            OS.memory().copyMemory(address, copy.address, capacity());
+            return (BytesStore) copy;
+
+        } else if (underlyingObject instanceof ByteBuffer) {
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
+            bb.put((ByteBuffer) underlyingObject);
+            bb.clear();
+            return (BytesStore) wrap(bb);
+
+        } else {
+            throw new UnsupportedOperationException();
+        }
+    }
+
+    @Override
     public Bytes<Underlying> bytes() {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
     }
@@ -139,11 +137,6 @@ public class NativeBytesStore<Underlying>
     @Override
     public Underlying underlyingObject() {
         return underlyingObject;
-    }
-
-    @Override
-    public Access<Underlying> access() {
-        return nativeAccess();
     }
 
     @Override
@@ -285,7 +278,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public NativeBytesStore<Underlying> write(
+    public void write(
             long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(),
@@ -294,14 +287,18 @@ public class NativeBytesStore<Underlying>
         } else {
             MEMORY.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
         }
-        return this;
     }
 
     @Override
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, Bytes bytes, long offset, long length) {
-        Access.copy(bytes.access(), bytes.accessHandle(), bytes.accessOffset(offset),
-                access(), accessHandle(), accessOffset(offsetInRDO), length);
+        long i = 0;
+        for (; i < length - 7; i += 8) {
+            writeLong(offsetInRDO + i, bytes.readLong(offset + i));
+        }
+        for (; i < length; i++) {
+            writeByte(offsetInRDO + i, bytes.readByte(offset + i));
+        }
         return this;
     }
 
@@ -311,22 +308,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public Underlying accessHandle() {
-        return null;
-    }
-
-    @Override
     public long accessOffset(long randomOffset) {
         return address + translate(randomOffset);
     }
 
-    protected void performRelease() {
+    private void performRelease() {
         if (cleaner != null)
             cleaner.clean();
-    }
-
-    public boolean isElastic() {
-        return elastic;
     }
 
     @Override
@@ -337,25 +325,13 @@ public class NativeBytesStore<Underlying>
     @Override
     public void nativeRead(long position, long address, long size) {
         // TODO add bounds checking.
-        NativeAccess.U.copyMemory(address() + position, address, size);
-/*
-        Access.copy(
-                access(), accessHandle(), accessOffset(position),
-                NativeAccess.INSTANCE, null, address,
-                size);
-*/
+        OS.memory().copyMemory(address() + position, address, size);
     }
 
     @Override
     public void nativeWrite(long address, long position, long size) {
         // TODO add bounds checking.
-        NativeAccess.U.copyMemory(address, address() + position, size);
-/*
-        Access.copy(
-                NativeAccess.INSTANCE, null, address,
-                access(), accessHandle(), accessOffset(position),
-                size);
-*/
+        OS.memory().copyMemory(address, address() + position, size);
     }
 
     void write8bit(long position, char[] chars, int offset, int length) {
@@ -370,6 +346,11 @@ public class NativeBytesStore<Underlying>
         Memory memory = NativeBytesStore.MEMORY;
         for (int i = 0; i < length; i++)
             chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
     }
 
     static class Deallocator implements Runnable {
@@ -387,10 +368,5 @@ public class NativeBytesStore<Underlying>
             address = 0;
             MEMORY.freeMemory(address);
         }
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
     }
 }

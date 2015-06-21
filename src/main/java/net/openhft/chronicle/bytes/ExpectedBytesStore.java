@@ -18,12 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteBuffer;
 
-/**
- * Created by peter.lawrey on 17/04/15.
- */
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
-    public static final int NOT_READY = 1 << 31;
-    final BytesStore<B, Underlying> underlyingBytesStore;
+    private static final int NOT_READY = 1 << 31;
+    private final BytesStore<B, Underlying> underlyingBytesStore;
 
     ExpectedBytesStore(BytesStore<B, Underlying> underlyingBytesStore) {
         this.underlyingBytesStore = underlyingBytesStore;
@@ -42,11 +39,6 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public Underlying underlyingObject() {
         return underlyingBytesStore.underlyingObject();
-    }
-
-    @Override
-    public Access<Underlying> access() {
-        return underlyingBytesStore.access();
     }
 
     @Override
@@ -121,11 +113,6 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         if (ia != i)
             throw new AssertionError("Expected: " + ia + "\nActual: " + i);
         return (B) this;
-    }
-
-    @Override
-    public Underlying accessHandle() {
-        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -204,7 +191,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
-    public B write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         throw new UnsupportedOperationException();
     }
 

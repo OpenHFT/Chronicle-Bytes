@@ -19,14 +19,13 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
-import java.nio.InvalidMarkException;
 import java.nio.charset.StandardCharsets;
 
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
-        StreamingDataInput<Bytes<Underlying>, Access<Underlying>, Underlying>,
-        StreamingDataOutput<Bytes<Underlying>, Access<Underlying>, Underlying>,
-        ByteStringParser<Bytes<Underlying>, Access<Underlying>, Underlying>,
-        ByteStringAppender<Bytes<Underlying>, Access<Underlying>, Underlying>,
+        StreamingDataInput<Bytes<Underlying>>,
+        StreamingDataOutput<Bytes<Underlying>>,
+        ByteStringParser<Bytes<Underlying>>,
+        ByteStringAppender<Bytes<Underlying>>,
         CharSequence {
 
     static Bytes<ByteBuffer> elasticByteBuffer() {
@@ -55,38 +54,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
-     * @return a copy of this Bytes from position() to limit().
-     */
-    BytesStore<Bytes<Underlying>, Underlying> copy();
-
-    @Override
-    default long remaining() {
-        return limit() - position();
-    }
-
-    /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
-     *
-     * @return hex representation of the buffer, from example [0D ,OA, FF]
-     */
-    default String toHexString() {
-        return BytesUtil.toHexString(this, position(), realCapacity() - position());
-    }
-
-    default String toHexString(long maxLength) {
-        if (realCapacity() - position() < maxLength) return toHexString();
-        return BytesUtil.toHexString(this, position(), maxLength) + ".... truncated";
-    }
-
-    long limit();
-
-    Bytes<Underlying> position(long position);
-
-    long position();
-
-    Bytes<Underlying> limit(long limit);
-
-    /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call
      *
@@ -105,35 +72,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             final StringBuilder builder = new StringBuilder();
             while (buffer.remaining() > 0) {
                 builder.append((char) buffer.readByte());
-            }
-
-            // remove the last comma
-            return builder.toString();
-        } finally {
-            buffer.limit(limit);
-            buffer.position(position);
-        }
-    }
-
-    /**
-     * Creates a string from the {@code position} to the  {@code limit}, The buffer is not modified
-     * by this call
-     *
-     * @param buffer the buffer to use
-     * @return a string contain the text from the {@code position}  to the  {@code limit}
-     */
-    static String tonString(@NotNull final ByteBuffer buffer) {
-        if (buffer.remaining() == 0)
-            return "";
-
-        int position = buffer.position();
-        int limit = buffer.limit();
-
-        try {
-
-            final StringBuilder builder = new StringBuilder();
-            while (buffer.remaining() > 0) {
-                builder.append((char) buffer.get());
             }
 
             // remove the last comma
@@ -173,26 +111,41 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         }
     }
 
-    /**
-     * Sets this buffer's mark at its position.
-     *
-     * @return This buffer
-     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
-     */
-    @Deprecated
-    Bytes mark();
+    default long realCapacity() {
+        return BytesStore.super.realCapacity();
+    }
 
     /**
-     * Resets this buffer's position to the previously-marked position.
-     * <p>
-     * Invoking this method neither changes nor discards the mark's value.
-     *
-     * @return This buffer
-     * @throws InvalidMarkException If the mark has not been set
-     * @deprecated Don't use mark() or reset(), use a lambda method like withLength
+     * @return a copy of this Bytes from position() to limit().
      */
-    @Deprecated
-    Bytes reset() throws InvalidMarkException;
+    BytesStore<Bytes<Underlying>, Underlying> copy();
+
+    @Override
+    default long remaining() {
+        return limit() - position();
+    }
+
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
+    default String toHexString() {
+        return BytesUtil.toHexString(this, position(), realCapacity() - position());
+    }
+
+    default String toHexString(long maxLength) {
+        if (realCapacity() - position() < maxLength) return toHexString();
+        return BytesUtil.toHexString(this, position(), maxLength) + ".... truncated";
+    }
+
+    long limit();
+
+    Bytes<Underlying> position(long position);
+
+    long position();
+
+    Bytes<Underlying> limit(long limit);
 
     @Override
     default int length() {
@@ -243,8 +196,4 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         boolean isClear = start() == position() && limit() == capacity();
         return isClear ? BytesStore.super.bytes() : new SubBytes<>(this, position(), limit() + start());
     }
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    Access<Underlying> access();
 }

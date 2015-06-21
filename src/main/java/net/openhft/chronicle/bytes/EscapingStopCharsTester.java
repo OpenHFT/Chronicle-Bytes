@@ -16,9 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-/**
- * Created by peter.lawrey on 16/01/15.
- */
 public class EscapingStopCharsTester implements StopCharsTester {
     private final StopCharsTester sct;
     private boolean escaped = false;

@@ -165,7 +165,7 @@ public enum BytesUtil {
         }
     }
 
-    public static long findUTFLength(@NotNull CharSequence str) {
+    private static long findUTFLength(@NotNull CharSequence str) {
         long utflen = 0;/* use charAt instead of copying String to char array */
         for (int i = 0, strlen = str.length(); i < strlen; i++) {
             char c = str.charAt(i);
@@ -182,19 +182,19 @@ public enum BytesUtil {
         return utflen;
     }
 
-    public static void writeUTF(long offsetInRDO, int maxLen, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+    public static void writeUTF(long offsetInRDO, int maxLen, RandomDataOutput bytes, @NotNull CharSequence str, int length) {
         if (length > maxLen)
             throw new IllegalArgumentException();
 
         if (bytes instanceof NativeBytes) {
             if (str instanceof NativeBytes) {
-                ((NativeBytes) bytes).write(offsetInRDO, (NativeBytes) str, offset, length);
+                ((NativeBytes) bytes).write(offsetInRDO, (NativeBytes) str, 0, length);
                 return;
             }
         }
         int i;
         for (i = 0; i < length; i++) {
-            char c = str.charAt(offset + i);
+            char c = str.charAt(i);
             if (c > 0x007F)
                 break;
             bytes.writeByte(offsetInRDO + i, (byte) c);
@@ -202,7 +202,7 @@ public enum BytesUtil {
 
         Bytes sbytes = asBytes(bytes, offsetInRDO + i, offsetInRDO + maxLen);
         for (; i < length; i++) {
-            char c = str.charAt(offset + i);
+            char c = str.charAt(i);
             appendUTF(sbytes, c);
         }
     }
@@ -254,23 +254,6 @@ public enum BytesUtil {
         }
     }
 
-    public static <T> void appendUTF(WriteAccess<T> access, T handle, long offset,
-                                     @NotNull CharSequence str, int strOff, int length) {
-        int i;
-        for (i = 0; i < length; i++) {
-            char c = str.charAt(strOff + i);
-            if (c > 0x007F)
-                break;
-            access.writeByte(handle, offset, (byte) c);
-            offset++;
-        }
-
-        for (; i < length; i++) {
-            char c = str.charAt(strOff + i);
-            offset = appendUTF(access, handle, offset, c);
-        }
-    }
-
     public static void appendUTF(StreamingDataOutput bytes, int c) {
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
@@ -289,31 +272,6 @@ public enum BytesUtil {
             bytes.writeByte((byte) (0x80 | ((c >> 12) & 0x3F)));
             bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
             bytes.writeByte((byte) (0x80 | (c & 0x3F)));
-        }
-    }
-
-    public static <T> long appendUTF(WriteAccess<T> access, T handle, long offset, int c) {
-        if (c <= 0x007F) {
-            access.writeByte(handle, offset, (byte) c);
-            return offset + 1;
-
-        } else if (c <= 0x07FF) {
-            access.writeByte(handle, offset, (byte) (0xC0 | ((c >> 6) & 0x1F)));
-            access.writeByte(handle, offset + 1, (byte) (0x80 | c & 0x3F));
-            return offset + 2;
-
-        } else if (c <= 0xFFFF) {
-            access.writeByte(handle, offset, (byte) (0xE0 | ((c >> 12) & 0x0F)));
-            access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 6) & 0x3F)));
-            access.writeByte(handle, offset + 2, (byte) (0x80 | (c & 0x3F)));
-            return offset + 3;
-
-        } else {
-            access.writeByte(handle, offset, (byte) (0xF0 | ((c >> 18) & 0x07)));
-            access.writeByte(handle, offset + 1, (byte) (0x80 | ((c >> 12) & 0x3F)));
-            access.writeByte(handle, offset + 2, (byte) (0x80 | ((c >> 6) & 0x3F)));
-            access.writeByte(handle, offset + 3, (byte) (0x80 | (c & 0x3F)));
-            return offset + 4;
         }
     }
 
@@ -389,7 +347,7 @@ public enum BytesUtil {
         return sb.toString();
     }
 
-    public static void toString(RandomDataInput bytes, Appendable sb, long start, long position, long end) {
+    private static void toString(RandomDataInput bytes, Appendable sb, long start, long position, long end) {
         try {
             // before
             if (start < 0) start = 0;
@@ -418,7 +376,7 @@ public enum BytesUtil {
         }
     }
 
-    public static void toString(RandomDataInput bytes, StringBuilder sb) {
+    private static void toString(RandomDataInput bytes, StringBuilder sb) {
         long start = bytes instanceof StreamingCommon ? ((StreamingCommon) bytes).position() : 0;
         for (long i = start; i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
@@ -494,7 +452,7 @@ public enum BytesUtil {
         }
     }
 
-    public static void numberTooLarge(int digits) {
+    private static void numberTooLarge(int digits) {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
     }
 
@@ -989,6 +947,7 @@ public enum BytesUtil {
                 in.skip(-1);
                 return Double.NaN;
             case 'I':
+                //noinspection SpellCheckingInspection
                 if (compareRest(in, "nfinity"))
                     return Double.POSITIVE_INFINITY;
                 in.skip(-1);
@@ -1091,11 +1050,6 @@ public enum BytesUtil {
             if (in.compareAndSwapLong(offset, value, value + adding))
                 return value;
         }
-    }
-
-    public static long asLong(@NotNull String str) {
-        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
-        return bb.getLong();
     }
 
     public static int asInt(@NotNull String str) {
@@ -1225,17 +1179,13 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static String toHex(@NotNull final Bytes buffer) {
-        return toHex(buffer, buffer.position(), buffer.limit());
-    }
-
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *
      * @param buffer the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
-    public static String toHex(@NotNull final Bytes buffer, long offset, long len) {
+    private static String toHex(@NotNull final Bytes buffer, long offset, long len) {
         if (len == 0)
             return "";
 
@@ -1253,7 +1203,7 @@ public enum BytesUtil {
                 long pos = buffer.position();
                 byte b = buffer.readByte();
                 char c = (char) b;
-                builder.append(c + "(" + String.format("%02X ", b).trim() + ")[" + pos + "]");
+                builder.append(c).append("(").append(String.format("%02X ", b).trim()).append(")[").append(pos).append("]");
                 builder.append(",");
             }
 

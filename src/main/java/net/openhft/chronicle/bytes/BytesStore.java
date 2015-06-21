@@ -18,9 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 
 import static java.lang.Math.min;
 
@@ -29,8 +27,7 @@ import static java.lang.Math.min;
  * Only offset access within the capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
-        extends RandomDataInput<B, Access<Underlying>, Underlying>,
-        RandomDataOutput<B, Access<Underlying>, Underlying>, ReferenceCounted {
+        extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted {
     static BytesStore wrap(byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
@@ -90,25 +87,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return realCapacity();
     }
 
-    @Override
-    default boolean isNative() {
-        return underlyingObject() == null;
-    }
-
     Underlying underlyingObject();
-
-    /**
-     * Perform a set of actions with a temporary bounds mode.
-     */
-    default BytesStore with(long position, long length, Consumer<Bytes> bytesConsumer) {
-        if (position + length > capacity())
-            throw new BufferUnderflowException();
-        VanillaBytes bsb = new VanillaBytes(this);
-        bsb.position(position);
-        bsb.limit(position + length);
-        bytesConsumer.accept(bsb);
-        return this;
-    }
 
     /**
      * Use this test to determine if an offset is considered safe.
@@ -121,27 +100,23 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return capacity();
     }
 
-    /**
-     * @return The smallest position allowed in this buffer.
-     */
-    default long start() {
-        return 0L;
-    }
-
     default void copyTo(BytesStore store) {
         long copy = min(capacity(), store.capacity());
-        Access.copy(access(), accessHandle(), accessOffset(start()),
-                store.access(), store.accessHandle(), store.accessOffset(store.start()), copy);
+        int i = 0;
+        for (; i < copy - 7; i++)
+            store.writeLong(i, readLong(i));
+        for (; i < copy; i++)
+            store.writeByte(i, readByte(i));
     }
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    Access<Underlying> access();
 
     default B zeroOut(long start, long end) {
         if (start < start() || end > capacity() || end > start)
             throw new IllegalArgumentException();
-        access().zeroOut(accessHandle(), accessOffset(start), end - start);
+        long i = start;
+        for (; i < end - 7; i++)
+            writeLong(i, 0L);
+        for (; i < end; i++)
+            writeByte(i, 0);
         return (B) this;
     }
 
@@ -159,9 +134,5 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     default long addAndGetLong(long offset, long adding) {
         return BytesUtil.getAndAddLong(this, offset, adding) + adding;
-    }
-
-    default long getAndAddLong(long offset, long adding) {
-        return BytesUtil.getAndAddLong(this, offset, adding);
     }
 }

@@ -20,8 +20,7 @@ import java.nio.BufferUnderflowException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
-        A extends AccessCommon<AT>, AT> extends RandomCommon<S, A, AT> {
+interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
     /**
      * @return the number of bytes between the position and the limit.
      */
@@ -55,14 +54,14 @@ public interface StreamingCommon<S extends StreamingCommon<S, A, AT>,
         return (S) this;
     }
 
-    default <S,R> R reply(long length, Function<S, R> bytesConsumer) {
+    default <I, R> R reply(long length, Function<I, R> bytesConsumer) {
         if (length > remaining())
             throw new BufferUnderflowException();
         long limit0 = limit();
         long limit = position() + length;
         try {
             limit(limit);
-            return bytesConsumer.apply((S) this);
+            return bytesConsumer.apply((I) this);
         } finally {
             limit(limit0);
             position(limit);

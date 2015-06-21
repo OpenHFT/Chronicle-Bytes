@@ -18,7 +18,18 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.ByteOrder;
 
-public interface RandomCommon<S extends RandomCommon<S, A, AT>, A extends AccessCommon<AT>, AT> {
+interface RandomCommon {
+    /**
+     * @return The smallest position allowed in this buffer.
+     */
+    default long start() {
+        return 0L;
+    }
+
+    default long position() {
+        return start();
+    }
+
     /**
      * @return the highest offset or position allowed for this buffer.
      */
@@ -48,15 +59,9 @@ public interface RandomCommon<S extends RandomCommon<S, A, AT>, A extends Access
      */
     long address() throws UnsupportedOperationException;
 
-    boolean isNative();
-
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
     }
-
-    A access();
-
-    AT accessHandle();
 
     long accessOffset(long randomOffset);
 

@@ -16,9 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
-        A extends WriteAccess<AT>, AT>
-        extends StreamingDataOutput<B, A, AT>, Appendable {
+public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     default B append(char ch) {
         BytesUtil.appendUTF(this, ch);
@@ -51,11 +49,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B, A, AT>,
 
     default B append8bit(CharSequence cs) {
         BytesUtil.append8bit(this, cs, 0, cs.length());
-        return (B) this;
-    }
-
-    default B append8bit(CharSequence cs, int start, int end) {
-        BytesUtil.append8bit(this, cs, start, end - start);
         return (B) this;
     }
 

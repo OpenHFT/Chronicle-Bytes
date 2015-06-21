@@ -23,7 +23,7 @@ public class MappedBytesStore extends NativeBytesStore {
     private final long start;
     private final long safeLimit;
 
-    protected MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) {
+    MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) {
         super(address, start + capacity, new OS.Unmapper(address, capacity, owner), false);
         this.start = start;
         this.safeLimit = start + safeCapacity;

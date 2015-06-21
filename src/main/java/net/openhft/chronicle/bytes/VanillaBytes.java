@@ -32,22 +32,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         limit(offset + length);
         position(offset);
     }
-    
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+
+    private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         BytesStore oldBS = this.bytesStore;
         this.bytesStore = bytesStore;
         oldBS.release();
         clear();
-    }
-
-    @Override
-    public BytesStore<Bytes<Underlying>, Underlying> bytesStore() {
-        return bytesStore;
-    }
-
-    @Override
-    public long offset() {
-        return position();
     }
 
     @Override

@@ -18,9 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by peter.lawrey on 19/04/15.
- */
 public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
     private final long start;
     private final long capacity;

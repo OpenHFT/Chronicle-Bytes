@@ -26,8 +26,7 @@ import java.nio.ByteBuffer;
 /**
  * This data input has a a position() and a limit()
  */
-public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
-        A extends ReadAccess<AT>, AT> extends StreamingCommon<S, A, AT> {
+public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     UnderflowMode underflowMode();
 
     S underflowMode(UnderflowMode underflowMode);
@@ -101,17 +100,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S, A, AT>,
         return true;
     }
 
-    void read(byte[] bytes);
+    default void read(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = readByte();
+    }
 
-    void read(ByteBuffer buffer);
+    default void read(ByteBuffer buffer) {
+        for (int i = (int) Math.min(remaining(), buffer.remaining()); i > 0; i--)
+            buffer.put(readByte());
+    }
 
     int readVolatileInt();
 
     long readVolatileLong();
-
-    // this "needless" override is needed for better erasure while accessing raw Bytes/BytesStore
-    @Override
-    A access();
 
     int peekUnsignedByte();
 

@@ -22,9 +22,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
-/**
- * Created by peter.lawrey on 24/02/15.
- */
 public class MappedBytes extends AbstractBytes<Void> {
     private final MappedFile mappedFile;
 
@@ -41,8 +38,7 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     public static MappedBytes mappedBytes(File file, long chunkSize) throws FileNotFoundException {
         MappedFile rw = new MappedFile(file, chunkSize, OS.pageSize());
-        MappedBytes bytes = new MappedBytes(rw);
-        return bytes;
+        return new MappedBytes(rw);
     }
 
     @Override
