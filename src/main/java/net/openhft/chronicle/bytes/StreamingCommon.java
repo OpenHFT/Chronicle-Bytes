@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.BufferUnderflowException;
 import java.util.function.Consumer;
-import java.util.function.Function;
 
 interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
     /**
@@ -54,19 +53,6 @@ interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
         return (S) this;
     }
 
-    default <I, R> R reply(long length, Function<I, R> bytesConsumer) {
-        if (length > remaining())
-            throw new BufferUnderflowException();
-        long limit0 = limit();
-        long limit = position() + length;
-        try {
-            limit(limit);
-            return bytesConsumer.apply((I) this);
-        } finally {
-            limit(limit0);
-            position(limit);
-        }
-    }
     S skip(long bytesToSkip);
 
     S flip();
@@ -77,9 +63,5 @@ interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
     default String toDebugString() {
         return toDebugString(128);
-    }
-
-    default long accessPositionOffset() {
-        return accessOffset(position());
     }
 }

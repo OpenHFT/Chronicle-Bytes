@@ -1179,44 +1179,6 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
-     *
-     * @param buffer the buffer you wish to toString()
-     * @return hex representation of the buffer, from example [0D ,OA, FF]
-     */
-    private static String toHex(@NotNull final Bytes buffer, long offset, long len) {
-        if (len == 0)
-            return "";
-
-        long position = buffer.position();
-        long limit = buffer.limit();
-
-        try {
-
-            buffer.limit(offset + len);
-            buffer.position(offset);
-
-            final StringBuilder builder = new StringBuilder("[");
-
-            while (buffer.remaining() > 0) {
-                long pos = buffer.position();
-                byte b = buffer.readByte();
-                char c = (char) b;
-                builder.append(c).append("(").append(String.format("%02X ", b).trim()).append(")[").append(pos).append("]");
-                builder.append(",");
-            }
-
-            // remove the last comma
-            builder.deleteCharAt(builder.length() - 1);
-            builder.append("]");
-            return builder.toString();
-        } finally {
-            buffer.limit(limit);
-            buffer.position(position);
-        }
-    }
-
     public static <ACS extends Appendable & CharSequence> void append(ACS sb, String str) {
         try {
             sb.append(str);

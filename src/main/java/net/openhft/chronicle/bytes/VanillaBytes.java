@@ -39,7 +39,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         oldBS.release();
         clear();
     }
-
     @Override
     public long maxSize() {
         return remaining();
@@ -76,5 +75,10 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         } else {
             return (BytesStore) NativeBytes.copyOf(this);
         }
+    }
+
+    @Override
+    public Bytes<Underlying> write(BytesStore buffer, long offset, long length) {
+        throw new UnsupportedOperationException("todo");
     }
 }

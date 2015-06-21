@@ -72,13 +72,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     S writeDouble(double d);
 
-    S write(BytesStore bytes);
-
-    S write(Bytes bytes);
+    default S write(BytesStore bytes) {
+        return write(bytes, bytes.position(), bytes.readLimit() - bytes.position());
+    }
 
     S write(BytesStore buffer, long offset, long length);
-
-    S write(Bytes buffer, long offset, long length);
 
     default S write(byte[] bytes) {
         return write(bytes, 0, bytes.length);

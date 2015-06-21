@@ -20,21 +20,12 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
-import java.io.ObjectInput;
 import java.nio.ByteBuffer;
 
 /**
  * This data input has a a position() and a limit()
  */
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
-    UnderflowMode underflowMode();
-
-    S underflowMode(UnderflowMode underflowMode);
-
-    default ObjectInput objectInput() {
-        throw new UnsupportedOperationException();
-    }
-
     default InputStream inputStream() {
         throw new UnsupportedOperationException();
     }
@@ -70,8 +61,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     float readFloat();
 
     double readDouble();
-
-    int peakVolatileInt();
 
     /**
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128

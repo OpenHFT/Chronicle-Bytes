@@ -23,8 +23,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static java.lang.Math.min;
-
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     BytesStore<Bytes<Underlying>, Underlying> bytesStore = NoBytesStore.noBytesStore();
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -133,17 +131,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    public UnderflowMode underflowMode() {
-        return underflowMode;
-    }
-
-    @Override
-    public Bytes<Underlying> underflowMode(UnderflowMode underflowMode) {
-        this.underflowMode = underflowMode;
-        return this;
-    }
-
-    @Override
     public byte readByte() {
         try {
             long offset = readOffsetPositionMoved(1);
@@ -192,12 +179,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public double readDouble() {
         long offset = readOffsetPositionMoved(8);
         return bytesStore.readDouble(offset);
-    }
-
-    @Override
-    public int peakVolatileInt() {
-        readCheckOffset(position, 4);
-        return bytesStore.readVolatileInt(position);
     }
 
     @Override
@@ -428,32 +409,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long offset = writeOffsetPositionMoved(8);
         bytesStore.writeDouble(offset, d);
         return this;
-    }
-
-    @Override
-    public Bytes<Underlying> write(BytesStore bytes) {
-        write(bytes, 0, bytes.capacity());
-        return this;
-    }
-
-    @Override
-    public Bytes<Underlying> write(Bytes bytes) {
-        long write = min(remaining(), bytes.remaining());
-        long offset = bytes.position();
-        bytes.skip(write); // skip first to ensure there is enough capacity.
-        write(position(), bytes, offset, write);
-        skip(write);
-        return this;
-    }
-
-    @Override
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
-        throw new UnsupportedOperationException("todo");
-    }
-
-    @Override
-    public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
-        throw new UnsupportedOperationException("todo");
     }
 
     @Override

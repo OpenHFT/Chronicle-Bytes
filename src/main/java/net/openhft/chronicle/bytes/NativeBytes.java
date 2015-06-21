@@ -94,17 +94,21 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     @Override
-    public Bytes<Underlying> write(Bytes bytes, long offset, long length) {
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
         if (bytes instanceof NativeBytes) {
             long len = Math.min(remaining(), Math.min(bytes.remaining(), length));
             writeCheckOffset(position(), len);
             OS.memory().copyMemory(bytes.address() + offset, address() + position(), len);
             skip(len);
-            return this;
 
         } else {
-            return super.write(bytes, offset, length);
+            long i = 0;
+            for (; i < length - 7; i += 8)
+                writeLong(bytes.readLong(offset + i));
+            for (; i < length; i++)
+                writeByte(bytes.readByte(offset + i));
         }
+        return this;
     }
 
     public void write(String str, int offset, int length) {
@@ -116,20 +120,6 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         nbs.write8bit(position, chars, offset, length);
         skip(length);
     }
-
-    @Override
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
-        if (bytes instanceof NativeBytesStore) {
-            writeCheckOffset(position(), length);
-            OS.memory().copyMemory(bytes.address() + offset, address() + position(), length);
-            skip(length);
-            return this;
-
-        } else {
-            return super.write(bytes, offset, length);
-        }
-    }
-
     public void read8Bit(char[] chars, int length) {
         long position = position();
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;

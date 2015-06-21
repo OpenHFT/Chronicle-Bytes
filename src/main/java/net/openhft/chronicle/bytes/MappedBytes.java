@@ -93,4 +93,9 @@ public class MappedBytes extends AbstractBytes<Void> {
     public boolean isElastic() {
         return true;
     }
+
+    @Override
+    public Bytes<Void> write(BytesStore buffer, long offset, long length) {
+        throw new UnsupportedOperationException("todo");
+    }
 }

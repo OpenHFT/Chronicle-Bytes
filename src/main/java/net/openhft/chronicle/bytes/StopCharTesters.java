@@ -30,11 +30,6 @@ public enum StopCharTesters implements StopCharTester {
         public boolean isStopChar(int ch) {
             return ch < ' ';
         }
-    }, NEW_LINE_STOP {
-        @Override
-        public boolean isStopChar(int ch) {
-            return ch == '\n';
-        }
     },
     SPACE_STOP {
         @Override
@@ -42,64 +37,10 @@ public enum StopCharTesters implements StopCharTester {
             return Character.isWhitespace(ch) || ch == 0;
         }
     },
-    XML_TEXT {
-        @Override
-        public boolean isStopChar(int ch) {
-            return ch == '"' || ch == '<' || ch == '>' || ch == 0;
-        }
-    },
-    FIX_TEXT {
-        @Override
-        public boolean isStopChar(int ch) {
-            return ch <= 1;
-        }
-    },
     QUOTES {
         @Override
         public boolean isStopChar(int ch) throws IllegalStateException {
             return ch == '"' || ch <= 0;
         }
-    },
-    ALL {
-        @Override
-        public boolean isStopChar(int ch) {
-            return ch < 0;
-        }
     };
-
-    public static StopCharTester forChars(CharSequence sequence) {
-        if (sequence.length() == 1)
-            return forChar(sequence.charAt(0));
-        return new CSCSTester(sequence);
-    }
-
-    private static StopCharTester forChar(char ch) {
-        return new CharCSTester(ch);
-    }
-
-    static class CSCSTester implements StopCharTester {
-        private final String separators;
-
-        public CSCSTester(CharSequence cs) {
-            separators = cs.toString();
-        }
-
-        @Override
-        public boolean isStopChar(int ch) {
-            return separators.indexOf(ch) >= 0;
-        }
-    }
-
-    static class CharCSTester implements StopCharTester {
-        private final char ch;
-
-        public CharCSTester(char ch) {
-            this.ch = ch;
-        }
-
-        @Override
-        public boolean isStopChar(int ch) {
-            return this.ch == ch;
-        }
-    }
 }
