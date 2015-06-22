@@ -27,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Objects;
 
 public enum BytesUtil {
     ;
@@ -182,34 +183,9 @@ public enum BytesUtil {
         return utflen;
     }
 
-    public static void writeUTF(long offsetInRDO, int maxLen, RandomDataOutput bytes, @NotNull CharSequence str, int length) {
-        if (length > maxLen)
-            throw new IllegalArgumentException();
-
-        if (bytes instanceof NativeBytes) {
-            if (str instanceof NativeBytes) {
-                ((NativeBytes) bytes).write(offsetInRDO, (NativeBytes) str, 0, length);
-                return;
-            }
-        }
-        int i;
-        for (i = 0; i < length; i++) {
-            char c = str.charAt(i);
-            if (c > 0x007F)
-                break;
-            bytes.writeByte(offsetInRDO + i, (byte) c);
-        }
-
-        Bytes sbytes = asBytes(bytes, offsetInRDO + i, offsetInRDO + maxLen);
-        for (; i < length; i++) {
-            char c = str.charAt(i);
-            appendUTF(sbytes, c);
-        }
-    }
-
     @NotNull
     public static Bytes asBytes(RandomDataOutput bytes, long position, long limit) {
-        Bytes sbytes = bytes.bytes();
+        Bytes sbytes = bytes.bytesForWrite();
         sbytes.writeLimit(limit);
         sbytes.readLimit(limit);
         sbytes.readPosition(position);
@@ -326,7 +302,7 @@ public enum BytesUtil {
     }
 
     public static Object asSize(long size) {
-        return size == 1L << 40 ? "1TiB" : size;
+        return size == Bytes.MAX_CAPACITY ? "8EiB" : size;
     }
 
     public static String to8bitString(BytesStore bytes) {
@@ -1009,12 +985,16 @@ public enum BytesUtil {
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
-            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
+            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
-            else if (b == '-')
+            } else if (b == '-') {
                 negative = true;
-            else
+            } else if (b == ']' || b == '}') {
+                in.readSkip(-1);
                 break;
+            } else {
+                break;
+            }
         }
         return negative ? -num : num;
     }
@@ -1193,5 +1173,13 @@ public enum BytesUtil {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public static <V> boolean equals(V a, V b) {
+        if (a == b) return true;
+        if (a == null || b == null) return false;
+        if (a instanceof CharSequence && b instanceof CharSequence)
+            return a.toString().equals(b.toString());
+        return Objects.equals(a, b);
     }
 }

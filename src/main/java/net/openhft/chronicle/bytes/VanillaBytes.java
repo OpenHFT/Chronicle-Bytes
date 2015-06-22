@@ -23,7 +23,11 @@ import java.nio.ByteBuffer;
 
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
     public VanillaBytes(@NotNull BytesStore bytesStore) {
-        super(bytesStore);
+        this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
+    }
+
+    public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit) {
+        super(bytesStore, writePosition, writeLimit);
     }
 
     @Override
@@ -52,8 +56,10 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public Bytes<Underlying> bytes() {
-        return isClear() ? new VanillaBytes<>(bytesStore) : new SubBytes<>(bytesStore, readPosition(), readLimit());
+    public Bytes<Underlying> bytesForRead() {
+        return isClear()
+                ? new VanillaBytes<>(bytesStore, bytesStore.writeLimit(), bytesStore.writeLimit())
+                : new SubBytes<>(bytesStore, readPosition(), readLimit());
     }
 
     @Override

@@ -25,16 +25,20 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         StreamingDataInput<Bytes<Underlying>>,
         StreamingDataOutput<Bytes<Underlying>>,
         ByteStringParser<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>>,
-        CharSequence {
+        ByteStringAppender<Bytes<Underlying>> {
+
+    long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
 
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        return NativeBytesStore.elasticByteBuffer().bytes();
+        return NativeBytesStore.elasticByteBuffer().bytesForWrite();
     }
 
-    static Bytes<ByteBuffer> wrap(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer)
-                .bytes(UnderflowMode.BOUNDED);
+    static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
+        return BytesStore.wrap(byteBuffer).bytesForRead(UnderflowMode.BOUNDED);
+    }
+
+    static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
+        return BytesStore.wrap(byteBuffer).bytesForWrite();
     }
 
     static Bytes<byte[]> expect(String text) {
@@ -46,7 +50,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<byte[]> wrap(byte[] byteArray) {
-        return BytesStore.<byte[]>wrap(byteArray).bytes(UnderflowMode.BOUNDED);
+        return BytesStore.<byte[]>wrap(byteArray).bytesForRead();
     }
 
     static Bytes<byte[]> from(String text) {
@@ -130,21 +134,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesUtil.toHexString(this, readPosition(), maxLength) + ".... truncated";
     }
 
-    @Override
-    default int length() {
-        return (int) Math.min(readLimit(), Integer.MAX_VALUE);
-    }
-
-    @Override
-    default char charAt(int offset) {
-        return (char) readUnsignedByte(offset);
-    }
-
-    @Override
-    default String subSequence(int start, int end) {
-        throw new UnsupportedOperationException();
-    }
-
     /**
      * @return can the Bytes resize when more data is written than it's realCapacity()
      */
@@ -170,7 +159,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * the capacity.
      */
     @Override
-    default Bytes<Underlying> bytes() {
-        return isClear() ? BytesStore.super.bytes() : new SubBytes<>(this, readPosition(), readLimit() + start());
+    default Bytes<Underlying> bytesForRead() {
+        return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
 }

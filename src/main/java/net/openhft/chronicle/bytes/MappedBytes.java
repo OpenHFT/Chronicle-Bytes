@@ -27,7 +27,7 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     // assume the mapped file is reserved already.
     MappedBytes(MappedFile mappedFile) {
-        super(NoBytesStore.noBytesStore());
+        super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
         this.mappedFile = mappedFile;
         clear();
     }

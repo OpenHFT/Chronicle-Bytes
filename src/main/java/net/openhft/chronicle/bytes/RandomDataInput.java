@@ -93,4 +93,9 @@ public interface RandomDataInput extends RandomCommon {
      * @param size     in bytes
      */
     void nativeRead(long position, long address, long size);
+
+    default void copyTo(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = readByte(start() + i);
+    }
 }

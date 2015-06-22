@@ -48,7 +48,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public String toString() {
-        return BytesUtil.toDebugString(this, 1024);
+        return BytesUtil.toString(this);
     }
 
     @Override

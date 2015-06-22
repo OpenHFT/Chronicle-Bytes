@@ -16,11 +16,10 @@
 
 package net.openhft.chronicle.bytes;
 
-public class PointerBytesStore extends NativeBytesStore {
+public class PointerBytesStore extends NativeBytesStore<Void> {
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false);
     }
-
 
     public void set(long address, long capacity) {
         this.address = address;
@@ -28,7 +27,7 @@ public class PointerBytesStore extends NativeBytesStore {
     }
 
     @Override
-    public Bytes<Void> bytes() {
+    public Bytes<Void> bytesForWrite() {
         return new VanillaBytes<>(this);
     }
 

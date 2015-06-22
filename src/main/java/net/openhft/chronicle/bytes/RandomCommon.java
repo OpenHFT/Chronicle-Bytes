@@ -74,6 +74,13 @@ interface RandomCommon {
 
     long accessOffset(long randomOffset);
 
-    // get a streaming bytes.
-    Bytes bytes();
+    /**
+     * @return the streaming bytes for reading.
+     */
+    Bytes bytesForRead();
+
+    /**
+     * @return the streaming bytes for writing.
+     */
+    Bytes bytesForWrite();
 }

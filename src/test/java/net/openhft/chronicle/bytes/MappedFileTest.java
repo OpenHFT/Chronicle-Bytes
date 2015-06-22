@@ -40,9 +40,7 @@ public class MappedFileTest {
         MappedBytesStore bs = mf.acquireByteStore(chunkSize + (1 << 10));
         assertEquals(chunkSize, bs.start());
         assertEquals(chunkSize * 2, bs.capacity());
-        Bytes bytes = bs.bytes();
-        // read everything which is there.
-        bytes.readLimit(bytes.capacity());
+        Bytes bytes = bs.bytesForRead();
 
         assertNotNull(bytes.toString()); // show it doesn't blow up.
         assertEquals(chunkSize, bytes.start());

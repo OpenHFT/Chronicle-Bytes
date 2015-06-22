@@ -113,15 +113,8 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public Bytes<Underlying> bytes() {
+    public Bytes<Underlying> bytesForWrite() {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
-    }
-
-    @Override
-    public Bytes bytes(UnderflowMode underflowMode) {
-        return underflowMode == UnderflowMode.BOUNDED
-                ? new NativeBytes<>(this)
-                : BytesStore.super.bytes(underflowMode);
     }
 
     @Override
@@ -319,7 +312,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public String toString() {
-        return BytesUtil.toDebugString(this, 1024);
+        return BytesUtil.toString(this);
     }
 
     @Override

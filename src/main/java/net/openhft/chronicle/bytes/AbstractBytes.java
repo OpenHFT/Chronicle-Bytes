@@ -24,16 +24,18 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
-    BytesStore<Bytes<Underlying>, Underlying> bytesStore = NoBytesStore.noBytesStore();
+    protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private long readPosition;
     private long writePosition;
     private long writeLimit;
 
-    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit) {
         this.bytesStore = bytesStore;
         bytesStore.reserve();
-        clear();
+        readPosition = bytesStore.readPosition();
+        this.writePosition = writePosition;
+        this.writeLimit = writeLimit;
     }
 
     public Bytes<Underlying> clear() {

@@ -25,11 +25,4 @@ interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
     S writeSkip(long bytesToSkip);
 
-    default String toDebugString(long maxLength) {
-        return BytesUtil.toDebugString((RandomDataInput & StreamingCommon) this, maxLength);
-    }
-
-    default String toDebugString() {
-        return toDebugString(128);
-    }
 }

@@ -28,7 +28,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     NativeBytes(BytesStore store) {
-        super(store, UnderflowMode.PADDED);
+        super(store, UnderflowMode.PADDED, MAX_CAPACITY);
     }
 
     public static NativeBytes<Void> nativeBytes() {
@@ -48,7 +48,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     @Override
     public long capacity() {
-        return 1L << 40;
+        return MAX_CAPACITY;
     }
 
     @Override
@@ -127,7 +127,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         writeSkip(length);
     }
     public void read8Bit(char[] chars, int length) {
-        long position = writePosition();
+        long position = readPosition();
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.read8bit(position, chars, length);
     }

@@ -50,13 +50,13 @@ public class ByteStoreTest {
     public void beforeTest() {
         byteBuffer = ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder());
         bytesStore = BytesStore.wrap(byteBuffer);
-        bytes = bytesStore.bytes();
+        bytes = bytesStore.bytesForWrite();
         bytes.clear();
     }
 
     @Test
     public void testCAS() {
-        Bytes bytes = BytesStore.wrap(ByteBuffer.allocate(100)).bytes();
+        BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
         assertEquals(1L, bytes.readLong(0));
     }
@@ -454,7 +454,7 @@ public class ByteStoreTest {
     @Test
     @Ignore
     public void testStream() throws IOException {
-        bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytes();
+        bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytesForWrite();
         GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
         out.write("Hello world\n".getBytes());
         out.close();
@@ -517,26 +517,26 @@ public class ByteStoreTest {
 
     @Test
     public void testToString() {
-        Bytes bytes = NativeBytesStore.nativeStore(32).bytes();
-        assertEquals("[pos: 0, rlim: 0, wlim: 1TiB, cap: 1TiB ] ", bytes.toDebugString());
+        Bytes bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
+        assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ", bytes.toDebugString());
         bytes.writeUnsignedByte(1);
-        assertEquals("[pos: 0, rlim: 1, wlim: 1TiB, cap: 1TiB ] ⒈", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ⒈", bytes.toDebugString());
         bytes.writeUnsignedByte(2);
         bytes.readByte();
-        assertEquals("[pos: 1, rlim: 2, wlim: 1TiB, cap: 1TiB ] ⒈‖⒉", bytes.toDebugString());
+        assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉", bytes.toDebugString());
         bytes.writeUnsignedByte(3);
-        assertEquals("[pos: 1, rlim: 3, wlim: 1TiB, cap: 1TiB ] ⒈‖⒉⒊", bytes.toDebugString());
+        assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉⒊", bytes.toDebugString());
         bytes.writeUnsignedByte(4);
         bytes.readByte();
-        assertEquals("[pos: 2, rlim: 4, wlim: 1TiB, cap: 1TiB ] ⒈⒉‖⒊⒋", bytes.toDebugString());
+        assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋", bytes.toDebugString());
         bytes.writeUnsignedByte(5);
-        assertEquals("[pos: 2, rlim: 5, wlim: 1TiB, cap: 1TiB ] ⒈⒉‖⒊⒋⒌", bytes.toDebugString());
+        assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋⒌", bytes.toDebugString());
         bytes.writeUnsignedByte(6);
         bytes.readByte();
-        assertEquals("[pos: 3, rlim: 6, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊‖⒋⒌⒍", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍", bytes.toDebugString());
         bytes.writeUnsignedByte(7);
-        assertEquals("[pos: 3, rlim: 7, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊‖⒋⒌⒍⒎", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎", bytes.toDebugString());
         bytes.writeUnsignedByte(8);
-        assertEquals("[pos: 3, rlim: 8, wlim: 1TiB, cap: 1TiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏", bytes.toDebugString());
     }
 }

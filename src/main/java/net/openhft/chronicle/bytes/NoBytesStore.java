@@ -182,4 +182,9 @@ public enum NoBytesStore implements BytesStore {
     public long accessOffset(long randomOffset) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public Bytes bytesForWrite() {
+        throw new UnsupportedOperationException("todo");
+    }
 }

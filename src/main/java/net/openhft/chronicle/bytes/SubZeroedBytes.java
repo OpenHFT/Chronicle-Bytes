@@ -23,7 +23,7 @@ public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
     private final long capacity;
 
     public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long capacity) {
-        super(bytesStore, underflowMode);
+        super(bytesStore, underflowMode, capacity);
         this.start = start;
         this.capacity = capacity;
         clear();

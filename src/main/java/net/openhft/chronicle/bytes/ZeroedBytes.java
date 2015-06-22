@@ -19,15 +19,15 @@ package net.openhft.chronicle.bytes;
 public class ZeroedBytes<Underlying> extends VanillaBytes<Underlying> {
     private final UnderflowMode underflowMode;
 
-    public ZeroedBytes(BytesStore store, UnderflowMode underflowMode) {
-        super(store);
+    public ZeroedBytes(BytesStore store, UnderflowMode underflowMode, long writeLimit) {
+        super(store, store.writePosition(), writeLimit);
         this.underflowMode = underflowMode;
     }
 
     @Override
-    public Bytes<Underlying> bytes() {
+    public Bytes<Underlying> bytesForRead() {
         return isClear()
-                ? new ZeroedBytes(bytesStore, underflowMode)
+                ? new ZeroedBytes(bytesStore, underflowMode, writeLimit())
                 : new SubZeroedBytes<>(bytesStore, underflowMode, readPosition(), readLimit());
     }
 

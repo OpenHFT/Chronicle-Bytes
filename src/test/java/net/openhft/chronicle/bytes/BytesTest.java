@@ -98,7 +98,7 @@ public class BytesTest {
     @Test
     public void testName() throws Exception {
         NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
-        Bytes<Void> bytes = nativeStore.bytes();
+        Bytes<Void> bytes = nativeStore.bytesForWrite();
 
         long expected = 12345L;
         int offset = 5;
@@ -124,14 +124,14 @@ public class BytesTest {
 
     @Test
     public void testCopy() {
-        Bytes<ByteBuffer> bbb = Bytes.wrap(ByteBuffer.allocateDirect(1024));
+        Bytes<ByteBuffer> bbb = Bytes.wrapForWrite(ByteBuffer.allocateDirect(1024));
         for (int i = 'a'; i <= 'z'; i++)
             bbb.writeUnsignedByte(i);
         bbb.readPosition(4);
         bbb.readLimit(16);
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
         bbb.writeUnsignedByte(10, '0');
-        assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toString());
+        assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
     }
 
     @Test
