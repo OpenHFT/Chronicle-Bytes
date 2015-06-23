@@ -73,11 +73,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.start();
     }
 
-    public Bytes<Underlying> zeroOut(long start, long end) {
-        bytesStore.zeroOut(start, end);
-        return this;
-    }
-
     @Override
     public long readPosition() {
         return readPosition;

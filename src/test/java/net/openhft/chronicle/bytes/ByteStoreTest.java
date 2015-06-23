@@ -85,6 +85,14 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testCompareAndSetInt() throws Exception {
+        Assert.assertTrue(bytes.compareAndSwapInt(0, 0, 1));
+        Assert.assertFalse(bytes.compareAndSwapInt(0, 0, 1));
+        Assert.assertTrue(bytes.compareAndSwapInt(8, 0, 1));
+        Assert.assertTrue(bytes.compareAndSwapInt(0, 1, 2));
+    }
+
+    @Test
     public void testCompareAndSetLong() throws Exception {
         Assert.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
         Assert.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
