@@ -31,6 +31,7 @@ public class MappedFileTest {
 
     @Test
     public void testReferenceCounts() throws IOException {
+        new File(OS.TARGET).mkdir();
         File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
         tmp.deleteOnExit();
         int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
