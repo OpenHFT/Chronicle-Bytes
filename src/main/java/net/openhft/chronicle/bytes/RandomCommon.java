@@ -72,9 +72,6 @@ interface RandomCommon {
         return ByteOrder.nativeOrder();
     }
 
-    // get a streaming bytes.
-    Bytes bytes();
-
     /**
      * @return the streaming bytes for reading.
      */

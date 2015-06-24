@@ -62,11 +62,6 @@ public final class ZeroRandomDataInput implements RandomDataInput {
     }
 
     @Override
-    public long realCapacity() {
-        return Long.MAX_VALUE;
-    }
-
-    @Override
     public long capacity() {
         return Long.MAX_VALUE;
     }
@@ -77,7 +72,12 @@ public final class ZeroRandomDataInput implements RandomDataInput {
     }
 
     @Override
-    public Bytes bytes() {
+    public Bytes bytesForRead() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public Bytes bytesForWrite() {
         throw new UnsupportedOperationException();
     }
 }
