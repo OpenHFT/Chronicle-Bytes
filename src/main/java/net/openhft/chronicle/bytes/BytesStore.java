@@ -112,7 +112,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     default B zeroOut(long start, long end) {
-        if (start < start() || end > capacity() || end > start)
+        if (end <= start)
+            return (B) this;
+        if (start < start() || end > capacity())
             throw new IllegalArgumentException();
         long i = start;
         for (; i < end - 7; i++)
