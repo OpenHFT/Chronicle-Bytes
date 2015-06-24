@@ -26,7 +26,7 @@ public class ByteStringParserTest   {
         Bytes b = Bytes.elasticByteBuffer();
         long expected = 123L;
         b.append(expected);
-        b.flip();
+
         Assert.assertEquals(expected,BytesUtil.parseLong(b));
     }
 
@@ -35,7 +35,7 @@ public class ByteStringParserTest   {
         Bytes b = Bytes.elasticByteBuffer();
         int expected = 123;
         b.append(expected);
-        b.flip();
+
         Assert.assertEquals(expected,BytesUtil.parseLong(b));
     }
 
@@ -44,7 +44,7 @@ public class ByteStringParserTest   {
         Bytes b = Bytes.elasticByteBuffer();
         double expected = 123.1234;
         b.append(expected);
-        b.flip();
+
         Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
     }
 
@@ -53,7 +53,7 @@ public class ByteStringParserTest   {
         Bytes b = Bytes.elasticByteBuffer();
         float expected = 123;
         b.append(expected);
-        b.flip();
+
         Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
     }
 
@@ -62,7 +62,7 @@ public class ByteStringParserTest   {
         Bytes b = Bytes.elasticByteBuffer();
         short expected = 123;
         b.append(expected);
-        b.flip();
+
         Assert.assertEquals(expected,BytesUtil.parseLong(b));
     }
 }

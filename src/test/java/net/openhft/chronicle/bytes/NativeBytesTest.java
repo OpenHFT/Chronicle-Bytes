@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Created by daniel on 17/04/15.
@@ -27,19 +28,27 @@ public class NativeBytesTest {
 
     @Test
     public void testWriteBytesWhereResizeNeeded0() {
-        Bytes bytes0 = NativeBytes.nativeBytes();
+        Bytes b = NativeBytes.nativeBytes();
+        assertEquals(b.start(), b.readLimit());
+        assertEquals(b.capacity(), b.writeLimit());
+        assertEquals(0, b.realCapacity());
+        assertTrue(b.readLimit() < b.writeLimit());
+
         Bytes<byte[]> wrap0 = Bytes.wrap("Hello World, Have a great day!".getBytes());
-        bytes0.write(wrap0);
-        bytes0.flip();
-        assertEquals("Hello World, Have a great day!", bytes0.toString());
+        b.write(wrap0);
+        assertEquals("Hello World, Have a great day!", b.toString());
     }
 
     @Test
     public void testWriteBytesWhereResizeNeeded() {
-        Bytes bytes1 = NativeBytes.nativeBytes(1);
+        Bytes b = NativeBytes.nativeBytes(1);
+        assertEquals(b.start(), b.readLimit());
+        assertEquals(b.capacity(), b.writeLimit());
+        assertEquals(1, b.realCapacity());
+        assertTrue(b.readLimit() < b.writeLimit());
+
         Bytes<byte[]> wrap1 = Bytes.wrap("Hello World, Have a great day!".getBytes());
-        bytes1.write(wrap1);
-        bytes1.flip();
-        assertEquals("Hello World, Have a great day!", bytes1.toString());
+        b.write(wrap1);
+        assertEquals("Hello World, Have a great day!", b.toString());
     }
 }

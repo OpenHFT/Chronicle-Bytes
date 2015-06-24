@@ -104,9 +104,16 @@ public class MappedFile implements ReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
 
-    public Bytes acquireBytes(long position) throws IOException {
+    public Bytes acquireBytesForRead(long position) throws IOException {
         MappedBytesStore mbs = acquireByteStore(position);
-        Bytes bytes = mbs.bytes();
+        Bytes bytes = mbs.bytesForRead();
+        mbs.release();
+        return bytes;
+    }
+
+    public Bytes acquireBytesForWrite(long position) throws IOException {
+        MappedBytesStore mbs = acquireByteStore(position);
+        Bytes bytes = mbs.bytesForWrite();
         mbs.release();
         return bytes;
     }

@@ -30,7 +30,7 @@ public class MappedBytesStore extends NativeBytesStore {
     }
 
     @Override
-    public Bytes<Void> bytes() {
+    public Bytes<Void> bytesForWrite() {
         return new VanillaBytes<>(this);
     }
 

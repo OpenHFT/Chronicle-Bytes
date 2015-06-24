@@ -96,13 +96,13 @@ public class MappedMemoryTest {
 
                 MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
                 long startTime = System.nanoTime();
-                Bytes bytes = mappedFile.acquireBytes(1);
+                Bytes bytes = mappedFile.acquireBytesForWrite(1);
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
                     bytes.writeLong(i);
                 }
                 bytes.release();
 
-                bytes = mappedFile.acquireBytes(BLOCK_SIZE / 2 + 1);
+                bytes = mappedFile.acquireBytesForWrite(BLOCK_SIZE / 2 + 1);
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
                     bytes.writeLong(i);
                 }
@@ -130,7 +130,6 @@ public class MappedMemoryTest {
             String text = "hello this is some very long text";
             bytes.writeUTFΔ(text);
 
-            bytes.flip();
             bytes.readUTFΔ();
             assertEquals(text, bytes.readUTFΔ());
             bytes.release();

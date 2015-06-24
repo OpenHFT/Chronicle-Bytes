@@ -110,15 +110,8 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public Bytes<Underlying> bytes() {
+    public Bytes<Underlying> bytesForWrite() {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
-    }
-
-    @Override
-    public Bytes bytes(UnderflowMode underflowMode) {
-        return underflowMode == UnderflowMode.BOUNDED
-                ? new NativeBytes<>(this)
-                : BytesStore.super.bytes(underflowMode);
     }
 
     @Override
@@ -138,8 +131,8 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
-        if (start < 0 || end > limit())
-            throw new IllegalArgumentException("start: " + start + ", end: " + end + ", limit=" + limit());
+        if (start < writePosition() || end > writeLimit())
+            throw new IllegalArgumentException("position: " + writePosition() + ", start: " + start + ", end: " + end + ", limit: " + writeLimit());
         if (start >= end)
             return this;
 
@@ -312,7 +305,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public String toString() {
-        return BytesUtil.toDebugString(this, 1024);
+        return BytesUtil.toString(this);
     }
 
     @Override

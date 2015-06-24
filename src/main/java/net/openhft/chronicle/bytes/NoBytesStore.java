@@ -178,4 +178,8 @@ public enum NoBytesStore implements BytesStore {
         return NO_PAGE;
     }
 
+    @Override
+    public Bytes bytesForWrite() {
+        throw new UnsupportedOperationException("todo");
+    }
 }

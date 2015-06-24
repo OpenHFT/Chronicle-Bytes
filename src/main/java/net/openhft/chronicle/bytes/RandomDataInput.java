@@ -121,4 +121,9 @@ public interface RandomDataInput extends RandomCommon {
                 return false;
         return true;
     }
+
+    default void copyTo(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++)
+            bytes[i] = readByte(start() + i);
+    }
 }

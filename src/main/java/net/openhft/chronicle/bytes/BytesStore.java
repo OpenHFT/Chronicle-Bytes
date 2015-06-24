@@ -27,7 +27,7 @@ import static java.lang.Math.min;
  * Only offset access within the capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
-        extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted {
+        extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
     static BytesStore wrap(byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
@@ -51,20 +51,30 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
 
-    default Bytes<Underlying> bytes() {
-        return bytes(UnderflowMode.PADDED);
+    default Bytes<Underlying> bytesForRead() {
+        return bytesForWrite()
+                // .writePosition(writeLimit())
+                .readLimit(writeLimit());
     }
 
-    default Bytes bytes(UnderflowMode underflowMode) {
+    default Bytes<Underlying> bytesForRead(UnderflowMode underflowMode) {
         switch (underflowMode) {
             case BOUNDED:
-                return new VanillaBytes(this);
+                return new VanillaBytes<Underlying>(this).readLimit(writeLimit());
             case ZERO_EXTEND:
             case PADDED:
-                return new ZeroedBytes(this, underflowMode);
+                return new ZeroedBytes<Underlying>(this, underflowMode, writeLimit()).readLimit(writeLimit());
             default:
                 throw new UnsupportedOperationException("Unknown known mode " + underflowMode);
         }
+    }
+
+    default Bytes<Underlying> bytesForWrite() {
+        return new ZeroedBytes<>(this, UnderflowMode.PADDED, writeLimit());
+    }
+
+    default boolean isClear() {
+        return true;
     }
 
     /**
@@ -78,14 +88,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return The maximum limit you can set.
      */
     long capacity();
-
-    default long position() {
-        return 0L;
-    }
-
-    default long remaining() {
-        return realCapacity();
-    }
 
     Underlying underlyingObject();
 
@@ -134,5 +136,27 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     default long addAndGetLong(long offset, long adding) {
         return BytesUtil.getAndAddLong(this, offset, adding) + adding;
+    }
+
+    @Override
+    default int length() {
+        return (int) Math.min(Integer.MAX_VALUE, readRemaining());
+    }
+
+    /**
+     * Assume ISO-8859-1 encoding, subclasses can overrride this.
+     */
+    @Override
+    default char charAt(int index) {
+        return (char) readUnsignedByte(index);
+    }
+
+    @Override
+    default CharSequence subSequence(int start, int end) {
+        throw new UnsupportedOperationException("todo");
+    }
+
+    default String toDebugString() {
+        return BytesUtil.toDebugString(this, Integer.MAX_VALUE);
     }
 }

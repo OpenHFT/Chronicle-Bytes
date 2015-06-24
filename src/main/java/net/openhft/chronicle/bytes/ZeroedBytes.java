@@ -19,17 +19,16 @@ package net.openhft.chronicle.bytes;
 public class ZeroedBytes<Underlying> extends VanillaBytes<Underlying> {
     private final UnderflowMode underflowMode;
 
-    public ZeroedBytes(BytesStore store, UnderflowMode underflowMode) {
-        super(store);
+    public ZeroedBytes(BytesStore store, UnderflowMode underflowMode, long writeLimit) {
+        super(store, store.writePosition(), writeLimit);
         this.underflowMode = underflowMode;
     }
 
     @Override
-    public Bytes<Underlying> bytes() {
-        boolean isClear = start() == position() && limit() == capacity();
-        return isClear
-                ? new ZeroedBytes(bytesStore, underflowMode)
-                : new SubZeroedBytes<>(bytesStore, underflowMode, position(), limit());
+    public Bytes<Underlying> bytesForRead() {
+        return isClear()
+                ? new ZeroedBytes(bytesStore, underflowMode, writeLimit())
+                : new SubZeroedBytes<>(bytesStore, underflowMode, readPosition(), readLimit());
     }
 
     @Override
@@ -38,7 +37,7 @@ public class ZeroedBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     private boolean positionOk(int needs) {
-        return underflowMode.isRemainingOk(remaining(), needs);
+        return underflowMode.isRemainingOk(readRemaining(), needs);
     }
 
     @Override

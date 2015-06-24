@@ -28,7 +28,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
 
     NativeBytes(BytesStore store) {
-        super(store, UnderflowMode.PADDED);
+        super(store, UnderflowMode.PADDED, MAX_CAPACITY);
     }
 
     public static NativeBytes<Void> nativeBytes() {
@@ -40,16 +40,15 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     }
 
     public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
-        long remaining = bytes.remaining();
+        long remaining = bytes.readRemaining();
         NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
         bytes2.write(bytes, 0, remaining);
-        bytes2.flip();
         return bytes2;
     }
 
     @Override
     public long capacity() {
-        return 1L << 40;
+        return MAX_CAPACITY;
     }
 
     @Override
@@ -70,6 +69,13 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
             throw new BufferOverflowException();
     }
 
+    public int readVolatileInt(long offset) {
+        return bytesStore.readVolatileInt(offset);
+    }
+
+    public long readVolatileLong(long offset) {
+        return bytesStore.readVolatileLong(offset);
+    }
     @Override
     public boolean isElastic() {
         return true;
@@ -96,10 +102,10 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     @Override
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
         if (bytes instanceof NativeBytes) {
-            long len = Math.min(remaining(), Math.min(bytes.remaining(), length));
-            writeCheckOffset(position(), len);
-            OS.memory().copyMemory(bytes.address() + offset, address() + position(), len);
-            skip(len);
+            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+            writeCheckOffset(writePosition(), len);
+            OS.memory().copyMemory(bytes.address() + offset, address() + writePosition(), len);
+            writeSkip(len);
 
         } else {
             long i = 0;
@@ -114,14 +120,14 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
     public void write(String str, int offset, int length) {
         // todo optimise
         char[] chars = str.toCharArray();
-        long position = position();
+        long position = writePosition();
         ensureCapacity(position + length);
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.write8bit(position, chars, offset, length);
-        skip(length);
+        writeSkip(length);
     }
     public void read8Bit(char[] chars, int length) {
-        long position = position();
+        long position = readPosition();
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.read8bit(position, chars, length);
     }

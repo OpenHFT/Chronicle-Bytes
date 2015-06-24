@@ -30,13 +30,13 @@ public class NativeBytesStoreTest {
     @Test
     public void testElasticByteBuffer() {
         Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
-        assertEquals(1L << 40, bbb.capacity());
+        assertEquals(Bytes.MAX_CAPACITY, bbb.capacity());
         assertEquals(OS.pageSize(), bbb.realCapacity());
         ByteBuffer bb = bbb.underlyingObject();
         assertNotNull(bb);
 
         for (int i = 0; i < 16; i++) {
-            bbb.skip(1000);
+            bbb.writeSkip(1000);
             bbb.writeLong(12345);
         }
         assertEquals(OS.pageSize() * 4, bbb.realCapacity());
