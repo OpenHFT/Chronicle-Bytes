@@ -63,8 +63,6 @@ interface RandomCommon {
         return ByteOrder.nativeOrder();
     }
 
-    long accessOffset(long randomOffset);
-
     // get a streaming bytes.
     Bytes bytes();
 }

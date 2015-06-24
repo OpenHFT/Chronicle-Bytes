@@ -16,10 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.Memory;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.*;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
@@ -46,7 +43,7 @@ public class NativeBytesStore<Underlying>
         cleaner = ((DirectBuffer) bb).cleaner();
     }
 
-    NativeBytesStore(
+    public NativeBytesStore(
             long address, long maximumLimit, Runnable deallocator, boolean elastic) {
         this.address = address;
         this.maximumLimit = maximumLimit;
@@ -291,7 +288,8 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public NativeBytesStore<Underlying> write(
-            long offsetInRDO, Bytes bytes, long offset, long length) {
+            long offsetInRDO, RandomDataInput bytes, long offset, long length) {
+        // TODO optimize, call unsafe.copyMemory when possible, copy 4, 2 bytes at once
         long i = 0;
         for (; i < length - 7; i += 8) {
             writeLong(offsetInRDO + i, bytes.readLong(offset + i));
@@ -305,11 +303,6 @@ public class NativeBytesStore<Underlying>
     @Override
     public long address() {
         return address;
-    }
-
-    @Override
-    public long accessOffset(long randomOffset) {
-        return address + translate(randomOffset);
     }
 
     private void performRelease() {

@@ -124,11 +124,6 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
-    public long accessOffset(long randomOffset) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public void reserve() throws IllegalStateException {
     }
 
@@ -196,7 +191,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
-    public B write(long offsetInRDO, Bytes bytes, long offset, long length) {
+    public B write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();
     }
 }

@@ -286,7 +286,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    public Bytes<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+    public Bytes<Underlying> write(long offsetInRDO,
+                                   RandomDataInput bytes, long offset, long length) {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -443,11 +444,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public long address() {
         return bytesStore.address();
-    }
-
-    @Override
-    public long accessOffset(long randomOffset) {
-        return bytesStore.accessOffset(randomOffset);
     }
 
     @Override

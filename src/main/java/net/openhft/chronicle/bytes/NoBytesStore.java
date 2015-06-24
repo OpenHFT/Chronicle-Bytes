@@ -94,7 +94,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public RandomDataOutput write(long offsetInRDO, Bytes bytes, long offset, long length) {
+    public RandomDataOutput write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();
     }
 
@@ -178,8 +178,4 @@ public enum NoBytesStore implements BytesStore {
         return NO_PAGE;
     }
 
-    @Override
-    public long accessOffset(long randomOffset) {
-        throw new UnsupportedOperationException();
-    }
 }

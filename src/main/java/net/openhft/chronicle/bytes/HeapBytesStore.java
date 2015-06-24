@@ -214,18 +214,14 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public HeapBytesStore<Underlying> write(long offsetInRDO, Bytes bytes, long offset, long length) {
+    public HeapBytesStore<Underlying> write(long offsetInRDO,
+                                            RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     public long address() throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public long accessOffset(long randomOffset) {
-        return dataOffset + randomOffset;
     }
 
     @Override
