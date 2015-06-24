@@ -108,11 +108,7 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
             writeSkip(len);
 
         } else {
-            long i = 0;
-            for (; i < length - 7; i += 8)
-                writeLong(bytes.readLong(offset + i));
-            for (; i < length; i++)
-                writeByte(bytes.readByte(offset + i));
+            super.write(bytes, offset, length);
         }
         return this;
     }

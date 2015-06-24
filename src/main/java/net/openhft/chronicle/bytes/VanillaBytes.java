@@ -85,7 +85,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public Bytes<Underlying> write(BytesStore buffer, long offset, long length) {
-        throw new UnsupportedOperationException("todo");
+    public Bytes<Underlying> write(BytesStore bs, long offset, long length) {
+        long i = 0;
+        for (; i < length - 7; i += 8)
+            writeLong(bs.readLong(offset + i));
+        for (; i < length; i++)
+            writeByte(bs.readByte(offset + i));
+        return this;
     }
 }
