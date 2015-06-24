@@ -71,6 +71,11 @@ public enum BytesUtil {
         return true;
     }
 
+    public static boolean bytesEqual(
+            RandomDataInput a, long aOffset, RandomDataInput b, long bOffset, long len) {
+        return a.bytesEqual(aOffset, b, bOffset, len);
+    }
+
     public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;

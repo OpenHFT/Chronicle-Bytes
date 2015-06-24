@@ -69,7 +69,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
-    R write(long offsetInRDO, Bytes bytes, long offset, long length);
+    R write(long offsetInRDO, RandomDataInput bytes, long offset, long length);
 
     R zeroOut(long start, long end) ;
 
