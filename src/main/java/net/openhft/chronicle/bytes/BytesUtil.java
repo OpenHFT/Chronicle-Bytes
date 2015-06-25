@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
@@ -161,6 +162,7 @@ public enum BytesUtil {
         }
     }
 
+    @ForceInline
     public static void writeUTF(StreamingDataOutput bytes, CharSequence str) {
         if (str == null) {
             bytes.writeStopBit(-1);
@@ -372,6 +374,7 @@ public enum BytesUtil {
         }
     }
 
+    @ForceInline
     public static long readStopBit(StreamingDataInput in) {
         long l;
         if ((l = in.readByte()) >= 0)
@@ -708,18 +711,21 @@ public enum BytesUtil {
         return negative ? -d : d;
     }
 
+    @ForceInline
     public static String readUTFΔ(StreamingDataInput in) {
         StringBuilder sb = SBP.acquireStringBuilder();
         return in.readUTFΔ(sb) ? SI.intern(sb) : null;
     }
 
     @NotNull
+    @ForceInline
     public static String parseUTF(StreamingDataInput bytes, @NotNull StopCharTester tester) {
         StringBuilder utfReader = SBP.acquireStringBuilder();
         parseUTF(bytes, utfReader, tester);
         return SI.intern(utfReader);
     }
 
+    @ForceInline
     public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
         setLength(builder, 0);
         try {
@@ -801,6 +807,7 @@ public enum BytesUtil {
         }
     }
 
+    @ForceInline
     public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) {
         setLength(builder, 0);
         try {
@@ -882,11 +889,13 @@ public enum BytesUtil {
         }
     }
 
+    @ForceInline
     public static void parse8bit(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
         read8bit0(bytes, builder, tester);
     }
 
+    @ForceInline
     public static void parse8bit(StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
         builder.readPosition(0);
 
@@ -984,6 +993,7 @@ public enum BytesUtil {
         return true;
     }
 
+    @ForceInline
     public static long parseLong(StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
@@ -1145,6 +1155,7 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
+    @ForceInline
     public static void setLength(@NotNull Appendable sb, int newLength) {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);

@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.ForceInline;
 
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
@@ -39,24 +40,28 @@ public interface RandomDataInput extends RandomCommon {
         return charToString;
     }
 
+    @ForceInline
     default boolean readBoolean(long offset) {
         return readByte(offset) != 0;
     }
 
     byte readByte(long offset);
 
+    @ForceInline
     default int readUnsignedByte(long offset) {
         return readByte(offset) & 0xFF;
     }
 
     short readShort(long offset);
 
+    @ForceInline
     default int readUnsignedShort(long offset) {
         return readShort(offset) & 0xFFFF;
     }
 
     int readInt(long offset);
 
+    @ForceInline
     default long readUnsignedInt(long offset) {
         return readInt(offset) & 0xFFFFFFFFL;
     }

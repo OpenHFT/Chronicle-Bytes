@@ -16,7 +16,11 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
@@ -115,21 +119,25 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public long realCapacity() {
         return maximumLimit;
     }
 
     @Override
+    @ForceInline
     public long capacity() {
         return maximumLimit;
     }
 
     @Override
+    @ForceInline
     public Underlying underlyingObject() {
         return underlyingObject;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
         if (start < writePosition() || end > writeLimit())
             throw new IllegalArgumentException("position: " + writePosition() + ", start: " + start + ", end: " + end + ", limit: " + writeLimit());
@@ -141,11 +149,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public boolean compareAndSwapInt(long offset, int expected, int value) {
         return MEMORY.compareAndSwapInt(address + translate(offset), expected, value);
     }
 
     @Override
+    @ForceInline
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
     }
@@ -158,109 +168,129 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public void reserve() {
         refCount.reserve();
     }
 
     @Override
+    @ForceInline
     public void release() {
         refCount.release();
     }
 
     @Override
+    @ForceInline
     public long refCount() {
         return refCount.get();
     }
 
     @Override
+    @ForceInline
     public byte readByte(long offset) {
         return MEMORY.readByte(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public short readShort(long offset) {
         return MEMORY.readShort(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public int readInt(long offset) {
         return MEMORY.readInt(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public long readLong(long offset) {
         return MEMORY.readLong(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public float readFloat(long offset) {
         return MEMORY.readFloat(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public double readDouble(long offset) {
         return MEMORY.readDouble(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public int readVolatileInt(long offset) {
         return MEMORY.readVolatileInt(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public long readVolatileLong(long offset) {
         return MEMORY.readVolatileLong(address + translate(offset));
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeByte(long offset, byte i8) {
         MEMORY.writeByte(address + translate(offset), i8);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeShort(long offset, short i16) {
         MEMORY.writeShort(address + translate(offset), i16);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeInt(long offset, int i32) {
         MEMORY.writeInt(address + translate(offset), i32);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeOrderedInt(long offset, int i) {
         MEMORY.writeOrderedInt(address + translate(offset), i);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeLong(long offset, long i64) {
         MEMORY.writeLong(address + translate(offset), i64);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
         MEMORY.writeOrderedLong(address + translate(offset), i);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeFloat(long offset, float f) {
         MEMORY.writeFloat(address + translate(offset), f);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> writeDouble(long offset, double d) {
         MEMORY.writeDouble(address + translate(offset), d);
         return this;
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length) {
         MEMORY.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
@@ -268,6 +298,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public void write(
             long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
@@ -280,6 +311,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         // TODO optimize, call unsafe.copyMemory when possible, copy 4, 2 bytes at once
@@ -309,12 +341,14 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    @ForceInline
     public void nativeRead(long position, long address, long size) {
         // TODO add bounds checking.
         OS.memory().copyMemory(address() + position, address, size);
     }
 
     @Override
+    @ForceInline
     public void nativeWrite(long address, long position, long size) {
         // TODO add bounds checking.
         OS.memory().copyMemory(address, address() + position, size);

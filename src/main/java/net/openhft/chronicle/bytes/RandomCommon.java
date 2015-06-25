@@ -16,12 +16,15 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.ForceInline;
+
 import java.nio.ByteOrder;
 
 interface RandomCommon {
     /**
      * @return The smallest position allowed in this buffer.
      */
+    @ForceInline
     default long start() {
         return 0L;
     }
@@ -29,22 +32,27 @@ interface RandomCommon {
     /**
      * @return the highest limit allowed for this buffer.
      */
+    @ForceInline
     default long capacity() {
-        return 1L << 40;
+        return Bytes.MAX_CAPACITY;
     }
 
+    @ForceInline
     default long readPosition() {
         return start();
     }
 
+    @ForceInline
     default long writePosition() {
         return start();
     }
 
+    @ForceInline
     default long readRemaining() {
         return readLimit() - readPosition();
     }
 
+    @ForceInline
     default long writeRemaining() {
         return writeLimit() - writePosition();
     }
@@ -52,10 +60,12 @@ interface RandomCommon {
     /**
      * @return the highest offset or position allowed for this buffer.
      */
+    @ForceInline
     default long readLimit() {
         return capacity();
     }
 
+    @ForceInline
     default long writeLimit() {
         return capacity();
     }

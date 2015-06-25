@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.ForceInline;
+
 public class EscapingStopCharTester implements StopCharTester {
     private final StopCharTester sct;
     private boolean escaped = false;
@@ -25,6 +27,7 @@ public class EscapingStopCharTester implements StopCharTester {
     }
 
     @Override
+    @ForceInline
     public boolean isStopChar(int ch) throws IllegalStateException {
         if (escaped) {
             escaped = false;

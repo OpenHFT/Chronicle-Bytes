@@ -16,19 +16,25 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.ForceInline;
+
 interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
+    @ForceInline
     default String parseUTF(StopCharTester stopCharTester) {
         return BytesUtil.parseUTF(this, stopCharTester);
     }
 
+    @ForceInline
     default void parseUTF(Appendable sb, StopCharTester stopCharTester) {
         BytesUtil.parseUTF(this, sb, stopCharTester);
     }
 
+    @ForceInline
     default void parseUTF(Appendable sb, StopCharsTester stopCharsTester) {
         BytesUtil.parseUTF(this, sb, stopCharsTester);
     }
 
+    @ForceInline
     default void parse8bit(Appendable sb, StopCharsTester stopCharsTester) {
         if (sb instanceof StringBuilder)
             BytesUtil.parse8bit(this, (StringBuilder) sb, stopCharsTester);
@@ -36,14 +42,17 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
             BytesUtil.parse8bit(this, (Bytes) sb, stopCharsTester);
     }
 
+    @ForceInline
     default long parseLong() {
         return BytesUtil.parseLong(this);
     }
 
+    @ForceInline
     default double parseDouble() {
         return BytesUtil.parseDouble(this);
     }
 
+    @ForceInline
     default boolean skipTo(StopCharTester tester) {
         return BytesUtil.skipTo(this, tester);
     }
