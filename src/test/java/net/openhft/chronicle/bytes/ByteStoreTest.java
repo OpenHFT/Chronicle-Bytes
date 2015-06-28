@@ -55,6 +55,20 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testReadIncompleteLong() {
+        bytes.writeLong(0x0102030405060708L);
+        assertEquals(0x0102030405060708L, bytes.readIncompleteLong(0));
+        bytes.clear();
+
+        long l = 0;
+        for (int i = 1; i <= 8; i++) {
+            bytes.writeUnsignedByte(i);
+            l |= (long) i << (i * 8 - 8);
+            assertEquals(l, bytes.readIncompleteLong(0));
+        }
+    }
+
+    @Test
     public void testCAS() {
         BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);

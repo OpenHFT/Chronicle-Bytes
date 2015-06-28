@@ -14,8 +14,12 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.util;
 
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -25,9 +29,6 @@ import net.openhft.chronicle.core.util.StringUtils;
  */
 public class UTF8StringInterner {
     private static final StringBuilderPool SBP = new StringBuilderPool();
-
-    private static final long K0 = 0xc3a5c85c97cb3127L;
-    private static final long K_MUL = 0x9ddfea08eb382d69L;
 
     private final String[] interner;
     private final int mask;
@@ -39,25 +40,13 @@ public class UTF8StringInterner {
     }
 
     public String intern(Bytes cs) {
-        int h = (int) ((hash(cs) >> 16) & mask);
+        long hash = BytesStoreHash.hash(cs);
+        int h = (int) (hash ^ (hash >> 32)) & mask;
         String s = interner[h];
         if (StringUtils.isEqual(s, cs))
             return s;
         StringBuilder sb = SBP.acquireStringBuilder();
         BytesUtil.parseUTF(cs, sb, StopCharTesters.ALL);
         return interner[h] = sb.toString();
-    }
-
-    public static long hash(Bytes bs) {
-        long h = 0;
-        int i = 0, len = Maths.toInt32(bs.readRemaining());
-        long start = bs.readPosition();
-        for (; i < len - 7; i += 8)
-            h = h * K0 + bs.readLong(start + i);
-        long l = 0;
-        for (; i < len; i++)
-            l = (l << 8) + bs.readUnsignedByte(start + i);
-        h = h * K0 + l;
-        return h * K_MUL;
     }
 }

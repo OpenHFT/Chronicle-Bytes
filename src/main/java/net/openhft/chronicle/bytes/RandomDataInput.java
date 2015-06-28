@@ -131,4 +131,17 @@ public interface RandomDataInput extends RandomCommon {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = readByte(start() + i);
     }
+
+    default long readIncompleteLong(long offset) {
+        long left = readRemaining() - offset;
+        if (left >= 8)
+            return readLong(offset);
+        if (left == 4)
+            return readInt(offset);
+        long l = 0;
+        for (int i = 0, remaining = (int) left; i < remaining; i++) {
+            l |= (long) readUnsignedByte(offset + i) << (i * 8);
+        }
+        return l;
+    }
 }

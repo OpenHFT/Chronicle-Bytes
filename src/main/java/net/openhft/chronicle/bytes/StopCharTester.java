@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.EscapingStopCharTester;
+
 /**
  * @author peter.lawrey
  */

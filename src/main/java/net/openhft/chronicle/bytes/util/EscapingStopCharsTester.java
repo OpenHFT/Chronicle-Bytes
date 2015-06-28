@@ -14,13 +14,15 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.util;
+
+import net.openhft.chronicle.bytes.StopCharsTester;
 
 public class EscapingStopCharsTester implements StopCharsTester {
     private final StopCharsTester sct;
     private boolean escaped = false;
 
-    EscapingStopCharsTester(StopCharsTester sct) {
+    public EscapingStopCharsTester(StopCharsTester sct) {
         this.sct = sct;
     }
 

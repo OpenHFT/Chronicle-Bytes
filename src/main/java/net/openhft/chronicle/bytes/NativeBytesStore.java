@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    private static final Memory MEMORY = OS.memory();
+    static final Memory MEMORY = OS.memory();
     @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -160,7 +160,7 @@ public class NativeBytesStore<Underlying>
         return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
-    private long translate(long offset) {
+    long translate(long offset) {
         long offset2 = offset - start();
         if (offset2 < 0 || offset2 > capacity())
             throw new IllegalArgumentException("Offset out of bounds " + offset2 + " cap: " + capacity());
@@ -368,6 +368,15 @@ public class NativeBytesStore<Underlying>
             chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
     }
 
+    public long readIncompleteLong(long offset) {
+        int remaining = (int) Math.min(8, readRemaining() - offset);
+        long l = 0;
+        for (int i = 0; i < remaining; i++) {
+            byte b = MEMORY.readByte(address + offset + i);
+            l |= (long) (b & 0xFF) << (i * 8);
+        }
+        return l;
+    }
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);

@@ -34,7 +34,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer).bytesForRead(UnderflowMode.BOUNDED);
+        return BytesStore.wrap(byteBuffer).bytesForRead();
     }
 
     static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
