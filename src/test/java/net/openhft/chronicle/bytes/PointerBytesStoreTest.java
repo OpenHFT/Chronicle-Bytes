@@ -20,7 +20,7 @@ import junit.framework.TestCase;
 
 public class PointerBytesStoreTest extends TestCase {
 
-    public void testWrap() throws Exception {
+    public void testWrap() {
         NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
 
         PointerBytesStore pbs = BytesStore.nativePointer();

@@ -22,7 +22,7 @@ import org.junit.Test;
 public class ByteStringAppenderTest {
 
     @Test
-    public void testAppend() throws Exception {
+    public void testAppend() {
 
         Bytes bytes = Bytes.elasticByteBuffer();
         long expected = 1234;
@@ -32,7 +32,7 @@ public class ByteStringAppenderTest {
     }
 
     @Test
-    public void testAppendWithOffset() throws Exception {
+    public void testAppendWithOffset() {
         Bytes bytes = Bytes.elasticByteBuffer();
         bytes.readLimit(20);
         bytes.writeLimit(20);
@@ -43,7 +43,7 @@ public class ByteStringAppenderTest {
     }
 
     @Test
-    public void testAppendWithOffsetNeg() throws Exception {
+    public void testAppendWithOffsetNeg() {
         Bytes bytes = Bytes.elasticByteBuffer();
         bytes.readLimit(20);
         bytes.writeLimit(20);

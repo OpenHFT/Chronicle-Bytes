@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
 public class NativeBytesHashTest {
 
     @Test
-    public void testApplyAsLong() throws Exception {
+    public void testApplyAsLong() {
         NativeBytes b = NativeBytes.nativeBytes(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
@@ -64,7 +64,7 @@ public class NativeBytesHashTest {
 
     @Test
     @Ignore("Long running, avg score = 6879")
-    public void testRandomness() throws Exception {
+    public void testRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {
@@ -104,7 +104,7 @@ public class NativeBytesHashTest {
 
     @Test
     @Ignore("Long running, avg score = 6823, avg time 0.027 us")
-    public void testSmallRandomness() throws Exception {
+    public void testSmallRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
 //        StringBuilder sb = new StringBuilder();
@@ -149,7 +149,7 @@ public class NativeBytesHashTest {
 
     @Test
     @Ignore("Only run for comparison, avg score = 6843")
-    public void testSecureRandomness() throws Exception {
+    public void testSecureRandomness() {
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {
             Random rand = new SecureRandom();
