@@ -152,8 +152,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> writeLimit(long limit) {
-        if (limit < start()) throw
-                new BufferUnderflowException();
+        if (limit < start())
+            throw                new BufferUnderflowException();
         long capacity = capacity();
         if (limit > capacity) {
             assert false : "cant set limit=" + limit + " > " + "capacity=" + capacity;
