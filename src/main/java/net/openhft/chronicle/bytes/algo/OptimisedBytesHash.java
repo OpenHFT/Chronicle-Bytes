@@ -16,8 +16,8 @@
 
 package net.openhft.chronicle.bytes.algo;
 
-import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -30,14 +30,14 @@ import static net.openhft.chronicle.core.Maths.agitate;
 /**
  * Created by peter on 28/06/15.
  */
-public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
+public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
     INSTANCE;
 
     private static final int TOP_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
     public static final Memory MEMORY = OS.memory();
 
     @Override
-    public long applyAsLong(NativeBytes store) {
+    public long applyAsLong(VanillaBytes store) {
         final int remaining = Maths.toInt32(store.readRemaining());
         if (remaining <= 16) {
             if (remaining == 0) {
@@ -56,7 +56,7 @@ public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
         }
     }
 
-    static long applyAsLong1to7(NativeBytes store, int remaining) {
+    static long applyAsLong1to7(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.address() + store.readPosition();
 
@@ -69,7 +69,7 @@ public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong8(NativeBytes store) {
+    static long applyAsLong8(VanillaBytes store) {
         final NativeBytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.address() + store.readPosition();
 
@@ -89,7 +89,7 @@ public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong9to16(NativeBytes store, int remaining) {
+    static long applyAsLong9to16(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.address() + store.readPosition();
         long h0 = (long) remaining * K0, h1 = 0;
@@ -108,7 +108,7 @@ public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong17to32(NativeBytes store, int remaining) {
+    static long applyAsLong17to32(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.address() + store.readPosition();
         long h0 = (long) remaining * K0, h1 = 0;
@@ -131,7 +131,7 @@ public enum NativeBytesHash implements BytesStoreHash<NativeBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLongAny(NativeBytes store, int remaining) {
+    static long applyAsLongAny(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.address() + store.readPosition();
         long h0 = remaining, h1 = 0;

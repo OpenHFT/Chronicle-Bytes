@@ -122,18 +122,9 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         nbs.write8bit(position, chars, offset, length);
         writeSkip(length);
     }
-    public void read8Bit(char[] chars, int length) {
-        long position = readPosition();
-        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
-        nbs.read8bit(position, chars, length);
-    }
 
     @Override
     public long readIncompleteLong(long offset) {
         return bytesStore.readIncompleteLong(offset);
-    }
-
-    public NativeBytesStore bytesStore() {
-        return (NativeBytesStore) bytesStore;
     }
 }

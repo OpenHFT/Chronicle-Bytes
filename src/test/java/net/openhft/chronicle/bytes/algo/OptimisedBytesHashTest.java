@@ -23,13 +23,13 @@ import org.junit.Test;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import static net.openhft.chronicle.bytes.algo.NativeBytesHash.*;
+import static net.openhft.chronicle.bytes.algo.OptimisedBytesHash.*;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter on 28/06/15.
  */
-public class NativeBytesHashTest {
+public class OptimisedBytesHashTest {
 
     @Test
     public void testApplyAsLong() {
@@ -39,11 +39,11 @@ public class NativeBytesHashTest {
         while (b.readRemaining() > 0) {
             assertEquals("Rem: " + b.readRemaining(),
                     VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                    NativeBytesHash.INSTANCE.applyAsLong(b));
+                    OptimisedBytesHash.INSTANCE.applyAsLong(b));
             b.readSkip(1);
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                NativeBytesHash.INSTANCE.applyAsLong(b));
+                OptimisedBytesHash.INSTANCE.applyAsLong(b));
     }
 
     @Test
@@ -79,7 +79,7 @@ public class NativeBytesHashTest {
                 b.writeLong(i >> 6 << 3, 1L << i);
                 b.readLimit(hashs.length / 8);
                 long start = System.nanoTime();
-                hashs[i] = NativeBytesHash.INSTANCE.applyAsLong(b);
+                hashs[i] = OptimisedBytesHash.INSTANCE.applyAsLong(b);
 
                 time += System.nanoTime() - start;
                 timeCount++;
@@ -118,7 +118,7 @@ public class NativeBytesHashTest {
                 b.append('-');
                 b.append(i);
                 long start = System.nanoTime();
-                hashs[i] = NativeBytesHash.INSTANCE.applyAsLong(b);
+                hashs[i] = OptimisedBytesHash.INSTANCE.applyAsLong(b);
                 time += System.nanoTime() - start;
                 timeCount++;
 

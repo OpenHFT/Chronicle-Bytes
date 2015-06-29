@@ -200,9 +200,9 @@ public enum BytesUtil {
     }
 
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        if (bytes instanceof NativeBytes) {
-            if (str instanceof NativeBytes) {
-                ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
+        if (bytes instanceof VanillaBytes) {
+            if (str instanceof VanillaBytes) {
+                ((VanillaBytes) bytes).write((VanillaBytes) str, offset, length);
                 return;
             }
         }
@@ -221,9 +221,9 @@ public enum BytesUtil {
     }
 
     public static void append8bit(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        if (bytes instanceof NativeBytes) {
-            if (str instanceof NativeBytes) {
-                ((NativeBytes) bytes).write((NativeBytes) str, offset, length);
+        if (bytes instanceof VanillaBytes) {
+            if (str instanceof VanillaBytes) {
+                ((VanillaBytes) bytes).write((VanillaBytes) str, offset, length);
                 return;
             }
             if (str instanceof String) {
@@ -316,8 +316,8 @@ public enum BytesUtil {
         long pos = bytes.readPosition();
         int len = Maths.toInt32(bytes.readRemaining());
         char[] chars = new char[len];
-        if (bytes instanceof NativeBytes) {
-            ((NativeBytes) bytes).read8Bit(chars, len);
+        if (bytes instanceof VanillaBytes) {
+            ((VanillaBytes) bytes).read8Bit(chars, len);
         } else {
             for (int i = 0; i < len; i++)
                 chars[i] = (char) bytes.readUnsignedByte(pos + i);

@@ -21,7 +21,16 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
+    /**
+     * @return a non elastic bytes.
+     */
+    public static VanillaBytes<Void> nativeBytes() {
+        return new VanillaBytes<>(noBytesStore());
+    }
+
     public VanillaBytes(@NotNull BytesStore bytesStore) {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
@@ -92,5 +101,15 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         for (; i < length; i++)
             writeByte(bs.readByte(offset + i));
         return this;
+    }
+
+    public NativeBytesStore bytesStore() {
+        return (NativeBytesStore) bytesStore;
+    }
+
+    public void read8Bit(char[] chars, int length) {
+        long position = readPosition();
+        NativeBytesStore nbs = bytesStore();
+        nbs.read8bit(position, chars, length);
     }
 }
