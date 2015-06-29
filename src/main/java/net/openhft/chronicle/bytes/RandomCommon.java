@@ -73,10 +73,11 @@ interface RandomCommon {
     /**
      * Obtain the underlying address.  This is for expert users only.
      *
+     * @param offset within this buffer. address(start()) is the actual address of the first byte.
      * @return the underlying address of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
      */
-    long address() throws UnsupportedOperationException;
+    long address(long offset) throws UnsupportedOperationException;
 
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();

@@ -220,7 +220,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long address() throws UnsupportedOperationException {
+    public long address(long offset) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

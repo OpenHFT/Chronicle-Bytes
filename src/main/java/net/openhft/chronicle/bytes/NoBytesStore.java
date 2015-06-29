@@ -144,7 +144,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean inStore(long offset) {
+    public boolean inside(long offset) {
         return false;
     }
 
@@ -174,7 +174,14 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long address() throws UnsupportedOperationException {
+    public boolean equalBytes(BytesStore b, long remaining) {
+        return remaining == 0;
+    }
+
+    @Override
+    public long address(long offset) throws UnsupportedOperationException {
+        if (offset != 0)
+            throw new IllegalArgumentException("offset: " + offset);
         return NO_PAGE;
     }
 
@@ -182,4 +189,6 @@ public enum NoBytesStore implements BytesStore {
     public Bytes bytesForWrite() {
         throw new UnsupportedOperationException("todo");
     }
+
+
 }

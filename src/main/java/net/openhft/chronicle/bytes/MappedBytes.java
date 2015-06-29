@@ -67,7 +67,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     private void checkOffset(long offset) {
-        if (!bytesStore.inStore(offset)) {
+        if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
                 bytesStore = mappedFile.acquireByteStore(offset);

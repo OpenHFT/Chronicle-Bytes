@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -27,7 +28,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     /**
      * @return a non elastic bytes.
      */
-    public static VanillaBytes<Void> nativeBytes() {
+    public static VanillaBytes<Void> vanillaBytes() {
         return new VanillaBytes<>(noBytesStore());
     }
 
@@ -94,12 +95,18 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public Bytes<Underlying> write(BytesStore bs, long offset, long length) {
-        long i = 0;
-        for (; i < length - 7; i += 8)
-            writeLong(bs.readLong(offset + i));
-        for (; i < length; i++)
-            writeByte(bs.readByte(offset + i));
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+        if (bytes.underlyingObject() == null) {
+            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+            if (len > 0) {
+                writeCheckOffset(writePosition(), len);
+                OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
+                writeSkip(len);
+            }
+
+        } else {
+            super.write(bytes, offset, length);
+        }
         return this;
     }
 
@@ -107,9 +114,39 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return (NativeBytesStore) bytesStore;
     }
 
+    @Override
+    public boolean equalBytes(BytesStore b, long remaining) {
+        if (b instanceof VanillaBytes) {
+            VanillaBytes b2 = (VanillaBytes) b;
+            NativeBytesStore nbs0 = bytesStore();
+            NativeBytesStore nbs2 = b2.bytesStore();
+            long i = 0;
+            for (; i < remaining - 7; i++) {
+                long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
+                long addr2 = nbs2.address + b2.readPosition() - nbs2.start() + i;
+                long l0 = NativeBytesStore.MEMORY.readLong(addr0);
+                long l2 = NativeBytesStore.MEMORY.readLong(addr2);
+                if (l0 != l2)
+                    return false;
+            }
+            for (; i < remaining; i++) {
+                long offset2 = readPosition() + i - nbs0.start();
+                long offset21 = b2.readPosition() + i - nbs2.start();
+                byte b0 = NativeBytesStore.MEMORY.readByte(nbs0.address + offset2);
+                byte b1 = NativeBytesStore.MEMORY.readByte(nbs2.address + offset21);
+                if (b0 != b1)
+                    return false;
+            }
+            return true;
+        } else {
+            return super.equalBytes(b, remaining);
+        }
+    }
+
     public void read8Bit(char[] chars, int length) {
         long position = readPosition();
         NativeBytesStore nbs = bytesStore();
         nbs.read8bit(position, chars, length);
     }
+
 }

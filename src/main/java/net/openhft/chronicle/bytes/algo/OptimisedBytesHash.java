@@ -58,7 +58,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
 
     static long applyAsLong1to7(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
-        final long address = bytesStore.address() + store.readPosition();
+        final long address = bytesStore.address(store.readPosition());
 
         long l0 = readIncompleteLong(address, remaining);
         long l0a = l0 >> 32;
@@ -71,7 +71,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
 
     static long applyAsLong8(VanillaBytes store) {
         final NativeBytesStore bytesStore = store.bytesStore();
-        final long address = bytesStore.address() + store.readPosition();
+        final long address = bytesStore.address(store.readPosition());
 
         long l0 = MEMORY.readLong(address);
         long l0a = MEMORY.readInt(address + TOP_BYTES);
@@ -91,7 +91,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
 
     static long applyAsLong9to16(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
-        final long address = bytesStore.address() + store.readPosition();
+        final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0, h1 = 0;
 
         int left = remaining;
@@ -110,7 +110,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
 
     static long applyAsLong17to32(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
-        final long address = bytesStore.address() + store.readPosition();
+        final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0, h1 = 0;
 
         int left = remaining;
@@ -133,7 +133,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
 
     static long applyAsLongAny(VanillaBytes store, int remaining) {
         final NativeBytesStore bytesStore = store.bytesStore();
-        final long address = bytesStore.address() + store.readPosition();
+        final long address = bytesStore.address(store.readPosition());
         long h0 = remaining, h1 = 0;
 
         int i;

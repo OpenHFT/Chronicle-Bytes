@@ -24,7 +24,7 @@ public class PointerBytesStoreTest extends TestCase {
         NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
 
         PointerBytesStore pbs = BytesStore.nativePointer();
-        pbs.set(nbs.address(), nbs.realCapacity());
+        pbs.set(nbs.address(nbs.start()), nbs.realCapacity());
 
         long nanoTime = System.nanoTime();
         pbs.writeLong(0L, nanoTime);

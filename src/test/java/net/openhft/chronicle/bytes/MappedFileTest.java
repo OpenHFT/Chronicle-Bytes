@@ -47,11 +47,11 @@ public class MappedFileTest {
         assertEquals(chunkSize, bytes.start());
         assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
         assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
-        Assert.assertFalse(bs.inStore(chunkSize - (1 << 10)));
-        Assert.assertFalse(bs.inStore(chunkSize - 1));
-        Assert.assertTrue(bs.inStore(chunkSize));
-        Assert.assertTrue(bs.inStore(chunkSize * 2 - 1));
-        Assert.assertFalse(bs.inStore(chunkSize * 2));
+        Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
+        Assert.assertFalse(bs.inside(chunkSize - 1));
+        Assert.assertTrue(bs.inside(chunkSize));
+        Assert.assertTrue(bs.inside(chunkSize * 2 - 1));
+        Assert.assertFalse(bs.inside(chunkSize * 2));
         try {
             bytes.readLong(chunkSize - (1 << 10));
             Assert.fail();

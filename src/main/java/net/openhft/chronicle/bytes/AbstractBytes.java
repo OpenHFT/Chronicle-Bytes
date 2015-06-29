@@ -520,9 +520,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    @ForceInline
-    public long address() {
-        return bytesStore.address();
+    public long address(long offset) throws UnsupportedOperationException {
+        return bytesStore.address(offset);
     }
 
     @Override
@@ -535,7 +534,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (!(obj instanceof Bytes)) return false;
         Bytes b2 = (Bytes) obj;
         long remaining = readRemaining();
-        if (b2.readRemaining() != remaining) return false;
+        return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
+    }
+
+    public boolean equalsBytes(Bytes b2, long remaining) {
         long i = 0;
         for (; i < remaining - 7; i++)
             if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
@@ -582,6 +584,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public void nativeWrite(long address, long position, long size) {
         bytesStore.nativeWrite(address, position, size);
+    }
+
+    @Override
+    public BytesStore bytesStore() {
+        return bytesStore;
     }
 }
 

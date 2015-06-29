@@ -103,7 +103,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
-    public long address() throws UnsupportedOperationException {
+    public long address(long offset) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

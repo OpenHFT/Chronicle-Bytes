@@ -91,11 +91,13 @@ public class MappedFile implements ReferenceCounted {
                     }
                 }
             }
+            long start = System.nanoTime();
             long mappedSize = chunkSize + overlapSize;
             long address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
             MappedBytesStore mbs2 = new MappedBytesStore(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
+            System.out.printf("Took %,d us to acquire chunk %,d%n", (System.nanoTime() - start) / 1000, chunk);
             return mbs2;
         }
     }

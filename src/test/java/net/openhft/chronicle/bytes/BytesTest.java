@@ -118,7 +118,7 @@ public class BytesTest {
 
     @Test
     public void testSliceOfZeroedBytes() {
-        testSliceOfZeroedBytes(NativeBytes.nativeBytes(1024));
+        testSliceOfZeroedBytes(NativeBytes.vanillaBytes(1024));
     }
 */
 

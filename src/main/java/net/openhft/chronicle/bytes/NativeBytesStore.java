@@ -162,9 +162,14 @@ public class NativeBytesStore<Underlying>
 
     long translate(long offset) {
         long offset2 = offset - start();
-        if (offset2 < 0 || offset2 > capacity())
-            throw new IllegalArgumentException("Offset out of bounds " + offset2 + " cap: " + capacity());
+        assert checkTranslatedBounds(offset2);
         return offset2;
+    }
+
+    private boolean checkTranslatedBounds(long offset2) {
+        if (offset2 < 0 || offset2 > realCapacity())
+            throw new IllegalArgumentException("Offset out of bounds " + offset2 + " cap: " + realCapacity());
+        return true;
     }
 
     @Override
@@ -326,8 +331,8 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long address() {
-        return address;
+    public long address(long offset) throws UnsupportedOperationException {
+        return address + translate(offset);
     }
 
     private void performRelease() {
@@ -344,14 +349,14 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public void nativeRead(long position, long address, long size) {
         // TODO add bounds checking.
-        OS.memory().copyMemory(address() + position, address, size);
+        OS.memory().copyMemory(address(position), address, size);
     }
 
     @Override
     @ForceInline
     public void nativeWrite(long address, long position, long size) {
         // TODO add bounds checking.
-        OS.memory().copyMemory(address, address() + position, size);
+        OS.memory().copyMemory(address, address(position), size);
     }
 
     void write8bit(long position, char[] chars, int offset, int length) {
@@ -377,6 +382,7 @@ public class NativeBytesStore<Underlying>
         }
         return l;
     }
+
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);

@@ -80,7 +80,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
-    S write(BytesStore buffer, long offset, long length);
+    default S write(BytesStore bytes, long offset, long length) {
+        long i = 0;
+        for (; i < length - 7; i += 8)
+            writeLong(bytes.readLong(offset + i));
+        for (; i < length; i++)
+            writeByte(bytes.readByte(offset + i));
+        return (S) this;
+    }
 
     default S write(byte[] bytes) {
         return write(bytes, 0, bytes.length);

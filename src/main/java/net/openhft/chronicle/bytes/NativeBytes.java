@@ -53,7 +53,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding) {
-        if (!bytesStore.inStore(offset + adding))
+        if (!bytesStore.inside(offset + adding))
             checkResize(offset + adding);
     }
 
@@ -99,20 +99,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         bytesStore = store;
     }
 
-    @Override
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
-        if (bytes instanceof NativeBytes) {
-            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-            writeCheckOffset(writePosition(), len);
-            OS.memory().copyMemory(bytes.address() + offset, address() + writePosition(), len);
-            writeSkip(len);
-
-        } else {
-            super.write(bytes, offset, length);
-        }
-        return this;
-    }
-
     public void write(String str, int offset, int length) {
         // todo optimise
         char[] chars = str.toCharArray();
@@ -126,5 +112,12 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     public long readIncompleteLong(long offset) {
         return bytesStore.readIncompleteLong(offset);
+    }
+
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+        long position = writePosition();
+        ensureCapacity(position + length);
+        super.write(bytes, offset, length);
+        return this;
     }
 }
