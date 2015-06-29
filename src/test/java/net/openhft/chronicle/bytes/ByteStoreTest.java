@@ -55,6 +55,20 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testReadIncompleteLong() {
+        bytes.writeLong(0x0102030405060708L);
+        assertEquals(0x0102030405060708L, bytes.readIncompleteLong(0));
+        bytes.clear();
+
+        long l = 0;
+        for (int i = 1; i <= 8; i++) {
+            bytes.writeUnsignedByte(i);
+            l |= (long) i << (i * 8 - 8);
+            assertEquals(l, bytes.readIncompleteLong(0));
+        }
+    }
+
+    @Test
     public void testCAS() {
         BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
@@ -62,7 +76,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testRead() throws Exception {
+    public void testRead() {
         for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte(i, i);
         bytes.writePosition(bytes.capacity());
@@ -74,7 +88,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testReadFully() throws Exception {
+    public void testReadFully() {
         for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
 
@@ -85,7 +99,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testCompareAndSetInt() throws Exception {
+    public void testCompareAndSetInt() {
         Assert.assertTrue(bytes.compareAndSwapInt(0, 0, 1));
         Assert.assertFalse(bytes.compareAndSwapInt(0, 0, 1));
         Assert.assertTrue(bytes.compareAndSwapInt(8, 0, 1));
@@ -93,7 +107,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testCompareAndSetLong() throws Exception {
+    public void testCompareAndSetLong() {
         Assert.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
         Assert.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
         Assert.assertTrue(bytes.compareAndSwapLong(8L, 0L, 1L));
@@ -101,7 +115,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testPosition() throws Exception {
+    public void testPosition() {
         for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
         for (int i = (int) (bytes.capacity() - 1); i >= 0; i--) {
@@ -111,13 +125,13 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testCapacity() throws Exception {
+    public void testCapacity() {
         assertEquals(SIZE, bytes.capacity());
         assertEquals(10, NativeBytesStore.nativeStoreWithFixedCapacity(10).capacity());
     }
 
     @Test
-    public void testRemaining() throws Exception {
+    public void testRemaining() {
         assertEquals(0, bytes.readRemaining());
         assertEquals(SIZE, bytes.writeRemaining());
         bytes.writePosition(10);
@@ -126,7 +140,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testByteOrder() throws Exception {
+    public void testByteOrder() {
         assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
     }
 

@@ -96,7 +96,7 @@ public class BytesTest {
 */
 
     @Test
-    public void testName() throws Exception {
+    public void testName() {
         NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
         Bytes<Void> bytes = nativeStore.bytesForWrite();
 

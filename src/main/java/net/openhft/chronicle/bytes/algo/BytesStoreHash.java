@@ -14,33 +14,25 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.algo;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.NativeBytes;
 
-public class SubZeroedBytes<Underlying> extends ZeroedBytes<Underlying> {
-    private final long start;
-    private final long capacity;
+import java.util.function.ToLongFunction;
 
-    public SubZeroedBytes(@NotNull BytesStore bytesStore, UnderflowMode underflowMode, long start, long capacity) {
-        super(bytesStore, underflowMode, capacity);
-        this.start = start;
-        this.capacity = capacity;
-        clear();
+/**
+ * Simple function to derive a long hash from a BytesStore
+ */
+public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
+    static long hash(NativeBytes b) {
+        return NativeBytesHash.INSTANCE.applyAsLong(b);
     }
 
-    @Override
-    public long capacity() {
-        return capacity;
+    static long hash(BytesStore b) {
+        return b instanceof NativeBytes
+                ? NativeBytesHash.INSTANCE.applyAsLong((NativeBytes) b)
+                : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
-    @Override
-    public long start() {
-        return start;
-    }
-
-    @Override
-    public long realCapacity() {
-        return capacity;
-    }
 }

@@ -736,7 +736,8 @@ public enum BytesUtil {
     }
 
     private static void readUTF0(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
-        while (true) {
+        int len = Maths.toInt32(bytes.readRemaining());
+        while (len-- > 0) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
                 bytes.readSkip(-1);
@@ -745,9 +746,9 @@ public enum BytesUtil {
             if (tester.isStopChar(c))
                 return;
             appendable.append((char) c);
-            if (bytes.readRemaining() == 0)
-                return;
         }
+        if (len <= 0)
+            return;
 
         while (true) {
             int c = bytes.readUnsignedByte();

@@ -14,15 +14,16 @@
  *     along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.util;
 
+import net.openhft.chronicle.bytes.StopCharTester;
 import net.openhft.chronicle.core.annotation.ForceInline;
 
 public class EscapingStopCharTester implements StopCharTester {
     private final StopCharTester sct;
     private boolean escaped = false;
 
-    EscapingStopCharTester(StopCharTester sct) {
+    public EscapingStopCharTester(StopCharTester sct) {
         this.sct = sct;
     }
 

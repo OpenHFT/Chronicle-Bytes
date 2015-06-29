@@ -107,15 +107,28 @@ public class MappedFile implements ReferenceCounted {
     public Bytes acquireBytesForRead(long position) throws IOException {
         MappedBytesStore mbs = acquireByteStore(position);
         Bytes bytes = mbs.bytesForRead();
+        bytes.readPosition(position);
         mbs.release();
         return bytes;
+    }
+
+    public void acquireBytesForRead(long position, NativeBytes bytes) throws IOException {
+        MappedBytesStore mbs = acquireByteStore(position);
+        bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
 
     public Bytes acquireBytesForWrite(long position) throws IOException {
         MappedBytesStore mbs = acquireByteStore(position);
         Bytes bytes = mbs.bytesForWrite();
+        bytes.writePosition(position);
         mbs.release();
         return bytes;
+    }
+
+    public void acquireBytesForWrite(long position, NativeBytes bytes) throws IOException {
+        MappedBytesStore mbs = acquireByteStore(position);
+        bytes.bytesStore(mbs, position, mbs.capacity() - position);
+        bytes.writePosition(position);
     }
 
     @Override

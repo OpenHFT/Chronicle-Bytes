@@ -25,10 +25,10 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
-public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
+public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     NativeBytes(BytesStore store) {
-        super(store, UnderflowMode.PADDED, MAX_CAPACITY);
+        super(store, 0, MAX_CAPACITY);
     }
 
     public static NativeBytes<Void> nativeBytes() {
@@ -126,5 +126,14 @@ public class NativeBytes<Underlying> extends ZeroedBytes<Underlying> {
         long position = readPosition();
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.read8bit(position, chars, length);
+    }
+
+    @Override
+    public long readIncompleteLong(long offset) {
+        return bytesStore.readIncompleteLong(offset);
+    }
+
+    public NativeBytesStore bytesStore() {
+        return (NativeBytesStore) bytesStore;
     }
 }
