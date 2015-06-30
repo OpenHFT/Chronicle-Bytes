@@ -40,9 +40,11 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     public long applyAsLong(BytesStore store) {
         long start = store.readPosition();
         int remaining = (int) store.readRemaining();
+        // use two hashes so that when they are combined the 64-bit hash is more random.
         long h0 = remaining;
         long h1 = 0;
         int i;
+        // optimise chunks of 32 bytes but this is the same as the next loop.
         for (i = 0; i < remaining - 31; i += 32) {
             h0 *= K0;
             h1 *= K1;
@@ -59,6 +61,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
             h0 += (l0 + l1a) * M0 + (l2 + l3a) * M2;
             h1 += (l1 + l0a) * M1 + (l3 + l2a) * M3;
         }
+        // perform a hash of the end.
         int left = remaining - i;
         if (left > 0) {
             h0 *= K0;

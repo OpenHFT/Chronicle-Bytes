@@ -89,7 +89,7 @@ public class OptimisedBytesHashTest {
                 for (int j = i + 1; j < hashs.length; j++) {
                     long diff = hashs[j] ^ hashs[i];
                     int diffBC = Long.bitCount(diff);
-                    if (diffBC < 18) {
+                    if (diffBC <= 17) {
                         long d = 1L << (17 - diffBC);
                         score += d;
                     }
