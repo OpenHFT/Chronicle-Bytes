@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import java.io.IOException;
+
 public class IORuntimeException extends RuntimeException {
     public IORuntimeException(String message) {
         super(message);
@@ -23,5 +25,9 @@ public class IORuntimeException extends RuntimeException {
 
     public IORuntimeException(Exception e) {
         super(e);
+    }
+
+    public IORuntimeException(String s, IOException e) {
+        super(s, e);
     }
 }
