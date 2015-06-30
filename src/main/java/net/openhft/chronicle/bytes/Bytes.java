@@ -42,19 +42,23 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     static Bytes<byte[]> expect(String text) {
-        return expect(wrap(text.getBytes(StandardCharsets.ISO_8859_1)));
+        return expect(wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1)));
     }
 
     static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
         return new VanillaBytes<>(new ExpectedBytesStore<>(bytesStore));
     }
 
-    static Bytes<byte[]> wrap(byte[] byteArray) {
+    static Bytes<byte[]> wrapForRead(byte[] byteArray) {
         return BytesStore.<byte[]>wrap(byteArray).bytesForRead();
     }
 
+    static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
+        return BytesStore.<byte[]>wrap(byteArray).bytesForWrite();
+    }
+
     static Bytes<byte[]> from(String text) {
-        return wrap(text.getBytes(StandardCharsets.UTF_8));
+        return wrapForRead(text.getBytes(StandardCharsets.UTF_8));
     }
 
     /**
