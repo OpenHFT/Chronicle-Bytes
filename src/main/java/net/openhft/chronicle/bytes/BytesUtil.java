@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
@@ -28,7 +29,10 @@ import java.lang.reflect.Constructor;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Objects;
+import java.util.TimeZone;
 
 public enum BytesUtil {
     ;
@@ -1198,5 +1202,57 @@ public enum BytesUtil {
         if (a instanceof CharSequence && b instanceof CharSequence)
             return a.toString().equals(b.toString());
         return Objects.equals(a, b);
+    }
+
+    public static void appendTimeMillis(ByteStringAppender b, long timeInMS) {
+        int hours = (int) (timeInMS / (60 * 60 * 1000));
+        if (hours > 99) {
+            b.append(hours); // can have over 24 hours.
+        } else {
+            b.writeByte((byte) (hours / 10 + '0'));
+            b.writeByte((byte) (hours % 10 + '0'));
+        }
+        b.writeByte((byte) ':');
+        int minutes = (int) ((timeInMS / (60 * 1000)) % 60);
+        b.writeByte((byte) (minutes / 10 + '0'));
+        b.writeByte((byte) (minutes % 10 + '0'));
+        b.writeByte((byte) ':');
+        int seconds = (int) ((timeInMS / 1000) % 60);
+        b.writeByte((byte) (seconds / 10 + '0'));
+        b.writeByte((byte) (seconds % 10 + '0'));
+        b.writeByte((byte) '.');
+        int millis = (int) (timeInMS % 1000);
+        b.writeByte((byte) (millis / 100 + '0'));
+        b.writeByte((byte) (millis / 10 % 10 + '0'));
+        b.writeByte((byte) (millis % 10 + '0'));
+    }
+
+    private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
+
+    static class DateCache {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        private long lastDay = Long.MIN_VALUE;
+        @Nullable
+        private byte[] lastDateStr = null;
+
+        DateCache() {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
+    }
+
+    public static void appendDateMillis(ByteStringAppender b, long timeInMS) {
+        DateCache dateCache = dateCacheTL.get();
+        if (dateCache == null) {
+            dateCacheTL.set(dateCache = new DateCache());
+        }
+        long date = timeInMS / 86400000;
+        if (dateCache.lastDay != date) {
+            dateCache.lastDateStr = dateCache.dateFormat.format(new Date(timeInMS)).getBytes(StandardCharsets.ISO_8859_1);
+            dateCache.lastDay = date;
+
+        } else {
+            assert dateCache.lastDateStr != null;
+        }
+        b.write(dateCache.lastDateStr);
     }
 }

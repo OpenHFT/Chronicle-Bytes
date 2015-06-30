@@ -57,4 +57,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         this.writeSkip(digits);
         return (B) this;
     }
+
+    default B appendDateMillis(long timeInMillis) {
+        BytesUtil.appendDateMillis(this, timeInMillis);
+        return (B) this;
+    }
+
+    default B appendTimeMillis(long timeInMillis) {
+        BytesUtil.appendTimeMillis(this, timeInMillis);
+        return (B) this;
+    }
 }
