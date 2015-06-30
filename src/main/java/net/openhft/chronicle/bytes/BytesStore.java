@@ -171,4 +171,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
         return true;
     }
+
+    default int byteCheckSum() {
+        byte b = 0;
+        for (long i = readPosition(); i < readLimit(); i++)
+            b += readByte(i);
+        return b & 0xFF;
+    }
 }

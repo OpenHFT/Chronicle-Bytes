@@ -149,4 +149,14 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         nbs.read8bit(position, chars, length);
     }
 
+    public int byteCheckSum() {
+        if (readLimit() >= Integer.MAX_VALUE || start() != 0)
+            return super.byteCheckSum();
+        byte b = 0;
+        NativeBytesStore bytesStore = bytesStore();
+        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
+            b += NativeBytesStore.MEMORY.readByte(bytesStore.address + i);
+        }
+        return b & 0xFF;
+    }
 }
