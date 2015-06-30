@@ -53,6 +53,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.<byte[]>wrap(byteArray).bytesForRead();
     }
 
+    static Bytes<byte[]> wrap(ByteBuffer byteBuffer) {
+        return BytesStore.<byte[]>wrap(byteBuffer).bytesForRead();
+    }
+
     static Bytes<byte[]> from(String text) {
         return wrap(text.getBytes(StandardCharsets.UTF_8));
     }
