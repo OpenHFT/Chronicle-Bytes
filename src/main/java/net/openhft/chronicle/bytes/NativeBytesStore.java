@@ -42,14 +42,14 @@ public class NativeBytesStore<Underlying>
     private NativeBytesStore(ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
-        this.address = ((DirectBuffer) bb).address();
+        setAddress(((DirectBuffer) bb).address());
         this.maximumLimit = bb.capacity();
         cleaner = ((DirectBuffer) bb).cleaner();
     }
 
     public NativeBytesStore(
             long address, long maximumLimit, Runnable deallocator, boolean elastic) {
-        this.address = address;
+        setAddress(address);
         this.maximumLimit = maximumLimit;
         cleaner = deallocator == null ? null : Cleaner.create(this, deallocator);
         underlyingObject = null;
@@ -386,6 +386,12 @@ public class NativeBytesStore<Underlying>
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
+    }
+
+    public void setAddress(long address) {
+        if ((address & ~0x3FFF) == 0)
+            throw new AssertionError("Invalid address " + Long.toHexString(address));
+        this.address = address;
     }
 
     static class Deallocator implements Runnable {
