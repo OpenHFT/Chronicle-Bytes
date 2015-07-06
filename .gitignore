@@ -25,3 +25,5 @@ target
 # tests
 *.bin
 *.deleteme
+
+.attach_pid*
