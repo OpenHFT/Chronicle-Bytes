@@ -22,6 +22,8 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     }
 
     public void set(long address, long capacity) {
+        if ((address & ~0x3FFF) == 0)
+            throw new AssertionError("Invalid address " + Long.toHexString(address));
         this.address = address;
         this.maximumLimit = capacity;
     }

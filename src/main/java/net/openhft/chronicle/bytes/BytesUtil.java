@@ -276,6 +276,16 @@ public enum BytesUtil {
         writeStopBit0(out, n);
     }
 
+    public static int stopBitLength(long n) {
+        if ((n & ~0x7F) == 0) {
+            return 1;
+        }
+        if ((n & ~0x3FFF) == 0) {
+            return 2;
+        }
+        return stopBitlength0(n);
+    }
+
     static void writeStopBit0(StreamingDataOutput out, long n) {
         boolean neg = false;
         if (n < 0) {
@@ -298,6 +308,17 @@ public enum BytesUtil {
         }
     }
 
+    static int stopBitlength0(long n) {
+        int len = 0;
+        if (n < 0) {
+            len = 1;
+            n = ~n;
+        }
+
+        while ((n >>>= 7) != 0) len++;
+        return len + 1;
+    }
+
     public static String toDebugString(RandomDataInput bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
         long position = bytes.readPosition();
@@ -307,7 +328,7 @@ public enum BytesUtil {
                 .append(", wlim: ").append(asSize(bytes.writeLimit()))
                 .append(", cap: ").append(asSize(bytes.capacity()))
                 .append(" ] ");
-        toString(bytes, sb, position - maxLength, position, position + maxLength);
+//        toString(bytes, sb, position - maxLength, position, position + maxLength);
 
         return sb.toString();
     }
@@ -1228,6 +1249,32 @@ public enum BytesUtil {
     }
 
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
+
+    public static boolean equalBytesAny(BytesStore b1, BytesStore b2, long remaining) {
+        BytesStore bs1 = b1.bytesStore();
+        BytesStore bs2 = b2.bytesStore();
+        long i = 0;
+        for (; i < remaining - 7; i++) {
+            long l1 = bs1.readLong(b1.readPosition() + i);
+            long l2 = bs2.readLong(b2.readPosition() + i);
+            if (l1 != l2)
+                return false;
+        }
+        if (i < remaining - 3) {
+            int i1 = bs1.readInt(b1.readPosition() + i);
+            int i2 = bs2.readInt(b2.readPosition() + i);
+            if (i1 != i2)
+                return false;
+            i += 4;
+        }
+        for (; i < remaining; i++) {
+            byte i1 = bs1.readByte(b1.readPosition() + i);
+            byte i2 = bs2.readByte(b2.readPosition() + i);
+            if (i1 != i2)
+                return false;
+        }
+        return true;
+    }
 
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");

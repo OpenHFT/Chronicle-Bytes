@@ -155,21 +155,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     default boolean equalBytes(BytesStore b, long remaining) {
-        BytesStore b2 = b.bytesStore();
-        long i = 0;
-        for (; i < remaining - 7; i++) {
-            long l0 = readLong(readPosition() + i);
-            long l2 = b2.readLong(b.readPosition() + i);
-            if (l0 != l2)
-                return false;
-        }
-        for (; i < remaining; i++) {
-            byte b0 = readByte(readPosition() + i);
-            byte b1 = b2.readByte(b.readPosition() + i);
-            if (b0 != b1)
-                return false;
-        }
-        return true;
+        return remaining == 8
+                ? readLong(readPosition()) == b.readLong(b.readPosition())
+                : BytesUtil.equalBytesAny(this, b, remaining);
     }
 
     default int byteCheckSum() {

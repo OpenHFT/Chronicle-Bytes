@@ -27,9 +27,9 @@ import java.nio.ByteBuffer;
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
-    private long readPosition;
-    private long writePosition;
-    private long writeLimit;
+    protected long readPosition;
+    protected long writePosition;
+    protected long writeLimit;
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit) {
         this.bytesStore = bytesStore;
@@ -128,7 +128,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> writePosition(long position) {
-        if (position < readPosition()) throw new BufferUnderflowException();
+        if (position < readPosition())
+            throw new BufferUnderflowException();
         if (position > writeLimit())
             throw new BufferOverflowException();
         this.writePosition = position;
@@ -240,7 +241,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.readVolatileLong(offset);
     }
 
-    private long readOffsetPositionMoved(long adding) {
+    protected long readOffsetPositionMoved(long adding) {
         long offset = readPosition;
         readCheckOffset(readPosition, adding);
         readPosition += adding;
@@ -438,8 +439,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    @ForceInline
-    private long writeOffsetPositionMoved(long adding) {
+    protected long writeOffsetPositionMoved(long adding) {
         long oldPosition = writePosition;
         writeCheckOffset(writePosition, adding);
         writePosition += adding;

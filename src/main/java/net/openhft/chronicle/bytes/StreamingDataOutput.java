@@ -84,6 +84,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         long i = 0;
         for (; i < length - 7; i += 8)
             writeLong(bytes.readLong(offset + i));
+        if (i < length - 3) {
+            writeInt(bytes.readInt(offset + (i += 4) - 4));
+        }
         for (; i < length; i++)
             writeByte(bytes.readByte(offset + i));
         return (S) this;

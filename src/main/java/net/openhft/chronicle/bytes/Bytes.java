@@ -61,6 +61,14 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return wrapForRead(text.getBytes(StandardCharsets.UTF_8));
     }
 
+    default Bytes<Underlying> unchecked(boolean unchecked) {
+        return unchecked ? new UncheckedBytes<>(this) : this;
+    }
+
+    default long safeLimit() {
+        return bytesStore().safeLimit();
+    }
+
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call

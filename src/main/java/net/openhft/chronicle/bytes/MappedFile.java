@@ -98,6 +98,7 @@ public class MappedFile implements ReferenceCounted {
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
             System.out.printf("Took %,d us to acquire chunk %,d%n", (System.nanoTime() - start) / 1000, chunk);
+//            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
     }

@@ -96,7 +96,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @Override
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
-        if (bytes.underlyingObject() == null) {
+        if (bytes.underlyingObject() == null && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
