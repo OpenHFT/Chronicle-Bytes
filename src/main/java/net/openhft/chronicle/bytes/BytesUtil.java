@@ -328,7 +328,7 @@ public enum BytesUtil {
                 .append(", wlim: ").append(asSize(bytes.writeLimit()))
                 .append(", cap: ").append(asSize(bytes.capacity()))
                 .append(" ] ");
-//        toString(bytes, sb, position - maxLength, position, position + maxLength);
+        toString(bytes, sb, position - maxLength, position, position + maxLength);
 
         return sb.toString();
     }
