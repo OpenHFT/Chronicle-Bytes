@@ -1217,7 +1217,7 @@ public enum BytesUtil {
         }
     }
 
-    public static boolean equal(Object o1, Object o2) {
+    public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
             return StringUtils.isEqual((CharSequence) o1, (CharSequence) o2);
