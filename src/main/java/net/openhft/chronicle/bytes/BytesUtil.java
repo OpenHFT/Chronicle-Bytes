@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -31,7 +32,6 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Objects;
 import java.util.TimeZone;
 
 public enum BytesUtil {
@@ -1217,12 +1217,11 @@ public enum BytesUtil {
         }
     }
 
-    public static <V> boolean equals(V a, V b) {
-        if (a == b) return true;
-        if (a == null || b == null) return false;
-        if (a instanceof CharSequence && b instanceof CharSequence)
-            return a.toString().equals(b.toString());
-        return Objects.equals(a, b);
+    public static boolean equal(Object o1, Object o2) {
+        if (o1 == o2) return true;
+        if (o1 instanceof CharSequence && o2 instanceof CharSequence)
+            return StringUtils.isEqual((CharSequence) o1, (CharSequence) o2);
+        return o1 != null && o1.equals(o2);
     }
 
     public static void appendTimeMillis(ByteStringAppender b, long timeInMS) {
