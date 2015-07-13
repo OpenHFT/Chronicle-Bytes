@@ -105,7 +105,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.underlyingObject() == null && length >= 64) {
+        } else if (bytes.underlyingObject() == null && length >= 32) {
             rawCopy(bytes, offset, length);
 
         } else {
