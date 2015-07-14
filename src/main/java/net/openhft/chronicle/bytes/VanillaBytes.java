@@ -124,16 +124,16 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             for (; i < remaining - 7; i++) {
                 long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
                 long addr2 = nbs2.address + b2.readPosition() - nbs2.start() + i;
-                long l0 = NativeBytesStore.MEMORY.readLong(addr0);
-                long l2 = NativeBytesStore.MEMORY.readLong(addr2);
+                long l0 = nbs0.memory.readLong(addr0);
+                long l2 = nbs2.memory.readLong(addr2);
                 if (l0 != l2)
                     return false;
             }
             for (; i < remaining; i++) {
                 long offset2 = readPosition() + i - nbs0.start();
                 long offset21 = b2.readPosition() + i - nbs2.start();
-                byte b0 = NativeBytesStore.MEMORY.readByte(nbs0.address + offset2);
-                byte b1 = NativeBytesStore.MEMORY.readByte(nbs2.address + offset21);
+                byte b0 = nbs0.memory.readByte(nbs0.address + offset2);
+                byte b1 = nbs2.memory.readByte(nbs2.address + offset21);
                 if (b0 != b1)
                     return false;
             }
@@ -155,7 +155,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         byte b = 0;
         NativeBytesStore bytesStore = bytesStore();
         for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += NativeBytesStore.MEMORY.readByte(bytesStore.address + i);
+            b += bytesStore.memory.readByte(bytesStore.address + i);
         }
         return b & 0xFF;
     }

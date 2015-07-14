@@ -30,12 +30,13 @@ import java.nio.ByteBuffer;
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    static final Memory MEMORY = OS.memory();
     @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
     private final Underlying underlyingObject;
+    // on release, set this to null.
+    protected Memory memory = OS.memory();
     protected long address;
     long maximumLimit;
 
@@ -70,10 +71,11 @@ public class NativeBytesStore<Underlying>
     }
 
     private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
-        long address = MEMORY.allocate(capacity);
+        Memory memory = OS.memory();
+        long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
-            MEMORY.setMemory(address, capacity, (byte) 0);
-            MEMORY.storeFence();
+            memory.setMemory(address, capacity, (byte) 0);
+            memory.storeFence();
         }
         Deallocator deallocator = new Deallocator(address);
         return new NativeBytesStore<>(address, capacity, deallocator, elastic);
@@ -144,20 +146,20 @@ public class NativeBytesStore<Underlying>
         if (start >= end)
             return this;
 
-        MEMORY.setMemory(address + translate(start), end - start, (byte) 0);
+        memory.setMemory(address + translate(start), end - start, (byte) 0);
         return this;
     }
 
     @Override
     @ForceInline
     public boolean compareAndSwapInt(long offset, int expected, int value) {
-        return MEMORY.compareAndSwapInt(address + translate(offset), expected, value);
+        return memory.compareAndSwapInt(address + translate(offset), expected, value);
     }
 
     @Override
     @ForceInline
     public boolean compareAndSwapLong(long offset, long expected, long value) {
-        return MEMORY.compareAndSwapLong(address + translate(offset), expected, value);
+        return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
     long translate(long offset) {
@@ -173,19 +175,19 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    @ForceInline
     public void reserve() {
         refCount.reserve();
     }
 
+    //    Error releasedHere;
     @Override
-    @ForceInline
     public void release() {
         refCount.release();
+//        if (Jvm.isDebug() && refCount.get() == 0)
+//            releasedHere = new Error();
     }
 
     @Override
-    @ForceInline
     public long refCount() {
         return refCount.get();
     }
@@ -193,104 +195,111 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public byte readByte(long offset) {
-        return MEMORY.readByte(address + translate(offset));
+//        if (Jvm.isDebug()) checkReleased();
+
+        return memory.readByte(address + translate(offset));
     }
+
+//    public void checkReleased() {
+//        if (releasedHere != null)
+//            throw new InternalError("Accessing a released resource", releasedHere);
+//    }
 
     @Override
     @ForceInline
     public short readShort(long offset) {
-        return MEMORY.readShort(address + translate(offset));
+        return memory.readShort(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public int readInt(long offset) {
-        return MEMORY.readInt(address + translate(offset));
+        return memory.readInt(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public long readLong(long offset) {
-        return MEMORY.readLong(address + translate(offset));
+        return memory.readLong(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public float readFloat(long offset) {
-        return MEMORY.readFloat(address + translate(offset));
+        return memory.readFloat(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public double readDouble(long offset) {
-        return MEMORY.readDouble(address + translate(offset));
+        return memory.readDouble(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public int readVolatileInt(long offset) {
-        return MEMORY.readVolatileInt(address + translate(offset));
+        return memory.readVolatileInt(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public long readVolatileLong(long offset) {
-        return MEMORY.readVolatileLong(address + translate(offset));
+        return memory.readVolatileLong(address + translate(offset));
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeByte(long offset, byte i8) {
-        MEMORY.writeByte(address + translate(offset), i8);
+        memory.writeByte(address + translate(offset), i8);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeShort(long offset, short i16) {
-        MEMORY.writeShort(address + translate(offset), i16);
+        memory.writeShort(address + translate(offset), i16);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeInt(long offset, int i32) {
-        MEMORY.writeInt(address + translate(offset), i32);
+        memory.writeInt(address + translate(offset), i32);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeOrderedInt(long offset, int i) {
-        MEMORY.writeOrderedInt(address + translate(offset), i);
+        memory.writeOrderedInt(address + translate(offset), i);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeLong(long offset, long i64) {
-        MEMORY.writeLong(address + translate(offset), i64);
+        memory.writeLong(address + translate(offset), i64);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
-        MEMORY.writeOrderedLong(address + translate(offset), i);
+        memory.writeOrderedLong(address + translate(offset), i);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeFloat(long offset, float f) {
-        MEMORY.writeFloat(address + translate(offset), f);
+        memory.writeFloat(address + translate(offset), f);
         return this;
     }
 
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeDouble(long offset, double d) {
-        MEMORY.writeDouble(address + translate(offset), d);
+        memory.writeDouble(address + translate(offset), d);
         return this;
     }
 
@@ -298,7 +307,7 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length) {
-        MEMORY.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
+        memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
         return this;
     }
 
@@ -307,11 +316,11 @@ public class NativeBytesStore<Underlying>
     public void write(
             long offsetInRDO, ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            MEMORY.copyMemory(((DirectBuffer) bytes).address(),
+            memory.copyMemory(((DirectBuffer) bytes).address(),
                     address + translate(offsetInRDO), length);
 
         } else {
-            MEMORY.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
+            memory.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
         }
     }
 
@@ -336,6 +345,7 @@ public class NativeBytesStore<Underlying>
     }
 
     private void performRelease() {
+        memory = null;
         if (cleaner != null)
             cleaner.clean();
     }
@@ -361,14 +371,14 @@ public class NativeBytesStore<Underlying>
 
     void write8bit(long position, char[] chars, int offset, int length) {
         long addr = address + translate(position);
-        Memory memory = NativeBytesStore.MEMORY;
+        Memory memory = OS.memory();
         for (int i = 0; i < length; i++)
             memory.writeByte(addr + i, (byte) chars[offset + i]);
     }
 
     void read8bit(long position, char[] chars, int length) {
         long addr = address + translate(position);
-        Memory memory = NativeBytesStore.MEMORY;
+        Memory memory = OS.memory();
         for (int i = 0; i < length; i++)
             chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
     }
@@ -377,7 +387,7 @@ public class NativeBytesStore<Underlying>
         int remaining = (int) Math.min(8, readRemaining() - offset);
         long l = 0;
         for (int i = 0; i < remaining; i++) {
-            byte b = MEMORY.readByte(address + offset + i);
+            byte b = memory.readByte(address + offset + i);
             l |= (long) (b & 0xFF) << (i * 8);
         }
         return l;
@@ -407,7 +417,7 @@ public class NativeBytesStore<Underlying>
             if (address == 0)
                 return;
             address = 0;
-            MEMORY.freeMemory(address);
+            OS.memory().freeMemory(address);
         }
     }
 }

@@ -16,11 +16,12 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
 
 import java.nio.ByteOrder;
 
-interface RandomCommon {
+interface RandomCommon extends ReferenceCounted {
     /**
      * @return The smallest position allowed in this buffer.
      */

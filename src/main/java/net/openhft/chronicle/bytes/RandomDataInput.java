@@ -144,4 +144,6 @@ public interface RandomDataInput extends RandomCommon {
         }
         return l;
     }
+
+    long realCapacity();
 }

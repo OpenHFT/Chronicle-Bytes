@@ -394,9 +394,15 @@ public enum BytesUtil {
     }
 
     private static void toString(RandomDataInput bytes, StringBuilder sb) {
+        bytes.reserve();
+        assert bytes.start() <= bytes.readPosition();
+        assert bytes.readPosition() <= bytes.readLimit();
+        assert bytes.readLimit() <= bytes.realCapacity();
+
         for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
             sb.append((char) bytes.readUnsignedByte(i));
         }
+        bytes.release();
     }
 
     @ForceInline
