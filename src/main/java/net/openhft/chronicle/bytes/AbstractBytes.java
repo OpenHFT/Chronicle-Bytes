@@ -555,12 +555,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    protected void finalize() throws Throwable {
-        super.finalize();
-        refCount.releaseAll();
-    }
-
-    @Override
     @ForceInline
     public void nativeRead(long address, long size) {
         bytesStore.nativeRead(readPosition(), address, size);
