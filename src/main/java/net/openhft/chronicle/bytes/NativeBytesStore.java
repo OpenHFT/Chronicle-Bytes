@@ -16,10 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.Memory;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.Nullable;
 import sun.misc.Cleaner;
@@ -179,12 +176,12 @@ public class NativeBytesStore<Underlying>
         refCount.reserve();
     }
 
-    //    Error releasedHere;
+    private Error releasedHere;
     @Override
     public void release() {
         refCount.release();
-//        if (Jvm.isDebug() && refCount.get() == 0)
-//            releasedHere = new Error();
+        if (Jvm.isDebug() && refCount.get() == 0)
+            releasedHere = new Error("Released here");
     }
 
     @Override
@@ -195,15 +192,15 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public byte readByte(long offset) {
-//        if (Jvm.isDebug()) checkReleased();
+        if (Jvm.isDebug()) checkReleased();
 
         return memory.readByte(address + translate(offset));
     }
 
-//    public void checkReleased() {
-//        if (releasedHere != null)
-//            throw new InternalError("Accessing a released resource", releasedHere);
-//    }
+    public void checkReleased() {
+        if (releasedHere != null)
+            throw new InternalError("Accessing a released resource", releasedHere);
+    }
 
     @Override
     @ForceInline
