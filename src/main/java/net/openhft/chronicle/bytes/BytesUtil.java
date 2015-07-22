@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -46,12 +47,15 @@ public enum BytesUtil {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final Constructor<String> STRING_CONSTRUCTOR;
+    private static final Field VALUE;
 
     static {
         try {
             STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
             STRING_CONSTRUCTOR.setAccessible(true);
-        } catch (NoSuchMethodException e) {
+            VALUE = String.class.getDeclaredField("value");
+            VALUE.setAccessible(true);
+        } catch (Exception e) {
             throw new AssertionError(e);
         }
     }
@@ -210,6 +214,33 @@ public enum BytesUtil {
                 return;
             }
         }
+        if (str instanceof String) {
+            appendUTFString(bytes, str, offset, length);
+        } else {
+            appendUTF0(bytes, str, offset, length);
+        }
+    }
+
+    private static void appendUTFString(StreamingDataOutput bytes, CharSequence str, int offset, int length) {
+        try {
+            char[] chars = (char[]) VALUE.get(str);
+            int i;
+            for (i = 0; i < length; i++) {
+                char c = chars[offset + i];
+                if (c > 0x007F)
+                    break;
+                bytes.writeByte((byte) c);
+            }
+            for (; i < length; i++) {
+                char c = chars[offset + i];
+                appendUTF(bytes, c);
+            }
+        } catch (IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static void appendUTF0(StreamingDataOutput bytes, CharSequence str, int offset, int length) {
         int i;
         for (i = 0; i < length; i++) {
             char c = str.charAt(offset + i);
@@ -217,7 +248,6 @@ public enum BytesUtil {
                 break;
             bytes.writeByte((byte) c);
         }
-
         for (; i < length; i++) {
             char c = str.charAt(offset + i);
             appendUTF(bytes, c);
