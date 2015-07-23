@@ -1122,6 +1122,10 @@ public enum BytesUtil {
         return bb.getInt();
     }
 
+    public static String toHexString(@NotNull final Bytes bytes) {
+        return toHexString(bytes, bytes.readPosition(), bytes.readRemaining());
+    }
+
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
      *
@@ -1148,12 +1152,7 @@ public enum BytesUtil {
             long end = (offset + len + width - 1) / width * width;
             for (long i = start; i < end; i += width) {
                 // check for duplicate rows
-                if (i == start) {
-                    for (int j = 0; j < width && i + j < offset + len; j++) {
-                        int ch = bytes.readUnsignedByte(i + j);
-                        lastLine[j] = ch;
-                    }
-                } else if (i + width < end) {
+                if (i + width < end) {
                     boolean same = true;
 
                     for (int j = 0; j < width && i + j < offset + len; j++) {
@@ -1161,7 +1160,7 @@ public enum BytesUtil {
                         same &= (ch == lastLine[j]);
                         lastLine[j] = ch;
                     }
-                    if (same) {
+                    if (i > start && same) {
                         sep = "........\n";
                         continue;
                     }

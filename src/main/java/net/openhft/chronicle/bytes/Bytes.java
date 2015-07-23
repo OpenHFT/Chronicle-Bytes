@@ -138,7 +138,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     default String toHexString() {
-        return BytesUtil.toHexString(this, readPosition(), readRemaining());
+        return BytesUtil.toHexString(this);
     }
 
     default String toHexString(long maxLength) {
