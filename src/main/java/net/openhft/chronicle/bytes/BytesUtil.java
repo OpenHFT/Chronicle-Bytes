@@ -250,7 +250,7 @@ public enum BytesUtil {
     }
 
     public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        if (bytes instanceof VanillaBytes) {
+        if (((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore) {
             if (str instanceof VanillaBytes) {
                 ((VanillaBytes) bytes).write((VanillaBytes) str, offset, length);
                 return;
