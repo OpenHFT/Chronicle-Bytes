@@ -69,6 +69,19 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return bytesStore().safeLimit();
     }
 
+    static VanillaBytes<Void> allocateDirect(long capacity) {
+        return NativeBytesStore.nativeStoreWithFixedCapacity(capacity).bytesForWrite();
+    }
+
+    static NativeBytes<Void> allocateElasticDirect() {
+        return NativeBytes.nativeBytes();
+    }
+
+    static NativeBytes<Void> allocateElasticDirect(long initialCapacity) {
+        return NativeBytes.nativeBytes(initialCapacity);
+    }
+
+
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call

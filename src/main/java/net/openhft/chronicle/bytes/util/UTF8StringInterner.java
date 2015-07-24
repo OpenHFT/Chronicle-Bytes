@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.StopCharTesters;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -46,7 +45,7 @@ public class UTF8StringInterner {
         if (StringUtils.isEqual(s, cs))
             return s;
         StringBuilder sb = SBP.acquireStringBuilder();
-        BytesUtil.parseUTF(cs, sb, StopCharTesters.ALL);
+        BytesUtil.parseUTF(cs, sb, Maths.toInt32(cs.readRemaining()));
         return interner[h] = sb.toString();
     }
 }

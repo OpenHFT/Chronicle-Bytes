@@ -27,7 +27,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    public Bytes<Void> bytesForWrite() {
+    public VanillaBytes<Void> bytesForWrite() {
         return new VanillaBytes<>(this);
     }
 

@@ -41,7 +41,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
         long remaining = bytes.readRemaining();
-        NativeBytes<Void> bytes2 = NativeBytes.nativeBytes(remaining);
+        NativeBytes<Void> bytes2 = Bytes.allocateElasticDirect(remaining);
         bytes2.write(bytes, 0, remaining);
         return bytes2;
     }
@@ -99,19 +99,17 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         bytesStore = store;
     }
 
-    public void write(String str, int offset, int length) {
-        // todo optimise
-        char[] chars = str.toCharArray();
-        long position = writePosition();
-        ensureCapacity(position + length);
-        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
-        nbs.write8bit(position, chars, offset, length);
-        writeSkip(length);
-    }
-
     @Override
     public long readIncompleteLong(long offset) {
         return bytesStore.readIncompleteLong(offset);
+    }
+
+    @Override
+    public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
+        long position = writePosition();
+        ensureCapacity(position + length);
+        super.write(bytes, offset, length);
+        return this;
     }
 
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {

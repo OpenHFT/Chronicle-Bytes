@@ -16,7 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -28,6 +30,7 @@ import java.io.IOException;
 import java.io.UTFDataFormatException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -47,14 +50,17 @@ public enum BytesUtil {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final Constructor<String> STRING_CONSTRUCTOR;
-    private static final Field VALUE;
+    private static final Field SB_VALUE, SB_COUNT;
+    private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
 
     static {
         try {
             STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
             STRING_CONSTRUCTOR.setAccessible(true);
-            VALUE = String.class.getDeclaredField("value");
-            VALUE.setAccessible(true);
+            SB_VALUE = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("value");
+            SB_VALUE.setAccessible(true);
+            SB_COUNT = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("count");
+            SB_COUNT.setAccessible(true);
         } catch (Exception e) {
             throw new AssertionError(e);
         }
@@ -86,6 +92,15 @@ public enum BytesUtil {
     }
 
     public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        if (((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore
+                && appendable instanceof StringBuilder) {
+            parseUTF_SB1((AbstractBytes) bytes, (StringBuilder) appendable, utflen);
+        } else {
+            parseUTF1(bytes, appendable, utflen);
+        }
+    }
+
+    static void parseUTF1(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
             assert bytes.readRemaining() >= utflen;
@@ -105,6 +120,31 @@ public enum BytesUtil {
             if (utflen > count)
                 parseUTF2(bytes, appendable, utflen, count);
         } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    static void parseUTF_SB1(AbstractBytes bytes, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+        try {
+            int count = 0;
+            if (utflen > bytes.readRemaining())
+                throw new BufferUnderflowException();
+            NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore;
+            long address = nbs.address + nbs.translate(bytes.readPosition());
+            Memory memory = nbs.memory;
+            sb.ensureCapacity(utflen);
+            char[] chars = (char[]) SB_VALUE.get(sb);
+            while (count < utflen) {
+                int c = memory.readByte(address + count);
+                if (c < 0)
+                    break;
+                chars[count++] = (char) c;
+            }
+            bytes.readSkip(count);
+            SB_COUNT.setInt(sb, count);
+            if (count < utflen)
+                parseUTF2(bytes, sb, utflen, count);
+        } catch (IOException | IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }
@@ -176,23 +216,25 @@ public enum BytesUtil {
             bytes.writeStopBit(-1);
 
         } else {
-            bytes.writeStopBit(findUTFLength(str));
+            long utfLength = findUTFLength(str);
+            bytes.writeStopBit(utfLength);
             appendUTF(bytes, str, 0, str.length());
         }
     }
 
     private static long findUTFLength(@NotNull CharSequence str) {
-        long utflen = 0;/* use charAt instead of copying String to char array */
-        for (int i = 0, strlen = str.length(); i < strlen; i++) {
+        int strlen = str.length();
+        long utflen = strlen;/* use charAt instead of copying String to char array */
+        for (int i = 0; i < strlen; i++) {
             char c = str.charAt(i);
             if (c <= 0x007F) {
+                continue;
+            }
+            if (c <= 0x07FF) {
                 utflen++;
 
-            } else if (c <= 0x07FF) {
-                utflen += 2;
-
             } else {
-                utflen += 3;
+                utflen += 2;
             }
         }
         return utflen;
@@ -213,31 +255,13 @@ public enum BytesUtil {
                 ((VanillaBytes) bytes).write((VanillaBytes) str, offset, length);
                 return;
             }
+            if (str instanceof String) {
+                ((VanillaBytes) bytes).write((String) str, offset, length);
+                return;
+            }
         }
-        if (str instanceof String) {
-            appendUTFString(bytes, str, offset, length);
-        } else {
-            appendUTF0(bytes, str, offset, length);
-        }
-    }
 
-    private static void appendUTFString(StreamingDataOutput bytes, CharSequence str, int offset, int length) {
-        try {
-            char[] chars = (char[]) VALUE.get(str);
-            int i;
-            for (i = 0; i < length; i++) {
-                char c = chars[offset + i];
-                if (c > 0x007F)
-                    break;
-                bytes.writeByte((byte) c);
-            }
-            for (; i < length; i++) {
-                char c = chars[offset + i];
-                appendUTF(bytes, c);
-            }
-        } catch (IllegalAccessException e) {
-            throw new AssertionError(e);
-        }
+        appendUTF0(bytes, str, offset, length);
     }
 
     private static void appendUTF0(StreamingDataOutput bytes, CharSequence str, int offset, int length) {
@@ -788,15 +812,104 @@ public enum BytesUtil {
 
     @ForceInline
     public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
-        setLength(builder, 0);
         try {
-            readUTF0(bytes, builder, tester);
+            if (builder instanceof StringBuilder
+                    && ((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore) {
+                VanillaBytes vb = (VanillaBytes) bytes;
+                StringBuilder sb = (StringBuilder) builder;
+                sb.setLength(0);
+                readUTF_SB1(vb, sb, tester);
+            } else {
+                setLength(builder, 0);
+                readUTF1(bytes, builder, tester);
+            }
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
-    private static void readUTF0(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
+    private static void readUTF_SB1(VanillaBytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws IOException {
+        NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore;
+        int i = 0, len = Maths.toInt32(bytes.readRemaining());
+        long address = nb.address + nb.translate(bytes.readPosition());
+
+        Memory memory = nb.memory;
+        for (; i < len; i++) {
+            int c = memory.readByte(address + i);
+            if (c < 0)
+                break;
+            if (tester.isStopChar(c)) {
+                bytes.readSkip(i + 1);
+                return;
+            }
+            appendable.append((char) c);
+        }
+        bytes.readSkip(i);
+        if (i < len) {
+            readUTF_SB2(bytes, appendable, tester);
+        }
+    }
+
+    private static void readUTF_SB2(StreamingDataInput bytes, StringBuilder appendable, StopCharTester tester) throws UTFDataFormatException {
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            switch (c >> 4) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                /* 0xxxxxxx */
+                    if (tester.isStopChar(c))
+                        return;
+                    appendable.append((char) c);
+                    break;
+
+                case 12:
+                case 13: {
+                /* 110x xxxx 10xx xxxx */
+                    int char2 = bytes.readUnsignedByte();
+                    if ((char2 & 0xC0) != 0x80)
+                        throw new UTFDataFormatException(
+                                "malformed input around byte");
+                    int c2 = (char) (((c & 0x1F) << 6) |
+                            (char2 & 0x3F));
+                    if (tester.isStopChar(c2))
+                        return;
+                    appendable.append((char) c2);
+                    break;
+                }
+
+                case 14: {
+                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+
+                    int char2 = bytes.readUnsignedByte();
+                    int char3 = bytes.readUnsignedByte();
+
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                        throw new UTFDataFormatException(
+                                "malformed input around byte ");
+                    int c3 = (char) (((c & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            (char3 & 0x3F));
+                    if (tester.isStopChar(c3))
+                        return;
+                    appendable.append((char) c3);
+                    break;
+                }
+
+                default:
+                /* 10xx xxxx, 1111 xxxx */
+                    throw new UTFDataFormatException(
+                            "malformed input around byte ");
+            }
+        }
+    }
+
+    private static void readUTF1(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
         int len = Maths.toInt32(bytes.readRemaining());
         while (len-- > 0) {
             int c = bytes.readUnsignedByte();
@@ -811,6 +924,10 @@ public enum BytesUtil {
         if (len <= 0)
             return;
 
+        readUTF2(bytes, appendable, tester);
+    }
+
+    private static void readUTF2(StreamingDataInput bytes, Appendable appendable, StopCharTester tester) throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -1282,8 +1399,6 @@ public enum BytesUtil {
         b.writeByte((byte) (millis % 10 + '0'));
     }
 
-    private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
-
     public static boolean equalBytesAny(BytesStore b1, BytesStore b2, long remaining) {
         BytesStore bs1 = b1.bytesStore();
         BytesStore bs2 = b2.bytesStore();
@@ -1310,17 +1425,6 @@ public enum BytesUtil {
         return true;
     }
 
-    static class DateCache {
-        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
-        private long lastDay = Long.MIN_VALUE;
-        @Nullable
-        private byte[] lastDateStr = null;
-
-        DateCache() {
-            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
-        }
-    }
-
     public static void appendDateMillis(ByteStringAppender b, long timeInMS) {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
@@ -1335,5 +1439,16 @@ public enum BytesUtil {
             assert dateCache.lastDateStr != null;
         }
         b.write(dateCache.lastDateStr);
+    }
+
+    static class DateCache {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
+        private long lastDay = Long.MIN_VALUE;
+        @Nullable
+        private byte[] lastDateStr = null;
+
+        DateCache() {
+            dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
+        }
     }
 }

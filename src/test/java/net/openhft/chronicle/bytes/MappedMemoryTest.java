@@ -126,6 +126,7 @@ public class MappedMemoryTest {
             final Bytes bytes = mappedBytes(tempFile, OS.pageSize());
             char[] chars = new char[OS.pageSize() * 11];
             Arrays.fill(chars, '.');
+            chars[chars.length - 1] = '*';
             bytes.writeUTFΔ(new String(chars));
             String text = "hello this is some very long text";
             bytes.writeUTFΔ(text);

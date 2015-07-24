@@ -113,7 +113,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public Bytes<Underlying> bytesForWrite() {
+    public VanillaBytes<Underlying> bytesForWrite() {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
     }
 
@@ -363,12 +363,12 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public void nativeWrite(long address, long position, long size) {
         // TODO add bounds checking.
-        OS.memory().copyMemory(address, address(position), size);
+        this.memory.copyMemory(address, address(position), size);
     }
 
     void write8bit(long position, char[] chars, int offset, int length) {
         long addr = address + translate(position);
-        Memory memory = OS.memory();
+        Memory memory = this.memory;
         for (int i = 0; i < length; i++)
             memory.writeByte(addr + i, (byte) chars[offset + i]);
     }

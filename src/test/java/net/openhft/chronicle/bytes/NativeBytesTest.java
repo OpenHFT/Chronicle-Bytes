@@ -28,7 +28,7 @@ public class NativeBytesTest {
 
     @Test
     public void testWriteBytesWhereResizeNeeded0() {
-        Bytes b = NativeBytes.nativeBytes();
+        Bytes b = Bytes.allocateElasticDirect();
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(0, b.realCapacity());
@@ -41,7 +41,7 @@ public class NativeBytesTest {
 
     @Test
     public void testWriteBytesWhereResizeNeeded() {
-        Bytes b = NativeBytes.nativeBytes(1);
+        Bytes b = Bytes.allocateElasticDirect(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(1, b.realCapacity());

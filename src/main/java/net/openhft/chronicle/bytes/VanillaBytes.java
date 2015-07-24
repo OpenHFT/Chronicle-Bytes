@@ -25,19 +25,19 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
-    /**
-     * @return a non elastic bytes.
-     */
-    public static VanillaBytes<Void> vanillaBytes() {
-        return new VanillaBytes<>(noBytesStore());
-    }
-
     public VanillaBytes(@NotNull BytesStore bytesStore) {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
 
     public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit) {
         super(bytesStore, writePosition, writeLimit);
+    }
+
+    /**
+     * @return a non elastic bytes.
+     */
+    public static VanillaBytes<Void> vanillaBytes() {
+        return new VanillaBytes<>(noBytesStore());
     }
 
     @Override
@@ -55,6 +55,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         oldBS.release();
         clear();
     }
+
     @Override
     public long maxSize() {
         return readRemaining();
@@ -110,16 +111,23 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return this;
     }
 
-    public NativeBytesStore bytesStore() {
-        return (NativeBytesStore) bytesStore;
+    public void write(String str, int offset, int length) {
+        // todo optimise
+        char[] chars = str.toCharArray();
+        long position = writePosition();
+        ensureCapacity(position + length);
+        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
+        nbs.write8bit(position, chars, offset, length);
+        writeSkip(length);
     }
 
     @Override
     public boolean equalBytes(BytesStore b, long remaining) {
-        if (b instanceof VanillaBytes) {
+        if (bytesStore instanceof NativeBytesStore &&
+                b instanceof VanillaBytes && b.bytesStore() instanceof NativeBytesStore) {
             VanillaBytes b2 = (VanillaBytes) b;
-            NativeBytesStore nbs0 = bytesStore();
-            NativeBytesStore nbs2 = b2.bytesStore();
+            NativeBytesStore nbs0 = (NativeBytesStore) bytesStore;
+            NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
             long i = 0;
             for (; i < remaining - 7; i++) {
                 long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
@@ -145,7 +153,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     public void read8Bit(char[] chars, int length) {
         long position = readPosition();
-        NativeBytesStore nbs = bytesStore();
+        NativeBytesStore nbs = (NativeBytesStore) bytesStore();
         nbs.read8bit(position, chars, length);
     }
 
@@ -153,7 +161,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         if (readLimit() >= Integer.MAX_VALUE || start() != 0)
             return super.byteCheckSum();
         byte b = 0;
-        NativeBytesStore bytesStore = bytesStore();
+        NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
             b += bytesStore.memory.readByte(bytesStore.address + i);
         }

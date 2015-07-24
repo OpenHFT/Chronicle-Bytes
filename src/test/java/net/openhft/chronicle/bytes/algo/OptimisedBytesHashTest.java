@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes.algo;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -33,7 +34,7 @@ public class OptimisedBytesHashTest {
 
     @Test
     public void testApplyAsLong() {
-        NativeBytes b = NativeBytes.nativeBytes(128);
+        NativeBytes b = Bytes.allocateElasticDirect(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
         while (b.readRemaining() > 0) {
@@ -48,7 +49,7 @@ public class OptimisedBytesHashTest {
 
     @Test
     public void sizeMatch() {
-        NativeBytes nb = NativeBytes.nativeBytes(64);
+        NativeBytes nb = Bytes.allocateElasticDirect(64);
         for (int i = 1; i <= 64; i++)
             nb.writeUnsignedByte(i);
         assertEquals(0L, applyAsLong1to7(nb, 0));
@@ -69,7 +70,7 @@ public class OptimisedBytesHashTest {
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {
             long[] hashs = new long[8192];
-            NativeBytes b = NativeBytes.nativeBytes(hashs.length / 64);
+            NativeBytes b = Bytes.allocateElasticDirect(hashs.length / 64);
             byte[] init = new byte[hashs.length / 64];
             new SecureRandom().nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
@@ -111,7 +112,7 @@ public class OptimisedBytesHashTest {
 
         for (int t = 0; t < 500; t++) {
             long[] hashs = new long[8192];
-            NativeBytes b = NativeBytes.nativeBytes(8);
+            NativeBytes b = Bytes.allocateElasticDirect(8);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
                 b.append(t);

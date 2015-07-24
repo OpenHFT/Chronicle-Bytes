@@ -97,8 +97,7 @@ public class BytesTest {
 
     @Test
     public void testName() {
-        NativeBytesStore<Void> nativeStore = NativeBytesStore.nativeStoreWithFixedCapacity(30);
-        Bytes<Void> bytes = nativeStore.bytesForWrite();
+        Bytes<Void> bytes = Bytes.allocateDirect(30);
 
         long expected = 12345L;
         int offset = 5;
@@ -136,7 +135,7 @@ public class BytesTest {
 
     @Test
     public void toHexString() {
-        Bytes bytes = NativeBytes.nativeBytes(1020);
+        Bytes bytes = Bytes.allocateElasticDirect(1020);
         bytes.append("Hello World");
         assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
         bytes.readLimit(bytes.realCapacity());

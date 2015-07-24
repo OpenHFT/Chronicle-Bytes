@@ -127,7 +127,7 @@ public class ByteStoreTest {
     @Test
     public void testCapacity() {
         assertEquals(SIZE, bytes.capacity());
-        assertEquals(10, NativeBytesStore.nativeStoreWithFixedCapacity(10).capacity());
+        assertEquals(10, Bytes.allocateDirect(10).capacity());
     }
 
     @Test
