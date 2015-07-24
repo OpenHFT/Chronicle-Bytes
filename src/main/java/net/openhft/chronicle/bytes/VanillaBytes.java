@@ -121,6 +121,21 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         writeSkip(length);
     }
 
+    public VanillaBytes append(CharSequence str, int start, int end) {
+        if (bytesStore() instanceof NativeBytesStore) {
+            if (str instanceof VanillaBytes) {
+                write((VanillaBytes) str, start, end - start);
+                return this;
+            }
+            if (str instanceof String) {
+                write((String) str, start, end - start);
+                return this;
+            }
+        }
+        super.append(str, start, end);
+        return this;
+    }
+
     @Override
     public boolean equalBytes(BytesStore b, long remaining) {
         if (bytesStore instanceof NativeBytesStore &&
