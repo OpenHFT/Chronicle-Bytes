@@ -16,18 +16,16 @@
 
 package net.openhft.chronicle.bytes;
 
-import java.io.IOException;
-
 public class IORuntimeException extends RuntimeException {
     public IORuntimeException(String message) {
         super(message);
     }
 
-    public IORuntimeException(Exception e) {
+    public IORuntimeException(Throwable e) {
         super(e);
     }
 
-    public IORuntimeException(String s, IOException e) {
+    public IORuntimeException(String s, Throwable e) {
         super(s, e);
     }
 }
