@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -55,6 +56,7 @@ public enum BytesUtil {
 
     static {
         try {
+            ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
             STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
             STRING_CONSTRUCTOR.setAccessible(true);
             SB_VALUE = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("value");
