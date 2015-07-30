@@ -49,5 +49,5 @@ public enum StopCharTesters implements StopCharTester {
         public boolean isStopChar(int ch) {
             return ch < 0;
         }
-    };
+    }
 }
