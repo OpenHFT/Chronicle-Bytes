@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
 
@@ -27,11 +29,14 @@ import java.nio.ByteBuffer;
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
+    private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
+
     @Nullable
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
     private final Underlying underlyingObject;
+    private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
     // on release, set this to null.
     protected Memory memory = OS.memory();
     protected long address;
@@ -74,7 +79,7 @@ public class NativeBytesStore<Underlying>
             memory.setMemory(address, capacity, (byte) 0);
             memory.storeFence();
         }
-        Deallocator deallocator = new Deallocator(address);
+        Deallocator deallocator = new Deallocator(address, capacity);
         return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
@@ -342,6 +347,10 @@ public class NativeBytesStore<Underlying>
     }
 
     private void performRelease() {
+        if (refCount.get() > 0) {
+            LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
+        }
+
         memory = null;
         if (cleaner != null)
             cleaner.clean();
@@ -402,11 +411,12 @@ public class NativeBytesStore<Underlying>
     }
 
     static class Deallocator implements Runnable {
-        private volatile long address;
+        private volatile long address, size;
 
-        Deallocator(long address) {
+        Deallocator(long address, long size) {
             assert address != 0;
             this.address = address;
+            this.size = size;
         }
 
         @Override
@@ -414,7 +424,7 @@ public class NativeBytesStore<Underlying>
             if (address == 0)
                 return;
             address = 0;
-            OS.memory().freeMemory(address);
+            OS.memory().freeMemory(address, size);
         }
     }
 }
