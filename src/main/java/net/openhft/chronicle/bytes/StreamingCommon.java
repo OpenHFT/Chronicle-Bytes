@@ -16,8 +16,11 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
+    @NotNull
     S clear();
 
 

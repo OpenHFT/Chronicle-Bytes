@@ -36,12 +36,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     /**
      * @return a non elastic bytes.
      */
+    @NotNull
     public static VanillaBytes<Void> vanillaBytes() {
         return new VanillaBytes<>(noBytesStore());
     }
 
     @Override
-    public void bytesStore(BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) {
         bytesStore(byteStore);
         // assume its read-only
         readLimit(offset + length);
@@ -66,6 +67,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return false;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> bytesForRead() {
         return isClear()
@@ -78,6 +80,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return bytesStore.realCapacity();
     }
 
+    @NotNull
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
@@ -95,8 +98,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         }
     }
 
+    @NotNull
     @Override
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
         if (bytes.underlyingObject() == null && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
@@ -111,7 +115,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return this;
     }
 
-    public void write(String str, int offset, int length) {
+    public void write(@NotNull String str, int offset, int length) {
         // todo optimise
         char[] chars = str.toCharArray();
         long position = writePosition();
@@ -121,6 +125,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         writeSkip(length);
     }
 
+    @NotNull
     public VanillaBytes append(CharSequence str, int start, int end) {
         if (bytesStore() instanceof NativeBytesStore) {
             if (str instanceof VanillaBytes) {

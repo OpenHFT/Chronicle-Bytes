@@ -17,16 +17,18 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Fast unchecked version of AbstractBytes
  */
 public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
-    public UncheckedBytes(Bytes underlyingBytes) {
+    public UncheckedBytes(@NotNull Bytes underlyingBytes) {
         super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
         readPosition(underlyingBytes.readPosition());
     }
 
+    @NotNull
     public Bytes<Underlying> unchecked(boolean unchecked) {
         return this;
     }
@@ -40,42 +42,49 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     void readCheckOffset(long offset, long adding) {
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> readPosition(long position) {
         readPosition = position;
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> readLimit(long limit) {
         writePosition = limit;
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writePosition(long position) {
         writePosition = position;
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> readSkip(long bytesToSkip) {
         readPosition += bytesToSkip;
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip) {
         writePosition += bytesToSkip;
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeLimit(long limit) {
         writeLimit = limit;
         return this;
     }
 
+    @NotNull
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         throw new UnsupportedOperationException("todo");
@@ -100,8 +109,9 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return oldPosition;
     }
 
+    @NotNull
     @Override
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -114,7 +124,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(BytesStore bytes, long offset, long length) {
+    public void rawCopy(@NotNull BytesStore bytes, long offset, long length) {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);

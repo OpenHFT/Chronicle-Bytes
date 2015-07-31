@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author peter.lawrey
@@ -29,6 +30,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 public class UTF8StringInterner {
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
+    @NotNull
     private final String[] interner;
     private final int mask;
 
@@ -38,7 +40,7 @@ public class UTF8StringInterner {
         mask = n - 1;
     }
 
-    public String intern(Bytes cs) {
+    public String intern(@NotNull Bytes cs) {
         long hash = BytesStoreHash.hash(cs);
         int h = (int) (hash ^ (hash >> 32)) & mask;
         String s = interner[h];

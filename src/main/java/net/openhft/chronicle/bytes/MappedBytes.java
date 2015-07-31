@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,11 +33,13 @@ public class MappedBytes extends AbstractBytes<Void> {
         clear();
     }
 
-    public static MappedBytes mappedBytes(String filename, long chunkSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
-    public static MappedBytes mappedBytes(File file, long chunkSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException {
         MappedFile rw = new MappedFile(file, chunkSize, OS.pageSize());
         return new MappedBytes(rw);
     }
@@ -94,6 +97,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         return true;
     }
 
+    @NotNull
     @Override
     public Bytes<Void> write(BytesStore buffer, long offset, long length) {
         throw new UnsupportedOperationException("todo");

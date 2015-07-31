@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
@@ -27,10 +28,12 @@ import java.nio.ByteBuffer;
  * <p>The use of this instance is single threaded, though the use of the data
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+    @NotNull
     default OutputStream outputStream() {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     default S writeStopBit(long x) {
         BytesUtil.writeStopBit(this, x);
         return (S) this;
@@ -47,40 +50,52 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param cs the string value to be written. Can be null.
      * @throws BufferOverflowException if there is not enough space left
      */
+    @NotNull
     default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         BytesUtil.writeUTF(this, cs);
         return (S) this;
     }
 
+    @NotNull
     S writeByte(byte i8);
 
+    @NotNull
     default S writeUnsignedByte(int i) {
         return writeByte((byte) Maths.toUInt8(i));
     }
 
+    @NotNull
     S writeShort(short i16);
 
+    @NotNull
     default S writeUnsignedShort(int u16) {
         return writeShort((short) Maths.toUInt16(u16));
     }
 
+    @NotNull
     S writeInt(int i);
 
+    @NotNull
     default S writeUnsignedInt(long i) {
         return writeInt((int) Maths.toUInt32(i));
     }
 
+    @NotNull
     S writeLong(long i64);
 
+    @NotNull
     S writeFloat(float f);
 
+    @NotNull
     S writeDouble(double d);
 
-    default S write(BytesStore bytes) {
+    @NotNull
+    default S write(@NotNull BytesStore bytes) {
         return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
-    default S write(BytesStore bytes, long offset, long length) {
+    @NotNull
+    default S write(@NotNull BytesStore bytes, long offset, long length) {
         long i = 0;
         for (; i < length - 7; i += 8)
             writeLong(bytes.readLong(offset + i));
@@ -92,20 +107,26 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
-    default S write(byte[] bytes) {
+    @NotNull
+    default S write(@NotNull byte[] bytes) {
         return write(bytes, 0, bytes.length);
     }
 
+    @NotNull
     S write(byte[] bytes, int offset, int length);
 
+    @NotNull
     S write(ByteBuffer buffer);
 
+    @NotNull
     default S writeBoolean(boolean flag) {
         return writeByte(flag ? (byte) 'Y' : 0);
     }
 
+    @NotNull
     S writeOrderedInt(int i);
 
+    @NotNull
     S writeOrderedLong(long i);
 
     /**

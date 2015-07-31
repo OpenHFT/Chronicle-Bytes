@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -27,19 +28,21 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
-    NativeBytes(BytesStore store) {
+    NativeBytes(@NotNull BytesStore store) {
         super(store, 0, MAX_CAPACITY);
     }
 
+    @NotNull
     public static NativeBytes<Void> nativeBytes() {
         return new NativeBytes<>(noBytesStore());
     }
 
+    @NotNull
     public static NativeBytes<Void> nativeBytes(long initialCapacity) {
         return new NativeBytes<>(nativeStoreWithFixedCapacity(initialCapacity));
     }
 
-    public static BytesStore<Bytes<Void>, Void> copyOf(Bytes bytes) {
+    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull Bytes bytes) {
         long remaining = bytes.readRemaining();
         NativeBytes<Void> bytes2 = Bytes.allocateElasticDirect(remaining);
         bytes2.write(bytes, 0, remaining);
@@ -104,6 +107,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return bytesStore.readIncompleteLong(offset);
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
         long position = writePosition();
@@ -112,6 +116,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return this;
     }
 
+    @NotNull
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
         long position = writePosition();
         ensureCapacity(position + length);

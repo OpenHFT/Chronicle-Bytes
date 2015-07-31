@@ -68,7 +68,7 @@ public enum BytesUtil {
         }
     }
 
-    public static boolean contentEqual(BytesStore a, BytesStore b) {
+    public static boolean contentEqual(@Nullable BytesStore a, @Nullable BytesStore b) {
         if (a == null) return b == null;
         if (b == null) return false;
         if (a.start() != b.start() || a.readRemaining() != b.readRemaining())
@@ -89,11 +89,11 @@ public enum BytesUtil {
     }
 
     public static boolean bytesEqual(
-            RandomDataInput a, long aOffset, RandomDataInput b, long bOffset, long len) {
+            @NotNull RandomDataInput a, long aOffset, RandomDataInput b, long bOffset, long len) {
         return a.bytesEqual(aOffset, b, bOffset, len);
     }
 
-    public static void parseUTF(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parseUTF(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         if (((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {
             parseUTF_SB1((AbstractBytes) bytes, (StringBuilder) appendable, utflen);
@@ -102,7 +102,7 @@ public enum BytesUtil {
         }
     }
 
-    static void parseUTF1(StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+    static void parseUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
             assert bytes.readRemaining() >= utflen;
@@ -126,7 +126,7 @@ public enum BytesUtil {
         }
     }
 
-    static void parseUTF_SB1(AbstractBytes bytes, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+    static void parseUTF_SB1(@NotNull AbstractBytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
             if (utflen > bytes.readRemaining())
@@ -146,12 +146,12 @@ public enum BytesUtil {
             SB_COUNT.setInt(sb, count);
             if (count < utflen)
                 parseUTF2(bytes, sb, utflen, count);
-        } catch (IOException | IllegalAccessException e) {
+        } catch (@NotNull IOException | IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }
 
-    static void parseUTF2(StreamingDataInput bytes, Appendable appendable, int utflen, int count) throws IOException {
+    static void parseUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -213,7 +213,7 @@ public enum BytesUtil {
     }
 
     @ForceInline
-    public static void writeUTF(StreamingDataOutput bytes, CharSequence str) {
+    public static void writeUTF(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
         if (str == null) {
             bytes.writeStopBit(-1);
 
@@ -243,7 +243,7 @@ public enum BytesUtil {
     }
 
     @NotNull
-    public static Bytes asBytes(RandomDataOutput bytes, long position, long limit) {
+    public static Bytes asBytes(@NotNull RandomDataOutput bytes, long position, long limit) {
         Bytes sbytes = bytes.bytesForWrite();
         sbytes.writeLimit(limit);
         sbytes.readLimit(limit);
@@ -251,11 +251,11 @@ public enum BytesUtil {
         return sbytes;
     }
 
-    public static void appendUTF(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+    public static void appendUTF(@NotNull StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
         appendUTF0(bytes, str, offset, length);
     }
 
-    private static void appendUTF0(StreamingDataOutput bytes, CharSequence str, int offset, int length) {
+    private static void appendUTF0(@NotNull StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
         int i;
         for (i = 0; i < length; i++) {
             char c = str.charAt(offset + i);
@@ -287,7 +287,7 @@ public enum BytesUtil {
         }
     }
 
-    public static void appendUTF(StreamingDataOutput bytes, int c) {
+    public static void appendUTF(@NotNull StreamingDataOutput bytes, int c) {
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
 
@@ -308,7 +308,7 @@ public enum BytesUtil {
         }
     }
 
-    public static void writeStopBit(StreamingDataOutput out, long n) {
+    public static void writeStopBit(@NotNull StreamingDataOutput out, long n) {
         if ((n & ~0x7F) == 0) {
             out.writeByte((byte) (n & 0x7f));
             return;
@@ -331,7 +331,7 @@ public enum BytesUtil {
         return stopBitlength0(n);
     }
 
-    static void writeStopBit0(StreamingDataOutput out, long n) {
+    static void writeStopBit0(@NotNull StreamingDataOutput out, long n) {
         boolean neg = false;
         if (n < 0) {
             neg = true;
@@ -364,7 +364,7 @@ public enum BytesUtil {
         return len + 1;
     }
 
-    public static String toDebugString(RandomDataInput bytes, long maxLength) {
+    public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
         StringBuilder sb = new StringBuilder(200);
         long position = bytes.readPosition();
         sb.append("[")
@@ -378,11 +378,12 @@ public enum BytesUtil {
         return sb.toString();
     }
 
+    @NotNull
     public static Object asSize(long size) {
         return size == Bytes.MAX_CAPACITY ? "8EiB" : size;
     }
 
-    public static String to8bitString(BytesStore bytes) {
+    public static String to8bitString(@NotNull BytesStore bytes) {
         long pos = bytes.readPosition();
         int len = Maths.toInt32(bytes.readRemaining());
         char[] chars = new char[len];
@@ -403,13 +404,13 @@ public enum BytesUtil {
         }
     }
 
-    public static String toString(RandomDataInput bytes) {
+    public static String toString(@NotNull RandomDataInput bytes) {
         StringBuilder sb = new StringBuilder(200);
         toString(bytes, sb);
         return sb.toString();
     }
 
-    private static void toString(RandomDataInput bytes, Appendable sb, long start, long position, long end) {
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long position, long end) {
         try {
             // before
             if (start < 0) start = 0;
@@ -438,7 +439,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void toString(RandomDataInput bytes, StringBuilder sb) {
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull StringBuilder sb) {
         bytes.reserve();
         assert bytes.start() <= bytes.readPosition();
         assert bytes.readPosition() <= bytes.readLimit();
@@ -451,14 +452,14 @@ public enum BytesUtil {
     }
 
     @ForceInline
-    public static long readStopBit(StreamingDataInput in) {
+    public static long readStopBit(@NotNull StreamingDataInput in) {
         long l;
         if ((l = in.readByte()) >= 0)
             return l;
         return readStopBit0(in, l);
     }
 
-    static long readStopBit0(StreamingDataInput in, long l) {
+    static long readStopBit0(@NotNull StreamingDataInput in, long l) {
         l &= 0x7FL;
         long b;
         int count = 7;
@@ -480,7 +481,7 @@ public enum BytesUtil {
         }
     }
 
-    public static <S extends ByteStringAppender> void append(S out, long num) {
+    public static <S extends ByteStringAppender> void append(@NotNull S out, long num) {
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
                 out.write(MIN_VALUE_TEXT);
@@ -500,7 +501,7 @@ public enum BytesUtil {
     /**
      * The length of the number must be fixed otherwise short numbers will not overwrite longer numbers
      */
-    public static void append(RandomDataOutput out, long offset, long num, int digits) {
+    public static void append(@NotNull RandomDataOutput out, long offset, long num, int digits) {
         boolean negative = num < 0;
         num = Math.abs(num);
 
@@ -524,7 +525,7 @@ public enum BytesUtil {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
     }
 
-    private static void appendLong0(StreamingDataOutput out, long num) {
+    private static void appendLong0(@NotNull StreamingDataOutput out, long num) {
         byte[] numberBuffer = NUMBER_BUFFER.get();
         // Extract digits into the end of the numberBuffer
         int endIndex = appendLong1(numberBuffer, num);
@@ -610,7 +611,7 @@ public enum BytesUtil {
         return 1;
     }
 
-    public static void append(StreamingDataOutput out, double d) {
+    public static void append(@NotNull StreamingDataOutput out, double d) {
         long val = Double.doubleToRawLongBits(d);
         int sign = (int) (val >>> 63);
         int exp = (int) ((val >>> 52) & 2047);
@@ -787,22 +788,23 @@ public enum BytesUtil {
         return negative ? -d : d;
     }
 
+    @Nullable
     @ForceInline
-    public static String readUTFΔ(StreamingDataInput in) {
+    public static String readUTFΔ(@NotNull StreamingDataInput in) {
         StringBuilder sb = SBP.acquireStringBuilder();
         return in.readUTFΔ(sb) ? SI.intern(sb) : null;
     }
 
     @NotNull
     @ForceInline
-    public static String parseUTF(StreamingDataInput bytes, @NotNull StopCharTester tester) {
+    public static String parseUTF(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) {
         StringBuilder utfReader = SBP.acquireStringBuilder();
         parseUTF(bytes, utfReader, tester);
         return SI.intern(utfReader);
     }
 
     @ForceInline
-    public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
+    public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
         try {
             if (builder instanceof StringBuilder
                     && ((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore) {
@@ -819,7 +821,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void readUTF_SB1(VanillaBytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws IOException {
+    private static void readUTF_SB1(@NotNull VanillaBytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws IOException {
         NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore;
         int i = 0, len = Maths.toInt32(bytes.readRemaining());
         long address = nb.address + nb.translate(bytes.readPosition());
@@ -841,7 +843,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void readUTF_SB2(StreamingDataInput bytes, StringBuilder appendable, StopCharTester tester) throws UTFDataFormatException {
+    private static void readUTF_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws UTFDataFormatException {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -900,7 +902,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void readUTF1(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
+    private static void readUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
         int len = Maths.toInt32(bytes.readRemaining());
         while (len-- > 0) {
             int c = bytes.readUnsignedByte();
@@ -918,7 +920,7 @@ public enum BytesUtil {
         readUTF2(bytes, appendable, tester);
     }
 
-    private static void readUTF2(StreamingDataInput bytes, Appendable appendable, StopCharTester tester) throws IOException {
+    private static void readUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -978,7 +980,7 @@ public enum BytesUtil {
     }
 
     @ForceInline
-    public static void parseUTF(StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) {
+    public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) {
         setLength(builder, 0);
         try {
             readUTF0(bytes, builder, tester);
@@ -987,7 +989,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void readUTF0(StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
+    private static void readUTF0(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
@@ -1060,19 +1062,19 @@ public enum BytesUtil {
     }
 
     @ForceInline
-    public static void parse8bit(StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
         read8bit0(bytes, builder, tester);
     }
 
     @ForceInline
-    public static void parse8bit(StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
         builder.readPosition(0);
 
         read8bit0(bytes, builder, tester);
     }
 
-    private static void read8bit0(StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
+    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -1083,7 +1085,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void read8bit0(StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) {
+    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) {
         int ch = bytes.readUnsignedByte();
         do {
             int next = bytes.readUnsignedByte();
@@ -1102,7 +1104,7 @@ public enum BytesUtil {
         bytes2.writeUnsignedByte(ch);
     }
 
-    public static double parseDouble(StreamingDataInput in) {
+    public static double parseDouble(@NotNull StreamingDataInput in) {
         long value = 0;
         int exp = 0;
         boolean negative = false;
@@ -1150,7 +1152,7 @@ public enum BytesUtil {
         return asDouble(value, exp, negative, decimalPlaces);
     }
 
-    static boolean compareRest(StreamingDataInput in, String s) {
+    static boolean compareRest(@NotNull StreamingDataInput in, @NotNull String s) {
         if (s.length() > in.readRemaining())
             return false;
         long position = in.readPosition();
@@ -1164,7 +1166,7 @@ public enum BytesUtil {
     }
 
     @ForceInline
-    public static long parseLong(StreamingDataInput in) {
+    public static long parseLong(@NotNull StreamingDataInput in) {
         long num = 0;
         boolean negative = false;
         while (in.readRemaining() > 0) {
@@ -1184,7 +1186,7 @@ public enum BytesUtil {
         return negative ? -num : num;
     }
 
-    public static long parseLong(RandomDataInput in, long offset) {
+    public static long parseLong(@NotNull RandomDataInput in, long offset) {
         long num = 0;
         boolean negative = false;
         while (true) {
@@ -1200,7 +1202,7 @@ public enum BytesUtil {
         return negative ? -num : num;
     }
 
-    public static boolean skipTo(ByteStringParser parser, StopCharTester tester) {
+    public static boolean skipTo(@NotNull ByteStringParser parser, @NotNull StopCharTester tester) {
         while (parser.readRemaining() > 0) {
             int ch = parser.readUnsignedByte();
             if (tester.isStopChar(ch))
@@ -1209,7 +1211,7 @@ public enum BytesUtil {
         return false;
     }
 
-    public static int getAndAddInt(BytesStore in, long offset, int adding) {
+    public static int getAndAddInt(@NotNull BytesStore in, long offset, int adding) {
         for (; ; ) {
             int value = in.readVolatileInt(offset);
             if (in.compareAndSwapInt(offset, value, value + adding))
@@ -1217,7 +1219,7 @@ public enum BytesUtil {
         }
     }
 
-    public static long getAndAddLong(BytesStore in, long offset, long adding) {
+    public static long getAndAddLong(@NotNull BytesStore in, long offset, long adding) {
         for (; ; ) {
             long value = in.readVolatileLong(offset);
             if (in.compareAndSwapLong(offset, value, value + adding))
@@ -1352,7 +1354,7 @@ public enum BytesUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static <ACS extends Appendable & CharSequence> void append(ACS sb, String str) {
+    public static <ACS extends Appendable & CharSequence> void append(@NotNull ACS sb, String str) {
         try {
             sb.append(str);
         } catch (IOException e) {
@@ -1367,7 +1369,7 @@ public enum BytesUtil {
         return o1 != null && o1.equals(o2);
     }
 
-    public static void appendTimeMillis(ByteStringAppender b, long timeInMS) {
+    public static void appendTimeMillis(@NotNull ByteStringAppender b, long timeInMS) {
         int hours = (int) (timeInMS / (60 * 60 * 1000));
         if (hours > 99) {
             b.append(hours); // can have over 24 hours.
@@ -1390,7 +1392,7 @@ public enum BytesUtil {
         b.writeByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(BytesStore b1, BytesStore b2, long remaining) {
+    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long remaining) {
         BytesStore bs1 = b1.bytesStore();
         BytesStore bs2 = b2.bytesStore();
         long i = 0;
@@ -1416,7 +1418,7 @@ public enum BytesUtil {
         return true;
     }
 
-    public static void appendDateMillis(ByteStringAppender b, long timeInMS) {
+    public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS) {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
             dateCacheTL.set(dateCache = new DateCache());

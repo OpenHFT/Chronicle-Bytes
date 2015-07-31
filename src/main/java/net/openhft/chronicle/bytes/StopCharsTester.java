@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.EscapingStopCharsTester;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author peter.lawrey
@@ -37,6 +38,7 @@ public interface StopCharsTester {
      */
     boolean isStopChar(int ch, int ch2) throws IllegalStateException;
 
+    @NotNull
     default StopCharsTester escaping() {
         return new EscapingStopCharsTester(this);
     }

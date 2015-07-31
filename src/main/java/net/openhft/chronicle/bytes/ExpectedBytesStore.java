@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import java.nio.ByteBuffer;
 
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
@@ -26,6 +29,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         this.underlyingBytesStore = underlyingBytesStore;
     }
 
+    @NotNull
     @Override
     public BytesStore<B, Underlying> copy() {
         throw new UnsupportedOperationException("todo");
@@ -36,6 +40,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return underlyingBytesStore.capacity();
     }
 
+    @Nullable
     @Override
     public Underlying underlyingObject() {
         return underlyingBytesStore.underlyingObject();
@@ -91,6 +96,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public B writeByte(long offset, byte i8) {
         byte i8a = underlyingBytesStore.readByte(offset);
@@ -107,6 +113,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public B writeShort(long offset, short i) {
         short ia = underlyingBytesStore.readShort(offset);
@@ -115,6 +122,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (B) this;
     }
 
+    @NotNull
     @Override
     public B writeInt(long offset, int i) {
         int ia = underlyingBytesStore.readInt(offset);
@@ -127,6 +135,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     public void reserve() throws IllegalStateException {
     }
 
+    @NotNull
     @Override
     public B writeOrderedInt(long offset, int i) {
         int ia = underlyingBytesStore.readInt(offset);
@@ -141,6 +150,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     public void release() throws IllegalStateException {
     }
 
+    @NotNull
     @Override
     public B writeLong(long offset, long i) {
         long ia = underlyingBytesStore.readLong(offset);
@@ -154,6 +164,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public B writeOrderedLong(long offset, long i) {
         long ia = underlyingBytesStore.readLong(offset);
@@ -162,6 +173,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (B) this;
     }
 
+    @NotNull
     @Override
     public B writeFloat(long offset, float d) {
         float ia = underlyingBytesStore.readFloat(offset);
@@ -170,6 +182,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (B) this;
     }
 
+    @NotNull
     @Override
     public B writeDouble(long offset, double d) {
         double ia = underlyingBytesStore.readDouble(offset);
@@ -178,6 +191,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (B) this;
     }
 
+    @NotNull
     @Override
     public B write(long offsetInRDO, byte[] bytes, int offset, int length) {
         for (int i = 0; i < length; i++)
@@ -190,6 +204,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public B write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();

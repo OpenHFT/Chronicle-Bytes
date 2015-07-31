@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
@@ -26,6 +27,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 public interface RandomDataInput extends RandomCommon {
     String[] charToString = createCharToString();
 
+    @NotNull
     static String[] createCharToString() {
         String[] charToString = new String[256];
         charToString[0] = "\u0660";
@@ -104,7 +106,7 @@ public interface RandomDataInput extends RandomCommon {
      */
     @Deprecated
     default boolean bytesEqual(
-            long offset, RandomDataInput second, long secondOffset, long len) {
+            long offset, @NotNull RandomDataInput second, long secondOffset, long len) {
         long i = 0;
         while (len - i >= 8L) {
             if (readLong(offset + i) != second.readLong(secondOffset + i))
@@ -127,7 +129,7 @@ public interface RandomDataInput extends RandomCommon {
         return true;
     }
 
-    default void copyTo(byte[] bytes) {
+    default void copyTo(@NotNull byte[] bytes) {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = readByte(start() + i);
     }

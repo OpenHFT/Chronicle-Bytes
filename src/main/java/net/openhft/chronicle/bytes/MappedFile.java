@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -32,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MappedFile implements ReferenceCounted {
+    @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
     private final long chunkSize;
@@ -41,7 +44,7 @@ public class MappedFile implements ReferenceCounted {
     private final AtomicBoolean closed = new AtomicBoolean();
     private final long capacity;
 
-    MappedFile(File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+    MappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
         this.raf = new RandomAccessFile(file, "rw");
         this.fileChannel = raf.getChannel();
         this.chunkSize = OS.mapAlign(chunkSize);
@@ -49,22 +52,27 @@ public class MappedFile implements ReferenceCounted {
         capacity = 1L << 40;
     }
 
-    public static MappedFile mappedFile(File file, long chunkSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize) throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
 
-    public static MappedFile mappedFile(String filename, long chunkSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedFile mappedFile(@NotNull String filename, long chunkSize) throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
 
-    public static MappedFile mappedFile(String filename, long chunkSize, long overlapSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long overlapSize) throws FileNotFoundException {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
-    public static MappedFile mappedFile(File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+    @NotNull
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
         return new MappedFile(file, chunkSize, overlapSize);
     }
 
+    @Nullable
     public MappedBytesStore acquireByteStore(long position) throws IOException {
         if (closed.get())
             throw new IOException("Closed");
@@ -115,7 +123,7 @@ public class MappedFile implements ReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForRead(long position, VanillaBytes bytes) throws IOException {
+    public void acquireBytesForRead(long position, @NotNull VanillaBytes bytes) throws IOException {
         MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
@@ -128,7 +136,7 @@ public class MappedFile implements ReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForWrite(long position, VanillaBytes bytes) throws IOException {
+    public void acquireBytesForWrite(long position, @NotNull VanillaBytes bytes) throws IOException {
         MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
         bytes.writePosition(position);
@@ -181,6 +189,7 @@ public class MappedFile implements ReferenceCounted {
         }
     }
 
+    @NotNull
     public String referenceCounts() {
         StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());

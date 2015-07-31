@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
@@ -26,6 +27,7 @@ public enum NoBytesStore implements BytesStore {
     public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
     public static final Bytes NO_BYTES = new VanillaBytes(noBytesStore());
 
+    @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return NO_BYTES_STORE;
     }
@@ -43,46 +45,55 @@ public enum NoBytesStore implements BytesStore {
         return 1L;
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeByte(long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeShort(long offset, short i) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeInt(long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeOrderedInt(long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeLong(long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeOrderedLong(long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeFloat(long offset, float d) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeDouble(long offset, double d) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {
         throw new UnsupportedOperationException();
@@ -93,6 +104,7 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();
@@ -128,6 +140,7 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public BytesStore copy() {
         return this;
@@ -185,6 +198,7 @@ public enum NoBytesStore implements BytesStore {
         return NO_PAGE;
     }
 
+    @NotNull
     @Override
     public Bytes bytesForWrite() {
         throw new UnsupportedOperationException("todo");

@@ -17,25 +17,27 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.ForceInline;
+import org.jetbrains.annotations.NotNull;
 
 interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
+    @NotNull
     @ForceInline
-    default String parseUTF(StopCharTester stopCharTester) {
+    default String parseUTF(@NotNull StopCharTester stopCharTester) {
         return BytesUtil.parseUTF(this, stopCharTester);
     }
 
     @ForceInline
-    default void parseUTF(Appendable sb, StopCharTester stopCharTester) {
+    default void parseUTF(@NotNull Appendable sb, @NotNull StopCharTester stopCharTester) {
         BytesUtil.parseUTF(this, sb, stopCharTester);
     }
 
     @ForceInline
-    default void parseUTF(Appendable sb, StopCharsTester stopCharsTester) {
+    default void parseUTF(@NotNull Appendable sb, @NotNull StopCharsTester stopCharsTester) {
         BytesUtil.parseUTF(this, sb, stopCharsTester);
     }
 
     @ForceInline
-    default void parse8bit(Appendable sb, StopCharsTester stopCharsTester) {
+    default void parse8bit(Appendable sb, @NotNull StopCharsTester stopCharsTester) {
         if (sb instanceof StringBuilder)
             BytesUtil.parse8bit(this, (StringBuilder) sb, stopCharsTester);
         else
@@ -53,7 +55,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     @ForceInline
-    default boolean skipTo(StopCharTester tester) {
+    default boolean skipTo(@NotNull StopCharTester tester) {
         return BytesUtil.skipTo(this, tester);
     }
 }

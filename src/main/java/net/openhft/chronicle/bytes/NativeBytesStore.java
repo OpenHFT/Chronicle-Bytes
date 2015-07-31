@@ -36,14 +36,17 @@ public class NativeBytesStore<Underlying>
     private final Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
+    @Nullable
     private final Underlying underlyingObject;
+    @Nullable
     private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
     // on release, set this to null.
+    @Nullable
     protected Memory memory = OS.memory();
     protected long address;
     long maximumLimit;
 
-    private NativeBytesStore(ByteBuffer bb, boolean elastic) {
+    private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
         setAddress(((DirectBuffer) bb).address());
@@ -52,7 +55,7 @@ public class NativeBytesStore<Underlying>
     }
 
     public NativeBytesStore(
-            long address, long maximumLimit, Runnable deallocator, boolean elastic) {
+            long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic) {
         setAddress(address);
         this.maximumLimit = maximumLimit;
         cleaner = deallocator == null ? null : Cleaner.create(this, deallocator);
@@ -60,7 +63,8 @@ public class NativeBytesStore<Underlying>
         this.elastic = elastic;
     }
 
-    public static NativeBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+    @NotNull
+    public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
     }
 
@@ -69,10 +73,12 @@ public class NativeBytesStore<Underlying>
      *
      * @param capacity of the buffer.
      */
+    @NotNull
     public static NativeBytesStore<Void> nativeStore(long capacity) {
         return of(capacity, true, true);
     }
 
+    @NotNull
     private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
@@ -84,22 +90,27 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
+    @NotNull
     public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity) {
         return of(capacity, true, false);
     }
 
+    @NotNull
     public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
         return of(capacity, false, false);
     }
 
+    @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(OS.pageSize());
     }
 
+    @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size) {
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
+    @NotNull
     @Override
     public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
         if (underlyingObject == null) {
@@ -135,12 +146,14 @@ public class NativeBytesStore<Underlying>
         return maximumLimit;
     }
 
+    @Nullable
     @Override
     @ForceInline
     public Underlying underlyingObject() {
         return underlyingObject;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> zeroOut(long start, long end) {
@@ -250,6 +263,7 @@ public class NativeBytesStore<Underlying>
         return memory.readVolatileLong(address + translate(offset));
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeByte(long offset, byte i8) {
@@ -257,6 +271,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeShort(long offset, short i16) {
@@ -264,6 +279,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeInt(long offset, int i32) {
@@ -271,6 +287,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeOrderedInt(long offset, int i) {
@@ -278,6 +295,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeLong(long offset, long i64) {
@@ -285,6 +303,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i) {
@@ -292,6 +311,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeFloat(long offset, float f) {
@@ -299,6 +319,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeDouble(long offset, double d) {
@@ -306,6 +327,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> write(
@@ -317,7 +339,7 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public void write(
-            long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
             memory.copyMemory(((DirectBuffer) bytes).address(),
                     address + translate(offsetInRDO), length);
@@ -327,10 +349,11 @@ public class NativeBytesStore<Underlying>
         }
     }
 
+    @NotNull
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> write(
-            long offsetInRDO, RandomDataInput bytes, long offset, long length) {
+            long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length) {
         // TODO optimize, call unsafe.copyMemory when possible, copy 4, 2 bytes at once
         long i = 0;
         for (; i < length - 7; i += 8) {

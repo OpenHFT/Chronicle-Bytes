@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.InputStream;
@@ -36,14 +37,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength(long length, Consumer<S> bytesConsumer) {
+    default void readWithLength(long length, @NotNull Consumer<S> bytesConsumer) {
         parseWithLength(length, (Function<S, Void>) s -> {
             bytesConsumer.accept(s);
             return null;
         });
     }
 
-    default <R> R parseWithLength(long length, Function<S, R> bytesConsumer) {
+    default <R> R parseWithLength(long length, @NotNull Function<S, R> bytesConsumer) {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -57,6 +58,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
+    @NotNull
     default InputStream inputStream() {
         throw new UnsupportedOperationException();
     }
@@ -110,7 +112,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param sb to copy chars to
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
-    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(ACS sb) throws UTFDataFormatRuntimeException {
+    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
         BytesUtil.setLength(sb, 0);
         long len0 = BytesUtil.readStopBit(this);
         if (len0 == -1)
@@ -120,12 +122,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default void read(byte[] bytes) {
+    default void read(@NotNull byte[] bytes) {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = readByte();
     }
 
-    default void read(ByteBuffer buffer) {
+    default void read(@NotNull ByteBuffer buffer) {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }

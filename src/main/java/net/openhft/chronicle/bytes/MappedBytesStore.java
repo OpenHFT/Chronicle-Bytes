@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
+import org.jetbrains.annotations.NotNull;
 
 public class MappedBytesStore extends NativeBytesStore {
     private final long start;
@@ -29,6 +30,7 @@ public class MappedBytesStore extends NativeBytesStore {
         this.safeLimit = start + safeCapacity;
     }
 
+    @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite() {
         return new VanillaBytes<>(this);

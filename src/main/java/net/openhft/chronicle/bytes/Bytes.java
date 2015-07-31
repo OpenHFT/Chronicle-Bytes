@@ -41,10 +41,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.wrap(byteBuffer).bytesForWrite();
     }
 
-    static Bytes<byte[]> expect(String text) {
+    @NotNull
+    static Bytes<byte[]> expect(@NotNull String text) {
         return expect(wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1)));
     }
 
+    @NotNull
     static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
         return new VanillaBytes<>(new ExpectedBytesStore<>(bytesStore));
     }
@@ -57,7 +59,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.<byte[]>wrap(byteArray).bytesForWrite();
     }
 
-    static Bytes<byte[]> from(String text) {
+    static Bytes<byte[]> from(@NotNull String text) {
         return wrapForRead(text.getBytes(StandardCharsets.UTF_8));
     }
 
@@ -150,10 +152,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
+    @NotNull
     default String toHexString() {
         return BytesUtil.toHexString(this);
     }
 
+    @NotNull
     default String toHexString(long maxLength) {
         if (readRemaining() < maxLength) return toHexString();
         return BytesUtil.toHexString(this, readPosition(), maxLength) + ".... truncated";

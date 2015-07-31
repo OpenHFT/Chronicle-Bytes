@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 public class PointerBytesStore extends NativeBytesStore<Void> {
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false);
@@ -26,6 +28,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
         this.maximumLimit = capacity;
     }
 
+    @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite() {
         return new VanillaBytes<>(this);

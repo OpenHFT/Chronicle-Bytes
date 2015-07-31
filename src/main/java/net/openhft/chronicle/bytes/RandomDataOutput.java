@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
 
@@ -57,7 +58,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     R writeDouble(long offset, double d);
 
-    default R write(long offsetInRDO, byte[] bytes) {
+    default R write(long offsetInRDO, @NotNull byte[] bytes) {
         return write(offsetInRDO, bytes, 0, bytes.length);
     }
 
@@ -65,7 +66,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length);
 
-    default R write(long offsetInRDO, Bytes bytes) {
+    default R write(long offsetInRDO, @NotNull Bytes bytes) {
         return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
@@ -73,6 +74,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     R zeroOut(long start, long end) ;
 
+    @NotNull
     default R append(long offset, long value, int digits) {
         BytesUtil.append(this, offset, value, digits);
         return (R) this;

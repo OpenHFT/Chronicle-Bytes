@@ -17,6 +17,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
 
@@ -28,16 +30,17 @@ import static java.lang.Math.min;
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
-    static BytesStore wrap(byte[] bytes) {
+    static BytesStore wrap(@NotNull byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
 
-    static BytesStore wrap(ByteBuffer bb) {
+    static BytesStore wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
                 ? NativeBytesStore.wrap(bb)
                 : HeapBytesStore.wrap(bb);
     }
 
+    @NotNull
     static PointerBytesStore nativePointer() {
         return new PointerBytesStore();
     }
@@ -77,6 +80,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     long capacity();
 
+    @Nullable
     Underlying underlyingObject();
 
     /**
@@ -90,7 +94,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return capacity();
     }
 
-    default void copyTo(BytesStore store) {
+    default void copyTo(@NotNull BytesStore store) {
         long copy = min(capacity(), store.capacity());
         int i = 0;
         for (; i < copy - 7; i++)
@@ -141,11 +145,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (char) readUnsignedByte(index);
     }
 
+    @NotNull
     @Override
     default CharSequence subSequence(int start, int end) {
         throw new UnsupportedOperationException("todo");
     }
 
+    @NotNull
     default String toDebugString() {
         return BytesUtil.toDebugString(this, Integer.MAX_VALUE);
     }
@@ -154,7 +160,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return this;
     }
 
-    default boolean equalBytes(BytesStore b, long remaining) {
+    default boolean equalBytes(@NotNull BytesStore b, long remaining) {
         return remaining == 8
                 ? readLong(readPosition()) == b.readLong(b.readPosition())
                 : BytesUtil.equalBytesAny(this, b, remaining);

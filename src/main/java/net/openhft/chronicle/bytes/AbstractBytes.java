@@ -19,12 +19,14 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
+    @Nullable
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long readPosition;
@@ -39,6 +41,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         this.writeLimit = writeLimit;
     }
 
+    @NotNull
     public Bytes<Underlying> clear() {
         readPosition = writePosition = start();
         writeLimit = capacity();
@@ -68,6 +71,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.capacity();
     }
 
+    @Nullable
     @Override
     public Underlying underlyingObject() {
         return bytesStore.underlyingObject();
@@ -265,6 +269,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return refCount.get();
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeByte(long offset, byte i) {
@@ -273,6 +278,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeShort(long offset, short i) {
@@ -281,6 +287,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeInt(long offset, int i) {
@@ -289,6 +296,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeOrderedInt(long offset, int i) {
@@ -297,6 +305,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeLong(long offset, long i) {
@@ -305,6 +314,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeOrderedLong(long offset, long i) {
@@ -313,6 +323,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeFloat(long offset, float d) {
@@ -321,6 +332,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeDouble(long offset, double d) {
@@ -329,6 +341,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) {
@@ -344,6 +357,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,
@@ -432,6 +446,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return true;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeByte(byte i8) {
@@ -447,6 +462,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return oldPosition;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeShort(short i16) {
@@ -455,6 +471,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeInt(int i) {
@@ -463,6 +480,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeLong(long i64) {
@@ -471,6 +489,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeFloat(float f) {
@@ -479,6 +498,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeDouble(double d) {
@@ -487,6 +507,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
@@ -495,15 +516,17 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(ByteBuffer buffer) {
+    public Bytes<Underlying> write(@NotNull ByteBuffer buffer) {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
         assert writePosition <= writeLimit();
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeOrderedInt(int i) {
@@ -512,6 +535,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeOrderedLong(long i) {
@@ -538,7 +562,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
     }
 
-    public boolean equalsBytes(Bytes b2, long remaining) {
+    public boolean equalsBytes(@NotNull Bytes b2, long remaining) {
         long i = 0;
         for (; i < remaining - 7; i++)
             if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
@@ -581,6 +605,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.nativeWrite(address, position, size);
     }
 
+    @Nullable
     @Override
     public BytesStore bytesStore() {
         return bytesStore;

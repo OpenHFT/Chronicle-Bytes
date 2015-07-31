@@ -29,13 +29,15 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();
+    @NotNull
     private final Object realUnderlyingObject;
     private final int dataOffset;
     private final int capacity;
     private final AtomicLong refCount = new AtomicLong(1);
+    @NotNull
     private final Underlying underlyingObject;
 
-    private HeapBytesStore(ByteBuffer byteBuffer) {
+    private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
@@ -43,7 +45,8 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
-    static HeapBytesStore<ByteBuffer> wrap(ByteBuffer bb) {
+    @NotNull
+    static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new HeapBytesStore<>(bb);
     }
 
@@ -53,6 +56,7 @@ public class HeapBytesStore<Underlying>
         return BytesUtil.toString(this);
     }
 
+    @NotNull
     @Override
     public BytesStore<HeapBytesStore<Underlying>, Underlying> copy() {
         throw new UnsupportedOperationException("todo");
@@ -78,6 +82,7 @@ public class HeapBytesStore<Underlying>
         return capacity;
     }
 
+    @NotNull
     @Override
     public Underlying underlyingObject() {
         return underlyingObject;
@@ -136,6 +141,7 @@ public class HeapBytesStore<Underlying>
         }
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b) {
         checkOffset(offset, 1);
@@ -143,6 +149,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeShort(long offset, short i16) {
         checkOffset(offset, 2);
@@ -150,6 +157,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore writeInt(long offset, int i32) {
         checkOffset(offset, 4);
@@ -157,6 +165,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32) {
         checkOffset(offset, 4);
@@ -164,6 +173,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeLong(long offset, long i64) {
         checkOffset(offset, 8);
@@ -171,6 +181,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeOrderedLong(long offset, long i) {
         checkOffset(offset, 8);
@@ -178,6 +189,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeFloat(long offset, float f) {
         checkOffset(offset, 4);
@@ -185,6 +197,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeDouble(long offset, double d) {
         checkOffset(offset, 8);
@@ -192,6 +205,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length) {
@@ -203,7 +217,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public void write(
-            long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         checkOffset(offset, length);
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
@@ -215,6 +229,7 @@ public class HeapBytesStore<Underlying>
         }
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> write(long offsetInRDO,
                                             RandomDataInput bytes, long offset, long length) {
