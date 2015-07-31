@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
@@ -46,6 +47,7 @@ public class HeapBytesStore<Underlying>
         return new HeapBytesStore<>(bb);
     }
 
+    @NotNull
     @Override
     public String toString() {
         return BytesUtil.toString(this);

@@ -52,7 +52,7 @@ public enum BytesUtil {
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final Constructor<String> STRING_CONSTRUCTOR;
     private static final Field SB_VALUE, SB_COUNT;
-    private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<DateCache>();
+    private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
 
     static {
         try {

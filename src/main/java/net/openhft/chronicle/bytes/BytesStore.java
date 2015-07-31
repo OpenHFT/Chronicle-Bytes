@@ -134,7 +134,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Assume ISO-8859-1 encoding, subclasses can overrride this.
+     * Assume ISO-8859-1 encoding, subclasses can override this.
      */
     @Override
     default char charAt(int index) {
