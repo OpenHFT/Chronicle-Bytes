@@ -21,6 +21,8 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +36,9 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MappedFile implements ReferenceCounted {
+
+    private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
+
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -105,7 +110,8 @@ public class MappedFile implements ReferenceCounted {
             MappedBytesStore mbs2 = new MappedBytesStore(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
-            System.out.printf("Took %,d us to acquire chunk %,d%n", (System.nanoTime() - start) / 1000, chunk);
+            LOG.warn("Took %,d us to acquire chunk %,d%n", (System.nanoTime() - start) / 1000,
+                    chunk);
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
@@ -185,7 +191,7 @@ public class MappedFile implements ReferenceCounted {
         try {
             fileChannel.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            LOG.error("", e);
         }
     }
 
