@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.VanillaBytes;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -64,23 +65,24 @@ public class OptimisedBytesHashTest {
     }
 
     @Test
-    @Ignore("Long running, avg score = 6879")
+    @Ignore("Long running, har mean score = 6851")
     public void testRandomness() {
         long time = 0, timeCount = 0;
-        long scoreSum = 0;
-        for (int t = 0; t < 500; t++) {
+        double scoreSum = 0;
+        int runs = 500;
+        for (int t = 0; t < runs; t++) {
             long[] hashs = new long[8192];
-            NativeBytes b = Bytes.allocateElasticDirect(hashs.length / 64);
-            byte[] init = new byte[hashs.length / 64];
+            byte[] init = new byte[hashs.length / 8];
+            VanillaBytes b = Bytes.allocateDirect(init.length);
             new SecureRandom().nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
                 b.write(init);
 
                 b.writeLong(i >> 6 << 3, 1L << i);
-                b.readLimit(hashs.length / 8);
+                b.readLimit(init.length);
                 long start = System.nanoTime();
-                hashs[i] = OptimisedBytesHash.INSTANCE.applyAsLong(b);
+                hashs[i] = VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
 
                 time += System.nanoTime() - start;
                 timeCount++;
@@ -95,11 +97,11 @@ public class OptimisedBytesHashTest {
                         score += d;
                     }
                 }
-            scoreSum += score;
+            scoreSum += 1.0 / score;
             if (t % 50 == 0)
                 System.out.println(t + " - Score: " + score);
         }
-        System.out.println("Average score: " + scoreSum / 500);
+        System.out.println("Average score: " + (long) (runs / scoreSum));
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
     }
 
