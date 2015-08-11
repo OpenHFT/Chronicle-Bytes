@@ -103,6 +103,16 @@ public enum BytesUtil {
         }
     }
 
+    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        if (bytes instanceof Bytes
+                && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
+                && appendable instanceof StringBuilder) {
+            parse8bit_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
+        } else {
+            parse8bit1(bytes, appendable, utflen);
+        }
+    }
+
     public static void parseUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
@@ -122,6 +132,18 @@ public enum BytesUtil {
 
             if (utflen > count)
                 parseUTF2(bytes, appendable, utflen, count);
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        try {
+            assert bytes.readRemaining() >= utflen;
+            for (int count = 0; count < utflen; count++) {
+                int c = bytes.readUnsignedByte();
+                appendable.append((char) c);
+            }
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -148,6 +170,27 @@ public enum BytesUtil {
             if (count < utflen)
                 parseUTF2(bytes, sb, utflen, count);
         } catch (@NotNull IOException | IllegalAccessException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+        try {
+            int count = 0;
+            if (utflen > bytes.readRemaining())
+                throw new BufferUnderflowException();
+            NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
+            long address = nbs.address + nbs.translate(bytes.readPosition());
+            Memory memory = nbs.memory;
+            sb.ensureCapacity(utflen);
+            char[] chars = (char[]) SB_VALUE.get(sb);
+            while (count < utflen) {
+                int c = memory.readByte(address + count) & 0xFF;
+                chars[count++] = (char) c;
+            }
+            bytes.readSkip(count);
+            SB_COUNT.setInt(sb, count);
+        } catch (@NotNull IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }
@@ -222,6 +265,18 @@ public enum BytesUtil {
             long utfLength = findUTFLength(str);
             bytes.writeStopBit(utfLength);
             appendUTF(bytes, str, 0, str.length());
+        }
+    }
+
+    @ForceInline
+    public static void write8bit(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
+        if (str == null) {
+            bytes.writeStopBit(-1);
+
+        } else {
+            long len = str.length();
+            bytes.writeStopBit(len);
+            append8bit(bytes, str, 0, str.length());
         }
     }
 
@@ -796,6 +851,13 @@ public enum BytesUtil {
         return in.readUTFΔ(sb) ? SI.intern(sb) : null;
     }
 
+    @Nullable
+    @ForceInline
+    public static String read8bit(@NotNull StreamingDataInput in) {
+        StringBuilder sb = SBP.acquireStringBuilder();
+        return in.read8bit(sb) ? SI.intern(sb) : null;
+    }
+
     @NotNull
     @ForceInline
     public static String parseUTF(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) {
@@ -808,8 +870,8 @@ public enum BytesUtil {
     public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharTester tester) {
         try {
             if (builder instanceof StringBuilder
-                    && ((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore) {
-                VanillaBytes vb = (VanillaBytes) bytes;
+                    && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
+                Bytes vb = (Bytes) bytes;
                 StringBuilder sb = (StringBuilder) builder;
                 sb.setLength(0);
                 readUTF_SB1(vb, sb, tester);
@@ -822,8 +884,8 @@ public enum BytesUtil {
         }
     }
 
-    private static void readUTF_SB1(@NotNull VanillaBytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws IOException {
-        NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore;
+    private static void readUTF_SB1(@NotNull Bytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws IOException {
+        NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0, len = Maths.toInt32(bytes.readRemaining());
         long address = nb.address + nb.translate(bytes.readPosition());
 
@@ -1073,6 +1135,49 @@ public enum BytesUtil {
         builder.readPosition(0);
 
         read8bit0(bytes, builder, tester);
+    }
+
+    @ForceInline
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharTester tester) {
+        builder.setLength(0);
+        read8bit0(bytes, builder, tester);
+    }
+
+    @ForceInline
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharTester tester) {
+        builder.readPosition(0);
+
+        read8bit0(bytes, builder, tester);
+    }
+
+    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) {
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            if (tester.isStopChar(c))
+                return;
+            appendable.append((char) c);
+            if (bytes.readRemaining() == 0)
+                return;
+        }
+    }
+
+    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester) {
+        int ch = bytes.readUnsignedByte();
+        do {
+            if (tester.isStopChar(ch)) {
+                bytes.readSkip(-1);
+                return;
+            }
+            bytes2.writeUnsignedByte(ch);
+            int next = bytes.readUnsignedByte();
+            ch = next;
+        } while (bytes.readRemaining() > 1);
+
+        if (tester.isStopChar(ch)) {
+            bytes.readSkip(-1);
+            return;
+        }
+        bytes2.writeUnsignedByte(ch);
     }
 
     private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {

@@ -37,6 +37,14 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     @ForceInline
+    default void parse8bit(Appendable sb, @NotNull StopCharTester stopCharTester) {
+        if (sb instanceof StringBuilder)
+            BytesUtil.parse8bit(this, (StringBuilder) sb, stopCharTester);
+        else
+            BytesUtil.parse8bit(this, (Bytes) sb, stopCharTester);
+    }
+
+    @ForceInline
     default void parse8bit(Appendable sb, @NotNull StopCharsTester stopCharsTester) {
         if (sb instanceof StringBuilder)
             BytesUtil.parse8bit(this, (StringBuilder) sb, stopCharsTester);

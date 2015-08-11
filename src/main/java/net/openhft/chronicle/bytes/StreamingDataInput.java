@@ -106,6 +106,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesUtil.readUTFΔ(this);
     }
 
+    @Nullable
+    default String read8bit() {
+        return BytesUtil.read8bit(this);
+    }
+
     /**
      * The same as readUTFΔ() except the chars are copied to a truncated StringBuilder.
      *
@@ -119,6 +124,26 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             return false;
         int len = Maths.toUInt31(len0);
         BytesUtil.parseUTF(this, sb, len);
+        return true;
+    }
+
+    default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+        BytesUtil.setLength(sb, 0);
+        long len0 = BytesUtil.readStopBit(this);
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        BytesUtil.parse8bit(this, sb, len);
+        return true;
+    }
+
+    default boolean read8bit(StringBuilder sb) {
+        sb.setLength(0);
+        long len0 = BytesUtil.readStopBit(this);
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        BytesUtil.parse8bit(this, sb, len);
         return true;
     }
 

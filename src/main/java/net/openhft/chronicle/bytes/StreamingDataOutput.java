@@ -56,6 +56,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    default S write8bit(CharSequence cs) {
+        BytesUtil.write8bit(this, cs);
+        return (S) this;
+    }
+
     @NotNull
     S writeByte(byte i8);
 

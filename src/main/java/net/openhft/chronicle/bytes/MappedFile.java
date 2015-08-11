@@ -110,8 +110,9 @@ public class MappedFile implements ReferenceCounted {
             MappedBytesStore mbs2 = new MappedBytesStore(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
-            LOG.warn("Took %,d us to acquire chunk %,d%n", (System.nanoTime() - start) / 1000,
-                    chunk);
+            LOG.warn(String.format("Took %,d us to acquire chunk %,d",
+                    (System.nanoTime() - start) / 1000,
+                    chunk));
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
