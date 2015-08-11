@@ -94,15 +94,16 @@ public enum BytesUtil {
     }
 
     public static void parseUTF(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
-        if (((AbstractBytes) bytes).bytesStore() instanceof NativeBytesStore
+        if (bytes instanceof Bytes
+                && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {
-            parseUTF_SB1((AbstractBytes) bytes, (StringBuilder) appendable, utflen);
+            parseUTF_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
             parseUTF1(bytes, appendable, utflen);
         }
     }
 
-    static void parseUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parseUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
             assert bytes.readRemaining() >= utflen;
@@ -126,12 +127,12 @@ public enum BytesUtil {
         }
     }
 
-    static void parseUTF_SB1(@NotNull AbstractBytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parseUTF_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
             if (utflen > bytes.readRemaining())
                 throw new BufferUnderflowException();
-            NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore;
+            NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
             long address = nbs.address + nbs.translate(bytes.readPosition());
             Memory memory = nbs.memory;
             sb.ensureCapacity(utflen);

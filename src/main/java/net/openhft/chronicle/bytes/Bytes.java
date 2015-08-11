@@ -63,14 +63,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return wrapForRead(text.getBytes(StandardCharsets.UTF_8));
     }
 
-    default Bytes<Underlying> unchecked(boolean unchecked) {
-        return unchecked ? new UncheckedBytes<>(this) : this;
-    }
-
-    default long safeLimit() {
-        return bytesStore().safeLimit();
-    }
-
     static VanillaBytes<Void> allocateDirect(long capacity) {
         return NativeBytesStore.nativeStoreWithFixedCapacity(capacity).bytesForWrite();
     }
@@ -82,7 +74,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) {
         return NativeBytes.nativeBytes(initialCapacity);
     }
-
 
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
@@ -132,6 +123,18 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             buffer.readLimit(limit);
             buffer.readPosition(pos);
         }
+    }
+
+    default Bytes<Underlying> unchecked(boolean unchecked) {
+        return unchecked ?
+                start() == 0 && bytesStore() instanceof NativeBytesStore ?
+                        new UncheckedNativeBytes<Underlying>(this) :
+                        new UncheckedBytes<>(this) :
+                this;
+    }
+
+    default long safeLimit() {
+        return bytesStore().safeLimit();
     }
 
     default boolean isClear() {
@@ -191,4 +194,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default Bytes<Underlying> bytesForRead() {
         return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
+
+    /**
+     * @return the ByteStore this Bytes wraps.
+     */
+    BytesStore bytesStore();
 }

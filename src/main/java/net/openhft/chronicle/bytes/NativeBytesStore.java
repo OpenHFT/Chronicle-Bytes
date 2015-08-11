@@ -34,7 +34,6 @@ public class NativeBytesStore<Underlying>
 
     @Nullable
     private final Cleaner cleaner;
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final boolean elastic;
     @Nullable
     private final Underlying underlyingObject;
@@ -43,8 +42,10 @@ public class NativeBytesStore<Underlying>
     // on release, set this to null.
     @Nullable
     protected Memory memory = OS.memory();
+    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long address;
     long maximumLimit;
+    private Error releasedHere;
 
     private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
@@ -180,8 +181,12 @@ public class NativeBytesStore<Underlying>
 
     long translate(long offset) {
         long offset2 = offset - start();
-        assert checkTranslatedBounds(offset2);
+//        assert checkTranslatedBounds(offset2);
         return offset2;
+    }
+
+    public long start() {
+        return 0L;
     }
 
     private boolean checkTranslatedBounds(long offset2) {
@@ -195,7 +200,6 @@ public class NativeBytesStore<Underlying>
         refCount.reserve();
     }
 
-    private Error releasedHere;
     @Override
     public void release() {
         refCount.release();
