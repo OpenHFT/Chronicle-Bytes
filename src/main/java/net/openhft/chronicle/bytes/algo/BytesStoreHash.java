@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.VanillaBytes;
 
 import java.util.function.ToLongFunction;
@@ -31,8 +30,8 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     static long hash(BytesStore b) {
-        return b instanceof NativeBytes
-                ? OptimisedBytesHash.INSTANCE.applyAsLong((NativeBytes) b)
+        return b instanceof VanillaBytes
+                ? OptimisedBytesHash.INSTANCE.applyAsLong((VanillaBytes) b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 

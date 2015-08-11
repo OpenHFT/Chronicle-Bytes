@@ -332,7 +332,7 @@ public enum BytesUtil {
                 return;
             }
             if (str instanceof String) {
-                ((NativeBytes) bytes).write((String) str, offset, length);
+                ((VanillaBytes) bytes).write((String) str, offset, length);
                 return;
             }
         }
