@@ -71,7 +71,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     @Override
     public Bytes<Underlying> bytesForRead() {
         return isClear()
-                ? new VanillaBytes<>(bytesStore, bytesStore.writeLimit(), bytesStore.writeLimit())
+                ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(bytesStore, readPosition(), readLimit());
     }
 
