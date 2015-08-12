@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -60,7 +61,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     @NotNull
     default InputStream inputStream() {
-        throw new UnsupportedOperationException();
+        return new InputStream() {
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                return StreamingDataInput.this.read(b, off, len);
+            }
+
+            @Override
+            public int read() throws IOException {
+                return readRemaining() > 0 ? readUnsignedByte() : -1;
+            }
+        };
     }
 
     default long readStopBit() {
@@ -150,6 +161,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void read(@NotNull byte[] bytes) {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = readByte();
+    }
+
+    default int read(@NotNull byte[] bytes, int off, int len) {
+        int len2 = (int) Math.min(len, readRemaining());
+        for (int i = 0; i < len2; i++)
+            bytes[off + i] = readByte();
+        return len2;
     }
 
     default void read(@NotNull ByteBuffer buffer) {
