@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * thrown when the TcpChannelHub drops its connection to te server
+ * thrown when the TcpChannelHub drops its connection to the server
  */
 public class ConnectionDroppedException extends RuntimeException {
     public ConnectionDroppedException(String message) {
