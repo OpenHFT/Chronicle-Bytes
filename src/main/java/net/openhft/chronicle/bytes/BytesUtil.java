@@ -20,12 +20,13 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
+import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
@@ -113,6 +114,15 @@ public enum BytesUtil {
         }
     }
 
+    public static void parse8bit(long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        if (bytesStore instanceof NativeBytesStore
+                && appendable instanceof StringBuilder) {
+            parse8bit_SB1(offset, (NativeBytesStore) bytesStore, (StringBuilder) appendable, utflen);
+        } else {
+            parse8bit1(offset, bytesStore, appendable, utflen);
+        }
+    }
+
     public static void parseUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
@@ -149,6 +159,18 @@ public enum BytesUtil {
         }
     }
 
+    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+        try {
+            assert bytes.readRemaining() >= utflen;
+            for (int count = 0; count < utflen; count++) {
+                int c = bytes.readUnsignedByte(offset + count);
+                appendable.append((char) c);
+            }
+        } catch (IOException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     public static void parseUTF_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
         try {
             int count = 0;
@@ -175,21 +197,27 @@ public enum BytesUtil {
     }
 
     public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+        if (utflen > bytes.readRemaining())
+            throw new BufferUnderflowException();
+        NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
+        long offset = bytes.readPosition();
+        int count = parse8bit_SB1(offset, nbs, sb, utflen);
+        bytes.readSkip(count);
+    }
+
+    public static int parse8bit_SB1(long offset, NativeBytesStore nbs, @NotNull StringBuilder sb, int utflen) {
         try {
-            int count = 0;
-            if (utflen > bytes.readRemaining())
-                throw new BufferUnderflowException();
-            NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
-            long address = nbs.address + nbs.translate(bytes.readPosition());
+            long address = nbs.address + nbs.translate(offset);
             Memory memory = nbs.memory;
             sb.ensureCapacity(utflen);
             char[] chars = (char[]) SB_VALUE.get(sb);
+            int count = 0;
             while (count < utflen) {
                 int c = memory.readByte(address + count) & 0xFF;
                 chars[count++] = (char) c;
             }
-            bytes.readSkip(count);
             SB_COUNT.setInt(sb, count);
+            return count;
         } catch (@NotNull IllegalAccessException e) {
             throw new AssertionError(e);
         }
@@ -280,6 +308,13 @@ public enum BytesUtil {
         }
     }
 
+    @ForceInline
+    public static void write8bit(@NotNull StreamingDataOutput bytes, @NotNull BytesStore str) {
+        long len = str.readRemaining();
+        bytes.writeStopBit(len);
+        bytes.write(str);
+    }
+
     private static long findUTFLength(@NotNull CharSequence str) {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
@@ -340,6 +375,25 @@ public enum BytesUtil {
             char c = str.charAt(offset + i);
             if (c > 255) c = '?';
             bytes.writeUnsignedByte(c);
+        }
+    }
+
+    public static void append8bit(long offsetInRDO, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
+        if (bytes instanceof VanillaBytes) {
+            VanillaBytes vb = (VanillaBytes) bytes;
+            if (str instanceof VanillaBytes) {
+                vb.write(offsetInRDO, (VanillaBytes) str, offset, length);
+                return;
+            }
+            if (str instanceof String) {
+                vb.write(offsetInRDO, (String) str, offset, length);
+                return;
+            }
+        }
+        for (int i = 0; i < length; i++) {
+            char c = str.charAt(offset + i);
+            if (c > 255) c = '?';
+            bytes.writeUnsignedByte(offsetInRDO + i, c);
         }
     }
 
@@ -1538,6 +1592,24 @@ public enum BytesUtil {
             assert dateCache.lastDateStr != null;
         }
         b.write(dateCache.lastDateStr);
+    }
+
+    public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(StreamingDataInput input, Class<E> eClass) {
+        StringBuilder sb = SBP.acquireStringBuilder();
+        input.read8bit(sb);
+
+        return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(sb);
+    }
+
+    public static void write(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) {
+        long i = 0;
+        for (; i < length - 7; i += 8)
+            sdo.writeLong(bytes.readLong(offset + i));
+        if (i < length - 3) {
+            sdo.writeInt(bytes.readInt(offset + (i += 4) - 4));
+        }
+        for (; i < length; i++)
+            sdo.writeByte(bytes.readByte(offset + i));
     }
 
     static class DateCache {

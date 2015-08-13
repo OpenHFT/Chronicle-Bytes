@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -60,7 +61,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     @NotNull
     default InputStream inputStream() {
-        throw new UnsupportedOperationException();
+        return new InputStream() {
+            @Override
+            public int read(byte[] b, int off, int len) throws IOException {
+                return StreamingDataInput.this.read(b, off, len);
+            }
+
+            @Override
+            public int read() throws IOException {
+                return readRemaining() > 0 ? readUnsignedByte() : -1;
+            }
+        };
     }
 
     default long readStopBit() {
@@ -127,6 +138,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
+        b.clear();
+        long len0 = BytesUtil.readStopBit(this);
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        b.write((BytesStore) ((BytesStore) this), (long) readPosition(), (long) len);
+        readSkip(len);
+        return true;
+    }
+
     default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
         BytesUtil.setLength(sb, 0);
         long len0 = BytesUtil.readStopBit(this);
@@ -152,6 +174,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes[i] = readByte();
     }
 
+    default int read(@NotNull byte[] bytes, int off, int len) {
+        int len2 = (int) Math.min(len, readRemaining());
+        for (int i = 0; i < len2; i++)
+            bytes[off + i] = readByte();
+        return len2;
+    }
+
     default void read(@NotNull ByteBuffer buffer) {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
@@ -170,4 +199,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param size    in bytes.
      */
     void nativeRead(long address, long size);
+
+    default <E extends Enum<E>> E readEnum(Class<E> eClass) {
+        return BytesUtil.readEnum(this, eClass);
+    }
 }
