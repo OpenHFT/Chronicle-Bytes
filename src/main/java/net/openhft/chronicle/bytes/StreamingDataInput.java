@@ -78,6 +78,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesUtil.readStopBit(this);
     }
 
+    default double readStopBitDouble() {
+        return BytesUtil.readStopBitDouble(this);
+    }
+
     default boolean readBoolean() {
         return readByte() != 0;
     }

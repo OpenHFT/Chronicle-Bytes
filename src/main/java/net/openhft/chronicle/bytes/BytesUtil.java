@@ -431,6 +431,28 @@ public enum BytesUtil {
         writeStopBit0(out, n);
     }
 
+    @SuppressWarnings("ShiftOutOfRange")
+    public static void writeStopBit(@NotNull StreamingDataOutput out, double d) {
+        long n = Double.doubleToRawLongBits(d);
+        out.writeByte((byte) ((n >>> -7) | 0x80));
+        while (((n <<= 7) & (~0L >>> 7)) != 0) {
+            out.writeByte((byte) (((n >>> -7) & 0x7F) | 0x80));
+        }
+        out.writeByte((byte) ((n >>> -7) & 0x7F));
+    }
+
+    public static double readStopBitDouble(@NotNull StreamingDataInput in) {
+        long n = 0;
+        int shift = 64 - 7;
+        int b;
+        do {
+            b = in.readByte();
+            n |= shift > 0 ? (long) (b & 0x7F) << shift : b >> -shift;
+            shift -= 7;
+        } while (b < 0);
+        return Double.longBitsToDouble(n);
+    }
+
     public static int stopBitLength(long n) {
         if ((n & ~0x7F) == 0) {
             return 1;

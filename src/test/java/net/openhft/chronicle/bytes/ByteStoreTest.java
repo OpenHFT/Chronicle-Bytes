@@ -444,6 +444,23 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testReadWriteStopBitDouble() {
+        double[] doubles = {
+                -Double.MAX_VALUE, Double.NEGATIVE_INFINITY,
+                Byte.MIN_VALUE, Byte.MAX_VALUE,
+                Short.MIN_VALUE, Short.MAX_VALUE,
+                Long.MIN_VALUE, Long.MAX_VALUE,
+                Integer.MIN_VALUE, Integer.MAX_VALUE};
+        for (double i : doubles) {
+            bytes.writeStopBit(i);
+            System.out.println(i + " " + bytes.writePosition());
+        }
+
+        for (double i : doubles)
+            assertEquals(i, bytes.readStopBitDouble(), 0.0);
+    }
+
+    @Test
     public void testAppendSubstring() {
         bytes.append("Hello World", 2, 7).append("\n");
 

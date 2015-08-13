@@ -39,6 +39,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    default S writeStopBit(double d) {
+        BytesUtil.writeStopBit(this, d);
+        return (S) this;
+    }
+
     S writePosition(long position);
 
     S writeLimit(long limit);
