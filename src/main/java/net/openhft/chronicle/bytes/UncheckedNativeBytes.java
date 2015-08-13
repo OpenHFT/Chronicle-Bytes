@@ -124,11 +124,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.underlyingObject() == null && length >= 32) {
+        } else if (bytes.bytesStore() instanceof NativeBytesStore && length >= 16) {
             rawCopy(bytes, offset, length);
 
         } else {
-            throw new UnsupportedOperationException();
+            BytesUtil.write(bytes, offset, length, this);
         }
         return this;
     }

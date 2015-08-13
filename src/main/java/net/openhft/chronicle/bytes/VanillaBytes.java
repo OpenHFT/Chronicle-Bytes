@@ -101,7 +101,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
-        if (bytes.underlyingObject() == null && length >= 64) {
+        if (bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
@@ -110,19 +110,23 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             }
 
         } else {
-            super.write(bytes, offset, length);
+            super.write((BytesStore) bytes, (long) offset, (long) length);
         }
         return this;
     }
 
     public void write(@NotNull String str, int offset, int length) {
+        long position = writePosition();
+        write(position, str, offset, length);
+        writeSkip(length);
+    }
+
+    public void write(long position, @NotNull String str, int offset, int length) {
         // todo optimise
         char[] chars = str.toCharArray();
-        long position = writePosition();
         ensureCapacity(position + length);
         NativeBytesStore nbs = (NativeBytesStore) bytesStore;
         nbs.write8bit(position, chars, offset, length);
-        writeSkip(length);
     }
 
     @NotNull

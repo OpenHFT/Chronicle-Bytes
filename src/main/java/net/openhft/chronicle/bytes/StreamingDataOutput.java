@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
@@ -61,6 +61,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    default S write8bit(@NotNull BytesStore sdi) {
+        BytesUtil.write8bit(this, sdi);
+        return (S) this;
+    }
+
     @NotNull
     S writeByte(byte i8);
 
@@ -101,14 +106,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     default S write(@NotNull BytesStore bytes, long offset, long length) {
-        long i = 0;
-        for (; i < length - 7; i += 8)
-            writeLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            writeInt(bytes.readInt(offset + (i += 4) - 4));
-        }
-        for (; i < length; i++)
-            writeByte(bytes.readByte(offset + i));
+        BytesUtil.write(bytes, offset, length, this);
         return (S) this;
     }
 
@@ -141,4 +139,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param size    in bytes.
      */
     void nativeWrite(long address, long size);
+
+    default <E extends Enum<E>> void writeEnum(E e) {
+        write8bit(e.name());
+    }
 }

@@ -119,7 +119,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
             rawCopy(bytes, offset, length);
 
         } else {
-            super.write(bytes, offset, length);
+            super.write((BytesStore) bytes, (long) offset, (long) length);
         }
         return this;
     }

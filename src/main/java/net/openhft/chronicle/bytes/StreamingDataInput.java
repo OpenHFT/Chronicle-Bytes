@@ -138,6 +138,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
+        b.clear();
+        long len0 = BytesUtil.readStopBit(this);
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        b.write((BytesStore) ((BytesStore) this), (long) readPosition(), (long) len);
+        readSkip(len);
+        return true;
+    }
+
     default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
         BytesUtil.setLength(sb, 0);
         long len0 = BytesUtil.readStopBit(this);
@@ -188,4 +199,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param size    in bytes.
      */
     void nativeRead(long address, long size);
+
+    default <E extends Enum<E>> E readEnum(Class<E> eClass) {
+        return BytesUtil.readEnum(this, eClass);
+    }
 }
