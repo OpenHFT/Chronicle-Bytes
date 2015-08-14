@@ -56,6 +56,11 @@ public class NativeBytesStore<Underlying>
     }
 
     public NativeBytesStore(
+            long address, long maximumLimit) {
+        this(address, maximumLimit, null, false);
+    }
+
+    public NativeBytesStore(
             long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic) {
         setAddress(address);
         this.maximumLimit = maximumLimit;
