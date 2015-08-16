@@ -21,6 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static java.lang.Math.min;
 
@@ -30,6 +31,9 @@ import static java.lang.Math.min;
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
+    static BytesStore wrap(@NotNull CharSequence cs) {
+        return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
+    }
     static BytesStore wrap(@NotNull byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
@@ -171,5 +175,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         for (long i = readPosition(); i < readLimit(); i++)
             b += readByte(i);
         return b & 0xFF;
+    }
+
+    default boolean endsWith(char c) {
+        return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
+    }
+
+    default boolean startsWith(char c) {
+        return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
     }
 }

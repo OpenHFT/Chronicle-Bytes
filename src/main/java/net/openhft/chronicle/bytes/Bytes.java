@@ -59,8 +59,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return BytesStore.<byte[]>wrap(byteArray).bytesForWrite();
     }
 
-    static Bytes<byte[]> from(@NotNull String text) {
-        return wrapForRead(text.getBytes(StandardCharsets.UTF_8));
+    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) {
+        return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
     static VanillaBytes<Void> allocateDirect(long capacity) {
@@ -123,6 +123,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             buffer.readLimit(limit);
             buffer.readPosition(pos);
         }
+    }
+
+    static BytesStore empty() {
+        return NoBytesStore.noBytesStore();
     }
 
     default Bytes<Underlying> unchecked(boolean unchecked) {

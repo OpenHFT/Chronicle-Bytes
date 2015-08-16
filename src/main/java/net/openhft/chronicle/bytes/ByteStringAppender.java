@@ -57,7 +57,27 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     @NotNull
     default B append8bit(@NotNull CharSequence cs) {
-        BytesUtil.append8bit(this, cs, 0, cs.length());
+        if (cs instanceof BytesStore) {
+            return write((BytesStore) cs);
+        }
+        int length = cs.length();
+        for (int i = 0; i < length; i++) {
+            char c = cs.charAt(i);
+            if (c > 255) c = '?';
+            writeUnsignedByte(c);
+        }
+        return (B) this;
+    }
+
+    default B append8bit(@NotNull CharSequence cs, int offset, int length) {
+        if (cs instanceof BytesStore) {
+            return write((BytesStore) cs, (long) offset, length);
+        }
+        for (int i = 0; i < length; i++) {
+            char c = cs.charAt(offset + i);
+            if (c > 255) c = '?';
+            writeUnsignedByte(c);
+        }
         return (B) this;
     }
 

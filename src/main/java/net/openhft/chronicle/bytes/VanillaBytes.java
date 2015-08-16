@@ -110,34 +110,39 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             }
 
         } else {
-            super.write((BytesStore) bytes, (long) offset, (long) length);
+            super.write(bytes, offset, length);
         }
         return this;
     }
 
-    public void write(@NotNull String str, int offset, int length) {
+    public Bytes<Underlying> write8bit(@NotNull CharSequence str, int offset, int length) {
         long position = writePosition();
         write(position, str, offset, length);
         writeSkip(length);
+        return this;
     }
 
-    public void write(long position, @NotNull String str, int offset, int length) {
+    public void write(long position, @NotNull CharSequence str, int offset, int length) {
         // todo optimise
-        char[] chars = str.toCharArray();
-        ensureCapacity(position + length);
-        NativeBytesStore nbs = (NativeBytesStore) bytesStore;
-        nbs.write8bit(position, chars, offset, length);
+        if (str instanceof String) {
+            char[] chars = ((String) str).toCharArray();
+            ensureCapacity(position + length);
+            NativeBytesStore nbs = (NativeBytesStore) bytesStore;
+            nbs.write8bit(position, chars, offset, length);
+        } else {
+            throw new UnsupportedOperationException();
+        }
     }
 
     @NotNull
     public VanillaBytes append(CharSequence str, int start, int end) {
         if (bytesStore() instanceof NativeBytesStore) {
-            if (str instanceof VanillaBytes) {
-                write((VanillaBytes) str, start, end - start);
+            if (str instanceof BytesStore) {
+                write((BytesStore) str, (long) start, end - start);
                 return this;
             }
             if (str instanceof String) {
-                write((String) str, start, end - start);
+                write8bit(str, start, end - start);
                 return this;
             }
         }

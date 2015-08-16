@@ -62,12 +62,43 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write8bit(CharSequence cs) {
-        BytesUtil.write8bit(this, cs);
+        if (cs instanceof BytesStore) {
+            return write8bit((BytesStore) cs);
+        }
+        return write8bit((String) cs, 0, cs.length());
+    }
+
+    default S write8bit(CharSequence s, int start, int length) {
+        writeStopBit(length);
+        return write(s, start, length);
+    }
+
+    default S write(CharSequence cs) {
+        if (cs instanceof BytesStore) {
+            return write((BytesStore) cs);
+        }
+        return write(cs, 0, cs.length());
+    }
+
+    default S write(CharSequence s, int start, int length) {
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i + start);
+            if (c > 255) c = '?';
+            writeUnsignedByte(c);
+        }
+        return (S) this;
+    }
+
+    default S write8bit(@NotNull String s) {
+        write8bit(s, 0, s.length());
         return (S) this;
     }
 
     default S write8bit(@NotNull BytesStore sdi) {
-        BytesUtil.write8bit(this, sdi);
+        long offset = sdi.readPosition();
+        long readRemaining = sdi.readLimit() - offset;
+        writeStopBit(readRemaining);
+        write(sdi, offset, readRemaining);
         return (S) this;
     }
 

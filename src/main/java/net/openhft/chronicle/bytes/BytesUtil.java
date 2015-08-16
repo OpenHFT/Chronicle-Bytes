@@ -296,25 +296,6 @@ public enum BytesUtil {
         }
     }
 
-    @ForceInline
-    public static void write8bit(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
-        if (str == null) {
-            bytes.writeStopBit(-1);
-
-        } else {
-            long len = str.length();
-            bytes.writeStopBit(len);
-            append8bit(bytes, str, 0, str.length());
-        }
-    }
-
-    @ForceInline
-    public static void write8bit(@NotNull StreamingDataOutput bytes, @NotNull BytesStore str) {
-        long len = str.readRemaining();
-        bytes.writeStopBit(len);
-        bytes.write(str);
-    }
-
     private static long findUTFLength(@NotNull CharSequence str) {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
@@ -360,33 +341,15 @@ public enum BytesUtil {
         }
     }
 
-    public static void append8bit(StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        if (bytes instanceof VanillaBytes) {
-            if (str instanceof VanillaBytes) {
-                ((VanillaBytes) bytes).write((VanillaBytes) str, offset, length);
-                return;
-            }
-            if (str instanceof String) {
-                ((VanillaBytes) bytes).write((String) str, offset, length);
-                return;
-            }
-        }
-        for (int i = 0; i < length; i++) {
-            char c = str.charAt(offset + i);
-            if (c > 255) c = '?';
-            bytes.writeUnsignedByte(c);
-        }
-    }
-
     public static void append8bit(long offsetInRDO, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
         if (bytes instanceof VanillaBytes) {
             VanillaBytes vb = (VanillaBytes) bytes;
-            if (str instanceof VanillaBytes) {
-                vb.write(offsetInRDO, (VanillaBytes) str, offset, length);
+            if (str instanceof RandomDataInput) {
+                vb.write(offsetInRDO, (RandomDataInput) str, offset, length);
                 return;
             }
             if (str instanceof String) {
-                vb.write(offsetInRDO, (String) str, offset, length);
+                vb.write(offsetInRDO, str, offset, length);
                 return;
             }
         }
@@ -1122,13 +1085,13 @@ public enum BytesUtil {
     public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) {
         setLength(builder, 0);
         try {
-            readUTF0(bytes, builder, tester);
+            readUTFAndAppend(bytes, builder, tester);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw new IORuntimeException(e);
         }
     }
 
-    private static void readUTF0(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
+    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
@@ -1203,30 +1166,30 @@ public enum BytesUtil {
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
-        read8bit0(bytes, builder, tester);
+        read8bitAndAppend(bytes, builder, tester);
     }
 
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester) {
         builder.readPosition(0);
 
-        read8bit0(bytes, builder, tester);
+        read8bitAndAppend(bytes, builder, tester);
     }
 
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharTester tester) {
         builder.setLength(0);
-        read8bit0(bytes, builder, tester);
+        read8bitAndAppend(bytes, builder, tester);
     }
 
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharTester tester) {
         builder.readPosition(0);
 
-        read8bit0(bytes, builder, tester);
+        read8bitAndAppend(bytes, builder, tester);
     }
 
-    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) {
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c))
@@ -1237,7 +1200,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester) {
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester) {
         int ch = bytes.readUnsignedByte();
         do {
             if (tester.isStopChar(ch)) {
@@ -1256,7 +1219,7 @@ public enum BytesUtil {
         bytes2.writeUnsignedByte(ch);
     }
 
-    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
+    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -1267,7 +1230,7 @@ public enum BytesUtil {
         }
     }
 
-    private static void read8bit0(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) {
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) {
         int ch = bytes.readUnsignedByte();
         do {
             int next = bytes.readUnsignedByte();
@@ -1628,7 +1591,8 @@ public enum BytesUtil {
         for (; i < length - 7; i += 8)
             sdo.writeLong(bytes.readLong(offset + i));
         if (i < length - 3) {
-            sdo.writeInt(bytes.readInt(offset + (i += 4) - 4));
+            sdo.writeInt(bytes.readInt(offset + i));
+            i += 4;
         }
         for (; i < length; i++)
             sdo.writeByte(bytes.readByte(offset + i));
