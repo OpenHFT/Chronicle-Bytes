@@ -116,9 +116,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     public Bytes<Underlying> write8bit(@NotNull CharSequence str, int offset, int length) {
-        long position = writePosition();
-        write(position, str, offset, length);
-        writeSkip(length);
+        writeStopBit(length);
+        write(str, offset, length);
         return this;
     }
 
@@ -142,7 +141,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
                 return this;
             }
             if (str instanceof String) {
-                write8bit(str, start, end - start);
+                write(str, start, end - start);
                 return this;
             }
         }
