@@ -75,6 +75,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return NativeBytes.nativeBytes(initialCapacity);
     }
 
+    @Deprecated
+    static Bytes from(String s) {
+        return BytesStore.wrap(s).bytesForRead();
+    }
+
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call
