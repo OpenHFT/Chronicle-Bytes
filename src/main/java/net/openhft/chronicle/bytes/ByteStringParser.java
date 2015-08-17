@@ -19,7 +19,12 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Reader;
+
 interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
+    default Reader reader() {
+        return new ByteStringReader(this);
+    }
     @NotNull
     @ForceInline
     default String parseUTF(@NotNull StopCharTester stopCharTester) {

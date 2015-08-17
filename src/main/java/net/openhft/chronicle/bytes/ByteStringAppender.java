@@ -18,7 +18,14 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.Writer;
+
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
+
+    default Writer writer() {
+        return new ByteStringWriter(this);
+    }
+
 
     @NotNull
     default B append(char ch) {

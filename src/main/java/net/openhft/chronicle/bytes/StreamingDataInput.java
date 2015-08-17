@@ -174,6 +174,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
+    default int read(@NotNull char[] bytes, int off, int len) {
+        int len2 = (int) Math.min(len, readRemaining());
+        for (int i = 0; i < len2; i++)
+            bytes[off + i] = (char) readUnsignedByte();
+        return len2;
+    }
+
     default void read(@NotNull ByteBuffer buffer) {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
