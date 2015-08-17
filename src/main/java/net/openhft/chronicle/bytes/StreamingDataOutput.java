@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     @NotNull
     default OutputStream outputStream() {
-        throw new UnsupportedOperationException();
+        return new StreamingOutputStream(this);
     }
 
     @NotNull
