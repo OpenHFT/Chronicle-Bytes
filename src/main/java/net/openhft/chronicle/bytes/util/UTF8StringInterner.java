@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
-import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -44,10 +43,12 @@ public class UTF8StringInterner {
         long hash = BytesStoreHash.hash(cs);
         int h = (int) (hash ^ (hash >> 32)) & mask;
         String s = interner[h];
-        if (StringUtils.isEqual(s, cs))
+        if (cs.isEqual(s))
             return s;
         StringBuilder sb = SBP.acquireStringBuilder();
+        long pos = cs.readPosition();
         BytesUtil.parseUTF(cs, sb, Maths.toInt32(cs.readRemaining()));
+        cs.readPosition(pos);
         return interner[h] = sb.toString();
     }
 }

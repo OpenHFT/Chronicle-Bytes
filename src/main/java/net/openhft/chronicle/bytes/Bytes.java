@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -208,4 +209,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the ByteStore this Bytes wraps.
      */
     BytesStore bytesStore();
+
+    default boolean isEqual(String s) {
+        return StringUtils.isEqual(this, s);
+    }
 }

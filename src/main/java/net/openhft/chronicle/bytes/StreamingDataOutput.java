@@ -179,4 +179,22 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default <E extends Enum<E>> void writeEnum(E e) {
         write8bit(e.name());
     }
+
+    default void appendUTF(char[] chars, int offset, int length) {
+        int i;
+        ascii:
+        {
+            for (i = 0; i < length; i++) {
+                char c = chars[offset + i];
+                if (c > 0x007F)
+                    break ascii;
+                writeByte((byte) c);
+            }
+            return;
+        }
+        for (; i < length; i++) {
+            char c = chars[offset + i];
+            BytesUtil.appendUTF(this, c);
+        }
+    }
 }

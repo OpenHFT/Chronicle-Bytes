@@ -30,8 +30,6 @@ import net.openhft.chronicle.core.util.StringUtils;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -39,6 +37,9 @@ import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
+
+import static net.openhft.chronicle.core.util.StringUtils.extractChars;
+import static net.openhft.chronicle.core.util.StringUtils.setCount;
 
 public enum BytesUtil {
     ;
@@ -51,19 +52,11 @@ public enum BytesUtil {
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
-    private static final Constructor<String> STRING_CONSTRUCTOR;
-    private static final Field SB_VALUE, SB_COUNT;
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
 
     static {
         try {
             ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
-            STRING_CONSTRUCTOR = String.class.getDeclaredConstructor(char[].class, boolean.class);
-            STRING_CONSTRUCTOR.setAccessible(true);
-            SB_VALUE = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("value");
-            SB_VALUE.setAccessible(true);
-            SB_COUNT = Class.forName("java.lang.AbstractStringBuilder").getDeclaredField("count");
-            SB_COUNT.setAccessible(true);
         } catch (Exception e) {
             throw new AssertionError(e);
         }
@@ -180,7 +173,7 @@ public enum BytesUtil {
             long address = nbs.address + nbs.translate(bytes.readPosition());
             Memory memory = nbs.memory;
             sb.ensureCapacity(utflen);
-            char[] chars = (char[]) SB_VALUE.get(sb);
+            char[] chars = extractChars(sb);
             while (count < utflen) {
                 int c = memory.readByte(address + count);
                 if (c < 0)
@@ -188,10 +181,10 @@ public enum BytesUtil {
                 chars[count++] = (char) c;
             }
             bytes.readSkip(count);
-            SB_COUNT.setInt(sb, count);
+            setCount(sb, count);
             if (count < utflen)
                 parseUTF2(bytes, sb, utflen, count);
-        } catch (@NotNull IOException | IllegalAccessException e) {
+        } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
@@ -206,21 +199,17 @@ public enum BytesUtil {
     }
 
     public static int parse8bit_SB1(long offset, NativeBytesStore nbs, @NotNull StringBuilder sb, int utflen) {
-        try {
             long address = nbs.address + nbs.translate(offset);
             Memory memory = nbs.memory;
             sb.ensureCapacity(utflen);
-            char[] chars = (char[]) SB_VALUE.get(sb);
+        char[] chars = extractChars(sb);
             int count = 0;
             while (count < utflen) {
                 int c = memory.readByte(address + count) & 0xFF;
                 chars[count++] = (char) c;
             }
-            SB_COUNT.setInt(sb, count);
+        setCount(sb, count);
             return count;
-        } catch (@NotNull IllegalAccessException e) {
-            throw new AssertionError(e);
-        }
     }
 
     static void parseUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
@@ -284,8 +273,19 @@ public enum BytesUtil {
         }
     }
 
+    public static void writeUTF(@NotNull StreamingDataOutput bytes, @Nullable String str) {
+        char[] chars = extractChars(str);
+        long utfLength = findUTFLength(chars);
+        bytes.writeStopBit(utfLength);
+        bytes.appendUTF(chars, 0, chars.length);
+    }
+
     @ForceInline
     public static void writeUTF(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
+        if (str instanceof String) {
+            writeUTF(bytes, (String) str);
+            return;
+        }
         if (str == null) {
             bytes.writeStopBit(-1);
 
@@ -314,6 +314,24 @@ public enum BytesUtil {
         return utflen;
     }
 
+    private static long findUTFLength(@NotNull char[] chars) {
+        int strlen = chars.length;
+        long utflen = strlen;/* use charAt instead of copying String to char array */
+        for (int i = 0; i < strlen; i++) {
+            char c = chars[i];
+            if (c <= 0x007F) {
+                continue;
+            }
+            if (c <= 0x07FF) {
+                utflen++;
+
+            } else {
+                utflen += 2;
+            }
+        }
+        return utflen;
+    }
+
     @NotNull
     public static Bytes asBytes(@NotNull RandomDataOutput bytes, long position, long limit) {
         Bytes sbytes = bytes.bytesForWrite();
@@ -324,10 +342,6 @@ public enum BytesUtil {
     }
 
     public static void appendUTF(@NotNull StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
-        appendUTF0(bytes, str, offset, length);
-    }
-
-    private static void appendUTF0(@NotNull StreamingDataOutput bytes, @NotNull CharSequence str, int offset, int length) {
         int i;
         for (i = 0; i < length; i++) {
             char c = str.charAt(offset + i);
@@ -488,15 +502,7 @@ public enum BytesUtil {
             for (int i = 0; i < len; i++)
                 chars[i] = (char) bytes.readUnsignedByte(pos + i);
         }
-        return newString(chars);
-    }
-
-    private static String newString(char[] chars) {
-        try {
-            return STRING_CONSTRUCTOR.newInstance(chars, true);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+        return StringUtils.newString(chars);
     }
 
     public static String toString(@NotNull RandomDataInput bytes) {

@@ -16,11 +16,14 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class BytesTest {
 /*
@@ -151,4 +154,30 @@ public class BytesTest {
                 ".... truncated", bytes.toHexString(256));
     }
 
+    @Test
+    public void testCharAt() {
+        Bytes b = Bytes.wrapForRead("Hello World");
+        b.readSkip(6);
+        assertTrue(StringUtils.isEqual("World", b));
+    }
+
+    @Test
+    public void internBytes() {
+        Bytes b = Bytes.wrapForRead("Hello World");
+        b.readSkip(6);
+        {
+            StringInterner si = new StringInterner(128);
+            String s = si.intern(b);
+            String s2 = si.intern(b);
+            assertEquals("World", s);
+            assertSame(s, s2);
+        }
+        {
+            UTF8StringInterner si = new UTF8StringInterner(128);
+            String s = si.intern(b);
+            String s2 = si.intern(b);
+            assertEquals("World", s);
+            assertSame(s, s2);
+        }
+    }
 }

@@ -17,7 +17,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -73,6 +75,29 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return isClear()
                 ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(bytesStore, readPosition(), readLimit());
+    }
+
+    @Override
+    public boolean isEqual(String s) {
+        if (s == null || s.length() != readRemaining()) return false;
+        char[] chars = StringUtils.extractChars(s);
+        if (bytesStore instanceof NativeBytesStore) {
+            NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+            long address = bs.address + bs.translate(readPosition);
+            Memory memory = bs.memory;
+            for (int i = 0; i < chars.length; i++) {
+                int b = memory.readByte(address + i) & 0xFF;
+                if (b != chars[i])
+                    return false;
+            }
+        } else {
+            for (int i = 0; i < chars.length; i++) {
+                int b = bytesStore.readByte(readPosition + i) & 0xFF;
+                if (b != chars[i])
+                    return false;
+            }
+        }
+        return true;
     }
 
     @Override
@@ -194,5 +219,15 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             b += bytesStore.memory.readByte(bytesStore.address + i);
         }
         return b & 0xFF;
+    }
+
+    @Override
+    public void appendUTF(char[] chars, int offset, int length) {
+        ensureCapacity(readPosition() + length);
+        if (bytesStore instanceof NativeBytesStore) {
+            writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));
+        } else {
+            super.appendUTF(chars, offset, length);
+        }
     }
 }

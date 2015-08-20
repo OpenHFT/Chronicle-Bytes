@@ -444,6 +444,44 @@ public class NativeBytesStore<Underlying>
         this.address = address;
     }
 
+    public long appendUTF(long pos, char[] chars, int offset, int length) {
+        long address = this.address + translate(0);
+        Memory memory = this.memory;
+        int i;
+        ascii:
+        {
+            for (i = 0; i < length; i++) {
+                char c = chars[offset + i];
+                if (c > 0x007F)
+                    break ascii;
+                memory.writeByte(address + pos++, (byte) c);
+            }
+
+            return pos;
+        }
+        return appendUTF0(pos, chars[offset + i], i < length, i);
+    }
+
+    private long appendUTF0(long pos, char aChar, boolean b, int i) {
+        for (; b; i++) {
+            char c = aChar;
+            if (c <= 0x007F) {
+                writeByte(pos++, (byte) c);
+
+            } else if (c <= 0x07FF) {
+                writeByte(pos++, (byte) (0xC0 | ((c >> 6) & 0x1F)));
+                writeByte(pos++, (byte) (0x80 | c & 0x3F));
+
+            } else {
+                writeByte(pos++, (byte) (0xE0 | ((c >> 12) & 0x0F)));
+                writeByte(pos++, (byte) (0x80 | ((c >> 6) & 0x3F)));
+                writeByte(pos++, (byte) (0x80 | (c & 0x3F)));
+            }
+        }
+        return pos;
+    }
+
+
     static class Deallocator implements Runnable {
         private volatile long address, size;
 

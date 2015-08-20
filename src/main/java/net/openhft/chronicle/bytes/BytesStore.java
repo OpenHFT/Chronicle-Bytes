@@ -146,7 +146,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     default char charAt(int index) {
-        return (char) readUnsignedByte(index);
+        return (char) readUnsignedByte(readPosition() + index);
     }
 
     @NotNull
