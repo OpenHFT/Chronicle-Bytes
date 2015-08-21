@@ -27,6 +27,7 @@ import sun.nio.ch.DirectBuffer;
 
 import java.nio.ByteBuffer;
 
+@SuppressWarnings("sunapi")
 public class NativeBytesStore<Underlying>
         implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;

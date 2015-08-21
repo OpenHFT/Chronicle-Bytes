@@ -53,20 +53,24 @@ public class OptimisedBytesHashTest {
         NativeBytes nb = Bytes.allocateElasticDirect(64);
         for (int i = 1; i <= 64; i++)
             nb.writeUnsignedByte(i);
+/*
         assertEquals(0L, applyAsLong1to7(nb, 0));
         for (int i = 1; i <= 7; i++)
             assertEquals(applyAsLong1to7(nb, i), applyAsLong9to16(nb, i));
         assertEquals(applyAsLong8(nb), applyAsLong1to7(nb, 8));
         assertEquals(applyAsLong8(nb), applyAsLong9to16(nb, 8));
+*/
         for (int i = 1; i <= 16; i++)
-            assertEquals(applyAsLong9to16(nb, i), applyAsLong17to32(nb, i));
-        for (int i = 1; i <= 32; i++)
-            assertEquals(applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
+            assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
+        for (int i = 17; i <= 32; i++)
+            assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
     }
 
     @Test
-    @Ignore("Long running, har mean score = 6851")
+    @Ignore("Long running, har mean score = 5436")
     public void testRandomness() {
+        SecureRandom rand = new SecureRandom();
+
         long time = 0, timeCount = 0;
         double scoreSum = 0;
         int runs = 500;
@@ -74,12 +78,14 @@ public class OptimisedBytesHashTest {
             long[] hashs = new long[8192];
             byte[] init = new byte[hashs.length / 8];
             VanillaBytes b = Bytes.allocateDirect(init.length);
-            new SecureRandom().nextBytes(init);
+            rand.nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
                 b.write(init);
 
-                b.writeLong(i >> 6 << 3, 1L << i);
+                long prev = b.readLong(i >> 6 << 3);
+                b.writeLong(i >> 6 << 3, prev ^ (1L << i));
+
                 b.readLimit(init.length);
                 long start = System.nanoTime();
                 hashs[i] = VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
@@ -106,7 +112,7 @@ public class OptimisedBytesHashTest {
     }
 
     @Test
-    @Ignore("Long running, avg score = 6823, avg time 0.027 us")
+    @Ignore("Long running, avg score = 5414, avg time 0.043 us")
     public void testSmallRandomness() {
         long time = 0, timeCount = 0;
         long scoreSum = 0;

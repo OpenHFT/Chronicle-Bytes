@@ -26,6 +26,7 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
+@SuppressWarnings("sunapi")
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();

@@ -56,7 +56,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding) {
-        if (!bytesStore.inside(offset + adding))
+        if (!bytesStore.inside(offset + adding - 1))
             checkResize(offset + adding);
     }
 
