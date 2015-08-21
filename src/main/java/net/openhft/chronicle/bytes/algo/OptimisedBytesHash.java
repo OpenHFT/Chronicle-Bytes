@@ -16,8 +16,8 @@
 
 package net.openhft.chronicle.bytes.algo;
 
+import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
-import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -31,33 +31,13 @@ import static net.openhft.chronicle.core.Maths.agitate;
 /**
  * Created by peter on 28/06/15.
  */
-public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
+public enum OptimisedBytesHash implements BytesStoreHash<Bytes> {
     INSTANCE;
 
-    private static final int TOP_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
     public static final Memory MEMORY = OS.memory();
+    private static final int TOP_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
-    @Override
-    public long applyAsLong(@NotNull VanillaBytes store) {
-        final int remaining = Maths.toInt32(store.readRemaining());
-        if (remaining <= 16) {
-            if (remaining == 0) {
-                return 0;
-            } else if (remaining < 8) {
-                return applyAsLong1to7(store, remaining);
-            } else if (remaining == 8) {
-                return applyAsLong8(store);
-            } else {
-                return applyAsLong9to16(store, remaining);
-            }
-        } else if (remaining <= 32) {
-            return applyAsLong17to32(store, remaining);
-        } else {
-            return applyAsLongAny(store, remaining);
-        }
-    }
-
-    static long applyAsLong1to7(@NotNull VanillaBytes store, int remaining) {
+    static long applyAsLong1to7(@NotNull Bytes store, int remaining) {
         final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
 
@@ -70,7 +50,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong8(@NotNull VanillaBytes store) {
+    static long applyAsLong8(@NotNull Bytes store) {
         final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
 
@@ -90,7 +70,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong9to16(@NotNull VanillaBytes store, int remaining) {
+    static long applyAsLong9to16(@NotNull Bytes store, int remaining) {
         final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0, h1 = 0;
@@ -109,7 +89,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLong17to32(@NotNull VanillaBytes store, int remaining) {
+    static long applyAsLong17to32(@NotNull Bytes store, int remaining) {
         final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0, h1 = 0;
@@ -132,7 +112,7 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
         return agitate(h0) ^ agitate(h1);
     }
 
-    static long applyAsLongAny(@NotNull VanillaBytes store, int remaining) {
+    static long applyAsLongAny(@NotNull Bytes store, int remaining) {
         final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = remaining, h1 = 0;
@@ -197,5 +177,25 @@ public enum OptimisedBytesHash implements BytesStoreHash<VanillaBytes> {
             l |= (long) (b & 0xFF) << (i * 8);
         }
         return l;
+    }
+
+    @Override
+    public long applyAsLong(@NotNull Bytes store) {
+        final int remaining = Maths.toInt32(store.readRemaining());
+        if (remaining <= 16) {
+            if (remaining == 0) {
+                return 0;
+            } else if (remaining < 8) {
+                return applyAsLong1to7(store, remaining);
+            } else if (remaining == 8) {
+                return applyAsLong8(store);
+            } else {
+                return applyAsLong9to16(store, remaining);
+            }
+        } else if (remaining <= 32) {
+            return applyAsLong17to32(store, remaining);
+        } else {
+            return applyAsLongAny(store, remaining);
+        }
     }
 }

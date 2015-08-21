@@ -31,7 +31,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     static long hash(BytesStore b) {
-        return b instanceof VanillaBytes && b.bytesStore() instanceof NativeBytesStore
+        return b.bytesStore() instanceof NativeBytesStore
                 ? OptimisedBytesHash.INSTANCE.applyAsLong((VanillaBytes) b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
