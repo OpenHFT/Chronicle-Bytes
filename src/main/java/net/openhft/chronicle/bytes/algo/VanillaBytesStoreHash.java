@@ -27,14 +27,14 @@ import java.nio.ByteOrder;
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
 
-    static final int K0 = 0x6d0f27bd;
-    static final int K1 = 0xc1f3bfc9;
-    static final int K2 = 0x6b192397;
-    static final int K3 = 0x6b915657;
-    static final int M0 = 0x5bc80bad;
-    static final int M1 = 0xea7585d7;
-    static final int M2 = 0x7a646e19;
-    static final int M3 = 0x855dd4db;
+    public static final int K0 = 0x6d0f27bd;
+    public static final int K1 = 0xc1f3bfc9;
+    public static final int K2 = 0x6b192397;
+    public static final int K3 = 0x6b915657;
+    public static final int M0 = 0x5bc80bad;
+    public static final int M1 = 0xea7585d7;
+    public static final int M2 = 0x7a646e19;
+    public static final int M3 = 0x855dd4db;
     private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
     public static long agitate(long l) {
