@@ -44,6 +44,12 @@ public enum StopCharTesters implements StopCharTester {
             return ch == '"' || ch <= 0;
         }
     },
+    SINGLE_QUOTES {
+        @Override
+        public boolean isStopChar(int ch) throws IllegalStateException {
+            return ch == '\'' || ch <= 0;
+        }
+    },
     ALL {
         @Override
         public boolean isStopChar(int ch) {

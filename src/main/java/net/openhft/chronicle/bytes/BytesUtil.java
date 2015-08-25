@@ -722,6 +722,8 @@ public enum BytesUtil {
         }
         if (exp == 0 && mantissa == 0) {
             out.writeByte((byte) '0');
+            out.writeByte((byte) '.');
+            out.writeByte((byte) '0');
             return;
 
         } else if (exp == 2047) {
@@ -766,6 +768,9 @@ public enum BytesUtil {
                         if (parsedValue == d)
                             break;
                     }
+                } else {
+                    out.writeByte((byte) '.');
+                    out.writeByte((byte) '0');
                 }
                 return;
 
