@@ -1335,6 +1335,8 @@ public enum BytesUtil {
             } else if (b == ']' || b == '}') {
                 in.readSkip(-1);
                 break;
+            } else if (b == '_') {
+                // ignore
             } else {
                 break;
             }
@@ -1352,7 +1354,7 @@ public enum BytesUtil {
                 num = num * 10 + b - '0';
             else if (b == '-')
                 negative = true;
-            else
+            else if (b != '_')
                 break;
         }
         return negative ? -num : num;
