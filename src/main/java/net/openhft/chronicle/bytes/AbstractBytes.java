@@ -175,6 +175,17 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public int readUnsignedByte() {
+        try {
+            long offset = readOffsetPositionMoved(1);
+            return bytesStore.readUnsignedByte(offset);
+
+        } catch (BufferOverflowException e) {
+            return -1;
+        }
+    }
+
+    @Override
     @ForceInline
     public byte readByte() {
         try {

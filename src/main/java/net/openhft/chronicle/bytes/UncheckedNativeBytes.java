@@ -216,6 +216,12 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public int readUnsignedByte() {
+        long offset = readOffsetPositionMoved(1);
+        return bytesStore.memory.readByte(bytesStore.address + offset);
+    }
+
+    @Override
     @ForceInline
     public byte readByte() {
         long offset = readOffsetPositionMoved(1);

@@ -77,9 +77,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     byte readByte();
 
-    default int readUnsignedByte() {
-        return readByte() & 0xFF;
-    }
+    int readUnsignedByte();
 
     short readShort();
 
