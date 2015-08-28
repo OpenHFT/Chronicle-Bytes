@@ -213,4 +213,16 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
     }
+
+    /**
+     * copies the contents of bytes into a direct byte buffer
+     *
+     * @param bytes the bytes to wrap
+     * @return a direct byte buffer contain the {@code bytes}
+     */
+    static Bytes allocateDirect(@NotNull byte[] bytes) {
+        VanillaBytes<Void> result = allocateDirect(bytes.length);
+        result.write(bytes);
+        return result;
+    }
 }
