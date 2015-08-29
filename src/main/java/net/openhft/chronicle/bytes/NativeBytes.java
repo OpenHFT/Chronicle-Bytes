@@ -62,7 +62,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     public void ensureCapacity(long size) {
-        writeCheckOffset(size, 0);
+        writeCheckOffset(size, 1L);
     }
 
     private void checkResize(long endOfBuffer) {
