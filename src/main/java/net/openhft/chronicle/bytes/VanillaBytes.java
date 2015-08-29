@@ -175,14 +175,14 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public boolean equalBytes(BytesStore b, long remaining) {
-        if (bytesStore instanceof NativeBytesStore &&
-                b instanceof VanillaBytes && b.bytesStore() instanceof NativeBytesStore) {
-            VanillaBytes b2 = (VanillaBytes) b;
-            NativeBytesStore nbs0 = (NativeBytesStore) bytesStore;
+    public boolean equalBytes(BytesStore bytesStore, long length) {
+        if (this.bytesStore instanceof NativeBytesStore &&
+                bytesStore instanceof VanillaBytes && bytesStore.bytesStore() instanceof NativeBytesStore) {
+            VanillaBytes b2 = (VanillaBytes) bytesStore;
+            NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
             long i = 0;
-            for (; i < remaining - 7; i++) {
+            for (; i < length - 7; i++) {
                 long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
                 long addr2 = nbs2.address + b2.readPosition() - nbs2.start() + i;
                 long l0 = nbs0.memory.readLong(addr0);
@@ -190,7 +190,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
                 if (l0 != l2)
                     return false;
             }
-            for (; i < remaining; i++) {
+            for (; i < length; i++) {
                 long offset2 = readPosition() + i - nbs0.start();
                 long offset21 = b2.readPosition() + i - nbs2.start();
                 byte b0 = nbs0.memory.readByte(nbs0.address + offset2);
@@ -200,7 +200,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             }
             return true;
         } else {
-            return super.equalBytes(b, remaining);
+            return super.equalBytes(bytesStore, length);
         }
     }
 

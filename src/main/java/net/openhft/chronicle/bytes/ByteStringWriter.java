@@ -41,7 +41,7 @@ public class ByteStringWriter extends Writer {
 
     @Override
     public void write(String str, int off, int len) {
-        out.append(str, off, len);
+        out.append(str, off, off + len);
     }
 
     @Override

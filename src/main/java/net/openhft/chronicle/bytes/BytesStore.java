@@ -31,22 +31,65 @@ import static java.lang.Math.min;
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
+
+    /**
+     * @deprecated Use from(CharSequence) instead.
+     */
+    @Deprecated
     static BytesStore wrap(@NotNull CharSequence cs) {
+        return from(cs);
+    }
+
+    /**
+     * This method builds a BytesStore using the bytes in a CharSequence. This chars are encoded using ISO_8859_1
+     *
+     * @param cs to convert
+     * @return BytesStore
+     */
+    static BytesStore from(@NotNull CharSequence cs) {
         return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
+
+    /**
+     * Wraps a byte[].  This means there is one copy in memory.
+     *
+     * @param bytes to wrap
+     * @return BytesStore
+     */
     static BytesStore wrap(@NotNull byte[] bytes) {
         return HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
     }
 
+    /**
+     * Wraps a ByteBuffer which can be either on heap or off heap.
+     * @param bb to wrap
+     * @return BytesStore
+     */
     static BytesStore wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
                 ? NativeBytesStore.wrap(bb)
                 : HeapBytesStore.wrap(bb);
     }
 
+    /**
+     * @return a PointerBytesStore which can be set to any address
+     */
     @NotNull
     static PointerBytesStore nativePointer() {
         return new PointerBytesStore();
+    }
+
+    /**
+     * Return the address and length as a BytesStore
+     *
+     * @param address for the start
+     * @param length  of data
+     * @return as a BytesStore
+     */
+    static PointerBytesStore wrap(long address, long length) {
+        PointerBytesStore pbs = nativePointer();
+        pbs.set(address, length);
+        return pbs;
     }
 
     /**
@@ -64,10 +107,18 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 .readLimit(writeLimit());
     }
 
+    /**
+     * @return a Bytes for writing to this BytesStore
+     */
     default Bytes<Underlying> bytesForWrite() {
         return new VanillaBytes<>(this, writePosition(), writeLimit());
     }
 
+    /**
+     * The Bytes are clear if start() == readPosition() && writeLimit() == capacity()
+     *
+     * @return is the Bytes clear?
+     */
     default boolean isClear() {
         return true;
     }
@@ -84,6 +135,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     long capacity();
 
+    /**
+     * @return the underlying object being wrapped, if there is one, or null if not.
+     */
     @Nullable
     Underlying underlyingObject();
 
@@ -94,10 +148,17 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return start() <= offset && offset < safeLimit();
     }
 
+    /**
+     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying data.
+     */
     default long safeLimit() {
         return capacity();
     }
 
+    /**
+     * Copy the data to another BytesStore
+     * @param store to copy to
+     */
     default void copyTo(@NotNull BytesStore store) {
         long copy = min(capacity(), store.capacity());
         int i = 0;
@@ -107,6 +168,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             store.writeByte(i, readByte(i));
     }
 
+    /**
+     * Fill the BytesStore with zeros
+     * @param start first byte inclusive
+     * @param end last byte exclusive.
+     * @return this.
+     */
     default B zeroOut(long start, long end) {
         if (end <= start)
             return (B) this;
@@ -120,22 +187,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (B) this;
     }
 
-    boolean compareAndSwapInt(long offset, int expected, int value);
-
-    boolean compareAndSwapLong(long offset, long expected, long value);
-
-    default int addAndGetInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
-    }
-
-    default int getAndAddInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding);
-    }
-
-    default long addAndGetLong(long offset, long adding) {
-        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
-    }
-
+    /**
+     * @return length in bytes to read or Integer.MAX_VALUE if longer.
+     */
     @Override
     default int length() {
         return (int) Math.min(Integer.MAX_VALUE, readRemaining());
@@ -149,27 +203,47 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return (char) readUnsignedByte(readPosition() + index);
     }
 
+    /**
+     * Not supported.
+     */
     @NotNull
     @Override
     default CharSequence subSequence(int start, int end) {
         throw new UnsupportedOperationException("todo");
     }
 
+    /**
+     * @return This BytesStore as a DebugString.
+     */
     @NotNull
     default String toDebugString() {
         return BytesUtil.toDebugString(this, Integer.MAX_VALUE);
     }
 
+    /**
+     * @return the underlying BytesStore
+     */
     default BytesStore bytesStore() {
         return this;
     }
 
-    default boolean equalBytes(@NotNull BytesStore b, long remaining) {
-        return remaining == 8
-                ? readLong(readPosition()) == b.readLong(b.readPosition())
-                : BytesUtil.equalBytesAny(this, b, remaining);
+    /**
+     * Check if a portion of a BytesStore matches this one.
+     *
+     * @param bytesStore to match against
+     * @param length     to match.
+     * @return true if the bytes and length matched.
+     */
+    default boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
+        return length == 8
+                ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
+                : BytesUtil.equalBytesAny(this, bytesStore, length);
     }
 
+    /**
+     * Return the bytes sum of the readable bytes.
+     * @return unsigned byte sum.
+     */
     default int byteCheckSum() {
         byte b = 0;
         for (long i = readPosition(); i < readLimit(); i++)
@@ -177,10 +251,20 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return b & 0xFF;
     }
 
+    /**
+     * Does the BytesStore end with a character?
+     * @param c to look for
+     * @return true if its the last character.
+     */
     default boolean endsWith(char c) {
         return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
     }
 
+    /**
+     * Does the BytesStore start with a character?
+     * @param c to look for
+     * @return true if its the last character.
+     */
     default boolean startsWith(char c) {
         return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
     }

@@ -93,4 +93,14 @@ interface RandomCommon extends ReferenceCounted {
      * @return the streaming bytes for writing.
      */
     Bytes bytesForWrite();
+
+    /**
+     * @param offset
+     * @param expected
+     * @param value
+     * @return
+     */
+    boolean compareAndSwapInt(long offset, int expected, int value);
+
+    boolean compareAndSwapLong(long offset, long expected, long value);
 }

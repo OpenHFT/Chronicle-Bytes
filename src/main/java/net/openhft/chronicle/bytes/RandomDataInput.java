@@ -148,4 +148,17 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     long realCapacity();
+
+    default int addAndGetInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
+    }
+
+    default int getAndAddInt(long offset, int adding) {
+        return BytesUtil.getAndAddInt(this, offset, adding);
+    }
+
+    default long addAndGetLong(long offset, long adding) {
+        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
+    }
+
 }

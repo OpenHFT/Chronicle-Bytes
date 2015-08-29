@@ -17,9 +17,9 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * User: peter.lawrey
- * Date: 07/10/13
- * Time: 21:38
+ * This Interface allows a reference to off heap memory to be reassigned.
+ * <p></p>
+ * A reference to off heap memory is a proxy for some memory which sits outside the heap.
  */
 public interface Byteable<Underlying> {
     /**
@@ -31,5 +31,8 @@ public interface Byteable<Underlying> {
      */
     void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length);
 
+    /**
+     * @return the maximum size in byte for this reference.
+     */
     long maxSize();
 }

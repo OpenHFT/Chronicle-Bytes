@@ -20,42 +20,81 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
 
+/**
+ * Methods to append text to a Bytes.
+ */
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
+    /**
+     * @return these Bytes as a Writer
+     */
     default Writer writer() {
         return new ByteStringWriter(this);
     }
 
 
+    /**
+     * Append a char in UTF-8
+     *
+     * @param ch to append
+     * @return this
+     */
     @NotNull
     default B append(char ch) {
         BytesUtil.appendUTF(this, ch);
         return (B) this;
     }
 
+    /**
+     * Append a characters in UTF-8
+     * @param cs to append
+     * @return this
+     */
     @NotNull
     default B append(@NotNull CharSequence cs) {
         return append(cs, 0, cs.length());
     }
 
+    /**
+     * Append a long in decimal
+     * @param value to append
+     * @return this
+     */
     @NotNull
     default B append(long value) {
         BytesUtil.append(this, value);
         return (B) this;
     }
 
+    /**
+     * Append a float in decimal notation
+     * @param f to append
+     * @return this
+     */
     @NotNull
     default B append(float f) {
         BytesUtil.append((StreamingDataOutput) this, f);
         return (B) this;
     }
 
+    /**
+     * Append a double in decimal notation
+     * @param d to append
+     * @return this
+     */
     @NotNull
     default B append(double d) {
         BytesUtil.append((StreamingDataOutput) this, d);
         return (B) this;
     }
 
+    /**
+     * Append a portion of a String to the Bytes in UTF-8.
+     * @param cs to copy
+     * @param start index of the first char inclusive
+     * @param end index of the last char exclusive.
+     * @return this
+     */
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end) {
         BytesUtil.appendUTF(this, cs, start, end - start);
@@ -76,34 +115,23 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
-    default B append8bit(@NotNull CharSequence cs, int offset, int length) {
+    /**
+     * Append a portion of a String to the Bytes in ISO-8859-1
+     *
+     * @param cs    to copy
+     * @param start index of the first char inclusive
+     * @param end   index of the last char exclusive.
+     * @return this
+     */
+    default B append8bit(@NotNull CharSequence cs, int start, int end) {
         if (cs instanceof BytesStore) {
-            return write((BytesStore) cs, (long) offset, length);
+            return write((BytesStore) cs, (long) start, end);
         }
-        for (int i = 0; i < length; i++) {
-            char c = cs.charAt(offset + i);
+        for (int i = start; i < end; i++) {
+            char c = cs.charAt(i);
             if (c > 255) c = '?';
             writeUnsignedByte(c);
         }
-        return (B) this;
-    }
-
-    @NotNull
-    default B append(long value, int digits) {
-        BytesUtil.append((RandomDataOutput) this, writePosition(), value, digits);
-        this.writeSkip(digits);
-        return (B) this;
-    }
-
-    @NotNull
-    default B appendDateMillis(long timeInMillis) {
-        BytesUtil.appendDateMillis(this, timeInMillis);
-        return (B) this;
-    }
-
-    @NotNull
-    default B appendTimeMillis(long timeInMillis) {
-        BytesUtil.appendTimeMillis(this, timeInMillis);
         return (B) this;
     }
 }

@@ -187,8 +187,8 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(BytesStore b, long remaining) {
-        return remaining == 0;
+    public boolean equalBytes(BytesStore bytesStore, long length) {
+        return length == 0;
     }
 
     @Override
