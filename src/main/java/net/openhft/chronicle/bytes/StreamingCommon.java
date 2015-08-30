@@ -20,12 +20,27 @@ import org.jetbrains.annotations.NotNull;
 
 interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
+    /**
+     * Set the readPosition= writePosition = start, writeLimit = capacity
+     *
+     * @return this
+     */
     @NotNull
     S clear();
 
 
+    /**
+     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     * @param bytesToSkip bytes to skip.
+     * @return this
+     */
     S readSkip(long bytesToSkip);
 
+    /**
+     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     * @param bytesToSkip bytes to skip.
+     * @return this
+     */
     S writeSkip(long bytesToSkip);
 
 }
