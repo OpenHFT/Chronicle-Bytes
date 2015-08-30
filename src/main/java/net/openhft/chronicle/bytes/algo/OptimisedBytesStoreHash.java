@@ -30,7 +30,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 /**
  * Created by peter on 28/06/15.
  */
-public enum OptimisedBytesHash implements BytesStoreHash<Bytes> {
+public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     INSTANCE;
 
     public static final Memory MEMORY = OS.memory();

@@ -25,13 +25,13 @@ import org.junit.Test;
 import java.security.SecureRandom;
 import java.util.Random;
 
-import static net.openhft.chronicle.bytes.algo.OptimisedBytesHash.*;
+import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
 import static org.junit.Assert.assertEquals;
 
 /**
  * Created by peter on 28/06/15.
  */
-public class OptimisedBytesHashTest {
+public class OptimisedBytesStoreHashTest {
 
     @Test
     public void testApplyAsLong() {
@@ -41,11 +41,11 @@ public class OptimisedBytesHashTest {
         while (b.readRemaining() > 0) {
             assertEquals("Rem: " + b.readRemaining(),
                     VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                    OptimisedBytesHash.INSTANCE.applyAsLong(b));
+                    OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
             b.readSkip(1);
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                OptimisedBytesHash.INSTANCE.applyAsLong(b));
+                OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
     }
 
     @Test
@@ -127,7 +127,7 @@ public class OptimisedBytesHashTest {
                 b.append('-');
                 b.append(i);
                 long start = System.nanoTime();
-                hashs[i] = OptimisedBytesHash.INSTANCE.applyAsLong(b);
+                hashs[i] = OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
                 time += System.nanoTime() - start;
                 timeCount++;
 

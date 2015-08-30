@@ -28,12 +28,12 @@ import java.util.function.ToLongFunction;
  */
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
     static long hash(VanillaBytes b) {
-        return OptimisedBytesHash.INSTANCE.applyAsLong(b);
+        return OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
     static long hash(BytesStore b) {
         return b instanceof Bytes && b.bytesStore() instanceof NativeBytesStore
-                ? OptimisedBytesHash.INSTANCE.applyAsLong((Bytes) b)
+                ? OptimisedBytesStoreHash.INSTANCE.applyAsLong((Bytes) b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
