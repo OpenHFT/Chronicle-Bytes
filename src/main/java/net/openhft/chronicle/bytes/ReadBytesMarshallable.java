@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * Created by peter on 13/08/15.
+ * Read data directly as Bytes.
  */
 @FunctionalInterface
 public interface ReadBytesMarshallable {
