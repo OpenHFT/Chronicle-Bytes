@@ -28,11 +28,20 @@ import java.nio.ByteBuffer;
  * <p>The use of this instance is single threaded, though the use of the data
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+    /**
+     * @return Bytes as an OutputStream
+     */
     @NotNull
     default OutputStream outputStream() {
         return new StreamingOutputStream(this);
     }
 
+    /**
+     * Write a stop bit encoded long
+     *
+     * @param x long to write
+     * @return this.
+     */
     @NotNull
     default S writeStopBit(long x) {
         BytesInternal.writeStopBit(this, x);

@@ -26,6 +26,9 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
+/**
+ * Simple Bytes implementation which is not Elastic.
+ */
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
     public VanillaBytes(@NotNull BytesStore bytesStore) {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());

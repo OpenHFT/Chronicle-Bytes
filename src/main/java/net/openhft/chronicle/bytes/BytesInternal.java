@@ -415,9 +415,9 @@ enum BytesInternal {
     @SuppressWarnings("ShiftOutOfRange")
     public static void writeStopBit(@NotNull StreamingDataOutput out, double d) {
         long n = Double.doubleToRawLongBits(d);
-        out.writeByte((byte) ((n >>> -7) | 0x80));
-        while (((n <<= 7) & (~0L >>> 7)) != 0) {
+        while ((n & (~0L >>> 7)) != 0) {
             out.writeByte((byte) (((n >>> -7) & 0x7F) | 0x80));
+            n <<= 7;
         }
         out.writeByte((byte) ((n >>> -7) & 0x7F));
     }

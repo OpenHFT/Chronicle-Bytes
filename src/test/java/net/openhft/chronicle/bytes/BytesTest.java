@@ -180,4 +180,24 @@ public class BytesTest {
             assertSame(s, s2);
         }
     }
+
+    @Test
+    public void testStopBitDouble() {
+        Bytes b = Bytes.elasticByteBuffer();
+        testSBD(b, -0.0, "00000000 40                                               @                \n");
+        testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
+        testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   ····N            \n");
+        testSBD(b, 0.0, "00000000 00                                               ·                \n");
+        testSBD(b, 1.0, "00000000 9F 7C                                            ·|               \n");
+        testSBD(b, 1024, "00000000 A0 24                                            ·$               \n");
+        testSBD(b, 1000000, "00000000 A0 CB D0 48                                      ···H             \n");
+        testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
+        testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
+    }
+
+    private void testSBD(Bytes b, double v, String s) {
+        b.clear();
+        b.writeStopBit(v);
+        assertEquals(s, b.toHexString());
+    }
 }

@@ -21,5 +21,10 @@ package net.openhft.chronicle.bytes;
  */
 @FunctionalInterface
 public interface ReadBytesMarshallable {
+    /**
+     * Bytes to read.  This can be used as a method to implement or as a lambda.
+     *
+     * @param bytes to read.
+     */
     void readMarshallable(Bytes<?> bytes);
 }

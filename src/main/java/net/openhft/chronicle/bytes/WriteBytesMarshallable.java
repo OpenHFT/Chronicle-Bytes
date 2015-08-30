@@ -21,5 +21,10 @@ package net.openhft.chronicle.bytes;
  */
 @FunctionalInterface
 public interface WriteBytesMarshallable {
+    /**
+     * Write to Bytes.  This can be used as an interface to extend or a lambda
+     *
+     * @param bytes to write to.
+     */
     void writeMarshallable(Bytes bytes);
 }
