@@ -13,4 +13,21 @@ The API supports.
  - compressed data types such as stop bit encoding.
  - elastic ByteBuffer wrappers which resize as required.
  - parsing text and writing text directly to off heap bytes.
+ 
+# Comparison of access to native memory
+
+| Access                                              | ByteBuffer       | Aeron UnsafeBuffer | Chronicle Bytes     |
+|--------------------------------------------|:---------------:|:--------------------:|:--------------------:|
+| Read/write primitives in native memory |  yes               |  yes                      |  yes                     |
+| Separate Mutable interfaces                 | run time check |  yes                      |  yes                     |
+| Read/Write UTF8 strings                      |  no                |  String                   |  any CharSequence + Appendable |
+| Read/Write ISO-8859-1 strings             |  no                |  ?                         |  any CharSequence + Appendable |
+| Support Endianness                            | Big and Little   |  Big and Little        | Native only           |
+| Size of buffer                                     |  31-bit            |  31-bit                  | 63-bit                  |
+| Elastic ByteBuffers                              |  no                 | no                        | yes                      |
+| Disable bounds checks                        |  no                 | set globally           | by buffer              |
+| Wrap an address                                 | no                 | yes                       | yes                      |
+| Thread safe off heap operations            | no                  | int, long                | int, long, float and double |
+| Streaming access                                | yes                 | no                        | yes                      |
+
 
