@@ -27,7 +27,7 @@ The API supports.
 | Elastic ByteBuffers                              |  no                 |  yes                | no                        | yes                      |
 | Disable bounds checks                        |  no                 | no                 | set globally           | by buffer              |
 | Wrap an address                                 | no                 | no                  | yes                       | yes                      |
-| CAS and atomic add operations            | no                  |no                  | int, long                | int, long, float and double |
+| Thread safe read/write, CAS and atomic add operations            | no                  |no                  | int, long                | int, long, float and double |
 | Streaming access                                | yes                 |yes                 | no                        | yes                      |
 | Deterministic release of memory           | Internal API     | Internal API     | Caller's responsibility | yes                     |
 | Separate read and write position           | no                 | yes                 | na                         | yes                      |
