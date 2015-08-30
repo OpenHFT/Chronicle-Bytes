@@ -549,9 +549,54 @@ public class ByteStoreTest {
         assertEquals(0, bytesStore.readInt(4L));
 
         for (int i = 0; i < 11; i++)
-            bytesStore.getAndAddInt(4L, 11);
+            bytesStore.addAndGetInt(4L, 11);
         assertEquals(100, bytesStore.readInt(0L));
         assertEquals(11 * 11, bytesStore.readInt(4L));
+    }
+
+    @Test
+    public void testAddAndGetLong() {
+        bytesStore = NativeBytesStore.nativeStore(128);
+
+        for (int i = 0; i < 10; i++)
+            bytesStore.addAndGetLong(0L, 10);
+        assertEquals(100, bytesStore.readLong(0L));
+        assertEquals(0, bytesStore.readLong(8L));
+
+        for (int i = 0; i < 11; i++)
+            bytesStore.addAndGetLong(8L, 11);
+        assertEquals(100, bytesStore.readLong(0L));
+        assertEquals(11 * 11, bytesStore.readLong(8L));
+    }
+
+    @Test
+    public void testAddAndGetFloat() {
+        bytesStore = NativeBytesStore.nativeStore(128);
+
+        for (int i = 0; i < 10; i++)
+            bytesStore.addAndGetFloat(0L, 10);
+        assertEquals(100, bytesStore.readFloat(0L), 0f);
+        assertEquals(0, bytesStore.readVolatileFloat(4L), 0f);
+
+        for (int i = 0; i < 11; i++)
+            bytesStore.addAndGetFloat(4L, 11);
+        assertEquals(100, bytesStore.readVolatileFloat(0L), 0f);
+        assertEquals(11 * 11, bytesStore.readFloat(4L), 0f);
+    }
+
+    @Test
+    public void testAddAndGetDouble() {
+        bytesStore = NativeBytesStore.nativeStore(128);
+
+        for (int i = 0; i < 10; i++)
+            bytesStore.addAndGetDouble(0L, 10);
+        assertEquals(100, bytesStore.readDouble(0L), 0.0);
+        assertEquals(0, bytesStore.readVolatileDouble(8L), 0.0);
+
+        for (int i = 0; i < 11; i++)
+            bytesStore.addAndGetDouble(8L, 11);
+        assertEquals(100, bytesStore.readVolatileDouble(0L), 0.0);
+        assertEquals(11 * 11, bytesStore.readDouble(8L), 0.0);
     }
 
     @Test
