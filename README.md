@@ -16,18 +16,20 @@ The API supports.
  
 # Comparison of access to native memory
 
-| Access                                              | ByteBuffer       | Aeron UnsafeBuffer | Chronicle Bytes     |
-|--------------------------------------------|:---------------:|:--------------------:|:--------------------:|
-| Read/write primitives in native memory |  yes               |  yes                      |  yes                     |
-| Separate Mutable interfaces                 | run time check |  yes                      |  yes                     |
-| Read/Write UTF8 strings                      |  no                |  String                   |  any CharSequence + Appendable |
-| Read/Write ISO-8859-1 strings             |  no                |  ?                         |  any CharSequence + Appendable |
-| Support Endianness                            | Big and Little   |  Big and Little        | Native only           |
-| Size of buffer                                     |  31-bit            |  31-bit                  | 63-bit                  |
-| Elastic ByteBuffers                              |  no                 | no                        | yes                      |
-| Disable bounds checks                        |  no                 | set globally           | by buffer              |
-| Wrap an address                                 | no                 | yes                       | yes                      |
-| Thread safe off heap operations            | no                  | int, long                | int, long, float and double |
-| Streaming access                                | yes                 | no                        | yes                      |
+| Access                                              | ByteBuffer       | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes     |
+|--------------------------------------------|:---------------:|:---------------:|:--------------------:|:--------------------:|
+| Read/write primitives in native memory |  yes               | yes                 |  yes                      |  yes                     |
+| Separate Mutable interfaces                 | run time check | run time check |  yes                      |  yes                     |
+| Read/Write UTF8 strings                      |  no                |   no                | String                   |  any CharSequence + Appendable |
+| Read/Write ISO-8859-1 strings             |  no                |  no                 | ?                         |  any CharSequence + Appendable |
+| Support Endianness                            | Big and Little   | Big and Little   |  Big and Little        | Native only           |
+| Size of buffer                                     |  31-bit            |  31-bit            |  31-bit                  | 63-bit                  |
+| Elastic ByteBuffers                              |  no                 |  yes                | no                        | yes                      |
+| Disable bounds checks                        |  no                 | no                 | set globally           | by buffer              |
+| Wrap an address                                 | no                 | no                  | yes                       | yes                      |
+| Thread safe off heap operations            | no                  |no                  | int, long                | int, long, float and double |
+| Streaming access                                | yes                 |yes                 | no                        | yes                      |
+| Deterministic release of memory           | Internal API     | Internal API     | Caller's responsibility | yes                     |
+| Separate read and write position           | no                 | yes                 | na                         | yes                      |
 
 
