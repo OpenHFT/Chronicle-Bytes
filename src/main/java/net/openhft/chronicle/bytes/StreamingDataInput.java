@@ -64,11 +64,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default long readStopBit() {
-        return BytesUtil.readStopBit(this);
+        return BytesInternal.readStopBit(this);
     }
 
     default double readStopBitDouble() {
-        return BytesUtil.readStopBitDouble(this);
+        return BytesInternal.readStopBitDouble(this);
     }
 
     default boolean readBoolean() {
@@ -105,12 +105,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     @Nullable
     default String readUTFΔ() {
-        return BytesUtil.readUTFΔ(this);
+        return BytesInternal.readUTFΔ(this);
     }
 
     @Nullable
     default String read8bit() {
-        return BytesUtil.read8bit(this);
+        return BytesInternal.read8bit(this);
     }
 
     /**
@@ -120,18 +120,18 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
     default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
-        BytesUtil.setLength(sb, 0);
-        long len0 = BytesUtil.readStopBit(this);
+        AppendableUtil.setLength(sb, 0);
+        long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        BytesUtil.parseUTF(this, sb, len);
+        BytesInternal.parseUTF(this, sb, len);
         return true;
     }
 
     default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
         b.clear();
-        long len0 = BytesUtil.readStopBit(this);
+        long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
@@ -141,22 +141,22 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
-        BytesUtil.setLength(sb, 0);
-        long len0 = BytesUtil.readStopBit(this);
+        AppendableUtil.setLength(sb, 0);
+        long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        BytesUtil.parse8bit(this, sb, len);
+        AppendableUtil.parse8bit(this, sb, len);
         return true;
     }
 
     default boolean read8bit(StringBuilder sb) {
         sb.setLength(0);
-        long len0 = BytesUtil.readStopBit(this);
+        long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        BytesUtil.parse8bit(this, sb, len);
+        AppendableUtil.parse8bit(this, sb, len);
         return true;
     }
 
@@ -199,7 +199,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void nativeRead(long address, long size);
 
     default <E extends Enum<E>> E readEnum(Class<E> eClass) {
-        return BytesUtil.readEnum(this, eClass);
+        return BytesInternal.readEnum(this, eClass);
     }
 
+    default void parseUTF(Appendable sb, int length) {
+        AppendableUtil.setLength(sb, 0);
+        BytesInternal.parseUTF(this, sb, length);
+    }
 }

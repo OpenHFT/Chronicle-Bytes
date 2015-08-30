@@ -26,6 +26,9 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
+/**
+ * Elastic native memory accessor which can wrap either a direct ByteBuffer or malloc'ed memory.
+ */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     NativeBytes(@NotNull BytesStore store) {

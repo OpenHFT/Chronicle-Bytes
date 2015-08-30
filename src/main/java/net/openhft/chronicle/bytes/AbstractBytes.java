@@ -587,7 +587,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public String toString() {
-        return BytesUtil.toString(this);
+        return BytesInternal.toString(this);
     }
 
     @Override

@@ -128,7 +128,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             rawCopy(bytes, offset, length);
 
         } else {
-            BytesUtil.write(bytes, offset, length, this);
+            BytesInternal.write(bytes, offset, length, this);
         }
         return this;
     }
@@ -583,7 +583,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public String toString() {
-        return BytesUtil.toString(this);
+        return BytesInternal.toString(this);
     }
 
     @Override

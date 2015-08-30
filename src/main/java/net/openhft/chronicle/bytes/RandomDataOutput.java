@@ -76,7 +76,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     @NotNull
     default R append(long offset, long value, int digits) {
-        BytesUtil.append(this, offset, value, digits);
+        BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
 

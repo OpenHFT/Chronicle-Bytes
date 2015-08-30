@@ -35,12 +35,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     default S writeStopBit(long x) {
-        BytesUtil.writeStopBit(this, x);
+        BytesInternal.writeStopBit(this, x);
         return (S) this;
     }
 
     default S writeStopBit(double d) {
-        BytesUtil.writeStopBit(this, d);
+        BytesInternal.writeStopBit(this, d);
         return (S) this;
     }
 
@@ -57,7 +57,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @NotNull
     default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
-        BytesUtil.writeUTF(this, cs);
+        BytesInternal.writeUTF(this, cs);
         return (S) this;
     }
 
@@ -142,7 +142,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     default S write(@NotNull BytesStore bytes, long offset, long length) {
-        BytesUtil.write(bytes, offset, length, this);
+        BytesInternal.write(bytes, offset, length, this);
         return (S) this;
     }
 
@@ -180,7 +180,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         write8bit(e.name());
     }
 
-    default void appendUTF(char[] chars, int offset, int length) {
+    default S appendUTF(int codepoint) {
+        BytesInternal.appendUTF(this, codepoint);
+        return (S) this;
+    }
+
+    default S appendUTF(char[] chars, int offset, int length) {
         int i;
         ascii:
         {
@@ -190,11 +195,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
                     break ascii;
                 writeByte((byte) c);
             }
-            return;
+            return (S) this;
         }
         for (; i < length; i++) {
             char c = chars[offset + i];
-            BytesUtil.appendUTF(this, c);
+            BytesInternal.appendUTF(this, c);
         }
+        return (S) this;
     }
 }

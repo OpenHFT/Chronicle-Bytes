@@ -89,7 +89,7 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     default long parseLong(long offset) {
-        return BytesUtil.parseLong(this, offset);
+        return BytesInternal.parseLong(this, offset);
     }
 
     /**
@@ -100,34 +100,6 @@ public interface RandomDataInput extends RandomCommon {
      * @param size     in bytes
      */
     void nativeRead(long position, long address, long size);
-
-    /**
-     * @deprecated use {@link BytesUtil#bytesEqual}
-     */
-    @Deprecated
-    default boolean bytesEqual(
-            long offset, @NotNull RandomDataInput second, long secondOffset, long len) {
-        long i = 0;
-        while (len - i >= 8L) {
-            if (readLong(offset + i) != second.readLong(secondOffset + i))
-                return false;
-            i += 8L;
-        }
-        if (len - i >= 4L) {
-            if (readInt(offset + i) != second.readInt(secondOffset + i))
-                return false;
-            i += 4L;
-        }
-        if (len - i >= 2L) {
-            if (readShort(offset + i) != second.readShort(secondOffset + i))
-                return false;
-            i += 2L;
-        }
-        if (i < len)
-            if (readByte(offset + i) != second.readByte(secondOffset + i))
-                return false;
-        return true;
-    }
 
     default void copyTo(@NotNull byte[] bytes) {
         for (int i = 0; i < bytes.length; i++)
@@ -150,15 +122,15 @@ public interface RandomDataInput extends RandomCommon {
     long realCapacity();
 
     default int addAndGetInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding) + adding;
+        return BytesInternal.getAndAddInt(this, offset, adding) + adding;
     }
 
     default int getAndAddInt(long offset, int adding) {
-        return BytesUtil.getAndAddInt(this, offset, adding);
+        return BytesInternal.getAndAddInt(this, offset, adding);
     }
 
     default long addAndGetLong(long offset, long adding) {
-        return BytesUtil.getAndAddLong(this, offset, adding) + adding;
+        return BytesInternal.getAndAddLong(this, offset, adding) + adding;
     }
 
 }

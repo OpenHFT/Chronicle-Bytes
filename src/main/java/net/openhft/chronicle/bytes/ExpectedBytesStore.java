@@ -98,7 +98,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeByte(long offset, byte i8) {
+    public B writeByte(long offset, byte i8) throws AssertionError {
         byte i8a = underlyingBytesStore.readByte(offset);
         if (i8a != i8) {
             Bytes<Underlying> bytes = underlyingBytesStore.bytesForRead();
@@ -115,7 +115,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeShort(long offset, short i) {
+    public B writeShort(long offset, short i) throws AssertionError {
         short ia = underlyingBytesStore.readShort(offset);
         if (ia != i)
             throw new AssertionError("Expected: " + ia + "\nActual: " + i);
@@ -124,7 +124,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeInt(long offset, int i) {
+    public B writeInt(long offset, int i) throws AssertionError {
         int ia = underlyingBytesStore.readInt(offset);
         if (ia != i)
             throw new AssertionError("Expected: " + ia + "\nActual: " + i);
@@ -137,7 +137,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedInt(long offset, int i) {
+    public B writeOrderedInt(long offset, int i) throws AssertionError {
         int ia = underlyingBytesStore.readInt(offset);
         if (ia != i) {
             if ((i & NOT_READY) == 0)
@@ -152,7 +152,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeLong(long offset, long i) {
+    public B writeLong(long offset, long i) throws AssertionError {
         long ia = underlyingBytesStore.readLong(offset);
         if (ia != i)
             throw new AssertionError("Expected: " + ia + "\nActual: " + i);
@@ -166,7 +166,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedLong(long offset, long i) {
+    public B writeOrderedLong(long offset, long i) throws AssertionError {
         long ia = underlyingBytesStore.readLong(offset);
         if (ia != i)
             throw new AssertionError("Expected: " + ia + "\nActual: " + i);
@@ -175,7 +175,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeFloat(long offset, float d) {
+    public B writeFloat(long offset, float d) throws AssertionError {
         float ia = underlyingBytesStore.readFloat(offset);
         if (ia != d)
             throw new AssertionError("Expected: " + ia + "\nActual: " + d);
@@ -184,7 +184,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeDouble(long offset, double d) {
+    public B writeDouble(long offset, double d) throws AssertionError {
         double ia = underlyingBytesStore.readDouble(offset);
         if (ia != d)
             throw new AssertionError("Expected: " + ia + "\nActual: " + d);
@@ -193,7 +193,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B write(long offsetInRDO, byte[] bytes, int offset, int length) {
+    public B write(long offsetInRDO, byte[] bytes, int offset, int length) throws AssertionError {
         for (int i = 0; i < length; i++)
             writeByte(offsetInRDO + i, bytes[offset + i]);
         return (B) this;

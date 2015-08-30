@@ -26,6 +26,9 @@ import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
 
+/**
+ * Wrapper for Heap ByteBuffers and arrays.
+ */
 @SuppressWarnings("sunapi")
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
@@ -54,7 +57,7 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public String toString() {
-        return BytesUtil.toString(this);
+        return BytesInternal.toString(this);
     }
 
     @NotNull
@@ -254,6 +257,6 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 }

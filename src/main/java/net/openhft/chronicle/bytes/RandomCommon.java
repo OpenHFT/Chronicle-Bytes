@@ -38,21 +38,36 @@ interface RandomCommon extends ReferenceCounted {
         return Bytes.MAX_CAPACITY;
     }
 
+    /**
+     * The read position must be start() &lt;= readPosition() &amp;&amp; readPosition() &lt;= readLimit() &amp;&amp; readPosition &lt; safeLimit()
+     *
+     * @return position to read from.
+     */
     @ForceInline
     default long readPosition() {
         return start();
     }
 
+    /**
+     * The read position must be readPosition() &lt;= writePosition() &amp;&amp; writePosition() &lt;= writeLimit()
+     * @return position to write to.
+     */
     @ForceInline
     default long writePosition() {
         return start();
     }
 
+    /**
+     * @return How many more bytes can we read.
+     */
     @ForceInline
     default long readRemaining() {
         return readLimit() - readPosition();
     }
 
+    /**
+     * @return How many more bytes can we written.
+     */
     @ForceInline
     default long writeRemaining() {
         return writeLimit() - writePosition();
@@ -95,12 +110,20 @@ interface RandomCommon extends ReferenceCounted {
     Bytes bytesForWrite();
 
     /**
-     * @param offset
-     * @param expected
-     * @param value
-     * @return
+     * Perform a 32-bit CAS at a give offset.
+     * @param offset to perform CAS
+     * @param expected value
+     * @param value to set
+     * @return true, if successful.
      */
     boolean compareAndSwapInt(long offset, int expected, int value);
 
+    /**
+     * Perform a 64-bit CAS at a give offset.
+     * @param offset to perform CAS
+     * @param expected value
+     * @param value to set
+     * @return true, if successful.
+     */
     boolean compareAndSwapLong(long offset, long expected, long value);
 }

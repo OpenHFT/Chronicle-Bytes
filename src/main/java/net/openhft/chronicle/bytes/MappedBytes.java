@@ -23,6 +23,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 
+/**
+ * Bytes to wrap memory mapped data.
+ */
 public class MappedBytes extends AbstractBytes<Void> {
     private final MappedFile mappedFile;
 

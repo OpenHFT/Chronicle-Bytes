@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.Writer;
 
 /**
- * Methods to append text to a Bytes.
+ * Methods to append text to a Bytes. This extends the Appendable interface.
  */
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
@@ -41,7 +41,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(char ch) {
-        BytesUtil.appendUTF(this, ch);
+        BytesInternal.appendUTF(this, ch);
         return (B) this;
     }
 
@@ -62,7 +62,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(long value) {
-        BytesUtil.append(this, value);
+        BytesInternal.append(this, value);
         return (B) this;
     }
 
@@ -73,7 +73,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f) {
-        BytesUtil.append((StreamingDataOutput) this, f);
+        BytesInternal.append((StreamingDataOutput) this, f);
         return (B) this;
     }
 
@@ -84,7 +84,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d) {
-        BytesUtil.append((StreamingDataOutput) this, d);
+        BytesInternal.append((StreamingDataOutput) this, d);
         return (B) this;
     }
 
@@ -97,7 +97,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end) {
-        BytesUtil.appendUTF(this, cs, start, end - start);
+        BytesInternal.appendUTF(this, cs, start, end - start);
         return (B) this;
     }
 

@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -47,7 +46,7 @@ public class UTF8StringInterner {
             return s;
         StringBuilder sb = SBP.acquireStringBuilder();
         long pos = cs.readPosition();
-        BytesUtil.parseUTF(cs, sb, Maths.toInt32(cs.readRemaining()));
+        cs.parseUTF(sb, Maths.toInt32(cs.readRemaining()));
         cs.readPosition(pos);
         return interner[h] = sb.toString();
     }

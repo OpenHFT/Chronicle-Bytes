@@ -26,7 +26,8 @@ import java.nio.charset.StandardCharsets;
 import static java.lang.Math.min;
 
 /**
- * A reference to some bytes with fixed extents.
+ * A immutable reference to some bytes with fixed extents.
+ * This can be shared safely across thread provided the data referenced is accessed in a thread safe manner.
  * Only offset access within the capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
@@ -47,6 +48,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return BytesStore
      */
     static BytesStore from(@NotNull CharSequence cs) {
+        if (cs instanceof BytesStore)
+            return ((BytesStore) cs).copy();
         return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
@@ -115,7 +118,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * The Bytes are clear if start() == readPosition() && writeLimit() == capacity()
+     * The Bytes are clear if start() == readPosition() &amp;&amp; writeLimit() == capacity()
      *
      * @return is the Bytes clear?
      */
@@ -217,7 +220,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @NotNull
     default String toDebugString() {
-        return BytesUtil.toDebugString(this, Integer.MAX_VALUE);
+        return BytesInternal.toDebugString(this, Integer.MAX_VALUE);
     }
 
     /**
@@ -237,7 +240,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
         return length == 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
-                : BytesUtil.equalBytesAny(this, bytesStore, length);
+                : BytesInternal.equalBytesAny(this, bytesStore, length);
     }
 
     /**
@@ -267,5 +270,19 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean startsWith(char c) {
         return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
+    }
+
+    /**
+     * Compare the contents of the BytesStores.
+     *
+     * @param bytesStore to compare with
+     * @return true if they contain the same data.
+     */
+    default boolean contentEquals(@Nullable BytesStore bytesStore) {
+        return BytesInternal.contentEqual(this, bytesStore);
+    }
+
+    default String to8bitString() {
+        return BytesInternal.to8bitString(this);
     }
 }

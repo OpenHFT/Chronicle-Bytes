@@ -27,7 +27,7 @@ public class ByteStringParserTest   {
         long expected = 123L;
         b.append(expected);
 
-        Assert.assertEquals(expected,BytesUtil.parseLong(b));
+        Assert.assertEquals(expected, BytesInternal.parseLong(b));
     }
 
     @Test
@@ -36,7 +36,7 @@ public class ByteStringParserTest   {
         int expected = 123;
         b.append(expected);
 
-        Assert.assertEquals(expected,BytesUtil.parseLong(b));
+        Assert.assertEquals(expected, BytesInternal.parseLong(b));
     }
 
     @Test
@@ -45,7 +45,7 @@ public class ByteStringParserTest   {
         double expected = 123.1234;
         b.append(expected);
 
-        Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
+        Assert.assertEquals(expected, BytesInternal.parseDouble(b), 0);
     }
 
     @Test
@@ -54,7 +54,7 @@ public class ByteStringParserTest   {
         float expected = 123;
         b.append(expected);
 
-        Assert.assertEquals(expected,BytesUtil.parseDouble(b),0);
+        Assert.assertEquals(expected, BytesInternal.parseDouble(b), 0);
     }
 
     @Test
@@ -63,6 +63,6 @@ public class ByteStringParserTest   {
         short expected = 123;
         b.append(expected);
 
-        Assert.assertEquals(expected,BytesUtil.parseLong(b));
+        Assert.assertEquals(expected, BytesInternal.parseLong(b));
     }
 }

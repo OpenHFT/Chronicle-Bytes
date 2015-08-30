@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Writer;
 
 /**
- * Created by peter on 17/08/15.
+ * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
  */
 public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;

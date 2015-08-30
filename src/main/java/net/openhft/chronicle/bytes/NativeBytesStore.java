@@ -393,7 +393,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public String toString() {
-        return BytesUtil.toString(this);
+        return BytesInternal.toString(this);
     }
 
     @Override
@@ -436,7 +436,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesUtil.contentEqual(this, (BytesStore) obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     public void setAddress(long address) {

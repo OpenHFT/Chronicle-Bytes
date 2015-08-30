@@ -156,14 +156,14 @@ public class BytesTest {
 
     @Test
     public void testCharAt() {
-        Bytes b = Bytes.wrapForRead("Hello World");
+        Bytes b = Bytes.from("Hello World");
         b.readSkip(6);
         assertTrue(StringUtils.isEqual("World", b));
     }
 
     @Test
     public void internBytes() {
-        Bytes b = Bytes.wrapForRead("Hello World");
+        Bytes b = Bytes.from("Hello World");
         b.readSkip(6);
         {
             StringInterner si = new StringInterner(128);

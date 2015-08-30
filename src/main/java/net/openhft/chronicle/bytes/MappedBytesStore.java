@@ -20,6 +20,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * BytesStore to wrap memory mapped data.
+ */
 public class MappedBytesStore extends NativeBytesStore {
     private final long start;
     private final long safeLimit;

@@ -222,12 +222,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public void appendUTF(char[] chars, int offset, int length) {
+    public VanillaBytes<Underlying> appendUTF(char[] chars, int offset, int length) {
         ensureCapacity(readPosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
             writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));
         } else {
             super.appendUTF(chars, offset, length);
         }
+        return this;
     }
 }

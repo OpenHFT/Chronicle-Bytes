@@ -22,6 +22,18 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+/**
+ * Bytes is a pointer to a region of memory within a BytesStore.
+ * It can be for a fixed region of memory or an "elastic" buffer which can be resized, but not for a fixed region.
+ * <p></p>
+ * This is a BytesStore which is mutable and not thread safe.
+ * It has a write position and read position which must follow these constraints
+ * <p></p>
+ * start() &lt;= readPosition() &lt;= writePosition() &lt;= writeLimit() &lt;= capacity()
+ * <p></p>
+ * Also readLimit() == writePosition() and readPosition() &lt;= safeLimit();
+ * <p></p>
+ */
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
         StreamingDataInput<Bytes<Underlying>>,
         StreamingDataOutput<Bytes<Underlying>>,
@@ -30,55 +42,117 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
 
+    /**
+     * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
+     */
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return NativeBytesStore.elasticByteBuffer().bytesForWrite();
     }
 
+    /**
+     * @param byteBuffer to read
+     * @return a Bytes which wrap a ByteBuffer and is ready for reading.
+     */
     static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
         return BytesStore.wrap(byteBuffer).bytesForRead();
     }
 
+    /**
+     * @param byteBuffer to read
+     * @return a Bytes which wrap a ByteBuffer and is ready for writing.
+     */
     static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
         return BytesStore.wrap(byteBuffer).bytesForWrite();
     }
 
+    /**
+     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the expected ones.
+     * An AssertionError is thrown if unexpected data is written, an UnsupportedOperationException is thrown if a read is attempted.
+     *
+     * @param text expected
+     * @return the expected buffer as Bytes
+     */
     @NotNull
     static Bytes<byte[]> expect(@NotNull String text) {
         return expect(wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1)));
     }
 
+
+    /**
+     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the expected ones.
+     * An AssertionError is thrown if unexpected data is written, an UnsupportedOperationException is thrown if a read is attempted.
+     *
+     * @param bytesStore expected
+     * @return the expected buffer as Bytes
+     */
     @NotNull
     static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
         return new VanillaBytes<>(new ExpectedBytesStore<>(bytesStore));
     }
 
+    /**
+     * Wrap the byte[] ready for reading
+     *
+     * @param byteArray to wrap
+     * @return the Bytes ready for reading.
+     */
     static Bytes<byte[]> wrapForRead(byte[] byteArray) {
         return BytesStore.<byte[]>wrap(byteArray).bytesForRead();
     }
 
+    /**
+     * Wrap the byte[] ready for writing
+     *
+     * @param byteArray to wrap
+     * @return the Bytes ready for writing.
+     */
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
         return BytesStore.<byte[]>wrap(byteArray).bytesForWrite();
     }
 
-    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) {
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
+        if (text instanceof BytesStore)
+            return ((BytesStore) text).copy().bytesForRead();
         return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
+    @Deprecated
+    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) {
+        return from(text);
+    }
+
+    /**
+     * Allocate a fixed size buffer read for writing.
+     *
+     * @param capacity minimum to allocate
+     * @return a new Bytes ready for writing.
+     */
     static VanillaBytes<Void> allocateDirect(long capacity) {
         return NativeBytesStore.nativeStoreWithFixedCapacity(capacity).bytesForWrite();
     }
 
+    /**
+     * Allocate an elastic buffer with initially no size.
+     *
+     * @return Bytes for writing.
+     */
     static NativeBytes<Void> allocateElasticDirect() {
         return NativeBytes.nativeBytes();
     }
 
+    /**
+     * Allocate an elastic buffer with initially no size.
+     *
+     * @return Bytes for writing.
+     */
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) {
         return NativeBytes.nativeBytes(initialCapacity);
-    }
-
-    @Deprecated
-    static Bytes from(String s) {
-        return BytesStore.wrap(s).bytesForRead();
     }
 
     /**
@@ -131,26 +205,56 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         }
     }
 
+    /**
+     * @return an empty, fixed sized Bytes
+     */
     static BytesStore empty() {
         return NoBytesStore.noBytesStore();
     }
 
+    /**
+     * copies the contents of bytes into a direct byte buffer
+     *
+     * @param bytes the bytes to wrap
+     * @return a direct byte buffer contain the {@code bytes}
+     */
+    static Bytes allocateDirect(@NotNull byte[] bytes) {
+        VanillaBytes<Void> result = allocateDirect(bytes.length);
+        result.write(bytes);
+        return result;
+    }
+
+    /**
+     * Return a Bytes which is optionally unchecked.  This allows bounds checks to be turned off.
+     *
+     * @param unchecked if true, minimal bounds checks will be performed.
+     * @return Bytes without bounds checking.
+     */
     default Bytes<Underlying> unchecked(boolean unchecked) {
         return unchecked ?
                 start() == 0 && bytesStore() instanceof NativeBytesStore ?
-                        new UncheckedNativeBytes<Underlying>(this) :
+                        new UncheckedNativeBytes<>(this) :
                         new UncheckedBytes<>(this) :
                 this;
     }
 
+    /**
+     * @return the size which can be safely read.  If this isElastic() it can be lower than the point it can safely write.
+     */
     default long safeLimit() {
         return bytesStore().safeLimit();
     }
 
+    /**
+     * @return is the readPosition at the start and the writeLimit at the end.
+     */
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
 
+    /**
+     * @return if isElastic, this can be much lower than the virtual capacity().
+     */
     default long realCapacity() {
         return BytesStore.super.realCapacity();
     }
@@ -167,13 +271,32 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     @NotNull
     default String toHexString() {
-        return BytesUtil.toHexString(this);
+        return BytesInternal.toHexString(this);
     }
 
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @param maxLength limit the number of bytes to be dumped.
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
     @NotNull
     default String toHexString(long maxLength) {
         if (readRemaining() < maxLength) return toHexString();
-        return BytesUtil.toHexString(this, readPosition(), maxLength) + ".... truncated";
+        return BytesInternal.toHexString(this, readPosition(), maxLength) + ".... truncated";
+    }
+
+    /**
+     * display the hex data of {@link Bytes} from the position() to the limit()
+     *
+     * @param maxLength limit the number of bytes to be dumped.
+     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     */
+    @NotNull
+    default String toHexString(long offset, long maxLength) {
+        long maxLength2 = Math.min(maxLength, readLimit() - offset);
+        String ret = BytesInternal.toHexString(this, offset, maxLength2);
+        return maxLength2 < maxLength ? ret + "... truncated" : ret;
     }
 
     /**
@@ -212,17 +335,5 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
-    }
-
-    /**
-     * copies the contents of bytes into a direct byte buffer
-     *
-     * @param bytes the bytes to wrap
-     * @return a direct byte buffer contain the {@code bytes}
-     */
-    static Bytes allocateDirect(@NotNull byte[] bytes) {
-        VanillaBytes<Void> result = allocateDirect(bytes.length);
-        result.write(bytes);
-        return result;
     }
 }

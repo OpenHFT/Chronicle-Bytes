@@ -35,6 +35,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+/**
+ * A memory mapped files which can be randomly accessed in chunks.
+ * It has overlapping regions to avoid wasting bytes at the end of chunks.
+ */
 public class MappedFile implements ReferenceCounted {
 
     private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);

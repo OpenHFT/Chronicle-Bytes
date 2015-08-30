@@ -6,7 +6,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
-public class BytesUtilTest {
+public class BytesInternalTest {
 
     @Test
     public void testParseUTF_SB1() throws Exception {
@@ -17,7 +17,7 @@ public class BytesUtilTest {
 
         StringBuilder sb = new StringBuilder();
 
-        BytesUtil.parseUTF(bytes, sb, 128);
+        BytesInternal.parseUTF(bytes, sb, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, 0), sb.toString());
     }

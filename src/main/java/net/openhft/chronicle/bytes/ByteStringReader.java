@@ -20,7 +20,7 @@ import java.io.IOException;
 import java.io.Reader;
 
 /**
- * Created by peter on 17/08/15.
+ * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
  */
 public class ByteStringReader extends Reader {
     private final ByteStringParser in;

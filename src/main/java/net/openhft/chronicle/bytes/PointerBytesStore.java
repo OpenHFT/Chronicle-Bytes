@@ -18,6 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A BytesStore which can point to arbitary memory.
+ */
 public class PointerBytesStore extends NativeBytesStore<Void> {
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false);
