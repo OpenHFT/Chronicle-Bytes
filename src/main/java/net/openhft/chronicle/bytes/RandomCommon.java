@@ -110,7 +110,7 @@ interface RandomCommon extends ReferenceCounted {
     Bytes bytesForWrite();
 
     /**
-     * Perform a 32-bit CAS at a give offset.
+     * Perform a 32-bit CAS at a given offset.
      * @param offset to perform CAS
      * @param expected value
      * @param value to set
@@ -119,11 +119,35 @@ interface RandomCommon extends ReferenceCounted {
     boolean compareAndSwapInt(long offset, int expected, int value);
 
     /**
-     * Perform a 64-bit CAS at a give offset.
+     * Perform a 64-bit CAS at a given offset.
      * @param offset to perform CAS
      * @param expected value
      * @param value to set
      * @return true, if successful.
      */
     boolean compareAndSwapLong(long offset, long expected, long value);
+
+    /**
+     * Perform a 32-bit float CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    default boolean compareAndSwapFloat(long offset, float expected, float value) {
+        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
+    }
+
+    /**
+     * Perform a 64-bit double CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    default boolean compareAndSwapDouble(long offset, double expected, double value) {
+        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
+    }
 }

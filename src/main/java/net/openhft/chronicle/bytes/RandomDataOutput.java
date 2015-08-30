@@ -48,11 +48,46 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     R writeInt(long offset, int i);
 
+    /**
+     * Perform a non stalling write with a store barrier.
+     *
+     * @param offset to write to
+     * @param i      value to write
+     * @return this
+     */
     R writeOrderedInt(long offset, int i);
+
+    /**
+     * Perform a non stalling write with a store barrier.
+     *
+     * @param offset to write to
+     * @param f      value to write
+     * @return this
+     */
+    default R writeOrderedFloat(long offset, float f) {
+        return writeOrderedInt(offset, Float.floatToRawIntBits(f));
+    }
 
     R writeLong(long offset, long i);
 
+    /**
+     * Perform a non stalling write with a store barrier.
+     * @param offset to write to
+     * @param i value to write
+     * @return this
+     */
     R writeOrderedLong(long offset, long i);
+
+    /**
+     * Perform a non stalling write with a store barrier.
+     *
+     * @param offset to write to
+     * @param d      value to write
+     * @return this
+     */
+    default R writeOrderedDouble(long offset, double d) {
+        return writeOrderedLong(offset, Double.doubleToRawLongBits(d));
+    }
 
     R writeFloat(long offset, float d);
 

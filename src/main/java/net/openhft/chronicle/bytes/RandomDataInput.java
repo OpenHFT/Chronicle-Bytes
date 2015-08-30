@@ -78,14 +78,45 @@ public interface RandomDataInput extends RandomCommon {
         return charToString[readUnsignedByte(offset)];
     }
 
+    /**
+     * Read a 32-bit int from memory with a load barrier.
+     *
+     * @param offset to read
+     * @return the int value
+     */
     default int readVolatileInt(long offset) {
         OS.memory().loadFence();
         return readInt(offset);
     }
 
+    /**
+     * Read a float from memory with a load barrier.
+     *
+     * @param offset to read
+     * @return the float value
+     */
+    default float readVolatileFloat(long offset) {
+        return Float.intBitsToFloat(readVolatileInt(offset));
+    }
+
+    /**
+     * Read a 64-bit long from memory with a load barrier.
+     * @param offset to read
+     * @return the long value
+     */
     default long readVolatileLong(long offset) {
         OS.memory().loadFence();
         return readLong(offset);
+    }
+
+    /**
+     * Read a 64-bit double from memory with a load barrier.
+     *
+     * @param offset to read
+     * @return the double value
+     */
+    default double readVolatileDouble(long offset) {
+        return Double.longBitsToDouble(readVolatileLong(offset));
     }
 
     default long parseLong(long offset) {
@@ -121,16 +152,45 @@ public interface RandomDataInput extends RandomCommon {
 
     long realCapacity();
 
+    /**
+     * Perform an atomic add and get operation for a 32-bit int
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
     default int addAndGetInt(long offset, int adding) {
-        return BytesInternal.getAndAddInt(this, offset, adding) + adding;
+        return BytesInternal.addAndGetInt(this, offset, adding);
     }
 
-    default int getAndAddInt(long offset, int adding) {
-        return BytesInternal.getAndAddInt(this, offset, adding);
-    }
-
+    /**
+     * Perform an atomic add and get operation for a 64-bit long
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
     default long addAndGetLong(long offset, long adding) {
-        return BytesInternal.getAndAddLong(this, offset, adding) + adding;
+        return BytesInternal.addAndGetLong(this, offset, adding);
     }
 
+    /**
+     * Perform an atomic add and get operation for a 32-bit float
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default float addAndGetFloat(long offset, float adding) {
+        return BytesInternal.addAndGetFloat(this, offset, adding);
+    }
+
+    /**
+     * Perform an atomic add and get operation for a 64-bit double
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default double addAndGetDouble(long offset, double adding) {
+        return BytesInternal.addAndGetDouble(this, offset, adding);
+    }
 }

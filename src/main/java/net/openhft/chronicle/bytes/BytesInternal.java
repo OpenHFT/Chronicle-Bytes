@@ -1280,19 +1280,41 @@ enum BytesInternal {
         return false;
     }
 
-    public static int getAndAddInt(@NotNull RandomDataInput in, long offset, int adding) {
+    public static float addAndGetFloat(@NotNull RandomDataInput in, long offset, float adding) {
         for (; ; ) {
             int value = in.readVolatileInt(offset);
-            if (in.compareAndSwapInt(offset, value, value + adding))
-                return value;
+            float value1 = Float.intBitsToFloat(value) + adding;
+            int value2 = Float.floatToRawIntBits(value1);
+            if (in.compareAndSwapInt(offset, value, value2))
+                return value1;
         }
     }
 
-    public static long getAndAddLong(@NotNull RandomDataInput in, long offset, long adding) {
+    public static double addAndGetDouble(@NotNull RandomDataInput in, long offset, double adding) {
         for (; ; ) {
             long value = in.readVolatileLong(offset);
-            if (in.compareAndSwapLong(offset, value, value + adding))
-                return value;
+            double value1 = Double.longBitsToDouble(value) + adding;
+            long value2 = Double.doubleToRawLongBits(value1);
+            if (in.compareAndSwapLong(offset, value, value2))
+                return value1;
+        }
+    }
+
+    public static int addAndGetInt(@NotNull RandomDataInput in, long offset, int adding) {
+        for (; ; ) {
+            int value = in.readVolatileInt(offset);
+            int value2 = value + adding;
+            if (in.compareAndSwapInt(offset, value, value2))
+                return value2;
+        }
+    }
+
+    public static long addAndGetLong(@NotNull RandomDataInput in, long offset, long adding) {
+        for (; ; ) {
+            long value = in.readVolatileLong(offset);
+            long value2 = value + adding;
+            if (in.compareAndSwapLong(offset, value, value2))
+                return value2;
         }
     }
 
