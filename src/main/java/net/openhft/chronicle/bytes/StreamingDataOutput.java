@@ -74,7 +74,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         if (cs instanceof BytesStore) {
             return write8bit((BytesStore) cs);
         }
-        return write8bit((String) cs, 0, cs.length());
+        return write8bit(cs, 0, cs.length());
     }
 
     default S write8bit(CharSequence s, int start, int length) {
