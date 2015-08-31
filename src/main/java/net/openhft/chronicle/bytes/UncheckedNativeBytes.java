@@ -180,12 +180,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @ForceInline
-    public long start() {
-        return 0L;
-    }
-
-    @Override
-    @ForceInline
     public long readPosition() {
         return readPosition;
     }

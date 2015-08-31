@@ -135,7 +135,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        b.write((BytesStore) ((BytesStore) this), (long) readPosition(), (long) len);
+        b.write((BytesStore) this, readPosition(), (long) len);
         readSkip(len);
         return true;
     }

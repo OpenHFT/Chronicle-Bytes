@@ -65,7 +65,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
         final long address = bytesStore.address(store.readPosition());
 
         final long remaining = 8L;
-        long h0 = (long) remaining * K0;
+        long h0 = remaining * K0;
 
         long l0 = MEMORY.readLong(address);
         long l0a = MEMORY.readInt(address + TOP_BYTES);
@@ -87,7 +87,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
 
     public static long hash(long l) {
         final long remaining = 8L;
-        long h0 = (long) remaining * K0;
+        long h0 = remaining * K0;
         long l0 = l;
         int l0a = (int) (l0 >> 32);
         final int l1a = 0;
