@@ -190,19 +190,19 @@ public class ByteStoreTest {
     }*/
 
     @Test
-    public void testWriteReadUTFΔ() {
-        bytes.writeUTFΔ(null);
+    public void testWriteReadUtf8() {
+        bytes.writeUtf8(null);
         String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
-            bytes.writeUTFΔ(word);
+            bytes.writeUtf8(word);
         }
 
-        assertEquals(null, bytes.readUTFΔ());
+        assertEquals(null, bytes.readUtf8());
         for (String word : words) {
-            assertEquals(word, bytes.readUTFΔ());
+            assertEquals(word, bytes.readUtf8());
         }
         try {
-            bytes.readUTFΔ();
+            bytes.readUtf8();
             fail();
         } catch (BufferUnderflowException e) {
             // expected
@@ -211,13 +211,13 @@ public class ByteStoreTest {
 
         bytes.readPosition(0);
         StringBuilder sb = new StringBuilder();
-        Assert.assertFalse(bytes.readUTFΔ(sb));
+        Assert.assertFalse(bytes.readUtf8(sb));
         for (String word : words) {
-            Assert.assertTrue(bytes.readUTFΔ(sb));
+            Assert.assertTrue(bytes.readUtf8(sb));
             Assert.assertEquals(word, sb.toString());
         }
         try {
-            bytes.readUTFΔ(sb);
+            bytes.readUtf8(sb);
             fail();
         } catch (BufferUnderflowException e) {
             // expected
@@ -229,16 +229,16 @@ public class ByteStoreTest {
     public void testWriteReadUTF() {
         String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
-            bytes.writeUTFΔ(word);
+            bytes.writeUtf8(word);
         }
-        bytes.writeUTFΔ("");
-        assertEquals(24, bytes.writePosition()); // check the size, more bytes for less strings than writeUTFΔ
+        bytes.writeUtf8("");
+        assertEquals(24, bytes.writePosition()); // check the size, more bytes for less strings than writeUtf8
 
 
         for (String word : words) {
-            assertEquals(word, bytes.readUTFΔ());
+            assertEquals(word, bytes.readUtf8());
         }
-        assertEquals("", bytes.readUTFΔ());
+        assertEquals("", bytes.readUtf8());
     }
 
     @Test

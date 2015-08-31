@@ -101,11 +101,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
      * chars.  <code>null</code> values are also supported
      *
-     * @return a Unicode string or <code>null</code> if <code>writeUTFΔ(null)</code> was called
+     * @return a Unicode string or <code>null</code> if <code>writeUtf8(null)</code> was called
      */
     @Nullable
+    default String readUtf8() {
+        return BytesInternal.readUtf8(this);
+    }
+
+    @Deprecated
     default String readUTFΔ() {
-        return BytesInternal.readUTFΔ(this);
+        return BytesInternal.readUtf8(this);
     }
 
     @Nullable
@@ -114,12 +119,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * The same as readUTFΔ() except the chars are copied to a truncated StringBuilder.
+     * The same as readUtf8() except the chars are copied to a truncated StringBuilder.
      *
      * @param sb to copy chars to
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
-    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+    default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
         AppendableUtil.setLength(sb, 0);
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -129,7 +134,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
+    @Deprecated
+    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+        return readUtf8(sb);
+    }
+
+        default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
         b.clear();
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)

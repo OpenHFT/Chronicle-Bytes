@@ -65,9 +65,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws BufferOverflowException if there is not enough space left
      */
     @NotNull
-    default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
-        BytesInternal.writeUTF(this, cs);
+    default S writeUtf8(CharSequence cs) throws BufferOverflowException {
+        BytesInternal.writeUtf8(this, cs);
         return (S) this;
+    }
+
+    @Deprecated
+    default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
+        return writeUtf8(cs);
     }
 
     default S write8bit(CharSequence cs) {

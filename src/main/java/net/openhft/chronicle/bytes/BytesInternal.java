@@ -277,7 +277,7 @@ enum BytesInternal {
         }
     }
 
-    public static void writeUTF(@NotNull StreamingDataOutput bytes, @Nullable String str) {
+    public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable String str) {
         char[] chars = extractChars(str);
         long utfLength = findUTFLength(chars);
         bytes.writeStopBit(utfLength);
@@ -285,9 +285,9 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void writeUTF(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
+    public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str) {
         if (str instanceof String) {
-            writeUTF(bytes, (String) str);
+            writeUtf8(bytes, (String) str);
             return;
         }
         if (str == null) {
@@ -890,9 +890,9 @@ enum BytesInternal {
 
     @Nullable
     @ForceInline
-    public static String readUTFΔ(@NotNull StreamingDataInput in) {
+    public static String readUtf8(@NotNull StreamingDataInput in) {
         StringBuilder sb = SBP.acquireStringBuilder();
-        return in.readUTFΔ(sb) ? SI.intern(sb) : null;
+        return in.readUtf8(sb) ? SI.intern(sb) : null;
     }
 
     @Nullable

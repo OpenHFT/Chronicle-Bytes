@@ -127,12 +127,12 @@ public class MappedMemoryTest {
             char[] chars = new char[OS.pageSize() * 11];
             Arrays.fill(chars, '.');
             chars[chars.length - 1] = '*';
-            bytes.writeUTFΔ(new String(chars));
+            bytes.writeUtf8(new String(chars));
             String text = "hello this is some very long text";
-            bytes.writeUTFΔ(text);
+            bytes.writeUtf8(text);
 
-            bytes.readUTFΔ();
-            assertEquals(text, bytes.readUTFΔ());
+            bytes.readUtf8();
+            assertEquals(text, bytes.readUtf8());
             bytes.release();
             assertEquals(0, bytes.refCount());
         } finally {
