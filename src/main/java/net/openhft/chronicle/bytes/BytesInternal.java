@@ -893,21 +893,25 @@ enum BytesInternal {
     @Nullable
     @ForceInline
     public static String readUtf8(@NotNull StreamingDataInput in) {
-        StringBuilder sb = SBP.acquireStringBuilder();
+        StringBuilder sb = acquireStringBuilder();
         return in.readUtf8(sb) ? SI.intern(sb) : null;
+    }
+
+    public static StringBuilder acquireStringBuilder() {
+        return SBP.acquireStringBuilder();
     }
 
     @Nullable
     @ForceInline
     public static String read8bit(@NotNull StreamingDataInput in) {
-        StringBuilder sb = SBP.acquireStringBuilder();
+        StringBuilder sb = acquireStringBuilder();
         return in.read8bit(sb) ? SI.intern(sb) : null;
     }
 
     @NotNull
     @ForceInline
     public static String parseUTF(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) {
-        StringBuilder utfReader = SBP.acquireStringBuilder();
+        StringBuilder utfReader = acquireStringBuilder();
         parseUTF(bytes, utfReader, tester);
         return SI.intern(utfReader);
     }
@@ -1471,7 +1475,7 @@ enum BytesInternal {
     }
 
     public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(StreamingDataInput input, Class<E> eClass) {
-        StringBuilder sb = SBP.acquireStringBuilder();
+        StringBuilder sb = acquireStringBuilder();
         input.read8bit(sb);
 
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(sb);
@@ -1510,6 +1514,32 @@ enum BytesInternal {
         }
     }
 
+    public static Boolean parseBoolean(ByteStringParser parser, StopCharTester tester) {
+        StringBuilder sb = acquireStringBuilder();
+        parseUTF(parser, sb, tester);
+        if (sb.length() == 0)
+            return null;
+        switch (sb.charAt(0)) {
+            case 't':
+            case 'T':
+                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? true : null;
+            case 'y':
+            case 'Y':
+                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? true : null;
+            case '0':
+                return sb.length() == 1 ? false : null;
+            case '1':
+                return sb.length() == 1 ? true : null;
+            case 'f':
+            case 'F':
+                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? false : null;
+            case 'n':
+            case 'N':
+                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
+        }
+        return null;
+    }
+
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
@@ -1520,5 +1550,4 @@ enum BytesInternal {
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
     }
-
 }

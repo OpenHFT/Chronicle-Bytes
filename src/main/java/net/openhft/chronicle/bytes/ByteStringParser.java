@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
+import java.nio.BufferUnderflowException;
 
 /**
  * Supports parsing bytes as text.  You can parse them as special or white space terminated text.
@@ -32,6 +33,21 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     default Reader reader() {
         return new ByteStringReader(this);
+    }
+
+    /**
+     * Return true or false, or null if it could not be detected
+     * as true or false.  Case is not important
+     *
+     * <p>false: f, false, n, no, 0
+     *
+     * <p>true: t, true, y, yes, 1
+     *
+     * @param tester to detect the end of the text.
+     * @return true, false, or null if neither.
+     */
+    default Boolean parseBoolean(@NotNull StopCharTester tester) throws BufferUnderflowException {
+        return BytesInternal.parseBoolean(this, tester);
     }
 
     /**
