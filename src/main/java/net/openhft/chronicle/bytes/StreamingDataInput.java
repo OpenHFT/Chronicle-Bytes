@@ -20,7 +20,9 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -170,9 +172,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default void read(@NotNull byte[] bytes) {
-        for (int i = 0; i < bytes.length; i++)
+    default int read(@NotNull byte[] bytes) {
+        int len = (int) Math.min(bytes.length, readRemaining());
+        for (int i = 0; i < len; i++)
             bytes[i] = readByte();
+        return len;
     }
 
     default int read(@NotNull byte[] bytes, int off, int len) {
@@ -215,5 +219,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void parseUTF(Appendable sb, int length) {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUTF(this, sb, length);
+    }
+
+    default byte[] toByteArray() {
+        return BytesInternal.toByteArray(this);
+    }
+
+    default void copyTo(OutputStream out) throws IOException {
+        BytesInternal.copy(this, out);
     }
 }

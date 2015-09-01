@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -216,5 +218,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             BytesInternal.appendUTF(this, c);
         }
         return (S) this;
+    }
+
+    default void copyFrom(InputStream input) throws IOException {
+        BytesInternal.copy(input, this);
     }
 }

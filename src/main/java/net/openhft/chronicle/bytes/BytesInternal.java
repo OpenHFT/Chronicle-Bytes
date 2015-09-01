@@ -29,6 +29,8 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.nio.BufferUnderflowException;
 import java.nio.charset.StandardCharsets;
@@ -1485,6 +1487,27 @@ enum BytesInternal {
         }
         for (; i < length; i++)
             sdo.writeByte(bytes.readByte(offset + i));
+    }
+
+    public static byte[] toByteArray(StreamingDataInput in) {
+        int len = Maths.toInt32(in.readRemaining());
+        byte[] bytes = new byte[len];
+        in.read(bytes);
+        return bytes;
+    }
+
+    public static void copy(StreamingDataInput input, OutputStream output) throws IOException {
+        byte[] bytes = new byte[512];
+        for (int len; (len = input.read(bytes)) > 0; ) {
+            output.write(bytes, 0, len);
+        }
+    }
+
+    public static void copy(InputStream input, StreamingDataOutput output) throws IOException {
+        byte[] bytes = new byte[512];
+        for (int len; (len = input.read(bytes)) > 0; ) {
+            output.write(bytes, 0, len);
+        }
     }
 
     static class DateCache {
