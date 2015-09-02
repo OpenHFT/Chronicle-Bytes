@@ -221,11 +221,13 @@ public class ByteStoreTest {
             bytes.writeUtf8(word);
         }
         bytes.writeUtf8("");
-        assertEquals(24, bytes.writePosition()); // check the size, more bytes for less strings than writeUtf8
+        bytes.writeUtf8(null);
+        assertEquals(26, bytes.writePosition()); // check the size, more bytes for less strings than writeUtf8
 
         for (String word : words) {
             assertEquals(word, bytes.readUtf8());
         }
+        assertEquals("", bytes.readUtf8());
         assertEquals(null, bytes.readUtf8());
     }
 
