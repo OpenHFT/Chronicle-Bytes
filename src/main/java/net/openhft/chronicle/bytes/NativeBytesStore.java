@@ -378,6 +378,8 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long address(long offset) throws UnsupportedOperationException {
+        if (offset < start() || offset >= capacity())
+            throw new IllegalArgumentException();
         return address + translate(offset);
     }
 

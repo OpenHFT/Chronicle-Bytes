@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 interface RandomCommon extends ReferenceCounted {
@@ -94,9 +93,10 @@ interface RandomCommon extends ReferenceCounted {
      * @param offset within this buffer. address(start()) is the actual address of the first byte.
      * @return the underlying address of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
+     * @throws IllegalArgumentException if the offset is before the start() or the after the capacity()
      */
     long address(long offset)
-            throws UnsupportedOperationException, BufferUnderflowException, BufferOverflowException;
+            throws UnsupportedOperationException, IllegalArgumentException;
 
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();

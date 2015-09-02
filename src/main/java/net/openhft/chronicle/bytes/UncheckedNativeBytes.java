@@ -554,7 +554,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    public long address(long offset) throws UnsupportedOperationException {
+    public long address(long offset) {
         return bytesStore.address(offset);
     }
 

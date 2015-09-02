@@ -24,16 +24,45 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
+    /**
+     * Write a byte at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException  if the capacity was exceeded
+     * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
+     * @throws IORuntimeException       if the underlying buffer fails to resize.
+     */
     default R writeByte(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return writeByte(offset, Maths.toInt8(i));
     }
 
+    /**
+     * Write an unsigned byte at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException  if the capacity was exceeded
+     * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
+     * @throws IORuntimeException       if the underlying buffer fails to resize.
+     */
     default R writeUnsignedByte(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return writeByte(offset, (byte) Maths.toUInt8(i));
     }
 
+    /**
+     * Write a boolean at an offset.
+     *
+     * @param offset to write to
+     * @param flag   the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
+     */
     default R writeBoolean(long offset, boolean flag)
             throws BufferOverflowException, IORuntimeException {
         try {
@@ -43,24 +72,71 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         }
     }
 
+    /**
+     * Write an unsigned byte at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException  if the capacity was exceeded
+     * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
+     * @throws IORuntimeException       if the underlying buffer fails to resize.
+     */
     default R writeUnsignedShort(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return writeShort(offset, (short) Maths.toUInt16(i));
     }
 
+    /**
+     * Write an unsigned byte at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException  if the capacity was exceeded
+     * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
+     * @throws IORuntimeException       if the underlying buffer fails to resize.
+     */
     default R writeUnsignedInt(long offset, long i)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return writeInt(offset, (int) Maths.toUInt32(i));
     }
 
+    /**
+     * Write an unsigned byte at an offset.
+     *
+     * @param offset to write to
+     * @param i8     the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
+     */
     R writeByte(long offset, byte i8)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
+    /**
+     * Write a short at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
+     */
     R writeShort(long offset, short i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
+    /**
+     * Write an int at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
+     */
     R writeInt(long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -68,9 +144,11 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param offset to write to
      * @param i      value to write
      * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
     R writeOrderedInt(long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -78,14 +156,25 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param offset to write to
      * @param f      value to write
      * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
     default R writeOrderedFloat(long offset, float f)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IORuntimeException {
         return writeOrderedInt(offset, Float.floatToRawIntBits(f));
     }
 
+    /**
+     * Write a long at an offset.
+     *
+     * @param offset to write to
+     * @param i      the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException      if the underlying buffer fails to resize.
+     */
     R writeLong(long offset, long i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -95,7 +184,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      */
     R writeOrderedLong(long offset, long i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -105,15 +194,33 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      */
     default R writeOrderedDouble(long offset, double d)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IORuntimeException {
         return writeOrderedLong(offset, Double.doubleToRawLongBits(d));
     }
 
+    /**
+     * Write a float at an offset.
+     *
+     * @param offset to write to
+     * @param d the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException if the underlying buffer fails to resize.
+     */
     R writeFloat(long offset, float d)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
+    /**
+     * Write a double at an offset.
+     *
+     * @param offset to write to
+     * @param d the value
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException if the underlying buffer fails to resize.
+     */
     R writeDouble(long offset, double d)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IORuntimeException;
 
     default R write(long offsetInRDO, @NotNull byte[] bytes)
             throws BufferOverflowException, IORuntimeException {
@@ -131,7 +238,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
 
     default R write(long offsetInRDO, @NotNull Bytes bytes)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IORuntimeException {
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
         } catch (BufferUnderflowException e) {
@@ -141,6 +248,16 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     R write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException, BufferUnderflowException;
+
+    /**
+     * Zero out the bytes between the start and the end.
+     *
+     * @param start index of first byte inclusive
+     * @param end index of last byte exclusive
+     * @return this
+     * @throws BufferOverflowException if the capacity was exceeded
+     * @throws IORuntimeException if the underlying buffer fails to resize.
+     */
 
     R zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException;
 

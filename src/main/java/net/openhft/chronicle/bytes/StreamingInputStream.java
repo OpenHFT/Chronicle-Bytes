@@ -30,6 +30,18 @@ public class StreamingInputStream extends InputStream {
     }
 
     @Override
+    public long skip(long n) throws IOException {
+        long len = Math.min(in.readRemaining(), n);
+        in.readSkip(len);
+        return len;
+    }
+
+    @Override
+    public int available() throws IOException {
+        return (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
+    }
+
+    @Override
     public int read(byte[] b, int off, int len) throws IOException {
         try {
             return in.read(b, off, len);

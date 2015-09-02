@@ -31,6 +31,21 @@ import java.nio.ByteBuffer;
  * <p>The use of this instance is single threaded, though the use of the data
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+
+    S writePosition(long position) throws BufferOverflowException;
+
+    S writeLimit(long limit) throws BufferOverflowException;
+
+    /**
+     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     *
+     * @param bytesToSkip bytes to skip.
+     * @return this
+     * @throws BufferOverflowException if the offset is outside the limits of the Bytes
+     * @throws IORuntimeException      if an error occurred trying to obtain the data.
+     */
+    S writeSkip(long bytesToSkip) throws BufferOverflowException, IORuntimeException;
+
     /**
      * @return Bytes as an OutputStream
      */
@@ -55,10 +70,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         BytesInternal.writeStopBit(this, d);
         return (S) this;
     }
-
-    S writePosition(long position) throws BufferOverflowException;
-
-    S writeLimit(long limit) throws BufferOverflowException;
 
     /**
      * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded

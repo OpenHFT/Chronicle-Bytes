@@ -37,6 +37,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     S readLimit(long limit) throws BufferUnderflowException;
 
+
+    /**
+     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     *
+     * @param bytesToSkip bytes to skip.
+     * @return this
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
+     */
+    S readSkip(long bytesToSkip) throws BufferUnderflowException, IORuntimeException;
+
     /**
      * Perform a set of actions with a temporary bounds mode.
      */

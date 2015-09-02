@@ -99,7 +99,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for reading.
      */
     static Bytes<byte[]> wrapForRead(byte[] byteArray) {
-        return BytesStore.<byte[]>wrap(byteArray).bytesForRead();
+        return BytesStore.wrap(byteArray).bytesForRead();
     }
 
     /**
@@ -109,7 +109,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for writing.
      */
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
-        return BytesStore.<byte[]>wrap(byteArray).bytesForWrite();
+        return BytesStore.wrap(byteArray).bytesForWrite();
     }
 
     /**
@@ -241,6 +241,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *
      * @param unchecked if true, minimal bounds checks will be performed.
      * @return Bytes without bounds checking.
+     * @throws IllegalStateException if the underlying BytesStore has been released
      */
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         return unchecked ?
@@ -274,7 +275,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     /**
      * @return a copy of this Bytes from position() to limit().
      */
-    BytesStore<Bytes<Underlying>, Underlying> copy() throws IllegalArgumentException;
+    BytesStore<Bytes<Underlying>, Underlying> copy();
 
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
@@ -282,7 +283,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString() throws BufferUnderflowException, IORuntimeException {
+    default String toHexString() throws IORuntimeException {
         return BytesInternal.toHexString(this);
     }
 
@@ -294,7 +295,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     @NotNull
     default String toHexString(long maxLength)
-            throws IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException {
         if (readRemaining() < maxLength) return toHexString();
         return BytesInternal.toHexString(this, readPosition(), maxLength) + ".... truncated";
     }
@@ -307,7 +308,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     @NotNull
     default String toHexString(long offset, long maxLength)
-            throws IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException {
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         String ret = BytesInternal.toHexString(this, offset, maxLength2);
         return maxLength2 < maxLength ? ret + "... truncated" : ret;
@@ -323,12 +324,13 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * method will throws {@link java.nio.BufferOverflowException}
      *
      * @param size the capacity that you required
-     * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough space
+     * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space
+     * @throws IORuntimeException if an error occured trying to resize the underlying buffer.
      */
     default void ensureCapacity(long size)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws IllegalArgumentException, IORuntimeException {
         if (size > capacity())
-            throw new UnsupportedOperationException(isElastic() ? "todo" : "not elastic");
+            throw new IllegalArgumentException(isElastic() ? "todo" : "not elastic");
     }
 
     /**
@@ -337,6 +339,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *
      * @return a slice of the existing Bytes where the start is moved to the position and the current limit determines
      * the capacity.
+     * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @Override
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {

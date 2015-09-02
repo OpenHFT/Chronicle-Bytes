@@ -35,15 +35,16 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return new ByteStringWriter(this);
     }
 
-
     /**
      * Append a char in UTF-8
      *
      * @param ch to append
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IOException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(char ch) throws IOException, BufferOverflowException {
+    default B append(char ch) throws BufferOverflowException, IOException {
         try {
             BytesInternal.appendUTF(this, ch);
         } catch (IORuntimeException e) {
@@ -57,9 +58,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param cs to append
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IOException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(@NotNull CharSequence cs) throws IOException, BufferOverflowException {
+    default B append(@NotNull CharSequence cs) throws BufferOverflowException, IOException {
         return append(cs, 0, cs.length());
     }
 
@@ -68,6 +71,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value to append
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
     default B append(long value) throws BufferOverflowException, IORuntimeException {
@@ -80,6 +85,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param f to append
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
     default B append(float f) throws BufferOverflowException, IORuntimeException {
@@ -92,6 +99,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param d to append
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
     default B append(double d) throws BufferOverflowException, IORuntimeException {
@@ -106,6 +115,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start index of the first char inclusive
      * @param end   index of the last char exclusive.
      * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IOException if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end)
@@ -118,6 +129,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    /**
+     * Append a String to the Bytes in ISO-8859-1
+     *
+     * @param cs to write
+     * @return this
+     * @throws BufferOverflowException  If the string as too large to write in the capacity available
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
@@ -140,6 +160,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start index of the first char inclusive
      * @param end   index of the last char exclusive.
      * @return this
+     * @throws BufferOverflowException If the string as too large to write in the capacity available
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException if an error occurred while attempting to resize the underlying buffer
+     * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
      */
     default B append8bit(@NotNull CharSequence cs, int start, int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IORuntimeException {

@@ -123,7 +123,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @NotNull
     @Override
-    public BytesStore<Bytes<Underlying>, Underlying> copy() throws IllegalArgumentException {
+    public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
@@ -178,7 +178,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @NotNull
-    public VanillaBytes append(CharSequence str, int start, int end) throws IndexOutOfBoundsException {
+    public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
         try {
         if (bytesStore() instanceof NativeBytesStore) {
             if (str instanceof BytesStore) {

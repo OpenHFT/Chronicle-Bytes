@@ -84,8 +84,12 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     public void ensureCapacity(long size)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        writeCheckOffset(size, 1L);
+            throws IllegalArgumentException, IORuntimeException {
+        try {
+            writeCheckOffset(size, 1L);
+        } catch (BufferOverflowException e) {
+            throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
+        }
     }
 
     private void checkResize(long endOfBuffer)
