@@ -136,8 +136,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         AppendableUtil.setLength(sb, 0);
+        if (readRemaining() <= 0)
+            return false;
         long len0 = BytesInternal.readStopBit(this);
-        if (len0 == -1 || readRemaining() < 1)
+        if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
         BytesInternal.parseUTF(this, sb, len);

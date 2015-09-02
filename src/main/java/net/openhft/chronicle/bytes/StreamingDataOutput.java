@@ -81,9 +81,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     default S write8bit(CharSequence cs)
             throws BufferOverflowException, IORuntimeException {
-        if (cs instanceof BytesStore) {
+        if (cs == null)
+            return writeStopBit(-1);
+
+        if (cs instanceof BytesStore)
             return write8bit((BytesStore) cs);
-        }
+
         return write8bit(cs, 0, cs.length());
     }
 
