@@ -40,29 +40,29 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(String str) {
+    public void write(String str) throws IOException {
         out.append(str);
     }
 
     @Override
-    public void write(String str, int off, int len) throws IndexOutOfBoundsException {
+    public void write(String str, int off, int len) throws IndexOutOfBoundsException, IOException {
         out.append(str, off, off + len);
     }
 
     @Override
-    public Writer append(CharSequence csq) {
+    public Writer append(CharSequence csq) throws IOException {
         out.append(csq);
         return this;
     }
 
     @Override
-    public Writer append(CharSequence csq, int start, int end) throws IndexOutOfBoundsException {
+    public Writer append(CharSequence csq, int start, int end) throws IndexOutOfBoundsException, IOException {
         out.append(csq, start, end);
         return this;
     }
 
     @Override
-    public Writer append(char c) {
+    public Writer append(char c) throws IOException {
         out.append(c);
         return this;
     }
@@ -78,9 +78,8 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len) {
-        for (int i = 0; i < len; i++) {
+    public void write(char[] cbuf, int off, int len) throws IOException {
+        for (int i = 0; i < len; i++)
             out.append(cbuf[i + off]);
-        }
     }
 }

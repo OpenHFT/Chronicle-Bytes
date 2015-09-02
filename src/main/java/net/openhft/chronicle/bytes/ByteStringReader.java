@@ -32,7 +32,11 @@ public class ByteStringReader extends Reader {
 
     @Override
     public int read() throws IOException {
-        return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        try {
+            return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -40,7 +44,7 @@ public class ByteStringReader extends Reader {
         long len = Math.min(in.readRemaining(), n);
         try {
             in.readSkip(len);
-        } catch (BufferUnderflowException e) {
+        } catch (BufferUnderflowException | IORuntimeException e) {
             throw new IOException(e);
         }
         return len;
@@ -48,7 +52,11 @@ public class ByteStringReader extends Reader {
 
     @Override
     public int read(char[] cbuf, int off, int len) throws IOException {
-        return in.read(cbuf, off, len);
+        try {
+            return in.read(cbuf, off, len);
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override

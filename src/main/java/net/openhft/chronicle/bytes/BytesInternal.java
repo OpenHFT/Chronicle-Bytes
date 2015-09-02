@@ -284,7 +284,7 @@ enum BytesInternal {
         char[] chars = extractChars(str);
         long utfLength = findUTFLength(chars);
         bytes.writeStopBit(utfLength);
-        bytes.appendUTF(chars, 0, chars.length);
+        bytes.appendUtf8(chars, 0, chars.length);
     }
 
     @ForceInline

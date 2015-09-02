@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -137,7 +138,7 @@ public class BytesTest {
     }
 
     @Test
-    public void toHexString() {
+    public void toHexString() throws IOException {
         Bytes bytes = Bytes.allocateElasticDirect(1020);
         bytes.append("Hello World");
         assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());

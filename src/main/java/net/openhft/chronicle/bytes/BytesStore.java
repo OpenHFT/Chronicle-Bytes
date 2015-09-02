@@ -38,7 +38,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @deprecated Use from(CharSequence) instead.
      */
     @Deprecated
-    static BytesStore wrap(@NotNull CharSequence cs) throws IllegalArgumentException {
+    static BytesStore wrap(@NotNull CharSequence cs) {
         return from(cs);
     }
 
@@ -48,7 +48,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param cs to convert
      * @return BytesStore
      */
-    static BytesStore from(@NotNull CharSequence cs) throws IllegalArgumentException {
+    static BytesStore from(@NotNull CharSequence cs) {
         if (cs instanceof BytesStore)
             return ((BytesStore) cs).copy();
         return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
@@ -287,7 +287,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytesStore to compare with
      * @return true if they contain the same data.
      */
-    default boolean contentEquals(@Nullable BytesStore bytesStore) {
+    default boolean contentEquals(@Nullable BytesStore bytesStore) throws IORuntimeException {
         return BytesInternal.contentEqual(this, bytesStore);
     }
 

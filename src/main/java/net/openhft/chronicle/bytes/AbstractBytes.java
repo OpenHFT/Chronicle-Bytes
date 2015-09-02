@@ -608,7 +608,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (!(obj instanceof Bytes)) return false;
         Bytes b2 = (Bytes) obj;
         long remaining = readRemaining();
-        return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
+        try {
+            return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
+        } catch (IORuntimeException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public boolean equalsBytes(@NotNull Bytes b2, long remaining) throws IORuntimeException {

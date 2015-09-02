@@ -144,7 +144,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testAppendDouble() {
+    public void testAppendDouble() throws IOException {
         testAppendDouble0(-6.895305375646115E24);
         Random random = new Random(1);
         for (int i = 0; i < 100000; i++) {
@@ -154,7 +154,7 @@ public class ByteStoreTest {
         }
     }
 
-    private void testAppendDouble0(double d) {
+    private void testAppendDouble0(double d) throws IOException {
         bytes.clear();
         bytes.append(d).append(' ');
 
@@ -230,7 +230,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testAppendParseUTF() {
+    public void testAppendParseUTF() throws IOException {
         String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
             bytes.append(word).append('\t');
@@ -449,14 +449,14 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testAppendSubstring() {
+    public void testAppendSubstring() throws IOException {
         bytes.append("Hello World", 2, 7).append("\n");
 
         assertEquals("Hello World".substring(2, 7), bytes.parseUTF(CONTROL_STOP));
     }
 
     @Test
-    public void testAppendParse() {
+    public void testAppendParse() throws IOException {
         bytes.append("word£€)").append(' ');
         bytes.append(1234).append(' ');
         bytes.append(123456L).append(' ');

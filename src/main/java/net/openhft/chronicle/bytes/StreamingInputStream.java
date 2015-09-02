@@ -31,11 +31,19 @@ public class StreamingInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        return in.read(b, off, len);
+        try {
+            return in.read(b, off, len);
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public int read() throws IOException {
-        return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        try {
+            return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
     }
 }

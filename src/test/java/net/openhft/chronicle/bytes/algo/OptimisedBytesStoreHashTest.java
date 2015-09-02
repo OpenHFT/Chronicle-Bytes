@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.VanillaBytes;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.security.SecureRandom;
 import java.util.Random;
 
@@ -113,7 +114,7 @@ public class OptimisedBytesStoreHashTest {
 
     @Test
     @Ignore("Long running, avg score = 5414, avg time 0.043 us")
-    public void testSmallRandomness() {
+    public void testSmallRandomness() throws IOException {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
 //        StringBuilder sb = new StringBuilder();

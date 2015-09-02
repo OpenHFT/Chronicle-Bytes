@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.io.Writer;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -42,23 +43,29 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(char ch) throws IORuntimeException, BufferOverflowException {
-        BytesInternal.appendUTF(this, ch);
+    default B append(char ch) throws IOException, BufferOverflowException {
+        try {
+            BytesInternal.appendUTF(this, ch);
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
         return (B) this;
     }
 
     /**
      * Append a characters in UTF-8
+     *
      * @param cs to append
      * @return this
      */
     @NotNull
-    default B append(@NotNull CharSequence cs) throws IORuntimeException, BufferOverflowException {
+    default B append(@NotNull CharSequence cs) throws IOException, BufferOverflowException {
         return append(cs, 0, cs.length());
     }
 
     /**
      * Append a long in decimal
+     *
      * @param value to append
      * @return this
      */
@@ -70,6 +77,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Append a float in decimal notation
+     *
      * @param f to append
      * @return this
      */
@@ -81,6 +89,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Append a double in decimal notation
+     *
      * @param d to append
      * @return this
      */
@@ -92,15 +101,20 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Append a portion of a String to the Bytes in UTF-8.
-     * @param cs to copy
+     *
+     * @param cs    to copy
      * @param start index of the first char inclusive
-     * @param end index of the last char exclusive.
+     * @param end   index of the last char exclusive.
      * @return this
      */
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end)
-            throws IndexOutOfBoundsException, BufferOverflowException, IORuntimeException {
-        BytesInternal.appendUTF(this, cs, start, end - start);
+            throws IndexOutOfBoundsException, BufferOverflowException, IOException {
+        try {
+            BytesInternal.appendUTF(this, cs, start, end - start);
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
+        }
         return (B) this;
     }
 

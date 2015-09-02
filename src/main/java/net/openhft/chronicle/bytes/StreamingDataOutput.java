@@ -211,12 +211,17 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         write8bit(e.name());
     }
 
-    default S appendUTF(int codepoint) throws BufferOverflowException, IORuntimeException {
+    default S appendUtf8(CharSequence cs)
+            throws BufferOverflowException, IORuntimeException {
+        return appendUtf8(cs, 0, cs.length());
+    }
+
+    default S appendUtf8(int codepoint) throws BufferOverflowException, IORuntimeException {
         BytesInternal.appendUTF(this, codepoint);
         return (S) this;
     }
 
-    default S appendUTF(char[] chars, int offset, int length)
+    default S appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         int i;
         ascii:
@@ -233,6 +238,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             char c = chars[offset + i];
             BytesInternal.appendUTF(this, c);
         }
+        return (S) this;
+    }
+
+    default S appendUtf8(CharSequence cs, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        BytesInternal.appendUTF(this, cs, offset, length);
         return (S) this;
     }
 

@@ -441,7 +441,11 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        try {
+            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        } catch (IORuntimeException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public void setAddress(long address) {

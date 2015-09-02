@@ -103,10 +103,14 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
                     return false;
             }
         } else {
-            for (int i = 0; i < chars.length; i++) {
-                int b = bytesStore.readByte(readPosition + i) & 0xFF;
-                if (b != chars[i])
-                    return false;
+            try {
+                for (int i = 0; i < chars.length; i++) {
+                    int b = bytesStore.readByte(readPosition + i) & 0xFF;
+                    if (b != chars[i])
+                        return false;
+                }
+            } catch (IORuntimeException e) {
+                throw new AssertionError(e);
             }
         }
         return true;
@@ -241,13 +245,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public VanillaBytes<Underlying> appendUTF(char[] chars, int offset, int length)
+    public VanillaBytes<Underlying> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         ensureCapacity(readPosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
             writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));
         } else {
-            super.appendUTF(chars, offset, length);
+            super.appendUtf8(chars, offset, length);
         }
         return this;
     }

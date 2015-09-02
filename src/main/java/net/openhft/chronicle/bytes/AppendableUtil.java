@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.NotNull;
 
@@ -94,74 +95,78 @@ public class AppendableUtil {
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
             throws IOException, BufferUnderflowException {
-        while (true) {
-            int c = bytes.readUnsignedByte();
-            if (c >= 128) {
-                bytes.readSkip(-1);
-                break;
-            }
-            if (tester.isStopChar(c, bytes.peekUnsignedByte()))
-                return;
-            appendable.append((char) c);
-            if (bytes.readRemaining() == 0)
-                return;
-        }
-
-        while (true) {
-            int c = bytes.readUnsignedByte();
-            switch (c >> 4) {
-                case 0:
-                case 1:
-                case 2:
-                case 3:
-                case 4:
-                case 5:
-                case 6:
-                case 7:
-                /* 0xxxxxxx */
-                    if (tester.isStopChar(c, bytes.peekUnsignedByte()))
-                        return;
-                    appendable.append((char) c);
-                    break;
-
-                case 12:
-                case 13: {
-                /* 110x xxxx 10xx xxxx */
-                    int char2 = bytes.readUnsignedByte();
-                    if ((char2 & 0xC0) != 0x80)
-                        throw new UTFDataFormatException(
-                                "malformed input around byte");
-                    int c2 = (char) (((c & 0x1F) << 6) |
-                            (char2 & 0x3F));
-                    if (tester.isStopChar(c2, bytes.peekUnsignedByte()))
-                        return;
-                    appendable.append((char) c2);
+        try {
+            while (true) {
+                int c = bytes.readUnsignedByte();
+                if (c >= 128) {
+                    bytes.readSkip(-1);
                     break;
                 }
+                if (tester.isStopChar(c, bytes.peekUnsignedByte()))
+                    return;
+                appendable.append((char) c);
+                if (bytes.readRemaining() == 0)
+                    return;
+            }
 
-                case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+            while (true) {
+                int c = bytes.readUnsignedByte();
+                switch (c >> 4) {
+                    case 0:
+                    case 1:
+                    case 2:
+                    case 3:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                    /* 0xxxxxxx */
+                        if (tester.isStopChar(c, bytes.peekUnsignedByte()))
+                            return;
+                        appendable.append((char) c);
+                        break;
 
-                    int char2 = bytes.readUnsignedByte();
-                    int char3 = bytes.readUnsignedByte();
+                    case 12:
+                    case 13: {
+                    /* 110x xxxx 10xx xxxx */
+                        int char2 = bytes.readUnsignedByte();
+                        if ((char2 & 0xC0) != 0x80)
+                            throw new UTFDataFormatException(
+                                    "malformed input around byte");
+                        int c2 = (char) (((c & 0x1F) << 6) |
+                                (char2 & 0x3F));
+                        if (tester.isStopChar(c2, bytes.peekUnsignedByte()))
+                            return;
+                        appendable.append((char) c2);
+                        break;
+                    }
 
-                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                    case 14: {
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
+
+                        int char2 = bytes.readUnsignedByte();
+                        int char3 = bytes.readUnsignedByte();
+
+                        if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                            throw new UTFDataFormatException(
+                                    "malformed input around byte ");
+                        int c3 = (char) (((c & 0x0F) << 12) |
+                                ((char2 & 0x3F) << 6) |
+                                (char3 & 0x3F));
+                        if (tester.isStopChar(c3, bytes.peekUnsignedByte()))
+                            return;
+                        appendable.append((char) c3);
+                        break;
+                    }
+
+                    default:
+                    /* 10xx xxxx, 1111 xxxx */
                         throw new UTFDataFormatException(
                                 "malformed input around byte ");
-                    int c3 = (char) (((c & 0x0F) << 12) |
-                            ((char2 & 0x3F) << 6) |
-                            (char3 & 0x3F));
-                    if (tester.isStopChar(c3, bytes.peekUnsignedByte()))
-                        return;
-                    appendable.append((char) c3);
-                    break;
                 }
-
-                default:
-                /* 10xx xxxx, 1111 xxxx */
-                    throw new UTFDataFormatException(
-                            "malformed input around byte ");
             }
+        } catch (IORuntimeException e) {
+            throw new IOException(e);
         }
     }
 
@@ -183,6 +188,19 @@ public class AppendableUtil {
             parse8bit_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
             BytesInternal.parse8bit1(bytes, appendable, utflen);
+        }
+    }
+
+    public static <ACS extends Appendable & CharSequence> void append(ACS a, CharSequence cs, long start, long len) {
+        if (a instanceof StringBuilder) {
+            if (cs instanceof Bytes)
+                ((StringBuilder) a).append(Bytes.toString(((Bytes) cs), start, len));
+            else
+                ((StringBuilder) a).append(cs.subSequence(Maths.toInt32(start), Maths.toInt32(len)));
+        } else if (a instanceof Bytes) {
+            ((Bytes) a).appendUtf8(cs, Maths.toInt32(start), Maths.toInt32(len));
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 }
