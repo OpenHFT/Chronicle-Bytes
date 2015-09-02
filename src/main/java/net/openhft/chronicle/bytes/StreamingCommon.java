@@ -18,6 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
 
     /**
@@ -34,13 +37,13 @@ interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
      * @param bytesToSkip bytes to skip.
      * @return this
      */
-    S readSkip(long bytesToSkip);
+    S readSkip(long bytesToSkip) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
      * @param bytesToSkip bytes to skip.
      * @return this
      */
-    S writeSkip(long bytesToSkip);
+    S writeSkip(long bytesToSkip) throws BufferOverflowException, IORuntimeException;
 
 }

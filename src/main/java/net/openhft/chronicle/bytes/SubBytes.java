@@ -22,7 +22,7 @@ class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private final long start;
     private final long capacity;
 
-    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity) {
+    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity) throws IllegalStateException {
         super(bytesStore);
         this.start = start;
         this.capacity = capacity;

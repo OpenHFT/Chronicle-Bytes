@@ -24,7 +24,6 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import java.util.zip.GZIPOutputStream;
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
 
 /**
  * User: peter.lawrey
@@ -201,12 +200,7 @@ public class ByteStoreTest {
         for (String word : words) {
             assertEquals(word, bytes.readUtf8());
         }
-        try {
-            bytes.readUtf8();
-            fail();
-        } catch (BufferUnderflowException e) {
-            // expected
-        }
+        assertEquals(null, bytes.readUtf8());
         assertEquals(25, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
@@ -216,12 +210,7 @@ public class ByteStoreTest {
             Assert.assertTrue(bytes.readUtf8(sb));
             Assert.assertEquals(word, sb.toString());
         }
-        try {
-            bytes.readUtf8(sb);
-            fail();
-        } catch (BufferUnderflowException e) {
-            // expected
-        }
+        assertFalse(bytes.readUtf8(sb));
         Assert.assertEquals("", sb.toString());
     }
 
@@ -234,11 +223,10 @@ public class ByteStoreTest {
         bytes.writeUtf8("");
         assertEquals(24, bytes.writePosition()); // check the size, more bytes for less strings than writeUtf8
 
-
         for (String word : words) {
             assertEquals(word, bytes.readUtf8());
         }
-        assertEquals("", bytes.readUtf8());
+        assertEquals(null, bytes.readUtf8());
     }
 
     @Test

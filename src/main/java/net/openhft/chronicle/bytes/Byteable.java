@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 /**
  * This Interface allows a reference to off heap memory to be reassigned.
  * <p></p>
@@ -29,7 +32,8 @@ public interface Byteable<Underlying> {
      * @param offset the offset within the ByteStore
      * @param length the length in the ByteStore
      */
-    void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length);
+    void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
 
     /**
      * @return the maximum size in byte for this reference.

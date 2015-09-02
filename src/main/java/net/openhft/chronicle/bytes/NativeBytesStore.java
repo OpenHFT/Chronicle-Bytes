@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
 import sun.nio.ch.DirectBuffer;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 @SuppressWarnings("sunapi")
@@ -81,12 +83,14 @@ public class NativeBytesStore<Underlying>
      * @param capacity of the buffer.
      */
     @NotNull
-    public static NativeBytesStore<Void> nativeStore(long capacity) {
+    public static NativeBytesStore<Void> nativeStore(long capacity)
+            throws IllegalArgumentException {
         return of(capacity, true, true);
     }
 
     @NotNull
-    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic) {
+    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic)
+            throws IllegalArgumentException {
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
@@ -98,12 +102,14 @@ public class NativeBytesStore<Underlying>
     }
 
     @NotNull
-    public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity) {
+    public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity)
+            throws IllegalArgumentException {
         return of(capacity, true, false);
     }
 
     @NotNull
-    public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
+    public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity)
+            throws IllegalArgumentException {
         return of(capacity, false, false);
     }
 
@@ -119,7 +125,7 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     @Override
-    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() {
+    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() throws IllegalStateException {
         if (underlyingObject == null) {
             NativeBytesStore<Void> copy = of(realCapacity(), false, true);
             OS.memory().copyMemory(address, copy.address, capacity());
@@ -137,7 +143,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public VanillaBytes<Underlying> bytesForWrite() {
+    public VanillaBytes<Underlying> bytesForWrite() throws IllegalStateException {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
     }
 
@@ -163,7 +169,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     @ForceInline
-    public NativeBytesStore<Underlying> zeroOut(long start, long end) {
+    public NativeBytesStore<Underlying> zeroOut(long start, long end) throws IllegalArgumentException {
         if (start < writePosition() || end > writeLimit())
             throw new IllegalArgumentException("position: " + writePosition() + ", start: " + start + ", end: " + end + ", limit: " + writeLimit());
         if (start >= end)
@@ -195,19 +201,13 @@ public class NativeBytesStore<Underlying>
         return 0L;
     }
 
-    private boolean checkTranslatedBounds(long offset2) {
-        if (offset2 < 0 || offset2 > realCapacity())
-            throw new IllegalArgumentException("Offset out of bounds " + offset2 + " cap: " + realCapacity());
-        return true;
-    }
-
     @Override
-    public void reserve() {
+    public void reserve() throws IllegalStateException {
         refCount.reserve();
     }
 
     @Override
-    public void release() {
+    public void release() throws IllegalStateException {
         refCount.release();
         if (Jvm.isDebug() && refCount.get() == 0)
             releasedHere = new Error("Released here");
@@ -363,7 +363,8 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> write(
-            long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length) {
+            long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
         // TODO optimize, call unsafe.copyMemory when possible, copy 4, 2 bytes at once
         long i = 0;
         for (; i < length - 7; i += 8) {
@@ -393,7 +394,11 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public String toString() {
-        return BytesInternal.toString(this);
+        try {
+            return BytesInternal.toString(this);
+        } catch (IllegalStateException | IORuntimeException e) {
+            return e.toString();
+        }
     }
 
     @Override

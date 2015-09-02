@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 
 /**
  * Created by peter on 17/08/15.
@@ -31,11 +32,19 @@ class StreamingOutputStream extends OutputStream {
 
     @Override
     public void write(byte[] b, int off, int len) throws IOException {
-        sdo.write(b, off, len);
+        try {
+            sdo.write(b, off, len);
+        } catch (BufferOverflowException | IllegalArgumentException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
     public void write(int b) throws IOException {
-        sdo.writeUnsignedByte(b);
+        try {
+            sdo.writeUnsignedByte(b);
+        } catch (BufferOverflowException | IllegalArgumentException e) {
+            throw new IOException(e);
+        }
     }
 }

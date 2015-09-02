@@ -19,13 +19,24 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 
-    public static final long NO_PAGE = OS.memory().allocate(OS.pageSize());
-    public static final Bytes NO_BYTES = new VanillaBytes(noBytesStore());
+    public static final long NO_PAGE;
+
+    public static final Bytes NO_BYTES;
+
+    static {
+        try {
+            NO_PAGE = OS.memory().allocate(OS.pageSize());
+            NO_BYTES = new VanillaBytes(noBytesStore());
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
@@ -192,9 +203,9 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long address(long offset) throws UnsupportedOperationException {
+    public long address(long offset) throws BufferOverflowException {
         if (offset != 0)
-            throw new IllegalArgumentException("offset: " + offset);
+            throw new BufferOverflowException();
         return NO_PAGE;
     }
 

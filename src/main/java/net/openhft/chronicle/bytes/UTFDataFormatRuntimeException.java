@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-class UTFDataFormatRuntimeException extends IORuntimeException {
+public class UTFDataFormatRuntimeException extends IORuntimeException {
     public UTFDataFormatRuntimeException(String message) {
         super(message);
     }

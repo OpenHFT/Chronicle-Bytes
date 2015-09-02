@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -28,7 +29,7 @@ import static org.junit.Assert.*;
  */
 public class NativeBytesStoreTest {
     @Test
-    public void testElasticByteBuffer() {
+    public void testElasticByteBuffer() throws IORuntimeException, BufferOverflowException {
         Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         assertEquals(Bytes.MAX_CAPACITY, bbb.capacity());
         assertEquals(OS.pageSize(), bbb.realCapacity());

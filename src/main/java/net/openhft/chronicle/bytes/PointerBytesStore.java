@@ -33,7 +33,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public VanillaBytes<Void> bytesForWrite() {
+    public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
         return new VanillaBytes<>(this);
     }
 

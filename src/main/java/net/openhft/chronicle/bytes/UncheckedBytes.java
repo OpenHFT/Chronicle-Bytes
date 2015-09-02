@@ -19,11 +19,13 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+
 /**
  * Fast unchecked version of AbstractBytes
  */
 public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
-    public UncheckedBytes(@NotNull Bytes underlyingBytes) {
+    public UncheckedBytes(@NotNull Bytes underlyingBytes) throws IllegalStateException {
         super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
         readPosition(underlyingBytes.readPosition());
     }
@@ -111,7 +113,8 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+            throws IORuntimeException, BufferOverflowException, IllegalArgumentException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -124,7 +127,8 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(@NotNull BytesStore bytes, long offset, long length) {
+    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+            throws IORuntimeException, BufferOverflowException, IllegalArgumentException {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);

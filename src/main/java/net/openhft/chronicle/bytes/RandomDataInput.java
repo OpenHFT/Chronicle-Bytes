@@ -20,6 +20,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
  * The thread safety of the underlying data depends on how the methods are used.
@@ -43,38 +46,42 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     @ForceInline
-    default boolean readBoolean(long offset) {
+    default boolean readBoolean(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return readByte(offset) != 0;
     }
 
-    byte readByte(long offset);
+    byte readByte(long offset) throws BufferUnderflowException, IORuntimeException;
 
     @ForceInline
-    default int readUnsignedByte(long offset) {
+    default int readUnsignedByte(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return readByte(offset) & 0xFF;
     }
 
-    short readShort(long offset);
+    short readShort(long offset) throws BufferUnderflowException, IORuntimeException;
 
     @ForceInline
-    default int readUnsignedShort(long offset) {
+    default int readUnsignedShort(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return readShort(offset) & 0xFFFF;
     }
 
-    int readInt(long offset);
+    int readInt(long offset) throws BufferUnderflowException, IORuntimeException;
 
     @ForceInline
-    default long readUnsignedInt(long offset) {
+    default long readUnsignedInt(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return readInt(offset) & 0xFFFFFFFFL;
     }
 
-    long readLong(long offset);
+    long readLong(long offset) throws BufferUnderflowException, IORuntimeException;
 
-    float readFloat(long offset);
+    float readFloat(long offset) throws BufferUnderflowException, IORuntimeException;
 
-    double readDouble(long offset);
+    double readDouble(long offset) throws BufferUnderflowException, IORuntimeException;
 
-    default String printable(long offset) {
+    default String printable(long offset) throws BufferUnderflowException, IORuntimeException {
         return charToString[readUnsignedByte(offset)];
     }
 
@@ -84,7 +91,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the int value
      */
-    default int readVolatileInt(long offset) {
+    default int readVolatileInt(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         OS.memory().loadFence();
         return readInt(offset);
     }
@@ -95,7 +103,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the float value
      */
-    default float readVolatileFloat(long offset) {
+    default float readVolatileFloat(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return Float.intBitsToFloat(readVolatileInt(offset));
     }
 
@@ -104,7 +113,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the long value
      */
-    default long readVolatileLong(long offset) {
+    default long readVolatileLong(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         OS.memory().loadFence();
         return readLong(offset);
     }
@@ -115,11 +125,12 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the double value
      */
-    default double readVolatileDouble(long offset) {
+    default double readVolatileDouble(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return Double.longBitsToDouble(readVolatileLong(offset));
     }
 
-    default long parseLong(long offset) {
+    default long parseLong(long offset) throws BufferUnderflowException, IORuntimeException {
         return BytesInternal.parseLong(this, offset);
     }
 
@@ -132,20 +143,26 @@ public interface RandomDataInput extends RandomCommon {
      */
     void nativeRead(long position, long address, long size);
 
-    default void copyTo(@NotNull byte[] bytes) {
+    default void copyTo(@NotNull byte[] bytes)
+            throws BufferUnderflowException, IORuntimeException {
         for (int i = 0; i < bytes.length; i++)
             bytes[i] = readByte(start() + i);
     }
 
-    default long readIncompleteLong(long offset) {
+    default long readIncompleteLong(long offset) throws IORuntimeException {
         long left = readRemaining() - offset;
-        if (left >= 8)
-            return readLong(offset);
-        if (left == 4)
-            return readInt(offset);
         long l = 0;
-        for (int i = 0, remaining = (int) left; i < remaining; i++) {
-            l |= (long) readUnsignedByte(offset + i) << (i * 8);
+        try {
+            if (left >= 8)
+                return readLong(offset);
+            if (left == 4)
+                return readInt(offset);
+            l = 0;
+            for (int i = 0, remaining = (int) left; i < remaining; i++) {
+                l |= (long) readUnsignedByte(offset + i) << (i * 8);
+            }
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
         return l;
     }
@@ -158,7 +175,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetInt(long offset, int adding) {
+    default int addAndGetInt(long offset, int adding)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException, BufferUnderflowException {
         return BytesInternal.addAndGetInt(this, offset, adding);
     }
 
@@ -168,7 +186,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default long addAndGetLong(long offset, long adding) {
+    default long addAndGetLong(long offset, long adding)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException, BufferUnderflowException {
         return BytesInternal.addAndGetLong(this, offset, adding);
     }
 
@@ -179,7 +198,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default float addAndGetFloat(long offset, float adding) {
+    default float addAndGetFloat(long offset, float adding)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException, BufferUnderflowException {
         return BytesInternal.addAndGetFloat(this, offset, adding);
     }
 
@@ -190,7 +210,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default double addAndGetDouble(long offset, double adding) {
+    default double addAndGetDouble(long offset, double adding)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException, BufferUnderflowException {
         return BytesInternal.addAndGetDouble(this, offset, adding);
     }
 }

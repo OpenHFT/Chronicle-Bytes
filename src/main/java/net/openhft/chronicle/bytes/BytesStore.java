@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -37,7 +38,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @deprecated Use from(CharSequence) instead.
      */
     @Deprecated
-    static BytesStore wrap(@NotNull CharSequence cs) {
+    static BytesStore wrap(@NotNull CharSequence cs) throws IllegalArgumentException {
         return from(cs);
     }
 
@@ -47,7 +48,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param cs to convert
      * @return BytesStore
      */
-    static BytesStore from(@NotNull CharSequence cs) {
+    static BytesStore from(@NotNull CharSequence cs) throws IllegalArgumentException {
         if (cs instanceof BytesStore)
             return ((BytesStore) cs).copy();
         return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
@@ -98,22 +99,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a copy of this BytesStore.
      */
-    BytesStore<B, Underlying> copy();
+    BytesStore<B, Underlying> copy() throws IllegalArgumentException;
 
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
 
-    default Bytes<Underlying> bytesForRead() {
+    default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return bytesForWrite()
-                // .writePosition(writeLimit())
                 .readLimit(writeLimit());
     }
 
     /**
      * @return a Bytes for writing to this BytesStore
      */
-    default Bytes<Underlying> bytesForWrite() {
+    default Bytes<Underlying> bytesForWrite() throws IllegalStateException {
         return new VanillaBytes<>(this, writePosition(), writeLimit());
     }
 
@@ -162,7 +162,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * Copy the data to another BytesStore
      * @param store to copy to
      */
-    default void copyTo(@NotNull BytesStore store) {
+    default void copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
         long copy = min(capacity(), store.capacity());
         int i = 0;
         for (; i < copy - 7; i++)
@@ -177,11 +177,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param end last byte exclusive.
      * @return this.
      */
-    default B zeroOut(long start, long end) {
+    default B zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException {
         if (end <= start)
             return (B) this;
-        if (start < start() || end > capacity())
-            throw new IllegalArgumentException();
+        if (start < start())
+            throw new IllegalArgumentException(start + " < " + start());
+        if (end > capacity())
+            throw new IllegalArgumentException(end + " > " + capacity());
         long i = start;
         for (; i < end - 7; i++)
             writeLong(i, 0L);
@@ -202,8 +204,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * Assume ISO-8859-1 encoding, subclasses can override this.
      */
     @Override
-    default char charAt(int index) {
-        return (char) readUnsignedByte(readPosition() + index);
+    default char charAt(int index) throws IndexOutOfBoundsException {
+        try {
+            return (char) readUnsignedByte(readPosition() + index);
+        } catch (BufferUnderflowException e) {
+            throw new IndexOutOfBoundsException((readPosition() + index) + " >= " + readLimit());
+        } catch (IORuntimeException e) {
+            throw new IndexOutOfBoundsException(e.toString());
+        }
     }
 
     /**
@@ -237,7 +245,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param length     to match.
      * @return true if the bytes and length matched.
      */
-    default boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
+    default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
+            throws BufferUnderflowException, IORuntimeException {
         return length == 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
@@ -247,7 +256,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * Return the bytes sum of the readable bytes.
      * @return unsigned byte sum.
      */
-    default int byteCheckSum() {
+    default int byteCheckSum() throws IORuntimeException {
         byte b = 0;
         for (long i = readPosition(); i < readLimit(); i++)
             b += readByte(i);
@@ -259,7 +268,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean endsWith(char c) {
+    default boolean endsWith(char c) throws IORuntimeException {
         return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
     }
 
@@ -268,7 +277,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean startsWith(char c) {
+    default boolean startsWith(char c) throws IORuntimeException {
         return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
     }
 
@@ -282,7 +291,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return BytesInternal.contentEqual(this, bytesStore);
     }
 
-    default String to8bitString() {
+    default String to8bitString() throws IORuntimeException, IllegalArgumentException {
         return BytesInternal.to8bitString(this);
     }
 }

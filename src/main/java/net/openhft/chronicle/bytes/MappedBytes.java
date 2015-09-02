@@ -22,6 +22,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -30,19 +32,19 @@ public class MappedBytes extends AbstractBytes<Void> {
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
-    MappedBytes(MappedFile mappedFile) {
+    MappedBytes(MappedFile mappedFile) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
         this.mappedFile = mappedFile;
         clear();
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException {
+    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException, IllegalStateException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException {
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException, IllegalStateException {
         MappedFile rw = new MappedFile(file, chunkSize, OS.pageSize());
         return new MappedBytes(rw);
     }
@@ -63,23 +65,31 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    protected void readCheckOffset(long offset, long adding) {
-        checkOffset(offset);
-    }
-
-    @Override
-    protected void writeCheckOffset(long offset, long adding) {
-        checkOffset(offset);
-    }
-
-    private void checkOffset(long offset) {
+    protected void readCheckOffset(long offset, long adding) throws BufferUnderflowException, IORuntimeException {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
                 bytesStore = mappedFile.acquireByteStore(offset);
                 oldBS.release();
-            } catch (IOException e) {
+            } catch (IOException | IllegalStateException e) {
                 throw new IORuntimeException(e);
+            } catch (IllegalArgumentException e) {
+                throw new BufferUnderflowException();
+            }
+        }
+    }
+
+    @Override
+    protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException, IORuntimeException {
+        if (!bytesStore.inside(offset)) {
+            BytesStore oldBS = bytesStore;
+            try {
+                bytesStore = mappedFile.acquireByteStore(offset);
+                oldBS.release();
+            } catch (IOException | IllegalStateException e) {
+                throw new IORuntimeException(e);
+            } catch (IllegalArgumentException e) {
+                throw new BufferOverflowException();
             }
         }
     }

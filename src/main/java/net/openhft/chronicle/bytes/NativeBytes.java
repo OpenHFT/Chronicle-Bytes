@@ -19,8 +19,11 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedCapacity;
@@ -31,25 +34,40 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
-    NativeBytes(@NotNull BytesStore store) {
+    private static final Logger LOG = LoggerFactory.getLogger(NativeBytes.class);
+
+    NativeBytes(@NotNull BytesStore store) throws IllegalStateException {
         super(store, 0, MAX_CAPACITY);
     }
 
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
-        return new NativeBytes<>(noBytesStore());
+        try {
+            return new NativeBytes<>(noBytesStore());
+        } catch (IllegalStateException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
-    public static NativeBytes<Void> nativeBytes(long initialCapacity) {
-        return new NativeBytes<>(nativeStoreWithFixedCapacity(initialCapacity));
+    public static NativeBytes<Void> nativeBytes(long initialCapacity) throws IllegalArgumentException {
+        try {
+            return new NativeBytes<>(nativeStoreWithFixedCapacity(initialCapacity));
+        } catch (IllegalStateException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull Bytes bytes) {
         long remaining = bytes.readRemaining();
-        NativeBytes<Void> bytes2 = Bytes.allocateElasticDirect(remaining);
-        bytes2.write(bytes, 0, remaining);
-        return bytes2;
+        NativeBytes<Void> bytes2;
+        try {
+            bytes2 = Bytes.allocateElasticDirect(remaining);
+            bytes2.write(bytes, 0, remaining);
+            return bytes2;
+        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException | IORuntimeException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -58,38 +76,45 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     @Override
-    protected void writeCheckOffset(long offset, long adding) {
+    protected void writeCheckOffset(long offset, long adding)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         if (!bytesStore.inside(offset + adding - 1))
             checkResize(offset + adding);
     }
 
     @Override
-    public void ensureCapacity(long size) {
+    public void ensureCapacity(long size)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         writeCheckOffset(size, 1L);
     }
 
-    private void checkResize(long endOfBuffer) {
+    private void checkResize(long endOfBuffer)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         if (isElastic())
             resize(endOfBuffer);
         else
             throw new BufferOverflowException();
     }
 
-    public int readVolatileInt(long offset) {
+    public int readVolatileInt(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return bytesStore.readVolatileInt(offset);
     }
 
-    public long readVolatileLong(long offset) {
+    public long readVolatileLong(long offset)
+            throws BufferUnderflowException, IORuntimeException {
         return bytesStore.readVolatileLong(offset);
     }
+
     @Override
     public boolean isElastic() {
         return true;
     }
 
-    private void resize(long endOfBuffer) {
+    private void resize(long endOfBuffer)
+            throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
         if (endOfBuffer < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException(endOfBuffer + " < 0");
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
         long size = (Math.max(endOfBuffer, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
@@ -100,19 +125,23 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         } else {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
         }
-        bytesStore.copyTo(store);
-        bytesStore.release();
+        try {
+            bytesStore.copyTo(store);
+            bytesStore.release();
+        } catch (IllegalStateException e) {
+            LOG.error("", e);
+        }
         bytesStore = store;
     }
 
     @Override
-    public long readIncompleteLong(long offset) {
+    public long readIncompleteLong(long offset) throws IORuntimeException {
         return bytesStore.readIncompleteLong(offset);
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
+    public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         long position = writePosition();
         ensureCapacity(position + length);
         super.write(bytes, offset, length);
@@ -120,7 +149,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     @NotNull
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException, IORuntimeException {
         long position = writePosition();
         ensureCapacity(position + length);
         super.write(bytes, offset, length);

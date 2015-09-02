@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -32,21 +33,23 @@ import java.util.function.Function;
  * This data input has a a position() and a limit()
  */
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
-    S readPosition(long position);
+    S readPosition(long position) throws BufferUnderflowException;
 
-    S readLimit(long limit);
+    S readLimit(long limit) throws BufferUnderflowException;
 
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength(long length, @NotNull Consumer<S> bytesConsumer) {
+    default void readWithLength(long length, @NotNull Consumer<S> bytesConsumer)
+            throws BufferUnderflowException {
         parseWithLength(length, (Function<S, Void>) s -> {
             bytesConsumer.accept(s);
             return null;
         });
     }
 
-    default <R> R parseWithLength(long length, @NotNull Function<S, R> bytesConsumer) {
+    default <R> R parseWithLength(long length, @NotNull Function<S, R> bytesConsumer)
+            throws BufferUnderflowException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -65,39 +68,41 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return new StreamingInputStream(this);
     }
 
-    default long readStopBit() {
+    default long readStopBit() throws IORuntimeException {
         return BytesInternal.readStopBit(this);
     }
 
-    default double readStopBitDouble() {
+    default double readStopBitDouble() throws IORuntimeException {
         return BytesInternal.readStopBitDouble(this);
     }
 
-    default boolean readBoolean() {
+    default boolean readBoolean() throws IORuntimeException {
         return readByte() != 0;
     }
 
-    byte readByte();
+    byte readByte() throws IORuntimeException;
 
-    int readUnsignedByte();
+    int readUnsignedByte() throws IORuntimeException;
 
-    short readShort();
+    short readShort() throws BufferUnderflowException, IORuntimeException;
 
-    default int readUnsignedShort() {
+    default int readUnsignedShort()
+            throws BufferUnderflowException, IORuntimeException {
         return readShort() & 0xFFFF;
     }
 
-    int readInt();
+    int readInt() throws BufferUnderflowException, IORuntimeException;
 
-    default long readUnsignedInt() {
+    default long readUnsignedInt()
+            throws BufferUnderflowException, IORuntimeException {
         return readInt() & 0xFFFFFFFFL;
     }
 
-    long readLong();
+    long readLong() throws BufferUnderflowException, IORuntimeException;
 
-    float readFloat();
+    float readFloat() throws BufferUnderflowException, IORuntimeException;
 
-    double readDouble();
+    double readDouble() throws BufferUnderflowException, IORuntimeException;
 
     /**
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
@@ -106,17 +111,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @return a Unicode string or <code>null</code> if <code>writeUtf8(null)</code> was called
      */
     @Nullable
-    default String readUtf8() {
+    default String readUtf8()
+            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
         return BytesInternal.readUtf8(this);
     }
 
     @Deprecated
-    default String readUTFΔ() {
+    default String readUTFΔ()
+            throws IORuntimeException, BufferUnderflowException, IllegalArgumentException {
         return BytesInternal.readUtf8(this);
     }
 
     @Nullable
-    default String read8bit() {
+    default String read8bit() throws IORuntimeException, BufferUnderflowException {
         return BytesInternal.read8bit(this);
     }
 
@@ -126,10 +133,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param sb to copy chars to
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
-    default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+    default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         AppendableUtil.setLength(sb, 0);
         long len0 = BytesInternal.readStopBit(this);
-        if (len0 == -1)
+        if (len0 == -1 || readRemaining() < 1)
             return false;
         int len = Maths.toUInt31(len0);
         BytesInternal.parseUTF(this, sb, len);
@@ -137,11 +145,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     @Deprecated
-    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         return readUtf8(sb);
     }
 
-        default boolean read8bit(@NotNull Bytes b) throws UTFDataFormatRuntimeException {
+    default boolean read8bit(@NotNull Bytes b)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
         b.clear();
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -152,7 +162,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws UTFDataFormatRuntimeException {
+    default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         AppendableUtil.setLength(sb, 0);
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -162,7 +173,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean read8bit(StringBuilder sb) {
+    default boolean read8bit(StringBuilder sb)
+            throws IORuntimeException, BufferUnderflowException {
         sb.setLength(0);
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -172,37 +184,37 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default int read(@NotNull byte[] bytes) {
+    default int read(@NotNull byte[] bytes) throws IORuntimeException {
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
             bytes[i] = readByte();
         return len;
     }
 
-    default int read(@NotNull byte[] bytes, int off, int len) {
+    default int read(@NotNull byte[] bytes, int off, int len) throws IORuntimeException {
         int len2 = (int) Math.min(len, readRemaining());
         for (int i = 0; i < len2; i++)
             bytes[off + i] = readByte();
         return len2;
     }
 
-    default int read(@NotNull char[] bytes, int off, int len) {
+    default int read(@NotNull char[] bytes, int off, int len) throws IORuntimeException {
         int len2 = (int) Math.min(len, readRemaining());
         for (int i = 0; i < len2; i++)
             bytes[off + i] = (char) readUnsignedByte();
         return len2;
     }
 
-    default void read(@NotNull ByteBuffer buffer) {
+    default void read(@NotNull ByteBuffer buffer) throws IORuntimeException {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }
 
-    int readVolatileInt();
+    int readVolatileInt() throws BufferUnderflowException, IORuntimeException;
 
-    long readVolatileLong();
+    long readVolatileLong() throws BufferUnderflowException, IORuntimeException;
 
-    int peekUnsignedByte();
+    int peekUnsignedByte() throws IORuntimeException;
 
     /**
      * This is an expert level method for copying raw native memory in bulk.
@@ -210,18 +222,21 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param address of the memory.
      * @param size    in bytes.
      */
-    void nativeRead(long address, long size);
+    void nativeRead(long address, long size)
+            throws BufferUnderflowException, IORuntimeException;
 
-    default <E extends Enum<E>> E readEnum(Class<E> eClass) {
+    default <E extends Enum<E>> E readEnum(Class<E> eClass)
+            throws IORuntimeException, BufferUnderflowException {
         return BytesInternal.readEnum(this, eClass);
     }
 
-    default void parseUTF(Appendable sb, int length) {
+    default void parseUTF(Appendable sb, int length)
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUTF(this, sb, length);
     }
 
-    default byte[] toByteArray() {
+    default byte[] toByteArray() throws IORuntimeException, IllegalArgumentException {
         return BytesInternal.toByteArray(this);
     }
 

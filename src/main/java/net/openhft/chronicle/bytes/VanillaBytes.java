@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
@@ -30,11 +32,12 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Simple Bytes implementation which is not Elastic.
  */
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
-    public VanillaBytes(@NotNull BytesStore bytesStore) {
+    public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
 
-    public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit) {
+    public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
+            throws IllegalStateException {
         super(bytesStore, writePosition, writeLimit);
     }
 
@@ -43,11 +46,16 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
      */
     @NotNull
     public static VanillaBytes<Void> vanillaBytes() {
-        return new VanillaBytes<>(noBytesStore());
+        try {
+            return new VanillaBytes<>(noBytesStore());
+        } catch (IllegalStateException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         bytesStore(byteStore);
         // assume its read-only
         readLimit(offset + length);
@@ -55,7 +63,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         readPosition(offset);
     }
 
-    private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
+            throws IllegalStateException {
         BytesStore oldBS = this.bytesStore;
         this.bytesStore = bytesStore;
         oldBS.release();
@@ -74,7 +83,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @NotNull
     @Override
-    public Bytes<Underlying> bytesForRead() {
+    public Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return isClear()
                 ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
                 : new SubBytes<>(bytesStore, readPosition(), readLimit());
@@ -110,7 +119,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @NotNull
     @Override
-    public BytesStore<Bytes<Underlying>, Underlying> copy() {
+    public BytesStore<Bytes<Underlying>, Underlying> copy() throws IllegalArgumentException {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
             ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
@@ -128,7 +137,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
         if (bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
@@ -143,13 +153,15 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         return this;
     }
 
-    public Bytes<Underlying> write8bit(@NotNull CharSequence str, int offset, int length) {
+    public Bytes<Underlying> write8bit(@NotNull CharSequence str, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
         writeStopBit(length);
         write(str, offset, length);
         return this;
     }
 
-    public void write(long position, @NotNull CharSequence str, int offset, int length) {
+    public void write(long position, @NotNull CharSequence str, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         // todo optimise
         if (str instanceof String) {
             char[] chars = ((String) str).toCharArray();
@@ -162,7 +174,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @NotNull
-    public VanillaBytes append(CharSequence str, int start, int end) {
+    public VanillaBytes append(CharSequence str, int start, int end) throws IndexOutOfBoundsException {
+        try {
         if (bytesStore() instanceof NativeBytesStore) {
             if (str instanceof BytesStore) {
                 write((BytesStore) str, (long) start, end - start);
@@ -175,10 +188,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         }
         super.append(str, start, end);
         return this;
+        } catch (Exception e) {
+            throw new IndexOutOfBoundsException(e.toString());
+        }
     }
 
     @Override
-    public boolean equalBytes(BytesStore bytesStore, long length) {
+    public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException, IORuntimeException {
         if (this.bytesStore instanceof NativeBytesStore &&
                 bytesStore instanceof VanillaBytes && bytesStore.bytesStore() instanceof NativeBytesStore) {
             VanillaBytes b2 = (VanillaBytes) bytesStore;
@@ -213,7 +229,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         nbs.read8bit(position, chars, length);
     }
 
-    public int byteCheckSum() {
+    public int byteCheckSum() throws IORuntimeException {
         if (readLimit() >= Integer.MAX_VALUE || start() != 0)
             return super.byteCheckSum();
         byte b = 0;
@@ -225,7 +241,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
     }
 
     @Override
-    public VanillaBytes<Underlying> appendUTF(char[] chars, int offset, int length) {
+    public VanillaBytes<Underlying> appendUTF(char[] chars, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         ensureCapacity(readPosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
             writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));

@@ -17,10 +17,13 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.BufferUnderflowException;
 
 /**
  * @author peter.lawrey
@@ -32,13 +35,14 @@ public class UTF8StringInterner {
     private final String[] interner;
     private final int mask;
 
-    public UTF8StringInterner(int capacity) {
+    public UTF8StringInterner(int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         interner = new String[n];
         mask = n - 1;
     }
 
-    public String intern(@NotNull Bytes cs) {
+    public String intern(@NotNull Bytes cs)
+            throws IllegalArgumentException, UTFDataFormatRuntimeException, BufferUnderflowException {
         long hash = BytesStoreHash.hash(cs);
         int h = (int) (hash ^ (hash >> 32)) & mask;
         String s = interner[h];

@@ -40,13 +40,13 @@ public enum StopCharTesters implements StopCharTester {
     },
     QUOTES {
         @Override
-        public boolean isStopChar(int ch) throws IllegalStateException {
+        public boolean isStopChar(int ch) {
             return ch == '"' || ch <= 0;
         }
     },
     SINGLE_QUOTES {
         @Override
-        public boolean isStopChar(int ch) throws IllegalStateException {
+        public boolean isStopChar(int ch) {
             return ch == '\'' || ch <= 0;
         }
     },

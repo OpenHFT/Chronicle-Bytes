@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 interface RandomCommon extends ReferenceCounted {
@@ -93,7 +95,8 @@ interface RandomCommon extends ReferenceCounted {
      * @return the underlying address of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
      */
-    long address(long offset) throws UnsupportedOperationException;
+    long address(long offset)
+            throws UnsupportedOperationException, BufferUnderflowException, BufferOverflowException;
 
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
@@ -102,12 +105,12 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return the streaming bytes for reading.
      */
-    Bytes bytesForRead();
+    Bytes bytesForRead() throws IllegalStateException;
 
     /**
      * @return the streaming bytes for writing.
      */
-    Bytes bytesForWrite();
+    Bytes bytesForWrite() throws IllegalStateException;
 
     /**
      * Perform a 32-bit CAS at a given offset.
@@ -116,7 +119,8 @@ interface RandomCommon extends ReferenceCounted {
      * @param value to set
      * @return true, if successful.
      */
-    boolean compareAndSwapInt(long offset, int expected, int value);
+    boolean compareAndSwapInt(long offset, int expected, int value)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
 
     /**
      * Perform a 64-bit CAS at a given offset.
@@ -125,7 +129,8 @@ interface RandomCommon extends ReferenceCounted {
      * @param value to set
      * @return true, if successful.
      */
-    boolean compareAndSwapLong(long offset, long expected, long value);
+    boolean compareAndSwapLong(long offset, long expected, long value)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
 
     /**
      * Perform a 32-bit float CAS at a given offset.
@@ -135,7 +140,8 @@ interface RandomCommon extends ReferenceCounted {
      * @param value    to set
      * @return true, if successful.
      */
-    default boolean compareAndSwapFloat(long offset, float expected, float value) {
+    default boolean compareAndSwapFloat(long offset, float expected, float value)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
     }
 
@@ -147,7 +153,8 @@ interface RandomCommon extends ReferenceCounted {
      * @param value    to set
      * @return true, if successful.
      */
-    default boolean compareAndSwapDouble(long offset, double expected, double value) {
+    default boolean compareAndSwapDouble(long offset, double expected, double value)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 }

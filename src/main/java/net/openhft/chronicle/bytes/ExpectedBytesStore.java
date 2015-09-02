@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
@@ -99,13 +101,21 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @NotNull
     @Override
     public B writeByte(long offset, byte i8) throws AssertionError {
-        byte i8a = underlyingBytesStore.readByte(offset);
-        if (i8a != i8) {
-            Bytes<Underlying> bytes = underlyingBytesStore.bytesForRead();
-            bytes.readPosition(offset);
-            throw new AssertionError(bytes.toDebugString() + "\nExpected: " + i8a + "\nActual: " + i8);
+        try {
+            byte i8a = underlyingBytesStore.readByte(offset);
+            if (i8a != i8) {
+                try {
+                    Bytes<Underlying> bytes = underlyingBytesStore.bytesForRead();
+                    bytes.readPosition(offset);
+                    throw new AssertionError(bytes.toDebugString() + "\nExpected: " + i8a + "\nActual: " + i8);
+                } catch (IllegalStateException e) {
+                    throw new AssertionError(e);
+                }
+            }
+            return (B) this;
+        } catch (BufferUnderflowException | IORuntimeException e) {
+            throw new AssertionError(e);
         }
-        return (B) this;
     }
 
     @Override
@@ -115,20 +125,28 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeShort(long offset, short i) throws AssertionError {
-        short ia = underlyingBytesStore.readShort(offset);
-        if (ia != i)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + i);
-        return (B) this;
+    public B writeShort(long offset, short i) throws AssertionError, IORuntimeException {
+        try {
+            short ia = underlyingBytesStore.readShort(offset);
+            if (ia != i)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + i);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
     @Override
-    public B writeInt(long offset, int i) throws AssertionError {
-        int ia = underlyingBytesStore.readInt(offset);
-        if (ia != i)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + i);
-        return (B) this;
+    public B writeInt(long offset, int i) throws AssertionError, IORuntimeException {
+        try {
+            int ia = underlyingBytesStore.readInt(offset);
+            if (ia != i)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + i);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -137,13 +155,17 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedInt(long offset, int i) throws AssertionError {
-        int ia = underlyingBytesStore.readInt(offset);
-        if (ia != i) {
-            if ((i & NOT_READY) == 0)
-                throw new AssertionError("Expected: " + ia + " <" + Integer.toHexString(ia) + ">\nActual: " + i + " <" + Integer.toHexString(i) + ">");
+    public B writeOrderedInt(long offset, int i) throws AssertionError, IORuntimeException {
+        try {
+            int ia = underlyingBytesStore.readInt(offset);
+            if (ia != i) {
+                if ((i & NOT_READY) == 0)
+                    throw new AssertionError("Expected: " + ia + " <" + Integer.toHexString(ia) + ">\nActual: " + i + " <" + Integer.toHexString(i) + ">");
+            }
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
-        return (B) this;
     }
 
     @Override
@@ -152,11 +174,15 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeLong(long offset, long i) throws AssertionError {
-        long ia = underlyingBytesStore.readLong(offset);
-        if (ia != i)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + i);
-        return (B) this;
+    public B writeLong(long offset, long i) throws AssertionError, IORuntimeException {
+        try {
+            long ia = underlyingBytesStore.readLong(offset);
+            if (ia != i)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + i);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -166,34 +192,46 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedLong(long offset, long i) throws AssertionError {
-        long ia = underlyingBytesStore.readLong(offset);
-        if (ia != i)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + i);
-        return (B) this;
+    public B writeOrderedLong(long offset, long i) throws AssertionError, IORuntimeException {
+        try {
+            long ia = underlyingBytesStore.readLong(offset);
+            if (ia != i)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + i);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
     @Override
-    public B writeFloat(long offset, float d) throws AssertionError {
-        float ia = underlyingBytesStore.readFloat(offset);
-        if (ia != d)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + d);
-        return (B) this;
+    public B writeFloat(long offset, float d) throws AssertionError, IORuntimeException {
+        try {
+            float ia = underlyingBytesStore.readFloat(offset);
+            if (ia != d)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + d);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
     @Override
-    public B writeDouble(long offset, double d) throws AssertionError {
-        double ia = underlyingBytesStore.readDouble(offset);
-        if (ia != d)
-            throw new AssertionError("Expected: " + ia + "\nActual: " + d);
-        return (B) this;
+    public B writeDouble(long offset, double d) throws AssertionError, IORuntimeException {
+        try {
+            double ia = underlyingBytesStore.readDouble(offset);
+            if (ia != d)
+                throw new AssertionError("Expected: " + ia + "\nActual: " + d);
+            return (B) this;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
     @Override
-    public B write(long offsetInRDO, byte[] bytes, int offset, int length) throws AssertionError {
+    public B write(long offsetInRDO, byte[] bytes, int offset, int length) throws AssertionError, BufferOverflowException, IORuntimeException {
         for (int i = 0; i < length; i++)
             writeByte(offsetInRDO + i, bytes[offset + i]);
         return (B) this;

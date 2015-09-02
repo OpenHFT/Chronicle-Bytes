@@ -73,7 +73,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
             h1 += (l1 + l2a - l3a) * M1;
             h2 += (l2 + l3a - l0a) * M2;
             h3 += (l3 + l0a - l1a) * M3;
-        }
+            }
 
         // perform a hash of the end.
         int left = remaining - i;

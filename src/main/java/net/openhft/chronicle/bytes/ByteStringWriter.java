@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.nio.BufferOverflowException;
 
 /**
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
@@ -30,8 +31,12 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(int c) {
-        out.append(c);
+    public void write(int c) throws IOException {
+        try {
+            out.append(c);
+        } catch (BufferOverflowException | IllegalArgumentException | IORuntimeException e) {
+            throw new IOException(e);
+        }
     }
 
     @Override
@@ -40,7 +45,7 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(String str, int off, int len) {
+    public void write(String str, int off, int len) throws IndexOutOfBoundsException {
         out.append(str, off, off + len);
     }
 
@@ -51,7 +56,7 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public Writer append(CharSequence csq, int start, int end) {
+    public Writer append(CharSequence csq, int start, int end) throws IndexOutOfBoundsException {
         out.append(csq, start, end);
         return this;
     }

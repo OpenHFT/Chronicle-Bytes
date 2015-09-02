@@ -99,7 +99,7 @@ public class BytesTest {
 */
 
     @Test
-    public void testName() {
+    public void testName() throws IORuntimeException {
         Bytes<Void> bytes = Bytes.allocateDirect(30);
 
         long expected = 12345L;

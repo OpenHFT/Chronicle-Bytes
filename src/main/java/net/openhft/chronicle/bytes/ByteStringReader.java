@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.nio.BufferUnderflowException;
 
 /**
  * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
@@ -37,7 +38,11 @@ public class ByteStringReader extends Reader {
     @Override
     public long skip(long n) throws IOException {
         long len = Math.min(in.readRemaining(), n);
-        in.readSkip(len);
+        try {
+            in.readSkip(len);
+        } catch (BufferUnderflowException e) {
+            throw new IOException(e);
+        }
         return len;
     }
 

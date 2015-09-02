@@ -82,7 +82,7 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @Nullable
-    public MappedBytesStore acquireByteStore(long position) throws IOException {
+    public MappedBytesStore acquireByteStore(long position) throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
         int chunk = (int) (position / chunkSize);
@@ -126,7 +126,8 @@ public class MappedFile implements ReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
 
-    public Bytes acquireBytesForRead(long position) throws IOException {
+    public Bytes acquireBytesForRead(long position)
+            throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
         Bytes bytes = mbs.bytesForRead();
         bytes.readPosition(position);
@@ -134,12 +135,14 @@ public class MappedFile implements ReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForRead(long position, @NotNull VanillaBytes bytes) throws IOException {
+    public void acquireBytesForRead(long position, @NotNull VanillaBytes bytes)
+            throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
 
-    public Bytes acquireBytesForWrite(long position) throws IOException {
+    public Bytes acquireBytesForWrite(long position)
+            throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
         Bytes bytes = mbs.bytesForWrite();
         bytes.writePosition(position);
@@ -147,19 +150,20 @@ public class MappedFile implements ReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForWrite(long position, @NotNull VanillaBytes bytes) throws IOException {
+    public void acquireBytesForWrite(long position, @NotNull VanillaBytes bytes)
+            throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
         bytes.writePosition(position);
     }
 
     @Override
-    public void reserve() {
+    public void reserve() throws IllegalStateException {
         refCount.reserve();
     }
 
     @Override
-    public void release() {
+    public void release() throws IllegalStateException {
         refCount.release();
     }
 
@@ -171,10 +175,14 @@ public class MappedFile implements ReferenceCounted {
     public void close() {
         if (!closed.compareAndSet(false, true))
             return;
-        synchronized (stores) {
-            ReferenceCounted.releaseAll((List) stores);
+        try {
+            synchronized (stores) {
+                ReferenceCounted.releaseAll((List) stores);
+            }
+            release();
+        } catch (IllegalStateException e) {
+            LOG.error("", e);
         }
-        release();
     }
 
     private void performRelease() {
@@ -186,7 +194,11 @@ public class MappedFile implements ReferenceCounted {
             if (mbs != null) {
                 long count = mbs.refCount();
                 if (count > 0) {
-                    mbs.release();
+                    try {
+                        mbs.release();
+                    } catch (IllegalStateException e) {
+                        LOG.error("", e);
+                    }
                     if (count > 1)
                         continue;
                 }

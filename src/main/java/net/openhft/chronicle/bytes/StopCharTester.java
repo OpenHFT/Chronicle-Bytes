@@ -33,9 +33,9 @@ public interface StopCharTester {
      *
      * @param ch to test, 0 should return true or throw an exception.
      * @return if this byte is a stop character.
-     * @throws IllegalStateException if an invalid character like 0 was detected.
+     * @throws IORuntimeException if an invalid character like 0 was detected.
      */
-    boolean isStopChar(int ch) throws IllegalStateException;
+    boolean isStopChar(int ch) throws IORuntimeException;
 
     @NotNull
     default StopCharTester escaping() {

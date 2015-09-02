@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
@@ -46,7 +47,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param tester to detect the end of the text.
      * @return true, false, or null if neither.
      */
-    default Boolean parseBoolean(@NotNull StopCharTester tester) throws BufferUnderflowException {
+    default Boolean parseBoolean(@NotNull StopCharTester tester) {
         return BytesInternal.parseBoolean(this, tester);
     }
 
@@ -80,7 +81,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharsTester to check if the end has been reached.
      */
     @ForceInline
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester) {
+    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
         BytesInternal.parseUTF(this, buffer, stopCharsTester);
     }
 
@@ -91,7 +93,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharTester to check if the end has been reached.
      */
     @ForceInline
-    default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester) {
+    default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
+            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
@@ -105,7 +108,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharsTester to check if the end has been reached.
      */
     @ForceInline
-    default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester) {
+    default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else
@@ -117,7 +121,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return a long.
      */
     @ForceInline
-    default long parseLong() {
+    default long parseLong() throws BufferUnderflowException, IORuntimeException {
         return BytesInternal.parseLong(this);
     }
 
@@ -126,7 +130,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return a double.
      */
     @ForceInline
-    default double parseDouble() {
+    default double parseDouble() throws BufferUnderflowException, IORuntimeException {
         return BytesInternal.parseDouble(this);
     }
 
@@ -136,7 +140,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return true if a terminating character was found, false if the end of the buffer was reached.
      */
     @ForceInline
-    default boolean skipTo(@NotNull StopCharTester tester) {
+    default boolean skipTo(@NotNull StopCharTester tester) throws IORuntimeException {
         return BytesInternal.skipTo(this, tester);
     }
 }

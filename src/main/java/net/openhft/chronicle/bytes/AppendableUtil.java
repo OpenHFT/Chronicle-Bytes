@@ -21,13 +21,15 @@ import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
  * Created by peter on 30/08/15.
  */
 public class AppendableUtil {
-    public static void setCharAt(@NotNull Appendable sb, int index, char ch) {
+    public static void setCharAt(@NotNull Appendable sb, int index, char ch)
+            throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setCharAt(index, ch);
         else if (sb instanceof Bytes)
@@ -37,7 +39,8 @@ public class AppendableUtil {
     }
 
     @ForceInline
-    public static void setLength(@NotNull Appendable sb, int newLength) {
+    public static void setLength(@NotNull Appendable sb, int newLength)
+            throws BufferUnderflowException, IllegalArgumentException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
@@ -46,7 +49,8 @@ public class AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void append(@NotNull Appendable sb, double value) {
+    public static void append(@NotNull Appendable sb, double value)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -55,7 +59,8 @@ public class AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void append(@NotNull Appendable sb, long value) {
+    public static void append(@NotNull Appendable sb, long value)
+            throws IllegalArgumentException, IORuntimeException, BufferOverflowException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -72,7 +77,9 @@ public class AppendableUtil {
         }
     }
 
-    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharsTester tester) {
+    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
+                                         @NotNull StringBuilder appendable,
+                                         @NotNull StopCharsTester tester) throws IORuntimeException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -83,7 +90,10 @@ public class AppendableUtil {
         }
     }
 
-    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharsTester tester) throws IOException {
+    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
+                                        @NotNull Appendable appendable,
+                                        @NotNull StopCharsTester tester)
+            throws IOException, BufferUnderflowException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
@@ -155,7 +165,8 @@ public class AppendableUtil {
         }
     }
 
-    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
+            throws IORuntimeException, BufferUnderflowException {
         if (utflen > bytes.readRemaining())
             throw new BufferUnderflowException();
         NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
@@ -164,7 +175,8 @@ public class AppendableUtil {
         bytes.readSkip(count);
     }
 
-    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
+            throws IORuntimeException, BufferUnderflowException {
         if (bytes instanceof Bytes
                 && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {

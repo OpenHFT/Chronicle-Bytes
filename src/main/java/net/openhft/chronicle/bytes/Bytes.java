@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
@@ -116,14 +118,14 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param text to convert
      * @return Bytes ready for reading.
      */
-    static Bytes<byte[]> from(@NotNull CharSequence text) {
+    static Bytes<byte[]> from(@NotNull CharSequence text) throws IllegalArgumentException, IllegalStateException {
         if (text instanceof BytesStore)
             return ((BytesStore) text).copy().bytesForRead();
         return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
     @Deprecated
-    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) {
+    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) throws IllegalArgumentException, IllegalStateException {
         return from(text);
     }
 
@@ -133,7 +135,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param capacity minimum to allocate
      * @return a new Bytes ready for writing.
      */
-    static VanillaBytes<Void> allocateDirect(long capacity) {
+    static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         return NativeBytesStore.nativeStoreWithFixedCapacity(capacity).bytesForWrite();
     }
 
@@ -151,7 +153,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      *
      * @return Bytes for writing.
      */
-    static NativeBytes<Void> allocateElasticDirect(long initialCapacity) {
+    static NativeBytes<Void> allocateElasticDirect(long initialCapacity) throws IllegalArgumentException {
         return NativeBytes.nativeBytes(initialCapacity);
     }
 
@@ -162,14 +164,19 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
-    static String toString(@NotNull final Bytes<?> buffer) {
+    static String toString(@NotNull final Bytes<?> buffer) throws BufferUnderflowException {
         if (buffer.readRemaining() == 0)
             return "";
         return buffer.parseWithLength(buffer.readRemaining(), b -> {
             final StringBuilder builder = new StringBuilder();
+            try {
             while (buffer.readRemaining() > 0) {
                 builder.append((char) buffer.readByte());
             }
+            } catch (IORuntimeException e) {
+                builder.append(' ').append(e);
+            }
+
 
             // remove the last comma
             return builder.toString();
@@ -184,7 +191,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
-    static String toString(@NotNull final Bytes buffer, long position, long len) {
+    static String toString(@NotNull final Bytes buffer, long position, long len)
+            throws BufferUnderflowException, IORuntimeException {
         final long pos = buffer.readPosition();
         final long limit = buffer.readLimit();
         buffer.readPosition(position);
@@ -218,9 +226,13 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param bytes the bytes to wrap
      * @return a direct byte buffer contain the {@code bytes}
      */
-    static Bytes allocateDirect(@NotNull byte[] bytes) {
+    static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
-        result.write(bytes);
+        try {
+            result.write(bytes);
+        } catch (BufferOverflowException | IORuntimeException e) {
+            throw new AssertionError(e);
+        }
         return result;
     }
 
@@ -230,7 +242,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param unchecked if true, minimal bounds checks will be performed.
      * @return Bytes without bounds checking.
      */
-    default Bytes<Underlying> unchecked(boolean unchecked) {
+    default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         return unchecked ?
                 start() == 0 && bytesStore() instanceof NativeBytesStore ?
                         new UncheckedNativeBytes<>(this) :
@@ -262,7 +274,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     /**
      * @return a copy of this Bytes from position() to limit().
      */
-    BytesStore<Bytes<Underlying>, Underlying> copy();
+    BytesStore<Bytes<Underlying>, Underlying> copy() throws IllegalArgumentException;
 
     /**
      * display the hex data of {@link Bytes} from the position() to the limit()
@@ -270,7 +282,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString() {
+    default String toHexString() throws BufferUnderflowException, IORuntimeException {
         return BytesInternal.toHexString(this);
     }
 
@@ -281,7 +293,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString(long maxLength) {
+    default String toHexString(long maxLength)
+            throws IORuntimeException, BufferUnderflowException {
         if (readRemaining() < maxLength) return toHexString();
         return BytesInternal.toHexString(this, readPosition(), maxLength) + ".... truncated";
     }
@@ -293,7 +306,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString(long offset, long maxLength) {
+    default String toHexString(long offset, long maxLength)
+            throws IORuntimeException, BufferUnderflowException {
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         String ret = BytesInternal.toHexString(this, offset, maxLength2);
         return maxLength2 < maxLength ? ret + "... truncated" : ret;
@@ -311,7 +325,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param size the capacity that you required
      * @throws java.nio.BufferOverflowException if the buffer is not elastic and there is not enough space
      */
-    default void ensureCapacity(long size) {
+    default void ensureCapacity(long size)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         if (size > capacity())
             throw new UnsupportedOperationException(isElastic() ? "todo" : "not elastic");
     }
@@ -324,7 +339,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * the capacity.
      */
     @Override
-    default Bytes<Underlying> bytesForRead() {
+    default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
 

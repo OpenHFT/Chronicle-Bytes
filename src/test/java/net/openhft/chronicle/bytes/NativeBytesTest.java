@@ -18,6 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import org.junit.Test;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -27,7 +30,7 @@ import static org.junit.Assert.assertTrue;
 public class NativeBytesTest {
 
     @Test
-    public void testWriteBytesWhereResizeNeeded0() {
+    public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = Bytes.allocateElasticDirect();
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
@@ -40,7 +43,7 @@ public class NativeBytesTest {
     }
 
     @Test
-    public void testWriteBytesWhereResizeNeeded() {
+    public void testWriteBytesWhereResizeNeeded() throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = Bytes.allocateElasticDirect(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());

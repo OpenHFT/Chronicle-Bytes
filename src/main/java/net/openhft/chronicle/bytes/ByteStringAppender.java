@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Methods to append text to a Bytes. This extends the Appendable interface.
@@ -40,7 +42,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(char ch) {
+    default B append(char ch) throws IORuntimeException, BufferOverflowException {
         BytesInternal.appendUTF(this, ch);
         return (B) this;
     }
@@ -51,7 +53,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(@NotNull CharSequence cs) {
+    default B append(@NotNull CharSequence cs) throws IORuntimeException, BufferOverflowException {
         return append(cs, 0, cs.length());
     }
 
@@ -61,7 +63,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(long value) {
+    default B append(long value) throws BufferOverflowException, IORuntimeException {
         BytesInternal.append(this, value);
         return (B) this;
     }
@@ -72,7 +74,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(float f) {
+    default B append(float f) throws BufferOverflowException, IORuntimeException {
         BytesInternal.append((StreamingDataOutput) this, f);
         return (B) this;
     }
@@ -83,7 +85,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(double d) {
+    default B append(double d) throws BufferOverflowException, IORuntimeException {
         BytesInternal.append((StreamingDataOutput) this, d);
         return (B) this;
     }
@@ -96,13 +98,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      */
     @NotNull
-    default B append(@NotNull CharSequence cs, int start, int end) {
+    default B append(@NotNull CharSequence cs, int start, int end)
+            throws IndexOutOfBoundsException, BufferOverflowException, IORuntimeException {
         BytesInternal.appendUTF(this, cs, start, end - start);
         return (B) this;
     }
 
     @NotNull
-    default B append8bit(@NotNull CharSequence cs) {
+    default B append8bit(@NotNull CharSequence cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
         }
@@ -123,7 +127,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param end   index of the last char exclusive.
      * @return this
      */
-    default B append8bit(@NotNull CharSequence cs, int start, int end) {
+    default B append8bit(@NotNull CharSequence cs, int start, int end)
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IORuntimeException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs, (long) start, end);
         }

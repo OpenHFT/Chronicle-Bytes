@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
@@ -38,7 +39,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     protected long writePosition;
     protected long writeLimit;
 
-    public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes) {
+    public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
+            throws IllegalStateException {
         underlyingBytes.reserve();
         this.bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
@@ -120,7 +122,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) {
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -133,7 +136,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(@NotNull BytesStore bytes, long offset, long length) {
+    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferOverflowException, BufferUnderflowException {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
@@ -192,14 +196,16 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @ForceInline
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
+    public boolean compareAndSwapInt(long offset, int expected, int value)
+            throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         return bytesStore.compareAndSwapInt(offset, expected, value);
     }
 
     @Override
     @ForceInline
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
+    public boolean compareAndSwapLong(long offset, long expected, long value)
+            throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
@@ -228,7 +234,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         try {
             return readRemaining() > 0 ? bytesStore.readUnsignedByte(readPosition) : -1;
 
-        } catch (BufferOverflowException e) {
+        } catch (BufferUnderflowException | IORuntimeException e) {
             return -1;
         }
     }
@@ -283,12 +289,12 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    public void reserve() {
+    public void reserve() throws IllegalStateException {
         refCount.reserve();
     }
 
     @Override
-    public void release() {
+    public void release() throws IllegalStateException {
         refCount.release();
     }
 
@@ -300,7 +306,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeByte(long offset, byte i) {
+    public Bytes<Underlying> writeByte(long offset, byte i) throws BufferOverflowException {
         writeCheckOffset(offset, 1);
         bytesStore.writeByte(offset, i);
         return this;
@@ -309,7 +315,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeShort(long offset, short i) {
+    public Bytes<Underlying> writeShort(long offset, short i) throws BufferOverflowException {
         writeCheckOffset(offset, 2);
         bytesStore.writeShort(offset, i);
         return this;
@@ -318,7 +324,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeInt(long offset, int i) {
+    public Bytes<Underlying> writeInt(long offset, int i) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeInt(offset, i);
         return this;
@@ -327,7 +333,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedInt(long offset, int i) {
+    public Bytes<Underlying> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeOrderedInt(offset, i);
         return this;
@@ -336,7 +342,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeLong(long offset, long i) {
+    public Bytes<Underlying> writeLong(long offset, long i) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeLong(offset, i);
         return this;
@@ -345,7 +351,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedLong(long offset, long i) {
+    public Bytes<Underlying> writeOrderedLong(long offset, long i) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeOrderedLong(offset, i);
         return this;
@@ -354,7 +360,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeFloat(long offset, float d) {
+    public Bytes<Underlying> writeFloat(long offset, float d) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeFloat(offset, d);
         return this;
@@ -363,7 +369,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeDouble(long offset, double d) {
+    public Bytes<Underlying> writeDouble(long offset, double d) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeDouble(offset, d);
         return this;
@@ -372,7 +378,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) {
+    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
+            throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -380,7 +387,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @ForceInline
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -389,20 +396,21 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,
-                                   RandomDataInput bytes, long offset, long length) {
+                                   RandomDataInput bytes, long offset, long length)
+            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
     }
 
     @ForceInline
-    void writeCheckOffset(long offset, long adding) {
+    void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert writeCheckOffset0(offset, adding);
     }
 
-    private boolean writeCheckOffset0(long offset, long adding) {
+    private boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
         if (offset < start())
-            throw new BufferUnderflowException();
+            throw new BufferOverflowException();
         if (offset + adding > writeLimit()) {
             assert offset + adding <= writeLimit() : "cant add bytes past the limit : limit=" + writeLimit() +
                     ",offset=" +
@@ -565,12 +573,16 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     public boolean equalsBytes(@NotNull Bytes b2, long remaining) {
         long i = 0;
-        for (; i < remaining - 7; i++)
-            if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
-                return false;
-        for (; i < remaining; i++)
-            if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
-                return false;
+        try {
+            for (; i < remaining - 7; i++)
+                if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
+                    return false;
+            for (; i < remaining; i++)
+                if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
+                    return false;
+        } catch (BufferUnderflowException | IORuntimeException e) {
+            throw Jvm.rethrow(e);
+        }
         return true;
     }
 
