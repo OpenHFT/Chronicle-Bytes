@@ -177,4 +177,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         }
         return (B) this;
     }
+
+    default B appendDateMillis(long dateInMillis) {
+        BytesInternal.appendDateMillis(this, dateInMillis);
+        return (B) this;
+    }
+
+    default B appendTimeMillis(long timeOfDayInMillis) {
+        BytesInternal.appendTimeMillis(this, timeOfDayInMillis % 86400_000L);
+        return (B) this;
+    }
 }
