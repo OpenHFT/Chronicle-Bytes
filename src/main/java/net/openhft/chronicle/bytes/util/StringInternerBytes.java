@@ -31,19 +31,19 @@ public class StringInternerBytes extends StringInterner {
         final long limit = bytes.readLimit();
 
         try {
-            int h = hash(bytes, bytes.readPosition(), bytes.readLimit(), stopByte) & mask;
+            final int h = hash(bytes, bytes.readPosition(), bytes.readLimit(), stopByte) & mask;
             final String s = interner[h];
 
             if (StringUtils.isEqual(s, bytes))
                 return s;
 
-            final StringBuilder stringBuilder = SBP.acquireStringBuilder();
+            final char[] chars = new char[(int) bytes.readRemaining()];
 
-            for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
-                stringBuilder.append((char) bytes.readByte(i));
+            for (int i = 0; i < bytes.readRemaining(); i++) {
+                chars[i] = (char) bytes.readUnsignedByte(i + bytes.readPosition());
             }
 
-            return interner[h] = stringBuilder.toString();
+            return interner[h] = StringUtils.newString(chars);
         } finally {
             bytes.readPosition(bytes.readLimit());
             bytes.readLimit(limit);
@@ -51,12 +51,12 @@ public class StringInternerBytes extends StringInterner {
     }
 
 
-    public static int hash(Bytes cs, long position, long limit, final byte delimitor) {
+    private static int hash(Bytes cs, long position, long limit, final byte delimitor) {
         long h = longHash(cs, position, limit, delimitor);
         return (int) (h ^ (h >> 32));
     }
 
-    public static long longHash(Bytes cs, long position, long limit, byte delimitor) {
+    private static long longHash(Bytes cs, long position, long limit, byte delimitor) {
         long hash = 0;
         for (long i = position; i < limit; i++) {
             final byte b = cs.readByte(i);
