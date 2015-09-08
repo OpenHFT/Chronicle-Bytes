@@ -50,4 +50,14 @@ public enum BytesUtil {
         }
         return BytesInternal.stopBitlength0(n);
     }
+
+    public static char[] toCharArray(Bytes bytes) {
+        final char[] chars = new char[(int) bytes.readRemaining()];
+
+        for (int i = 0; i < bytes.readRemaining(); i++) {
+            chars[i] = (char) bytes.readUnsignedByte(i + bytes.readPosition());
+        }
+        return chars;
+    }
+
 }

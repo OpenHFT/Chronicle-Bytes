@@ -80,7 +80,7 @@ enum BytesInternal {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
                 return false;
         }
-        for (i = 0; i < length; i++) {
+        for (; i < length; i++) {
             if (a.readByte(aPos + i) != b.readByte(bPos + i))
                 return false;
         }

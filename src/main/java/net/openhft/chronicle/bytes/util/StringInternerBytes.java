@@ -2,31 +2,32 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+
+import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 
 /**
  * @author Rob Austin.
  */
 public class StringInternerBytes extends StringInterner {
 
-    private static final StringBuilderPool SBP = new StringBuilderPool();
-
     public StringInternerBytes(int capacity) {
         super(capacity);
     }
 
     /**
-     * converts the bytes an ISO-8859-1 String, the end of the string is either then bytes.limit ()
-     * or a byte containing the stopByte ( which ever comes first ) The string is interned, and
-     * added to a pool. If the string can be obtained from the pool, this string is used instead.
+     * converts the bytes to a ISO-8859-1 String, the end of the string is either the bytes .limit
+     * () or a byte containing the stopByte ( which ever comes first ). If the string can be
+     * obtained from the pool, this string is used instead. otherwise, the string is added to the
+     * pool.
      *
      * @param bytes    the bytes to convert to a string
      * @param stopByte parse the string up to the stopByte
      * @return the string made from bytes only ( rather than chars )
      */
-    public String bytesToSting(Bytes bytes, final byte stopByte) {
+    public String bytesToSting(@NotNull final Bytes bytes, final byte stopByte) {
 
         final long limit = bytes.readLimit();
 
@@ -37,13 +38,7 @@ public class StringInternerBytes extends StringInterner {
             if (StringUtils.isEqual(s, bytes))
                 return s;
 
-            final char[] chars = new char[(int) bytes.readRemaining()];
-
-            for (int i = 0; i < bytes.readRemaining(); i++) {
-                chars[i] = (char) bytes.readUnsignedByte(i + bytes.readPosition());
-            }
-
-            return interner[h] = StringUtils.newString(chars);
+            return interner[h] = StringUtils.newString(toCharArray(bytes));
         } finally {
             bytes.readPosition(bytes.readLimit());
             bytes.readLimit(limit);
