@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.util.StringUtils;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
@@ -28,6 +29,32 @@ import java.nio.charset.StandardCharsets;
  */
 public enum BytesUtil {
     ;
+
+    public static boolean bytesEqual(
+            @NotNull RandomDataInput a, long offset,
+            @NotNull RandomDataInput second, long secondOffset, long len)
+            throws IORuntimeException, BufferUnderflowException {
+        long i = 0;
+        while (len - i >= 8L) {
+            if (a.readLong(offset + i) != second.readLong(secondOffset + i))
+                return false;
+            i += 8L;
+        }
+        if (len - i >= 4L) {
+            if (a.readInt(offset + i) != second.readInt(secondOffset + i))
+                return false;
+            i += 4L;
+        }
+        if (len - i >= 2L) {
+            if (a.readShort(offset + i) != second.readShort(secondOffset + i))
+                return false;
+            i += 2L;
+        }
+        if (i < len)
+            if (a.readByte(offset + i) != second.readByte(secondOffset + i))
+                return false;
+        return true;
+    }
 
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
