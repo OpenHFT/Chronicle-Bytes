@@ -25,16 +25,12 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Bytes is a pointer to a region of memory within a BytesStore.
- * It can be for a fixed region of memory or an "elastic" buffer which can be resized, but not for a fixed region.
- * <p></p>
- * This is a BytesStore which is mutable and not thread safe.
- * It has a write position and read position which must follow these constraints
- * <p></p>
- * start() &lt;= readPosition() &lt;= writePosition() &lt;= writeLimit() &lt;= capacity()
- * <p></p>
- * Also readLimit() == writePosition() and readPosition() &lt;= safeLimit();
- * <p></p>
+ * Bytes is a pointer to a region of memory within a BytesStore. It can be for a fixed region of
+ * memory or an "elastic" buffer which can be resized, but not for a fixed region. <p></p> This is a
+ * BytesStore which is mutable and not thread safe. It has a write position and read position which
+ * must follow these constraints <p></p> start() &lt;= readPosition() &lt;= writePosition() &lt;=
+ * writeLimit() &lt;= capacity() <p></p> Also readLimit() == writePosition() and readPosition()
+ * &lt;= safeLimit(); <p></p>
  */
 public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
         StreamingDataInput<Bytes<Underlying>>,
@@ -68,8 +64,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
-     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the expected ones.
-     * An AssertionError is thrown if unexpected data is written, an UnsupportedOperationException is thrown if a read is attempted.
+     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the
+     * expected ones. An AssertionError is thrown if unexpected data is written, an
+     * UnsupportedOperationException is thrown if a read is attempted.
      *
      * @param text expected
      * @return the expected buffer as Bytes
@@ -81,8 +78,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
 
     /**
-     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the expected ones.
-     * An AssertionError is thrown if unexpected data is written, an UnsupportedOperationException is thrown if a read is attempted.
+     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the
+     * expected ones. An AssertionError is thrown if unexpected data is written, an
+     * UnsupportedOperationException is thrown if a read is attempted.
      *
      * @param bytesStore expected
      * @return the expected buffer as Bytes
@@ -99,7 +97,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for reading.
      */
     static Bytes<byte[]> wrapForRead(byte[] byteArray) {
-        return BytesStore.wrap(byteArray).bytesForRead();
+        return ((BytesStore) BytesStore.wrap(byteArray)).bytesForRead();
     }
 
     /**
@@ -109,7 +107,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for writing.
      */
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
-        return BytesStore.wrap(byteArray).bytesForWrite();
+        return ((BytesStore) BytesStore.wrap(byteArray)).bytesForWrite();
     }
 
     /**
@@ -170,9 +168,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return buffer.parseWithLength(buffer.readRemaining(), b -> {
             final StringBuilder builder = new StringBuilder();
             try {
-            while (buffer.readRemaining() > 0) {
-                builder.append((char) buffer.readByte());
-            }
+                while (buffer.readRemaining() > 0) {
+                    builder.append((char) buffer.readByte());
+                }
             } catch (IORuntimeException e) {
                 builder.append(' ').append(e);
             }
@@ -252,7 +250,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
-     * @return the size which can be safely read.  If this isElastic() it can be lower than the point it can safely write.
+     * @return the size which can be safely read.  If this isElastic() it can be lower than the
+     * point it can safely write.
      */
     default long safeLimit() {
         return bytesStore().safeLimit();
@@ -320,12 +319,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     boolean isElastic();
 
     /**
-     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not enough capacity then this
-     * method will throws {@link java.nio.BufferOverflowException}
+     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not
+     * enough capacity then this method will throws {@link java.nio.BufferOverflowException}
      *
      * @param size the capacity that you required
      * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space
-     * @throws IORuntimeException if an error occured trying to resize the underlying buffer.
+     * @throws IORuntimeException       if an error occured trying to resize the underlying buffer.
      */
     default void ensureCapacity(long size)
             throws IllegalArgumentException, IORuntimeException {
@@ -334,11 +333,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
-     * Creates a slice of the current Bytes based on its position() and limit().  As a sub-section of a Bytes it cannot
-     * be elastic.
+     * Creates a slice of the current Bytes based on its position() and limit().  As a sub-section
+     * of a Bytes it cannot be elastic.
      *
-     * @return a slice of the existing Bytes where the start is moved to the position and the current limit determines
-     * the capacity.
+     * @return a slice of the existing Bytes where the start is moved to the position and the
+     * current limit determines the capacity.
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @Override
