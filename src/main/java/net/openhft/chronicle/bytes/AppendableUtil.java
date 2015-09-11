@@ -143,7 +143,6 @@ public class AppendableUtil {
 
                     case 14: {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
-
                         int char2 = bytes.readUnsignedByte();
                         int char3 = bytes.readUnsignedByte();
 

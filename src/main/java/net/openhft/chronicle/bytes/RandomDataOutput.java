@@ -258,7 +258,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      * @throws IORuntimeException if the underlying buffer fails to resize.
      */
-
     R zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException;
 
     @NotNull

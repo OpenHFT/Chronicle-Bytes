@@ -98,7 +98,6 @@ public class BytesTest {
         assertEquals(Long.toHexString(num9), num, num9);
     }
 */
-
     @Test
     public void testName() throws IORuntimeException {
         Bytes<Void> bytes = Bytes.allocateDirect(30);
@@ -124,7 +123,6 @@ public class BytesTest {
         testSliceOfZeroedBytes(NativeBytes.vanillaBytes(1024));
     }
 */
-
     @Test
     public void testCopy() {
         Bytes<ByteBuffer> bbb = Bytes.wrapForWrite(ByteBuffer.allocateDirect(1024));

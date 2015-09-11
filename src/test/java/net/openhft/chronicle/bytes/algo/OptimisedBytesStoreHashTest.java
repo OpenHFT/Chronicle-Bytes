@@ -137,7 +137,6 @@ public class OptimisedBytesStoreHashTest {
                     sb.append(b);
                     assertEquals(hashs[i], Maths.longHash(sb));
                 }*/
-
             }
             long score = 0;
             for (int i = 0; i < hashs.length - 1; i++)

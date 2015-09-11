@@ -187,7 +187,6 @@ public class ByteStoreTest {
         this.bytes.position(this.bytes.capacity());
         assertEquals(-1, this.bytes.read(bytes3));
     }*/
-
     @Test
     public void testWriteReadUtf8() {
         bytes.writeUtf8(null);

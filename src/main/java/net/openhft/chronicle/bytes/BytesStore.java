@@ -104,7 +104,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
-
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return bytesForWrite()
                 .readLimit(writeLimit());
