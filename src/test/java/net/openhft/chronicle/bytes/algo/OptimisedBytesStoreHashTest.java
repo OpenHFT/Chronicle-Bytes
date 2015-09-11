@@ -183,4 +183,18 @@ public class OptimisedBytesStoreHashTest {
         System.out.println("Average score: " + scoreSum / 500);
     }
 
+    @Test
+    public void testReadIncompleteLong() {
+        Bytes bs = Bytes.allocateDirect(8);
+        for (int i = 1; i <= 8; i++)
+            bs.writeUnsignedByte(i);
+        Bytes bs2 = Bytes.allocateDirect(9).unchecked(true);
+
+        for (int i = 0; i <= 8; i++) {
+            assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),
+                    Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.address(0), i)));
+            bs2.writeUnsignedByte(i + 1);
+        }
+    }
+
 }

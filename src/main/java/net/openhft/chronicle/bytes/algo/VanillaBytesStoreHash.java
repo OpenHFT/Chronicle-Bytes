@@ -52,6 +52,10 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
 
     public long applyAsLong(@NotNull BytesStore store, int remaining) {
         long start = store.readPosition();
+        if (remaining <= 8) {
+            long l = store.readIncompleteLong(start);
+            return agitate(l * K0 + (l >> 32) * K1);
+        }
         // use two hashes so that when they are combined the 64-bit hash is more random.
         long h0 = (long) remaining * K0;
         long h1 = 0, h2 = 0, h3 = 0;
