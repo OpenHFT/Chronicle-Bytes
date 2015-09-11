@@ -52,7 +52,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     public static long hash(long l) {
-        return hash0(l, ((l >> 32) * K1));
+        return hash0(l, l >> 32);
     }
 
     static long hash0(long l, long hi) {

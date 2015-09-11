@@ -39,10 +39,11 @@ public class OptimisedBytesStoreHashTest {
         NativeBytes b = Bytes.allocateElasticDirect(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
+        b.readSkip(9);
         while (b.readRemaining() > 0) {
-            assertEquals("Rem: " + b.readRemaining(),
-                    VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
-                    OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
+            long expected = VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
+            long actual = OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
+            assertEquals("Rem: " + b.readRemaining(), expected, actual);
             b.readSkip(1);
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
