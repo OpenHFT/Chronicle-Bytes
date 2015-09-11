@@ -37,4 +37,20 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
+    static int hash32(Bytes b) {
+        long hash = hash(b);
+        return (int) (hash ^ (hash >>> 32));
+    }
+
+    static long hash(Bytes b, int length) {
+        return b.bytesStore() instanceof NativeBytesStore
+                ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b, length)
+                : VanillaBytesStoreHash.INSTANCE.applyAsLong(b, length);
+    }
+
+    static int hash32(Bytes b, int length) {
+        long hash = hash(b, length);
+        return (int) (hash ^ (hash >>> 32));
+    }
+
 }

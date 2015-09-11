@@ -43,8 +43,7 @@ public class UTF8StringInterner {
 
     public String intern(@NotNull Bytes cs)
             throws IllegalArgumentException, UTFDataFormatRuntimeException, BufferUnderflowException {
-        long hash = BytesStoreHash.hash(cs);
-        int h = (int) (hash ^ (hash >> 32)) & mask;
+        int h = BytesStoreHash.hash32(cs) & mask;
         String s = interner[h];
         if (cs.isEqual(s))
             return s;

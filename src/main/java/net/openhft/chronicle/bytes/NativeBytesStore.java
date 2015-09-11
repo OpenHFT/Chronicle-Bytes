@@ -493,7 +493,6 @@ public class NativeBytesStore<Underlying>
         return pos;
     }
 
-
     static class Deallocator implements Runnable {
         private volatile long address, size;
 

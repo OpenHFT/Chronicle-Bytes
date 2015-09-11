@@ -60,19 +60,21 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Read byte at an offset
+     *
      * @param offset to read
      * @return the byte
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     byte readByte(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read an unsigned byte at an offset
+     *
      * @param offset to read
      * @return the unsigned byte
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     @ForceInline
     default int readUnsignedByte(long offset)
@@ -82,19 +84,21 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Read a short at an offset
+     *
      * @param offset to read
      * @return the short
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     short readShort(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read an unsigned short at an offset
+     *
      * @param offset to read
      * @return the unsigned short
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     @ForceInline
     default int readUnsignedShort(long offset)
@@ -104,19 +108,21 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Read an int at an offset
+     *
      * @param offset to read
      * @return the int
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     int readInt(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read an unsigned int at an offset
+     *
      * @param offset to read
      * @return the unsigned int
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     @ForceInline
     default long readUnsignedInt(long offset)
@@ -126,37 +132,41 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Read a long at an offset
+     *
      * @param offset to read
      * @return the long
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     long readLong(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read a float at an offset
+     *
      * @param offset to read
      * @return the float
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     float readFloat(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read a double at an offset
+     *
      * @param offset to read
      * @return the double
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     double readDouble(long offset) throws BufferUnderflowException, IORuntimeException;
 
     /**
      * Read the byte at an offset and converts it into a printable
+     *
      * @param offset to read
      * @return the byte in a printable form.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default String printable(long offset) throws BufferUnderflowException, IORuntimeException {
         return charToString[readUnsignedByte(offset)];
@@ -168,7 +178,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the int value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default int readVolatileInt(long offset)
             throws BufferUnderflowException, IORuntimeException {
@@ -182,7 +192,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the float value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default float readVolatileFloat(long offset)
             throws BufferUnderflowException, IORuntimeException {
@@ -191,10 +201,11 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Read a 64-bit long from memory with a load barrier.
+     *
      * @param offset to read
      * @return the long value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default long readVolatileLong(long offset)
             throws BufferUnderflowException, IORuntimeException {
@@ -208,7 +219,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the double value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default double readVolatileDouble(long offset)
             throws BufferUnderflowException, IORuntimeException {
@@ -226,7 +237,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param address  in native memory
      * @param size     in bytes
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     void nativeRead(long position, long address, long size);
 
@@ -278,11 +289,12 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Perform an atomic add and get operation for a 32-bit int
+     *
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default int addAndGetInt(long offset, int adding)
             throws IORuntimeException, BufferUnderflowException {
@@ -291,11 +303,12 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Perform an atomic add and get operation for a 64-bit long
+     *
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default long addAndGetLong(long offset, long adding)
             throws IORuntimeException, BufferUnderflowException {
@@ -309,7 +322,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default float addAndGetFloat(long offset, float adding)
             throws IORuntimeException, BufferUnderflowException {
@@ -323,10 +336,25 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException if an error occurred trying to obtain the data.
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
     default double addAndGetDouble(long offset, double adding)
             throws IORuntimeException, BufferUnderflowException {
         return BytesInternal.addAndGetDouble(this, offset, adding);
+    }
+
+    /**
+     * Copy a sub sequence of bytes as a BytesStore.
+     *
+     * @param start  of bytes
+     * @param length of bytes
+     * @return ByteStore copy.
+     */
+    default BytesStore subBytes(long start, long length) {
+        return BytesInternal.subBytes(this, start, length);
+    }
+
+    default int findByte(byte stopByte) {
+        return BytesInternal.findByte(this, stopByte);
     }
 }

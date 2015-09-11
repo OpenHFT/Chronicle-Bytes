@@ -56,6 +56,17 @@ public enum BytesUtil {
         return true;
     }
 
+    public static boolean bytesEqual(CharSequence cs, RandomDataInput bs, long offset, int length) {
+        if (cs == null || cs.length() != length)
+            return false;
+        for (int i = 0; i < length; i++) {
+            if (cs.charAt(i) != bs.readUnsignedByte(offset + i))
+                return false;
+        }
+        return true;
+    }
+
+
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
@@ -87,13 +98,12 @@ public enum BytesUtil {
         return chars;
     }
 
-
-    public static char[] toCharArray(Bytes bytes, long position, long limit) {
-        final char[] chars = new char[(int) bytes.readRemaining()];
+    public static char[] toCharArray(Bytes bytes, long position, int length) {
+        final char[] chars = new char[length];
 
         int j = 0;
-        for (long i = position; i < limit; i++) {
-            chars[j++] = (char) bytes.readUnsignedByte(i);
+        for (long i = 0; i < length; i++) {
+            chars[j++] = (char) bytes.readUnsignedByte(position + i);
         }
         return chars;
     }

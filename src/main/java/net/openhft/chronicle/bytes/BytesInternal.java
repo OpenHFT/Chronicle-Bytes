@@ -87,7 +87,6 @@ enum BytesInternal {
         return true;
     }
 
-
     public static void parseUTF(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (bytes instanceof Bytes
                 && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
@@ -1525,6 +1524,21 @@ enum BytesInternal {
                 return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
         }
         return null;
+    }
+
+    public static BytesStore subBytes(RandomDataInput from, long start, long length) {
+        BytesStore ret = NativeBytesStore.nativeStore(length);
+        ret.write(0L, from, start, length);
+        return ret;
+    }
+
+    public static int findByte(RandomDataInput bytes, byte stopByte) {
+        long start = bytes.readPosition();
+        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+            if (bytes.readByte(start + i) == stopByte)
+                return i;
+        }
+        throw new IllegalArgumentException("Stop byte " + stopByte + " not found");
     }
 
     static class DateCache {

@@ -37,7 +37,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     S readLimit(long limit) throws BufferUnderflowException;
 
-
     /**
      * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
      *
@@ -256,4 +255,5 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void copyTo(OutputStream out) throws IOException {
         BytesInternal.copy(this, out);
     }
+
 }

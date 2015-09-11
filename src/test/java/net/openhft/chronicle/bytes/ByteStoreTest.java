@@ -463,7 +463,6 @@ public class ByteStoreTest {
         bytes.append(123456L).append(' ');
         bytes.append(1.2345).append(' ');
 
-
         assertEquals("word£€)", bytes.parseUTF(SPACE_STOP));
         assertEquals(1234, bytes.parseLong());
         assertEquals(123456L, bytes.parseLong());
@@ -505,7 +504,6 @@ public class ByteStoreTest {
         out.write(33);
         out.write(44);
         out.write(55);
-
 
         InputStream in = bytes.inputStream();
         Assert.assertTrue(in.markSupported());

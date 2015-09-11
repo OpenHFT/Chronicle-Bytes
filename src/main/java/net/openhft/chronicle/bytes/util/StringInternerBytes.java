@@ -1,7 +1,8 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -24,45 +25,23 @@ public class StringInternerBytes extends StringInterner {
      * pool.
      *
      * @param bytes    the bytes to convert to a string
-     * @param stopByte parse the string up to the stopByte
+     * @param length  parse the string up to the length
      * @return the string made from bytes only ( rather than chars )
      */
-    public String bytesToSting(@NotNull final Bytes bytes, final byte stopByte) {
-
-        final long limit = bytes.readLimit();
-
+    public String bytesToSting(@NotNull final Bytes bytes, int length) {
         try {
-            final int h = hash(bytes, bytes.readPosition(), bytes.readLimit(), stopByte) & mask;
+            int h = BytesStoreHash.hash32(bytes, length) & mask;
             final String s = interner[h];
 
-            if (StringUtils.isEqual(s, bytes))
+            long position = bytes.readPosition();
+            if (BytesUtil.bytesEqual(s, bytes, position, length))
                 return s;
 
-            return interner[h] = StringUtils.newString(toCharArray(bytes));
+            char[] chars = toCharArray(bytes, position, length);
+            return interner[h] =
+                    StringUtils.newString(chars);
         } finally {
-            bytes.readPosition(bytes.readLimit());
-            bytes.readLimit(limit);
+            bytes.readSkip(length);
         }
     }
-
-
-    private static int hash(Bytes cs, long position, long limit, final byte delimitor) {
-        long h = longHash(cs, position, limit, delimitor);
-        return (int) (h ^ (h >> 32));
-    }
-
-    private static long longHash(Bytes cs, long position, long limit, byte delimitor) {
-        long hash = 0;
-        for (long i = position; i < limit; i++) {
-            final byte b = cs.readByte(i);
-            if (b == delimitor) {
-                cs.readLimit(i);
-                break;
-            }
-            hash = Long.rotateLeft(hash, 7) + b;
-        }
-        return Maths.longHash(hash);
-    }
-
-
 }

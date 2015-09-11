@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteOrder;
@@ -45,8 +46,12 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
 
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
+        int remaining = Maths.toInt32(store.readRemaining());
+        return applyAsLong(store, remaining);
+    }
+
+    public long applyAsLong(@NotNull BytesStore store, int remaining) {
         long start = store.readPosition();
-        int remaining = (int) store.readRemaining();
         // use two hashes so that when they are combined the 64-bit hash is more random.
         long h0 = (long) remaining * K0;
         long h1 = 0, h2 = 0, h3 = 0;

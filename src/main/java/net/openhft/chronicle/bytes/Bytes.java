@@ -76,7 +76,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return expect(wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1)));
     }
 
-
     /**
      * A Bytes suitable for writing to for testing purposes. It checks the writes made are the
      * expected ones. An AssertionError is thrown if unexpected data is written, an
@@ -174,7 +173,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             } catch (IORuntimeException e) {
                 builder.append(' ').append(e);
             }
-
 
             // remove the last comma
             return builder.toString();

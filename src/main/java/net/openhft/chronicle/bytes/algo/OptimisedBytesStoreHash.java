@@ -280,6 +280,10 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     @Override
     public long applyAsLong(@NotNull Bytes store) {
         final int remaining = Maths.toInt32(store.readRemaining());
+        return applyAsLong(store, remaining);
+    }
+
+    public long applyAsLong(@NotNull Bytes store, int remaining) {
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;
