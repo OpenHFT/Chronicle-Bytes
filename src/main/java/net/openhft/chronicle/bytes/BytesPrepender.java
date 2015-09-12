@@ -27,6 +27,15 @@ import java.nio.BufferUnderflowException;
 public interface BytesPrepender<B extends BytesPrepender<B>> {
 
     /**
+     * Clear a buffer, with a given padding to allow for prepending later. clearAndPad(0) is the same as clear()
+     *
+     * @param length to pad
+     * @return this
+     * @throws BufferOverflowException if the length > capacity() - start()
+     */
+    B clearAndPad(long length) throws BufferOverflowException;
+
+    /**
      * Prepends a long in decimal, this method moves the readPosition() backwards.
      * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
      *

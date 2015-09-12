@@ -50,6 +50,15 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
+        if (start() + length > capacity())
+            throw new BufferOverflowException();
+        readPosition = writePosition = start() + length;
+        writeLimit = capacity();
+        return this;
+    }
+
+    @Override
     @ForceInline
     public long readLimit() {
         return writePosition;
