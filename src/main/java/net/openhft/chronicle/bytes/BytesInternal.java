@@ -566,7 +566,7 @@ enum BytesInternal {
         }
     }
 
-    public static <S extends ByteStringAppender> void append(@NotNull S out, long num) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+    public static void append(@NotNull ByteStringAppender out, long num) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
                 out.write(MIN_VALUE_TEXT);
@@ -581,6 +581,24 @@ enum BytesInternal {
         } else {
             appendLong0(out, num);
         }
+    }
+
+    public static void prepend(@NotNull BytesPrepender out, long num) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+        boolean neg = false;
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.prewrite(MIN_VALUE_TEXT);
+                return;
+            }
+            neg = true;
+            num = -num;
+        }
+        do {
+            out.prewriteByte((byte) (num % 10 + '0'));
+            num /= 10;
+        } while (num > 0);
+        if (neg)
+            out.prewriteByte((byte) '-');
     }
 
     /**

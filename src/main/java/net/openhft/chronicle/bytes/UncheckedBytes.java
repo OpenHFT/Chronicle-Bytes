@@ -43,6 +43,10 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     void readCheckOffset(long offset, long adding) {
     }
 
+    @Override
+    void prewriteCheckOffset(long offset, long subtracting) {
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> readPosition(long position) {
@@ -108,6 +112,11 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         long oldPosition = writePosition;
         writePosition += adding;
         return oldPosition;
+    }
+
+    @Override
+    protected long prewriteOffsetPositionMoved(long subtracting) throws BufferOverflowException, IORuntimeException {
+        return readPosition -= subtracting;
     }
 
     @NotNull

@@ -120,6 +120,10 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return oldPosition;
     }
 
+    protected long prewriteOffsetPositionMoved(long substracting) {
+        return readPosition -= substracting;
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
@@ -474,8 +478,26 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> prewriteByte(byte i8) {
+        long offset = prewriteOffsetPositionMoved(1);
+        bytesStore.memory.writeByte(bytesStore.address + offset, i8);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> writeShort(short i16) {
         long offset = writeOffsetPositionMoved(2);
+        bytesStore.writeShort(offset, i16);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> prewriteShort(short i16) {
+        long offset = prewriteOffsetPositionMoved(2);
         bytesStore.writeShort(offset, i16);
         return this;
     }
@@ -492,8 +514,26 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> prewriteInt(int i) {
+        long offset = prewriteOffsetPositionMoved(4);
+        bytesStore.writeInt(offset, i);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> writeLong(long i64) {
         long offset = writeOffsetPositionMoved(8);
+        bytesStore.writeLong(offset, i64);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> prewriteLong(long i64) {
+        long offset = prewriteOffsetPositionMoved(8);
         bytesStore.writeLong(offset, i64);
         return this;
     }
@@ -522,6 +562,15 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> prewrite(byte[] bytes) {
+        long offsetInRDO = prewriteOffsetPositionMoved(bytes.length);
+        bytesStore.write(offsetInRDO, bytes);
         return this;
     }
 

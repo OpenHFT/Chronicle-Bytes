@@ -481,6 +481,26 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return true;
     }
 
+    @ForceInline
+    void prewriteCheckOffset(long offset, long subtracting)
+            throws BufferUnderflowException, IORuntimeException {
+        assert prewriteCheckOffset0(offset, subtracting);
+    }
+
+    @ForceInline
+    private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
+        if (offset - subtracting < start())
+            throw new BufferOverflowException();
+        long limit0 = readLimit();
+        if (offset > limit0) {
+//          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
+            //                  offset +
+            //                ",adding=" + adding;
+            throw new BufferOverflowException();
+        }
+        return true;
+    }
+
     @NotNull
     @Override
     @ForceInline
@@ -488,6 +508,44 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throws BufferOverflowException, IORuntimeException {
         long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> prewrite(byte[] bytes) {
+        long offset = prewriteOffsetPositionMoved(bytes.length);
+        bytesStore.write(offset, bytes);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> prewriteByte(byte i8)
+            throws BufferOverflowException, IORuntimeException {
+        long offset = prewriteOffsetPositionMoved(1);
+        bytesStore.writeByte(offset, i8);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> prewriteInt(int i) {
+        long offset = prewriteOffsetPositionMoved(4);
+        bytesStore.writeInt(offset, i);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> prewriteShort(short i) {
+        long offset = prewriteOffsetPositionMoved(2);
+        bytesStore.writeShort(offset, i);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> prewriteLong(long l) {
+        long offset = prewriteOffsetPositionMoved(8);
+        bytesStore.writeLong(offset, l);
         return this;
     }
 
@@ -501,6 +559,16 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         }
         writePosition += adding;
         return oldPosition;
+    }
+
+    protected long prewriteOffsetPositionMoved(long subtracting)
+            throws BufferOverflowException, IORuntimeException {
+        try {
+            prewriteCheckOffset(readPosition, subtracting);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
+        return readPosition -= subtracting;
     }
 
     @NotNull

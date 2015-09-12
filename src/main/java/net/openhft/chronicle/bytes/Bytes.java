@@ -36,7 +36,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         StreamingDataInput<Bytes<Underlying>>,
         StreamingDataOutput<Bytes<Underlying>>,
         ByteStringParser<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>> {
+        ByteStringAppender<Bytes<Underlying>>,
+        BytesPrepender<Bytes<Underlying>> {
 
     long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
 
@@ -351,4 +352,5 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
     }
+
 }
