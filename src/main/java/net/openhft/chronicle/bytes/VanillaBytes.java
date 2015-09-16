@@ -238,8 +238,10 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
             return super.byteCheckSum();
         byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
+        Memory memory = bytesStore.memory;
+        assert memory != null;
         for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += bytesStore.memory.readByte(bytesStore.address + i);
+            b += memory.readByte(bytesStore.address + i);
         }
         return b & 0xFF;
     }
