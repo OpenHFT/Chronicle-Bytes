@@ -24,22 +24,25 @@ public class StringInternerBytes extends StringInterner {
      * obtained from the pool, this string is used instead. otherwise, the string is added to the
      * pool.
      *
-     * @param bytes    the bytes to convert to a string
-     * @param length  parse the string up to the length
+     * @param bytes  the bytes to convert to a string
+     * @param length parse the string up to the length
      * @return the string made from bytes only ( rather than chars )
      */
     public String bytesToSting(@NotNull final Bytes bytes, int length) {
         try {
-            int h = BytesStoreHash.hash32(bytes, length) & mask;
-            final String s = interner[h];
-
+            int hash32 = BytesStoreHash.hash32(bytes, length);
+            int h = hash32 & mask;
+            String s = interner[h];
             long position = bytes.readPosition();
             if (BytesUtil.bytesEqual(s, bytes, position, length))
                 return s;
+            int h2 = (hash32 >> shift) & mask;
+            String s2 = interner[h2];
+            if (BytesUtil.bytesEqual(s2, bytes, position, length))
+                return s2;
 
             char[] chars = toCharArray(bytes, position, length);
-            return interner[h] =
-                    StringUtils.newString(chars);
+            return interner[toggle() ? h : h2] = StringUtils.newString(chars);
         } finally {
             bytes.readSkip(length);
         }
