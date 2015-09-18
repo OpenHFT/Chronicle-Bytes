@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Fast unchecked version of AbstractBytes
@@ -131,6 +132,23 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
         } else {
             super.write(bytes, offset, length);
+        }
+        return this;
+    }
+
+    @NotNull
+    public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+        if (cs instanceof BytesStore) {
+            return write((BytesStore) cs);
+        }
+
+        int length = cs.length();
+        long offset = writeOffsetPositionMoved(length);
+        for (int i = 0; i < length; i++) {
+            char c = cs.charAt(i);
+            if (c > 255) c = '?';
+            writeByte(offset, (byte) c);
         }
         return this;
     }

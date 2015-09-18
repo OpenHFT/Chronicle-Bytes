@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
@@ -680,5 +681,38 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public BytesStore bytesStore() {
         return bytesStore;
+    }
+
+    public int byteCheckSum() throws IORuntimeException {
+        if (readLimit() >= Integer.MAX_VALUE || start() != 0)
+            throw new AssertionError();
+        byte b = 0;
+        NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
+        Memory memory = bytesStore.memory;
+        assert memory != null;
+        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
+            b += memory.readByte(bytesStore.address + i);
+        }
+        return b & 0xFF;
+    }
+
+    @NotNull
+    public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+        if (cs instanceof BytesStore) {
+            return write((BytesStore) cs);
+        }
+        int length = cs.length();
+        long offset = writeOffsetPositionMoved(length);
+        long address = bytesStore.address(offset);
+        Memory memory = bytesStore.memory;
+        assert memory != null;
+        for (int i = 0; i < length; i++) {
+            char c = cs.charAt(i);
+            if (c > 255) c = '?';
+            memory.writeByte(address + i, (byte) c);
+        }
+
+        return this;
     }
 }

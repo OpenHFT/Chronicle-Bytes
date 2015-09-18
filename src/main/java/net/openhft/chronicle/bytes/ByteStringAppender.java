@@ -148,7 +148,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         for (int i = 0; i < length; i++) {
             char c = cs.charAt(i);
             if (c > 255) c = '?';
-            writeUnsignedByte(c);
+            writeByte((byte) c);
         }
         return (B) this;
     }
@@ -173,7 +173,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         for (int i = start; i < end; i++) {
             char c = cs.charAt(i);
             if (c > 255) c = '?';
-            writeUnsignedByte(c);
+            writeByte((byte) c);
         }
         return (B) this;
     }
