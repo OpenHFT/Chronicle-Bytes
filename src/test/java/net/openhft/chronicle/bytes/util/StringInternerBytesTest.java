@@ -27,12 +27,12 @@ import static org.junit.Assert.assertEquals;
 public class StringInternerBytesTest {
 
     @Test
-    public void testBytesToSting() throws Exception {
+    public void testIntern() throws Exception {
         StringInternerBytes si = new StringInternerBytes(128);
         for (int i = 0; i < 100; i++) {
             Bytes b = Bytes.from("key" + i);
-            si.bytesToSting(b, (int) b.readRemaining());
+            si.intern(b, (int) b.readRemaining());
         }
-        assertEquals(72, si.valueCount());
+        assertEquals(82, si.valueCount());
     }
 }

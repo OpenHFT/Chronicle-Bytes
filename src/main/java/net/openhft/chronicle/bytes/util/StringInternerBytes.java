@@ -28,7 +28,7 @@ public class StringInternerBytes extends StringInterner {
      * @param length parse the string up to the length
      * @return the string made from bytes only ( rather than chars )
      */
-    public String bytesToSting(@NotNull final Bytes bytes, int length) {
+    public String intern(@NotNull final Bytes bytes, int length) {
         try {
             int hash32 = BytesStoreHash.hash32(bytes, length);
             int h = hash32 & mask;
@@ -42,7 +42,7 @@ public class StringInternerBytes extends StringInterner {
                 return s2;
 
             char[] chars = toCharArray(bytes, position, length);
-            return interner[toggle() ? h : h2] = StringUtils.newString(chars);
+            return interner[s == null || (s2 != null && toggle()) ? h : h2] = StringUtils.newString(chars);
         } finally {
             bytes.readSkip(length);
         }
