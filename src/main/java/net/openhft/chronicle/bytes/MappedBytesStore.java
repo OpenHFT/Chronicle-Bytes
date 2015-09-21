@@ -23,11 +23,11 @@ import org.jetbrains.annotations.NotNull;
 /**
  * BytesStore to wrap memory mapped data.
  */
-public class MappedBytesStore extends NativeBytesStore {
+public class MappedBytesStore extends NativeBytesStore<Void> {
     private final long start;
     private final long safeLimit;
 
-    MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
+    protected MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity, owner), false);
         this.start = start;
         this.safeLimit = start + safeCapacity;

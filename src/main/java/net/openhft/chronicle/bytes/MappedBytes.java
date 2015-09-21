@@ -69,7 +69,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
-                bytesStore = mappedFile.acquireByteStore(offset);
+                bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
             } catch (IOException | IllegalStateException e) {
                 throw new IORuntimeException(e);
@@ -84,7 +84,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
-                bytesStore = mappedFile.acquireByteStore(offset);
+                bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
             } catch (IOException | IllegalStateException e) {
                 throw new IORuntimeException(e);
