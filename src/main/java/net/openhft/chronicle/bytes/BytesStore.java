@@ -66,6 +66,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Wraps a ByteBuffer which can be either on heap or off heap.
+     *
      * @param bb to wrap
      * @return BytesStore
      */
@@ -159,6 +160,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Copy the data to another BytesStore
+     *
      * @param store to copy to
      */
     default void copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
@@ -172,8 +174,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Fill the BytesStore with zeros
+     *
      * @param start first byte inclusive
-     * @param end last byte exclusive.
+     * @param end   last byte exclusive.
      * @return this.
      */
     default B zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException {
@@ -253,6 +256,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Return the bytes sum of the readable bytes.
+     *
      * @return unsigned byte sum.
      */
     default int byteCheckSum() throws IORuntimeException {
@@ -263,7 +267,23 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * Return the long sum of the readable bytes.
+     *
+     * @return signed long sum.
+     */
+    default long longCheckSum() throws IORuntimeException {
+        long sum = 0;
+        long i;
+        for (i = readPosition(); i < readLimit() - 7; i += 8)
+            sum += readLong(i);
+        if (i < readLimit())
+            sum += readIncompleteLong(i);
+        return sum;
+    }
+
+    /**
      * Does the BytesStore end with a character?
+     *
      * @param c to look for
      * @return true if its the last character.
      */
@@ -273,6 +293,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Does the BytesStore start with a character?
+     *
      * @param c to look for
      * @return true if its the last character.
      */
