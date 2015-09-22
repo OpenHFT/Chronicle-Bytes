@@ -87,7 +87,7 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @Nullable
-    public MappedBytesStore acquireByteStore(long position, MappedBytesStoreFactory mappedBytesStoreFactory) throws IOException, IllegalArgumentException, IllegalStateException {
+    public <T extends MappedBytesStore> T acquireByteStore(long position, MappedBytesStoreFactory<T> mappedBytesStoreFactory) throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
         int chunk = (int) (position / chunkSize);
@@ -97,7 +97,7 @@ public class MappedFile implements ReferenceCounted {
             }
             WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
             if (mbsRef != null) {
-                MappedBytesStore mbs = mbsRef.get();
+                T mbs = (T) mbsRef.get();
                 if (mbs != null && mbs.tryReserve()) {
                     return mbs;
                 }
@@ -116,7 +116,7 @@ public class MappedFile implements ReferenceCounted {
             long start = System.nanoTime();
             long mappedSize = chunkSize + overlapSize;
             long address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
-            MappedBytesStore mbs2 = mappedBytesStoreFactory.create(this, chunk * chunkSize, address, mappedSize, chunkSize);
+            T mbs2 = mappedBytesStoreFactory.create(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
             LOG.warn(String.format("Took %,d us to acquire chunk %,d",
