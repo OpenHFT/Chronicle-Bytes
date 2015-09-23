@@ -31,7 +31,8 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 /**
  * Simple Bytes implementation which is not Elastic.
  */
-public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implements Byteable<Underlying> {
+public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
+        implements Byteable<Bytes<Underlying>, Underlying> {
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
@@ -69,6 +70,11 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying> implemen
         this.bytesStore = bytesStore;
         oldBS.release();
         clear();
+    }
+
+    @Override
+    public long offset() {
+        return readPosition();
     }
 
     @Override

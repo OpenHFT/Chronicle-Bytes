@@ -24,7 +24,7 @@ import java.nio.BufferUnderflowException;
  * <p></p>
  * A reference to off heap memory is a proxy for some memory which sits outside the heap.
  */
-public interface Byteable<Underlying> {
+public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
     /**
      * This setter for a data type which points to an underlying ByteStore.
      *
@@ -32,8 +32,13 @@ public interface Byteable<Underlying> {
      * @param offset the offset within the ByteStore
      * @param length the length in the ByteStore
      */
-    void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore, long offset, long length)
-            throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
+    void bytesStore(BytesStore<B, Underlying> bytesStore, long offset, long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException,
+            BufferUnderflowException;
+
+    BytesStore<B, Underlying> bytesStore();
+
+    long offset();
 
     /**
      * @return the maximum size in byte for this reference.
