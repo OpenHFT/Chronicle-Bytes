@@ -314,4 +314,124 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default String to8bitString() throws IORuntimeException, IllegalArgumentException {
         return BytesInternal.to8bitString(this);
     }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a byte value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default byte addAndGetByteNotAtomic(long offset, byte adding) {
+        byte r = (byte) (readByte(offset) + adding);
+        writeByte(offset, r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for an unsigned byte value. This method
+     * <i>does not</i> check for unsigned byte overflow.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default int addAndGetUnsignedByteNotAtomic(long offset, int adding) {
+        int r = (readUnsignedByte(offset) + adding) & 0xFF;
+        writeByte(offset, (byte) r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a short value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default short addAndGetShortNotAtomic(long offset, short adding) {
+        short r = (short) (readShort(offset) + adding);
+        writeByte(offset, r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for an unsigned short value. This method
+     * <i>does not</i> check for unsigned short overflow.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default int addAndGetUnsignedShortNotAtomic(long offset, int adding) {
+        int r = (readUnsignedShort(offset) + adding) & 0xFFFF;
+        writeShort(offset, (short) r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for an int value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default int addAndGetIntNotAtomic(long offset, int adding) {
+        int r = readInt(offset) + adding;
+        writeInt(offset, r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for an unsigned int value. This method
+     * <i>does not</i> check for unsigned int overflow.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default long addAndGetUnsignedIntNotAtomic(long offset, long adding) {
+        long r = (readUnsignedInt(offset) + adding) & 0xFFFFFFFFL;
+        writeInt(offset, (int) r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a long value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default long addAndGetLongNotAtomic(long offset, long adding) {
+        long r = readLong(offset) + adding;
+        writeLong(offset, r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a float value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default float addAndGetFloatNotAtomic(long offset, float adding) {
+        float r = readFloat(offset) + adding;
+        writeFloat(offset, r);
+        return r;
+    }
+
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a double value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default double addAndGetDoubleNotAtomic(long offset, double adding) {
+        double r = readDouble(offset) + adding;
+        writeDouble(offset, r);
+        return r;
+    }
 }
