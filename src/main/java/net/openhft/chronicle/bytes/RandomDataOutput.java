@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -275,4 +276,18 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param size     in bytes
      */
     void nativeWrite(long address, long position, long size);
+
+    /**
+     * Writes the given {@code cs} to this {@code RandomDataOutput} from the given {@code offset},
+     * in Utf8 format. Returns the offset after the written char sequence.
+     *
+     * @param offset the offset to write char sequence from
+     * @param cs the char sequence to write, could be {@code null}
+     * @return the offset after the char sequence written, in this {@code RandomDataOutput}
+     * @see RandomDataInput#readUtf8(long, Appendable)
+     */
+    default long writeUtf8(long offset, @Nullable CharSequence cs)
+            throws BufferOverflowException, IORuntimeException {
+        return BytesInternal.writeUtf8(this, offset, cs);
+    }
 }

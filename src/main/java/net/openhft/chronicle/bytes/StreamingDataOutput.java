@@ -231,7 +231,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S appendUtf8(int codepoint) throws BufferOverflowException, IORuntimeException {
-        BytesInternal.appendUTF(this, codepoint);
+        BytesInternal.appendUTFChar(this, codepoint);
         return (S) this;
     }
 
@@ -250,7 +250,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
         for (; i < length; i++) {
             char c = chars[offset + i];
-            BytesInternal.appendUTF(this, c);
+            BytesInternal.appendUTFChar(this, c);
         }
         return (S) this;
     }

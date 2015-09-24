@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
@@ -356,5 +357,52 @@ public interface RandomDataInput extends RandomCommon {
 
     default int findByte(byte stopByte) {
         return BytesInternal.findByte(this, stopByte);
+    }
+
+    /**
+     * Truncates {@code sb} (it must be a {@link StringBuilder} or {@link Bytes}) and reads a char
+     * sequence from the given {@code offset}, encoded as Utf8, into it. Returns offset <i>after</i>
+     * the read Utf8, if a normal char sequence was read, or {@code -1 - offset}, if {@code null}
+     * was observed (in this case, {@code sb} is truncated too, but not updated then, by querying
+     * {@code sb} only this case is indistinguishable from reading an empty char sequence).
+     *
+     * @param offset the offset in this {@code RandomDataInput} to read char sequence from
+     * @param sb the buffer to read char sequence into (truncated first)
+     * @param <ACS> buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
+     * {@code null}
+     * @see RandomDataOutput#writeUtf8(long, CharSequence)
+     */
+    default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+        AppendableUtil.setLength(sb, 0);
+        // TODO insert some bounds check here
+
+        long utflen;
+        if ((utflen = readByte(offset++)) < 0) {
+            utflen &= 0x7FL;
+            long b;
+            int count = 7;
+            while ((b = readByte(offset++)) < 0) {
+                utflen |= (b & 0x7FL) << count;
+                count += 7;
+            }
+            if (b != 0) {
+                if (count > 56)
+                    throw new IORuntimeException(
+                            "Cannot read more than 9 stop bits of positive value");
+                utflen |= (b << count);
+            } else {
+                if (count > 63)
+                    throw new IORuntimeException(
+                            "Cannot read more than 10 stop bits of negative value");
+                utflen = ~utflen;
+            }
+        }
+        if (utflen == -1)
+            return ~offset;
+        int len = Maths.toUInt31(utflen);
+        BytesInternal.parseUTF(this, offset, sb, len);
+        return offset + utflen;
     }
 }

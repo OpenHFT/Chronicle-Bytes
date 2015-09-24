@@ -46,7 +46,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(char ch) throws BufferOverflowException, IOException {
         try {
-            BytesInternal.appendUTF(this, ch);
+            BytesInternal.appendUTFChar(this, ch);
         } catch (IORuntimeException e) {
             throw new IOException(e);
         }
