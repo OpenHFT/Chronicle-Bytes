@@ -290,4 +290,24 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException, IORuntimeException {
         return BytesInternal.writeUtf8(this, offset, cs);
     }
+
+    /**
+     * Writes the given {@code cs} to this {@code RandomDataOutput} from the given {@code offset},
+     * in Utf8 format, checking that the utf8 encoding size of the given char sequence is less or
+     * equal to the given {@code maxUtf8Len}, otherwise {@code IllegalArgumentException} is thrown,
+     * and no bytes of this {@code RandomDataOutput} are overwritten. Returns the offset after the
+     * written char sequence.
+     *
+     * @param offset the offset to write char sequence from
+     * @param cs the char sequence to write, could be {@code null}
+     * @param maxUtf8Len the maximum allowed length (in Utf8 encoding) of the given char sequence
+     * @return the offset after the char sequence written, in this {@code RandomDataOutput}
+     * @throws IllegalArgumentException if the given char sequence size in Utf8 encoding exceeds
+     * maxUtf8Len
+     * @see RandomDataInput#readUtf8(long, Appendable)
+     */
+    default long writeUtf8(long offset, @Nullable CharSequence cs, int maxUtf8Len)
+            throws BufferOverflowException, IORuntimeException, IllegalArgumentException {
+        return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
+    }
 }

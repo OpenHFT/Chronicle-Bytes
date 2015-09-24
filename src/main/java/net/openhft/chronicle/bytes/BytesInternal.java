@@ -444,6 +444,33 @@ enum BytesInternal {
         return offset;
     }
 
+    @ForceInline
+    public static long writeUtf8(@NotNull RandomDataOutput out, long offset,
+                                 @Nullable CharSequence str, int maxUtf8Len)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException,
+            IndexOutOfBoundsException {
+        if (str == null) {
+            offset = writeStopBit(out, offset, -1);
+
+        } else {
+            int strLength = str.length();
+            long utfLength = findUTFLength(str);
+            if (utfLength > maxUtf8Len) {
+                throw new IllegalArgumentException("Attempted to write a char sequence of " +
+                        "utf8 size " + utfLength + ": \"" + str +
+                        "\", when only " + maxUtf8Len + " allowed");
+            }
+            offset = writeStopBit(out, offset, utfLength);
+            if (utfLength == strLength) {
+                append8bit(offset, out, str, 0, strLength);
+                offset += utfLength;
+            } else {
+                offset = appendUTF(out, offset, str, 0, strLength);
+            }
+        }
+        return offset;
+    }
+
     private static long findUTFLength(@NotNull CharSequence str) throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
