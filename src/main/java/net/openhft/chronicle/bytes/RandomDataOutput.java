@@ -306,7 +306,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * maxUtf8Len
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
-    default long writeUtf8(long offset, @Nullable CharSequence cs, int maxUtf8Len)
+    default long writeUtf8Limited(long offset, @Nullable CharSequence cs, int maxUtf8Len)
             throws BufferOverflowException, IORuntimeException, IllegalArgumentException {
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
