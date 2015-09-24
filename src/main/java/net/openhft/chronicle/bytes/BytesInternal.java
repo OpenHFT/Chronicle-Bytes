@@ -423,9 +423,23 @@ enum BytesInternal {
             offset = writeStopBit(out, offset, -1);
 
         } else {
-            long utfLength = findUTFLength(str);
-            offset = writeStopBit(out, offset, utfLength);
-            offset = appendUTF(out, offset, str, 0, str.length());
+            int strLength = str.length();
+            if (strLength < 32) {
+                long lenOffset = offset;
+                offset = appendUTF(out, offset + 1, str, 0, strLength);
+                long utfLength = offset - lenOffset - 1;
+                assert utfLength <= 127;
+                writeStopBit(out, lenOffset, utfLength);
+            } else {
+                long utfLength = findUTFLength(str);
+                offset = writeStopBit(out, offset, utfLength);
+                if (utfLength == strLength) {
+                    append8bit(offset, out, str, 0, strLength);
+                    offset += utfLength;
+                } else {
+                    offset = appendUTF(out, offset, str, 0, strLength);
+                }
+            }
         }
         return offset;
     }
