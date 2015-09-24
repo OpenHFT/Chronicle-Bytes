@@ -471,12 +471,12 @@ public class NativeBytesStore<Underlying>
 
             return pos;
         }
-        return appendUTF0(pos, chars[offset + i], i < length, i);
+        return appendUTF0(pos, chars, offset, length, i);
     }
 
-    private long appendUTF0(long pos, char aChar, boolean b, int i) {
-        for (; b; i++) {
-            char c = aChar;
+    private long appendUTF0(long pos, char[] chars, int offset, int length, int i) {
+        for (; i < length; i++) {
+            char c = chars[offset + i];
             if (c <= 0x007F) {
                 writeByte(pos++, (byte) c);
 

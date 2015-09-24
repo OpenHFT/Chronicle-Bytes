@@ -54,4 +54,10 @@ public class NativeBytesTest {
         b.write(wrap1);
         assertEquals("Hello World, Have a great day!", b.toString());
     }
+
+    @Test
+    public void testAppendCharArrayNonAscii() {
+        Bytes b = Bytes.allocateElasticDirect();
+        b.appendUtf8(new char[] {'Δ'}, 0, 1);
+    }
 }
