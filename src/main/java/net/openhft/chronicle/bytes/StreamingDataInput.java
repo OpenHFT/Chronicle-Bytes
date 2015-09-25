@@ -147,6 +147,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         AppendableUtil.setLength(sb, 0);
         if (readRemaining() <= 0)
+            // TODO throw BufferUnderflowException here? please review
             return false;
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
