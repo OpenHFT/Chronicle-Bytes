@@ -1187,9 +1187,19 @@ enum BytesInternal {
 
     @Nullable
     @ForceInline
-    public static String readUtf8(@NotNull StreamingDataInput in) throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
+    public static String readUtf8(@NotNull StreamingDataInput in)
+            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
         StringBuilder sb = acquireStringBuilder();
         return in.readUtf8(sb) ? SI.intern(sb) : null;
+    }
+
+    @Nullable
+    @ForceInline
+    public static String readUtf8(@NotNull RandomDataInput in, long offset, int maxUtf8Len)
+            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
+            IllegalStateException {
+        StringBuilder sb = acquireStringBuilder();
+        return in.readUtf8Limited(offset, sb, maxUtf8Len) > 0 ? SI.intern(sb) : null;
     }
 
     public static StringBuilder acquireStringBuilder() {

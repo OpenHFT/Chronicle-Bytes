@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -378,31 +379,102 @@ public interface RandomDataInput extends RandomCommon {
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
 
-        long utflen;
-        if ((utflen = readByte(offset++)) < 0) {
-            utflen &= 0x7FL;
+        long utfLen;
+        if ((utfLen = readByte(offset++)) < 0) {
+            utfLen &= 0x7FL;
             long b;
             int count = 7;
             while ((b = readByte(offset++)) < 0) {
-                utflen |= (b & 0x7FL) << count;
+                utfLen |= (b & 0x7FL) << count;
                 count += 7;
             }
             if (b != 0) {
                 if (count > 56)
                     throw new IORuntimeException(
                             "Cannot read more than 9 stop bits of positive value");
-                utflen |= (b << count);
+                utfLen |= (b << count);
             } else {
                 if (count > 63)
                     throw new IORuntimeException(
                             "Cannot read more than 10 stop bits of negative value");
-                utflen = ~utflen;
+                utfLen = ~utfLen;
             }
         }
-        if (utflen == -1)
+        if (utfLen == -1)
             return ~offset;
-        int len = Maths.toUInt31(utflen);
+        int len = Maths.toUInt31(utfLen);
         BytesInternal.parseUTF(this, offset, sb, len);
-        return offset + utflen;
+        return offset + utfLen;
+    }
+
+    /**
+     * Truncates {@code sb} (it must be a {@link StringBuilder} or {@link Bytes}) and reads a char
+     * sequence from the given {@code offset}, encoded as Utf8, into it. Returns offset <i>after</i>
+     * the read Utf8, if a normal char sequence was read, or {@code -1 - offset}, if {@code null}
+     * was observed (in this case, {@code sb} is truncated too, but not updated then, by querying
+     * {@code sb} only this case is indistinguishable from reading an empty char sequence). If
+     * length of Utf8 encoding of the char sequence exceeds {@code maxUtf8Len},
+     * {@code IllegalStateException} is thrown.
+     *
+     * @param offset the offset in this {@code RandomDataInput} to read char sequence from
+     * @param sb the buffer to read char sequence into (truncated first)
+     * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
+     * @param <ACS> buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
+     * {@code null}
+     * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
+     */
+    default <ACS extends Appendable & CharSequence> long readUtf8Limited(
+            long offset, @NotNull ACS sb, int maxUtf8Len)
+            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
+            IllegalStateException {
+        AppendableUtil.setLength(sb, 0);
+        // TODO insert some bounds check here
+
+        long utfLen;
+        if ((utfLen = readByte(offset++)) < 0) {
+            utfLen &= 0x7FL;
+            long b;
+            int count = 7;
+            while ((b = readByte(offset++)) < 0) {
+                utfLen |= (b & 0x7FL) << count;
+                count += 7;
+            }
+            if (b != 0) {
+                if (count > 56)
+                    throw new IORuntimeException(
+                            "Cannot read more than 9 stop bits of positive value");
+                utfLen |= (b << count);
+            } else {
+                if (count > 63)
+                    throw new IORuntimeException(
+                            "Cannot read more than 10 stop bits of negative value");
+                utfLen = ~utfLen;
+            }
+        }
+        if (utfLen == -1)
+            return ~offset;
+        if (utfLen > maxUtf8Len)
+            throw new IllegalStateException("Attempted to read a char sequence of " +
+                    "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
+        BytesInternal.parseUTF(this, offset, sb, (int) utfLen);
+        return offset + utfLen;
+    }
+
+    /**
+     * Reads a char sequence from the given {@code offset}, encoded as Utf8. If length of Utf8
+     * encoding of the char sequence exceeds {@code maxUtf8Len}, {@code IllegalStateException}
+     * is thrown.
+     *
+     * @param offset the offset in this {@code RandomDataInput} to read char sequence from
+     * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
+     * @return the char sequence was read
+     * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
+     */
+    @Nullable
+    default String readUtf8Limited(long offset, int maxUtf8Len)
+            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
+            IllegalStateException{
+        return BytesInternal.readUtf8(this, offset, maxUtf8Len);
     }
 }

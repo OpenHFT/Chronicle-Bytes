@@ -304,7 +304,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return the offset after the char sequence written, in this {@code RandomDataOutput}
      * @throws IllegalArgumentException if the given char sequence size in Utf8 encoding exceeds
      * maxUtf8Len
-     * @see RandomDataInput#readUtf8(long, Appendable)
+     * @see RandomDataInput#readUtf8Limited(long, Appendable, int)
+     * @see RandomDataInput#readUtf8Limited(long, int)
      */
     default long writeUtf8Limited(long offset, @Nullable CharSequence cs, int maxUtf8Len)
             throws BufferOverflowException, IORuntimeException, IllegalArgumentException {
