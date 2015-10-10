@@ -50,6 +50,19 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
+    private HeapBytesStore(@NotNull byte[] byteArray) {
+        //noinspection unchecked
+        this.underlyingObject = (Underlying) byteArray;
+        this.realUnderlyingObject = byteArray;
+        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+        this.capacity = byteArray.length;
+    }
+
+    @NotNull
+    static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
+        return new HeapBytesStore<>(byteArray);
+    }
+
     @NotNull
     static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new HeapBytesStore<>(bb);

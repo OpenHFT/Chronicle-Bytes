@@ -45,7 +45,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        return NativeBytesStore.elasticByteBuffer().bytesForWrite();
+        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer();
+        try {
+            return bs.bytesForWrite();
+        } finally {
+            bs.release();
+        }
     }
 
     /**
@@ -53,7 +58,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a Bytes which wrap a ByteBuffer and is ready for reading.
      */
     static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer).bytesForRead();
+        BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
+        try {
+            return bs.bytesForRead();
+        } finally {
+            bs.release();
+        }
     }
 
     /**
@@ -61,7 +71,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a Bytes which wrap a ByteBuffer and is ready for writing.
      */
     static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
-        return BytesStore.wrap(byteBuffer).bytesForWrite();
+        BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
+        try {
+            return bs.bytesForWrite();
+        } finally {
+            bs.release();
+        }
     }
 
     /**
@@ -97,7 +112,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for reading.
      */
     static Bytes<byte[]> wrapForRead(byte[] byteArray) {
-        return ((BytesStore) BytesStore.wrap(byteArray)).bytesForRead();
+        HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
+        try {
+            return bs.bytesForRead();
+        } finally {
+            bs.release();
+        }
     }
 
     /**
@@ -107,7 +127,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return the Bytes ready for writing.
      */
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
-        return ((BytesStore) BytesStore.wrap(byteArray)).bytesForWrite();
+        BytesStore bs = (BytesStore) BytesStore.wrap(byteArray);
+        try {
+            return bs.bytesForWrite();
+        } finally {
+            bs.release();
+        }
     }
 
     /**
@@ -134,7 +159,12 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a new Bytes ready for writing.
      */
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
-        return NativeBytesStore.nativeStoreWithFixedCapacity(capacity).bytesForWrite();
+        NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
+        try {
+            return bs.bytesForWrite();
+        } finally {
+            bs.release();
+        }
     }
 
     /**

@@ -51,10 +51,13 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @NotNull
     public static NativeBytes<Void> nativeBytes(long initialCapacity) throws IllegalArgumentException {
+        NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
-            return new NativeBytes<>(nativeStoreWithFixedCapacity(initialCapacity));
+            return new NativeBytes<>(store);
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
+        } finally {
+            store.release();
         }
     }
 

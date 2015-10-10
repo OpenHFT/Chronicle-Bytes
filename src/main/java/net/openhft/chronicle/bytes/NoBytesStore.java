@@ -53,7 +53,7 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public long refCount() {
-        return 1L;
+        return 0L;
     }
 
     @NotNull

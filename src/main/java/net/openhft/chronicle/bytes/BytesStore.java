@@ -60,8 +60,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytes to wrap
      * @return BytesStore
      */
-    static <B extends BytesStore<B, byte[]>> B wrap(@NotNull byte[] bytes) {
-        return (B) (BytesStore) HeapBytesStore.wrap(ByteBuffer.wrap(bytes));
+    static HeapBytesStore<byte[]> wrap(@NotNull byte[] bytes) {
+        return HeapBytesStore.wrap(bytes);
     }
 
     /**
@@ -70,10 +70,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bb to wrap
      * @return BytesStore
      */
-    static <B extends BytesStore<B, ByteBuffer>> B wrap(@NotNull ByteBuffer bb) {
-        return (B) (bb.isDirect()
+    static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
+        return bb.isDirect()
                 ? NativeBytesStore.wrap(bb)
-                : HeapBytesStore.wrap(bb));
+                : HeapBytesStore.wrap(bb);
     }
 
     /**
