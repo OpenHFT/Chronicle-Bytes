@@ -104,6 +104,27 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public RandomDataOutput writeVolatileByte(long offset, byte i8) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RandomDataOutput writeVolatileShort(long offset, short i16) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RandomDataOutput writeVolatileInt(long offset, int i32) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public RandomDataOutput writeVolatileLong(long offset, long i64) {
+        throw new UnsupportedOperationException();
+    }
+
+
     @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {

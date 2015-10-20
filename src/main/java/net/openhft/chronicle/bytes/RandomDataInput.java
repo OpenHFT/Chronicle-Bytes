@@ -175,6 +175,34 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     /**
+     * Read a 8-bit byte from memory with a load barrier.
+     *
+     * @param offset to read
+     * @return the byte value
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
+     */
+    default byte readVolatileByte(long offset)
+            throws BufferUnderflowException, IORuntimeException {
+        OS.memory().loadFence();
+        return readByte(offset);
+    }
+
+    /**
+     * Read a 16-bit short from memory with a load barrier.
+     *
+     * @param offset to read
+     * @return the short value
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
+     */
+    default short readVolatileShort(long offset)
+            throws BufferUnderflowException, IORuntimeException {
+        OS.memory().loadFence();
+        return readShort(offset);
+    }
+
+    /**
      * Read a 32-bit int from memory with a load barrier.
      *
      * @param offset to read

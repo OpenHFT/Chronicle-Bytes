@@ -263,6 +263,18 @@ public class NativeBytesStore<Underlying>
 
     @Override
     @ForceInline
+    public byte readVolatileByte(long offset) {
+        return memory.readVolatileByte(address + translate(offset));
+    }
+
+    @Override
+    @ForceInline
+    public short readVolatileShort(long offset) {
+        return memory.readVolatileShort(address + translate(offset));
+    }
+
+    @Override
+    @ForceInline
     public int readVolatileInt(long offset) {
         return memory.readVolatileInt(address + translate(offset));
     }
@@ -334,6 +346,38 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public NativeBytesStore<Underlying> writeDouble(long offset, double d) {
         memory.writeDouble(address + translate(offset), d);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public NativeBytesStore<Underlying> writeVolatileByte(long offset, byte i8) {
+        memory.writeVolatileByte(address + translate(offset), i8);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public NativeBytesStore<Underlying> writeVolatileShort(long offset, short i16) {
+        memory.writeVolatileShort(address + translate(offset), i16);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public NativeBytesStore<Underlying> writeVolatileInt(long offset, int i32) {
+        memory.writeVolatileInt(address + translate(offset), i32);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public NativeBytesStore<Underlying> writeVolatileLong(long offset, long i64) {
+        memory.writeVolatileLong(address + translate(offset), i64);
         return this;
     }
 

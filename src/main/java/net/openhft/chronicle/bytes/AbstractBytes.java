@@ -380,6 +380,38 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @Override
+    public Bytes<Underlying> writeVolatileByte(long offset, byte i8)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        writeCheckOffset(offset, 1);
+        bytesStore.writeVolatileByte(offset, i8);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> writeVolatileShort(long offset, short i16)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        writeCheckOffset(offset, 2);
+        bytesStore.writeVolatileShort(offset, i16);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> writeVolatileInt(long offset, int i32)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        writeCheckOffset(offset, 4);
+        bytesStore.writeVolatileInt(offset, i32);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> writeVolatileLong(long offset, long i64)
+            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        writeCheckOffset(offset, 8);
+        bytesStore.writeVolatileLong(offset, i64);
+        return this;
+    }
+
     @NotNull
     @Override
     @ForceInline

@@ -223,6 +223,24 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     R writeDouble(long offset, double d)
             throws BufferOverflowException, IORuntimeException;
 
+    R writeVolatileByte(long offset, byte i8) throws BufferOverflowException, IORuntimeException;
+
+    R writeVolatileShort(long offset, short i16) throws BufferOverflowException, IORuntimeException;
+
+    R writeVolatileInt(long offset, int i32) throws BufferOverflowException, IORuntimeException;
+
+    R writeVolatileLong(long offset, long i64) throws BufferOverflowException, IORuntimeException;
+
+    default R writeVolatileFloat(long offset, float f)
+            throws BufferOverflowException, IORuntimeException {
+        return writeVolatileInt(offset, Float.floatToRawIntBits(f));
+    }
+
+    default R writeVolatileDouble(long offset, double d)
+            throws BufferOverflowException, IORuntimeException {
+        return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
+    }
+
     default R write(long offsetInRDO, @NotNull byte[] bytes)
             throws BufferOverflowException, IORuntimeException {
         try {

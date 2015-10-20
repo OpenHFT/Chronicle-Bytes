@@ -193,14 +193,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @NotNull
     @Override
     public B writeOrderedLong(long offset, long i) throws AssertionError, IORuntimeException {
-        try {
-            long ia = underlyingBytesStore.readLong(offset);
-            if (ia != i)
-                throw new AssertionError("Expected: " + ia + "\nActual: " + i);
-            return (B) this;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return writeLong(offset, i);
     }
 
     @NotNull
@@ -227,6 +220,30 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public B writeVolatileByte(long offset, byte i8)
+            throws BufferOverflowException, IORuntimeException {
+        return writeByte(offset, i8);
+    }
+
+    @Override
+    public B writeVolatileShort(long offset, short i16)
+            throws BufferOverflowException, IORuntimeException {
+        return writeShort(offset, i16);
+    }
+
+    @Override
+    public B writeVolatileInt(long offset, int i32)
+            throws BufferOverflowException, IORuntimeException {
+        return writeInt(offset, i32);
+    }
+
+    @Override
+    public B writeVolatileLong(long offset, long i64)
+            throws BufferOverflowException, IORuntimeException {
+        return writeLong(offset, i64);
     }
 
     @NotNull

@@ -103,11 +103,25 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             throw new BufferOverflowException();
     }
 
+    @Override
+    public byte readVolatileByte(long offset)
+            throws BufferUnderflowException, IORuntimeException {
+        return bytesStore.readVolatileByte(offset);
+    }
+
+    @Override
+    public short readVolatileShort(long offset)
+            throws BufferUnderflowException, IORuntimeException {
+        return bytesStore.readVolatileShort(offset);
+    }
+
+    @Override
     public int readVolatileInt(long offset)
             throws BufferUnderflowException, IORuntimeException {
         return bytesStore.readVolatileInt(offset);
     }
 
+    @Override
     public long readVolatileLong(long offset)
             throws BufferUnderflowException, IORuntimeException {
         return bytesStore.readVolatileLong(offset);
