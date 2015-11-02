@@ -95,6 +95,13 @@ public class AppendableUtil {
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
             throws IOException, BufferUnderflowException {
+        readUtf8AndAppend(bytes, appendable, tester);
+    }
+
+    public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
+                                         @NotNull Appendable appendable,
+                                         @NotNull StopCharsTester tester)
+            throws IOException, BufferUnderflowException {
         try {
             while (true) {
                 int c = bytes.readUnsignedByte();
