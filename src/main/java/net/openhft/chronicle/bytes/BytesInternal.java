@@ -776,7 +776,7 @@ enum BytesInternal {
     public static String toString(@NotNull RandomDataInput bytes) throws IllegalStateException, IORuntimeException {
 
         // the output will be no larger than this
-        final int size = 200;
+        final int size = 1024;
         final StringBuilder sb = new StringBuilder(size);
 
         if (bytes.readRemaining() > size) {
