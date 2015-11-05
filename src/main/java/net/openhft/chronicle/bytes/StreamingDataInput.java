@@ -243,7 +243,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readEnum(this, eClass);
     }
 
+    @Deprecated
     default void parseUTF(Appendable sb, int length)
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+        parseUtf8(sb, length);
+    }
+
+    default void parseUtf8(Appendable sb, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUTF(this, sb, length);

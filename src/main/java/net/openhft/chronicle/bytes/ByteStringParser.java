@@ -59,8 +59,13 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @NotNull
     @ForceInline
-    default String parseUTF(@NotNull StopCharTester stopCharTester) {
+    default String parseUtf8(@NotNull StopCharTester stopCharTester) {
         return BytesInternal.parseUTF(this, stopCharTester);
+    }
+
+    @Deprecated
+    default String parseUTF(@NotNull StopCharTester stopCharTester) {
+        return parseUtf8(stopCharTester);
     }
 
     /**
@@ -70,8 +75,13 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharTester to check if the end has been reached.
      */
     @ForceInline
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
+    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
         BytesInternal.parseUTF(this, buffer, stopCharTester);
+    }
+
+    @Deprecated
+    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
+        parseUtf8(buffer, stopCharTester);
     }
 
     /**
@@ -81,9 +91,15 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharsTester to check if the end has been reached.
      */
     @ForceInline
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
+    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
         BytesInternal.parseUTF(this, buffer, stopCharsTester);
+    }
+
+    @Deprecated
+    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
+        parseUtf8(buffer, stopCharsTester);
     }
 
     /**

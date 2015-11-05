@@ -500,7 +500,12 @@ public class NativeBytesStore<Underlying>
         this.address = address;
     }
 
+    @Deprecated
     public long appendUTF(long pos, char[] chars, int offset, int length) {
+        return appendUtf8(pos, chars, offset, length);
+    }
+
+    public long appendUtf8(long pos, char[] chars, int offset, int length) {
         long address = this.address + translate(0);
         Memory memory = this.memory;
         int i;

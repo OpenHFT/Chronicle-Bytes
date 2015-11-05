@@ -224,4 +224,15 @@ public class BytesTest {
 
 //        Bytes.allocateElasticDirect(),
     }
+
+    @Test
+    public void testParseUtf8() {
+        Bytes bytes = Bytes.allocateElasticDirect();
+        bytes.appendUtf8("starting Hello World");
+        String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+        assertEquals("starting", s0);
+        String s = bytes.parseUtf8(StopCharTesters.ALL);
+        assertEquals("Hello World", s);
+    }
+
 }
