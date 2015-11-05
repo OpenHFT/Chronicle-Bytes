@@ -27,9 +27,9 @@ import java.nio.charset.StandardCharsets;
 import static java.lang.Math.min;
 
 /**
- * A immutable reference to some bytes with fixed extents.
- * This can be shared safely across thread provided the data referenced is accessed in a thread safe manner.
- * Only offset access within the capacity is possible.
+ * A immutable reference to some bytes with fixed extents. This can be shared safely across thread
+ * provided the data referenced is accessed in a thread safe manner. Only offset access within the
+ * capacity is possible.
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
@@ -43,7 +43,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * This method builds a BytesStore using the bytes in a CharSequence. This chars are encoded using ISO_8859_1
+     * This method builds a BytesStore using the bytes in a CharSequence. This chars are encoded
+     * using ISO_8859_1
      *
      * @param cs to convert
      * @return BytesStore
@@ -152,7 +153,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying data.
+     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying
+     * data.
      */
     default long safeLimit() {
         return capacity();
@@ -232,6 +234,17 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default String toDebugString() {
         return BytesInternal.toDebugString(this, Integer.MAX_VALUE);
     }
+
+
+    /**
+     * @param maxLength the maxiumum len of the output
+     * @return This BytesStore as a DebugString.
+     */
+    @NotNull
+    default String toDebugString(long maxLength) {
+        return BytesInternal.toDebugString(this, maxLength);
+    }
+
 
     /**
      * @return the underlying BytesStore

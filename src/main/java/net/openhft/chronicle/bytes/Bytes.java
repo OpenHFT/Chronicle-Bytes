@@ -210,6 +210,38 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         });
     }
 
+
+    /**
+     * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
+     * by this call
+     *
+     * @param buffer the buffer to use
+     * @param maxLen of the result returned
+     * @return a string contain the text from the {@code position}  to the  {@code limit}
+     */
+    static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
+            BufferUnderflowException {
+        if (buffer.readRemaining() == 0)
+            return "";
+
+        final long length = (maxLen < buffer.readRemaining()) ? maxLen :
+                buffer.readRemaining();
+
+        return buffer.parseWithLength(length, b -> {
+            final StringBuilder builder = new StringBuilder();
+            try {
+                while (buffer.readRemaining() > 0) {
+                    builder.append((char) buffer.readByte());
+                }
+            } catch (IORuntimeException e) {
+                builder.append(' ').append(e);
+            }
+
+            // remove the last comma
+            return builder.toString();
+        });
+    }
+
     /**
      * The buffer is not modified by this call
      *

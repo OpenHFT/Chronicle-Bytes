@@ -43,8 +43,8 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 import static net.openhft.chronicle.core.util.StringUtils.setCount;
 
 /**
- * Utility methods to support common functionality in this package.
- * This is not intended to be accessed directly.
+ * Utility methods to support common functionality in this package. This is not intended to be
+ * accessed directly.
  */
 enum BytesInternal {
     ;
@@ -252,17 +252,17 @@ enum BytesInternal {
     }
 
     public static int parse8bit_SB1(long offset, NativeBytesStore nbs, @NotNull StringBuilder sb, int utflen) {
-            long address = nbs.address + nbs.translate(offset);
-            Memory memory = nbs.memory;
-            sb.ensureCapacity(utflen);
+        long address = nbs.address + nbs.translate(offset);
+        Memory memory = nbs.memory;
+        sb.ensureCapacity(utflen);
         char[] chars = extractChars(sb);
-            int count = 0;
-            while (count < utflen) {
-                int c = memory.readByte(address + count) & 0xFF;
-                chars[count++] = (char) c;
-            }
+        int count = 0;
+        while (count < utflen) {
+            int c = memory.readByte(address + count) & 0xFF;
+            chars[count++] = (char) c;
+        }
         setCount(sb, count);
-            return count;
+        return count;
     }
 
     static void parseUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
@@ -774,9 +774,20 @@ enum BytesInternal {
     }
 
     public static String toString(@NotNull RandomDataInput bytes) throws IllegalStateException, IORuntimeException {
-        StringBuilder sb = new StringBuilder(200);
-        toString(bytes, sb);
-        return sb.toString();
+
+        // the output will be no larger than this
+        final int size = 200;
+        final StringBuilder sb = new StringBuilder(size);
+
+        if (bytes.readRemaining() > size) {
+            final Bytes bytes1 = bytes.bytesForRead();
+            bytes1.readLimit(bytes1.readPosition() + size);
+            toString(bytes1, sb);
+            return sb.toString() + "...";
+        } else {
+            toString(bytes, sb);
+            return sb.toString();
+        }
     }
 
     private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long position, long end) throws BufferUnderflowException {
@@ -815,9 +826,9 @@ enum BytesInternal {
         assert bytes.readLimit() <= bytes.realCapacity();
 
         try {
-        for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
-            sb.append((char) bytes.readUnsignedByte(i));
-        }
+            for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
+                sb.append((char) bytes.readUnsignedByte(i));
+            }
         } catch (BufferUnderflowException e) {
             sb.append(' ').append(e);
         }
@@ -891,7 +902,8 @@ enum BytesInternal {
     }
 
     /**
-     * The length of the number must be fixed otherwise short numbers will not overwrite longer numbers
+     * The length of the number must be fixed otherwise short numbers will not overwrite longer
+     * numbers
      */
     public static void append(@NotNull RandomDataOutput out, long offset, long num, int digits) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         boolean negative = num < 0;
