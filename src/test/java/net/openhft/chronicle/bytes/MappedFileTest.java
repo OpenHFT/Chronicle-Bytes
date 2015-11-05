@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -29,6 +30,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class MappedFileTest {
 
+    @Ignore("CE-175 - https://higherfrequencytrading.atlassian.net/browse/CE-175")
     @Test
     public void testReferenceCounts() throws IOException {
         new File(OS.TARGET).mkdir();
