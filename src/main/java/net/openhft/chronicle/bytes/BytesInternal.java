@@ -155,7 +155,7 @@ enum BytesInternal {
                                  @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            assert input.realCapacity() >= utflen;
+            assert input.realCapacity() >= offset + utflen;
             long limit = offset + utflen;
             while (offset < limit) {
                 int c = input.readUnsignedByte(offset++);
@@ -230,7 +230,7 @@ enum BytesInternal {
                                     @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            if (utflen > bytes.realCapacity())
+            if (offset + utflen > bytes.realCapacity())
                 throw new BufferUnderflowException();
             long address = bytes.address + bytes.translate(offset);
             Memory memory = bytes.memory;

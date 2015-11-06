@@ -24,6 +24,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -609,5 +610,17 @@ public class ByteStoreTest {
         assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎", bytes.toDebugString());
         bytes.writeUnsignedByte(8);
         assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏", bytes.toDebugString());
+    }
+
+    @Test
+    public void testOverflowReadUtf8() {
+        NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        BytesInternal.writeStopBit(bs, 10, 30);
+        try {
+            bs.readUtf8(10, new StringBuilder());
+            throw new AssertionError("should throw BufferUnderflowException");
+        } catch (BufferUnderflowException e) {
+            // expected
+        }
     }
 }
