@@ -86,7 +86,7 @@ public enum BytesUtil {
         if ((n & ~0x3FFF) == 0) {
             return 2;
         }
-        return BytesInternal.stopBitlength0(n);
+        return BytesInternal.stopBitLength0(n);
     }
 
     public static char[] toCharArray(Bytes bytes) {
