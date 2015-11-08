@@ -285,7 +285,7 @@ enum BytesInternal {
             }
 
             if (limit > offset)
-                parseUTF2(input, offset, appendable, utflen);
+                parseUTF2(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -360,7 +360,7 @@ enum BytesInternal {
             }
             setCount(sb, count);
             if (count < utflen)
-                parseUTF2(bytes, offset + count, sb, utflen);
+                parseUTF2(bytes, offset + count, offset + utflen, sb, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -441,10 +441,9 @@ enum BytesInternal {
         }
     }
 
-    static void parseUTF2(@NotNull RandomDataInput input, long offset,
+    static void parseUTF2(@NotNull RandomDataInput input, long offset, long limit,
                           @NotNull Appendable appendable, int utflen)
             throws IOException, UTFDataFormatRuntimeException {
-        long limit = offset + utflen;
         while (offset < limit) {
             int c = input.readUnsignedByte(offset++);
             switch (c >> 4) {
