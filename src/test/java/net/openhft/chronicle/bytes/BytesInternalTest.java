@@ -40,5 +40,7 @@ public class BytesInternalTest {
         bs.readUtf8(1, sb);
         assertEquals("£€", sb.toString());
         assertTrue(BytesInternal.compareUTF(bs, 1, "£€"));
+        assertFalse(BytesInternal.compareUTF(bs, 1, "£"));
+        assertFalse(BytesInternal.compareUTF(bs, 1, "£€$"));
     }
 }

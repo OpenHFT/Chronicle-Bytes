@@ -505,4 +505,18 @@ public interface RandomDataInput extends RandomCommon {
             IllegalStateException{
         return BytesInternal.readUtf8(this, offset, maxUtf8Len);
     }
+
+    /**
+     * Compares the UTF-8 encoded char sequence, written in this {@code RandomDataInput} at the
+     * given offset, with the given char sequence. Returns {@code true}, if they are equal. Both
+     * char sequences (encoded in bytes and the given) may be {@code null}.
+     *
+     * @param offset the offset in this {@code RandomDataInput} where the char sequence to compare
+     * is written
+     * @param other the second char sequence to compare
+     * @return {@code true} if two char sequences are equal
+     */
+    default boolean compareUtf8(long offset, @Nullable CharSequence other) {
+        return BytesInternal.compareUTF(this, offset, other);
+    }
 }
