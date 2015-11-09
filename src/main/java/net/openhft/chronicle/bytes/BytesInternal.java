@@ -1660,55 +1660,7 @@ enum BytesInternal {
     }
 
 
-    public static double parseDoubleChars(@NotNull CharSequence in) throws IORuntimeException,
-            BufferUnderflowException {
-        long value = 0;
-        int exp = 0;
-        boolean negative = false;
-        int decimalPlaces = Integer.MIN_VALUE;
 
-        int ch = in.charAt(0);
-        int pos = 1;
-        switch (ch) {
-            case 'N':
-                if (compareRest(in, 1, "aN"))
-                    return Double.NaN;
-                return Double.NaN;
-            case 'I':
-                //noinspection SpellCheckingInspection
-                if (compareRest(in, 1, "nfinity"))
-                    return Double.POSITIVE_INFINITY;
-
-                return Double.NaN;
-            case '-':
-                if (compareRest(in, 1, "Infinity"))
-                    return Double.NEGATIVE_INFINITY;
-                negative = true;
-                ch = in.charAt(pos++);
-                break;
-        }
-        while (true) {
-            if (ch >= '0' && ch <= '9') {
-                while (value >= MAX_VALUE_DIVIDE_10) {
-                    value >>>= 1;
-                    exp++;
-                }
-                value = value * 10 + (ch - '0');
-                decimalPlaces++;
-
-            } else if (ch == '.') {
-                decimalPlaces = 0;
-
-            } else {
-                break;
-            }
-            if (pos == in.length())
-                break;
-            ch = in.charAt(pos++);
-        }
-
-        return asDouble(value, exp, negative, decimalPlaces);
-    }
 
     static boolean compareRest(@NotNull StreamingDataInput in, @NotNull String s) throws IORuntimeException, BufferUnderflowException {
         if (s.length() > in.readRemaining())
@@ -1724,21 +1676,7 @@ enum BytesInternal {
     }
 
 
-    static boolean compareRest(@NotNull CharSequence in, int pos, @NotNull String s) throws
-            IORuntimeException,
-            BufferUnderflowException {
 
-
-        if (s.length() > in.length() - pos)
-            return false;
-
-        for (int i = 0; i < s.length(); i++) {
-            if (in.charAt(i + pos) != s.charAt(i)) {
-                return false;
-            }
-        }
-        return true;
-    }
 
 
     @ForceInline

@@ -471,18 +471,7 @@ public class ByteStoreTest {
     }
 
 
-    @Test
-    public void testParseDouble() throws IOException {
-        for (double d : new double[]{Double.NaN, Double.NEGATIVE_INFINITY, Double
-                .POSITIVE_INFINITY, 0.0, -1.0, 1.0, 9999.0}) {
-            assertEquals(d, BytesInternal.parseDoubleChars(Double.toString(d)), 0);
-        }
 
-        assertEquals(1.0, BytesInternal.parseDoubleChars("1"), 0);
-        assertEquals(0.0, BytesInternal.parseDoubleChars("-0"), 0);
-        assertEquals(123.0, BytesInternal.parseDoubleChars("123"), 0);
-        assertEquals(-1.0, BytesInternal.parseDoubleChars("-1"), 0);
-    }
 
     @Test
     public void testWriteBytes() {
