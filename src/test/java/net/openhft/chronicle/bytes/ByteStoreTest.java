@@ -470,9 +470,6 @@ public class ByteStoreTest {
         assertEquals(1.2345, bytes.parseDouble(), 0);
     }
 
-
-
-
     @Test
     public void testWriteBytes() {
         bytes.write("Hello World\n".getBytes(), 0, 10);
@@ -627,4 +624,3 @@ public class ByteStoreTest {
         }
     }
 }
-

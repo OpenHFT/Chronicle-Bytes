@@ -1659,9 +1659,6 @@ enum BytesInternal {
         return asDouble(value, exp, negative, decimalPlaces);
     }
 
-
-
-
     static boolean compareRest(@NotNull StreamingDataInput in, @NotNull String s) throws IORuntimeException, BufferUnderflowException {
         if (s.length() > in.readRemaining())
             return false;
@@ -1674,10 +1671,6 @@ enum BytesInternal {
         }
         return true;
     }
-
-
-
-
 
     @ForceInline
     public static long parseLong(@NotNull StreamingDataInput in) throws IORuntimeException, BufferUnderflowException {
