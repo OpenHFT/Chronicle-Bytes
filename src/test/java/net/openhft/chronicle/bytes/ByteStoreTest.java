@@ -170,23 +170,23 @@ public class ByteStoreTest {
 */
     }
 
-/*    @Test
-    public void testWriteReadBytes() {
-        byte[] bytes = "Hello World!".getBytes();
-        this.bytes.write(bytes);
-        byte[] bytes2 = new byte[bytes.length];
-        this.bytes.position(0);
-        this.bytes.read(bytes2);
-        assertTrue(Arrays.equals(bytes, bytes2));
+    /*    @Test
+        public void testWriteReadBytes() {
+            byte[] bytes = "Hello World!".getBytes();
+            this.bytes.write(bytes);
+            byte[] bytes2 = new byte[bytes.length];
+            this.bytes.position(0);
+            this.bytes.read(bytes2);
+            assertTrue(Arrays.equals(bytes, bytes2));
 
-        this.bytes.write(22, bytes);
-        byte[] bytes3 = new byte[bytes.length];
-        this.bytes.skipBytes((int) (22 - this.bytes.position()));
-        assertEquals(bytes3.length, this.bytes.read(bytes3));
-        assertTrue(Arrays.equals(bytes, bytes3));
-        this.bytes.position(this.bytes.capacity());
-        assertEquals(-1, this.bytes.read(bytes3));
-    }*/
+            this.bytes.write(22, bytes);
+            byte[] bytes3 = new byte[bytes.length];
+            this.bytes.skipBytes((int) (22 - this.bytes.position()));
+            assertEquals(bytes3.length, this.bytes.read(bytes3));
+            assertTrue(Arrays.equals(bytes, bytes3));
+            this.bytes.position(this.bytes.capacity());
+            assertEquals(-1, this.bytes.read(bytes3));
+        }*/
     @Test
     public void testWriteReadUtf8() {
         bytes.writeUtf8(null);
@@ -469,6 +469,20 @@ public class ByteStoreTest {
         assertEquals(1.2345, bytes.parseDouble(), 0);
     }
 
+
+    @Test
+    public void testParseDouble() throws IOException {
+        for (double d : new double[]{Double.NaN, Double.NEGATIVE_INFINITY, Double
+                .POSITIVE_INFINITY, 0.0, -1.0, 1.0, 9999.0}) {
+            assertEquals(d, BytesInternal.parseDoubleChars(Double.toString(d)), 0);
+        }
+
+        assertEquals(1.0, BytesInternal.parseDoubleChars("1"), 0);
+        assertEquals(0.0, BytesInternal.parseDoubleChars("-0"), 0);
+        assertEquals(123.0, BytesInternal.parseDoubleChars("123"), 0);
+        assertEquals(-1.0, BytesInternal.parseDoubleChars("-1"), 0);
+    }
+
     @Test
     public void testWriteBytes() {
         bytes.write("Hello World\n".getBytes(), 0, 10);
@@ -611,3 +625,4 @@ public class ByteStoreTest {
         assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏", bytes.toDebugString());
     }
 }
+
