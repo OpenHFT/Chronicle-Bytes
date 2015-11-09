@@ -116,6 +116,121 @@ enum BytesInternal {
         parseUTF1(input, offset, appendable, utflen);
     }
 
+    public static boolean compareUTF(RandomDataInput input, long offset, CharSequence other) {
+        long utfLen;
+        if ((utfLen = input.readByte(offset++)) < 0) {
+            utfLen &= 0x7FL;
+            long b;
+            int count = 7;
+            while ((b = input.readByte(offset++)) < 0) {
+                utfLen |= (b & 0x7FL) << count;
+                count += 7;
+            }
+            if (b != 0) {
+                if (count > 56)
+                    throw new IORuntimeException(
+                            "Cannot read more than 9 stop bits of positive value");
+                utfLen |= (b << count);
+            } else {
+                if (count > 63)
+                    throw new IORuntimeException(
+                            "Cannot read more than 10 stop bits of negative value");
+                utfLen = ~utfLen;
+            }
+        }
+        if (utfLen == -1)
+            return other == null;
+        if (other == null)
+            return false;
+        return compareUTF(input, offset, utfLen, other);
+    }
+
+    private static boolean compareUTF(
+            RandomDataInput input, long offset, long utfLen, CharSequence other) {
+        if (offset + utfLen > input.realCapacity())
+            throw new BufferUnderflowException();
+        int i = 0;
+        while (i < utfLen && i < other.length()) {
+            int c = input.readByte(offset + i);
+            if (c < 0)
+                break;
+            if ((char) c != other.charAt(i))
+                return false;
+            i++;
+        }
+        if (i < utfLen && i < other.length())
+            return compareUTF2(input, offset + i, i, utfLen, other);
+        return utfLen == other.length();
+    }
+
+    private static boolean compareUTF2(
+            RandomDataInput input, long offset, int charI, long utfLen, CharSequence other)
+            throws UTFDataFormatRuntimeException {
+        long limit = offset + utfLen;
+        while (offset < limit && charI < other.length()) {
+            int c = input.readUnsignedByte(offset++);
+            switch (c >> 4) {
+                case 0:
+                case 1:
+                case 2:
+                case 3:
+                case 4:
+                case 5:
+                case 6:
+                case 7:
+                /* 0xxxxxxx */
+                    if ((char) c != other.charAt(charI))
+                        return false;
+                    break;
+
+                case 12:
+                case 13: {
+                /* 110x xxxx 10xx xxxx */
+                    if (offset == limit)
+                        throw new UTFDataFormatRuntimeException(
+                                "malformed input: partial character at end");
+                    int char2 = input.readUnsignedByte(offset++);
+                    if ((char2 & 0xC0) != 0x80)
+                        throw new UTFDataFormatRuntimeException(
+                                "malformed input around byte " + (offset - limit + utfLen) +
+                                        " was " + char2);
+                    int c2 = (char) (((c & 0x1F) << 6) |
+                            (char2 & 0x3F));
+                    if ((char) c2 != other.charAt(charI))
+                        return false;
+                    break;
+                }
+
+                case 14: {
+                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    if (offset + 2 > limit)
+                        throw new UTFDataFormatRuntimeException(
+                                "malformed input: partial character at end");
+                    int char2 = input.readUnsignedByte(offset++);
+                    int char3 = input.readUnsignedByte(offset++);
+
+                    if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
+                        throw new UTFDataFormatRuntimeException(
+                                "malformed input around byte " + (offset - limit + utfLen - 1) +
+                                        " was " + char2 + " " + char3);
+                    int c3 = (char) (((c & 0x0F) << 12) |
+                            ((char2 & 0x3F) << 6) |
+                            (char3 & 0x3F));
+                    if ((char) c3 != other.charAt(charI))
+                        return false;
+                    break;
+                }
+                // TODO add code point of characters > 0xFFFF support.
+                default:
+                /* 10xx xxxx, 1111 xxxx */
+                    throw new UTFDataFormatRuntimeException(
+                            "malformed input around byte " + (offset - limit + utfLen));
+            }
+            charI++;
+        }
+        return offset == limit && charI == other.length();
+    }
+
     public static void parse8bit(long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (bytesStore instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {
@@ -155,7 +270,7 @@ enum BytesInternal {
                                  @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            assert input.realCapacity() >= utflen;
+            assert input.realCapacity() >= offset + utflen;
             long limit = offset + utflen;
             while (offset < limit) {
                 int c = input.readUnsignedByte(offset++);
@@ -170,7 +285,7 @@ enum BytesInternal {
             }
 
             if (limit > offset)
-                parseUTF2(input, offset, appendable, utflen);
+                parseUTF2(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -230,7 +345,7 @@ enum BytesInternal {
                                     @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            if (utflen > bytes.realCapacity())
+            if (offset + utflen > bytes.realCapacity())
                 throw new BufferUnderflowException();
             long address = bytes.address + bytes.translate(offset);
             Memory memory = bytes.memory;
@@ -245,7 +360,7 @@ enum BytesInternal {
             }
             setCount(sb, count);
             if (count < utflen)
-                parseUTF2(bytes, offset + count, sb, utflen);
+                parseUTF2(bytes, offset + count, offset + utflen, sb, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -326,10 +441,9 @@ enum BytesInternal {
         }
     }
 
-    static void parseUTF2(@NotNull RandomDataInput input, long offset,
+    static void parseUTF2(@NotNull RandomDataInput input, long offset, long limit,
                           @NotNull Appendable appendable, int utflen)
             throws IOException, UTFDataFormatRuntimeException {
-        long limit = offset + utflen;
         while (offset < limit) {
             int c = input.readUnsignedByte(offset++);
             switch (c >> 4) {
@@ -348,10 +462,10 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                 /* 110x xxxx 10xx xxxx */
-                    if (++offset > limit)
+                    if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
-                    int char2 = input.readUnsignedByte(offset);
+                    int char2 = input.readUnsignedByte(offset++);
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input around byte " + (offset - limit + utflen) +
@@ -364,7 +478,7 @@ enum BytesInternal {
 
                 case 14: {
                 /* 1110 xxxx 10xx xxxx 10xx xxxx */
-                    if (offset + 2 > utflen)
+                    if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = input.readUnsignedByte(offset++);
@@ -722,7 +836,7 @@ enum BytesInternal {
         return offset;
     }
 
-    static int stopBitlength0(long n) {
+    static int stopBitLength0(long n) {
         int len = 0;
         if (n < 0) {
             len = 1;
