@@ -585,7 +585,7 @@ enum BytesInternal {
         return offset;
     }
 
-    private static long findUTFLength(@NotNull CharSequence str) throws IndexOutOfBoundsException {
+    static long findUTFLength(@NotNull CharSequence str) throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {

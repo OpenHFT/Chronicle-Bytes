@@ -35,14 +35,24 @@ public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();
     @NotNull
-    private final Object realUnderlyingObject;
-    private final int dataOffset;
-    private final int capacity;
+    private Object realUnderlyingObject;
+    private int dataOffset;
+    private long capacity;
     private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
-    private final Underlying underlyingObject;
+    private Underlying underlyingObject;
+
+    private HeapBytesStore() {}
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
+        init(byteBuffer);
+    }
+
+    private HeapBytesStore(@NotNull byte[] byteArray) {
+        init(byteArray);
+    }
+
+    public void init(@NotNull ByteBuffer byteBuffer) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
@@ -50,12 +60,19 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
-    private HeapBytesStore(@NotNull byte[] byteArray) {
+    public void init(@NotNull byte[] byteArray) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
         this.capacity = byteArray.length;
+    }
+
+    public void uninit() {
+        underlyingObject = null;
+        realUnderlyingObject = null;
+        dataOffset = 0;
+        capacity = 0;
     }
 
     @NotNull
@@ -66,6 +83,10 @@ public class HeapBytesStore<Underlying>
     @NotNull
     static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new HeapBytesStore<>(bb);
+    }
+
+    public static <T> HeapBytesStore<T> uninitialized() {
+        return new HeapBytesStore<>();
     }
 
     @NotNull

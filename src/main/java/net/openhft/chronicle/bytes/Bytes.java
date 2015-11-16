@@ -54,6 +54,19 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
+     * Returns an elastic wrapper for a direct ByteBuffer which will be resized as required, with
+     * the given initial capacity.
+     */
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
+        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity);
+        try {
+            return bs.bytesForWrite();
+        } finally {
+            bs.release();
+        }
+    }
+
+    /**
      * @param byteBuffer to read
      * @return a Bytes which wrap a ByteBuffer and is ready for reading.
      */
