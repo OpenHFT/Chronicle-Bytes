@@ -23,9 +23,20 @@ import java.io.InputStream;
  * Created by peter on 17/08/15.
  */
 public class StreamingInputStream extends InputStream {
-    final StreamingDataInput in;
+
+    public static StreamingInputStream uninitialized() {
+        return new StreamingInputStream();
+    }
+
+    StreamingDataInput in;
+
+    private StreamingInputStream() {}
 
     public StreamingInputStream(StreamingDataInput in) {
+        this.in = in;
+    }
+
+    public void init(StreamingDataInput in) {
         this.in = in;
     }
 

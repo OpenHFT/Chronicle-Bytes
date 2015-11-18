@@ -107,4 +107,25 @@ public enum BytesUtil {
         }
         return chars;
     }
+
+    public static long readStopBit(StreamingDataInput in) {
+        return BytesInternal.readStopBit(in);
+    }
+
+    public static void writeStopBit(StreamingDataOutput out, long n) {
+        BytesInternal.writeStopBit(out, n);
+    }
+
+    public static long utf8Length(CharSequence cs) {
+        return BytesInternal.findUTFLength(cs);
+    }
+
+    public static void parseUtf8(
+            @NotNull StreamingDataInput in, Appendable appendable, int utflen) {
+        BytesInternal.parseUTF(in, appendable, utflen);
+    }
+
+    public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
+        BytesInternal.appendUTF(out, cs, 0, cs.length());
+    }
 }

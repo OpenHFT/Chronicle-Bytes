@@ -36,10 +36,10 @@ public class NativeBytesStore<Underlying>
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
 
     @Nullable
-    private final Cleaner cleaner;
-    private final boolean elastic;
+    private Cleaner cleaner;
+    private boolean elastic;
     @Nullable
-    private final Underlying underlyingObject;
+    private Underlying underlyingObject;
     @Nullable
     private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
     // on release, set this to null.
@@ -50,12 +50,26 @@ public class NativeBytesStore<Underlying>
     long maximumLimit;
     private Error releasedHere;
 
+    private NativeBytesStore() {
+    }
+
     private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
+        init(bb, elastic);
+    }
+
+    public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
         setAddress(((DirectBuffer) bb).address());
         this.maximumLimit = bb.capacity();
         cleaner = ((DirectBuffer) bb).cleaner();
+    }
+
+    public void uninit() {
+        underlyingObject = null;
+        address = 0;
+        maximumLimit = 0;
+        cleaner = null;
     }
 
     public NativeBytesStore(
@@ -75,6 +89,11 @@ public class NativeBytesStore<Underlying>
     @NotNull
     public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
+    }
+
+    @NotNull
+    public static <T> NativeBytesStore<T> uninitialized() {
+        return new NativeBytesStore<>();
     }
 
     /**
