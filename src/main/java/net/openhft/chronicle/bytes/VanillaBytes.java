@@ -186,18 +186,18 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
         try {
-        if (bytesStore() instanceof NativeBytesStore) {
-            if (str instanceof BytesStore) {
-                write((BytesStore) str, (long) start, end - start);
-                return this;
+            if (bytesStore() instanceof NativeBytesStore) {
+                if (str instanceof BytesStore) {
+                    write((BytesStore) str, (long) start, end - start);
+                    return this;
+                }
+                if (str instanceof String) {
+                    write(str, start, end - start);
+                    return this;
+                }
             }
-            if (str instanceof String) {
-                write(str, start, end - start);
-                return this;
-            }
-        }
-        super.append(str, start, end);
-        return this;
+            super.append(str, start, end);
+            return this;
         } catch (Exception e) {
             throw new IndexOutOfBoundsException(e.toString());
         }
