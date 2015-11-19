@@ -32,7 +32,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
-    MappedBytes(MappedFile mappedFile) throws IllegalStateException {
+    public MappedBytes(MappedFile mappedFile) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
         this.mappedFile = mappedFile;
         clear();
