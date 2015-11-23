@@ -110,9 +110,4 @@ public class MappedBytes extends AbstractBytes<Void> {
         return true;
     }
 
-    @NotNull
-    @Override
-    public Bytes<Void> write(BytesStore buffer, long offset, long length) {
-        throw new UnsupportedOperationException("todo");
-    }
 }
