@@ -56,7 +56,7 @@ public class HeapBytesStore<Underlying>
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
-        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET + byteBuffer.arrayOffset();
         this.capacity = byteBuffer.capacity();
     }
 
