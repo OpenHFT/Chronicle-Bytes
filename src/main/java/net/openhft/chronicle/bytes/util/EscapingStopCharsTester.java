@@ -16,8 +16,8 @@
 
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.chronicle.bytes.IORuntimeException;
 import net.openhft.chronicle.bytes.StopCharsTester;
+import net.openhft.chronicle.core.io.IORuntimeException;
 
 public class EscapingStopCharsTester implements StopCharsTester {
     private final StopCharsTester sct;

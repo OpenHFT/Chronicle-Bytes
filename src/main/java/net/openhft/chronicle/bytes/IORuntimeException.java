@@ -16,7 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
-public class IORuntimeException extends RuntimeException {
+@Deprecated
+public class IORuntimeException extends net.openhft.chronicle.core.io.IORuntimeException {
     public IORuntimeException(String message) {
         super(message);
     }
