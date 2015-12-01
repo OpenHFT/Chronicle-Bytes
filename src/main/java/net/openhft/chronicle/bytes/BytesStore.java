@@ -228,11 +228,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * By default the maximum length of data shown is 256 characters. Use toDebugString(long) if you want more.
+     *
      * @return This BytesStore as a DebugString.
      */
     @NotNull
     default String toDebugString() {
-        return BytesInternal.toDebugString(this, Integer.MAX_VALUE);
+        return toDebugString(256);
     }
 
 
