@@ -20,6 +20,8 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -172,6 +174,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             store.writeLong(i, readLong(i));
         for (; i < copy; i++)
             store.writeByte(i, readByte(i));
+    }
+
+
+    default void copyTo(OutputStream out) throws IOException {
+        BytesInternal.copy(this, out);
     }
 
     /**

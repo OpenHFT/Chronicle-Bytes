@@ -20,9 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -254,13 +252,4 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUTF(this, sb, length);
     }
-
-    default byte[] toByteArray() throws IORuntimeException, IllegalArgumentException {
-        return BytesInternal.toByteArray(this);
-    }
-
-    default void copyTo(OutputStream out) throws IOException {
-        BytesInternal.copy(this, out);
-    }
-
 }

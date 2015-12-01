@@ -263,4 +263,11 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
         return this;
     }
+
+    @Override
+    public ByteBuffer toTemporaryDirectByteBuffer() {
+        if (isClear())
+            return bytesStore.toTemporaryDirectByteBuffer();
+        return super.toTemporaryDirectByteBuffer();
+    }
 }

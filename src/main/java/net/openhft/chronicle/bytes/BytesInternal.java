@@ -1927,16 +1927,17 @@ enum BytesInternal {
             sdo.writeByte(bytes.readByte(offset + i));
     }
 
-    public static byte[] toByteArray(StreamingDataInput in) throws IllegalArgumentException, IORuntimeException {
+    public static byte[] toByteArray(RandomDataInput in) throws IllegalArgumentException, IORuntimeException {
         int len = Maths.toInt32(in.readRemaining());
         byte[] bytes = new byte[len];
-        in.read(bytes);
+        in.read(in.readPosition(), bytes);
         return bytes;
     }
 
-    public static void copy(StreamingDataInput input, OutputStream output) throws IOException {
+    public static void copy(RandomDataInput input, OutputStream output) throws IOException {
         byte[] bytes = new byte[512];
-        for (int len; (len = input.read(bytes)) > 0; ) {
+        long start = input.readPosition();
+        for (int i = 0, len; (len = (int) input.read(start + i, bytes)) > 0; i += len) {
             output.write(bytes, 0, len);
         }
     }

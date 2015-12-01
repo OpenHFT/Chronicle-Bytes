@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.annotation.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
@@ -286,6 +287,17 @@ public interface RandomDataInput extends RandomCommon {
         return len;
     }
 
+    default int copyTo(@NotNull ByteBuffer bb)
+            throws BufferUnderflowException, IORuntimeException {
+        int len = (int) Math.min(bb.remaining(), readRemaining());
+        int i;
+        for (i = 0; i < len - 7; i += 8)
+            bb.putLong(i, readLong(start() + i));
+        for (i = 0; i < len; i++)
+            bb.put(i, readByte(start() + i));
+        return len;
+    }
+
     /**
      * Read a long which is zero padded (high bytes) if the available bytes is less than 8.
      * If the offset is at or beyond the readLimit, this will return 0L.
@@ -518,5 +530,24 @@ public interface RandomDataInput extends RandomCommon {
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other) {
         return BytesInternal.compareUTF(this, offset, other);
+    }
+
+    default byte[] toByteArray() throws IORuntimeException, IllegalArgumentException {
+        return BytesInternal.toByteArray(this);
+    }
+
+    default long read(long offset, byte[] bytes) {
+        int len = (int) Math.min(bytes.length, readLimit() - offset);
+        for (int i = 0; i < len; i++)
+            bytes[i] = readByte(offset + i);
+        return len;
+    }
+
+    default ByteBuffer toTemporaryDirectByteBuffer() {
+        int len = Maths.toUInt31(readRemaining());
+        ByteBuffer bb = ByteBuffer.allocateDirect(len);
+        copyTo(bb);
+        bb.clear();
+        return bb;
     }
 }
