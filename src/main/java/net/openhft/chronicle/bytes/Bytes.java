@@ -206,23 +206,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
     static String toString(@NotNull final Bytes<?> buffer) throws BufferUnderflowException {
-        if (buffer.readRemaining() == 0)
-            return "";
-        return buffer.parseWithLength(buffer.readRemaining(), b -> {
-            final StringBuilder builder = new StringBuilder();
-            try {
-                while (buffer.readRemaining() > 0) {
-                    builder.append((char) buffer.readByte());
-                }
-            } catch (IORuntimeException e) {
-                builder.append(' ').append(e);
-            }
-
-            // remove the last comma
-            return builder.toString();
-        });
+        return toString(buffer, Integer.MAX_VALUE - 4);
     }
-
 
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
@@ -237,13 +222,16 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         if (buffer.readRemaining() == 0)
             return "";
 
-        final long length = (maxLen < buffer.readRemaining()) ? maxLen :
-                buffer.readRemaining();
+        final long length = Math.min(maxLen + 1, buffer.readRemaining());
 
         return buffer.parseWithLength(length, b -> {
             final StringBuilder builder = new StringBuilder();
             try {
                 while (buffer.readRemaining() > 0) {
+                    if (builder.length() >= maxLen) {
+                        builder.append("...");
+                        break;
+                    }
                     builder.append((char) buffer.readByte());
                 }
             } catch (IORuntimeException e) {
