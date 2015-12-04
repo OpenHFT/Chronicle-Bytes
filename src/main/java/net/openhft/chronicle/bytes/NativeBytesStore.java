@@ -533,6 +533,8 @@ public class NativeBytesStore<Underlying>
     }
 
     public long appendUtf8(long pos, char[] chars, int offset, int length) {
+        if (length > realCapacity())
+            throw new BufferOverflowException();
         long address = this.address + translate(0);
         Memory memory = this.memory;
         int i;
