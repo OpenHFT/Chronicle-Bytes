@@ -1695,6 +1695,30 @@ enum BytesInternal {
         return negative ? -num : num;
     }
 
+    @ForceInline
+    public static long parseHexLong(@NotNull StreamingDataInput in) throws IORuntimeException, BufferUnderflowException {
+        long num = 0;
+        while (in.readRemaining() > 0) {
+            int b = in.readUnsignedByte();
+            // if (b >= '0' && b <= '9')
+            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
+                num = num * 16 + b - '0';
+            } else if ((b - ('A' + Integer.MIN_VALUE)) <= 6 + Integer.MIN_VALUE) {
+                num = num * 16 + b - 'A' + 10;
+            } else if ((b - ('a' + Integer.MIN_VALUE)) <= 6 + Integer.MIN_VALUE) {
+                num = num * 16 + b - 'a' + 10;
+            } else if (b == ']' || b == '}') {
+                in.readSkip(-1);
+                break;
+            } else if (b == '_') {
+                // ignore
+            } else {
+                break;
+            }
+        }
+        return num;
+    }
+
     public static long parseLong(@NotNull RandomDataInput in, long offset) throws IORuntimeException, BufferUnderflowException {
         long num = 0;
         boolean negative = false;
@@ -1988,6 +2012,26 @@ enum BytesInternal {
                 return i;
         }
         throw new IllegalArgumentException("Stop byte " + stopByte + " not found");
+    }
+
+    public static Bytes fromHexString(String s) {
+        Bytes in = Bytes.from(s);
+        Bytes out = Bytes.elasticByteBuffer();
+        OUTER:
+        while (in.readRemaining() > 0) {
+            in.parseHexLong();
+            for (int i = 0; i < 16; i++) {
+                if (in.peekUnsignedByte() == ' ') {
+                    in.readSkip(1);
+                    if (in.peekUnsignedByte() == ' ')
+                        break OUTER;
+                }
+                long value = in.parseHexLong();
+                out.writeByte((byte) value);
+            }
+            in.skipTo(StopCharTesters.CONTROL_STOP);
+        }
+        return out;
     }
 
     static class DateCache {

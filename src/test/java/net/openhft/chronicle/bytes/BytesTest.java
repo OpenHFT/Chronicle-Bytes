@@ -155,6 +155,16 @@ public class BytesTest {
     }
 
     @Test
+    public void fromHexString() {
+        Bytes bytes = Bytes.elasticByteBuffer();
+        for (int i = 0; i < 259; i++)
+            bytes.writeByte((byte) i);
+        String s = bytes.toHexString();
+        Bytes bytes2 = Bytes.fromHexString(s);
+        assertEquals(s, bytes2.toHexString());
+    }
+
+    @Test
     public void testCharAt() {
         Bytes b = Bytes.from("Hello World");
         b.readSkip(6);

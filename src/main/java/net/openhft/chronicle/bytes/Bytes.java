@@ -416,4 +416,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return StringUtils.isEqual(this, s);
     }
 
+    static Bytes fromHexString(String s) {
+        return BytesInternal.fromHexString(s);
+    }
 }
