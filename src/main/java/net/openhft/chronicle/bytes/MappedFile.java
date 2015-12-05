@@ -52,6 +52,7 @@ public class MappedFile implements ReferenceCounted {
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
     private final long capacity;
+    private final File file;
 
     MappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
         this.raf = new RandomAccessFile(file, "rw");
@@ -59,6 +60,7 @@ public class MappedFile implements ReferenceCounted {
         this.chunkSize = OS.mapAlign(chunkSize);
         this.overlapSize = overlapSize == 0 ? 0 : OS.mapAlign(overlapSize);
         capacity = 1L << 40;
+        this.file = file;
     }
 
     @NotNull
@@ -234,5 +236,17 @@ public class MappedFile implements ReferenceCounted {
 
     public long capacity() {
         return capacity;
+    }
+
+    public long overlapSize() {
+        return overlapSize;
+    }
+
+    public long chunkSize() {
+        return chunkSize;
+    }
+
+    public File file() {
+        return file;
     }
 }
