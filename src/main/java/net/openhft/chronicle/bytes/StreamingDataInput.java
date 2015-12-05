@@ -252,4 +252,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUTF(this, sb, length);
     }
+
+    default long parseHexLong() {
+        return BytesInternal.parseHexLong(this);
+    }
 }

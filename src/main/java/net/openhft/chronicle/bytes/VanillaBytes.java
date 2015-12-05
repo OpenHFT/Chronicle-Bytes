@@ -255,7 +255,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public VanillaBytes<Underlying> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        ensureCapacity(readPosition() + length);
+        ensureCapacity(writePosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
             writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));
         } else {
