@@ -52,13 +52,20 @@ public class MappedFile implements ReferenceCounted {
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
     private final long capacity;
+    @NotNull
+    private final File file;
 
     MappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+        this.file = file;
         this.raf = new RandomAccessFile(file, "rw");
         this.fileChannel = raf.getChannel();
         this.chunkSize = OS.mapAlign(chunkSize);
         this.overlapSize = overlapSize == 0 ? 0 : OS.mapAlign(overlapSize);
         capacity = 1L << 40;
+    }
+
+    public File file() {
+        return file;
     }
 
     @NotNull
