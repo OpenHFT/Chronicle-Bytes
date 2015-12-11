@@ -167,13 +167,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param store to copy to
      */
-    default void copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
+    default long copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
         long copy = min(capacity(), store.capacity());
         int i = 0;
         for (; i < copy - 7; i++)
             store.writeLong(i, readLong(i));
         for (; i < copy; i++)
             store.writeByte(i, readByte(i));
+        return copy;
     }
 
 

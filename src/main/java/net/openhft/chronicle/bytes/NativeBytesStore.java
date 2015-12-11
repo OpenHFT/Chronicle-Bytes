@@ -573,14 +573,14 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public void copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
+    public long copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
         if (store instanceof NativeBytesStore)
-            copyTo((NativeBytesStore) store);
+            return copyTo((NativeBytesStore) store);
         else
-            BytesStore.super.copyTo(store);
+            return BytesStore.super.copyTo(store);
     }
 
-    public void copyTo(NativeBytesStore store) {
+    public long copyTo(NativeBytesStore store) {
         long addr = address;
         long addr2 = store.address;
         long read = readRemaining();
@@ -589,6 +589,7 @@ public class NativeBytesStore<Underlying>
             throw new BufferUnderflowException();
         Memory memory = OS.memory();
         memory.copyMemory(addr, addr2, read);
+        return read;
     }
 
     @Override
