@@ -194,8 +194,9 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void copyTo(BytesStore store) {
+    public long copyTo(BytesStore store) {
         // nothing to copy.
+        return 0L;
     }
 
     @Override

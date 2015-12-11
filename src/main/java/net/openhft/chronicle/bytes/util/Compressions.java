@@ -27,7 +27,8 @@ public enum Compressions implements Compression {
 
         @Override
         public void compress(Bytes from, Bytes to) throws IORuntimeException {
-            from.copyTo(to);
+            long copied = from.copyTo(to);
+            to.writeSkip(copied);
         }
 
         @Override
@@ -78,12 +79,20 @@ public enum Compressions implements Compression {
     Snappy {
         @Override
         public byte[] compress(byte[] bytes) throws IORuntimeException {
-            return Snappy.compress(bytes);
+            try {
+                return org.xerial.snappy.Snappy.compress(bytes);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override
         public byte[] uncompress(byte[] bytes) throws IORuntimeException {
-            return Snappy.uncompress(bytes);
+            try {
+                return org.xerial.snappy.Snappy.uncompress(bytes);
+            } catch (IOException e) {
+                throw new IORuntimeException(e);
+            }
         }
 
         @Override
