@@ -471,6 +471,70 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testLastDecimalPlaces() throws IOException {
+        bytes.append("1").append(' ');
+        bytes.append("1.").append(' ');
+        bytes.append("0.0").append(' ');
+        bytes.append("0.1").append(' ');
+        bytes.append("1.1").append(' ');
+        bytes.append("1.28").append(' ');
+        bytes.append("1.10").append(' ');
+        bytes.append("1.10000").append(' ');
+
+        // test long first
+        bytes.readPosition(0);
+        assertEquals(1, bytes.parseLongDecimal());
+        assertEquals(0, bytes.lastDecimalPlaces());
+
+        assertEquals(1, bytes.parseLongDecimal());
+        assertEquals(0, bytes.lastDecimalPlaces());
+
+        assertEquals(0, bytes.parseLongDecimal());
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(1, bytes.parseLongDecimal());
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(11, bytes.parseLongDecimal());
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(128, bytes.parseLongDecimal());
+        assertEquals(2, bytes.lastDecimalPlaces());
+
+        assertEquals(110, bytes.parseLongDecimal());
+        assertEquals(2, bytes.lastDecimalPlaces());
+
+        assertEquals(110000, bytes.parseLongDecimal());
+        assertEquals(5, bytes.lastDecimalPlaces());
+
+        // test double
+        bytes.readPosition(0);
+        assertEquals(1, bytes.parseDouble(), 0);
+        assertEquals(0, bytes.lastDecimalPlaces());
+
+        assertEquals(1., bytes.parseDouble(), 0);
+        assertEquals(0, bytes.lastDecimalPlaces());
+
+        assertEquals(0.0, bytes.parseDouble(), 0);
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(0.1, bytes.parseDouble(), 0);
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(1.1, bytes.parseDouble(), 0);
+        assertEquals(1, bytes.lastDecimalPlaces());
+
+        assertEquals(1.28, bytes.parseDouble(), 0);
+        assertEquals(2, bytes.lastDecimalPlaces());
+
+        assertEquals(1.10, bytes.parseDouble(), 0);
+        assertEquals(2, bytes.lastDecimalPlaces());
+
+        assertEquals(1.10000, bytes.parseDouble(), 0);
+        assertEquals(5, bytes.lastDecimalPlaces());
+    }
+
+    @Test
     public void testWriteBytes() {
         bytes.write("Hello World\n".getBytes(), 0, 10);
         bytes.write("good bye\n".getBytes(), 4, 4);

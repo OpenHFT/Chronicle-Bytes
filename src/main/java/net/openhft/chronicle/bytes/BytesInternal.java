@@ -1617,46 +1617,51 @@ enum BytesInternal {
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
         int ch = in.readUnsignedByte();
-        switch (ch) {
-            case 'N':
-                if (compareRest(in, "aN"))
+        try {
+            switch (ch) {
+                case 'N':
+                    if (compareRest(in, "aN"))
+                        return Double.NaN;
+                    in.readSkip(-1);
+
                     return Double.NaN;
-                in.readSkip(-1);
-                return Double.NaN;
-            case 'I':
-                //noinspection SpellCheckingInspection
-                if (compareRest(in, "nfinity"))
-                    return Double.POSITIVE_INFINITY;
-                in.readSkip(-1);
-                return Double.NaN;
-            case '-':
-                if (compareRest(in, "Infinity"))
-                    return Double.NEGATIVE_INFINITY;
-                negative = true;
-                ch = in.readUnsignedByte();
-                break;
-        }
-        while (true) {
-            if (ch >= '0' && ch <= '9') {
-                while (value >= MAX_VALUE_DIVIDE_10) {
-                    value >>>= 1;
-                    exp++;
-                }
-                value = value * 10 + (ch - '0');
-                decimalPlaces++;
-
-            } else if (ch == '.') {
-                decimalPlaces = 0;
-
-            } else {
-                break;
+                case 'I':
+                    //noinspection SpellCheckingInspection
+                    if (compareRest(in, "nfinity"))
+                        return Double.POSITIVE_INFINITY;
+                    in.readSkip(-1);
+                    return Double.NaN;
+                case '-':
+                    if (compareRest(in, "Infinity"))
+                        return Double.NEGATIVE_INFINITY;
+                    negative = true;
+                    ch = in.readUnsignedByte();
+                    break;
             }
-            if (in.readRemaining() == 0)
-                break;
-            ch = in.readUnsignedByte();
-        }
+            while (true) {
+                if (ch >= '0' && ch <= '9') {
+                    while (value >= MAX_VALUE_DIVIDE_10) {
+                        value >>>= 1;
+                        exp++;
+                    }
+                    value = value * 10 + (ch - '0');
+                    decimalPlaces++;
 
-        return asDouble(value, exp, negative, decimalPlaces);
+                } else if (ch == '.') {
+                    decimalPlaces = 0;
+
+                } else {
+                    break;
+                }
+                if (in.readRemaining() == 0)
+                    break;
+                ch = in.readUnsignedByte();
+            }
+
+            return asDouble(value, exp, negative, decimalPlaces);
+        } finally {
+            ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
+        }
     }
 
     static boolean compareRest(@NotNull StreamingDataInput in, @NotNull String s) throws IORuntimeException, BufferUnderflowException {
@@ -1692,6 +1697,34 @@ enum BytesInternal {
                 break;
             }
         }
+        return negative ? -num : num;
+    }
+
+    @ForceInline
+    public static long parseLongDecimal(@NotNull StreamingDataInput in) throws IORuntimeException, BufferUnderflowException {
+        long num = 0;
+        boolean negative = false;
+        int decimalPlaces = Integer.MIN_VALUE;
+        while (in.readRemaining() > 0) {
+            int b = in.readUnsignedByte();
+            // if (b >= '0' && b <= '9')
+            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
+                num = num * 10 + b - '0';
+                decimalPlaces++;
+            } else if (b == '.') {
+                decimalPlaces = 0;
+            } else if (b == '-') {
+                negative = true;
+            } else if (b == ']' || b == '}') {
+                in.readSkip(-1);
+                break;
+            } else if (b == '_') {
+                // ignore
+            } else {
+                break;
+            }
+        }
+        ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
         return negative ? -num : num;
     }
 

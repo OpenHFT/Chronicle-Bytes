@@ -39,9 +39,9 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * Return true or false, or null if it could not be detected
      * as true or false.  Case is not important
-     *
+     * <p/>
      * <p>false: f, false, n, no, 0
-     *
+     * <p/>
      * <p>true: t, true, y, yes, 1
      *
      * @param tester to detect the end of the text.
@@ -71,7 +71,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * parse text with UTF-8 decoding as character terminated.
      *
-     * @param buffer to populate
+     * @param buffer         to populate
      * @param stopCharTester to check if the end has been reached.
      */
     @ForceInline
@@ -87,7 +87,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * parse text with UTF-8 decoding as one or two character terminated.
      *
-     * @param buffer to populate
+     * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */
     @ForceInline
@@ -105,7 +105,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * parse text with ISO-8859-1 decoding as character terminated.
      *
-     * @param buffer to populate
+     * @param buffer         to populate
      * @param stopCharTester to check if the end has been reached.
      */
     @ForceInline
@@ -120,7 +120,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * parse text with ISO-8859-1 decoding as character terminated.
      *
-     * @param buffer to populate
+     * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */
     @ForceInline
@@ -134,6 +134,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
 
     /**
      * parse text as a long integer. The terminating character is consumed.
+     *
      * @return a long.
      */
     @ForceInline
@@ -143,6 +144,9 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
 
     /**
      * parse text as a double decimal. The terminating character is consumed.
+     * <p/>
+     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     *
      * @return a double.
      */
     @ForceInline
@@ -151,7 +155,32 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     /**
+     * Parse the significant digits of a decimal number.
+     * <p/>
+     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     *
+     * @return the significant digits
+     * @throws BufferUnderflowException
+     */
+    default long parseLongDecimal() throws BufferUnderflowException {
+        return BytesInternal.parseLongDecimal(this);
+    }
+
+    /**
+     * @return the last number of decimal places for parseDouble or parseLongDecimal
+     */
+    int lastDecimalPlaces();
+
+    /**
+     * Store the last number of decimal places. If
+     *
+     * @param lastDecimalPlaces set the number of decimal places if positive, otherwise 0.
+     */
+    void lastDecimalPlaces(int lastDecimalPlaces);
+
+    /**
      * Skip text until a terminating character is reached.
+     *
      * @param tester to stop at
      * @return true if a terminating character was found, false if the end of the buffer was reached.
      */

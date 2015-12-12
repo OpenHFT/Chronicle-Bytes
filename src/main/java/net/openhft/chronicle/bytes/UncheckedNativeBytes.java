@@ -39,6 +39,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     protected long readPosition;
     protected long writePosition;
     protected long writeLimit;
+    private int lastDecimalPlaces = 0;
 
     public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
@@ -754,5 +755,15 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         }
 
         return this;
+    }
+
+    @Override
+    public int lastDecimalPlaces() {
+        return lastDecimalPlaces;
+    }
+
+    @Override
+    public void lastDecimalPlaces(int lastDecimalPlaces) {
+        this.lastDecimalPlaces = Math.max(0, lastDecimalPlaces);
     }
 }
