@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.io.IORuntimeException;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;

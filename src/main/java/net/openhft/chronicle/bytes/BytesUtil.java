@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.nio.BufferUnderflowException;
@@ -117,15 +118,15 @@ public enum BytesUtil {
     }
 
     public static long utf8Length(CharSequence cs) {
-        return BytesInternal.findUTFLength(cs);
+        return BytesInternal.findUtf8Length(cs);
     }
 
     public static void parseUtf8(
             @NotNull StreamingDataInput in, Appendable appendable, int utflen) {
-        BytesInternal.parseUTF(in, appendable, utflen);
+        BytesInternal.parseUtf8(in, appendable, utflen);
     }
 
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
-        BytesInternal.appendUTF(out, cs, 0, cs.length());
+        BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
 }

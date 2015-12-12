@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.annotation.Nullable;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
@@ -87,36 +88,36 @@ enum BytesInternal {
         return true;
     }
 
-    public static void parseUTF(
+    public static void parseUtf8(
             @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (bytes instanceof Bytes
                 && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
                 && appendable instanceof StringBuilder) {
-            parseUTF_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
+            parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
-            parseUTF1(bytes, appendable, utflen);
+            parseUtf81(bytes, appendable, utflen);
         }
     }
 
-    public static void parseUTF(
+    public static void parseUtf8(
             @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
-                parseUTF_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
+                parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
-                parseUTF_SB1(bs, offset, (StringBuilder) appendable, utflen);
+                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
                 return;
             }
         }
-        parseUTF1(input, offset, appendable, utflen);
+        parseUtf81(input, offset, appendable, utflen);
     }
 
-    public static boolean compareUTF(RandomDataInput input, long offset, CharSequence other) {
+    public static boolean compareUtf8(RandomDataInput input, long offset, CharSequence other) {
         long utfLen;
         if ((utfLen = input.readByte(offset++)) < 0) {
             utfLen &= 0x7FL;
@@ -142,10 +143,10 @@ enum BytesInternal {
             return other == null;
         if (other == null)
             return false;
-        return compareUTF(input, offset, utfLen, other);
+        return compareUtf8(input, offset, utfLen, other);
     }
 
-    private static boolean compareUTF(
+    private static boolean compareUtf8(
             RandomDataInput input, long offset, long utfLen, CharSequence other) {
         if (offset + utfLen > input.realCapacity())
             throw new BufferUnderflowException();
@@ -159,11 +160,11 @@ enum BytesInternal {
             i++;
         }
         if (i < utfLen && i < other.length())
-            return compareUTF2(input, offset + i, i, utfLen, other);
+            return compareUtf82(input, offset + i, i, utfLen, other);
         return utfLen == other.length();
     }
 
-    private static boolean compareUTF2(
+    private static boolean compareUtf82(
             RandomDataInput input, long offset, int charI, long utfLen, CharSequence other)
             throws UTFDataFormatRuntimeException {
         long limit = offset + utfLen;
@@ -240,7 +241,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUTF1(
+    public static void parseUtf81(
             @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
@@ -260,14 +261,14 @@ enum BytesInternal {
             }
 
             if (utflen > count)
-                parseUTF2(bytes, appendable, utflen, count);
+                parseUtf82(bytes, appendable, utflen, count);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
 
-    public static void parseUTF1(@NotNull RandomDataInput input, long offset,
-                                 @NotNull Appendable appendable, int utflen)
+    public static void parseUtf81(@NotNull RandomDataInput input, long offset,
+                                  @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             assert input.realCapacity() >= offset + utflen;
@@ -285,7 +286,7 @@ enum BytesInternal {
             }
 
             if (limit > offset)
-                parseUTF2(input, offset, limit, appendable, utflen);
+                parseUtf82(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -315,7 +316,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUTF_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             int count = 0;
@@ -335,14 +336,14 @@ enum BytesInternal {
             bytes.readSkip(count);
             setCount(sb, count);
             if (count < utflen)
-                parseUTF2(bytes, sb, utflen, count);
+                parseUtf82(bytes, sb, utflen, count);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
     }
 
-    public static void parseUTF_SB1(@NotNull NativeBytesStore bytes, long offset,
-                                    @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, long offset,
+                                     @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             if (offset + utflen > bytes.realCapacity())
@@ -360,7 +361,7 @@ enum BytesInternal {
             }
             setCount(sb, count);
             if (count < utflen)
-                parseUTF2(bytes, offset + count, offset + utflen, sb, utflen);
+                parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
         } catch (IOException e) {
             throw new AssertionError(e);
         }
@@ -380,7 +381,7 @@ enum BytesInternal {
         return count;
     }
 
-    static void parseUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
+    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -441,8 +442,8 @@ enum BytesInternal {
         }
     }
 
-    static void parseUTF2(@NotNull RandomDataInput input, long offset, long limit,
-                          @NotNull Appendable appendable, int utflen)
+    static void parseUtf82(@NotNull RandomDataInput input, long offset, long limit,
+                           @NotNull Appendable appendable, int utflen)
             throws IOException, UTFDataFormatRuntimeException {
         while (offset < limit) {
             int c = input.readUnsignedByte(offset++);
@@ -505,7 +506,7 @@ enum BytesInternal {
 
     public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable String str) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         char[] chars = extractChars(str);
-        long utfLength = findUTFLength(chars);
+        long utfLength = findUtf8Length(chars);
         bytes.writeStopBit(utfLength);
         bytes.appendUtf8(chars, 0, chars.length);
     }
@@ -522,9 +523,9 @@ enum BytesInternal {
             bytes.writeStopBit(-1);
 
         } else {
-            long utfLength = findUTFLength(str);
+            long utfLength = findUtf8Length(str);
             bytes.writeStopBit(utfLength);
-            appendUTF(bytes, str, 0, str.length());
+            appendUtf8(bytes, str, 0, str.length());
         }
     }
 
@@ -540,18 +541,18 @@ enum BytesInternal {
             int strLength = str.length();
             if (strLength < 32) {
                 long lenOffset = offset;
-                offset = appendUTF(out, offset + 1, str, 0, strLength);
+                offset = appendUtf8(out, offset + 1, str, 0, strLength);
                 long utfLength = offset - lenOffset - 1;
                 assert utfLength <= 127;
                 writeStopBit(out, lenOffset, utfLength);
             } else {
-                long utfLength = findUTFLength(str);
+                long utfLength = findUtf8Length(str);
                 offset = writeStopBit(out, offset, utfLength);
                 if (utfLength == strLength) {
                     append8bit(offset, out, str, 0, strLength);
                     offset += utfLength;
                 } else {
-                    offset = appendUTF(out, offset, str, 0, strLength);
+                    offset = appendUtf8(out, offset, str, 0, strLength);
                 }
             }
         }
@@ -568,7 +569,7 @@ enum BytesInternal {
 
         } else {
             int strLength = str.length();
-            long utfLength = findUTFLength(str);
+            long utfLength = findUtf8Length(str);
             if (utfLength > maxUtf8Len) {
                 throw new IllegalArgumentException("Attempted to write a char sequence of " +
                         "utf8 size " + utfLength + ": \"" + str +
@@ -579,13 +580,13 @@ enum BytesInternal {
                 append8bit(offset, out, str, 0, strLength);
                 offset += utfLength;
             } else {
-                offset = appendUTF(out, offset, str, 0, strLength);
+                offset = appendUtf8(out, offset, str, 0, strLength);
             }
         }
         return offset;
     }
 
-    static long findUTFLength(@NotNull CharSequence str) throws IndexOutOfBoundsException {
+    static long findUtf8Length(@NotNull CharSequence str) throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
@@ -603,7 +604,7 @@ enum BytesInternal {
         return utflen;
     }
 
-    private static long findUTFLength(@NotNull char[] chars) {
+    private static long findUtf8Length(@NotNull char[] chars) {
         int strlen = chars.length;
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
@@ -630,8 +631,8 @@ enum BytesInternal {
         return sbytes;
     }
 
-    public static void appendUTF(@NotNull StreamingDataOutput bytes,
-                                 @NotNull CharSequence str, int offset, int length)
+    public static void appendUtf8(@NotNull StreamingDataOutput bytes,
+                                  @NotNull CharSequence str, int offset, int length)
             throws IndexOutOfBoundsException, IORuntimeException, BufferOverflowException {
         int i;
         for (i = 0; i < length; i++) {
@@ -640,20 +641,20 @@ enum BytesInternal {
                 break;
             bytes.writeByte((byte) c);
         }
-        appendUTF2(bytes, str, offset, length, i);
+        appendUtf82(bytes, str, offset, length, i);
     }
 
-    private static void appendUTF2(@NotNull StreamingDataOutput bytes,
-                                   @NotNull CharSequence str, int offset, int length, int i)
+    private static void appendUtf82(@NotNull StreamingDataOutput bytes,
+                                    @NotNull CharSequence str, int offset, int length, int i)
             throws IndexOutOfBoundsException, IORuntimeException, BufferOverflowException {
         for (; i < length; i++) {
             char c = str.charAt(offset + i);
-            appendUTFChar(bytes, c);
+            appendUtf8Char(bytes, c);
         }
     }
 
-    public static long appendUTF(@NotNull RandomDataOutput out, long outOffset,
-                                 @NotNull CharSequence str, int strOffset, int length)
+    public static long appendUtf8(@NotNull RandomDataOutput out, long outOffset,
+                                  @NotNull CharSequence str, int strOffset, int length)
             throws IndexOutOfBoundsException, IORuntimeException, BufferOverflowException {
         int i;
         for (i = 0; i < length; i++) {
@@ -662,15 +663,15 @@ enum BytesInternal {
                 break;
             out.writeByte(outOffset++, (byte) c);
         }
-        return appendUTF2(out, outOffset, str, strOffset, length, i);
+        return appendUtf82(out, outOffset, str, strOffset, length, i);
     }
 
-    private static long appendUTF2(@NotNull RandomDataOutput out, long outOffset,
-                                   @NotNull CharSequence str, int strOffset, int length, int i)
+    private static long appendUtf82(@NotNull RandomDataOutput out, long outOffset,
+                                    @NotNull CharSequence str, int strOffset, int length, int i)
             throws IndexOutOfBoundsException, IORuntimeException, BufferOverflowException {
         for (; i < length; i++) {
             char c = str.charAt(strOffset + i);
-            outOffset = appendUTFChar(out, outOffset, c);
+            outOffset = appendUtf8Char(out, outOffset, c);
         }
         return outOffset;
     }
@@ -694,7 +695,7 @@ enum BytesInternal {
         }
     }
 
-    public static void appendUTFChar(@NotNull StreamingDataOutput bytes, int c)
+    public static void appendUtf8Char(@NotNull StreamingDataOutput bytes, int c)
             throws IORuntimeException, BufferOverflowException {
         if (c <= 0x007F) {
             bytes.writeByte((byte) c);
@@ -716,7 +717,7 @@ enum BytesInternal {
         }
     }
 
-    public static long appendUTFChar(@NotNull RandomDataOutput out, long offset, int c)
+    public static long appendUtf8Char(@NotNull RandomDataOutput out, long offset, int c)
             throws IORuntimeException, BufferOverflowException {
         if (c <= 0x007F) {
             out.writeByte(offset++, (byte) c);
@@ -995,6 +996,42 @@ enum BytesInternal {
         } else {
             appendLong0(out, num);
         }
+    }
+
+    public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+        if (decimalPlaces == 0) {
+            append(out, num);
+            return;
+        }
+
+        byte[] numberBuffer = NUMBER_BUFFER.get();
+        int endIndex;
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                numberBuffer = MIN_VALUE_TEXT;
+                endIndex = MIN_VALUE_TEXT.length;
+            } else {
+                out.writeByte((byte) '-');
+                num = -num;
+                endIndex = appendLong1(numberBuffer, num);
+            }
+        } else {
+            endIndex = appendLong1(numberBuffer, num);
+        }
+        int digits = numberBuffer.length - endIndex;
+        if (decimalPlaces >= digits) {
+            out.writeUnsignedByte('0');
+            out.writeUnsignedByte('.');
+            while (decimalPlaces-- > digits)
+                out.writeUnsignedByte('0');
+            out.write(numberBuffer, endIndex, digits);
+            return;
+        }
+
+        int decimalLength = numberBuffer.length - endIndex - decimalPlaces;
+        out.write(numberBuffer, endIndex, decimalLength);
+        out.writeUnsignedByte('.');
+        out.write(numberBuffer, endIndex + decimalLength, digits - decimalLength);
     }
 
     public static void prepend(@NotNull BytesPrepender out, long num) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
@@ -1341,15 +1378,15 @@ enum BytesInternal {
 
     @NotNull
     @ForceInline
-    public static String parseUTF(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) {
+    public static String parseUtf8(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) {
         StringBuilder utfReader = acquireStringBuilder();
-        parseUTF(bytes, utfReader, tester);
+        parseUtf8(bytes, utfReader, tester);
         return SI.intern(utfReader);
     }
 
     @ForceInline
-    public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder,
-                                @NotNull StopCharTester tester)
+    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder,
+                                 @NotNull StopCharTester tester)
             throws BufferUnderflowException, IllegalStateException {
         try {
             if (builder instanceof StringBuilder
@@ -1357,17 +1394,17 @@ enum BytesInternal {
                 Bytes vb = (Bytes) bytes;
                 StringBuilder sb = (StringBuilder) builder;
                 sb.setLength(0);
-                readUTF_SB1(vb, sb, tester);
+                readUtf8_SB1(vb, sb, tester);
             } else {
                 AppendableUtil.setLength(builder, 0);
-                readUTF1(bytes, builder, tester);
+                readUtf81(bytes, builder, tester);
             }
         } catch (IOException | IllegalArgumentException e) {
             throw Jvm.rethrow(e);
         }
     }
 
-    private static void readUTF_SB1(
+    private static void readUtf8_SB1(
             @NotNull Bytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, IllegalArgumentException, IllegalStateException,
             BufferUnderflowException {
@@ -1388,11 +1425,11 @@ enum BytesInternal {
         }
         bytes.readSkip(i);
         if (i < len) {
-            readUTF_SB2(bytes, appendable, tester);
+            readUtf8_SB2(bytes, appendable, tester);
         }
     }
 
-    private static void readUTF_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws UTFDataFormatException, IORuntimeException {
+    private static void readUtf8_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) throws UTFDataFormatException, IORuntimeException {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -1450,7 +1487,7 @@ enum BytesInternal {
         }
     }
 
-    private static void readUTF1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException, IllegalArgumentException, BufferUnderflowException {
+    private static void readUtf81(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException, IllegalArgumentException, BufferUnderflowException {
         int len = Maths.toInt32(bytes.readRemaining());
         while (len-- > 0) {
             int c = bytes.readUnsignedByte();
@@ -1465,10 +1502,10 @@ enum BytesInternal {
         if (len <= 0)
             return;
 
-        readUTF2(bytes, appendable, tester);
+        readUtf82(bytes, appendable, tester);
     }
 
-    private static void readUTF2(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
+    private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester) throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
             switch (c >> 4) {
@@ -1527,10 +1564,10 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parseUTF(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) throws IllegalArgumentException, BufferUnderflowException, IORuntimeException {
+    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester) throws IllegalArgumentException, BufferUnderflowException, IORuntimeException {
         AppendableUtil.setLength(builder, 0);
         try {
-            AppendableUtil.readUTFAndAppend(bytes, builder, tester);
+            AppendableUtil.readUtf8AndAppend(bytes, builder, tester);
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }
@@ -2008,7 +2045,7 @@ enum BytesInternal {
 
     public static Boolean parseBoolean(ByteStringParser parser, StopCharTester tester) {
         StringBuilder sb = acquireStringBuilder();
-        parseUTF(parser, sb, tester);
+        parseUtf8(parser, sb, tester);
         if (sb.length() == 0)
             return null;
         switch (sb.charAt(0)) {

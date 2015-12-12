@@ -49,7 +49,7 @@ public class UTF8StringInterner {
             return s;
         StringBuilder sb = SBP.acquireStringBuilder();
         long pos = cs.readPosition();
-        cs.parseUTF(sb, Maths.toInt32(cs.readRemaining()));
+        cs.parseUtf8(sb, Maths.toInt32(cs.readRemaining()));
         cs.readPosition(pos);
         return interner[h] = sb.toString();
     }

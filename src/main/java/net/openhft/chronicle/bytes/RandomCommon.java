@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.IORuntimeException;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;

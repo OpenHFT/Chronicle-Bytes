@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+
 /**
  * thrown when the TcpChannelHub drops its connection to the server
  */

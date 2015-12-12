@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;

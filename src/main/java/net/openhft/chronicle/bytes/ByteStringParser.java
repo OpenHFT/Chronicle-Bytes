@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
@@ -60,7 +61,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     @NotNull
     @ForceInline
     default String parseUtf8(@NotNull StopCharTester stopCharTester) {
-        return BytesInternal.parseUTF(this, stopCharTester);
+        return BytesInternal.parseUtf8(this, stopCharTester);
     }
 
     @Deprecated
@@ -76,7 +77,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
-        BytesInternal.parseUTF(this, buffer, stopCharTester);
+        BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
     @Deprecated
@@ -93,7 +94,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     @ForceInline
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
-        BytesInternal.parseUTF(this, buffer, stopCharsTester);
+        BytesInternal.parseUtf8(this, buffer, stopCharsTester);
     }
 
     @Deprecated
