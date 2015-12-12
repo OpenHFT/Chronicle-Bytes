@@ -116,32 +116,32 @@ public class ByteStringAppenderTest {
     @Test
     public void testAppendDoublePrecision() throws IOException {
         bytes.append(1.28, 0).append('\n');
-        bytes.append(1.28, 1).append('\n');
+        bytes.append(-1.28, 1).append('\n');
         bytes.append(1.28, 2).append('\n');
-        bytes.append(1.28, 3).append('\n');
+        bytes.append(-1.28, 3).append('\n');
         bytes.append(1.28, 4).append('\n');
 
         bytes.append(0, 0).append('\n');
-        bytes.append(0, 1).append('\n');
+        bytes.append(-0, 1).append('\n');
         bytes.append(0, 4).append('\n');
         bytes.append(1, 0).append('\n');
-        bytes.append(1.11, 1).append('\n');
+        bytes.append(-1.11, 1).append('\n');
         bytes.append(0.111, 2).append('\n');
         bytes.append(1.1, 3).append('\n');
-        bytes.append(0.01111, 4).append('\n');
+        bytes.append(-0.01111, 4).append('\n');
 
         assertEquals("1\n" +
-                "1.3\n" +
+                "-1.3\n" +
                 "1.28\n" +
-                "1.280\n" +
+                "-1.280\n" +
                 "1.2800\n" +
                 "0\n" +
                 "0.0\n" +
                 "0.0000\n" +
                 "1\n" +
-                "1.1\n" +
+                "-1.1\n" +
                 "0.11\n" +
                 "1.100\n" +
-                "0.0111", bytes.toString());
+                "-0.0111\n", bytes.toString());
     }
 }
