@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -151,7 +152,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        BytesInternal.parseUTF(this, sb, len);
+        BytesInternal.parseUtf8(this, sb, len);
         return true;
     }
 
@@ -250,7 +251,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void parseUtf8(Appendable sb, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
         AppendableUtil.setLength(sb, 0);
-        BytesInternal.parseUTF(this, sb, length);
+        BytesInternal.parseUtf8(this, sb, length);
     }
 
     default long parseHexLong() {

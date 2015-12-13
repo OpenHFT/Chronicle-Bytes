@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.Nullable;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -443,7 +444,7 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen == -1)
             return ~offset;
         int len = Maths.toUInt31(utfLen);
-        BytesInternal.parseUTF(this, offset, sb, len);
+        BytesInternal.parseUtf8(this, offset, sb, len);
         return offset + utfLen;
     }
 
@@ -497,7 +498,7 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen > maxUtf8Len)
             throw new IllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
-        BytesInternal.parseUTF(this, offset, sb, (int) utfLen);
+        BytesInternal.parseUtf8(this, offset, sb, (int) utfLen);
         return offset + utfLen;
     }
 
@@ -529,7 +530,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return {@code true} if two char sequences are equal
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other) {
-        return BytesInternal.compareUTF(this, offset, other);
+        return BytesInternal.compareUtf8(this, offset, other);
     }
 
     default byte[] toByteArray() throws IORuntimeException, IllegalArgumentException {

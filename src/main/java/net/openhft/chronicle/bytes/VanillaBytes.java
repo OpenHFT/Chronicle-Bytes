@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,6 +34,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         implements Byteable<Bytes<Underlying>, Underlying> {
+
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }

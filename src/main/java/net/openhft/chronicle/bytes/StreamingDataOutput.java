@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.io.IORuntimeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -119,8 +120,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
-            if (c > 255) c = '?';
-            writeUnsignedByte(c);
+            appendUtf8(c);
         }
         return (S) this;
     }
@@ -231,7 +231,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S appendUtf8(int codepoint) throws BufferOverflowException, IORuntimeException {
-        BytesInternal.appendUTFChar(this, codepoint);
+        BytesInternal.appendUtf8Char(this, codepoint);
         return (S) this;
     }
 
@@ -250,14 +250,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
         for (; i < length; i++) {
             char c = chars[offset + i];
-            BytesInternal.appendUTFChar(this, c);
+            BytesInternal.appendUtf8Char(this, c);
         }
         return (S) this;
     }
 
     default S appendUtf8(CharSequence cs, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        BytesInternal.appendUTF(this, cs, offset, length);
+        BytesInternal.appendUtf8(this, cs, offset, length);
         return (S) this;
     }
 

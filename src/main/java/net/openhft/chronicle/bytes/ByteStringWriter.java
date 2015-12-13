@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.BufferOverflowException;

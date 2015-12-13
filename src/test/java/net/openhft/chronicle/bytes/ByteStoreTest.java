@@ -28,12 +28,9 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
-import java.util.Random;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
-import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -144,32 +141,6 @@ public class ByteStoreTest {
         assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
     }
 
-    @Test
-    public void testAppendDouble() throws IOException {
-        testAppendDouble0(-6.895305375646115E24);
-        Random random = new Random(1);
-        for (int i = 0; i < 100000; i++) {
-            double d = Math.pow(1e32, random.nextDouble()) / 1e6;
-            if (i % 3 == 0) d = -d;
-            testAppendDouble0(d);
-        }
-    }
-
-    private void testAppendDouble0(double d) throws IOException {
-        bytes.clear();
-        bytes.append(d).append(' ');
-
-        double d2 = bytes.parseDouble();
-        Assert.assertEquals(d, d2, 0);
-
-/* assumes self terminating.
-        bytes.clear();
-        bytes.append(d);
-        bytes.flip();
-        double d3 = bytes.parseDouble();
-        Assert.assertEquals(d, d3, 0);
-*/
-    }
 
     /*    @Test
         public void testWriteReadBytes() {
@@ -229,40 +200,6 @@ public class ByteStoreTest {
         }
         assertEquals("", bytes.readUtf8());
         assertEquals(null, bytes.readUtf8());
-    }
-
-    @Test
-    public void testAppendParseUTF() throws IOException {
-        String[] words = "Hello,World!,Bye£€!".split(",");
-        for (String word : words) {
-            bytes.append(word).append('\t');
-        }
-        bytes.append('\t');
-
-        for (String word : words) {
-            assertEquals(word, bytes.parseUTF(CONTROL_STOP));
-        }
-        assertEquals("", bytes.parseUTF(CONTROL_STOP));
-
-        bytes.readPosition(0);
-        StringBuilder sb = new StringBuilder();
-        for (String word : words) {
-            bytes.parseUTF(sb, CONTROL_STOP);
-            Assert.assertEquals(word, sb.toString());
-        }
-        bytes.parseUTF(sb, CONTROL_STOP);
-        Assert.assertEquals("", sb.toString());
-
-        bytes.readPosition(0);
-        bytes.skipTo(CONTROL_STOP);
-        assertEquals(6, bytes.readPosition());
-        bytes.skipTo(CONTROL_STOP);
-        assertEquals(13, bytes.readPosition());
-        Assert.assertTrue(bytes.skipTo(CONTROL_STOP));
-        assertEquals(23, bytes.readPosition());
-        Assert.assertTrue(bytes.skipTo(CONTROL_STOP));
-        assertEquals(24, bytes.readPosition());
-        Assert.assertFalse(bytes.skipTo(CONTROL_STOP));
     }
 
     @Test
@@ -448,35 +385,6 @@ public class ByteStoreTest {
 
         for (double i : doubles)
             assertEquals(i, bytes.readStopBitDouble(), 0.0);
-    }
-
-    @Test
-    public void testAppendSubstring() throws IOException {
-        bytes.append("Hello World", 2, 7).append("\n");
-
-        assertEquals("Hello World".substring(2, 7), bytes.parseUTF(CONTROL_STOP));
-    }
-
-    @Test
-    public void testAppendParse() throws IOException {
-        bytes.append("word£€)").append(' ');
-        bytes.append(1234).append(' ');
-        bytes.append(123456L).append(' ');
-        bytes.append(1.2345).append(' ');
-
-        assertEquals("word£€)", bytes.parseUTF(SPACE_STOP));
-        assertEquals(1234, bytes.parseLong());
-        assertEquals(123456L, bytes.parseLong());
-        assertEquals(1.2345, bytes.parseDouble(), 0);
-    }
-
-    @Test
-    public void testWriteBytes() {
-        bytes.write("Hello World\n".getBytes(), 0, 10);
-        bytes.write("good bye\n".getBytes(), 4, 4);
-        bytes.write(4, "0 w".getBytes());
-
-        assertEquals("Hell0 worl bye", bytes.parseUTF(CONTROL_STOP));
     }
 
     @Test
