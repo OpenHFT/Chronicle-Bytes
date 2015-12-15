@@ -164,12 +164,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Copy the data to another BytesStore
+     * Copy the data to another BytesStore as long as there is space available in the destination store.
      *
+     * @return how many bytes were copied
      * @param store to copy to
      */
     default long copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
-        long copy = min(readRemaining(), store.capacity());
+        final long copy = min(readRemaining(), store.capacity());
         long pos = 0L;
         for (long i =0L; i < copy - 7; i+=8L) {
             store.writeLong(i, readLong(i));
