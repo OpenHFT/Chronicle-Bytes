@@ -70,6 +70,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             throws IllegalStateException {
         BytesStore oldBS = this.bytesStore;
         this.bytesStore = bytesStore;
+        bytesStore.reserve();
         oldBS.release();
         clear();
     }
