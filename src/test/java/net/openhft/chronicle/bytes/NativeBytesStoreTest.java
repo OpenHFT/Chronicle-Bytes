@@ -45,4 +45,13 @@ public class NativeBytesStoreTest {
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
     }
+
+    @Test
+    public void testCopyTo() {
+        Bytes<ByteBuffer> src = Bytes.elasticByteBuffer().writeUtf8("hello");
+        Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
+
+        dst.writePosition(src.copyTo(dst));
+        assertEquals(src, dst);
+    }
 }
