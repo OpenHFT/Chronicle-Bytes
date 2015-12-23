@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.nio.ch.DirectBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,6 +37,10 @@ import static java.lang.Math.min;
  */
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
+
+    default boolean isNative() {
+        return underlyingObject() == null || underlyingObject() instanceof DirectBuffer;
+    }
 
     /**
      * @deprecated Use from(CharSequence) instead.
