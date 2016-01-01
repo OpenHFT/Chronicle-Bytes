@@ -141,7 +141,6 @@ public class ByteStoreTest {
         assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
     }
 
-
     /*    @Test
         public void testWriteReadBytes() {
             byte[] bytes = "Hello World!".getBytes();

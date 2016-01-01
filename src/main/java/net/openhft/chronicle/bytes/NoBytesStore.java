@@ -124,7 +124,6 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
-
     @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {

@@ -38,10 +38,6 @@ import static java.lang.Math.min;
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
-    default boolean isNative() {
-        return underlyingObject() == null || underlyingObject() instanceof DirectBuffer;
-    }
-
     /**
      * @deprecated Use from(CharSequence) instead.
      */
@@ -104,6 +100,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         PointerBytesStore pbs = nativePointer();
         pbs.set(address, length);
         return pbs;
+    }
+
+    default boolean isNative() {
+        return underlyingObject() == null || underlyingObject() instanceof DirectBuffer;
     }
 
     /**
@@ -183,7 +183,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return copy;
     }
 
-
     default void copyTo(OutputStream out) throws IOException {
         BytesInternal.copy(this, out);
     }
@@ -251,7 +250,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return toDebugString(256);
     }
 
-
     /**
      * @param maxLength the maxiumum len of the output
      * @return This BytesStore as a DebugString.
@@ -260,7 +258,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default String toDebugString(long maxLength) {
         return BytesInternal.toDebugString(this, maxLength);
     }
-
 
     /**
      * @return the underlying BytesStore

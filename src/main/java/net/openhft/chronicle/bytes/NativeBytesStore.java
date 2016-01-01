@@ -624,6 +624,5 @@ public class NativeBytesStore<Underlying>
             address = 0;
             OS.memory().freeMemory(addressToFree, size);
         }
-
     }
 }

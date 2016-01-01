@@ -67,7 +67,6 @@ public enum BytesUtil {
         return true;
     }
 
-
     public static boolean equals(Object o1, Object o2) {
         if (o1 == o2) return true;
         if (o1 instanceof CharSequence && o2 instanceof CharSequence)
