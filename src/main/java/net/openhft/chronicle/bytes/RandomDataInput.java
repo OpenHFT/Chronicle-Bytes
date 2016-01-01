@@ -409,8 +409,8 @@ public interface RandomDataInput extends RandomCommon {
      * {@code sb} only this case is indistinguishable from reading an empty char sequence).
      *
      * @param offset the offset in this {@code RandomDataInput} to read char sequence from
-     * @param sb the buffer to read char sequence into (truncated first)
-     * @param <ACS> buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param sb     the buffer to read char sequence into (truncated first)
+     * @param <ACS>  buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
@@ -457,10 +457,10 @@ public interface RandomDataInput extends RandomCommon {
      * length of Utf8 encoding of the char sequence exceeds {@code maxUtf8Len},
      * {@code IllegalStateException} is thrown.
      *
-     * @param offset the offset in this {@code RandomDataInput} to read char sequence from
-     * @param sb the buffer to read char sequence into (truncated first)
+     * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
+     * @param sb         the buffer to read char sequence into (truncated first)
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
-     * @param <ACS> buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param <ACS>      buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
@@ -507,7 +507,7 @@ public interface RandomDataInput extends RandomCommon {
      * encoding of the char sequence exceeds {@code maxUtf8Len}, {@code IllegalStateException}
      * is thrown.
      *
-     * @param offset the offset in this {@code RandomDataInput} to read char sequence from
+     * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
      * @return the char sequence was read
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
@@ -515,7 +515,7 @@ public interface RandomDataInput extends RandomCommon {
     @Nullable
     default String readUtf8Limited(long offset, int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
-            IllegalStateException{
+            IllegalStateException {
         return BytesInternal.readUtf8(this, offset, maxUtf8Len);
     }
 
@@ -525,8 +525,8 @@ public interface RandomDataInput extends RandomCommon {
      * char sequences (encoded in bytes and the given) may be {@code null}.
      *
      * @param offset the offset in this {@code RandomDataInput} where the char sequence to compare
-     * is written
-     * @param other the second char sequence to compare
+     *               is written
+     * @param other  the second char sequence to compare
      * @return {@code true} if two char sequences are equal
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other) {

@@ -26,16 +26,17 @@ import java.io.InputStream;
  */
 public class StreamingInputStream extends InputStream {
 
-    public static StreamingInputStream uninitialized() {
-        return new StreamingInputStream();
-    }
-
     StreamingDataInput in;
 
-    private StreamingInputStream() {}
+    private StreamingInputStream() {
+    }
 
     public StreamingInputStream(StreamingDataInput in) {
         this.in = in;
+    }
+
+    public static StreamingInputStream uninitialized() {
+        return new StreamingInputStream();
     }
 
     public void init(StreamingDataInput in) {

@@ -35,15 +35,16 @@ import java.util.concurrent.atomic.AtomicLong;
 public class HeapBytesStore<Underlying>
         implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();
+    private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
     private Object realUnderlyingObject;
     private int dataOffset;
     private long capacity;
-    private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
     private Underlying underlyingObject;
 
-    private HeapBytesStore() {}
+    private HeapBytesStore() {
+    }
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         init(byteBuffer);
@@ -51,6 +52,20 @@ public class HeapBytesStore<Underlying>
 
     private HeapBytesStore(@NotNull byte[] byteArray) {
         init(byteArray);
+    }
+
+    @NotNull
+    static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
+        return new HeapBytesStore<>(byteArray);
+    }
+
+    @NotNull
+    static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
+        return new HeapBytesStore<>(bb);
+    }
+
+    public static <T> HeapBytesStore<T> uninitialized() {
+        return new HeapBytesStore<>();
     }
 
     public void init(@NotNull ByteBuffer byteBuffer) {
@@ -74,20 +89,6 @@ public class HeapBytesStore<Underlying>
         realUnderlyingObject = null;
         dataOffset = 0;
         capacity = 0;
-    }
-
-    @NotNull
-    static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
-        return new HeapBytesStore<>(byteArray);
-    }
-
-    @NotNull
-    static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
-        return new HeapBytesStore<>(bb);
-    }
-
-    public static <T> HeapBytesStore<T> uninitialized() {
-        return new HeapBytesStore<>();
     }
 
     @NotNull

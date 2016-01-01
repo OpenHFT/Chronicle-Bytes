@@ -29,8 +29,8 @@ public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
      * This setter for a data type which points to an underlying ByteStore.
      *
      * @param bytesStore the fix point ByteStore
-     * @param offset the offset within the ByteStore
-     * @param length the length in the ByteStore
+     * @param offset     the offset within the ByteStore
+     * @param length     the length in the ByteStore
      */
     void bytesStore(BytesStore<B, Underlying> bytesStore, long offset, long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException,

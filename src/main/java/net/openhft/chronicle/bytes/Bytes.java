@@ -297,6 +297,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return result;
     }
 
+    static Bytes fromHexString(String s) {
+        return BytesInternal.fromHexString(s);
+    }
+
     /**
      * Return a Bytes which is optionally unchecked.  This allows bounds checks to be turned off.
      *
@@ -415,9 +419,5 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
 
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
-    }
-
-    static Bytes fromHexString(String s) {
-        return BytesInternal.fromHexString(s);
     }
 }

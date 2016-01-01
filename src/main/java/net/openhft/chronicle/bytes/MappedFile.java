@@ -41,9 +41,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  */
 public class MappedFile implements ReferenceCounted {
 
-    private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
     public static final long DEFAULT_CAPACITY = 1L << 40;
-
+    private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -56,11 +55,6 @@ public class MappedFile implements ReferenceCounted {
     @NotNull
     private final File file;
 
-    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        return new MappedFile(file, raf, chunkSize, overlapSize, DEFAULT_CAPACITY);
-    }
-
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity) {
         this.file = file;
         this.raf = raf;
@@ -70,20 +64,9 @@ public class MappedFile implements ReferenceCounted {
         this.capacity = capacity;
     }
 
-    public MappedFile withSizes(long chunkSize, long overlapSize) {
-        chunkSize = OS.mapAlign(chunkSize);
-        overlapSize = OS.mapAlign(overlapSize);
-        if (chunkSize == this.chunkSize && overlapSize == this.overlapSize)
-            return this;
-        try {
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity);
-        } finally {
-            release();
-        }
-    }
-
-    public File file() {
-        return file;
+    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+        RandomAccessFile raf = new RandomAccessFile(file, "rw");
+        return new MappedFile(file, raf, chunkSize, overlapSize, DEFAULT_CAPACITY);
     }
 
     @NotNull
@@ -104,6 +87,22 @@ public class MappedFile implements ReferenceCounted {
     @NotNull
     public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
         return MappedFile.of(file, chunkSize, overlapSize);
+    }
+
+    public MappedFile withSizes(long chunkSize, long overlapSize) {
+        chunkSize = OS.mapAlign(chunkSize);
+        overlapSize = OS.mapAlign(overlapSize);
+        if (chunkSize == this.chunkSize && overlapSize == this.overlapSize)
+            return this;
+        try {
+            return new MappedFile(file, raf, chunkSize, overlapSize, capacity);
+        } finally {
+            release();
+        }
+    }
+
+    public File file() {
+        return file;
     }
 
     @Nullable

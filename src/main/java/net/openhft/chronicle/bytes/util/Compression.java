@@ -13,48 +13,6 @@ import java.util.function.Function;
  */
 public interface Compression {
 
-    default byte[] compress(byte[] bytes) throws IORuntimeException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (OutputStream output = compressingStream(baos)) {
-            output.write(bytes);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-        return baos.toByteArray();
-    }
-
-    default void compress(Bytes from, Bytes to) throws IORuntimeException {
-        try (OutputStream output = compressingStream(to.outputStream())) {
-            from.copyTo(output);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    default byte[] uncompress(byte[] bytes) throws IORuntimeException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
-            byte[] buf = new byte[512];
-            for (int len; (len = input.read(buf)) > 0; )
-                baos.write(buf, 0, len);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-        return baos.toByteArray();
-    }
-
-    default void uncompress(Bytes from, Bytes to) {
-        try (InputStream input = decompressingStream(from.inputStream())) {
-            to.copyFrom(input);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-    }
-
-    InputStream decompressingStream(InputStream input);
-
-    OutputStream compressingStream(OutputStream output);
-
     static <T> void compress(CharSequence cs, Bytes uncompressed, Bytes compressed) {
         switch (cs.charAt(0)) {
             case 'l':
@@ -106,4 +64,46 @@ public interface Compression {
 
         return null;
     }
+
+    default byte[] compress(byte[] bytes) throws IORuntimeException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (OutputStream output = compressingStream(baos)) {
+            output.write(bytes);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+        return baos.toByteArray();
+    }
+
+    default void compress(Bytes from, Bytes to) throws IORuntimeException {
+        try (OutputStream output = compressingStream(to.outputStream())) {
+            from.copyTo(output);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    default byte[] uncompress(byte[] bytes) throws IORuntimeException {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
+            byte[] buf = new byte[512];
+            for (int len; (len = input.read(buf)) > 0; )
+                baos.write(buf, 0, len);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+        return baos.toByteArray();
+    }
+
+    default void uncompress(Bytes from, Bytes to) {
+        try (InputStream input = decompressingStream(from.inputStream())) {
+            to.copyFrom(input);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
+    }
+
+    InputStream decompressingStream(InputStream input);
+
+    OutputStream compressingStream(OutputStream output);
 }

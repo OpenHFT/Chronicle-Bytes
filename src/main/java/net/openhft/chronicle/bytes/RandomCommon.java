@@ -52,6 +52,7 @@ interface RandomCommon extends ReferenceCounted {
 
     /**
      * The read position must be readPosition() &lt;= writePosition() &amp;&amp; writePosition() &lt;= writeLimit()
+     *
      * @return position to write to.
      */
     @ForceInline
@@ -94,7 +95,7 @@ interface RandomCommon extends ReferenceCounted {
      * @param offset within this buffer. address(start()) is the actual address of the first byte.
      * @return the underlying address of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
-     * @throws IllegalArgumentException if the offset is before the start() or the after the capacity()
+     * @throws IllegalArgumentException      if the offset is before the start() or the after the capacity()
      */
     long address(long offset)
             throws UnsupportedOperationException, IllegalArgumentException;
@@ -115,9 +116,10 @@ interface RandomCommon extends ReferenceCounted {
 
     /**
      * Perform a 32-bit CAS at a given offset.
-     * @param offset to perform CAS
+     *
+     * @param offset   to perform CAS
      * @param expected value
-     * @param value to set
+     * @param value    to set
      * @return true, if successful.
      */
     boolean compareAndSwapInt(long offset, int expected, int value)
@@ -125,9 +127,10 @@ interface RandomCommon extends ReferenceCounted {
 
     /**
      * Perform a 64-bit CAS at a given offset.
-     * @param offset to perform CAS
+     *
+     * @param offset   to perform CAS
      * @param expected value
-     * @param value to set
+     * @param value    to set
      * @return true, if successful.
      */
     boolean compareAndSwapLong(long offset, long expected, long value)

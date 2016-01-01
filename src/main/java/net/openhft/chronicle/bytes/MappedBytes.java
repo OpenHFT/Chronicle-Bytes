@@ -39,6 +39,17 @@ public class MappedBytes extends AbstractBytes<Void> {
         clear();
     }
 
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException, IllegalStateException {
+        return mappedBytes(new File(filename), chunkSize);
+    }
+
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException, IllegalStateException {
+        MappedFile rw = MappedFile.of(file, chunkSize, OS.pageSize());
+        return new MappedBytes(rw);
+    }
+
     public MappedFile mappedFile() {
         return mappedFile;
     }
@@ -52,17 +63,6 @@ public class MappedBytes extends AbstractBytes<Void> {
         } finally {
             release();
         }
-    }
-
-    @NotNull
-    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException, IllegalStateException {
-        return mappedBytes(new File(filename), chunkSize);
-    }
-
-    @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException, IllegalStateException {
-        MappedFile rw = MappedFile.of(file, chunkSize, OS.pageSize());
-        return new MappedBytes(rw);
     }
 
     @Override

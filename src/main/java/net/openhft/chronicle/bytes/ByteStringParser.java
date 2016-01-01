@@ -40,9 +40,9 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * Return true or false, or null if it could not be detected
      * as true or false.  Case is not important
-     * <p/>
+     * <p>
      * <p>false: f, false, n, no, 0
-     * <p/>
+     * <p>
      * <p>true: t, true, y, yes, 1
      *
      * @param tester to detect the end of the text.
@@ -145,7 +145,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
 
     /**
      * parse text as a double decimal. The terminating character is consumed.
-     * <p/>
+     * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
      * @return a double.
@@ -157,7 +157,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
 
     /**
      * Parse the significant digits of a decimal number.
-     * <p/>
+     * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
      * @return the significant digits

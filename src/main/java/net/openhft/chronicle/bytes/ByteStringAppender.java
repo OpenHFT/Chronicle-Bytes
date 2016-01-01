@@ -127,7 +127,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     /**
      * Append a double in decimal notation to a specific number of decimal places. Trailing zeros are not truncated.
-     * <p/>
+     * <p>
      * If the number would normally be printed with more decimal places, the number is rounded.
      *
      * @param d             to append
