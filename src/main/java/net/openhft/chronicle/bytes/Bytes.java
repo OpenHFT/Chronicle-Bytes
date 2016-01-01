@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -46,7 +47,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer();
+        return elasticByteBuffer(OS.pageSize());
+    }
+
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
+        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -59,12 +64,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * the given initial capacity.
      */
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
-        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity);
-        try {
-            return bs.bytesForWrite();
-        } finally {
-            bs.release();
-        }
+        return elasticByteBuffer(initialCapacity, Integer.MAX_VALUE & ~(OS.pageSize() - 1));
     }
 
     /**

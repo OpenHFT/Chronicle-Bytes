@@ -128,11 +128,11 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
-        return elasticByteBuffer(OS.pageSize());
+        return elasticByteBuffer(OS.pageSize(), Bytes.MAX_CAPACITY);
     }
 
     @NotNull
-    public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size) {
+    public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size, long maxSize) {
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 

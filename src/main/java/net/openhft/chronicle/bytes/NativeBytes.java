@@ -137,12 +137,16 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
         if (endOfBuffer < 0)
             throw new IllegalArgumentException(endOfBuffer + " < 0");
+        if (endOfBuffer > capacity())
+            throw new BufferOverflowException();
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
         long size = (Math.max(endOfBuffer, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
+        if (capacity() < Long.MAX_VALUE)
+            size = Math.min(size, capacity());
         NativeBytesStore store;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
-            store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size));
+            store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size), capacity());
 
         } else {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
