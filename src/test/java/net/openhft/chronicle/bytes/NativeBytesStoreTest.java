@@ -45,4 +45,13 @@ public class NativeBytesStoreTest {
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
     }
+
+    @Test
+    public void testAppendUtf8() {
+        String hi = "Hello World";
+        char[] chars = hi.toCharArray();
+        NativeBytesStore nbs = NativeBytesStore.nativeStore(chars.length);
+        nbs.appendUtf8(0, chars, 0, chars.length);
+        assertEquals(hi, nbs.toString());
+    }
 }
