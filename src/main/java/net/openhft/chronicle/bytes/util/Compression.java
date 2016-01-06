@@ -39,6 +39,39 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
+    static void uncompress(CharSequence cs, Bytes from, Bytes to) {
+        switch (cs.charAt(0)) {
+            case 'b':
+            case '!':
+                if (StringUtils.isEqual("binary", cs) || StringUtils.isEqual("!binary", cs)) {
+                    Compressions.Binary.uncompress(from, to);
+                    return;
+                }
+
+                break;
+            case 'l':
+                if (StringUtils.isEqual("lzw", cs)) {
+                    Compressions.LZW.uncompress(from, to);
+                    return;
+                }
+                break;
+            case 's':
+                if (StringUtils.isEqual("snappy", cs)) {
+                    Compressions.Snappy.uncompress(from, to);
+                    return;
+                }
+                break;
+            case 'g':
+                if (StringUtils.isEqual("gzip", cs)) {
+                    Compressions.GZIP.uncompress(from, to);
+                    return;
+                }
+                break;
+        }
+
+        throw new IllegalArgumentException("Unsupported compression " + cs);
+    }
+
     @Nullable
     static <T> byte[] uncompress(CharSequence cs, T t, Function<T, byte[]> bytes) {
         switch (cs.charAt(0)) {
@@ -64,6 +97,7 @@ public interface Compression {
 
         return null;
     }
+
 
     default byte[] compress(byte[] bytes) throws IORuntimeException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

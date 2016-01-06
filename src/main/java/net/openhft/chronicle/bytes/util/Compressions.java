@@ -54,7 +54,7 @@ public enum Compressions implements Compression {
 
         @Override
         public OutputStream compressingStream(OutputStream output) {
-            return new DeflaterOutputStream(output, new Deflater(Deflater.BEST_COMPRESSION));
+            return new DeflaterOutputStream(output, new Deflater(Deflater.DEFAULT_COMPRESSION));
         }
     },
     GZIP {
