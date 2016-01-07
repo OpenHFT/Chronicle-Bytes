@@ -161,4 +161,6 @@ interface RandomCommon extends ReferenceCounted {
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
+
+    boolean isNative();
 }

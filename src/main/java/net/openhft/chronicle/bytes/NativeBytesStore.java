@@ -437,7 +437,15 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
-        // TODO optimize, call unsafe.copyMemory when possible, copy 4, 2 bytes at once
+        if (bytes.isNative()) {
+            memory.copyMemory(bytes.address(offset), address(offsetInRDO), length);
+        } else {
+            write0(offsetInRDO, bytes, offset, length);
+        }
+        return this;
+    }
+
+    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length) {
         long i = 0;
         for (; i < length - 7; i += 8) {
             writeLong(offsetInRDO + i, bytes.readLong(offset + i));
@@ -445,7 +453,6 @@ public class NativeBytesStore<Underlying>
         for (; i < length; i++) {
             writeByte(offsetInRDO + i, bytes.readByte(offset + i));
         }
-        return this;
     }
 
     @Override
