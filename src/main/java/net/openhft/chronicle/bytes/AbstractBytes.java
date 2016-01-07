@@ -147,7 +147,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> writePosition(long position) throws BufferOverflowException {
-
         if (position < readPosition())
             throw new BufferOverflowException();
         if (position > writeLimit())

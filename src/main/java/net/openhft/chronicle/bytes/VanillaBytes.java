@@ -56,6 +56,39 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    private static boolean isEqual0(char[] chars, NativeBytesStore bs, long address) {
+        long start = System.nanoTime();
+        Memory memory = bs.memory;
+        int i = 0;
+        for (; i < chars.length - 4; i += 4) {
+            int b = memory.readInt(address + i);
+            int b0 = b & 0xFF;
+            int b1 = (b >> 8) & 0xFF;
+            int b2 = (b >> 16) & 0xFF;
+            int b3 = (b >> 24) & 0xFF;
+            if (b0 != chars[i] || b1 != chars[i + 1] || b2 != chars[i + 2] || b3 != chars[i + 3])
+                return false;
+        }
+        for (; i < chars.length; i++) {
+            int b = memory.readByte(address + i) & 0xFF;
+            if (b != chars[i])
+                return false;
+        }
+        long time = System.nanoTime() - start;
+        if (time > 1.e6)
+            System.out.println("isEquals took " + time / 1e6 + " ms. len=" + chars.length);
+        return true;
+    }
+
+    private static boolean isEqual1(char[] chars, BytesStore bytesStore, long readPosition) {
+        for (int i = 0; i < chars.length; i++) {
+            int b = bytesStore.readByte(readPosition + i) & 0xFF;
+            if (b != chars[i])
+                return false;
+        }
+        return true;
+    }
+
     @Override
     public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
@@ -105,24 +138,16 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (bytesStore instanceof NativeBytesStore) {
             NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
             long address = bs.address + bs.translate(readPosition);
-            Memory memory = bs.memory;
-            for (int i = 0; i < chars.length; i++) {
-                int b = memory.readByte(address + i) & 0xFF;
-                if (b != chars[i])
-                    return false;
-            }
+            return isEqual0(chars, bs, address);
+
         } else {
             try {
-                for (int i = 0; i < chars.length; i++) {
-                    int b = bytesStore.readByte(readPosition + i) & 0xFF;
-                    if (b != chars[i])
-                        return false;
-                }
+                return isEqual1(chars, bytesStore, readPosition);
+
             } catch (IORuntimeException e) {
                 throw new AssertionError(e);
             }
         }
-        return true;
     }
 
     @Override

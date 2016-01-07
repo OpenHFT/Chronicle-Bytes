@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
+import java.util.stream.Stream;
 
 /**
  * @author peter.lawrey
@@ -32,25 +33,48 @@ public class UTF8StringInterner {
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
     @NotNull
-    private final String[] interner;
-    private final int mask;
+    protected final String[] interner;
+    protected final int mask, shift;
+    protected boolean toggle = false;
 
     public UTF8StringInterner(int capacity) throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
+        shift = Maths.intLog2(n);
         interner = new String[n];
         mask = n - 1;
     }
 
     public String intern(@NotNull Bytes cs)
             throws IllegalArgumentException, UTFDataFormatRuntimeException, BufferUnderflowException {
-        int h = BytesStoreHash.hash32(cs) & mask;
+        if (cs.readRemaining() > interner.length)
+            return getString(cs);
+        int hash = BytesStoreHash.hash32(cs);
+        int h = hash & mask;
         String s = interner[h];
         if (cs.isEqual(s))
             return s;
+        int h2 = (hash >> shift) & mask;
+        String s2 = interner[h2];
+        if (cs.isEqual(s))
+            return s2;
+        String str = getString(cs);
+        return interner[s == null || (s2 != null && toggle()) ? h : h2] = str;
+    }
+
+    @NotNull
+    private String getString(@NotNull Bytes cs) {
         StringBuilder sb = SBP.acquireStringBuilder();
         long pos = cs.readPosition();
         cs.parseUtf8(sb, Maths.toInt32(cs.readRemaining()));
         cs.readPosition(pos);
-        return interner[h] = sb.toString();
+        return sb.toString();
+    }
+
+    protected boolean toggle() {
+        return toggle = !toggle;
+    }
+
+    public int valueCount() {
+        return (int) Stream.of(interner).filter(s -> s != null).count();
     }
 }

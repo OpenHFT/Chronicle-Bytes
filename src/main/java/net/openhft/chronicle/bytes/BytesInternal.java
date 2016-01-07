@@ -52,7 +52,7 @@ enum BytesInternal {
     static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes();
     private static final StringBuilderPool SBP = new StringBuilderPool();
-    private static final StringInterner SI = new StringInterner(1024);
+    private static final StringInterner SI = new StringInterner(4096);
     private static final byte[] Infinity = "Infinity".getBytes();
     private static final byte[] NaN = "NaN".getBytes();
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
