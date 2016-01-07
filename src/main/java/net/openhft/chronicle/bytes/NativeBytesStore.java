@@ -156,7 +156,7 @@ public class NativeBytesStore<Underlying>
     public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() throws IllegalStateException {
         if (underlyingObject == null) {
             NativeBytesStore<Void> copy = of(realCapacity(), false, true);
-            OS.memory().copyMemory(address, copy.address, capacity());
+            memory.copyMemory(address, copy.address, capacity());
             return (BytesStore) copy;
 
         } else if (underlyingObject instanceof ByteBuffer) {
@@ -486,14 +486,14 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public void nativeRead(long position, long address, long size) {
         // TODO add bounds checking.
-        OS.memory().copyMemory(address(position), address, size);
+        memory.copyMemory(address(position), address, size);
     }
 
     @Override
     @ForceInline
     public void nativeWrite(long address, long position, long size) {
         // TODO add bounds checking.
-        this.memory.copyMemory(address, address(position), size);
+        memory.copyMemory(address, address(position), size);
     }
 
     void write8bit(long position, char[] chars, int offset, int length) {
@@ -605,7 +605,6 @@ public class NativeBytesStore<Underlying>
         long toWrite = writeRemaining();
         if (toWrite < read)
             throw new BufferUnderflowException();
-        Memory memory = OS.memory();
         memory.copyMemory(addr, addr2, read);
         return read;
     }
