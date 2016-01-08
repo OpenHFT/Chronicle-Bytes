@@ -460,4 +460,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         writeDouble(offset, r);
         return r;
     }
+
+
+    /**
+     * Clear and set the flag for present.
+     * @param isPresent if there is data, or false if not.
+     */
+    default void isPresent(boolean isPresent) {
+        if (!isPresent)
+            throw new IllegalArgumentException("isPresent="+false+" not supported");
+    }
+
+    /**
+     * @return if there is data, or false if not.
+     */
+    default boolean isPresent() {
+        return true;
+    }
 }

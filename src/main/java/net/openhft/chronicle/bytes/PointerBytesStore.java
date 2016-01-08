@@ -22,11 +22,14 @@ import org.jetbrains.annotations.NotNull;
  * A BytesStore which can point to arbitary memory.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
+    private boolean isPresent = false;
+
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false);
     }
 
     public void set(long address, long capacity) {
+        isPresent = true;
         setAddress(address);
         this.maximumLimit = capacity;
     }
@@ -45,5 +48,13 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     @Override
     public long start() {
         return 0;
+    }
+
+    public void isPresent(boolean isPresent) {
+        this.isPresent = isPresent;
+    }
+
+    public boolean isPresent() {
+        return isPresent;
     }
 }

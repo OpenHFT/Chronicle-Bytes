@@ -33,6 +33,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long readPosition;
     protected long writePosition;
     protected long writeLimit;
+    protected boolean isPresent;
     private int lastDecimalPlaces = 0;
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
@@ -42,6 +43,17 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         readPosition = bytesStore.readPosition();
         this.writePosition = writePosition;
         this.writeLimit = writeLimit;
+    }
+
+    @Override
+    public void isPresent(boolean isPresent) {
+        clear();
+        this.isPresent = isPresent;
+    }
+
+    @Override
+    public boolean isPresent() {
+        return isPresent;
     }
 
     @NotNull
