@@ -107,7 +107,8 @@ public class MappedFile implements ReferenceCounted {
 
     @Nullable
     public MappedBytesStore acquireByteStore(long position) throws IOException, IllegalArgumentException, IllegalStateException {
-        return acquireByteStore(position, MappedBytesStore::new);
+        return acquireByteStore(position, (owner, start, address, capacity1, safeCapacity) -> new
+                MappedBytesStore(owner, start, address, capacity1, safeCapacity, this));
     }
 
     @Nullable
@@ -172,7 +173,7 @@ public class MappedFile implements ReferenceCounted {
     public Bytes acquireBytesForWrite(long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
-        Bytes bytes = mbs.bytesForWrite();
+        MappedBytes bytes = mbs.bytesForWrite();
         bytes.writePosition(position);
         mbs.release();
         return bytes;

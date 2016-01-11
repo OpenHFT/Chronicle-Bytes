@@ -172,7 +172,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param capacity minimum to allocate
      * @return a new Bytes ready for writing.
      */
-    static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
+    static Bytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
             return bs.bytesForWrite();
@@ -288,7 +288,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return a direct byte buffer contain the {@code bytes}
      */
     static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
-        VanillaBytes<Void> result = allocateDirect(bytes.length);
+        Bytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
         } catch (BufferOverflowException | IORuntimeException e) {

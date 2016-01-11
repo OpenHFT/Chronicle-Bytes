@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.bytes.VanillaBytes;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -79,7 +78,7 @@ public class OptimisedBytesStoreHashTest {
         for (int t = 0; t < runs; t++) {
             long[] hashs = new long[8192];
             byte[] init = new byte[hashs.length / 8];
-            VanillaBytes b = Bytes.allocateDirect(init.length);
+            Bytes b = Bytes.allocateDirect(init.length);
             rand.nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
