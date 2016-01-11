@@ -27,4 +27,6 @@ interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCommon {
      */
     @NotNull
     S clear();
+
+
 }
