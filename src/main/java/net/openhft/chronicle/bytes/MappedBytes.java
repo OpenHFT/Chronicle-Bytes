@@ -30,12 +30,10 @@ import java.nio.BufferUnderflowException;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> {
-
-    @NotNull
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
-    public MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
+    public MappedBytes(MappedFile mappedFile) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
         this.mappedFile = mappedFile;
         clear();
@@ -132,6 +130,5 @@ public class MappedBytes extends AbstractBytes<Void> {
     public boolean isElastic() {
         return true;
     }
-
 
 }

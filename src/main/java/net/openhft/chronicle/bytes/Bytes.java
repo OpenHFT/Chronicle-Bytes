@@ -172,7 +172,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @param capacity minimum to allocate
      * @return a new Bytes ready for writing.
      */
-    static Bytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
+    static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
             return bs.bytesForWrite();

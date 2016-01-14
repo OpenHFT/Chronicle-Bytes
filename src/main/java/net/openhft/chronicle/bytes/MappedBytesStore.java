@@ -26,24 +26,17 @@ import org.jetbrains.annotations.NotNull;
 public class MappedBytesStore extends NativeBytesStore<Void> {
     private final long start;
     private final long safeLimit;
-    private MappedFile mappedFile;
 
-    protected MappedBytesStore(ReferenceCounted owner,
-                               long start,
-                               long address,
-                               long capacity,
-                               long safeCapacity,
-                               @NotNull final MappedFile mappedFile) throws IllegalStateException {
+    protected MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity, owner), false);
         this.start = start;
         this.safeLimit = start + safeCapacity;
-        this.mappedFile = mappedFile;
     }
 
     @NotNull
     @Override
-    public MappedBytes bytesForWrite() throws IllegalStateException {
-        return new MappedBytes(mappedFile);
+    public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
+        return new VanillaBytes<>(this);
     }
 
     @Override
