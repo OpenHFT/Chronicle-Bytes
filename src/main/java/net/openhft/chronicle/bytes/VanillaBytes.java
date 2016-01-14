@@ -60,7 +60,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         long start = System.nanoTime();
         Memory memory = bs.memory;
         int i = 0;
-        for (; i < chars.length - 4; i += 4) {
+        for (; i < chars.length - 3; i += 4) {
             int b = memory.readInt(address + i);
             int b0 = b & 0xFF;
             int b1 = (b >> 8) & 0xFF;
