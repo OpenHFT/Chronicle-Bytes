@@ -40,6 +40,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * It has overlapping regions to avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted {
+    // A single JVM cannot lock a file more than once.
+    private static final Object GLOBAL_FILE_LOCK = new Object();
 
     public static final long DEFAULT_CAPACITY = 1L << 40;
     private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
@@ -130,10 +132,12 @@ public class MappedFile implements ReferenceCounted {
             long size = fileChannel.size();
             if (size < minSize) {
                 // handle a possible race condition between processes.
-                try (FileLock lock = fileChannel.lock()) {
-                    size = fileChannel.size();
-                    if (size < minSize) {
-                        raf.setLength(minSize);
+                synchronized (GLOBAL_FILE_LOCK) {
+                    try (FileLock lock = fileChannel.lock()) {
+                        size = fileChannel.size();
+                        if (size < minSize) {
+                            raf.setLength(minSize);
+                        }
                     }
                 }
             }
