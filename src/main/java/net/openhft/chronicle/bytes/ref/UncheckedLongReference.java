@@ -15,16 +15,21 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
-import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
-public class UncheckedLongReference implements LongValue, Byteable {
+public class UncheckedLongReference implements LongReference {
     private long address;
     private Unsafe unsafe;
+
+    public static LongReference create(BytesStore bytesStore, long offset, int size) {
+        LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
+        ref.bytesStore(bytesStore, offset, size);
+        return ref;
+    }
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {

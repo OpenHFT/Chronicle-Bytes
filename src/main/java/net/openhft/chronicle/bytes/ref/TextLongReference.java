@@ -15,11 +15,9 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.LongSupplier;
@@ -27,7 +25,7 @@ import java.util.function.LongSupplier;
 /**
  * reference to an array fo 32-bit in values in Text wire format.
  */
-public class TextLongReference implements LongValue, Byteable {
+public class TextLongReference implements LongReference {
     static final int VALUE = 33;
     private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
     private static final int FALSE = BytesUtil.asInt("fals");
