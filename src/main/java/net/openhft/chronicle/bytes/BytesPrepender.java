@@ -63,6 +63,14 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * Write backward in binary a byte
      * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
      *
+     * @param bytes to prepend to.
+     */
+    B prewrite(BytesStore bytes);
+
+    /**
+     * Write backward in binary a byte
+     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     *
      * @param b byte to prepend to.
      */
     B prewriteByte(byte b);

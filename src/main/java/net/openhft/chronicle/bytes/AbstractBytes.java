@@ -575,6 +575,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @Override
+    public Bytes<Underlying> prewrite(BytesStore bytes) {
+        long offset = prewriteOffsetPositionMoved(bytes.readRemaining());
+        bytesStore.write(offset, bytes);
+        return this;
+    }
+
     @NotNull
     @Override
     @ForceInline

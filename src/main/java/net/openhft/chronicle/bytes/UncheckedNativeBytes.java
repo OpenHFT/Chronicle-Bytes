@@ -629,6 +629,15 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> prewrite(BytesStore bytes) {
+        long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
+        bytesStore.write(offsetInRDO, bytes);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> write(@NotNull ByteBuffer buffer) {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
