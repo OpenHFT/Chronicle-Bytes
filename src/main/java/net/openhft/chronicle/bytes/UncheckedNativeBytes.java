@@ -735,9 +735,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0)
-            throw new AssertionError();
-        byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         return bytesStore.byteCheckSum(readPosition(), readLimit());
     }

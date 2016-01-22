@@ -633,9 +633,15 @@ public class NativeBytesStore<Underlying>
         int b = 0;
         long ptr = address + position;
         long end = address + limit;
-        for (; ptr < end - 3; ptr += 4) {
-            int l = memory.readInt(ptr);
-            b += l + (l >> 8) + (l >> 16) + (l >> 24);
+        for (; ptr < end - 7; ptr += 8) {
+            b += memory.readByte(ptr)
+                    + memory.readByte(ptr + 1)
+                    + memory.readByte(ptr + 2)
+                    + memory.readByte(ptr + 3)
+                    + memory.readByte(ptr + 4)
+                    + memory.readByte(ptr + 5)
+                    + memory.readByte(ptr + 6)
+                    + memory.readByte(ptr + 7);
         }
         for (; ptr < end; ptr++) {
             b += memory.readByte(ptr);
