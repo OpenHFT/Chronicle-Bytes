@@ -739,12 +739,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             throw new AssertionError();
         byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
-        Memory memory = bytesStore.memory;
-        assert memory != null;
-        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += memory.readByte(bytesStore.address + i);
-        }
-        return b & 0xFF;
+        return bytesStore.byteCheckSum(readPosition(), readLimit());
     }
 
     @NotNull
