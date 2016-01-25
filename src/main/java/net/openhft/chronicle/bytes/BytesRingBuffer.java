@@ -28,7 +28,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats {
      * @param bytes0 the {@code bytes0} that you wish to add to the ring buffer
      * @return returning {@code true} upon success and {@code false} if this queue is full.
      */
-    boolean offer(@NotNull Bytes bytes0) throws InterruptedException;
+    boolean offer(@NotNull BytesStore bytes0) throws InterruptedException;
 
     /**
      * Retrieves and removes the head of this queue, or returns {@code null} if this queue is
@@ -40,6 +40,8 @@ public interface BytesRingBuffer extends BytesRingBufferStats {
     boolean read(@NotNull Bytes using) throws
             InterruptedException,
             IllegalStateException;
+
+    long readRemaining();
 
     @NotNull
     static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
@@ -59,11 +61,11 @@ public interface BytesRingBuffer extends BytesRingBufferStats {
     static Class<BytesRingBuffer> clazz() throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
         return (Class<BytesRingBuffer>) Class.forName(
-                "software.chronicle.enterprise.queue.EnterpriseBytesRingBuffer");
+                "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
     }
 
 
-    public static long sizeFor(long capacity) {
+    static long sizeFor(long capacity) {
         try {
             final Method sizeFor = clazz().getMethod("sizeFor", long.class);
             return (long) sizeFor.invoke(null, capacity);
@@ -75,5 +77,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats {
         }
 
     }
+
 
 }
