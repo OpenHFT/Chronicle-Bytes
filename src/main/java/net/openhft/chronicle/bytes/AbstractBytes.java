@@ -163,8 +163,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferOverflowException();
         if (position < start())
             throw new BufferUnderflowException();
-        if (position < readPosition())
+        if (position < readPosition()) {
             this.readPosition = position;
+            System.out.println("writePosition - setting readPosition=" + readPosition);
+
+
+        }
         this.writePosition = position;
         return this;
     }
