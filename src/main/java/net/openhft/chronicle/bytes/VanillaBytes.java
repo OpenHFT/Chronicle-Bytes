@@ -268,7 +268,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0)
+        if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !(bytesStore() instanceof NativeBytesStore))
             return super.byteCheckSum();
         byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();

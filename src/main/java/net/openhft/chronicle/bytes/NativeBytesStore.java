@@ -622,6 +622,33 @@ public class NativeBytesStore<Underlying>
         return bb;
     }
 
+    @Override
+    public int byteCheckSum() throws IORuntimeException {
+        return byteCheckSum(start(), readLimit());
+    }
+
+    public int byteCheckSum(long position, long limit) {
+        Memory memory = this.memory;
+        assert memory != null;
+        int b = 0;
+        long ptr = address + position;
+        long end = address + limit;
+        for (; ptr < end - 7; ptr += 8) {
+            b += memory.readByte(ptr)
+                    + memory.readByte(ptr + 1)
+                    + memory.readByte(ptr + 2)
+                    + memory.readByte(ptr + 3)
+                    + memory.readByte(ptr + 4)
+                    + memory.readByte(ptr + 5)
+                    + memory.readByte(ptr + 6)
+                    + memory.readByte(ptr + 7);
+        }
+        for (; ptr < end; ptr++) {
+            b += memory.readByte(ptr);
+        }
+        return b & 0xFF;
+    }
+
     static class Deallocator implements Runnable {
 
         private volatile long address, size;

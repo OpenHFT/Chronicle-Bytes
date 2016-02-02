@@ -257,7 +257,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
 
-    default R write(long offsetInRDO, @NotNull Bytes bytes)
+    default R write(long offsetInRDO, @NotNull BytesStore bytes)
             throws BufferOverflowException, IORuntimeException {
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());

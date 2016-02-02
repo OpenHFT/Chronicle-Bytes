@@ -163,8 +163,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferOverflowException();
         if (position < start())
             throw new BufferUnderflowException();
-        if (position < readPosition())
+        if (position < readPosition()) {
             this.readPosition = position;
+            System.out.println("writePosition - setting readPosition=" + readPosition);
+
+
+        }
         this.writePosition = position;
         return this;
     }
@@ -571,6 +575,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> prewrite(byte[] bytes) {
         long offset = prewriteOffsetPositionMoved(bytes.length);
+        bytesStore.write(offset, bytes);
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> prewrite(BytesStore bytes) {
+        long offset = prewriteOffsetPositionMoved(bytes.readRemaining());
         bytesStore.write(offset, bytes);
         return this;
     }

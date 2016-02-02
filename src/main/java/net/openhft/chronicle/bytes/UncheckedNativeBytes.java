@@ -629,6 +629,15 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> prewrite(BytesStore bytes) {
+        long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
+        bytesStore.write(offsetInRDO, bytes);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> write(@NotNull ByteBuffer buffer) {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
@@ -726,16 +735,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0)
-            throw new AssertionError();
-        byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
-        Memory memory = bytesStore.memory;
-        assert memory != null;
-        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += memory.readByte(bytesStore.address + i);
-        }
-        return b & 0xFF;
+        return bytesStore.byteCheckSum(readPosition(), readLimit());
     }
 
     @NotNull
