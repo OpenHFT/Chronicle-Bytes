@@ -1835,6 +1835,7 @@ enum BytesInternal {
     }
 
     public static int addAndGetInt(@NotNull RandomDataInput in, long offset, int adding) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {
+        // TODO use Memory.addAndGetInt
         for (; ; ) {
             int value = in.readVolatileInt(offset);
             int value2 = value + adding;
@@ -1844,6 +1845,7 @@ enum BytesInternal {
     }
 
     public static long addAndGetLong(@NotNull RandomDataInput in, long offset, long adding) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {
+        // TODO use Memory.addAndGetLong
         for (; ; ) {
             long value = in.readVolatileLong(offset);
             long value2 = value + adding;
