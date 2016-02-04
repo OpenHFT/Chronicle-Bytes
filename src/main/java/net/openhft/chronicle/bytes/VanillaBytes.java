@@ -231,6 +231,71 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    @NotNull
+    public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+        if (cs instanceof BytesStore)
+            return write((BytesStore) cs);
+
+        if (bytesStore instanceof NativeBytesStore && cs instanceof String)
+            return append8bitNBS_S((NativeBytesStore) bytesStore, (String) cs);
+        return append8bit0(cs);
+    }
+
+    private Bytes<Underlying> append8bitNBS_S(NativeBytesStore bytesStore, String s) {
+        int length = s.length();
+        long offset = writeOffsetPositionMoved(length);
+        final long address = bytesStore.address + bytesStore.translate(offset);
+        final Memory memory = bytesStore.memory;
+        final char[] chars = StringUtils.extractChars(s);
+        assert memory != null;
+
+        for (int i = 0; i < length; i++) {
+            char c = chars[i];
+            if (c > 255) c = '?';
+            memory.writeByte(address + i, (byte) c);
+        }
+        return this;
+    }
+
+    public String toString() {
+        return bytesStore instanceof NativeBytesStore
+                ? toString2((NativeBytesStore) bytesStore)
+                : toString0();
+    }
+
+    private String toString2(NativeBytesStore bytesStore) {
+        int length = Maths.toUInt31(readRemaining());
+        char[] chars = new char[length];
+        final Memory memory = bytesStore.memory;
+        final long address = bytesStore.address + bytesStore.translate(readPosition());
+        for (int i = 0; i < length; i++)
+            chars[i] = (char) (memory.readByte(address + i) & 0xFF);
+
+        return StringUtils.newString(chars);
+    }
+
+    protected String toString0() {
+        int length = Maths.toUInt31(readRemaining());
+        char[] chars = new char[length];
+        for (int i = 0; i < length; i++) {
+            chars[i] = (char) (bytesStore.readByte(readPosition() + i) & 0xFF);
+        }
+        return StringUtils.newString(chars);
+    }
+
+    @NotNull
+    protected Bytes<Underlying> append8bit0(@NotNull CharSequence cs) {
+        int length = cs.length();
+        long offset = writeOffsetPositionMoved(length);
+        for (int i = 0; i < length; i++) {
+            char c = cs.charAt(i);
+            if (c > 255) c = '?';
+            bytesStore.writeByte(offset + i, (byte) c);
+        }
+        return this;
+    }
+
     @Override
     public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException, IORuntimeException {
         if (this.bytesStore instanceof NativeBytesStore &&
