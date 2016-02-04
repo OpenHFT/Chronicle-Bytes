@@ -1412,17 +1412,21 @@ enum BytesInternal {
         int i = 0, len = Maths.toInt32(bytes.readRemaining());
         long address = nb.address + nb.translate(bytes.readPosition());
 
+        final char[] chars = StringUtils.extractChars(appendable);
         Memory memory = nb.memory;
-        for (; i < len; i++) {
+        for (; i < len && i < chars.length; i++) {
             int c = memory.readByte(address + i);
-            if (c < 0)
+            if (c < 0) // we have hit a non-ASCII character.
                 break;
             if (tester.isStopChar(c)) {
                 bytes.readSkip(i + 1);
+                StringUtils.setCount(appendable, i);
                 return;
             }
-            appendable.append((char) c);
+            chars[i] = (char) c;
+//            appendable.append((char) c);
         }
+        StringUtils.setCount(appendable, i);
         bytes.readSkip(i);
         if (i < len) {
             readUtf8_SB2(bytes, appendable, tester);
