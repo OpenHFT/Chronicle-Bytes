@@ -238,7 +238,7 @@ public class MappedFile implements ReferenceCounted {
             stores.set(i, null);
         }
         try {
-            fileChannel.close();
+            raf.close();
         } catch (IOException e) {
             LOG.error("", e);
         }
