@@ -35,13 +35,13 @@ import java.io.OutputStream;
 import java.io.UTFDataFormatException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
 
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 import static net.openhft.chronicle.core.util.StringUtils.setCount;
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * Utility methods to support common functionality in this package. This is not intended to be
@@ -50,11 +50,11 @@ import static net.openhft.chronicle.core.util.StringUtils.setCount;
 enum BytesInternal {
     ;
     static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
-    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes();
+    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final StringInterner SI = new StringInterner(4096);
-    private static final byte[] Infinity = "Infinity".getBytes();
-    private static final byte[] NaN = "NaN".getBytes();
+    private static final byte[] Infinity = "Infinity".getBytes(ISO_8859_1);
+    private static final byte[] NaN = "NaN".getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
@@ -1999,7 +1999,7 @@ enum BytesInternal {
         }
         long date = timeInMS / 86400000;
         if (dateCache.lastDay != date) {
-            dateCache.lastDateStr = dateCache.dateFormat.format(new Date(timeInMS)).getBytes(StandardCharsets.ISO_8859_1);
+            dateCache.lastDateStr = dateCache.dateFormat.format(new Date(timeInMS)).getBytes(ISO_8859_1);
             dateCache.lastDay = date;
 
         } else {
