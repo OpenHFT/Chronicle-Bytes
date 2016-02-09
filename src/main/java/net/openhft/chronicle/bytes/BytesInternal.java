@@ -2071,8 +2071,9 @@ enum BytesInternal {
             case 'n':
             case 'N':
                 return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
-        }
-        return null;
+            default :
+            	return null;            
+        }        
     }
 
     public static BytesStore subBytes(RandomDataInput from, long start, long length) {
