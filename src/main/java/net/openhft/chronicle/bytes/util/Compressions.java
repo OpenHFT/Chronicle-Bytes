@@ -14,7 +14,7 @@ import java.util.zip.*;
  * Created by peter.lawrey on 09/12/2015.
  */
 public enum Compressions implements Compression {
-    Binary {
+    BINARY {
         @Override
         public byte[] compress(byte[] bytes) throws IORuntimeException {
             return bytes;
@@ -76,7 +76,7 @@ public enum Compressions implements Compression {
             }
         }
     },
-    Snappy {
+    SNAPPY {
         @Override
         public byte[] compress(byte[] bytes) throws IORuntimeException {
             try {

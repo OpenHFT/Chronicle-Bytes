@@ -30,6 +30,11 @@ import java.nio.BufferUnderflowException;
  * Created by peter on 30/08/15.
  */
 public class AppendableUtil {
+	
+	private AppendableUtil() {
+		
+	}
+	
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
         if (sb instanceof StringBuilder)

@@ -220,9 +220,7 @@ public class NativeBytesStore<Underlying>
     }
 
     long translate(long offset) {
-        long offset2 = offset - start();
-//        assert checkTranslatedBounds(offset2);
-        return offset2;
+        return offset - start();
     }
 
     public long start() {
