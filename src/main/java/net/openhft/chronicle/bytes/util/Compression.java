@@ -23,7 +23,7 @@ public interface Compression {
                 break;
             case 's':
                 if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.compress(uncompressed, compressed);
+                    Compressions.SNAPPY.compress(uncompressed, compressed);
                     return;
                 }
                 break;
@@ -36,7 +36,7 @@ public interface Compression {
             default:
                 break;
         }
-        Compressions.Binary.compress(uncompressed, compressed);
+        Compressions.BINARY.compress(uncompressed, compressed);
     }
 
     static void uncompress(CharSequence cs, Bytes from, Bytes to) {
@@ -44,7 +44,7 @@ public interface Compression {
             case 'b':
             case '!':
                 if (StringUtils.isEqual("binary", cs) || StringUtils.isEqual("!binary", cs)) {
-                    Compressions.Binary.uncompress(from, to);
+                    Compressions.BINARY.uncompress(from, to);
                     return;
                 }
 
@@ -57,7 +57,7 @@ public interface Compression {
                 break;
             case 's':
                 if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.uncompress(from, to);
+                    Compressions.SNAPPY.uncompress(from, to);
                     return;
                 }
                 break;
@@ -78,7 +78,7 @@ public interface Compression {
             case 'b':
             case '!':
                 if (StringUtils.isEqual("binary", cs) || StringUtils.isEqual("!binary", cs))
-                    return Compressions.Binary.uncompress(bytes.apply(t));
+                    return Compressions.BINARY.uncompress(bytes.apply(t));
 
                 break;
             case 'l':
@@ -87,7 +87,7 @@ public interface Compression {
                 break;
             case 's':
                 if (StringUtils.isEqual("snappy", cs))
-                    return Compressions.Snappy.uncompress(bytes.apply(t));
+                    return Compressions.SNAPPY.uncompress(bytes.apply(t));
                 break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs))
