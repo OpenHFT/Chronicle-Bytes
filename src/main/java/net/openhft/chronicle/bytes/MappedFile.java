@@ -40,10 +40,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * It has overlapping regions to avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted {
+    public static final long DEFAULT_CAPACITY = 1L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = new Object();
-
-    public static final long DEFAULT_CAPACITY = 1L << 40;
     private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
     @NotNull
     private final RandomAccessFile raf;
@@ -56,6 +55,7 @@ public class MappedFile implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
+    private NewChunkListener listener = null;
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity) {
         this.file = file;
@@ -147,9 +147,8 @@ public class MappedFile implements ReferenceCounted {
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
-            LOG.warn(String.format("Took %,d us to acquire chunk %,d",
-                    (System.nanoTime() - start) / 1000,
-                    chunk));
+            if (listener != null)
+                listener.onNewChunk(file.getPath(), chunk, (System.nanoTime() - start) / 1000);
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
@@ -270,5 +269,13 @@ public class MappedFile implements ReferenceCounted {
 
     public long overlapSize() {
         return overlapSize;
+    }
+
+    public NewChunkListener getListener() {
+        return listener;
+    }
+
+    public void setListener(NewChunkListener listener) {
+        this.listener = listener;
     }
 }
