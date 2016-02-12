@@ -55,7 +55,7 @@ public class MappedFile implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
-    private NewChunkListener listener = null;
+    private NewChunkListener newChunkListener = null;
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity) {
         this.file = file;
@@ -147,8 +147,8 @@ public class MappedFile implements ReferenceCounted {
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * chunkSize, address, mappedSize, chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
-            if (listener != null)
-                listener.onNewChunk(file.getPath(), chunk, (System.nanoTime() - start) / 1000);
+            if (newChunkListener != null)
+                newChunkListener.onNewChunk(file.getPath(), chunk, (System.nanoTime() - start) / 1000);
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
@@ -271,11 +271,11 @@ public class MappedFile implements ReferenceCounted {
         return overlapSize;
     }
 
-    public NewChunkListener getListener() {
-        return listener;
+    public NewChunkListener getNewChunkListener() {
+        return newChunkListener;
     }
 
-    public void setListener(NewChunkListener listener) {
-        this.listener = listener;
+    public void setNewChunkListener(NewChunkListener listener) {
+        this.newChunkListener = listener;
     }
 }

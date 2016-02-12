@@ -55,6 +55,10 @@ public class MappedBytes extends AbstractBytes<Void> {
         return new MappedBytes(rw);
     }
 
+    public void setNewChunkListener(NewChunkListener listener) {
+        mappedFile.setNewChunkListener(listener);
+    }
+
     public MappedFile mappedFile() {
         return mappedFile;
     }
