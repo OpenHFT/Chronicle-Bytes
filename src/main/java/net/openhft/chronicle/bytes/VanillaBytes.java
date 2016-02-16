@@ -238,17 +238,19 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return write((BytesStore) cs);
 
         if (bytesStore instanceof NativeBytesStore && cs instanceof String)
-            return append8bitNBS_S((NativeBytesStore) bytesStore, (String) cs);
+            return append8bitNBS_S((String) cs);
         return append8bit0(cs);
     }
 
-    private Bytes<Underlying> append8bitNBS_S(NativeBytesStore bytesStore, String s) {
+    private Bytes<Underlying> append8bitNBS_S(String s) {
         int length = s.length();
-        long offset = writeOffsetPositionMoved(length);
+        long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
+        NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
         final long address = bytesStore.address + bytesStore.translate(offset);
         final Memory memory = bytesStore.memory;
         final char[] chars = StringUtils.extractChars(s);
-        assert memory != null;
+        if (memory == null)
+            throw new AssertionError(bytesStore.releasedHere);
 
         for (int i = 0; i < length; i++) {
             char c = chars[i];

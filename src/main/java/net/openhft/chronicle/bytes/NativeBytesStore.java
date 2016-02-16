@@ -51,13 +51,13 @@ public class NativeBytesStore<Underlying>
     protected Memory memory = OS.memory();
     protected long address;
     long maximumLimit;
+    Error releasedHere;
     @Nullable
     private Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private boolean elastic;
     @Nullable
     private Underlying underlyingObject;
-    private Error releasedHere;
 
     private NativeBytesStore() {
     }
@@ -466,7 +466,8 @@ public class NativeBytesStore<Underlying>
         if (refCount.get() > 0) {
             LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
         }
-
+        if (releasedHere == null)
+            releasedHere = new Error();
         memory = null;
         if (cleaner != null)
             cleaner.clean();
