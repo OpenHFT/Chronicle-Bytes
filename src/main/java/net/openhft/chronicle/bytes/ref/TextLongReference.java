@@ -62,6 +62,12 @@ public class TextLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != template.length)
             throw new IllegalArgumentException();
+        if (this.bytes != bytes) {
+            if (this.bytes != null)
+                this.bytes.release();
+            bytes.reserve();
+            ;
+        }
         this.bytes = bytes;
         this.offset = offset;
         if (bytes.readLong(offset) == UNINITIALIZED)
