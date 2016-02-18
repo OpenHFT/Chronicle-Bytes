@@ -128,4 +128,10 @@ public enum BytesUtil {
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
+
+    public static void appendBytesFromStart(Bytes bytes, long startPosition, StringBuilder sb) {
+        BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
+        sb.append('\u2016');
+        sb.append(bytes);
+    }
 }
