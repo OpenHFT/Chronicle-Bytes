@@ -177,7 +177,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
-        if (bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
+        if (bytesStore() instanceof NativeBytesStore && bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
