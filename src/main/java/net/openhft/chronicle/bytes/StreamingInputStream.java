@@ -58,7 +58,8 @@ public class StreamingInputStream extends InputStream {
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
         try {
-            return in.read(b, off, len);
+            int len2 = in.read(b, off, len);
+            return len2 == 0 ? -1 : len2;
         } catch (IORuntimeException e) {
             throw new IOException(e);
         }
