@@ -306,7 +306,7 @@ enum BytesInternal {
 
     public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            assert bytes.readRemaining() >= utflen;
+            assert bytes.realCapacity() >= utflen + offset;
             for (int count = 0; count < utflen; count++) {
                 int c = bytes.readUnsignedByte(offset + count);
                 appendable.append((char) c);
