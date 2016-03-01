@@ -74,7 +74,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            return bs.bytesForRead();
+            Bytes<ByteBuffer> bbb = bs.bytesForRead();
+            bbb.readPosition(byteBuffer.position());
+            bbb.readLimit(byteBuffer.limit());
+            return bbb;
         } finally {
             bs.release();
         }
@@ -87,7 +90,10 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            return bs.bytesForWrite();
+            Bytes<ByteBuffer> bbb = bs.bytesForWrite();
+            bbb.writePosition(byteBuffer.position());
+            bbb.writeLimit(byteBuffer.limit());
+            return bbb;
         } finally {
             bs.release();
         }
@@ -420,4 +426,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
     }
+
+    /**
+     * Compact these Bytes by moving the readPosition to the start.
+     *
+     * @return this
+     */
+    Bytes<Underlying> compact();
 }

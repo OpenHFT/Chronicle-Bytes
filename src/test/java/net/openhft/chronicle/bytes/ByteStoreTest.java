@@ -204,7 +204,7 @@ public class ByteStoreTest {
     @Test
     public void testWriteReadByteBuffer() {
         byte[] bytes = "Hello\nWorld!\r\nBye".getBytes();
-        this.bytes.write(ByteBuffer.wrap(bytes));
+        this.bytes.writeSome(ByteBuffer.wrap(bytes));
 
         byte[] bytes2 = new byte[bytes.length + 1];
         ByteBuffer bb2 = ByteBuffer.wrap(bytes2);

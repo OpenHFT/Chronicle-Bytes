@@ -151,6 +151,12 @@ public class NativeBytesStore<Underlying>
         cleaner = null;
     }
 
+    @Override
+    public void move(long from, long to, long length) {
+        if (from < 0 || to < 0) throw new BufferUnderflowException();
+        OS.memory().copyMemory(address + from, address + to, length);
+    }
+
     @NotNull
     @Override
     public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() throws IllegalStateException {

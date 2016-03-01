@@ -176,6 +176,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     S writeDouble(double d) throws BufferOverflowException, IORuntimeException;
 
+    /**
+     * Write all data or fail.
+     */
     @NotNull
     default S write(@NotNull BytesStore bytes)
             throws BufferOverflowException, IORuntimeException {
@@ -183,22 +186,44 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
+    default S writeSome(@NotNull Bytes bytes)
+            throws BufferOverflowException, IORuntimeException {
+        long length = Math.min(bytes.readRemaining(), writeRemaining());
+        write(bytes, bytes.readPosition(), length);
+        if (length == bytes.readRemaining()) {
+            bytes.clear();
+        } else {
+            bytes.readSkip(length);
+            if (bytes.readRemaining() < bytes.writeRemaining() || bytes.readRemaining() < bytes.readPosition())
+                bytes.compact();
+        }
+        return (S) this;
+    }
+
+    /**
+     * Write all data or fail.
+     */
+    @NotNull
     default S write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
-        BytesInternal.write(bytes, offset, length, this);
+        BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
 
     @NotNull
     default S write(@NotNull byte[] bytes) throws BufferOverflowException, IORuntimeException {
-        return write(bytes, 0, bytes.length);
+        write(bytes, 0, bytes.length);
+        return (S) this;
     }
 
+    /**
+     * Write all data or fail.
+     */
     @NotNull
     S write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
 
     @NotNull
-    S write(ByteBuffer buffer) throws BufferOverflowException, IORuntimeException;
+    S writeSome(ByteBuffer buffer) throws BufferOverflowException, IORuntimeException;
 
     @NotNull
     default S writeBoolean(boolean flag) throws BufferOverflowException, IORuntimeException {

@@ -58,6 +58,17 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+
+    @Override
+    public void move(long from, long to, long length) {
+        bytesStore.move(from - start(), to - start(), length);
+    }
+
+    @Override
+    public Bytes<Underlying> compact() {
+        return null;
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> readPosition(long position) {
@@ -138,7 +149,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             rawCopy(bytes, offset, length);
 
         } else {
-            BytesInternal.write(bytes, offset, length, this);
+            BytesInternal.writeFully(bytes, offset, length, this);
         }
         return this;
     }
@@ -432,7 +443,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @NotNull
-    @Override
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
@@ -441,7 +451,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    @Override
     @ForceInline
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
@@ -449,7 +458,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @NotNull
-    @Override
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,
                                    RandomDataInput bytes, long offset, long length)
@@ -612,6 +620,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
+        if (bytes.length > writeRemaining())
+            throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -638,7 +648,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(@NotNull ByteBuffer buffer) {
+    public Bytes<Underlying> writeSome(@NotNull ByteBuffer buffer) {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
         assert writePosition <= writeLimit();

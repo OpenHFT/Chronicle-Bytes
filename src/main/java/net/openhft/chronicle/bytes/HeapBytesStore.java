@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -91,6 +92,12 @@ public class HeapBytesStore<Underlying>
         capacity = 0;
     }
 
+    @Override
+    public void move(long from, long to, long length) {
+        if (from < 0 || to < 0) throw new BufferUnderflowException();
+        //noinspection SuspiciousSystemArraycopy
+        System.arraycopy(underlyingObject, Maths.toUInt31(from), underlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
+    }
     @NotNull
     @Override
     public String toString() {

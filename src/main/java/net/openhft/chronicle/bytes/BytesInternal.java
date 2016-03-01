@@ -2015,7 +2015,7 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(sb);
     }
 
-    public static void write(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+    public static void writeFully(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         long i = 0;
         for (; i < length - 7; i += 8)
             sdo.writeLong(bytes.readLong(offset + i));

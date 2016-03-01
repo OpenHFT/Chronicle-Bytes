@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -245,4 +246,50 @@ public class BytesTest {
         assertEquals("Hello World", s);
     }
 
+    @Test
+    public void testPartialWrite() {
+        Bytes from = Bytes.elasticByteBuffer();
+        from.write("Hello World");
+        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+
+        to.writeSome(from);
+        assertEquals("World", from.toString());
+    }
+
+    @Test(expected = BufferOverflowException.class)
+    public void testPartialWriteArray() {
+        byte[] array = "Hello World".getBytes();
+        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+
+        to.write(array);
+    }
+
+    @Test
+    public void testPartialWriteBB() {
+        ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes());
+        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+
+        to.writeSome(bb);
+        assertEquals("World", Bytes.wrapForRead(bb).toString());
+    }
+
+    @Test
+    public void testPartialWrite64plus() {
+        Bytes from = Bytes.elasticByteBuffer();
+        from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
+        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+
+        to.writeSome(from);
+        assertTrue("from: " + from, from.toString().startsWith("World "));
+    }
+
+    @Test
+    public void testCompact() {
+        Bytes from = Bytes.elasticByteBuffer();
+        from.write("Hello World");
+        from.readLong();
+        from.compact();
+        assertEquals("rld", from.toString());
+        assertEquals(0, from.readPosition());
+    }
 }

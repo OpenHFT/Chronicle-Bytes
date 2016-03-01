@@ -265,4 +265,9 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     public B write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public void move(long from, long to, long length) {
+        throw new UnsupportedOperationException();
+    }
 }

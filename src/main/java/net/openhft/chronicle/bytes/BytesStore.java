@@ -477,4 +477,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default boolean isPresent() {
         return true;
     }
+
+    void move(long from, long to, long length);
 }
