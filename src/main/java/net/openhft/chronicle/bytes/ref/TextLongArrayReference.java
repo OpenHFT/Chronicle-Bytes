@@ -19,7 +19,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.LongValue;
+
 import org.jetbrains.annotations.NotNull;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /*
 The format for a long array in text is
@@ -27,11 +30,11 @@ The format for a long array in text is
  */
 
 public class TextLongArrayReference implements ByteableLongArrayValues {
-    private static final byte[] SECTION1 = "{ capacity: ".getBytes();
-    private static final byte[] SECTION2 = ", values: [ ".getBytes();
-    private static final byte[] SECTION3 = " ] }\n".getBytes();
-    private static final byte[] ZERO = "00000000000000000000".getBytes();
-    private static final byte[] SEP = ", ".getBytes();
+    private static final byte[] SECTION1 = "{ capacity: ".getBytes(ISO_8859_1);
+    private static final byte[] SECTION2 = ", values: [ ".getBytes(ISO_8859_1);
+    private static final byte[] SECTION3 = " ] }\n".getBytes(ISO_8859_1);
+    private static final byte[] ZERO = "00000000000000000000".getBytes(ISO_8859_1);
+    private static final byte[] SEP = ", ".getBytes(ISO_8859_1);
 
     private static final int DIGITS = ZERO.length;
     private static final int CAPACITY = SECTION1.length;
