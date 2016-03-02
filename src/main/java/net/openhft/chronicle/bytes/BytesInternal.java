@@ -1598,7 +1598,7 @@ enum BytesInternal {
 
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharTester tester) throws BufferUnderflowException, BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        builder.readPosition(0);
+        builder.clear();
 
         read8bitAndAppend(bytes, builder, tester);
     }
@@ -1615,22 +1615,14 @@ enum BytesInternal {
     }
 
     private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {
-        int ch = bytes.readUnsignedByte();
-        do {
-            if (tester.isStopChar(ch)) {
-                bytes.readSkip(-1);
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            if (tester.isStopChar(c))
                 return;
-            }
-            bytes2.writeUnsignedByte(ch);
-            int next = bytes.readUnsignedByte();
-            ch = next;
-        } while (bytes.readRemaining() > 1);
-
-        if (tester.isStopChar(ch)) {
-            bytes.readSkip(-1);
-            return;
+            bytes2.writeUnsignedByte(c);
+            if (bytes.readRemaining() == 0)
+                return;
         }
-        bytes2.writeUnsignedByte(ch);
     }
 
     private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {

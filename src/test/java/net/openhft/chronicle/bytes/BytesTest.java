@@ -260,7 +260,6 @@ public class BytesTest {
     public void testPartialWriteArray() {
         byte[] array = "Hello World".getBytes();
         Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
-
         to.write(array);
     }
 
@@ -291,5 +290,18 @@ public class BytesTest {
         from.compact();
         assertEquals("rld", from.toString());
         assertEquals(0, from.readPosition());
+    }
+
+    @Test
+    public void testParseToBytes() {
+        Bytes from = Bytes.allocateDirect(64);
+        from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
+        Bytes to = Bytes.allocateDirect(32);
+        for (int i = 0; i < 4; i++) {
+            from.parse8bit(to, StopCharTesters.SPACE_STOP);
+            assertEquals(10, to.readRemaining());
+        }
+        assertEquals(0, from.readRemaining());
+
     }
 }
