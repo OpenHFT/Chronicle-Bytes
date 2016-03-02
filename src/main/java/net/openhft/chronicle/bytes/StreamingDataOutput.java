@@ -194,7 +194,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             bytes.clear();
         } else {
             bytes.readSkip(length);
-            if (bytes.writePosition() > bytes.writeLimit()/2)
+            if (bytes.writePosition() > bytes.realCapacity() / 2)
                 bytes.compact();
         }
         return (S) this;
