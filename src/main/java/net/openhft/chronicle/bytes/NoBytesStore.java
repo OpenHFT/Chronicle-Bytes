@@ -200,12 +200,12 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public void nativeWrite(long address, long position, long size) {
-        throw new UnsupportedOperationException("todo");
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void nativeRead(long position, long address, long size) {
-        throw new UnsupportedOperationException("todo");
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -221,6 +221,11 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public boolean equalBytes(BytesStore bytesStore, long length) {
         return length == 0;
+    }
+
+    @Override
+    public void move(long from, long to, long length) {
+        throw new UnsupportedOperationException();
     }
 
     @Override

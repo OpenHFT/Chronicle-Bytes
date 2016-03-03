@@ -168,6 +168,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        if (bytes.length > writeRemaining())
+            throw new BufferOverflowException();
         long position = writePosition();
         ensureCapacity(position + length);
         super.write(bytes, offset, length);

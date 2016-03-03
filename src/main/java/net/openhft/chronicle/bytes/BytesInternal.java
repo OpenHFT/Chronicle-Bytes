@@ -306,7 +306,7 @@ enum BytesInternal {
 
     public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
-            assert bytes.readRemaining() >= utflen;
+            assert bytes.realCapacity() >= utflen + offset;
             for (int count = 0; count < utflen; count++) {
                 int c = bytes.readUnsignedByte(offset + count);
                 appendable.append((char) c);
@@ -1598,7 +1598,7 @@ enum BytesInternal {
 
     @ForceInline
     public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharTester tester) throws BufferUnderflowException, BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        builder.readPosition(0);
+        builder.clear();
 
         read8bitAndAppend(bytes, builder, tester);
     }
@@ -1615,22 +1615,14 @@ enum BytesInternal {
     }
 
     private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {
-        int ch = bytes.readUnsignedByte();
-        do {
-            if (tester.isStopChar(ch)) {
-                bytes.readSkip(-1);
+        while (true) {
+            int c = bytes.readUnsignedByte();
+            if (tester.isStopChar(c))
                 return;
-            }
-            bytes2.writeUnsignedByte(ch);
-            int next = bytes.readUnsignedByte();
-            ch = next;
-        } while (bytes.readRemaining() > 1);
-
-        if (tester.isStopChar(ch)) {
-            bytes.readSkip(-1);
-            return;
+            bytes2.writeUnsignedByte(c);
+            if (bytes.readRemaining() == 0)
+                return;
         }
-        bytes2.writeUnsignedByte(ch);
     }
 
     private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester) throws IORuntimeException, BufferUnderflowException, IllegalArgumentException, BufferOverflowException {
@@ -2015,7 +2007,7 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(sb);
     }
 
-    public static void write(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+    public static void writeFully(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         long i = 0;
         for (; i < length - 7; i += 8)
             sdo.writeLong(bytes.readLong(offset + i));
