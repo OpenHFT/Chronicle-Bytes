@@ -420,4 +420,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     default boolean isEqual(String s) {
         return StringUtils.isEqual(this, s);
     }
+
+    default boolean isEmpty() {
+        return readRemaining() == 0;
+    }
+
 }
