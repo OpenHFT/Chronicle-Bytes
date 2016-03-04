@@ -50,6 +50,12 @@ public enum StopCharTesters implements StopCharTester {
             return ch == '\'' || ch <= 0;
         }
     },
+    EQUALS {
+        @Override
+        public boolean isStopChar(int ch) {
+            return ch == '=' || ch <= 0;
+        }
+    },
     ALL {
         @Override
         public boolean isStopChar(int ch) {
