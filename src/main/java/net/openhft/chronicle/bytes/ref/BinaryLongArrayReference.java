@@ -29,6 +29,7 @@ import java.nio.BufferUnderflowException;
 public class BinaryLongArrayReference implements ByteableLongArrayValues {
     //    private static final long CAPACITY = 0;
     private static final long VALUES = 8;
+    private static final int MAX_TO_STRING = 128;
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
@@ -113,11 +114,24 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     @NotNull
     public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("value: ");
+        String sep = "";
         try {
-            return "value: " + getValueAt(0) + " ...";
+            int i, max = (int) Math.min(length, MAX_TO_STRING);
+            for (i = 0; i < max; i++) {
+                long valueAt = getValueAt(i);
+                if (valueAt == 0)
+                    break;
+                sb.append(sep).append(valueAt);
+                sep = ", ";
+            }
+            if (i < length)
+                sb.append(" ...");
         } catch (BufferUnderflowException e) {
-            return e.toString();
+            sb.append(" ").append(e);
         }
+        return sb.toString();
     }
 
     @Override

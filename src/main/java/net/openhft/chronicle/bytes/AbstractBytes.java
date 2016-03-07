@@ -182,12 +182,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferOverflowException();
         if (position < start())
             throw new BufferUnderflowException();
-        if (position < readPosition()) {
+        if (position < readPosition())
             this.readPosition = position;
-            System.out.println("writePosition - setting readPosition=" + readPosition);
-
-
-        }
         this.writePosition = position;
         return this;
     }
@@ -374,6 +370,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeOrderedInt(long offset, int i)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        if (offset < 0) throw new IllegalArgumentException();
         writeCheckOffset(offset, 4);
         bytesStore.writeOrderedInt(offset, i);
         return this;

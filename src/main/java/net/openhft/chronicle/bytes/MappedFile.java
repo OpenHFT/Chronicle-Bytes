@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -116,6 +117,8 @@ public class MappedFile implements ReferenceCounted {
     public <T extends MappedBytesStore> T acquireByteStore(long position, MappedBytesStoreFactory<T> mappedBytesStoreFactory) throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
+        if (position < 0)
+            throw new IOException("Attempt to access a negative position: " + position);
         int chunk = (int) (position / chunkSize);
         synchronized (stores) {
             while (stores.size() <= chunk) {
@@ -132,13 +135,17 @@ public class MappedFile implements ReferenceCounted {
             long size = fileChannel.size();
             if (size < minSize) {
                 // handle a possible race condition between processes.
-                synchronized (GLOBAL_FILE_LOCK) {
-                    try (FileLock lock = fileChannel.lock()) {
-                        size = fileChannel.size();
-                        if (size < minSize) {
-                            raf.setLength(minSize);
+                try {
+                    synchronized (GLOBAL_FILE_LOCK) {
+                        try (FileLock lock = fileChannel.lock()) {
+                            size = fileChannel.size();
+                            if (size < minSize) {
+                                raf.setLength(minSize);
+                            }
                         }
                     }
+                } catch (IOException ioe) {
+                    throw new IORuntimeException("Failed to resize to " + minSize, ioe);
                 }
             }
             long start = System.nanoTime();
@@ -277,5 +284,13 @@ public class MappedFile implements ReferenceCounted {
 
     public void setNewChunkListener(NewChunkListener listener) {
         this.newChunkListener = listener;
+    }
+
+    public long actualSize() {
+        try {
+            return fileChannel.size();
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 }

@@ -85,6 +85,11 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
+    public long realCapacity() {
+        return mappedFile.actualSize();
+    }
+
+    @Override
     public long refCount() {
         return Math.max(super.refCount(), mappedFile.refCount());
     }
@@ -106,6 +111,8 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException, IORuntimeException {
+        if (offset < 0 || offset >= capacity())
+            throw new IllegalArgumentException("Offset out of bound " + offset);
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
