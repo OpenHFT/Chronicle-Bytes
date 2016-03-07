@@ -79,7 +79,6 @@ public interface Compression {
             case '!':
                 if (StringUtils.isEqual("binary", cs) || StringUtils.isEqual("!binary", cs))
                     return Compressions.Binary.uncompress(bytes.apply(t));
-
                 break;
             case 'l':
                 if (StringUtils.isEqual("lzw", cs))
