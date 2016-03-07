@@ -431,4 +431,11 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         return readRemaining() == 0;
     }
 
+    /**
+     * Compact these Bytes by moving the readPosition to the start.
+     *
+     * @return this
+     */
+    Bytes<Underlying> compact();
+
 }
