@@ -477,6 +477,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        long next = offset + adding;
+        if (next > 230 && next < 239)
+            new Throwable(Thread.currentThread().toString()).printStackTrace();
         assert writeCheckOffset0(offset, adding);
     }
 

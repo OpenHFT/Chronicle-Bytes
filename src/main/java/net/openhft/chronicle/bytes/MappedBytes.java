@@ -30,10 +30,11 @@ import java.nio.BufferUnderflowException;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> {
+    public static boolean CHECKING = false;
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
-    public MappedBytes(MappedFile mappedFile) throws IllegalStateException {
+    protected MappedBytes(MappedFile mappedFile) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
         this.mappedFile = mappedFile;
         clear();
@@ -52,7 +53,12 @@ public class MappedBytes extends AbstractBytes<Void> {
     @NotNull
     public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException, IllegalStateException {
         MappedFile rw = MappedFile.of(file, chunkSize, overlapSize);
-        return new MappedBytes(rw);
+        return mappedBytes(rw);
+    }
+
+    @NotNull
+    public static MappedBytes mappedBytes(MappedFile rw) {
+        return CHECKING ? new CheckingMappedBytes(rw) : new MappedBytes(rw);
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -68,7 +74,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         if (mappedFile2 == this.mappedFile)
             return this;
         try {
-            return new MappedBytes(mappedFile2);
+            return mappedBytes(mappedFile2);
         } finally {
             release();
         }
