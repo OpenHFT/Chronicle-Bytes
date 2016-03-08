@@ -75,8 +75,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             Bytes<ByteBuffer> bbb = bs.bytesForRead();
-            bbb.readPosition(byteBuffer.position());
             bbb.readLimit(byteBuffer.limit());
+            bbb.readPosition(byteBuffer.position());
             return bbb;
         } finally {
             bs.release();
@@ -262,8 +262,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             throws BufferUnderflowException, IORuntimeException {
         final long pos = buffer.readPosition();
         final long limit = buffer.readLimit();
-        buffer.readPosition(position);
         buffer.readLimit(position + len);
+        buffer.readPosition(position);
 
         try {
 
