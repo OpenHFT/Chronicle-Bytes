@@ -497,26 +497,26 @@ public class ByteStoreTest {
     @Test
     public void testToString() {
         Bytes bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
-        assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ‖‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(1);
-        assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ⒈", bytes.toDebugString());
+        assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ‖⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(2);
         bytes.readByte();
-        assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉", bytes.toDebugString());
+        assertEquals("[pos: 1, rlim: 2, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(3);
-        assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉⒊", bytes.toDebugString());
+        assertEquals("[pos: 1, rlim: 3, wlim: 8EiB, cap: 8EiB ] ⒈‖⒉⒊‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(4);
         bytes.readByte();
-        assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋", bytes.toDebugString());
+        assertEquals("[pos: 2, rlim: 4, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(5);
-        assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋⒌", bytes.toDebugString());
+        assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋⒌‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(6);
         bytes.readByte();
-        assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(7);
-        assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         bytes.writeUnsignedByte(8);
-        assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏", bytes.toDebugString());
+        assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
     }
 
     @Test

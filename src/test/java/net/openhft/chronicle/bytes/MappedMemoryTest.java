@@ -73,7 +73,7 @@ public class MappedMemoryTest {
 
                 long startTime = System.nanoTime();
                 final Bytes bytes = mappedBytes(tempFile, BLOCK_SIZE / 2);
-                bytes.writeLong(1, 1);
+//                bytes.writeLong(1, 1);
                 for (long i = 0; i < BLOCK_SIZE; i += 8) {
                     bytes.writeLong(i);
                 }

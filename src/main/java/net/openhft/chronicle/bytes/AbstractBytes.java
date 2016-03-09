@@ -312,7 +312,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long readOffsetPositionMoved(long adding)
             throws BufferUnderflowException, IORuntimeException {
         long offset = readPosition;
-        readCheckOffset(readPosition, adding);
+        readCheckOffset(readPosition, adding, false);
         readPosition += adding;
         assert readPosition <= readLimit();
         return offset;
@@ -494,56 +494,56 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public byte readByte(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 1);
+        readCheckOffset(offset, 1, true);
         return bytesStore.readByte(offset);
     }
 
     @Override
     @ForceInline
     public short readShort(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 2);
+        readCheckOffset(offset, 2, true);
         return bytesStore.readShort(offset);
     }
 
     @Override
     @ForceInline
     public int readInt(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 4);
+        readCheckOffset(offset, 4, true);
         return bytesStore.readInt(offset);
     }
 
     @Override
     @ForceInline
     public long readLong(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 8);
+        readCheckOffset(offset, 8, true);
         return bytesStore.readLong(offset);
     }
 
     @Override
     @ForceInline
     public float readFloat(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 4);
+        readCheckOffset(offset, 4, true);
         return bytesStore.readFloat(offset);
     }
 
     @Override
     @ForceInline
     public double readDouble(long offset) throws BufferUnderflowException, IORuntimeException {
-        readCheckOffset(offset, 8);
+        readCheckOffset(offset, 8, true);
         return bytesStore.readDouble(offset);
     }
 
     @ForceInline
-    void readCheckOffset(long offset, long adding)
+    void readCheckOffset(long offset, long adding, boolean given)
             throws BufferUnderflowException, IORuntimeException {
-        assert readCheckOffset0(offset, adding);
+        assert readCheckOffset0(offset, adding, given);
     }
 
     @ForceInline
-    private boolean readCheckOffset0(long offset, long adding) throws BufferUnderflowException {
+    private boolean readCheckOffset0(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (offset < start())
             throw new BufferUnderflowException();
-        long limit0 = readLimit();
+        long limit0 = given ? writeLimit() : readLimit();
         if (offset + adding > limit0) {
 //          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
             //                  offset +

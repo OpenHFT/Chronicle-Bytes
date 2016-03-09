@@ -101,7 +101,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    protected void readCheckOffset(long offset, long adding) throws BufferUnderflowException, IORuntimeException {
+    protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException, IORuntimeException {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {

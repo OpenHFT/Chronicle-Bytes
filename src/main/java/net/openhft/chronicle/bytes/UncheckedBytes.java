@@ -42,7 +42,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     }
 
     @Override
-    void readCheckOffset(long offset, long adding) {
+    void readCheckOffset(long offset, long adding, boolean given) {
     }
 
     @Override

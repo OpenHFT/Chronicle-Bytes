@@ -24,7 +24,7 @@ import static org.junit.Assert.assertEquals;
 public class TextLongArrayReferenceTest {
     @Test
     public void getSetValues() {
-        int length = 5 * 22 + 47;
+        int length = 5 * 22 + 62;
         try (NativeBytes bytes = Bytes.allocateElasticDirect(length)) {
             TextLongArrayReference.write(bytes, 5);
 
@@ -38,7 +38,7 @@ public class TextLongArrayReferenceTest {
             for (int i = 0; i < 5; i++)
                 assertEquals(i + 1, array.getValueAt(i));
 
-            assertEquals("{ capacity: 00000000000000000005, values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n", bytes.toString());
+            assertEquals("{ locked: false, capacity: 5                   , values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n", bytes.toString());
         }
     }
 }
