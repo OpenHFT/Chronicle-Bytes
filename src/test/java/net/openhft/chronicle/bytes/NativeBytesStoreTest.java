@@ -40,7 +40,7 @@ public class NativeBytesStoreTest {
         assertNotNull(bb);
 
         for (int i = 0; i < 16; i++) {
-            bbb.writeSkip(16000);
+            bbb.writeSkip(1000);
             bbb.writeLong(12345);
         }
         assertEquals(OS.pageSize() * 4, bbb.realCapacity());

@@ -861,8 +861,10 @@ enum BytesInternal {
                 .append(" ] ");
         try {
             long start = Math.max(bytes.start(), readPosition - 64);
-            long end = start + maxLength;
+            long end = Math.min(readLimit + 64, start + maxLength);
             toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
+            if (end < bytes.readLimit())
+                sb.append("...");
         } catch (Exception e) {
             sb.append(' ').append(e);
         }

@@ -201,6 +201,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IORuntimeException {
         writeCheckOffset(writePosition, bytesToSkip);
+        writePosition += bytesToSkip;
         return this;
     }
 

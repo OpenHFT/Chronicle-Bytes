@@ -30,7 +30,7 @@ import java.nio.BufferUnderflowException;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> {
-    public static boolean CHECKING = true;
+    public static boolean CHECKING = false;
     private final MappedFile mappedFile;
 
     // assume the mapped file is reserved already.
