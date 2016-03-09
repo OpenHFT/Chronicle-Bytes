@@ -11,7 +11,7 @@ import java.lang.reflect.Method;
 /**
  * @author Rob Austin.
  */
-public interface BytesRingBuffer extends BytesRingBufferStats {
+public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
 
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
 
@@ -37,9 +37,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats {
      * @return false if this queue is empty, or a populated buffer if the element was retried
      * @throws IllegalStateException is the {@code using} buffer is not large enough
      */
-    boolean read(@NotNull Bytes using) throws
-            InterruptedException,
-            IllegalStateException;
+    boolean read(@NotNull Bytes using) throws IllegalStateException;
 
     long readRemaining();
 
