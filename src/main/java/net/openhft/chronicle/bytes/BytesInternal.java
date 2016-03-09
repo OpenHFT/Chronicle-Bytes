@@ -849,16 +849,20 @@ enum BytesInternal {
     }
 
     public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
-        StringBuilder sb = new StringBuilder(200);
-        long position = bytes.readPosition();
+        int len = Maths.toUInt31(maxLength);
+        StringBuilder sb = new StringBuilder(len + 40);
+        long readPosition = bytes.readPosition();
+        long writePosition = bytes.writePosition();
         sb.append("[")
-                .append("pos: ").append(position)
-                .append(", rlim: ").append(bytes.readLimit())
+                .append("pos: ").append(readPosition)
+                .append(", rlim: ").append(writePosition)
                 .append(", wlim: ").append(asSize(bytes.writeLimit()))
                 .append(", cap: ").append(asSize(bytes.capacity()))
                 .append(" ] ");
         try {
-            toString(bytes, sb, position - maxLength, position, position + maxLength);
+            long start = Math.max(bytes.start(), readPosition - 64);
+            long end = start + maxLength;
+            toString(bytes, sb, start, readPosition, writePosition, end);
         } catch (Exception e) {
             sb.append(' ').append(e);
         }
@@ -905,32 +909,33 @@ enum BytesInternal {
         }
     }
 
-    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long position, long end) throws BufferUnderflowException {
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long readPosition, long writePosition, long end) throws BufferUnderflowException {
         try {
             // before
-            if (start < 0) start = 0;
-            if (position > start) {
-                long last = Math.min(position, bytes.readLimit());
-                for (long i = start; i < last; i++) {
-                    sb.append(bytes.printable(i));
-                }
+            if (start < bytes.start()) start = bytes.start();
+
+            if (readPosition >= start) {
+                long last = Math.min(readPosition, end);
+                toString(bytes, sb, start, last);
                 sb.append('\u2016');
-                if (position >= bytes.readLimit()) {
-                    return;
-                }
             }
-            if (end > bytes.readLimit())
-                end = bytes.readLimit();
-            // after
-            for (long i = position; i < end; i++) {
-                sb.append(bytes.printable(i));
+            toString(bytes, sb, Math.max(readPosition, start), Math.min(writePosition, end));
+            if (writePosition <= end) {
+                sb.append('\u2021');
+                toString(bytes, sb, writePosition, end);
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             try {
-                sb.append(e.toString());
+                sb.append(' ').append(e.toString());
             } catch (IOException e1) {
                 throw new AssertionError(e);
             }
+        }
+    }
+
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long last) throws IOException {
+        for (long i = start; i < last; i++) {
+            sb.append(bytes.printable(i));
         }
     }
 
@@ -1848,10 +1853,6 @@ enum BytesInternal {
             if (in.compareAndSwapLong(offset, value, value2))
                 return value2;
         }
-    }
-
-    public static String toHexString(@NotNull final Bytes bytes) throws IORuntimeException, BufferUnderflowException {
-        return toHexString(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     /**

@@ -247,7 +247,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @NotNull
     default String toDebugString() {
-        return toDebugString(256);
+        return toDebugString(512);
     }
 
     /**

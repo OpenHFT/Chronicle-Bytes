@@ -99,7 +99,8 @@ public class CheckingMappedBytes extends MappedBytes {
 
     @Override
     public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException, IORuntimeException {
-        return super.writeSkip(bytesToSkip);
+        writePosition(writePosition() + bytesToSkip);
+        return this;
     }
 
     @NotNull

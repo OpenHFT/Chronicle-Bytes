@@ -200,7 +200,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IORuntimeException {
-        writeOffsetPositionMoved(bytesToSkip);
+        writeCheckOffset(writePosition, bytesToSkip);
         return this;
     }
 
@@ -221,8 +221,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     void performRelease() {
         try {
             this.bytesStore.release();
-        } catch (IllegalStateException e) {
-            throw new AssertionError(e);
         } finally {
             this.bytesStore = NoBytesStore.noBytesStore();
         }
@@ -477,9 +475,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        long next = offset + adding;
-        if (next > 230 && next < 239)
-            new Throwable(Thread.currentThread().toString()).printStackTrace();
         assert writeCheckOffset0(offset, adding);
     }
 
@@ -636,22 +631,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long writeOffsetPositionMoved(long adding)
             throws BufferOverflowException, IORuntimeException {
         long oldPosition = writePosition;
-        try {
             writeCheckOffset(writePosition, adding);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
         writePosition += adding;
         return oldPosition;
     }
 
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException, IORuntimeException {
-        try {
             prewriteCheckOffset(readPosition, subtracting);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
         return readPosition -= subtracting;
     }
 
@@ -786,7 +773,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public String toString() {
         try {
             return BytesInternal.toString(this);
-        } catch (IllegalStateException | IORuntimeException e) {
+        } catch (Exception e) {
             return e.toString();
         }
     }

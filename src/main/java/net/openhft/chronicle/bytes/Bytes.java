@@ -356,7 +356,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     @NotNull
     default String toHexString() throws IORuntimeException {
-        return BytesInternal.toHexString(this);
+        return toHexString(1024);
     }
 
     /**
@@ -368,8 +368,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     @NotNull
     default String toHexString(long maxLength)
             throws IORuntimeException {
-        if (readRemaining() < maxLength) return toHexString();
-        return BytesInternal.toHexString(this, readPosition(), maxLength) + ".... truncated";
+        long position = Math.max(start(), readPosition() - 32);
+        return toHexString(position, maxLength);
     }
 
     /**
@@ -381,7 +381,8 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     @NotNull
     default String toHexString(long offset, long maxLength)
             throws IORuntimeException {
-        long maxLength2 = Math.min(maxLength, readLimit() - offset);
+        long limit = Math.min(readLimit() + 32, writeLimit());
+        long maxLength2 = Math.min(maxLength, limit - offset);
         String ret = BytesInternal.toHexString(this, offset, maxLength2);
         return maxLength2 < maxLength ? ret + "... truncated" : ret;
     }
