@@ -27,7 +27,7 @@ The format for a long array in text is
  */
 
 public class TextLongArrayReference implements ByteableLongArrayValues {
-    private static final byte[] SECTION1 = "{ capacity: ".getBytes();
+    private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes();
     private static final byte[] SECTION2 = ", values: [ ".getBytes();
     private static final byte[] SECTION3 = " ] }\n".getBytes();
     private static final byte[] ZERO = "00000000000000000000".getBytes();
@@ -43,9 +43,12 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private long length = VALUES;
 
     public static void write(@NotNull Bytes bytes, long capacity) {
+        long start = bytes.writePosition();
         bytes.write(SECTION1);
-        bytes.append(bytes.writePosition(), capacity, 20);
-        bytes.writeSkip(20);
+        bytes.append(capacity);
+        while (bytes.writePosition() - start < CAPACITY + DIGITS) {
+            bytes.writeUnsignedByte(' ');
+        }
         bytes.write(SECTION2);
         for (long i = 0; i < capacity; i++) {
             if (i > 0)

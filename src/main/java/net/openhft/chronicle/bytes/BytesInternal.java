@@ -852,17 +852,19 @@ enum BytesInternal {
         int len = Maths.toUInt31(maxLength);
         StringBuilder sb = new StringBuilder(len + 40);
         long readPosition = bytes.readPosition();
-        long writePosition = bytes.writePosition();
+        long readLimit = bytes.readLimit();
         sb.append("[")
                 .append("pos: ").append(readPosition)
-                .append(", rlim: ").append(writePosition)
+                .append(", rlim: ").append(readLimit)
                 .append(", wlim: ").append(asSize(bytes.writeLimit()))
                 .append(", cap: ").append(asSize(bytes.capacity()))
                 .append(" ] ");
         try {
             long start = Math.max(bytes.start(), readPosition - 64);
-            long end = start + maxLength;
-            toString(bytes, sb, start, readPosition, writePosition, end);
+            long end = Math.min(readLimit + 64, start + maxLength);
+            toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
+            if (end < bytes.readLimit())
+                sb.append("...");
         } catch (Exception e) {
             sb.append(' ').append(e);
         }
@@ -913,15 +915,17 @@ enum BytesInternal {
         try {
             // before
             if (start < bytes.start()) start = bytes.start();
-
-            if (readPosition >= start) {
+            long realCapacity = bytes.realCapacity();
+            if (end > realCapacity) end = realCapacity;
+            if (readPosition >= start && bytes instanceof Bytes) {
                 long last = Math.min(readPosition, end);
                 toString(bytes, sb, start, last);
                 sb.append('\u2016');
             }
             toString(bytes, sb, Math.max(readPosition, start), Math.min(writePosition, end));
             if (writePosition <= end) {
-                sb.append('\u2021');
+                if (bytes instanceof Bytes)
+                    sb.append('\u2021');
                 toString(bytes, sb, writePosition, end);
             }
         } catch (Exception e) {
