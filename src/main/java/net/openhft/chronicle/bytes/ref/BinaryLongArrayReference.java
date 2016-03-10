@@ -98,6 +98,18 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
+    public boolean isNull() {
+        return bytes == null;
+    }
+
+    @Override
+    public void reset() {
+        bytes = null;
+        offset = 0;
+        length = 0;
+    }
+
+    @Override
     public BytesStore bytesStore() {
         return bytes;
     }
@@ -114,11 +126,13 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     @NotNull
     public String toString() {
+        if (bytes == null)
+            return "not set";
         StringBuilder sb = new StringBuilder();
         sb.append("value: ");
         String sep = "";
         try {
-            int i, max = (int) Math.min(length, MAX_TO_STRING);
+            int i, max = (int) Math.min(getCapacity(), MAX_TO_STRING);
             for (i = 0; i < max; i++) {
                 long valueAt = getValueAt(i);
                 if (valueAt == 0)
@@ -126,7 +140,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
                 sb.append(sep).append(valueAt);
                 sep = ", ";
             }
-            if (i < length)
+            if (i < getCapacity())
                 sb.append(" ...");
         } catch (BufferUnderflowException e) {
             sb.append(" ").append(e);
@@ -138,4 +152,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public long sizeInBytes(long capacity) {
         return (capacity << 3) + VALUES;
     }
+
+
 }

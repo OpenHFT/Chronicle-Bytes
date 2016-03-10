@@ -110,6 +110,18 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
+    public boolean isNull() {
+        return bytes == null;
+    }
+
+    @Override
+    public void reset() {
+        bytes = null;
+        offset = 0;
+        length = 0;
+    }
+
+    @Override
     public BytesStore bytesStore() {
         return bytes;
     }
