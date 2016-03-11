@@ -117,7 +117,7 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException, IORuntimeException {
-        if (offset < 0 || offset >= capacity())
+        if (offset < 0 || offset > capacity() - adding)
             throw new IllegalArgumentException("Offset out of bound " + offset);
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
