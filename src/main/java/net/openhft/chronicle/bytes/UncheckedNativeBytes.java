@@ -469,7 +469,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @ForceInline
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
-        assert writeCheckOffset0(offset, adding);
+//        assert writeCheckOffset0(offset, adding);
     }
 
     private boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {

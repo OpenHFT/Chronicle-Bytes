@@ -147,4 +147,29 @@ public class MappedBytes extends AbstractBytes<Void> {
     public boolean isElastic() {
         return true;
     }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
+            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+        if (length == 8) {
+            writeLong(bytes.readLong(offset));
+
+        } else if (bytes.bytesStore() instanceof NativeBytesStore && length >= 16) {
+            rawCopy(bytes, offset, length);
+
+        } else {
+            BytesInternal.writeFully(bytes, offset, length, this);
+        }
+        return this;
+    }
+
+    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferOverflowException, BufferUnderflowException {
+        long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+        if (len > 0) {
+            OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
+            writePosition += len;
+        }
+    }
 }

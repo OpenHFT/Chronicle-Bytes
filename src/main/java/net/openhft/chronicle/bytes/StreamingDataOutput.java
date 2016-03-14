@@ -295,4 +295,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default void copyFrom(InputStream input) throws IOException, BufferOverflowException, IllegalArgumentException {
         BytesInternal.copy(input, this);
     }
+
+    default void writePositionRemaining(long position, long length) {
+        writeLimit(position + length);
+        writePosition(position);
+    }
+
 }
