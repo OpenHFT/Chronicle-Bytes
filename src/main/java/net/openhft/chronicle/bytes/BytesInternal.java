@@ -1876,9 +1876,7 @@ enum BytesInternal {
         long limit = bytes.readLimit();
 
         try {
-
-            bytes.readLimit(offset + len);
-            bytes.readPosition(offset);
+            bytes.readPositionRemaining(offset, len);
 
             final StringBuilder builder = new StringBuilder();
             long start = offset / width * width;

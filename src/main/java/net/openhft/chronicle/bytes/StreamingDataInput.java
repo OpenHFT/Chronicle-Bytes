@@ -34,6 +34,11 @@ import java.util.function.Function;
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     S readPosition(long position) throws BufferUnderflowException;
 
+    default S readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
+        readLimit(position + remaining);
+        return readPosition(position);
+    }
+
     S readLimit(long limit) throws BufferUnderflowException;
 
     /**
@@ -98,6 +103,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default int readUnsignedShort()
             throws BufferUnderflowException, IORuntimeException {
         return readShort() & 0xFFFF;
+    }
+
+    default int readUnsignedInt24() throws BufferUnderflowException, IORuntimeException {
+        return readUnsignedShort() | (readUnsignedByte() << 16);
     }
 
     int readInt() throws BufferUnderflowException, IORuntimeException;

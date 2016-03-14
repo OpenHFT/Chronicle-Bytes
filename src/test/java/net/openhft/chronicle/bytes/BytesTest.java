@@ -130,8 +130,7 @@ public class BytesTest {
         Bytes<ByteBuffer> bbb = Bytes.wrapForWrite(ByteBuffer.allocateDirect(1024));
         for (int i = 'a'; i <= 'z'; i++)
             bbb.writeUnsignedByte(i);
-        bbb.readLimit(16);
-        bbb.readPosition(4);
+        bbb.readPositionRemaining(4, 12);
         BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
         bbb.writeUnsignedByte(10, '0');
         assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());

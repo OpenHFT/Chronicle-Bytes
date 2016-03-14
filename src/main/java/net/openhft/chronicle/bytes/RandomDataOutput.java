@@ -128,6 +128,12 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     R writeShort(long offset, short i)
             throws BufferOverflowException, IORuntimeException;
 
+    default R writeInt24(long offset, int i)
+            throws BufferOverflowException, IORuntimeException {
+        writeUnsignedShort(offset, i);
+        return writeUnsignedByte(offset + 2, i >> 16);
+    }
+
     /**
      * Write an int at an offset.
      *

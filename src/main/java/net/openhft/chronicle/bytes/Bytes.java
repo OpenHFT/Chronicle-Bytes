@@ -262,8 +262,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
             throws BufferUnderflowException, IORuntimeException {
         final long pos = buffer.readPosition();
         final long limit = buffer.readLimit();
-        buffer.readLimit(position + len);
-        buffer.readPosition(position);
+        buffer.readPositionRemaining(position, len);
 
         try {
 

@@ -111,6 +111,18 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     /**
+     * Read an unsigned int at an offset
+     *
+     * @param offset to read
+     * @return the int
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IORuntimeException       if an error occurred trying to obtain the data.
+     */
+    default int readUnsignedInt24(long offset) throws BufferUnderflowException, IORuntimeException {
+        return readUnsignedShort(offset) | (readUnsignedByte(offset) << 16);
+    }
+
+    /**
      * Read an int at an offset
      *
      * @param offset to read

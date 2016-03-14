@@ -159,6 +159,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
+    default S writeInt24(int i) throws BufferOverflowException, IORuntimeException {
+        writeUnsignedShort(i);
+        return writeUnsignedByte(i >> 16);
+    }
+
+    @NotNull
     S writeInt(int i) throws BufferOverflowException, IORuntimeException;
 
     @NotNull
