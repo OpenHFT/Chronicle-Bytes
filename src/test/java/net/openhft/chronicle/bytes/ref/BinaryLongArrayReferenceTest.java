@@ -16,7 +16,6 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -24,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 public class BinaryLongArrayReferenceTest {
     @Test
     public void getSetValues() {
-        int length = 1024 + 8;
-        try (NativeBytes bytes = Bytes.allocateElasticDirect(length + 8)) {
+        int length = 128 * 8 + 2 * 8;
+        try (Bytes bytes = Bytes.allocateDirect(length)) {
             BinaryLongArrayReference.write(bytes, 128);
 
             BinaryLongArrayReference array = new BinaryLongArrayReference();

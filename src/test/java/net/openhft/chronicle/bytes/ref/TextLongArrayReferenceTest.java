@@ -16,7 +16,6 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -24,8 +23,8 @@ import static org.junit.Assert.assertEquals;
 public class TextLongArrayReferenceTest {
     @Test
     public void getSetValues() {
-        int length = 5 * 22 + 62;
-        try (NativeBytes bytes = Bytes.allocateElasticDirect(length)) {
+        int length = 5 * 22 + 62 + 35;
+        try (Bytes bytes = Bytes.allocateDirect(length)) {
             TextLongArrayReference.write(bytes, 5);
 
             TextLongArrayReference array = new TextLongArrayReference();
@@ -38,7 +37,9 @@ public class TextLongArrayReferenceTest {
             for (int i = 0; i < 5; i++)
                 assertEquals(i + 1, array.getValueAt(i));
 
-            assertEquals("{ locked: false, capacity: 5                   , values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n", bytes.toString());
+            assertEquals("{ locked: false, capacity: 5                   , used: 00000000000000000000, " +
+                            "values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n",
+                    bytes.toString());
         }
     }
 }

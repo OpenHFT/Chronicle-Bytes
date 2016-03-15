@@ -38,7 +38,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
-        long start = bytes.writePosition() + VALUES;
+        long start = bytes.writePosition();
         bytes.zeroOut(start, start + (capacity << 3));
         bytes.writeSkip(capacity << 3);
     }
@@ -53,7 +53,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public static long peakLength(@NotNull BytesStore bytes, long offset) throws BufferUnderflowException {
         final long capacity = bytes.readLong(offset);
         assert capacity > 0 : "capacity too small";
-        return (capacity << 3) + 8;
+        return (capacity << 3) + VALUES;
     }
 
     @Override
