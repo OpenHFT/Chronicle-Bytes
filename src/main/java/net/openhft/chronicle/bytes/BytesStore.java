@@ -479,4 +479,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     void move(long from, long to, long length);
+
+
+    /**
+     * Write a value which is not smaller.
+     *
+     * @param offset  to write to
+     * @param atLeast value it is at least.
+     */
+    default void writeMaxLong(long offset, long atLeast) {
+        for (; ; ) {
+            long v = readVolatileLong(offset);
+            if (v >= atLeast)
+                return;
+            if (compareAndSwapLong(offset, v, atLeast))
+                return;
+        }
+    }
 }

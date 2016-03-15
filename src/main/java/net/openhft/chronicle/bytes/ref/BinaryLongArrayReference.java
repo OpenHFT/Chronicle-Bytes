@@ -27,8 +27,9 @@ import java.nio.BufferUnderflowException;
  * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
  */
 public class BinaryLongArrayReference implements ByteableLongArrayValues {
-    //    private static final long CAPACITY = 0;
-    private static final long VALUES = 8;
+    private static final long CAPACITY = 0;
+    private static final long USED = CAPACITY + Long.BYTES;
+    private static final long VALUES = USED + Long.BYTES;
     private static final int MAX_TO_STRING = 128;
     private BytesStore bytes;
     private long offset;
@@ -36,6 +37,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
         bytes.writeLong(capacity);
+        bytes.writeLong(0L); // used
         long start = bytes.writePosition() + VALUES;
         bytes.zeroOut(start, start + (capacity << 3));
         bytes.writeSkip(capacity << 3);
@@ -44,6 +46,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public static void lazyWrite(@NotNull Bytes bytes, long capacity) throws BufferOverflowException {
         //System.out.println("capacity location =" + bytes.position());
         bytes.writeLong(capacity);
+        bytes.writeLong(0L); // used
         bytes.writeSkip(capacity << 3);
     }
 
@@ -56,6 +59,16 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     @Override
     public long getCapacity() {
         return (length - VALUES) >>> 3;
+    }
+
+    @Override
+    public long getUsed() {
+        return bytes.readVolatileLong(offset + USED);
+    }
+
+    @Override
+    public void setMaxUsed(long usedAtLeast) {
+        bytes.writeMaxLong(offset + USED, usedAtLeast);
     }
 
     @Override

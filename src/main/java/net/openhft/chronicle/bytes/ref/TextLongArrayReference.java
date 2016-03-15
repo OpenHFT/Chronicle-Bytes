@@ -28,14 +28,16 @@ The format for a long array in text is
 
 public class TextLongArrayReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes();
-    private static final byte[] SECTION2 = ", values: [ ".getBytes();
-    private static final byte[] SECTION3 = " ] }\n".getBytes();
+    private static final byte[] SECTION2 = ", used: ".getBytes();
+    private static final byte[] SECTION3 = ", values: [ ".getBytes();
+    private static final byte[] SECTION4 = " ] }\n".getBytes();
     private static final byte[] ZERO = "00000000000000000000".getBytes();
     private static final byte[] SEP = ", ".getBytes();
 
     private static final int DIGITS = ZERO.length;
     private static final int CAPACITY = SECTION1.length;
-    private static final int VALUES = CAPACITY + DIGITS + SECTION2.length;
+    private static final int USED = CAPACITY + DIGITS + SECTION2.length;
+    private static final int VALUES = USED + DIGITS + SECTION3.length;
     private static final int VALUE_SIZE = DIGITS + SEP.length;
 
     private BytesStore bytes;
@@ -50,17 +52,29 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
             bytes.writeUnsignedByte(' ');
         }
         bytes.write(SECTION2);
+        bytes.write(ZERO);
+        bytes.write(SECTION3);
         for (long i = 0; i < capacity; i++) {
             if (i > 0)
                 bytes.appendUtf8(", ");
             bytes.write(ZERO);
         }
-        bytes.write(SECTION3);
+        bytes.write(SECTION4);
     }
 
     public static long peakLength(@NotNull BytesStore bytes, long offset) {
         //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+    }
+
+    @Override
+    public long getUsed() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void setMaxUsed(long usedAtLeast) {
+        throw new UnsupportedOperationException();
     }
 
     @Override
