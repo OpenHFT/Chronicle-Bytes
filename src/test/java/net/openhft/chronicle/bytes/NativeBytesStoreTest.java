@@ -35,7 +35,7 @@ public class NativeBytesStoreTest {
     public void testElasticByteBuffer() throws IORuntimeException, BufferOverflowException {
         Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         assertEquals(Bytes.MAX_CAPACITY, bbb.capacity());
-        assertEquals(OS.pageSize(), bbb.realCapacity());
+        assertEquals(Bytes.DEFAULT_BYTE_BUFFER_CAPACITY, bbb.realCapacity());
         ByteBuffer bb = bbb.underlyingObject();
         assertNotNull(bb);
 
