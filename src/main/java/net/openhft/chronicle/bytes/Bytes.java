@@ -47,7 +47,7 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        return elasticByteBuffer(OS.pageSize());
+        return elasticByteBuffer(256);
     }
 
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
