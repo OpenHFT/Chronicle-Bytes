@@ -42,12 +42,13 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
         BytesPrepender<Bytes<Underlying>> {
 
     long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
+    int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
      * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
-        return elasticByteBuffer(OS.pageSize());
+        return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
 
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
