@@ -141,7 +141,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             throw new BufferOverflowException();
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
-        long size = (Math.max(endOfBuffer, bytesStore.capacity() * 3 / 2) + ps) & ~(ps - 1);
+        long size = (Math.max(endOfBuffer, bytesStore.realCapacity() * 3 / 2) + ps) & ~(ps - 1);
         if (capacity() < Long.MAX_VALUE)
             size = Math.min(size, capacity());
         NativeBytesStore store;

@@ -697,7 +697,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> write(byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
-        if (bytes.length > writeRemaining())
+        if (length > writeRemaining())
             throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, bytes, offset, length);

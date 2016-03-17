@@ -102,6 +102,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return pbs;
     }
 
+    /**
+     * @return an empty, fixed sized Bytes
+     */
+    static BytesStore empty() {
+        return NoBytesStore.noBytesStore();
+    }
+
     default boolean isNative() {
         return underlyingObject() == null || underlyingObject() instanceof DirectBuffer;
     }

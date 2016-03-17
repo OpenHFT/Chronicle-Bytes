@@ -281,13 +281,6 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
     }
 
     /**
-     * @return an empty, fixed sized Bytes
-     */
-    static BytesStore empty() {
-        return NoBytesStore.noBytesStore();
-    }
-
-    /**
      * copies the contents of bytes into a direct byte buffer
      *
      * @param bytes the bytes to wrap
