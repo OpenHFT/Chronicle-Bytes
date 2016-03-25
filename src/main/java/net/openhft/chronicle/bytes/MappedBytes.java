@@ -16,8 +16,10 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -171,5 +173,69 @@ public class MappedBytes extends AbstractBytes<Void> {
             OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
             writePosition += len;
         }
+    }
+
+    public MappedBytes write8bit(CharSequence s, int start, int length) {
+        // check the start.
+        long pos = writePosition();
+        writeCheckOffset(pos, 0);
+        if (!(s instanceof String) || pos + length + 5 >= safeLimit()) {
+            super.write8bit(s, start, length);
+            return this;
+        }
+
+        writeStopBit(length);
+        char[] chars = StringUtils.extractChars((String) s);
+        long address = address(writePosition());
+        Memory memory = OS.memory();
+        int i = 0;
+        for (; i < length - 3; i += 4) {
+            int c0 = chars[i + start] & 0xff;
+            int c1 = chars[i + start + 1] & 0xff;
+            int c2 = chars[i + start + 2] & 0xff;
+            int c3 = chars[i + start + 3] & 0xff;
+            memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+            address += 4;
+        }
+        for (; i < length; i++) {
+            char c = chars[i + start];
+            memory.writeByte(address++, (byte) c);
+        }
+        writeSkip(length);
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        // check the start.
+        long pos = writePosition();
+        writeCheckOffset(pos, 0);
+        if (!(cs instanceof String) || pos + length + 5 >= safeLimit()) {
+            super.appendUtf8(cs, start, length);
+            return this;
+        }
+
+        char[] chars = StringUtils.extractChars((String) cs);
+        long address = address(pos);
+        Memory memory = OS.memory();
+        int i = 0;
+        non_ascii:
+        {
+            for (; i < length; i++) {
+                char c = chars[i + start];
+                if (c > 127) {
+                    writeSkip(i);
+                    break non_ascii;
+                }
+                memory.writeByte(address++, (byte) c);
+            }
+            writeSkip(length);
+            return this;
+        }
+        for (; i < length; i++) {
+            char c = chars[i + start];
+            appendUtf8(c);
+        }
+        return this;
     }
 }

@@ -191,13 +191,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return this;
     }
 
-    public Bytes<Underlying> write8bit(@NotNull CharSequence str, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
-        writeStopBit(length);
-        write(str, offset, length);
-        return this;
-    }
-
     public void write(long position, @NotNull CharSequence str, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         // todo optimise

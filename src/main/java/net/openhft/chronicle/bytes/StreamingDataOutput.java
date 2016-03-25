@@ -105,7 +105,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write8bit(CharSequence s, int start, int length)
             throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
         writeStopBit(length);
-        return write(s, start, length);
+        for (int i = 0; i < length; i++) {
+            char c = s.charAt(i + start);
+            writeUnsignedByte(c);
+        }
+        return (S) this;
     }
 
     default S write(CharSequence cs)
