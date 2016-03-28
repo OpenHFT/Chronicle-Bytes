@@ -340,7 +340,11 @@ public class HeapBytesStore<Underlying>
     @Override
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+        // TODO this method is almost certainly wrong.
+        if (true)
+            throw new UnsupportedOperationException();
         writeCheckOffset(offset, length);
+        assert realUnderlyingObject == null;
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
