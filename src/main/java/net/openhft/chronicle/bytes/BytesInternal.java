@@ -1014,7 +1014,7 @@ enum BytesInternal {
 
     public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         if (decimalPlaces == 0) {
-            append(out, num);
+            append(out, num, 10);
             return;
         }
 
