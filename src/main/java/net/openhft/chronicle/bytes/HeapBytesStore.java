@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -340,11 +341,8 @@ public class HeapBytesStore<Underlying>
     @Override
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
-        // TODO this method is almost certainly wrong.
-        if (true)
-            throw new UnsupportedOperationException();
         writeCheckOffset(offset, length);
-        assert realUnderlyingObject == null;
+        assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);

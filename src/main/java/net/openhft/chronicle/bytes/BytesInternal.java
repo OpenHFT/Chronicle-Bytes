@@ -990,10 +990,12 @@ enum BytesInternal {
         }
     }
 
-    public static void append(@NotNull ByteStringAppender out, long num) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+    public static void append(@NotNull ByteStringAppender out, long num, int base) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
-                out.write(MIN_VALUE_TEXT);
+                if (base == 10)
+                    out.write(MIN_VALUE_TEXT);
+                else out.write(Long.toString(Long.MIN_VALUE, base));
                 return;
             }
             out.writeByte((byte) '-');
@@ -1003,7 +1005,10 @@ enum BytesInternal {
             out.writeByte((byte) '0');
 
         } else {
+            if (base == 10)
             appendLong0(out, num);
+            else
+                out.write(Long.toString(num, base));
         }
     }
 

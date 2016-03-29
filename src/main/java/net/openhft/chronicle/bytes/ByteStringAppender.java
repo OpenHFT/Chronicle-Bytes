@@ -78,7 +78,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(long value) throws BufferOverflowException, IORuntimeException {
-        BytesInternal.append(this, value);
+        BytesInternal.append(this, value, 10);
+        return (B) this;
+    }
+
+    @NotNull
+    default B appendBase(long value, int base) throws BufferOverflowException, IORuntimeException {
+        BytesInternal.append(this, value, base);
         return (B) this;
     }
 
