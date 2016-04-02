@@ -22,7 +22,7 @@ import java.io.*;
  * Created by peter on 12/07/15.
  */
 public class PrintVdsoMain {
-    public static void main(String[] args) throws IOException, InterruptedException, IllegalStateException {
+    public static void main(String[] args) throws IOException, IllegalStateException {
         long start = 0;
         long end = 0;
         String maps = "/proc/self/maps";
