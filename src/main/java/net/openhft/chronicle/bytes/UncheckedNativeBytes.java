@@ -58,7 +58,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-
     @Override
     public void move(long from, long to, long length) {
         bytesStore.move(from - start(), to - start(), length);

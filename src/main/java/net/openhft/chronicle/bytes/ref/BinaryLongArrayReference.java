@@ -165,6 +165,4 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public long sizeInBytes(long capacity) {
         return (capacity << 3) + VALUES;
     }
-
-
 }

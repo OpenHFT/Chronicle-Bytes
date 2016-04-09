@@ -304,5 +304,4 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writeLimit(position + length);
         writePosition(position);
     }
-
 }

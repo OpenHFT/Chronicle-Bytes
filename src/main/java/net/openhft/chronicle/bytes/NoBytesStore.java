@@ -240,5 +240,4 @@ public enum NoBytesStore implements BytesStore {
     public Bytes bytesForWrite() {
         throw new UnsupportedOperationException("todo");
     }
-
 }

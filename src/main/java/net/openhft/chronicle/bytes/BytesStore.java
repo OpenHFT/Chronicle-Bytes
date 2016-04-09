@@ -468,7 +468,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return r;
     }
 
-
     /**
      * Clear and set the flag for present.
      * @param isPresent if there is data, or false if not.
@@ -486,7 +485,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     void move(long from, long to, long length);
-
 
     /**
      * Write a value which is not smaller.

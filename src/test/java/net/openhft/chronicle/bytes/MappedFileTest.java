@@ -29,7 +29,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class MappedFileTest {
 
-
     @Test
     public void testReferenceCounts() throws IOException {
         new File(OS.TARGET).mkdir();

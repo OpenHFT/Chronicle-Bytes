@@ -90,5 +90,4 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
 
     long readRemaining();
 
-
 }

@@ -113,7 +113,6 @@ public interface Compression {
         return null;
     }
 
-
     default byte[] compress(byte[] bytes) throws IORuntimeException {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {

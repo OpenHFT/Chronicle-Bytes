@@ -52,5 +52,4 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
         long hash = hash(b, length);
         return (int) (hash ^ (hash >>> 32));
     }
-
 }
