@@ -18,6 +18,9 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -33,6 +36,17 @@ import static org.junit.Assert.assertEquals;
  */
 public class OptimisedBytesStoreHashTest {
 
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     @Test
     public void testApplyAsLong() {
         NativeBytes b = Bytes.allocateElasticDirect(128);

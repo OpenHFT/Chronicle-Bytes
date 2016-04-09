@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -25,6 +28,19 @@ import static org.junit.Assert.assertEquals;
 
 public class ByteStringAppenderTest {
     Bytes bytes = Bytes.elasticByteBuffer();
+
+
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
 
     @Test
     public void testAppend() {

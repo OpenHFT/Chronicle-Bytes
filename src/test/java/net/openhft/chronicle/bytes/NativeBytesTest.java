@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -29,6 +32,17 @@ import static org.junit.Assert.assertTrue;
  */
 public class NativeBytesTest {
 
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     @Test
     public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = Bytes.allocateElasticDirect();

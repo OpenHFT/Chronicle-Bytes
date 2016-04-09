@@ -16,10 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.*;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,6 +41,17 @@ public class ByteStoreTest {
     private ByteBuffer byteBuffer;
     private BytesStore bytesStore;
 
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     @Before
     public void beforeTest() {
         byteBuffer = ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder());

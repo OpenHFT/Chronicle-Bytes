@@ -18,7 +18,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -28,6 +31,18 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.*;
 
 public class BytesTest {
+
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     /*
         public static void testSliceOfBytes(Bytes bytes) {
             // move the position by 1

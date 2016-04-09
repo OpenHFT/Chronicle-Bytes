@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -24,6 +27,17 @@ import static org.junit.Assert.*;
 
 public class BytesInternalTest {
 
+    private ThreadDump threadDump;
+
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     @Test
     public void testParseUTF_SB1() throws Exception {
         VanillaBytes bytes = Bytes.allocateElasticDirect();

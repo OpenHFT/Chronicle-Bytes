@@ -16,6 +16,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.threads.ThreadDump;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -33,10 +36,20 @@ buffers 128 KB took an average of 10,768 ns for heap ByteBuffer, 21,444 ns for d
 buffers 128 KB took an average of 8,739 ns for heap ByteBuffer, 22,684 ns for direct ByteBuffer and 890 for DirectStore
  */
 public class AllocationRatesTest {
+    public static final int BATCH = 10;
     static final int BUFFER_SIZE = 128 * 1024;
     static final int ALLOCATIONS = 10000;
-    public static final int BATCH = 10;
+    private ThreadDump threadDump;
 
+    @Before
+    public void threadDump() {
+        threadDump = new ThreadDump();
+    }
+
+    @After
+    public void checkThreadDump() {
+        threadDump.assertNoNewThreads();
+    }
     @Test
     public void compareAllocationRates() {
         for (int i = 0; i < 5; i++) {
