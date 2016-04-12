@@ -238,4 +238,9 @@ public class MappedBytes extends AbstractBytes<Void> {
         }
         return this;
     }
+
+    @Override
+    public boolean sharedMemory() {
+        return true;
+    }
 }

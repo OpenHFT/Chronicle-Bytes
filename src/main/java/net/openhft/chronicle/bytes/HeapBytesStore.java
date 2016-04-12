@@ -383,4 +383,9 @@ public class HeapBytesStore<Underlying>
             throw new AssertionError(e);
         }
     }
+
+    @Override
+    public boolean sharedMemory() {
+        return false;
+    }
 }

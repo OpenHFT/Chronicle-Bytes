@@ -25,7 +25,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
-    private static final int NOT_READY = 1 << 31;
+    private static final int NOT_COMPLETE = 1 << 31;
     private final BytesStore<B, Underlying> underlyingBytesStore;
 
     ExpectedBytesStore(BytesStore<B, Underlying> underlyingBytesStore) {
@@ -160,7 +160,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         try {
             int ia = underlyingBytesStore.readInt(offset);
             if (ia != i) {
-                if ((i & NOT_READY) == 0)
+                if ((i & NOT_COMPLETE) == 0)
                     throw new AssertionError("Expected: " + ia + " <" + Integer.toHexString(ia) + ">\nActual: " + i + " <" + Integer.toHexString(i) + ">");
             }
             return (B) this;
@@ -269,5 +269,10 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @Override
     public void move(long from, long to, long length) {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean sharedMemory() {
+        return false;
     }
 }

@@ -430,4 +430,9 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     Bytes<Underlying> compact();
 
+
+    @Override
+    default boolean sharedMemory() {
+        return bytesStore().sharedMemory();
+    }
 }

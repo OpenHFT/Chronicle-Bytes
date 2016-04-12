@@ -163,4 +163,9 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     boolean isNative();
+
+    /**
+     * @return true if these Bytes use shared memory.
+     */
+    boolean sharedMemory();
 }

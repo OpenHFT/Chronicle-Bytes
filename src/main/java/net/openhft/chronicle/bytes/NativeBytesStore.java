@@ -656,6 +656,11 @@ public class NativeBytesStore<Underlying>
         return b & 0xFF;
     }
 
+    @Override
+    public boolean sharedMemory() {
+        return false;
+    }
+
     static class Deallocator implements Runnable {
 
         private volatile long address, size;
