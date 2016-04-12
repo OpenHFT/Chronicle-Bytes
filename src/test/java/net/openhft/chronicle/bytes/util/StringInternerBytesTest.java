@@ -27,7 +27,7 @@ import static org.junit.Assert.assertEquals;
 public class StringInternerBytesTest {
 
     @Test
-    public void testIntern() throws Exception {
+    public void testIntern() {
         StringInternerBytes si = new StringInternerBytes(128);
         for (int i = 0; i < 100; i++) {
             Bytes b = Bytes.from("key" + i);

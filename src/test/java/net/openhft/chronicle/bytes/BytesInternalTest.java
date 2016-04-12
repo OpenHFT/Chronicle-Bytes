@@ -39,7 +39,7 @@ public class BytesInternalTest {
         threadDump.assertNoNewThreads();
     }
     @Test
-    public void testParseUTF_SB1() throws Exception {
+    public void testParseUTF_SB1() {
         VanillaBytes bytes = Bytes.allocateElasticDirect();
         byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
