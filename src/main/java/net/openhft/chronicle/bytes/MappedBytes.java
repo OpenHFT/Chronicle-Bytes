@@ -175,6 +175,13 @@ public class MappedBytes extends AbstractBytes<Void> {
         }
     }
 
+    @Override
+    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IORuntimeException {
+        return cs instanceof String
+                ? append8bit0((String) cs, start, end - start)
+                : super.append8bit(cs, start, end);
+    }
+
     public MappedBytes write8bit(CharSequence s, int start, int length) {
         // check the start.
         long pos = writePosition();
@@ -185,7 +192,12 @@ public class MappedBytes extends AbstractBytes<Void> {
         }
 
         writeStopBit(length);
-        char[] chars = StringUtils.extractChars((String) s);
+        return append8bit0((String) s, start, length);
+    }
+
+    @NotNull
+    private MappedBytes append8bit0(String s, int start, int length) {
+        char[] chars = StringUtils.extractChars(s);
         long address = address(writePosition());
         Memory memory = OS.memory();
         int i = 0;

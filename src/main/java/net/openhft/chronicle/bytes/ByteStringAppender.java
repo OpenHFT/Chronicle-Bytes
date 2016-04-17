@@ -186,16 +186,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
-        if (cs instanceof BytesStore) {
-            return write((BytesStore) cs);
-        }
-        int length = cs.length();
-        for (int i = 0; i < length; i++) {
-            char c = cs.charAt(i);
-            if (c > 255) c = '?';
-            writeByte((byte) c);
-        }
-        return (B) this;
+        return append8bit(cs, 0, cs.length());
     }
 
     /**
