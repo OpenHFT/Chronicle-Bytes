@@ -21,7 +21,9 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -266,4 +268,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default long parseHexLong() {
         return BytesInternal.parseHexLong(this);
     }
+
+    void copyTo(OutputStream out) throws IOException;
+
+    long copyTo(BytesStore to);
 }

@@ -26,5 +26,5 @@ public interface WriteBytesMarshallable {
      *
      * @param bytes to write to.
      */
-    void writeMarshallable(Bytes bytes);
+    void writeMarshallable(BytesOut bytes);
 }

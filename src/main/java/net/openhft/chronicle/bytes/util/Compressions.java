@@ -16,7 +16,9 @@
 
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
@@ -42,14 +44,18 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public void compress(Bytes from, Bytes to) throws IORuntimeException {
-            long copied = from.copyTo(to);
-            to.writeSkip(copied);
+        public void compress(BytesIn from, BytesOut to) throws IORuntimeException {
+            copy(from, to);
         }
 
         @Override
-        public void uncompress(Bytes from, Bytes to) {
-            from.copyTo(to);
+        public void uncompress(BytesIn from, BytesOut to) {
+            copy(from, to);
+        }
+
+        private void copy(BytesIn from, BytesOut to) {
+            long copied = from.copyTo((BytesStore) to);
+            to.writeSkip(copied);
         }
 
         @Override

@@ -21,6 +21,8 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -34,12 +36,10 @@ import java.nio.charset.StandardCharsets;
  * writeLimit() &lt;= capacity() <p></p> Also readLimit() == writePosition() and readPosition()
  * &lt;= safeLimit(); <p></p>
  */
-public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underlying>,
-        StreamingDataInput<Bytes<Underlying>>,
-        StreamingDataOutput<Bytes<Underlying>>,
-        ByteStringParser<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>>,
-        BytesPrepender<Bytes<Underlying>> {
+public interface Bytes<Underlying> extends
+        BytesStore<Bytes<Underlying>, Underlying>,
+        BytesIn<Underlying>,
+        BytesOut<Underlying> {
 
     long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
@@ -430,6 +430,15 @@ public interface Bytes<Underlying> extends BytesStore<Bytes<Underlying>, Underly
      */
     Bytes<Underlying> compact();
 
+    @Override
+    default long copyTo(@NotNull BytesStore store) {
+        return BytesStore.super.copyTo(store);
+    }
+
+    @Override
+    default void copyTo(OutputStream out) throws IOException {
+        BytesStore.super.copyTo(out);
+    }
 
     @Override
     default boolean sharedMemory() {

@@ -134,4 +134,14 @@ public enum BytesUtil {
         sb.append('\u2016');
         sb.append(bytes);
     }
+
+    public static void readMarshallable(ReadBytesMarshallable marshallable, BytesIn bytes) {
+        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
+                .readMarshallable(marshallable, bytes);
+    }
+
+    public static void writeMarshallable(WriteBytesMarshallable marshallable, BytesOut bytes) {
+        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
+                .writeMarshallable(marshallable, bytes);
+    }
 }

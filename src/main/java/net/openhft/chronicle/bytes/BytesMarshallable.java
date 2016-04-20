@@ -20,4 +20,13 @@ package net.openhft.chronicle.bytes;
  * An object which can be read or written directly to Bytes in a streaming manner.
  */
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
+    @Override
+    default void readMarshallable(BytesIn bytes) {
+        BytesUtil.readMarshallable(this, bytes);
+    }
+
+    @Override
+    default void writeMarshallable(BytesOut bytes) {
+        BytesUtil.writeMarshallable(this, bytes);
+    }
 }

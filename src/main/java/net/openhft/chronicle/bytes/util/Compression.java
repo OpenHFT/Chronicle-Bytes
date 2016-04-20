@@ -17,6 +17,8 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesIn;
+import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
@@ -55,7 +57,7 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
-    static void uncompress(CharSequence cs, Bytes from, Bytes to) {
+    static void uncompress(CharSequence cs, BytesIn from, BytesOut to) {
         switch (cs.charAt(0)) {
             case 'b':
             case '!':
@@ -123,7 +125,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void compress(Bytes from, Bytes to) throws IORuntimeException {
+    default void compress(BytesIn from, BytesOut to) throws IORuntimeException {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
         } catch (IOException e) {
@@ -143,7 +145,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void uncompress(Bytes from, Bytes to) {
+    default void uncompress(BytesIn from, BytesOut to) {
         try (InputStream input = decompressingStream(from.inputStream())) {
             to.copyFrom(input);
         } catch (IOException e) {

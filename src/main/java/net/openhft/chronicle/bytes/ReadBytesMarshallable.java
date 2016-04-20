@@ -26,5 +26,5 @@ public interface ReadBytesMarshallable {
      *
      * @param bytes to read.
      */
-    void readMarshallable(Bytes<?> bytes);
+    void readMarshallable(BytesIn bytes);
 }
