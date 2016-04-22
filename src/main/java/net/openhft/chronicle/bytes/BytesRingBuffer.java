@@ -83,10 +83,11 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
      * Retrieves and removes the head of this queue, or returns {@code null} if this queue is
      * empty.
      *
+     * @param using Bytes to read into.
      * @return false if this queue is empty, or a populated buffer if the element was retried
      * @throws IllegalStateException is the {@code using} buffer is not large enough
      */
-    boolean read(@NotNull Bytes using) throws IllegalStateException;
+    boolean read(@NotNull BytesOut using) throws IllegalStateException;
 
     long readRemaining();
 
