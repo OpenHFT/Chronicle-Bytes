@@ -86,6 +86,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    default S writeUtf8(String s)
+            throws BufferOverflowException, IORuntimeException {
+        BytesInternal.writeUtf8(this, s);
+        return (S) this;
+    }
+
     @Deprecated
     default S writeUTFΔ(CharSequence cs) throws BufferOverflowException, IORuntimeException {
         return writeUtf8(cs);

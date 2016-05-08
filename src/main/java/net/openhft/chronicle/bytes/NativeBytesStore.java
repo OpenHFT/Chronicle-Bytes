@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import sun.misc.Cleaner;
+import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
 import java.lang.reflect.Field;
@@ -553,6 +554,8 @@ public class NativeBytesStore<Underlying>
 
         long address = this.address + translate(0);
         Memory memory = this.memory;
+        if (memory == null) throw new NullPointerException();
+        Unsafe unsafe = UnsafeMemory.UNSAFE;
         int i;
         ascii:
         {
@@ -563,22 +566,22 @@ public class NativeBytesStore<Underlying>
                 char c3 = chars[offset + i + 3];
                 if ((c0 | c1 | c2 | c3) > 0x007F)
                     break ascii;
-                memory.writeInt(address + pos, (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24));
+                unsafe.putInt(address + pos, (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24));
                 pos += 4;
             }
             for (; i < length; i++) {
                 char c = chars[offset + i];
                 if (c > 0x007F)
                     break ascii;
-                memory.writeByte(address + pos++, (byte) c);
+                unsafe.putByte(address + pos++, (byte) c);
             }
 
             return pos;
         }
-        return appendUTF0(pos, chars, offset, length, i);
+        return appendUtf8a(pos, chars, offset, length, i);
     }
 
-    private long appendUTF0(long pos, char[] chars, int offset, int length, int i) {
+    private long appendUtf8a(long pos, char[] chars, int offset, int length, int i) {
         for (; i < length; i++) {
             char c = chars[offset + i];
             if (c <= 0x007F) {
@@ -659,6 +662,22 @@ public class NativeBytesStore<Underlying>
     @Override
     public boolean sharedMemory() {
         return false;
+    }
+
+    public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+        int len = (int) Math.min(length, readLimit() - offsetInRDI);
+        int i;
+        final long offset2 = UnsafeMemory.UNSAFE.ARRAY_BYTE_BASE_OFFSET + offset;
+        final long address = this.address + translate(offsetInRDI);
+        for (i = 0; i < len - 7; i += 8)
+            UnsafeMemory.UNSAFE.putLong(bytes, offset2 + i, memory.readLong(address + i));
+        if (i < len - 3) {
+            UnsafeMemory.UNSAFE.putInt(bytes, offset2 + i, memory.readInt(address + i));
+            i += 4;
+        }
+        for (; i < len; i++)
+            UnsafeMemory.UNSAFE.putByte(bytes, offset2 + i, memory.readByte(address + i));
+        return len;
     }
 
     static class Deallocator implements Runnable {

@@ -213,11 +213,31 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
                     return this;
                 }
                 if (str instanceof String) {
-                    write(str, start, end - start);
+                    appendUtf8(StringUtils.extractChars((String) str), start, end - start);
                     return this;
                 }
             }
             super.append(str, start, end);
+            return this;
+        } catch (Exception e) {
+            throw new IndexOutOfBoundsException(e.toString());
+        }
+    }
+
+    @Override
+    public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException, IORuntimeException {
+        try {
+            if (bytesStore() instanceof NativeBytesStore) {
+                if (str instanceof BytesStore) {
+                    write((BytesStore) str, 0L, str.length());
+                    return this;
+                }
+                if (str instanceof String) {
+                    appendUtf8(StringUtils.extractChars((String) str), 0, str.length());
+                    return this;
+                }
+            }
+            super.append(str, 0, str.length());
             return this;
         } catch (Exception e) {
             throw new IndexOutOfBoundsException(e.toString());
@@ -235,6 +255,14 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return append8bit0(cs);
     }
 
+    @NotNull
+    public Bytes<Underlying> append8bit(@NotNull String cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+        if (bytesStore instanceof NativeBytesStore)
+            return append8bitNBS_S(cs);
+        return append8bit0(cs);
+    }
+
     private Bytes<Underlying> append8bitNBS_S(String s) {
         int length = s.length();
         long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
@@ -245,10 +273,17 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (memory == null)
             throw new AssertionError(bytesStore.releasedHere);
 
-        for (int i = 0; i < length; i++) {
-            char c = chars[i];
-            if (c > 255) c = '?';
-            memory.writeByte(address + i, (byte) c);
+        int i = 0;
+        for (i = 0; i < length - 4; i += 4) {
+            int c0 = chars[i] & 0xFF;
+            int c1 = chars[i + 1] & 0xFF;
+            int c2 = chars[i + 2] & 0xFF;
+            int c3 = chars[i + 3] & 0xFF;
+            memory.writeInt(address + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+        }
+        for (; i < length; i++) {
+            int c0 = chars[i];
+            memory.writeByte(address + i, (byte) c0);
         }
         return this;
     }
@@ -341,11 +376,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public VanillaBytes<Underlying> appendUtf8(char[] chars, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
         ensureCapacity(writePosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
-            writePosition(((NativeBytesStore) bytesStore).appendUTF(writePosition(), chars, offset, length));
+            NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+            long position = nbs.appendUtf8(writePosition(), chars, offset, length);
+            writePosition(position);
         } else {
             super.appendUtf8(chars, offset, length);
         }
@@ -357,5 +393,16 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (isClear())
             return bytesStore.toTemporaryDirectByteBuffer();
         return super.toTemporaryDirectByteBuffer();
+    }
+
+    public int read(@NotNull byte[] bytes) throws IORuntimeException {
+        int len = (int) Math.min(bytes.length, readRemaining());
+        if (bytesStore instanceof NativeBytesStore) {
+            NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+            long len2 = nbs.read(readPosition(), bytes, 0, len);
+            readSkip(len2);
+            return Maths.toUInt31(len2);
+        }
+        return super.read(bytes);
     }
 }

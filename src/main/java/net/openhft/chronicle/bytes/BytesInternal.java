@@ -505,6 +505,10 @@ enum BytesInternal {
     }
 
     public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable String str) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+        if (str == null) {
+            bytes.writeStopBit(-1);
+            return;
+        }
         char[] chars = extractChars(str);
         long utfLength = findUtf8Length(chars);
         bytes.writeStopBit(utfLength);
@@ -604,7 +608,7 @@ enum BytesInternal {
         return utflen;
     }
 
-    private static long findUtf8Length(@NotNull char[] chars) {
+    static long findUtf8Length(@NotNull char[] chars) {
         int strlen = chars.length;
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
@@ -2030,14 +2034,14 @@ enum BytesInternal {
     public static byte[] toByteArray(RandomDataInput in) throws IllegalArgumentException, IORuntimeException {
         int len = Maths.toInt32(in.readRemaining());
         byte[] bytes = new byte[len];
-        in.read(in.readPosition(), bytes);
+        in.read(in.readPosition(), bytes, 0, bytes.length);
         return bytes;
     }
 
     public static void copy(RandomDataInput input, OutputStream output) throws IOException {
         byte[] bytes = new byte[512];
         long start = input.readPosition();
-        for (int i = 0, len; (len = (int) input.read(start + i, bytes)) > 0; i += len) {
+        for (int i = 0, len; (len = (int) input.read(start + i, bytes, 0, bytes.length)) > 0; i += len) {
             output.write(bytes, 0, len);
         }
     }

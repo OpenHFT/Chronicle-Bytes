@@ -189,6 +189,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return append8bit(cs, 0, cs.length());
     }
 
+    default B append8bit(@NotNull String cs)
+            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+        return append8bit(cs, 0, cs.length());
+    }
+
     /**
      * Append a portion of a String to the Bytes in ISO-8859-1
      *

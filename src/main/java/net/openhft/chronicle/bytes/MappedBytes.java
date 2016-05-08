@@ -28,6 +28,8 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.StringUtils.extractChars;
+
 /**
  * Bytes to wrap memory mapped data.
  */
@@ -180,6 +182,15 @@ public class MappedBytes extends AbstractBytes<Void> {
         return cs instanceof String
                 ? append8bit0((String) cs, start, end - start)
                 : super.append8bit(cs, start, end);
+    }
+
+    @Override
+    public Bytes<Void> writeUtf8(String s) throws BufferOverflowException, IORuntimeException {
+        char[] chars = extractChars(s);
+        long utfLength = BytesInternal.findUtf8Length(chars);
+        writeStopBit(utfLength);
+        appendUtf8(chars, 0, chars.length);
+        return this;
     }
 
     public MappedBytes write8bit(CharSequence s, int start, int length) {

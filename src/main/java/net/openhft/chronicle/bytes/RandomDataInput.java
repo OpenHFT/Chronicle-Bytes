@@ -549,10 +549,10 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.toByteArray(this);
     }
 
-    default long read(long offset, byte[] bytes) {
-        int len = (int) Math.min(bytes.length, readLimit() - offset);
+    default long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+        int len = (int) Math.min(length, readLimit() - offsetInRDI);
         for (int i = 0; i < len; i++)
-            bytes[i] = readByte(offset + i);
+            bytes[offset + i] = readByte(offsetInRDI + i);
         return len;
     }
 
