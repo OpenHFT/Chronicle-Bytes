@@ -19,7 +19,7 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A BytesStore which can point to arbitary memory.
+ * A BytesStore which can point to arbitrary memory.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
     private boolean isPresent = false;

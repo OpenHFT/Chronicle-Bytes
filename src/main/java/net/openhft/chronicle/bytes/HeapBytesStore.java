@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 @SuppressWarnings("sunapi")
 public class HeapBytesStore<Underlying>
-        implements BytesStore<HeapBytesStore<Underlying>, Underlying> {
+        extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
     private static final Memory MEMORY = OS.memory();
     private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
@@ -99,6 +99,7 @@ public class HeapBytesStore<Underlying>
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(underlyingObject, Maths.toUInt31(from), underlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
     }
+
     @NotNull
     @Override
     public String toString() {

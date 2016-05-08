@@ -33,7 +33,7 @@ import java.nio.ByteBuffer;
 
 @SuppressWarnings("sunapi")
 public class NativeBytesStore<Underlying>
-        implements BytesStore<NativeBytesStore<Underlying>, Underlying> {
+        extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
     private static final Field BB_ADDRESS, BB_CAPACITY;
@@ -602,7 +602,7 @@ public class NativeBytesStore<Underlying>
         if (store instanceof NativeBytesStore)
             return copyTo((NativeBytesStore) store);
         else
-            return BytesStore.super.copyTo(store);
+            return super.copyTo(store);
     }
 
     public long copyTo(NativeBytesStore store) {

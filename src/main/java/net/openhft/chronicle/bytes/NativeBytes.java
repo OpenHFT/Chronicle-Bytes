@@ -160,11 +160,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         bytesStore = store;
     }
 
-    @Override
-    public long readIncompleteLong(long offset) throws IORuntimeException {
-        return bytesStore.readIncompleteLong(offset);
-    }
-
     @NotNull
     @Override
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -742,7 +743,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException("todo");
+        long h = VanillaBytesStoreHash.INSTANCE.applyAsLong(this);
+        h ^= h >> 32;
+        return (int) h;
     }
 
     @Override
