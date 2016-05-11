@@ -117,6 +117,7 @@ public class MappedBytes extends AbstractBytes<Void> {
                 throw new BufferUnderflowException();
             }
         }
+        super.readCheckOffset(offset, adding, given);
     }
 
     @Override
