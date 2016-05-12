@@ -36,6 +36,8 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private long length = VALUES;
 
     public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
+        assert (bytes.writePosition() & 0x7) == 0;
+
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
         long start = bytes.writePosition();
@@ -44,7 +46,8 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     public static void lazyWrite(@NotNull Bytes bytes, long capacity) throws BufferOverflowException {
-        //System.out.println("capacity location =" + bytes.position());
+        assert (bytes.writePosition() & 0x7) == 0;
+
         bytes.writeLong(capacity);
         bytes.writeLong(0L); // used
         bytes.writeSkip(capacity << 3);
@@ -106,7 +109,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         this.bytes = bytes;
-        this.offset = offset;
+        this.offset = (offset + 7) & ~7;
         this.length = length;
     }
 
