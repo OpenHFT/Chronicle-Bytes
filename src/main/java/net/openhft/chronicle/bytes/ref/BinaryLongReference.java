@@ -24,14 +24,10 @@ public class BinaryLongReference implements LongReference {
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
-        if (length != maxSize()) throw new IllegalArgumentException();
-        BytesStore bytesStore = bytes.bytesStore();
-        if (this.bytes != bytes) {
-            if (this.bytes != null)
-                this.bytes.release();
-            bytesStore.reserve();
-        }
-        this.bytes = bytesStore;
+        if (length != maxSize())
+            throw new IllegalArgumentException();
+
+        this.bytes = bytes.bytesStore();
         this.offset = offset;
     }
 

@@ -15,13 +15,13 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
+import java.util.function.IntSupplier;
+
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.IntSupplier;
 
 /**
  * Implementation of a reference to a 32-bit in in text wire format.
@@ -30,6 +30,7 @@ public class TextIntReference implements IntValue, Byteable {
     private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
+    private static final int UNINITIALIZED = 0;
     private static final int INT_TRUE = 1;
     private static final int INT_FALSE = 0;
     private static final int LOCKED = 19;
@@ -110,13 +111,12 @@ public class TextIntReference implements IntValue, Byteable {
     public void bytesStore(BytesStore bytes, long offset, long length) {
         if (length != template.length)
             throw new IllegalArgumentException();
-        if (this.bytes != bytes) {
-            if (this.bytes != null)
-                this.bytes.release();
-            bytes.reserve();
-        }
+
         this.bytes = bytes;
         this.offset = offset;
+
+        if (bytes.readInt(offset) == UNINITIALIZED)
+            bytes.write(offset, template);
     }
 
     @Override
