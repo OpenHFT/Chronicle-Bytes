@@ -384,6 +384,8 @@ enum BytesInternal {
     static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count) throws IOException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
+            if (c < 0)
+                break;
             switch (c >> 4) {
                 case 0:
                 case 1:
@@ -510,7 +512,7 @@ enum BytesInternal {
             return;
         }
         char[] chars = extractChars(str);
-        long utfLength = findUtf8Length(chars);
+        long utfLength = AppendableUtil.findUtf8Length(chars);
         bytes.writeStopBit(utfLength);
         bytes.appendUtf8(chars, 0, chars.length);
     }
@@ -527,7 +529,7 @@ enum BytesInternal {
             bytes.writeStopBit(-1);
 
         } else {
-            long utfLength = findUtf8Length(str);
+            long utfLength = AppendableUtil.findUtf8Length(str);
             bytes.writeStopBit(utfLength);
             appendUtf8(bytes, str, 0, str.length());
         }
@@ -550,7 +552,7 @@ enum BytesInternal {
                 assert utfLength <= 127;
                 writeStopBit(out, lenOffset, utfLength);
             } else {
-                long utfLength = findUtf8Length(str);
+                long utfLength = AppendableUtil.findUtf8Length(str);
                 offset = writeStopBit(out, offset, utfLength);
                 if (utfLength == strLength) {
                     append8bit(offset, out, str, 0, strLength);
@@ -573,7 +575,7 @@ enum BytesInternal {
 
         } else {
             int strLength = str.length();
-            long utfLength = findUtf8Length(str);
+            long utfLength = AppendableUtil.findUtf8Length(str);
             if (utfLength > maxUtf8Len) {
                 throw new IllegalArgumentException("Attempted to write a char sequence of " +
                         "utf8 size " + utfLength + ": \"" + str +
@@ -588,42 +590,6 @@ enum BytesInternal {
             }
         }
         return offset;
-    }
-
-    static long findUtf8Length(@NotNull CharSequence str) throws IndexOutOfBoundsException {
-        int strlen = str.length();
-        long utflen = strlen;/* use charAt instead of copying String to char array */
-        for (int i = 0; i < strlen; i++) {
-            char c = str.charAt(i);
-            if (c <= 0x007F) {
-                continue;
-            }
-            if (c <= 0x07FF) {
-                utflen++;
-
-            } else {
-                utflen += 2;
-            }
-        }
-        return utflen;
-    }
-
-    static long findUtf8Length(@NotNull char[] chars) {
-        int strlen = chars.length;
-        long utflen = strlen;/* use charAt instead of copying String to char array */
-        for (int i = 0; i < strlen; i++) {
-            char c = chars[i];
-            if (c <= 0x007F) {
-                continue;
-            }
-            if (c <= 0x07FF) {
-                utflen++;
-
-            } else {
-                utflen += 2;
-            }
-        }
-        return utflen;
     }
 
     @NotNull

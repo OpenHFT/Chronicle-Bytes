@@ -117,7 +117,7 @@ public enum BytesUtil {
     }
 
     public static long utf8Length(CharSequence cs) {
-        return BytesInternal.findUtf8Length(cs);
+        return AppendableUtil.findUtf8Length(cs);
     }
 
     public static void parseUtf8(

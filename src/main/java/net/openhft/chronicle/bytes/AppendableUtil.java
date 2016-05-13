@@ -118,8 +118,7 @@ public enum AppendableUtil {
                     return;
             }
 
-            while (true) {
-                int c = bytes.readUnsignedByte();
+            for (int c; (c = bytes.readUnsignedByte()) >= 0; ) {
                 switch (c >> 4) {
                     case 0:
                     case 1:
@@ -213,5 +212,41 @@ public enum AppendableUtil {
         } else {
             throw new UnsupportedOperationException();
         }
+    }
+
+    public static long findUtf8Length(@NotNull CharSequence str) throws IndexOutOfBoundsException {
+        int strlen = str.length();
+        long utflen = strlen;/* use charAt instead of copying String to char array */
+        for (int i = 0; i < strlen; i++) {
+            char c = str.charAt(i);
+            if (c <= 0x007F) {
+                continue;
+            }
+            if (c <= 0x07FF) {
+                utflen++;
+
+            } else {
+                utflen += 2;
+            }
+        }
+        return utflen;
+    }
+
+    public static long findUtf8Length(@NotNull char[] chars) {
+        int strlen = chars.length;
+        long utflen = strlen;/* use charAt instead of copying String to char array */
+        for (int i = 0; i < strlen; i++) {
+            char c = chars[i];
+            if (c <= 0x007F) {
+                continue;
+            }
+            if (c <= 0x07FF) {
+                utflen++;
+
+            } else {
+                utflen += 2;
+            }
+        }
+        return utflen;
     }
 }

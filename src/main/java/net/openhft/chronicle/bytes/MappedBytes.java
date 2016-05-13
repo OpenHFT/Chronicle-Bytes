@@ -188,7 +188,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     @Override
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException, IORuntimeException {
         char[] chars = extractChars(s);
-        long utfLength = BytesInternal.findUtf8Length(chars);
+        long utfLength = AppendableUtil.findUtf8Length(chars);
         writeStopBit(utfLength);
         appendUtf8(chars, 0, chars.length);
         return this;
