@@ -15,12 +15,12 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
+import java.util.function.LongSupplier;
+
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.function.LongSupplier;
 
 /**
  * reference to an array fo 32-bit in values in Text wire format.
@@ -62,13 +62,10 @@ public class TextLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != template.length)
             throw new IllegalArgumentException();
-        if (this.bytes != bytes) {
-            if (this.bytes != null)
-                this.bytes.release();
-            bytes.reserve();
-        }
+
         this.bytes = bytes;
         this.offset = offset;
+
         if (bytes.readLong(offset) == UNINITIALIZED)
             bytes.write(offset, template);
     }
