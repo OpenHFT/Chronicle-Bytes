@@ -88,6 +88,24 @@ enum BytesInternal {
         return true;
     }
 
+    static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b) throws IORuntimeException {
+        if (a.readRemaining() > b.readRemaining())
+            return false;
+        long aPos = a.readPosition();
+        long bPos = b.readPosition();
+        long length = a.readRemaining();
+        long i;
+        for (i = 0; i < length - 7; i += 8) {
+            if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                return false;
+        }
+        for (; i < length; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        return true;
+    }
+
     public static void parseUtf8(
             @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
@@ -290,6 +308,17 @@ enum BytesInternal {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+        assert bytes.readRemaining() >= utflen;
+        sb.ensureCapacity(utflen);
+        char[] chars = StringUtils.extractChars(sb);
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            chars[count] = (char) c;
+        }
+        StringUtils.setLength(sb, utflen);
     }
 
     public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
@@ -976,7 +1005,7 @@ enum BytesInternal {
 
         } else {
             if (base == 10)
-            appendLong0(out, num);
+                appendLong0(out, num);
             else
                 out.write(Long.toString(num, base));
         }

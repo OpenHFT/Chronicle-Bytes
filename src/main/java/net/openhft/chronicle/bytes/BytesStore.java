@@ -344,6 +344,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return BytesInternal.contentEqual(this, bytesStore);
     }
 
+    default boolean startsWith(@Nullable BytesStore bytesStore) throws IORuntimeException {
+        return BytesInternal.startsWith(this, bytesStore);
+    }
+
     default String to8bitString() throws IORuntimeException, IllegalArgumentException {
         return BytesInternal.to8bitString(this);
     }

@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
@@ -24,18 +23,19 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author peter.lawrey
  */
-public class UTF8StringInterner extends AbstractInterner<String> {
+public class Bit8StringInterner extends AbstractInterner<String> {
 
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
-    public UTF8StringInterner(int capacity) throws IllegalArgumentException {
+    public Bit8StringInterner(int capacity) throws IllegalArgumentException {
         super(capacity);
     }
 
     @NotNull
     protected String getValue(@NotNull BytesStore cs, int length) {
         StringBuilder sb = SBP.acquireStringBuilder();
-        AppendableUtil.parseUtf8(cs, sb, length);
+        for (int i = 0; i < length; i++)
+            sb.append((char) cs.readUnsignedByte(cs.readPosition() + i));
         return sb.toString();
     }
 }

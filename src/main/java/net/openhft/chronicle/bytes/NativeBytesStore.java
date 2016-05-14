@@ -560,13 +560,15 @@ public class NativeBytesStore<Underlying>
         ascii:
         {
             for (i = 0; i < length - 3; i += 4) {
-                char c0 = chars[offset + i];
-                char c1 = chars[offset + i + 1];
-                char c2 = chars[offset + i + 2];
-                char c3 = chars[offset + i + 3];
+                final int i2 = offset + i;
+                char c0 = chars[i2];
+                char c1 = chars[i2 + 1];
+                char c2 = chars[i2 + 2];
+                char c3 = chars[i2 + 3];
                 if ((c0 | c1 | c2 | c3) > 0x007F)
                     break ascii;
-                unsafe.putInt(address + pos, (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24));
+                final int value = (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24);
+                unsafe.putInt(address + pos, value);
                 pos += 4;
             }
             for (; i < length; i++) {

@@ -563,4 +563,21 @@ public interface RandomDataInput extends RandomCommon {
         bb.clear();
         return bb;
     }
+
+    default int fastHash(long offset, int length) {
+        long hash = 0;
+        int i = 0;
+        for (; i < length - 3; i += 4) {
+            hash += readInt(offset + i);
+            hash *= 0x6d0f27bdL;
+        }
+        if (i < length - 1) {
+            hash += readShort(offset + i);
+            hash *= 0x6d0f27bdL;
+            i += 2;
+        }
+        if (i < length)
+            hash += readByte(offset + i);
+        return (int) (hash ^ (hash >> 32));
+    }
 }

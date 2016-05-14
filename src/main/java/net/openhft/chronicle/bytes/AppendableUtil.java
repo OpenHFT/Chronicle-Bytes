@@ -31,6 +31,7 @@ import java.nio.BufferUnderflowException;
  */
 public enum AppendableUtil {
     ;
+
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
         if (sb instanceof StringBuilder)
@@ -39,6 +40,10 @@ public enum AppendableUtil {
             ((Bytes) sb).writeByte(index, ch);
         else
             throw new IllegalArgumentException("" + sb.getClass());
+    }
+
+    public static void parseUtf8(BytesStore bs, StringBuilder sb, int utflen) {
+        BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utflen);
     }
 
     @ForceInline
@@ -192,10 +197,13 @@ public enum AppendableUtil {
 
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws IORuntimeException, BufferUnderflowException {
-        if (bytes instanceof Bytes
-                && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
-                && appendable instanceof StringBuilder) {
-            parse8bit_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
+        if (appendable instanceof StringBuilder) {
+            final StringBuilder sb = (StringBuilder) appendable;
+            if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
+                parse8bit_SB1((Bytes) bytes, sb, utflen);
+            } else {
+                BytesInternal.parse8bit1(bytes, sb, utflen);
+            }
         } else {
             BytesInternal.parse8bit1(bytes, appendable, utflen);
         }

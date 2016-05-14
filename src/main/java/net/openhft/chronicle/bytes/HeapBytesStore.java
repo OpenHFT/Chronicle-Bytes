@@ -45,7 +45,7 @@ public class HeapBytesStore<Underlying>
     @NotNull
     private Underlying underlyingObject;
 
-    private HeapBytesStore() {
+    public HeapBytesStore() {
     }
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {

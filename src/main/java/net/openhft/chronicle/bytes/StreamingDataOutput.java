@@ -137,7 +137,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     default S write8bit(@NotNull String s)
             throws BufferOverflowException, IORuntimeException {
-        write8bit(s, 0, s.length());
+        if (s == null)
+            writeStopBit(-1);
+        else
+            write8bit(s, 0, s.length());
         return (S) this;
     }
 

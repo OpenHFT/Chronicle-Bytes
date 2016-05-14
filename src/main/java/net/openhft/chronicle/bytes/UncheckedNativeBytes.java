@@ -244,7 +244,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public int readUnsignedByte() {
         long offset = readOffsetPositionMoved(1);
-        return bytesStore.memory.readByte(bytesStore.address + offset);
+        return bytesStore.memory.readByte(bytesStore.address + offset) & 0xFF;
     }
 
     @Override
@@ -759,12 +759,27 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         long address = bytesStore.address(offset);
         Memory memory = bytesStore.memory;
         assert memory != null;
-        for (int i = 0; i < length; i++) {
+        int i = 0;
+        for (; i < length - 1; i += 2) {
             char c = cs.charAt(i);
-            if (c > 255) c = '?';
+            char c2 = cs.charAt(i + 1);
+            memory.writeByte(address + i, (byte) c);
+            memory.writeByte(address + i + 1, (byte) c2);
+        }
+        for (; i < length; i++) {
+            char c = cs.charAt(i);
             memory.writeByte(address + i, (byte) c);
         }
 
+        return this;
+    }
+
+    @Override
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+        ensureCapacity(writePosition() + length);
+        NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+        long position = nbs.appendUtf8(writePosition(), chars, offset, length);
+        writePosition(position);
         return this;
     }
 
