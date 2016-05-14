@@ -2104,6 +2104,8 @@ enum BytesInternal {
                 long value = in.parseHexLong();
                 out.writeByte((byte) value);
             }
+            if (in.readByte(in.readPosition() - 1) <= ' ')
+                in.readSkip(-1);
             in.skipTo(StopCharTesters.CONTROL_STOP);
         }
         return out;
