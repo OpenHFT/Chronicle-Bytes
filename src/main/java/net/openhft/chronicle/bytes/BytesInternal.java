@@ -1737,6 +1737,9 @@ enum BytesInternal {
             } else if (b == ']' || b == '}') {
                 in.readSkip(-1);
                 break;
+            } else if (b == '.') {
+                consumeDecimals(in);
+                break;
             } else if (b == '_') {
                 // ignore
             } else {
@@ -1744,6 +1747,16 @@ enum BytesInternal {
             }
         }
         return negative ? -num : num;
+    }
+
+    static void consumeDecimals(@NotNull StreamingDataInput in) {
+        int b;
+        while (in.readRemaining() > 0) {
+            b = in.readUnsignedByte();
+            if (b < '0' || b > '9') {
+                break;
+            }
+        }
     }
 
     @ForceInline
