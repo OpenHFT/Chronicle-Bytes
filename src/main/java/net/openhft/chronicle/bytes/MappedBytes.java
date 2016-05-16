@@ -100,11 +100,6 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    public long refCount() {
-        return Math.max(super.refCount(), mappedFile.refCount());
-    }
-
-    @Override
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException, IORuntimeException {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
