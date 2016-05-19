@@ -750,8 +750,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Bytes)) return false;
-        Bytes b2 = (Bytes) obj;
+        if (!(obj instanceof BytesStore)) return false;
+        BytesStore b2 = (BytesStore) obj;
         long remaining = readRemaining();
         try {
             return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
@@ -760,9 +760,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         }
     }
 
-    public boolean equalsBytes(@NotNull Bytes b2, long remaining) throws IORuntimeException {
+    public boolean equalsBytes(@NotNull BytesStore b2, long remaining) throws IORuntimeException {
         long i = 0;
-        for (; i < remaining - 7; i++)
+        for (; i < remaining - 7; i += 8)
             if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
                 return false;
         for (; i < remaining; i++)

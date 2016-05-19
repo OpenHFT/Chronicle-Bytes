@@ -358,7 +358,16 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> write(long offsetInRDO,
                                             RandomDataInput bytes, long offset, long length) {
-        throw new UnsupportedOperationException();
+        long i;
+        for (i = 0; i < length - 7; i += 8) {
+            long x = bytes.readLong(offset + i);
+            writeLong(offsetInRDO + i, x);
+        }
+        for (; i < length; i++) {
+            byte x = bytes.readByte(offset + i);
+            writeByte(offsetInRDO + i, x);
+        }
+        return this;
     }
 
     @Override
