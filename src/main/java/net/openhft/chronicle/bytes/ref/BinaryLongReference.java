@@ -16,18 +16,25 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
 
 public class BinaryLongReference implements LongReference {
     private BytesStore bytes;
     private long offset;
 
-    private static List<WeakReference<BinaryLongReference>> binaryLongReferences = new
-            ArrayList<>();
+    private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
+
+    static {
+        if (Jvm.isDebug()) {
+            binaryLongReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        }
+    }
 
     /**
      * only used for testing
@@ -41,10 +48,6 @@ public class BinaryLongReference implements LongReference {
         });
     }
 
-
-    public BinaryLongReference() {
-        binaryLongReferences.add(new WeakReference<BinaryLongReference>(this));
-    }
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
@@ -107,6 +110,9 @@ public class BinaryLongReference implements LongReference {
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
+        if (Jvm.isDebug() && (value & 1 << 31) != 0)
+            binaryLongReferences.add(new WeakReference<BinaryLongReference>(this));
+
         return bytes.compareAndSwapLong(offset, expected, value);
     }
 }
