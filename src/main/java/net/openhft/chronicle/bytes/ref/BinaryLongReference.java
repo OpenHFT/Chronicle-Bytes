@@ -36,7 +36,7 @@ public class BinaryLongReference implements LongReference {
         binaryLongReferences.forEach(x -> {
             BinaryLongReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
-                binaryLongReference.setValue(1 << 31);
+                binaryLongReference.setValue(1 << 31 | binaryLongReference.getValue());
             }
         });
     }
