@@ -18,9 +18,33 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
 public class BinaryLongReference implements LongReference {
     private BytesStore bytes;
     private long offset;
+
+    private static List<WeakReference<BinaryLongReference>> binaryLongReferences = new
+            ArrayList<>();
+
+    /**
+     * only used for testing
+     */
+    public static void forceAllToNotCompleteState() {
+        binaryLongReferences.forEach(x -> {
+            BinaryLongReference binaryLongReference = x.get();
+            if (binaryLongReference != null) {
+                binaryLongReference.setValue(1 << 31);
+            }
+        });
+    }
+
+
+    public BinaryLongReference() {
+        binaryLongReferences.add(new WeakReference<BinaryLongReference>(this));
+    }
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
