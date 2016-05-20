@@ -20,8 +20,14 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Set;
+
+import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
 /**
  * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
@@ -31,9 +37,25 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
     private static final int MAX_TO_STRING = 128;
+    private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
+
+
+    public static void startCollecting() {
+        binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+    }
+
+    public static void forceAllToNotCompleteState() {
+        binaryLongArrayReferences.forEach(x -> {
+            BinaryLongArrayReference binaryLongReference = x.get();
+            if (binaryLongReference != null) {
+                binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
+            }
+        });
+        binaryLongArrayReferences = null;
+    }
 
     public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -100,11 +122,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value) throws IllegalArgumentException, BufferOverflowException {
-        return bytes.compareAndSwapLong(VALUES + offset + (index << 3), expected, value);
-    }
-
-    @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) throws BufferUnderflowException, IllegalArgumentException {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
@@ -168,4 +185,12 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public long sizeInBytes(long capacity) {
         return (capacity << 3) + VALUES;
     }
+
+    @Override
+    public boolean compareAndSet(long index, long expected, long value) throws IllegalArgumentException, BufferOverflowException {
+        if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
+            binaryLongArrayReferences.add(new WeakReference<>(this));
+        return bytes.compareAndSwapLong(VALUES + offset + (index << 3), expected, value);
+    }
+
 }
