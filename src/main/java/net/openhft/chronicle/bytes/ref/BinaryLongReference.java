@@ -16,24 +16,23 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.ref.WeakReference;
-import java.util.Collections;
-import java.util.IdentityHashMap;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BinaryLongReference implements LongReference {
+    public static final long LONG_NOT_COMPLETE = -1;
+    private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
     private BytesStore bytes;
     private long offset;
 
-    private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
-
-    static {
-        if (Jvm.isDebug()) {
-            binaryLongReferences = Collections.newSetFromMap(new IdentityHashMap<>());
-        }
+    /**
+     * only used for testing
+     */
+    public static void startCollecting() {
+        binaryLongReferences = new CopyOnWriteArraySet<>();
     }
 
     /**
@@ -43,11 +42,11 @@ public class BinaryLongReference implements LongReference {
         binaryLongReferences.forEach(x -> {
             BinaryLongReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
-                binaryLongReference.setValue(1 << 31 | binaryLongReference.getValue());
+                binaryLongReference.setValue(LONG_NOT_COMPLETE);
             }
         });
+        binaryLongReferences = null;
     }
-
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
@@ -110,9 +109,8 @@ public class BinaryLongReference implements LongReference {
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
-        if (Jvm.isDebug() && (value & 1 << 31) != 0)
-            binaryLongReferences.add(new WeakReference<BinaryLongReference>(this));
-
+        if (value == LONG_NOT_COMPLETE && binaryLongReferences != null)
+            binaryLongReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(offset, expected, value);
     }
 }
