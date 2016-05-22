@@ -67,7 +67,8 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
 
     public static long peakLength(@NotNull BytesStore bytes, long offset) {
         //todo check this, I think there could be a bug here
-        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUE_SIZE + SECTION3.length - SEP.length;
+        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
+                + VALUES + SECTION4.length;
     }
 
     @Override
