@@ -39,6 +39,9 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private static final int USED = CAPACITY + DIGITS + SECTION2.length;
     private static final int VALUES = USED + DIGITS + SECTION3.length;
     private static final int VALUE_SIZE = DIGITS + SEP.length;
+    private static final int LOCK_OFFSET = 10;
+    private static final int FALS = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
+    private static final int TRU = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
     private BytesStore bytes;
     private long offset;
@@ -64,17 +67,32 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
 
     public static long peakLength(@NotNull BytesStore bytes, long offset) {
         //todo check this, I think there could be a bug here
-        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) + VALUE_SIZE + SECTION3.length - SEP.length;
     }
 
     @Override
     public long getUsed() {
-        throw new UnsupportedOperationException();
+        return bytes.parseLong(USED + offset);
+    }
+
+    private void setUsed(long used) {
+        bytes.append(VALUES + offset, used, DIGITS);
     }
 
     @Override
     public void setMaxUsed(long usedAtLeast) {
-        throw new UnsupportedOperationException();
+        while (true) {
+            if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
+                continue;
+            try {
+                if (getUsed() < usedAtLeast) {
+                    setUsed(usedAtLeast);
+                }
+                return;
+            } finally {
+                bytes.writeInt(LOCK_OFFSET + offset, FALS);
+            }
+        }
     }
 
     @Override
@@ -111,7 +129,18 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
 
     @Override
     public boolean compareAndSet(long index, long expected, long value) {
-        throw new UnsupportedOperationException("todo");
+        if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
+            return false;
+        boolean ret = false;
+        try {
+            if (getVolatileValueAt(index) == expected) {
+                setOrderedValueAt(index, value);
+                ret = true;
+            }
+            return ret;
+        } finally {
+            bytes.writeInt(LOCK_OFFSET + offset, FALS);
+        }
     }
 
     @Override
