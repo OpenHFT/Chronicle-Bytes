@@ -201,6 +201,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S write(@NotNull BytesStore bytes)
             throws BufferOverflowException, IORuntimeException {
+        if (bytes == this)
+            throw new IllegalArgumentException("you should not write to your self !");
+
         return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
