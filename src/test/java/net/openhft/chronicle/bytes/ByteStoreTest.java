@@ -26,6 +26,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -58,6 +59,19 @@ public class ByteStoreTest {
         bytesStore = BytesStore.wrap(byteBuffer);
         bytes = bytesStore.bytesForWrite();
         bytes.clear();
+    }
+
+    @Test
+    public void testCopyTo() {
+        final BytesStore bytesStoreOriginal = BytesStore.wrap(new byte[SIZE]);
+        for(int i = 0;i<SIZE;i++) {
+            final byte randomByte = (byte)ThreadLocalRandom.current().nextInt(Byte.MAX_VALUE);
+            bytesStoreOriginal.writeByte(i,randomByte);
+        }
+        final BytesStore bytesStoreCopy = BytesStore.wrap(new byte[SIZE]);
+        bytesStoreOriginal.copyTo(bytesStoreCopy);
+        for (int i = 0; i < SIZE; i++)
+            assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i));
     }
 
     @Test
