@@ -430,7 +430,7 @@ public class NativeBytesStore<Underlying>
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            memory.copyMemory(((DirectBuffer) bytes).address(),
+            memory.copyMemory(((DirectBuffer) bytes).address() + offset,
                     address + translate(offsetInRDO), length);
 
         } else {
