@@ -16,8 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -57,20 +55,12 @@ public class StreamingInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        try {
             int len2 = in.read(b, off, len);
             return len2 == 0 ? -1 : len2;
-        } catch (IORuntimeException e) {
-            throw new IOException(e);
-        }
     }
 
     @Override
     public int read() throws IOException {
-        try {
             return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
-        } catch (IORuntimeException e) {
-            throw new IOException(e);
-        }
     }
 }

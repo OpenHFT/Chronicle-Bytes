@@ -21,10 +21,10 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
+import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.util.function.Function;
 
 /**
  * Created by peter.lawrey on 09/12/2015.
@@ -57,7 +57,7 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
-    static void uncompress(CharSequence cs, BytesIn from, BytesOut to) {
+    static void uncompress(CharSequence cs, BytesIn from, BytesOut to) throws IORuntimeException {
         switch (cs.charAt(0)) {
             case 'b':
             case '!':
@@ -91,7 +91,7 @@ public interface Compression {
     }
 
     @Nullable
-    static <T> byte[] uncompress(CharSequence cs, T t, Function<T, byte[]> bytes) {
+    static <T> byte[] uncompress(CharSequence cs, T t, ThrowingFunction<T, byte[], IORuntimeException> bytes) throws IORuntimeException {
         switch (cs.charAt(0)) {
             case 'b':
             case '!':
@@ -115,21 +115,21 @@ public interface Compression {
         return null;
     }
 
-    default byte[] compress(byte[] bytes) throws IORuntimeException {
+    default byte[] compress(byte[] bytes) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
             output.write(bytes);
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw new AssertionError(e); // compressing in memory
         }
         return baos.toByteArray();
     }
 
-    default void compress(BytesIn from, BytesOut to) throws IORuntimeException {
+    default void compress(BytesIn from, BytesOut to) {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw new AssertionError(e); // compressing in memory
         }
     }
 
@@ -145,7 +145,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void uncompress(BytesIn from, BytesOut to) {
+    default void uncompress(BytesIn from, BytesOut to) throws IORuntimeException {
         try (InputStream input = decompressingStream(from.inputStream())) {
             to.copyFrom(input);
         } catch (IOException e) {
@@ -153,7 +153,7 @@ public interface Compression {
         }
     }
 
-    InputStream decompressingStream(InputStream input);
+    InputStream decompressingStream(InputStream input) throws IORuntimeException;
 
     OutputStream compressingStream(OutputStream output);
 }

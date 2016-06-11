@@ -46,7 +46,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B prepend(long value) throws BufferOverflowException, IORuntimeException {
+    default B prepend(long value) throws BufferOverflowException {
         BytesInternal.prepend(this, value);
         return (B) this;
     }

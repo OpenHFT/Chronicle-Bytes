@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.io.IORuntimeException;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
@@ -123,7 +122,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapInt(long offset, int expected, int value)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IllegalArgumentException;
 
     /**
      * Perform a 64-bit CAS at a given offset.
@@ -134,7 +133,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapLong(long offset, long expected, long value)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IllegalArgumentException;
 
     /**
      * Perform a 32-bit float CAS at a given offset.
@@ -145,7 +144,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapFloat(long offset, float expected, float value)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
     }
 
@@ -158,7 +157,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapDouble(long offset, double expected, double value)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 

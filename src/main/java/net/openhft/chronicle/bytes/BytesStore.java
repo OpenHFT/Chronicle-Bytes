@@ -180,7 +180,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param store to copy to
      */
-    default long copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
+    default long copyTo(@NotNull BytesStore store) throws IllegalStateException {
         long copy = min(capacity(), store.capacity());
         int i = 0;
         for (; i < copy - 7; i++)
@@ -201,7 +201,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param end   last byte exclusive.
      * @return this.
      */
-    default B zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException {
+    default B zeroOut(long start, long end) throws IllegalArgumentException {
         if (end <= start)
             return (B) this;
         if (start < start())
@@ -233,8 +233,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             return (char) readUnsignedByte(readPosition() + index);
         } catch (BufferUnderflowException e) {
             throw new IndexOutOfBoundsException((readPosition() + index) + " >= " + readLimit());
-        } catch (IORuntimeException e) {
-            throw new IndexOutOfBoundsException(e.toString());
         }
     }
 
@@ -281,7 +279,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return true if the bytes and length matched.
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException {
         return length == 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
@@ -304,7 +302,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @return signed long sum.
      */
-    default long longCheckSum() throws IORuntimeException {
+    default long longCheckSum() {
         long sum = 0;
         long i;
         for (i = readPosition(); i < readLimit() - 7; i += 8)
@@ -320,7 +318,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean endsWith(char c) throws IORuntimeException {
+    default boolean endsWith(char c) {
         return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
     }
 
@@ -330,7 +328,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean startsWith(char c) throws IORuntimeException {
+    default boolean startsWith(char c) {
         return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
     }
 
@@ -340,15 +338,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytesStore to compare with
      * @return true if they contain the same data.
      */
-    default boolean contentEquals(@Nullable BytesStore bytesStore) throws IORuntimeException {
+    default boolean contentEquals(@Nullable BytesStore bytesStore) {
         return BytesInternal.contentEqual(this, bytesStore);
     }
 
-    default boolean startsWith(@Nullable BytesStore bytesStore) throws IORuntimeException {
+    default boolean startsWith(@Nullable BytesStore bytesStore) {
         return BytesInternal.startsWith(this, bytesStore);
     }
 
-    default String to8bitString() throws IORuntimeException, IllegalArgumentException {
+    default String to8bitString() throws IllegalArgumentException {
         return BytesInternal.to8bitString(this);
     }
 

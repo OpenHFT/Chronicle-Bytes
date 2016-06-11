@@ -34,7 +34,7 @@ import java.util.zip.*;
 public enum Compressions implements Compression {
     Binary {
         @Override
-        public byte[] compress(byte[] bytes) throws IORuntimeException {
+        public byte[] compress(byte[] bytes) {
             return bytes;
         }
 
@@ -44,7 +44,7 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public void compress(BytesIn from, BytesOut to) throws IORuntimeException {
+        public void compress(BytesIn from, BytesOut to) {
             copy(from, to);
         }
 
@@ -81,7 +81,7 @@ public enum Compressions implements Compression {
     },
     GZIP {
         @Override
-        public InputStream decompressingStream(InputStream input) {
+        public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
                 return new GZIPInputStream(input);
             } catch (IOException e) {
@@ -94,17 +94,17 @@ public enum Compressions implements Compression {
             try {
                 return new GZIPOutputStream(output);
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new AssertionError(e); // in memory.
             }
         }
     },
     Snappy {
         @Override
-        public byte[] compress(byte[] bytes) throws IORuntimeException {
+        public byte[] compress(byte[] bytes) {
             try {
                 return org.xerial.snappy.Snappy.compress(bytes);
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new AssertionError(e);
             }
         }
 
@@ -118,7 +118,7 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public InputStream decompressingStream(InputStream input) {
+        public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
                 return new SnappyInputStream(input);
             } catch (IOException e) {

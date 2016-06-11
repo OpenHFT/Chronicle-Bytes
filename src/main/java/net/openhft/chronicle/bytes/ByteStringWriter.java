@@ -16,8 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
-
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.BufferOverflowException;
@@ -36,7 +34,7 @@ public class ByteStringWriter extends Writer {
     public void write(int c) throws IOException {
         try {
             out.append(c);
-        } catch (BufferOverflowException | IllegalArgumentException | IORuntimeException e) {
+        } catch (BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }
     }

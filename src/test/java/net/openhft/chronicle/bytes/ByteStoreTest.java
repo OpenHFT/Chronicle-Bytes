@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.*;
 
@@ -168,7 +169,7 @@ public class ByteStoreTest {
             assertEquals(-1, this.bytes.read(bytes3));
         }*/
     @Test
-    public void testWriteReadUtf8() {
+    public void testWriteReadUtf8() throws IORuntimeException {
         bytes.writeUtf8(null);
         String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
@@ -194,7 +195,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testWriteReadUTF() {
+    public void testWriteReadUTF() throws IORuntimeException {
         String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
             bytes.writeUtf8(word);
@@ -253,7 +254,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testReadWriteStop() {
+    public void testReadWriteStop() throws IORuntimeException {
         long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
@@ -529,7 +530,7 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testOverflowReadUtf8() {
+    public void testOverflowReadUtf8() throws IORuntimeException {
         NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
@@ -39,7 +40,7 @@ public class BytesInternalTest {
         threadDump.assertNoNewThreads();
     }
     @Test
-    public void testParseUTF_SB1() {
+    public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
         VanillaBytes bytes = Bytes.allocateElasticDirect();
         byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
@@ -53,7 +54,7 @@ public class BytesInternalTest {
     }
 
     @Test
-    public void testCompareUTF() {
+    public void testCompareUTF() throws IORuntimeException {
         NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));

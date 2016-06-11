@@ -77,7 +77,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
      * @param bytes0 the {@code bytes0} that you wish to add to the ring buffer
      * @return returning {@code true} upon success and {@code false} if this queue is full.
      */
-    boolean offer(@NotNull BytesStore bytes0) throws InterruptedException;
+    boolean offer(@NotNull BytesStore bytes0);
 
     /**
      * Retrieves and removes the head of this queue, or returns {@code null} if this queue is

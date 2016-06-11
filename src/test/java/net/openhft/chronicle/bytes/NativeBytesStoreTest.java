@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
@@ -73,7 +74,7 @@ public class NativeBytesStoreTest {
     }
 
     @Test
-    public void perfCheckSum() {
+    public void perfCheckSum() throws IORuntimeException {
         NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),
                 NativeBytesStore.nativeStoreWithFixedCapacity(149),

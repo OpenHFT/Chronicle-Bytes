@@ -34,7 +34,7 @@ public enum BytesUtil {
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
-            throws IORuntimeException, BufferUnderflowException {
+            throws BufferUnderflowException {
         long i = 0;
         while (len - i >= 8L) {
             if (a.readLong(offset + i) != second.readLong(secondOffset + i))
@@ -108,7 +108,7 @@ public enum BytesUtil {
         return chars;
     }
 
-    public static long readStopBit(StreamingDataInput in) {
+    public static long readStopBit(StreamingDataInput in) throws IORuntimeException {
         return BytesInternal.readStopBit(in);
     }
 
@@ -116,23 +116,13 @@ public enum BytesUtil {
         BytesInternal.writeStopBit(out, n);
     }
 
-    public static long utf8Length(CharSequence cs) {
-        return AppendableUtil.findUtf8Length(cs);
-    }
-
     public static void parseUtf8(
-            @NotNull StreamingDataInput in, Appendable appendable, int utflen) {
+            @NotNull StreamingDataInput in, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         BytesInternal.parseUtf8(in, appendable, utflen);
     }
 
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
-    }
-
-    public static void appendBytesFromStart(Bytes bytes, long startPosition, StringBuilder sb) {
-        BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
-        sb.append('\u2016');
-        sb.append(bytes);
     }
 
     public static void readMarshallable(ReadBytesMarshallable marshallable, BytesIn bytes) {

@@ -111,7 +111,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
+            throws BufferUnderflowException, BufferOverflowException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
@@ -126,7 +126,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
+            throws BufferUnderflowException, BufferOverflowException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else
@@ -139,7 +139,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return a long.
      */
     @ForceInline
-    default long parseLong() throws BufferUnderflowException, IORuntimeException {
+    default long parseLong() throws BufferUnderflowException {
         return BytesInternal.parseLong(this);
     }
 
@@ -151,7 +151,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return a double.
      */
     @ForceInline
-    default double parseDouble() throws BufferUnderflowException, IORuntimeException {
+    default double parseDouble() throws BufferUnderflowException {
         return BytesInternal.parseDouble(this);
     }
 
@@ -186,7 +186,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return true if a terminating character was found, false if the end of the buffer was reached.
      */
     @ForceInline
-    default boolean skipTo(@NotNull StopCharTester tester) throws IORuntimeException {
+    default boolean skipTo(@NotNull StopCharTester tester) {
         return BytesInternal.skipTo(this, tester);
     }
 }

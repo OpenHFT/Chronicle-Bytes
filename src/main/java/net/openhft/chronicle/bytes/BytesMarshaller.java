@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
 import java.lang.reflect.Field;
@@ -132,12 +133,12 @@ public class BytesMarshaller<T> {
         void read(Object o, BytesIn read) {
             try {
                 setValue(o, read);
-            } catch (IllegalAccessException iae) {
+            } catch (IllegalAccessException | IORuntimeException iae) {
                 throw new AssertionError(iae);
             }
         }
 
-        protected abstract void setValue(Object o, BytesIn read) throws IllegalAccessException;
+        protected abstract void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException;
     }
 
     static class ScalarFieldAccess extends FieldAccess<Object> {
@@ -153,7 +154,7 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
             String s = read.readUtf8();
             field.set(o, ObjectUtils.convertTo(field.getType(), s));
         }
@@ -172,7 +173,7 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
             BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             if (!field.getType().isInstance(o2))
                 field.set(o, o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType()));
@@ -195,7 +196,7 @@ public class BytesMarshaller<T> {
             write.write(bytes, offset, length);
         }
 
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
             // TODO see if recycling a Bytes is an option.
             long length = read.readStopBit();
             BytesStore bs = NativeBytesStore.nativeStore(length);

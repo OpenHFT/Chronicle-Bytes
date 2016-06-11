@@ -18,6 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ThrowingConsumer;
+import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,8 +29,6 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.function.Consumer;
-import java.util.function.Function;
 
 /**
  * This data input has a a position() and a limit()
@@ -49,23 +49,22 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param bytesToSkip bytes to skip.
      * @return this
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException       if an error occurred trying to obtain the data.
      */
-    S readSkip(long bytesToSkip) throws BufferUnderflowException, IORuntimeException;
+    S readSkip(long bytesToSkip) throws BufferUnderflowException;
 
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength(long length, @NotNull Consumer<S> bytesConsumer)
-            throws BufferUnderflowException {
-        parseWithLength(length, (Function<S, Void>) s -> {
+    default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
+            throws BufferUnderflowException, IORuntimeException {
+        parseWithLength(length, (ThrowingFunction<S, Void, IORuntimeException>) s -> {
             bytesConsumer.accept(s);
             return null;
         });
     }
 
-    default <R> R parseWithLength(long length, @NotNull Function<S, R> bytesConsumer)
-            throws BufferUnderflowException {
+    default <R> R parseWithLength(long length, @NotNull ThrowingFunction<S, R, IORuntimeException> bytesConsumer)
+            throws BufferUnderflowException, IORuntimeException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -88,41 +87,40 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readStopBit(this);
     }
 
-    default double readStopBitDouble() throws IORuntimeException {
+    default double readStopBitDouble() {
         return BytesInternal.readStopBitDouble(this);
     }
 
-    default boolean readBoolean() throws IORuntimeException {
+    default boolean readBoolean() {
         return readByte() != 0;
     }
 
-    byte readByte() throws IORuntimeException;
+    byte readByte();
 
-    int readUnsignedByte() throws IORuntimeException;
+    int readUnsignedByte();
 
-    short readShort() throws BufferUnderflowException, IORuntimeException;
+    short readShort() throws BufferUnderflowException;
 
-    default int readUnsignedShort()
-            throws BufferUnderflowException, IORuntimeException {
+    default int readUnsignedShort() throws BufferUnderflowException {
         return readShort() & 0xFFFF;
     }
 
-    default int readUnsignedInt24() throws BufferUnderflowException, IORuntimeException {
+    default int readUnsignedInt24() throws BufferUnderflowException {
         return readUnsignedShort() | (readUnsignedByte() << 16);
     }
 
-    int readInt() throws BufferUnderflowException, IORuntimeException;
+    int readInt() throws BufferUnderflowException;
 
     default long readUnsignedInt()
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException {
         return readInt() & 0xFFFFFFFFL;
     }
 
-    long readLong() throws BufferUnderflowException, IORuntimeException;
+    long readLong() throws BufferUnderflowException;
 
-    float readFloat() throws BufferUnderflowException, IORuntimeException;
+    float readFloat() throws BufferUnderflowException;
 
-    double readDouble() throws BufferUnderflowException, IORuntimeException;
+    double readDouble() throws BufferUnderflowException;
 
     /**
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
@@ -207,37 +205,37 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default int read(@NotNull byte[] bytes) throws IORuntimeException {
+    default int read(@NotNull byte[] bytes) {
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
             bytes[i] = readByte();
         return len;
     }
 
-    default int read(@NotNull byte[] bytes, int off, int len) throws IORuntimeException {
+    default int read(@NotNull byte[] bytes, int off, int len) {
         int len2 = (int) Math.min(len, readRemaining());
         for (int i = 0; i < len2; i++)
             bytes[off + i] = readByte();
         return len2;
     }
 
-    default int read(@NotNull char[] bytes, int off, int len) throws IORuntimeException {
+    default int read(@NotNull char[] bytes, int off, int len) {
         int len2 = (int) Math.min(len, readRemaining());
         for (int i = 0; i < len2; i++)
             bytes[off + i] = (char) readUnsignedByte();
         return len2;
     }
 
-    default void read(@NotNull ByteBuffer buffer) throws IORuntimeException {
+    default void read(@NotNull ByteBuffer buffer) {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }
 
-    int readVolatileInt() throws BufferUnderflowException, IORuntimeException;
+    int readVolatileInt() throws BufferUnderflowException;
 
-    long readVolatileLong() throws BufferUnderflowException, IORuntimeException;
+    long readVolatileLong() throws BufferUnderflowException;
 
-    int peekUnsignedByte() throws IORuntimeException;
+    int peekUnsignedByte();
 
     /**
      * This is an expert level method for copying raw native memory in bulk.
@@ -246,7 +244,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param size    in bytes.
      */
     void nativeRead(long address, long size)
-            throws BufferUnderflowException, IORuntimeException;
+            throws BufferUnderflowException;
 
     default <E extends Enum<E>> E readEnum(Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException {

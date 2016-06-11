@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -24,7 +25,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
@@ -152,7 +152,7 @@ public class BytesTest {
     }
 
     @Test
-    public void toHexString() throws IOException {
+    public void toHexString() {
         Bytes bytes = Bytes.allocateElasticDirect(1020);
         bytes.append("Hello World");
         assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
@@ -187,7 +187,7 @@ public class BytesTest {
     }
 
     @Test
-    public void internBytes() {
+    public void internBytes() throws IORuntimeException {
         Bytes b = Bytes.from("Hello World");
         b.readSkip(6);
         {
@@ -207,7 +207,7 @@ public class BytesTest {
     }
 
     @Test
-    public void testStopBitDouble() {
+    public void testStopBitDouble() throws IORuntimeException {
         Bytes b = Bytes.elasticByteBuffer();
         testSBD(b, -0.0, "00000000 40                                               @                \n");
         testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
@@ -220,7 +220,7 @@ public class BytesTest {
         testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
     }
 
-    private void testSBD(Bytes b, double v, String s) {
+    private void testSBD(Bytes b, double v, String s) throws IORuntimeException {
         b.clear();
         b.writeStopBit(v);
         assertEquals(s, b.toHexString());
@@ -307,7 +307,7 @@ public class BytesTest {
     }
 
     @Test
-    public void testParseToBytes() {
+    public void testParseToBytes() throws IORuntimeException {
         Bytes from = Bytes.allocateDirect(64);
         from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
         Bytes to = Bytes.allocateDirect(32);

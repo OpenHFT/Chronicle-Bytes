@@ -145,7 +145,7 @@ public class MappedFile implements ReferenceCounted {
                         }
                     }
                 } catch (IOException ioe) {
-                    throw new IORuntimeException("Failed to resize to " + minSize, ioe);
+                    throw new IOException("Failed to resize to " + minSize, ioe);
                 }
             }
             long start = System.nanoTime();
@@ -286,7 +286,7 @@ public class MappedFile implements ReferenceCounted {
         this.newChunkListener = listener;
     }
 
-    public long actualSize() {
+    public long actualSize() throws IORuntimeException {
         try {
             return fileChannel.size();
         } catch (IOException e) {

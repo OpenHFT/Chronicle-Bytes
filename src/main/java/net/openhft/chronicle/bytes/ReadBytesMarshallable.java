@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+
 /**
  * Read data directly as Bytes.
  */
@@ -26,5 +28,5 @@ public interface ReadBytesMarshallable {
      *
      * @param bytes to read.
      */
-    void readMarshallable(BytesIn bytes);
+    void readMarshallable(BytesIn bytes) throws IORuntimeException;
 }

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
@@ -43,7 +44,7 @@ public class ByteStringAppenderTest {
     }
 
     @Test
-    public void testAppend() {
+    public void testAppend() throws IORuntimeException {
         long expected = 1234;
         bytes.append(expected);
 
@@ -71,7 +72,7 @@ public class ByteStringAppenderTest {
     }
 
     @Test
-    public void testAppendDouble() throws IOException {
+    public void testAppendDouble() throws IOException, IORuntimeException {
         testAppendDouble0(-6.895305375646115E24);
         Random random = new Random(1);
         for (int i = 0; i < 100000; i++) {
@@ -81,7 +82,7 @@ public class ByteStringAppenderTest {
         }
     }
 
-    private void testAppendDouble0(double d) throws IOException {
+    private void testAppendDouble0(double d) throws IOException, IORuntimeException {
         bytes.clear();
         bytes.append(d).append(' ');
 

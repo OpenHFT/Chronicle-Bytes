@@ -443,7 +443,7 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
-            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException {
         if (bytes.isNative()) {
             memory.copyMemory(bytes.address(offset), address(offsetInRDO), length);
         } else {
@@ -485,7 +485,7 @@ public class NativeBytesStore<Underlying>
     public String toString() {
         try {
             return BytesInternal.toString(this);
-        } catch (IllegalStateException | IORuntimeException e) {
+        } catch (IllegalStateException e) {
             return e.toString();
         }
     }
@@ -530,11 +530,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-        try {
             return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-        } catch (IORuntimeException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public void setAddress(long address) {
@@ -603,7 +599,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store) throws IllegalStateException, IORuntimeException {
+    public long copyTo(@NotNull BytesStore store) throws IllegalStateException {
         if (store instanceof NativeBytesStore)
             return copyTo((NativeBytesStore) store);
         else

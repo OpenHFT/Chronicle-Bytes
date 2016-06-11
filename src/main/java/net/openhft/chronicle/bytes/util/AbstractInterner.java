@@ -18,8 +18,8 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -46,12 +46,12 @@ public abstract class AbstractInterner<T> {
     }
 
     public T intern(@NotNull Bytes cs)
-            throws IllegalArgumentException, UTFDataFormatRuntimeException, BufferUnderflowException {
+            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         return intern(cs, (int) cs.readRemaining());
     }
 
     public T intern(@NotNull Bytes cs, int length)
-            throws IllegalArgumentException, UTFDataFormatRuntimeException, BufferUnderflowException {
+            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         if (length> entries.length)
             return getValue(cs, length);
         int hash = hash32(cs, length);
@@ -71,7 +71,7 @@ public abstract class AbstractInterner<T> {
         return t;
     }
 
-    protected abstract T getValue(BytesStore bs, int length);
+    protected abstract T getValue(BytesStore bs, int length) throws IORuntimeException;
 
     protected boolean toggle() {
         return toggle = !toggle;

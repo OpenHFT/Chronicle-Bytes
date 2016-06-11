@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -232,9 +231,9 @@ public interface Bytes<Underlying> extends
 
         final long length = Math.min(maxLen + 1, buffer.readRemaining());
 
-        return buffer.parseWithLength(length, b -> {
-            final StringBuilder builder = new StringBuilder();
-            try {
+        final StringBuilder builder = new StringBuilder();
+        try {
+            buffer.parseWithLength(length, b -> {
                 while (buffer.readRemaining() > 0) {
                     if (builder.length() >= maxLen) {
                         builder.append("...");
@@ -242,13 +241,12 @@ public interface Bytes<Underlying> extends
                     }
                     builder.append((char) buffer.readByte());
                 }
-            } catch (IORuntimeException e) {
-                builder.append(' ').append(e);
-            }
-
-            // remove the last comma
-            return builder.toString();
-        });
+                return b;
+            });
+        } catch (Exception e) {
+            builder.append(' ').append(e);
+        }
+        return builder.toString();
     }
 
     /**
@@ -259,8 +257,9 @@ public interface Bytes<Underlying> extends
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
+
     static String toString(@NotNull final Bytes buffer, long position, long len)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException {
         final long pos = buffer.readPosition();
         final long limit = buffer.readLimit();
         buffer.readPositionRemaining(position, len);
@@ -290,7 +289,7 @@ public interface Bytes<Underlying> extends
         Bytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
-        } catch (BufferOverflowException | IORuntimeException e) {
+        } catch (BufferOverflowException e) {
             throw new AssertionError(e);
         }
         return result;
@@ -348,7 +347,7 @@ public interface Bytes<Underlying> extends
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString() throws IORuntimeException {
+    default String toHexString() {
         return toHexString(1024);
     }
 
@@ -359,8 +358,7 @@ public interface Bytes<Underlying> extends
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString(long maxLength)
-            throws IORuntimeException {
+    default String toHexString(long maxLength) {
         return toHexString(readPosition(), maxLength);
     }
 
@@ -371,8 +369,7 @@ public interface Bytes<Underlying> extends
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
-    default String toHexString(long offset, long maxLength)
-            throws IORuntimeException {
+    default String toHexString(long offset, long maxLength) {
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         String ret = BytesInternal.toHexString(this, offset, maxLength2);
         return maxLength2 < readLimit() - offset ? ret + "... truncated" : ret;
@@ -389,10 +386,8 @@ public interface Bytes<Underlying> extends
      *
      * @param size the capacity that you required
      * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space
-     * @throws IORuntimeException       if an error occured trying to resize the underlying buffer.
      */
-    default void ensureCapacity(long size)
-            throws IllegalArgumentException, IORuntimeException {
+    default void ensureCapacity(long size) throws IllegalArgumentException {
         if (size > capacity())
             throw new IllegalArgumentException(isElastic() ? "todo" : "not elastic");
     }

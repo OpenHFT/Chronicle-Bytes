@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
@@ -105,7 +104,7 @@ public class HeapBytesStore<Underlying>
     public String toString() {
         try {
             return BytesInternal.toString(this);
-        } catch (IllegalStateException | IORuntimeException e) {
+        } catch (IllegalStateException e) {
             return e.toString();
         }
     }
@@ -387,11 +386,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-        try {
             return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-        } catch (IORuntimeException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @Override

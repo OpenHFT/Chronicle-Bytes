@@ -21,6 +21,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -34,6 +36,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> {
+    private static final Logger LOG = LoggerFactory.getLogger(MappedBytes.class);
     public static boolean CHECKING = false;
     private final MappedFile mappedFile;
 
@@ -96,27 +99,32 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @Override
     public long realCapacity() {
-        return mappedFile.actualSize();
+        try {
+            return mappedFile.actualSize();
+        } catch (IORuntimeException e) {
+            LOG.warn("Ununable to obtain the real size for " + mappedFile.file(), e);
+            return 0;
+        }
     }
 
     @Override
-    protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException, IORuntimeException {
+    protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (!bytesStore.inside(offset)) {
             BytesStore oldBS = bytesStore;
             try {
                 bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
-            } catch (IOException | IllegalStateException e) {
-                throw new IORuntimeException(e);
-            } catch (IllegalArgumentException e) {
-                throw new BufferUnderflowException();
+            } catch (IOException | IllegalStateException | IllegalArgumentException e) {
+                BufferUnderflowException bue = new BufferUnderflowException();
+                bue.initCause(e);
+                throw bue;
             }
         }
         super.readCheckOffset(offset, adding, given);
     }
 
     @Override
-    protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException, IORuntimeException {
+    protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         if (offset < 0 || offset > capacity() - adding)
             throw new IllegalArgumentException("Offset out of bound " + offset);
         if (!bytesStore.inside(offset)) {
@@ -124,10 +132,10 @@ public class MappedBytes extends AbstractBytes<Void> {
             try {
                 bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
-            } catch (IOException | IllegalStateException e) {
-                throw new IORuntimeException(e);
-            } catch (IllegalArgumentException e) {
-                throw new BufferOverflowException();
+            } catch (IOException | IllegalStateException | IllegalArgumentException e) {
+                BufferOverflowException boe = new BufferOverflowException();
+                boe.initCause(e);
+                throw boe;
             }
         }
     }
@@ -151,7 +159,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
-            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+            throws BufferUnderflowException, BufferOverflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -174,14 +182,14 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IORuntimeException {
+    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
         return cs instanceof String
                 ? append8bit0((String) cs, start, end - start)
                 : super.append8bit(cs, start, end);
     }
 
     @Override
-    public Bytes<Void> writeUtf8(String s) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
         char[] chars = extractChars(s);
         long utfLength = AppendableUtil.findUtf8Length(chars);
         writeStopBit(utfLength);
@@ -225,7 +233,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     }
 
     @Override
-    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length) throws BufferOverflowException, IllegalArgumentException {
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);

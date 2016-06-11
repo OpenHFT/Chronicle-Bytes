@@ -140,7 +140,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
-            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+            throws BufferUnderflowException, BufferOverflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -260,7 +260,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         try {
             return readRemaining() > 0 ? bytesStore.readUnsignedByte(readPosition) : -1;
 
-        } catch (BufferUnderflowException | IORuntimeException e) {
+        } catch (BufferUnderflowException e) {
             return -1;
         }
     }
@@ -460,7 +460,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,
                                    RandomDataInput bytes, long offset, long length)
-            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+            throws BufferUnderflowException, BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -699,7 +699,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             for (; i < remaining; i++)
                 if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
                     return false;
-        } catch (BufferUnderflowException | IORuntimeException e) {
+        } catch (BufferUnderflowException e) {
             throw Jvm.rethrow(e);
         }
         return true;
@@ -750,7 +750,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
         }
@@ -775,7 +775,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         ensureCapacity(writePosition() + length);
         NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);

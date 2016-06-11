@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -17,7 +18,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class BytesMarshallableTest {
     @Test
-    public void serializePrimitives() {
+    public void serializePrimitives() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
         MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
@@ -34,7 +35,7 @@ public class BytesMarshallableTest {
     }
 
     @Test
-    public void serializeScalars() {
+    public void serializeScalars() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
         MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
@@ -51,7 +52,7 @@ public class BytesMarshallableTest {
     }
 
     @Test
-    public void serializeNested() {
+    public void serializeNested() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
         MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);

@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +34,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     }
 
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, int length) {
+    protected String getValue(@NotNull BytesStore cs, int length) throws UTFDataFormatRuntimeException {
         StringBuilder sb = SBP.acquireStringBuilder();
         AppendableUtil.parseUtf8(cs, sb, length);
         return sb.toString();

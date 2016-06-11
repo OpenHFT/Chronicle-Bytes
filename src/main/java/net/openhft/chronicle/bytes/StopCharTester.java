@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.EscapingStopCharTester;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -34,9 +33,8 @@ public interface StopCharTester {
      *
      * @param ch to test, 0 should return true or throw an exception.
      * @return if this byte is a stop character.
-     * @throws IORuntimeException if an invalid character like 0 was detected.
      */
-    boolean isStopChar(int ch) throws IORuntimeException;
+    boolean isStopChar(int ch);
 
     @NotNull
     default StopCharTester escaping() {

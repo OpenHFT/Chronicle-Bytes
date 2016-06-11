@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Nullable;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -34,10 +33,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      * @throws BufferOverflowException  if the capacity was exceeded
      * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
-     * @throws IORuntimeException       if the underlying buffer fails to resize.
      */
     default R writeByte(long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeByte(offset, Maths.toInt8(i));
     }
 
@@ -49,10 +47,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      * @throws BufferOverflowException  if the capacity was exceeded
      * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
-     * @throws IORuntimeException       if the underlying buffer fails to resize.
      */
     default R writeUnsignedByte(long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeByte(offset, (byte) Maths.toUInt8(i));
     }
 
@@ -63,10 +60,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param flag   the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
     default R writeBoolean(long offset, boolean flag)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         try {
             return writeByte(offset, flag ? 'Y' : 0);
         } catch (IllegalArgumentException e) {
@@ -82,10 +78,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      * @throws BufferOverflowException  if the capacity was exceeded
      * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
-     * @throws IORuntimeException       if the underlying buffer fails to resize.
      */
     default R writeUnsignedShort(long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeShort(offset, (short) Maths.toUInt16(i));
     }
 
@@ -97,10 +92,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      * @throws BufferOverflowException  if the capacity was exceeded
      * @throws IllegalArgumentException if the value cannot be cast to the type without loss.
-     * @throws IORuntimeException       if the underlying buffer fails to resize.
      */
     default R writeUnsignedInt(long offset, long i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeInt(offset, (int) Maths.toUInt32(i));
     }
 
@@ -111,10 +105,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i8     the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeByte(long offset, byte i8)
-            throws BufferOverflowException, IORuntimeException;
+    R writeByte(long offset, byte i8) throws BufferOverflowException;
 
     /**
      * Write a short at an offset.
@@ -123,13 +115,10 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeShort(long offset, short i)
-            throws BufferOverflowException, IORuntimeException;
+    R writeShort(long offset, short i) throws BufferOverflowException;
 
-    default R writeInt24(long offset, int i)
-            throws BufferOverflowException, IORuntimeException {
+    default R writeInt24(long offset, int i) throws BufferOverflowException {
         writeUnsignedShort(offset, i);
         return writeUnsignedByte(offset + 2, i >> 16);
     }
@@ -141,10 +130,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeInt(long offset, int i)
-            throws BufferOverflowException, IORuntimeException;
+    R writeInt(long offset, int i) throws BufferOverflowException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -153,10 +140,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      value to write
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeOrderedInt(long offset, int i)
-            throws BufferOverflowException, IORuntimeException;
+    R writeOrderedInt(long offset, int i) throws BufferOverflowException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -165,10 +150,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param f      value to write
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    default R writeOrderedFloat(long offset, float f)
-            throws BufferOverflowException, IORuntimeException {
+    default R writeOrderedFloat(long offset, float f) throws BufferOverflowException {
         return writeOrderedInt(offset, Float.floatToRawIntBits(f));
     }
 
@@ -179,10 +162,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeLong(long offset, long i)
-            throws BufferOverflowException, IORuntimeException;
+    R writeLong(long offset, long i) throws BufferOverflowException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -191,8 +172,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      value to write
      * @return this
      */
-    R writeOrderedLong(long offset, long i)
-            throws BufferOverflowException, IORuntimeException;
+    R writeOrderedLong(long offset, long i) throws BufferOverflowException;
 
     /**
      * Perform a non stalling write with a store barrier.
@@ -201,8 +181,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      value to write
      * @return this
      */
-    default R writeOrderedDouble(long offset, double d)
-            throws BufferOverflowException, IORuntimeException {
+    default R writeOrderedDouble(long offset, double d) throws BufferOverflowException {
         return writeOrderedLong(offset, Double.doubleToRawLongBits(d));
     }
 
@@ -213,10 +192,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeFloat(long offset, float d)
-            throws BufferOverflowException, IORuntimeException;
+    R writeFloat(long offset, float d) throws BufferOverflowException;
 
     /**
      * Write a double at an offset.
@@ -225,31 +202,26 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      the value
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R writeDouble(long offset, double d)
-            throws BufferOverflowException, IORuntimeException;
+    R writeDouble(long offset, double d) throws BufferOverflowException;
 
-    R writeVolatileByte(long offset, byte i8) throws BufferOverflowException, IORuntimeException;
+    R writeVolatileByte(long offset, byte i8) throws BufferOverflowException;
 
-    R writeVolatileShort(long offset, short i16) throws BufferOverflowException, IORuntimeException;
+    R writeVolatileShort(long offset, short i16) throws BufferOverflowException;
 
-    R writeVolatileInt(long offset, int i32) throws BufferOverflowException, IORuntimeException;
+    R writeVolatileInt(long offset, int i32) throws BufferOverflowException;
 
-    R writeVolatileLong(long offset, long i64) throws BufferOverflowException, IORuntimeException;
+    R writeVolatileLong(long offset, long i64) throws BufferOverflowException;
 
-    default R writeVolatileFloat(long offset, float f)
-            throws BufferOverflowException, IORuntimeException {
+    default R writeVolatileFloat(long offset, float f) throws BufferOverflowException {
         return writeVolatileInt(offset, Float.floatToRawIntBits(f));
     }
 
-    default R writeVolatileDouble(long offset, double d)
-            throws BufferOverflowException, IORuntimeException {
+    default R writeVolatileDouble(long offset, double d) throws BufferOverflowException {
         return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
     }
 
-    default R write(long offsetInRDO, @NotNull byte[] bytes)
-            throws BufferOverflowException, IORuntimeException {
+    default R write(long offsetInRDO, @NotNull byte[] bytes) throws BufferOverflowException {
         try {
             return write(offsetInRDO, bytes, 0, bytes.length);
         } catch (IllegalArgumentException e) {
@@ -258,13 +230,13 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     }
 
     R write(long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IllegalArgumentException;
 
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+            throws BufferOverflowException, IllegalArgumentException;
 
     default R write(long offsetInRDO, @NotNull BytesStore bytes)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
         } catch (BufferUnderflowException e) {
@@ -273,7 +245,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     }
 
     R write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException, BufferUnderflowException;
+            throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException;
 
     /**
      * Zero out the bytes between the start and the end.
@@ -282,13 +254,12 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param end   index of last byte exclusive
      * @return this
      * @throws BufferOverflowException if the capacity was exceeded
-     * @throws IORuntimeException      if the underlying buffer fails to resize.
      */
-    R zeroOut(long start, long end) throws IllegalArgumentException, IORuntimeException;
+    R zeroOut(long start, long end) throws IllegalArgumentException;
 
     @NotNull
     default R append(long offset, long value, int digits)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
@@ -311,8 +282,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return the offset after the char sequence written, in this {@code RandomDataOutput}
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
-    default long writeUtf8(long offset, @Nullable CharSequence cs)
-            throws BufferOverflowException, IORuntimeException {
+    default long writeUtf8(long offset, @Nullable CharSequence cs) throws BufferOverflowException {
         return BytesInternal.writeUtf8(this, offset, cs);
     }
 
@@ -333,7 +303,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
     default long writeUtf8Limited(long offset, @Nullable CharSequence cs, int maxUtf8Len)
-            throws BufferOverflowException, IORuntimeException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException {
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
 }

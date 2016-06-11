@@ -16,12 +16,14 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+
 /**
  * An object which can be read or written directly to Bytes in a streaming manner.
  */
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
     @Override
-    default void readMarshallable(BytesIn bytes) {
+    default void readMarshallable(BytesIn bytes) throws IORuntimeException {
         BytesUtil.readMarshallable(this, bytes);
     }
 

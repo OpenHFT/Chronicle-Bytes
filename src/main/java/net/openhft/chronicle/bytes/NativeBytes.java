@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,7 +68,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             bytes2 = Bytes.allocateElasticDirect(remaining);
             bytes2.write(bytes, 0, remaining);
             return bytes2;
-        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException | IORuntimeException e) {
+        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException e) {
             throw new AssertionError(e);
         }
     }
@@ -81,14 +80,13 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         if (!bytesStore.inside(offset + adding - 1))
             checkResize(offset + adding);
     }
 
     @Override
-    public void ensureCapacity(long size)
-            throws IllegalArgumentException, IORuntimeException {
+    public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
             writeCheckOffset(size, 1L);
         } catch (BufferOverflowException e) {
@@ -97,7 +95,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     private void checkResize(long endOfBuffer)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         if (isElastic())
             resize(endOfBuffer);
         else
@@ -105,26 +103,22 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     @Override
-    public byte readVolatileByte(long offset)
-            throws BufferUnderflowException, IORuntimeException {
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
         return bytesStore.readVolatileByte(offset);
     }
 
     @Override
-    public short readVolatileShort(long offset)
-            throws BufferUnderflowException, IORuntimeException {
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
         return bytesStore.readVolatileShort(offset);
     }
 
     @Override
-    public int readVolatileInt(long offset)
-            throws BufferUnderflowException, IORuntimeException {
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
         return bytesStore.readVolatileInt(offset);
     }
 
     @Override
-    public long readVolatileLong(long offset)
-            throws BufferUnderflowException, IORuntimeException {
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
         return bytesStore.readVolatileLong(offset);
     }
 
@@ -134,7 +128,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     private void resize(long endOfBuffer)
-            throws IllegalArgumentException, BufferOverflowException, IORuntimeException {
+            throws IllegalArgumentException, BufferOverflowException {
         if (endOfBuffer < 0)
             throw new IllegalArgumentException(endOfBuffer + " < 0");
         if (endOfBuffer > capacity())
@@ -162,7 +156,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+    public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         if (bytes.length > writeRemaining())
             throw new BufferOverflowException();
         long position = writePosition();
@@ -172,7 +166,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     @NotNull
-    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException, IORuntimeException {
+    public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
         long position = writePosition();
         ensureCapacity(position + length);
         super.write(bytes, offset, length);

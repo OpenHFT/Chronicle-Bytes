@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Assert;
@@ -85,7 +86,7 @@ public class ByteStringParserTest   {
     }
 
     @Test
-    public void testAppendParse() throws IOException {
+    public void testAppendParse() throws IOException, IORuntimeException {
         bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
         bytes.append("word£€)").append(' ');
         bytes.append(1234).append(' ');
@@ -100,7 +101,7 @@ public class ByteStringParserTest   {
     }
 
     @Test
-    public void testLastDecimalPlaces() throws IOException {
+    public void testLastDecimalPlaces() throws IOException, IORuntimeException {
         bytes.append("1").append(' ');
         bytes.append("1.").append(' ');
         bytes.append("0.0").append(' ');

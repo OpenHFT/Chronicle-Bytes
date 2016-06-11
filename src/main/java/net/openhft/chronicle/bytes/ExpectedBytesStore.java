@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -114,7 +113,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 }
             }
             return (B) this;
-        } catch (BufferUnderflowException | IORuntimeException e) {
+        } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
     }
@@ -126,7 +125,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeShort(long offset, short i) throws AssertionError, IORuntimeException {
+    public B writeShort(long offset, short i) throws AssertionError {
         try {
             short ia = underlyingBytesStore.readShort(offset);
             if (ia != i)
@@ -139,7 +138,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeInt(long offset, int i) throws AssertionError, IORuntimeException {
+    public B writeInt(long offset, int i) throws AssertionError {
         try {
             int ia = underlyingBytesStore.readInt(offset);
             if (ia != i)
@@ -156,7 +155,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedInt(long offset, int i) throws AssertionError, IORuntimeException {
+    public B writeOrderedInt(long offset, int i) throws AssertionError {
         try {
             int ia = underlyingBytesStore.readInt(offset);
             if (ia != i) {
@@ -175,7 +174,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeLong(long offset, long i) throws AssertionError, IORuntimeException {
+    public B writeLong(long offset, long i) throws AssertionError {
         try {
             long ia = underlyingBytesStore.readLong(offset);
             if (ia != i)
@@ -193,13 +192,13 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeOrderedLong(long offset, long i) throws AssertionError, IORuntimeException {
+    public B writeOrderedLong(long offset, long i) throws AssertionError {
         return writeLong(offset, i);
     }
 
     @NotNull
     @Override
-    public B writeFloat(long offset, float d) throws AssertionError, IORuntimeException {
+    public B writeFloat(long offset, float d) throws AssertionError {
         try {
             float ia = underlyingBytesStore.readFloat(offset);
             if (ia != d)
@@ -212,7 +211,7 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @NotNull
     @Override
-    public B writeDouble(long offset, double d) throws AssertionError, IORuntimeException {
+    public B writeDouble(long offset, double d) throws AssertionError {
         try {
             double ia = underlyingBytesStore.readDouble(offset);
             if (ia != d)
@@ -224,32 +223,28 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
-    public B writeVolatileByte(long offset, byte i8)
-            throws BufferOverflowException, IORuntimeException {
+    public B writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
         return writeByte(offset, i8);
     }
 
     @Override
-    public B writeVolatileShort(long offset, short i16)
-            throws BufferOverflowException, IORuntimeException {
+    public B writeVolatileShort(long offset, short i16) throws BufferOverflowException {
         return writeShort(offset, i16);
     }
 
     @Override
-    public B writeVolatileInt(long offset, int i32)
-            throws BufferOverflowException, IORuntimeException {
+    public B writeVolatileInt(long offset, int i32) throws BufferOverflowException {
         return writeInt(offset, i32);
     }
 
     @Override
-    public B writeVolatileLong(long offset, long i64)
-            throws BufferOverflowException, IORuntimeException {
+    public B writeVolatileLong(long offset, long i64) throws BufferOverflowException {
         return writeLong(offset, i64);
     }
 
     @NotNull
     @Override
-    public B write(long offsetInRDO, byte[] bytes, int offset, int length) throws AssertionError, BufferOverflowException, IORuntimeException {
+    public B write(long offsetInRDO, byte[] bytes, int offset, int length) throws AssertionError, BufferOverflowException {
         for (int i = 0; i < length; i++)
             writeByte(offsetInRDO + i, bytes[offset + i]);
         return (B) this;

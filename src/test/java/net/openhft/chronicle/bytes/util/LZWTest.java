@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
@@ -46,14 +47,14 @@ public class LZWTest {
         threadDump.assertNoNewThreads();
     }
     @Test
-    public void testCompress() {
+    public void testCompress() throws IORuntimeException {
         byte[] bytes = "hello world".getBytes();
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
         assertTrue(Arrays.equals(bytes, bytes2));
     }
 
     @Test
-    public void testCompressionRatio() {
+    public void testCompressionRatio() throws IORuntimeException {
         byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');
         Random rand = new Random();

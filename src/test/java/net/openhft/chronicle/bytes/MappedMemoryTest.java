@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -118,7 +119,7 @@ public class MappedMemoryTest {
     }
 
     @Test
-    public void mappedMemoryTest() throws IOException {
+    public void mappedMemoryTest() throws IOException, IORuntimeException {
 
         File tempFile = File.createTempFile("chronicle", "q");
         try {

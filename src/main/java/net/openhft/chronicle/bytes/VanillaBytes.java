@@ -141,12 +141,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return isEqual0(chars, bs, address);
 
         } else {
-            try {
                 return isEqual1(chars, bytesStore, readPosition);
-
-            } catch (IORuntimeException e) {
-                throw new AssertionError(e);
-            }
         }
     }
 
@@ -176,7 +171,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         if (bytesStore() instanceof NativeBytesStore && bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
@@ -192,7 +187,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     public void write(long position, @NotNull CharSequence str, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         // todo optimise
         if (str instanceof String) {
             char[] chars = ((String) str).toCharArray();
@@ -225,7 +220,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException, IORuntimeException {
+    public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException {
         try {
             if (bytesStore() instanceof NativeBytesStore) {
                 if (str instanceof BytesStore) {
@@ -246,7 +241,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException {
         if (cs instanceof BytesStore)
             return write((BytesStore) cs);
 
@@ -257,7 +252,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull String cs)
-            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException {
         if (bytesStore instanceof NativeBytesStore)
             return append8bitNBS_S(cs);
         return append8bit0(cs);
@@ -327,7 +322,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException, IORuntimeException {
+    public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException {
         if (this.bytesStore instanceof NativeBytesStore &&
                 bytesStore instanceof VanillaBytes && bytesStore.bytesStore() instanceof NativeBytesStore) {
             VanillaBytes b2 = (VanillaBytes) bytesStore;
@@ -376,7 +371,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         ensureCapacity(writePosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
             NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
@@ -395,7 +390,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return super.toTemporaryDirectByteBuffer();
     }
 
-    public int read(@NotNull byte[] bytes) throws IORuntimeException {
+    public int read(@NotNull byte[] bytes) {
         int len = (int) Math.min(bytes.length, readRemaining());
         if (bytesStore instanceof NativeBytesStore) {
             NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;

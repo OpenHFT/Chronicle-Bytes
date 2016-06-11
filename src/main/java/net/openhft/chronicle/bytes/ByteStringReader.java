@@ -16,8 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
-
 import java.io.IOException;
 import java.io.Reader;
 import java.nio.BufferUnderflowException;
@@ -33,12 +31,8 @@ public class ByteStringReader extends Reader {
     }
 
     @Override
-    public int read() throws IOException {
-        try {
+    public int read() {
             return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
-        } catch (IORuntimeException e) {
-            throw new IOException(e);
-        }
     }
 
     @Override
@@ -46,7 +40,7 @@ public class ByteStringReader extends Reader {
         long len = Math.min(in.readRemaining(), n);
         try {
             in.readSkip(len);
-        } catch (BufferUnderflowException | IORuntimeException e) {
+        } catch (BufferUnderflowException e) {
             throw new IOException(e);
         }
         return len;
@@ -56,7 +50,7 @@ public class ByteStringReader extends Reader {
     public int read(char[] cbuf, int off, int len) throws IOException {
         try {
             return in.read(cbuf, off, len);
-        } catch (IORuntimeException e) {
+        } catch (BufferUnderflowException e) {
             throw new IOException(e);
         }
     }

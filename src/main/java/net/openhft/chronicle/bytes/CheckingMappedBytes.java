@@ -16,7 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -31,7 +30,7 @@ public class CheckingMappedBytes extends MappedBytes {
     }
 
     @Override
-    protected long writeOffsetPositionMoved(long adding) throws BufferOverflowException, IORuntimeException {
+    protected long writeOffsetPositionMoved(long adding) throws BufferOverflowException {
         long wp = writePosition();
         if (adding <= 8) {
             long value = 0;
@@ -69,25 +68,25 @@ public class CheckingMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> writeOrderedInt(int i) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeOrderedInt(int i) throws BufferOverflowException {
         return super.writeOrderedInt(i);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         return super.writeOrderedInt(offset, i);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> writeOrderedLong(long i) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeOrderedLong(long i) throws BufferOverflowException {
         return super.writeOrderedLong(i);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> writeOrderedLong(long offset, long i) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeOrderedLong(long offset, long i) throws BufferOverflowException {
         return super.writeOrderedLong(offset, i);
     }
 
@@ -103,45 +102,45 @@ public class CheckingMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> writeShort(short i16) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeShort(short i16) throws BufferOverflowException {
         return super.writeShort(i16);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> writeShort(long offset, short i) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeShort(long offset, short i) throws BufferOverflowException {
         return super.writeShort(offset, i);
     }
 
     @Override
-    public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException {
         writePosition(writePosition() + bytesToSkip);
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Void> writeSome(@NotNull ByteBuffer buffer) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeSome(@NotNull ByteBuffer buffer) throws BufferOverflowException {
         return super.writeSome(buffer);
     }
 
     @Override
-    public Bytes<Void> writeVolatileByte(long offset, byte i8) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
         return super.writeVolatileByte(offset, i8);
     }
 
     @Override
-    public Bytes<Void> writeVolatileInt(long offset, int i32) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeVolatileInt(long offset, int i32) throws BufferOverflowException {
         return super.writeVolatileInt(offset, i32);
     }
 
     @Override
-    public Bytes<Void> writeVolatileLong(long offset, long i64) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeVolatileLong(long offset, long i64) throws BufferOverflowException {
         return super.writeVolatileLong(offset, i64);
     }
 
     @Override
-    public Bytes<Void> writeVolatileShort(long offset, short i16) throws BufferOverflowException, IORuntimeException {
+    public Bytes<Void> writeVolatileShort(long offset, short i16) throws BufferOverflowException {
         return super.writeVolatileShort(offset, i16);
     }
 }

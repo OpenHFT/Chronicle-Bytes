@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.core.io.IORuntimeException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -43,9 +42,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param bytesToSkip bytes to skip.
      * @return this
      * @throws BufferOverflowException if the offset is outside the limits of the Bytes
-     * @throws IORuntimeException      if an error occurred trying to obtain the data.
      */
-    S writeSkip(long bytesToSkip) throws BufferOverflowException, IORuntimeException;
+    S writeSkip(long bytesToSkip) throws BufferOverflowException;
 
     /**
      * @return Bytes as an OutputStream
@@ -62,12 +60,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return this.
      */
     @NotNull
-    default S writeStopBit(long x) throws BufferOverflowException, IORuntimeException {
+    default S writeStopBit(long x) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, x);
         return (S) this;
     }
 
-    default S writeStopBit(double d) throws BufferOverflowException, IORuntimeException {
+    default S writeStopBit(double d) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, d);
         return (S) this;
     }
@@ -81,24 +79,24 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @NotNull
     default S writeUtf8(CharSequence cs)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         BytesInternal.writeUtf8(this, cs);
         return (S) this;
     }
 
     default S writeUtf8(String s)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         BytesInternal.writeUtf8(this, s);
         return (S) this;
     }
 
     @Deprecated
-    default S writeUTFΔ(CharSequence cs) throws BufferOverflowException, IORuntimeException {
+    default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         return writeUtf8(cs);
     }
 
     default S write8bit(CharSequence cs)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         if (cs == null)
             return writeStopBit(-1);
 
@@ -109,7 +107,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write8bit(CharSequence s, int start, int length)
-            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         writeStopBit(length);
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
@@ -119,7 +117,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write(CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
         }
@@ -127,7 +125,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write(CharSequence s, int start, int length)
-            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
             appendUtf8(c);
@@ -136,7 +134,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write8bit(@NotNull String s)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         if (s == null)
             writeStopBit(-1);
         else
@@ -145,7 +143,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S write8bit(@NotNull BytesStore sdi)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         long offset = sdi.readPosition();
         long readRemaining = sdi.readLimit() - offset;
         writeStopBit(readRemaining);
@@ -154,53 +152,53 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    S writeByte(byte i8) throws BufferOverflowException, IORuntimeException;
+    S writeByte(byte i8) throws BufferOverflowException;
 
     @NotNull
     default S writeUnsignedByte(int i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeByte((byte) Maths.toUInt8(i));
     }
 
     @NotNull
-    S writeShort(short i16) throws BufferOverflowException, IORuntimeException;
+    S writeShort(short i16) throws BufferOverflowException;
 
     @NotNull
     default S writeUnsignedShort(int u16)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeShort((short) Maths.toUInt16(u16));
     }
 
     @NotNull
-    default S writeInt24(int i) throws BufferOverflowException, IORuntimeException {
+    default S writeInt24(int i) throws BufferOverflowException {
         writeUnsignedShort(i);
         return writeUnsignedByte(i >> 16);
     }
 
     @NotNull
-    S writeInt(int i) throws BufferOverflowException, IORuntimeException;
+    S writeInt(int i) throws BufferOverflowException;
 
     @NotNull
     default S writeUnsignedInt(long i)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         return writeInt((int) Maths.toUInt32(i));
     }
 
     @NotNull
-    S writeLong(long i64) throws BufferOverflowException, IORuntimeException;
+    S writeLong(long i64) throws BufferOverflowException;
 
     @NotNull
-    S writeFloat(float f) throws BufferOverflowException, IORuntimeException;
+    S writeFloat(float f) throws BufferOverflowException;
 
     @NotNull
-    S writeDouble(double d) throws BufferOverflowException, IORuntimeException;
+    S writeDouble(double d) throws BufferOverflowException;
 
     /**
      * Write all data or fail.
      */
     @NotNull
     default S write(@NotNull BytesStore bytes)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         if (bytes == this)
             throw new IllegalArgumentException("you should not write to your self !");
 
@@ -209,7 +207,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     default S writeSome(@NotNull Bytes bytes)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         long length = Math.min(bytes.readRemaining(), writeRemaining());
         write(bytes, bytes.readPosition(), length);
         if (length == bytes.readRemaining()) {
@@ -227,13 +225,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @NotNull
     default S write(@NotNull BytesStore bytes, long offset, long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
 
     @NotNull
-    default S write(@NotNull byte[] bytes) throws BufferOverflowException, IORuntimeException {
+    default S write(@NotNull byte[] bytes) throws BufferOverflowException {
         write(bytes, 0, bytes.length);
         return (S) this;
     }
@@ -242,21 +240,21 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Write all data or fail.
      */
     @NotNull
-    S write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException, IORuntimeException;
+    S write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException;
 
     @NotNull
-    S writeSome(ByteBuffer buffer) throws BufferOverflowException, IORuntimeException;
+    S writeSome(ByteBuffer buffer) throws BufferOverflowException;
 
     @NotNull
-    default S writeBoolean(boolean flag) throws BufferOverflowException, IORuntimeException {
+    default S writeBoolean(boolean flag) throws BufferOverflowException {
         return writeByte(flag ? (byte) 'Y' : 0);
     }
 
     @NotNull
-    S writeOrderedInt(int i) throws BufferOverflowException, IORuntimeException;
+    S writeOrderedInt(int i) throws BufferOverflowException;
 
     @NotNull
-    S writeOrderedLong(long i) throws BufferOverflowException, IORuntimeException;
+    S writeOrderedLong(long i) throws BufferOverflowException;
 
     /**
      * This is an expert level method for writing out data to native memory.
@@ -265,25 +263,25 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param size    in bytes.
      */
     void nativeWrite(long address, long size)
-            throws BufferOverflowException, IORuntimeException;
+            throws BufferOverflowException;
 
     default <E extends Enum<E>> void writeEnum(E e)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         write8bit(e.name());
     }
 
     default S appendUtf8(CharSequence cs)
-            throws BufferOverflowException, IORuntimeException {
+            throws BufferOverflowException {
         return appendUtf8(cs, 0, cs.length());
     }
 
-    default S appendUtf8(int codepoint) throws BufferOverflowException, IORuntimeException {
+    default S appendUtf8(int codepoint) throws BufferOverflowException {
         BytesInternal.appendUtf8Char(this, codepoint);
         return (S) this;
     }
 
     default S appendUtf8(char[] chars, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         int i;
         ascii:
         {
@@ -303,7 +301,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     default S appendUtf8(CharSequence cs, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException, IORuntimeException {
+            throws BufferOverflowException, IllegalArgumentException {
         BytesInternal.appendUtf8(this, cs, offset, length);
         return (S) this;
     }

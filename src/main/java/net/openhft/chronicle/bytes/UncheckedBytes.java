@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -117,14 +116,14 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     }
 
     @Override
-    protected long prewriteOffsetPositionMoved(long subtracting) throws BufferOverflowException, IORuntimeException {
+    protected long prewriteOffsetPositionMoved(long subtracting) throws BufferOverflowException {
         return readPosition -= subtracting;
     }
 
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
-            throws IORuntimeException, BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -139,7 +138,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IORuntimeException {
+            throws BufferOverflowException, BufferUnderflowException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
         }
@@ -155,7 +154,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     }
 
     public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
-            throws IORuntimeException, BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
