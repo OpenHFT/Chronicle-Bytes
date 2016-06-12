@@ -281,7 +281,7 @@ enum BytesInternal {
             if (utflen > count)
                 parseUtf82(bytes, appendable, utflen, count);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -306,7 +306,7 @@ enum BytesInternal {
             if (limit > offset)
                 parseUtf82(input, offset, limit, appendable, utflen);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -329,7 +329,7 @@ enum BytesInternal {
                 appendable.append((char) c);
             }
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -341,7 +341,7 @@ enum BytesInternal {
                 appendable.append((char) c);
             }
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -367,7 +367,7 @@ enum BytesInternal {
             if (count < utflen)
                 parseUtf82(bytes, sb, utflen, count);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -392,7 +392,7 @@ enum BytesInternal {
             if (count < utflen)
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
         } catch (IOException e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -1411,7 +1411,7 @@ enum BytesInternal {
                 AppendableUtil.setLength(builder, 0);
                 readUtf81(bytes, builder, tester);
             }
-        } catch (IOException | IllegalArgumentException e) {
+        } catch (IOException e) {
             throw Jvm.rethrow(e);
         }
     }
@@ -1585,7 +1585,7 @@ enum BytesInternal {
         try {
             AppendableUtil.readUtf8AndAppend(bytes, builder, tester);
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw Jvm.rethrow(e);
         }
     }
 

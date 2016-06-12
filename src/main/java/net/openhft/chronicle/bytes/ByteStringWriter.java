@@ -34,6 +34,7 @@ public class ByteStringWriter extends Writer {
     public void write(int c) throws IOException {
         try {
             out.append(c);
+
         } catch (BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }

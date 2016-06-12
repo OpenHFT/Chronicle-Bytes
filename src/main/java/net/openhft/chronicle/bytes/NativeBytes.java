@@ -42,11 +42,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
-        try {
             return new NativeBytes<>(noBytesStore());
-        } catch (IllegalStateException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @NotNull
@@ -54,8 +50,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
             return new NativeBytes<>(store);
-        } catch (IllegalStateException e) {
-            throw new AssertionError(e);
+
         } finally {
             store.release();
         }
@@ -64,13 +59,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull Bytes bytes) {
         long remaining = bytes.readRemaining();
         NativeBytes<Void> bytes2;
-        try {
-            bytes2 = Bytes.allocateElasticDirect(remaining);
+
+        bytes2 = Bytes.allocateElasticDirect(remaining);
             bytes2.write(bytes, 0, remaining);
             return bytes2;
-        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+
     }
 
     @Override
@@ -89,6 +82,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
             writeCheckOffset(size, 1L);
+
         } catch (BufferOverflowException e) {
             throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
         }
@@ -148,8 +142,9 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         try {
             bytesStore.copyTo(store);
             bytesStore.release();
+
         } catch (IllegalStateException e) {
-            LOG.error("", e);
+            LOG.warn("", e);
         }
         bytesStore = store;
     }

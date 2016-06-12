@@ -51,6 +51,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     public static VanillaBytes<Void> vanillaBytes() {
         try {
             return new VanillaBytes<>(noBytesStore());
+
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
         }
@@ -214,6 +215,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             }
             super.append(str, start, end);
             return this;
+
         } catch (Exception e) {
             throw new IndexOutOfBoundsException(e.toString());
         }
@@ -234,6 +236,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             }
             super.append(str, 0, str.length());
             return this;
+
         } catch (Exception e) {
             throw new IndexOutOfBoundsException(e.toString());
         }

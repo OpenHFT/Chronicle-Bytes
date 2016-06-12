@@ -104,6 +104,7 @@ public class HeapBytesStore<Underlying>
     public String toString() {
         try {
             return BytesInternal.toString(this);
+
         } catch (IllegalStateException e) {
             return e.toString();
         }

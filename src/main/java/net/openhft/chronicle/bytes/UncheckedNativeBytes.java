@@ -699,6 +699,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             for (; i < remaining; i++)
                 if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
                     return false;
+
         } catch (BufferUnderflowException e) {
             throw Jvm.rethrow(e);
         }

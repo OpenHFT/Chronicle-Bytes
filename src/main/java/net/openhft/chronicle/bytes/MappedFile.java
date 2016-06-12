@@ -144,6 +144,7 @@ public class MappedFile implements ReferenceCounted {
                             }
                         }
                     }
+
                 } catch (IOException ioe) {
                     throw new IOException("Failed to resize to " + minSize, ioe);
                 }
@@ -218,8 +219,9 @@ public class MappedFile implements ReferenceCounted {
                 ReferenceCounted.releaseAll((List) stores);
             }
             release();
+
         } catch (IllegalStateException e) {
-            LOG.error("", e);
+            LOG.warn("", e);
         }
     }
 
@@ -234,8 +236,9 @@ public class MappedFile implements ReferenceCounted {
                 if (count > 0) {
                     try {
                         mbs.release();
+
                     } catch (IllegalStateException e) {
-                        LOG.error("", e);
+                        LOG.warn("", e);
                     }
                     if (count > 1)
                         continue;
@@ -245,8 +248,9 @@ public class MappedFile implements ReferenceCounted {
         }
         try {
             raf.close();
+
         } catch (IOException e) {
-            LOG.error("", e);
+            LOG.warn("", e);
         }
     }
 
@@ -289,6 +293,7 @@ public class MappedFile implements ReferenceCounted {
     public long actualSize() throws IORuntimeException {
         try {
             return fileChannel.size();
+
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }

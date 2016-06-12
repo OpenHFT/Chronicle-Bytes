@@ -213,5 +213,4 @@ public class ByteStringParserTest   {
 
         assertEquals("Hell0 worl bye", bytes.parseUtf8(CONTROL_STOP));
     }
-
 }

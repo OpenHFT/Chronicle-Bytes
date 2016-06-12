@@ -40,6 +40,7 @@ public class ByteStringReader extends Reader {
         long len = Math.min(in.readRemaining(), n);
         try {
             in.readSkip(len);
+
         } catch (BufferUnderflowException e) {
             throw new IOException(e);
         }
@@ -50,6 +51,7 @@ public class ByteStringReader extends Reader {
     public int read(char[] cbuf, int off, int len) throws IOException {
         try {
             return in.read(cbuf, off, len);
+
         } catch (BufferUnderflowException e) {
             throw new IOException(e);
         }

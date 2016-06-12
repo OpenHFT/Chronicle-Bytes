@@ -233,7 +233,7 @@ public interface Bytes<Underlying> extends
 
         final StringBuilder builder = new StringBuilder();
         try {
-            buffer.parseWithLength(length, b -> {
+            buffer.readWithLength(length, b -> {
                 while (buffer.readRemaining() > 0) {
                     if (builder.length() >= maxLen) {
                         builder.append("...");
@@ -241,7 +241,6 @@ public interface Bytes<Underlying> extends
                     }
                     builder.append((char) buffer.readByte());
                 }
-                return b;
             });
         } catch (Exception e) {
             builder.append(' ').append(e);

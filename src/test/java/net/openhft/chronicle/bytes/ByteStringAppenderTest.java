@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 public class ByteStringAppenderTest {
     Bytes bytes = Bytes.elasticByteBuffer();
 
-
     private ThreadDump threadDump;
 
     @Before

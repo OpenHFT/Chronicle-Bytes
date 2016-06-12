@@ -37,6 +37,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
             @NotNull final Class<BytesRingBuffer> aClass = clazz();
             final Constructor<BytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class);
             return constructor.newInstance(bytesStore);
+
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
                     "sales@higherfrequencytrading.com to unlock this feature.");
@@ -56,6 +57,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
         try {
             final Method sizeFor = clazz().getMethod("sizeFor", long.class);
             return (long) sizeFor.invoke(null, capacity);
+
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
                     "sales@higherfrequencytrading.com to unlock this feature.");
@@ -90,5 +92,4 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     boolean read(@NotNull BytesOut using) throws IllegalStateException;
 
     long readRemaining();
-
 }

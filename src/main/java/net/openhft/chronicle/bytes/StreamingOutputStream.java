@@ -34,6 +34,7 @@ class StreamingOutputStream extends OutputStream {
     public void write(byte[] b, int off, int len) throws IOException {
         try {
             sdo.write(b, off, len);
+
         } catch (BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }
@@ -43,6 +44,7 @@ class StreamingOutputStream extends OutputStream {
     public void write(int b) throws IOException {
         try {
             sdo.writeUnsignedByte(b);
+
         } catch (BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }

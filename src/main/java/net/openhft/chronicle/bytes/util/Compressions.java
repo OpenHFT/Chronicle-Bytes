@@ -84,8 +84,9 @@ public enum Compressions implements Compression {
         public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
                 return new GZIPInputStream(input);
+
             } catch (IOException e) {
-                throw new IORuntimeException(e);
+                throw new AssertionError(e);
             }
         }
 
@@ -93,6 +94,7 @@ public enum Compressions implements Compression {
         public OutputStream compressingStream(OutputStream output) {
             try {
                 return new GZIPOutputStream(output);
+
             } catch (IOException e) {
                 throw new AssertionError(e); // in memory.
             }
@@ -103,6 +105,7 @@ public enum Compressions implements Compression {
         public byte[] compress(byte[] bytes) {
             try {
                 return org.xerial.snappy.Snappy.compress(bytes);
+
             } catch (IOException e) {
                 throw new AssertionError(e);
             }
@@ -112,6 +115,7 @@ public enum Compressions implements Compression {
         public byte[] uncompress(byte[] bytes) throws IORuntimeException {
             try {
                 return org.xerial.snappy.Snappy.uncompress(bytes);
+
             } catch (IOException e) {
                 throw new IORuntimeException(e);
             }
@@ -121,6 +125,7 @@ public enum Compressions implements Compression {
         public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
                 return new SnappyInputStream(input);
+
             } catch (IOException e) {
                 throw new IORuntimeException(e);
             }

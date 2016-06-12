@@ -33,6 +33,7 @@ public enum NoBytesStore implements BytesStore {
         try {
             NO_PAGE = OS.memory().allocate(OS.pageSize());
             NO_BYTES = new VanillaBytes(noBytesStore());
+
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
         }

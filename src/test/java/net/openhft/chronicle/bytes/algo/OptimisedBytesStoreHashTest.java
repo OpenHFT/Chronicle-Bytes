@@ -211,5 +211,4 @@ public class OptimisedBytesStoreHashTest {
             bs2.writeUnsignedByte(i + 1);
         }
     }
-
 }

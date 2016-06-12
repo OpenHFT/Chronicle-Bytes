@@ -42,7 +42,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private long offset;
     private long length = VALUES;
 
-
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
@@ -175,6 +174,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
             }
             if (i < getCapacity())
                 sb.append(" ...");
+
         } catch (BufferUnderflowException e) {
             sb.append(" ").append(e);
         }
@@ -192,5 +192,5 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
             binaryLongArrayReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(VALUES + offset + (index << 3), expected, value);
     }
-
 }
+

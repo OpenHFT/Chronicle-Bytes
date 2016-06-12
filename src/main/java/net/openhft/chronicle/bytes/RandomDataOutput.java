@@ -65,6 +65,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException {
         try {
             return writeByte(offset, flag ? 'Y' : 0);
+
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }
@@ -224,6 +225,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     default R write(long offsetInRDO, @NotNull byte[] bytes) throws BufferOverflowException {
         try {
             return write(offsetInRDO, bytes, 0, bytes.length);
+
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }
@@ -239,6 +241,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException {
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
+
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }

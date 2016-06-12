@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ClassLocal;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
@@ -133,12 +134,24 @@ public class BytesMarshaller<T> {
         void read(Object o, BytesIn read) {
             try {
                 setValue(o, read);
-            } catch (IllegalAccessException | IORuntimeException iae) {
+            } catch (IllegalAccessException iae) {
                 throw new AssertionError(iae);
+            } catch (IORuntimeException e) {
+                throw Jvm.rethrow(e);
             }
         }
 
         protected abstract void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException;
+
+        protected Supplier<Map> newInstance(Class type) {
+            try {
+                return (Supplier<Map>) type.newInstance();
+            } catch (IllegalAccessException e) {
+                throw new AssertionError(e);
+            } catch (InstantiationException e) {
+                throw Jvm.rethrow(e);
+            }
+        }
     }
 
     static class ScalarFieldAccess extends FieldAccess<Object> {
@@ -240,7 +253,7 @@ public class BytesMarshaller<T> {
             else if (type == Set.class)
                 collectionSupplier = LinkedHashSet::new;
             else
-                collectionSupplier = newInstance();
+                collectionSupplier = newInstance(type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 ParameterizedType pType = (ParameterizedType) genericType;
@@ -251,15 +264,6 @@ public class BytesMarshaller<T> {
             }
         }
 
-        private Supplier<Collection> newInstance() {
-            try {
-                return (Supplier<Collection>) type.newInstance();
-            } catch (InstantiationException e) {
-                throw new AssertionError(e);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
-        }
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
@@ -286,7 +290,7 @@ public class BytesMarshaller<T> {
             else if (type == SortedMap.class || type == NavigableMap.class)
                 collectionSupplier = TreeMap::new;
             else
-                collectionSupplier = newInstance();
+                collectionSupplier = newInstance(type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 ParameterizedType pType = (ParameterizedType) genericType;
@@ -300,15 +304,6 @@ public class BytesMarshaller<T> {
             }
         }
 
-        private Supplier<Map> newInstance() {
-            try {
-                return (Supplier<Map>) type.newInstance();
-            } catch (InstantiationException e) {
-                throw new AssertionError(e);
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            }
-        }
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {

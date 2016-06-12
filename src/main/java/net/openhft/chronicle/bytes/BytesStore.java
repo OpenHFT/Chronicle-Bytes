@@ -231,6 +231,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default char charAt(int index) throws IndexOutOfBoundsException {
         try {
             return (char) readUnsignedByte(readPosition() + index);
+
         } catch (BufferUnderflowException e) {
             throw new IndexOutOfBoundsException((readPosition() + index) + " >= " + readLimit());
         }

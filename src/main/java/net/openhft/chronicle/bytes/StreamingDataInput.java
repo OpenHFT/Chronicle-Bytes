@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
-import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -57,21 +56,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException {
-        parseWithLength(length, (ThrowingFunction<S, Void, IORuntimeException>) s -> {
-            bytesConsumer.accept(s);
-            return null;
-        });
-    }
-
-    default <R> R parseWithLength(long length, @NotNull ThrowingFunction<S, R, IORuntimeException> bytesConsumer)
-            throws BufferUnderflowException, IORuntimeException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
         long limit = readPosition() + length;
         try {
             readLimit(limit);
-            return bytesConsumer.apply((S) this);
+            bytesConsumer.accept((S) this);
         } finally {
             readLimit(limit0);
             readPosition(limit);

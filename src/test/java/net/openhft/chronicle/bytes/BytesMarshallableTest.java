@@ -170,6 +170,5 @@ public class BytesMarshallableTest {
                     '}';
         }
     }
-
-
 }
+

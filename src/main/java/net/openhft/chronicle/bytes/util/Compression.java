@@ -119,6 +119,7 @@ public interface Compression {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
             output.write(bytes);
+
         } catch (IOException e) {
             throw new AssertionError(e); // compressing in memory
         }
@@ -128,6 +129,7 @@ public interface Compression {
     default void compress(BytesIn from, BytesOut to) {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
+
         } catch (IOException e) {
             throw new AssertionError(e); // compressing in memory
         }
@@ -139,6 +141,7 @@ public interface Compression {
             byte[] buf = new byte[512];
             for (int len; (len = input.read(buf)) > 0; )
                 baos.write(buf, 0, len);
+
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }
@@ -148,6 +151,7 @@ public interface Compression {
     default void uncompress(BytesIn from, BytesOut to) throws IORuntimeException {
         try (InputStream input = decompressingStream(from.inputStream())) {
             to.copyFrom(input);
+
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }

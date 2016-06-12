@@ -485,6 +485,7 @@ public class NativeBytesStore<Underlying>
     public String toString() {
         try {
             return BytesInternal.toString(this);
+
         } catch (IllegalStateException e) {
             return e.toString();
         }
@@ -623,6 +624,7 @@ public class NativeBytesStore<Underlying>
         try {
             BB_ADDRESS.setLong(bb, address);
             BB_CAPACITY.setInt(bb, Maths.toUInt31(readRemaining()));
+
         } catch (Exception e) {
             throw new AssertionError(e);
         }

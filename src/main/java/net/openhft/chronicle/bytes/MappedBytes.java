@@ -101,8 +101,9 @@ public class MappedBytes extends AbstractBytes<Void> {
     public long realCapacity() {
         try {
             return mappedFile.actualSize();
+
         } catch (IORuntimeException e) {
-            LOG.warn("Ununable to obtain the real size for " + mappedFile.file(), e);
+            LOG.warn("Unable to obtain the real size for " + mappedFile.file(), e);
             return 0;
         }
     }
@@ -114,6 +115,7 @@ public class MappedBytes extends AbstractBytes<Void> {
             try {
                 bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
+
             } catch (IOException | IllegalStateException | IllegalArgumentException e) {
                 BufferUnderflowException bue = new BufferUnderflowException();
                 bue.initCause(e);
@@ -132,6 +134,7 @@ public class MappedBytes extends AbstractBytes<Void> {
             try {
                 bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
                 oldBS.release();
+
             } catch (IOException | IllegalStateException | IllegalArgumentException e) {
                 BufferOverflowException boe = new BufferOverflowException();
                 boe.initCause(e);
