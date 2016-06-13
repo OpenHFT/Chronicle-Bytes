@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
@@ -221,7 +222,7 @@ public class MappedFile implements ReferenceCounted {
             release();
 
         } catch (IllegalStateException e) {
-            LOG.warn("", e);
+            Jvm.warn().on(getClass(), e);
         }
     }
 
@@ -238,7 +239,7 @@ public class MappedFile implements ReferenceCounted {
                         mbs.release();
 
                     } catch (IllegalStateException e) {
-                        LOG.warn("", e);
+                        Jvm.warn().on(getClass(), e);
                     }
                     if (count > 1)
                         continue;
@@ -250,7 +251,7 @@ public class MappedFile implements ReferenceCounted {
             raf.close();
 
         } catch (IOException e) {
-            LOG.warn("", e);
+            Jvm.warn().on(getClass(), e);
         }
     }
 

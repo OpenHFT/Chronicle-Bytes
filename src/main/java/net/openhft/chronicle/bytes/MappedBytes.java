@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -103,7 +104,7 @@ public class MappedBytes extends AbstractBytes<Void> {
             return mappedFile.actualSize();
 
         } catch (IORuntimeException e) {
-            LOG.warn("Unable to obtain the real size for " + mappedFile.file(), e);
+            Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
             return 0;
         }
     }

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
@@ -144,7 +145,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             bytesStore.release();
 
         } catch (IllegalStateException e) {
-            LOG.warn("", e);
+            Jvm.warn().on(getClass(), e);
         }
         bytesStore = store;
     }
