@@ -222,7 +222,7 @@ public class MappedFile implements ReferenceCounted {
             release();
 
         } catch (IllegalStateException e) {
-            Jvm.warn().on(getClass(), e);
+            Jvm.debug().on(getClass(), e);
         }
     }
 
@@ -239,7 +239,7 @@ public class MappedFile implements ReferenceCounted {
                         mbs.release();
 
                     } catch (IllegalStateException e) {
-                        Jvm.warn().on(getClass(), e);
+                        Jvm.debug().on(getClass(), e);
                     }
                     if (count > 1)
                         continue;
@@ -251,7 +251,7 @@ public class MappedFile implements ReferenceCounted {
             raf.close();
 
         } catch (IOException e) {
-            Jvm.warn().on(getClass(), e);
+            Jvm.debug().on(getClass(), e);
         }
     }
 

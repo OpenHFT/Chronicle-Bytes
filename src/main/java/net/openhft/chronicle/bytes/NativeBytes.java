@@ -145,7 +145,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             bytesStore.release();
 
         } catch (IllegalStateException e) {
-            Jvm.warn().on(getClass(), e);
+            Jvm.debug().on(getClass(), e);
         }
         bytesStore = store;
     }
