@@ -27,6 +27,7 @@ class SubBytes<Underlying> extends VanillaBytes<Underlying> {
         this.start = start;
         this.capacity = capacity;
         clear();
+        readLimit(writeLimit());
     }
 
     @Override

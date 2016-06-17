@@ -20,8 +20,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -35,15 +33,13 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
-    private static final Logger LOG = LoggerFactory.getLogger(NativeBytes.class);
-
     NativeBytes(@NotNull BytesStore store) throws IllegalStateException {
         super(store, 0, MAX_CAPACITY);
     }
 
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
-            return new NativeBytes<>(noBytesStore());
+        return new NativeBytes<>(noBytesStore());
     }
 
     @NotNull
@@ -62,9 +58,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         NativeBytes<Void> bytes2;
 
         bytes2 = Bytes.allocateElasticDirect(remaining);
-            bytes2.write(bytes, 0, remaining);
-            return bytes2;
-
+        bytes2.write(bytes, 0, remaining);
+        return bytes2;
     }
 
     @Override
