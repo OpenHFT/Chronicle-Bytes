@@ -266,6 +266,19 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
+    
+    @NotNull
+    default R append(long offset, double value, int decimalPlaces, int digits) throws BufferOverflowException, IllegalArgumentException {
+        if (decimalPlaces < 20) {
+            double d2 = value * Maths.tens(decimalPlaces);
+            if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
+            	BytesInternal.appendDecimal(this, Math.round(d2), offset, decimalPlaces, digits);
+                return (R) this;
+            }
+        }
+        BytesInternal.append((StreamingDataOutput) this, value);
+        return (R) this;
+    }
 
     /**
      * expert level method to copy data from native memory into the BytesStore
@@ -309,4 +322,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException, IllegalArgumentException {
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
+    
+    
 }
