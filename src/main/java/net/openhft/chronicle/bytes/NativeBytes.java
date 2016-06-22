@@ -129,7 +129,10 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         if (capacity() < Long.MAX_VALUE)
             size = Math.min(size, capacity());
         NativeBytesStore store;
+        int position = 0, limit = 0;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
+            position = ((ByteBuffer) bytesStore.underlyingObject()).position();
+            limit = ((ByteBuffer) bytesStore.underlyingObject()).limit();
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size), capacity());
 
         } else {
@@ -138,11 +141,17 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         try {
             bytesStore.copyTo(store);
             bytesStore.release();
-
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
         bytesStore = store;
+
+        if (bytesStore.underlyingObject() instanceof ByteBuffer) {
+            ByteBuffer byteBuffer = (ByteBuffer) bytesStore.underlyingObject();
+            byteBuffer.position(0);
+            byteBuffer.limit(limit);
+            byteBuffer.position(position);
+        }
     }
 
     @NotNull
