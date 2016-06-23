@@ -1087,6 +1087,70 @@ enum BytesInternal {
             out.writeByte(offset, (byte) (num % 10 + '0'));
         }
     }
+    
+    /**
+     * Appends given long value with given decimalPlaces to RandomDataOutput out
+     * @param out
+     * @param num
+     * @param offset
+     * @param decimalPlaces
+     * @param width Maximum width. I will be padded with zeros to the left if necessary
+     * @throws IORuntimeException
+     * @throws IllegalArgumentException
+     * @throws BufferOverflowException
+     */
+    public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
+    	if (decimalPlaces == 0) {
+            append(out, offset, num, width);
+            return;
+        }
+
+        byte[] numberBuffer = NUMBER_BUFFER.get();
+        int endIndex;
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                numberBuffer = MIN_VALUE_TEXT;
+                endIndex = MIN_VALUE_TEXT.length;
+            } else {
+                out.writeByte(offset++, (byte) '-');
+                num = -num;
+                endIndex = appendLong1(numberBuffer, num);
+            }
+        } else {
+            endIndex = appendLong1(numberBuffer, num);
+        }
+        int digits = numberBuffer.length - endIndex;
+        
+        
+        
+        if (decimalPlaces >= digits) {
+        	int numDigitsRequired = 2+decimalPlaces;
+        	if (numDigitsRequired > width)
+        		throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+            out.writeUnsignedByte(offset++, '0');
+            out.writeUnsignedByte(offset++, '.');
+            while (decimalPlaces-- > digits)
+                out.writeUnsignedByte(offset++, '0');
+            out.write(offset++, numberBuffer, endIndex, digits);
+            return;
+        } else {
+        	int numDigitsRequired = digits+1;
+        	if (numDigitsRequired > width)
+        		throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+        }
+        
+       
+        while (width-- > (digits+1)) {
+            out.writeUnsignedByte(offset++, '0');
+        }
+        
+
+        int decimalLength = numberBuffer.length - endIndex - decimalPlaces;
+        out.write(offset, numberBuffer, endIndex, decimalLength);
+        offset+=decimalLength;
+        out.writeUnsignedByte(offset++, '.');
+        out.write(offset++, numberBuffer, endIndex + decimalLength, digits - decimalLength);
+    }
 
     private static void numberTooLarge(int digits) throws IllegalArgumentException {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");

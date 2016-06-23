@@ -318,4 +318,86 @@ public class BytesTest {
         assertEquals(0, from.readRemaining());
 
     }
+    
+    @Test
+    public void testAppendLongRandomPosition() {
+        byte[] bytes = "00000".getBytes();
+    	ByteBuffer bb = ByteBuffer.wrap(bytes);
+        Bytes to = Bytes.wrapForWrite(bb);
+        
+        to.append(0, 1, 5);
+        assertEquals("00001", Bytes.wrapForRead(bb).toString());
+    }
+    
+    @Test
+    public void testAppendLongRandomPosition2() {
+        byte[] bytes = "WWWWW00000".getBytes();
+    	ByteBuffer bb = ByteBuffer.wrap(bytes);
+        Bytes to = Bytes.wrapForWrite(bb);
+        
+        to.append(5, 10, 5);
+        assertEquals("WWWWW00010", Bytes.wrapForRead(bb).toString());
+    }
+    
+    public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
+        try {
+			byte[] bytes = "000".getBytes();
+			ByteBuffer bb = ByteBuffer.wrap(bytes);
+			Bytes to = Bytes.wrapForWrite(bb);
+			
+			to.append(0, 1000, 5);
+			fail("Should throw Exception");
+		} catch (Exception e) {			
+			e.printStackTrace();
+		}
+    }
+    
+    public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
+        try {
+			byte[] bytes = "000".getBytes();
+			ByteBuffer bb = ByteBuffer.wrap(bytes);
+			Bytes to = Bytes.wrapForWrite(bb);
+			
+			to.append(0, 1000, 3);
+			fail("Should throw Exception");
+		} catch (BufferOverflowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    @Test
+    public void testAppendDoubleRandomPosition() {
+    	byte[] bytes = "000000".getBytes();
+        Bytes to = Bytes.wrapForWrite(bytes);
+        
+        to.append(0, 3.14, 2, 6);
+        assertEquals("003.14", Bytes.wrapForRead(bytes).toString());
+    }
+    
+    public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
+    	try {
+			byte[] bytes = "000000".getBytes();
+			Bytes to = Bytes.wrapForWrite(bytes);
+			
+			to.append(0, 3.14, 2, 8);
+			fail("Should throw Exception");
+		} catch (BufferOverflowException e) {
+			e.printStackTrace();
+		}
+    }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
+    	try {
+			byte[] bytes = "000000".getBytes();
+			Bytes to = Bytes.wrapForWrite(bytes);
+			
+			to.append(0, 33333.14, 2, 6);
+			fail("Should throw Exception");
+		} catch (BufferOverflowException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
 }

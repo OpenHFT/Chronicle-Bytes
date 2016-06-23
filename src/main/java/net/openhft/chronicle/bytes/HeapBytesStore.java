@@ -333,7 +333,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
-        writeCheckOffset(offset, length);
+        writeCheckOffset(offsetInRDO, length);
         MEMORY.copyMemory(
                 bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
         return this;
@@ -342,7 +342,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
-        writeCheckOffset(offset, length);
+        writeCheckOffset(offsetInRDO, length);
         assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
         if (bytes.isDirect()) {
             MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
