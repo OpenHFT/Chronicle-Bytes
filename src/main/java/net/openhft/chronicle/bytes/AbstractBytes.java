@@ -631,14 +631,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long writeOffsetPositionMoved(long adding)
             throws BufferOverflowException {
         long oldPosition = writePosition;
-            writeCheckOffset(writePosition, adding);
+        writeCheckOffset(writePosition, adding);
         writePosition += adding;
         return oldPosition;
     }
 
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException {
-            prewriteCheckOffset(readPosition, subtracting);
+        prewriteCheckOffset(readPosition, subtracting);
         return readPosition -= subtracting;
     }
 
@@ -752,7 +752,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (!(obj instanceof BytesStore)) return false;
         BytesStore b2 = (BytesStore) obj;
         long remaining = readRemaining();
-            return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
+        return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
     }
 
     public boolean equalsBytes(@NotNull BytesStore b2, long remaining) {

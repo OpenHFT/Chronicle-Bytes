@@ -77,8 +77,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
+            assert size >= 0;
             writeCheckOffset(size, 1L);
-
         } catch (BufferOverflowException e) {
             throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
         }
@@ -132,7 +132,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         int position = 0, limit = 0;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             position = ((ByteBuffer) bytesStore.underlyingObject()).position();
-            limit = ((ByteBuffer) bytesStore.underlyingObject()).limit();
             store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size), capacity());
 
         } else {
@@ -149,7 +148,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             ByteBuffer byteBuffer = (ByteBuffer) bytesStore.underlyingObject();
             byteBuffer.position(0);
-            byteBuffer.limit(limit);
+            byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
     }
