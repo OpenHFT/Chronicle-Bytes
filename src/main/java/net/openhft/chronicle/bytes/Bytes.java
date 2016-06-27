@@ -424,6 +424,12 @@ public interface Bytes<Underlying> extends
      */
     Bytes<Underlying> compact();
 
+    /**
+     * copy bytes from one ByteStore to another
+     *
+     * @param store to copy to
+     * @return the number of bytes copied.
+     */
     @Override
     default long copyTo(@NotNull BytesStore store) {
         return BytesStore.super.copyTo(store);

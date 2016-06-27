@@ -101,4 +101,13 @@ public class NativeBytesStoreTest {
             System.out.printf("Average time was %,d ns%n", time / runs);
         }
     }
+
+    @Test
+    public void testCopyTo() {
+        Bytes<ByteBuffer> src = Bytes.elasticByteBuffer().writeUtf8("hello");
+        Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
+
+        dst.writePosition(src.copyTo(dst));
+        assertEquals(src, dst);
+    }
 }
