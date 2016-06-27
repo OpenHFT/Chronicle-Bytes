@@ -85,9 +85,10 @@ public interface Compression {
                     return;
                 }
                 break;
+            default:
+                	throw new IllegalArgumentException("Unsupported compression " + cs);
         }
-
-        throw new IllegalArgumentException("Unsupported compression " + cs);
+               
     }
 
     @Nullable
@@ -110,8 +111,9 @@ public interface Compression {
                 if (StringUtils.isEqual("gzip", cs))
                     return Compressions.GZIP.uncompress(bytes.apply(t));
                 break;
+            default :
+            	return null;
         }
-
         return null;
     }
 
