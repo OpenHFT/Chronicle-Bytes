@@ -15,19 +15,21 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import java.util.function.LongSupplier;
-
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.LongSupplier;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
  * reference to an array fo 32-bit in values in Text wire format.
  */
 public class TextLongReference implements LongReference {
     static final int VALUE = 33;
-    private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes();
+    private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");
     private static final long UNINITIALIZED = 0x0L;

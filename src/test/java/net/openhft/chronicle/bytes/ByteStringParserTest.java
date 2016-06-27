@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
@@ -207,9 +208,9 @@ public class ByteStringParserTest   {
 
     @Test
     public void testWriteBytes() {
-        bytes.write("Hello World\n".getBytes(), 0, 10);
-        bytes.write("good bye\n".getBytes(), 4, 4);
-        bytes.write(4, "0 w".getBytes());
+        bytes.write("Hello World\n".getBytes(ISO_8859_1), 0, 10);
+        bytes.write("good bye\n".getBytes(ISO_8859_1), 4, 4);
+        bytes.write(4, "0 w".getBytes(ISO_8859_1));
 
         assertEquals("Hell0 worl bye", bytes.parseUtf8(CONTROL_STOP));
     }

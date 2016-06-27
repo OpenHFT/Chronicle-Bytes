@@ -9,6 +9,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertArrayEquals;
 
 public class StreamingInputStreamTest {
@@ -28,7 +29,7 @@ public class StreamingInputStreamTest {
     public void testReadBlock() throws IOException {
 
         Bytes b = Bytes.allocateElasticDirect();
-        byte[] test = "Hello World, Have a great day!".getBytes();
+        byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
         b.write(test);
 
         InputStream is = b.inputStream();

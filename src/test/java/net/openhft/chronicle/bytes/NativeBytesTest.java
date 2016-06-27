@@ -25,6 +25,7 @@ import org.junit.Test;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -52,7 +53,7 @@ public class NativeBytesTest {
         assertEquals(0, b.realCapacity());
         assertTrue(b.readLimit() < b.writeLimit());
 
-        Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes());
+        Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap0);
         assertEquals("Hello World, Have a great day!", b.toString());
     }
@@ -65,7 +66,7 @@ public class NativeBytesTest {
         assertEquals(1, b.realCapacity());
         assertTrue(b.readLimit() < b.writeLimit());
 
-        Bytes<byte[]> wrap1 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes());
+        Bytes<byte[]> wrap1 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap1);
         assertEquals("Hello World, Have a great day!", b.toString());
     }

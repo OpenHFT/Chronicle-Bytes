@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -48,7 +49,7 @@ public class LZWTest {
     }
     @Test
     public void testCompress() throws IORuntimeException {
-        byte[] bytes = "hello world".getBytes();
+        byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
         assertTrue(Arrays.equals(bytes, bytes2));
     }

@@ -125,6 +125,13 @@ public enum BytesUtil {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
 
+    // used by Chronicle FIX.
+    public static void appendBytesFromStart(Bytes bytes, long startPosition, StringBuilder sb) {
+        BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
+        sb.append('\u2016');
+        sb.append(bytes);
+    }
+
     public static void readMarshallable(ReadBytesMarshallable marshallable, BytesIn bytes) {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .readMarshallable(marshallable, bytes);

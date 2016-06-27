@@ -31,6 +31,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -155,7 +156,7 @@ public class ByteStoreTest {
 
     /*    @Test
         public void testWriteReadBytes() {
-            byte[] bytes = "Hello World!".getBytes();
+            byte[] bytes = "Hello World!".getBytes(ISO_8859_1);
             this.bytes.write(bytes);
             byte[] bytes2 = new byte[bytes.length];
             this.bytes.position(0);
@@ -215,7 +216,7 @@ public class ByteStoreTest {
 
     @Test
     public void testWriteReadByteBuffer() {
-        byte[] bytes = "Hello\nWorld!\r\nBye".getBytes();
+        byte[] bytes = "Hello\nWorld!\r\nBye".getBytes(ISO_8859_1);
         this.bytes.writeSome(ByteBuffer.wrap(bytes));
 
         byte[] bytes2 = new byte[bytes.length + 1];
@@ -403,7 +404,7 @@ public class ByteStoreTest {
     public void testStream() throws IOException {
         bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytesForWrite();
         GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
-        out.write("Hello world\n".getBytes());
+        out.write("Hello world\n".getBytes(ISO_8859_1));
         out.close();
 
         GZIPInputStream in = new GZIPInputStream(bytes.inputStream());

@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class BytesTest {
@@ -272,14 +273,14 @@ public class BytesTest {
 
     @Test(expected = BufferOverflowException.class)
     public void testPartialWriteArray() {
-        byte[] array = "Hello World".getBytes();
+        byte[] array = "Hello World".getBytes(ISO_8859_1);
         Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
         to.write(array);
     }
 
     @Test
     public void testPartialWriteBB() {
-        ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes());
+        ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes(ISO_8859_1));
         Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
 
         to.writeSome(bb);
@@ -321,8 +322,8 @@ public class BytesTest {
     
     @Test
     public void testAppendLongRandomPosition() {
-        byte[] bytes = "00000".getBytes();
-    	ByteBuffer bb = ByteBuffer.wrap(bytes);
+        byte[] bytes = "00000".getBytes(ISO_8859_1);
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
         
         to.append(0, 1, 5);
@@ -331,8 +332,8 @@ public class BytesTest {
     
     @Test
     public void testAppendLongRandomPosition2() {
-        byte[] bytes = "WWWWW00000".getBytes();
-    	ByteBuffer bb = ByteBuffer.wrap(bytes);
+        byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
+        ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
         
         to.append(5, 10, 5);
@@ -341,8 +342,8 @@ public class BytesTest {
     
     public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
         try {
-			byte[] bytes = "000".getBytes();
-			ByteBuffer bb = ByteBuffer.wrap(bytes);
+            byte[] bytes = "000".getBytes(ISO_8859_1);
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
 			Bytes to = Bytes.wrapForWrite(bb);
 			
 			to.append(0, 1000, 5);
@@ -354,8 +355,8 @@ public class BytesTest {
     
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
         try {
-			byte[] bytes = "000".getBytes();
-			ByteBuffer bb = ByteBuffer.wrap(bytes);
+            byte[] bytes = "000".getBytes(ISO_8859_1);
+            ByteBuffer bb = ByteBuffer.wrap(bytes);
 			Bytes to = Bytes.wrapForWrite(bb);
 			
 			to.append(0, 1000, 3);
@@ -368,7 +369,7 @@ public class BytesTest {
     
     @Test
     public void testAppendDoubleRandomPosition() {
-    	byte[] bytes = "000000".getBytes();
+        byte[] bytes = "000000".getBytes(ISO_8859_1);
         Bytes to = Bytes.wrapForWrite(bytes);
         
         to.append(0, 3.14, 2, 6);
@@ -377,8 +378,8 @@ public class BytesTest {
     
     public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
     	try {
-			byte[] bytes = "000000".getBytes();
-			Bytes to = Bytes.wrapForWrite(bytes);
+            byte[] bytes = "000000".getBytes(ISO_8859_1);
+            Bytes to = Bytes.wrapForWrite(bytes);
 			
 			to.append(0, 3.14, 2, 8);
 			fail("Should throw Exception");
@@ -390,8 +391,8 @@ public class BytesTest {
     @Test(expected=IllegalArgumentException.class)
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
     	try {
-			byte[] bytes = "000000".getBytes();
-			Bytes to = Bytes.wrapForWrite(bytes);
+            byte[] bytes = "000000".getBytes(ISO_8859_1);
+            Bytes to = Bytes.wrapForWrite(bytes);
 			
 			to.append(0, 33333.14, 2, 6);
 			fail("Should throw Exception");

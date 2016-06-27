@@ -15,19 +15,21 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import java.util.function.IntSupplier;
-
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.util.function.IntSupplier;
+
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 /**
  * Implementation of a reference to a 32-bit in in text wire format.
  */
 public class TextIntReference implements IntValue, Byteable {
-    private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes();
+    private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
     private static final int UNINITIALIZED = 0;
