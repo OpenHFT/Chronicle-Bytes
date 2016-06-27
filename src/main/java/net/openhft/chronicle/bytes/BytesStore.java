@@ -176,9 +176,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Copy the data to another BytesStore
+     * Copy the data to another BytesStore  as long as there is space available in the destination store.
      *
      * @param store to copy to
+     * @return how many bytes were copied
      */
     default long copyTo(@NotNull BytesStore store) throws IllegalStateException {
         long copy = min(readRemaining(), store.capacity());
@@ -209,7 +210,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         if (end > capacity())
             throw new IllegalArgumentException(end + " > " + capacity());
         long i = start;
-        for (; i < end - 7; i++)
+        for (; i < end - 7; i += 8L)
             writeLong(i, 0L);
         for (; i < end; i++)
             writeByte(i, 0);
@@ -473,11 +474,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     /**
      * Clear and set the flag for present.
+     *
      * @param isPresent if there is data, or false if not.
      */
     default void isPresent(boolean isPresent) {
         if (!isPresent)
-            throw new IllegalArgumentException("isPresent="+false+" not supported");
+            throw new IllegalArgumentException("isPresent=" + false + " not supported");
     }
 
     /**
