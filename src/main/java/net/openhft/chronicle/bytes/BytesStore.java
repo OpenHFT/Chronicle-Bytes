@@ -506,4 +506,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 return;
         }
     }
+
+    default boolean isEmpty() {
+        return readRemaining() == 0;
+    }
 }

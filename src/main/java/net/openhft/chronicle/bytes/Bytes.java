@@ -413,10 +413,6 @@ public interface Bytes<Underlying> extends
         return StringUtils.isEqual(this, s);
     }
 
-    default boolean isEmpty() {
-        return readRemaining() == 0;
-    }
-
     /**
      * Compact these Bytes by moving the readPosition to the start.
      *
