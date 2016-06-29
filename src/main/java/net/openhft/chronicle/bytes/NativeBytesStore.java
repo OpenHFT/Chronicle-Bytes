@@ -27,8 +27,6 @@ import sun.misc.Cleaner;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -40,7 +38,7 @@ public class NativeBytesStore<Underlying>
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
     private static final Field BB_ADDRESS, BB_CAPACITY;
-    static MappedBytes last;
+//    static MappedBytes last;
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -48,13 +46,13 @@ public class NativeBytesStore<Underlying>
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
     }
 
-    static {
+/*    static {
         try {
             last = MappedBytes.mappedBytes(new File("last"), 8);
         } catch (FileNotFoundException e) {
             throw new AssertionError(e);
         }
-    }
+    }*/
 
     @Nullable
     private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
@@ -695,12 +693,22 @@ public class NativeBytesStore<Underlying>
     public int peekUnsignedByte(long offset) {
         final long address = this.address;
         final Memory memory = this.memory;
-        last.writeLong(0, offset);
-        last.writeLong(16, maximumLimit);
-        last.writeLong(32, address);
-        last.writeBoolean(48, memory != null);
-        return offset >= maximumLimit ? -1 :
-                memory.readByte(address + translate(offset)) & 0xFF;
+        final long translate = translate(offset);
+        assert translate >= 0;
+        final long address2 = address + translate;
+//        last.writeLong(8, Thread.currentThread().getId());
+//        last.writeLong(0, offset);
+//        last.writeLong(16, translate);
+//        last.writeLong(32, maximumLimit);
+//        last.writeLong(48, address);
+//        last.writeLong(64, address2);
+//        last.writeBoolean(80, memory != null);
+//        last.writeVolatileByte(88, (byte) 1);
+        int ret = translate >= maximumLimit ? -1 :
+                memory.readByte(address2) & 0xFF;
+//        last.writeVolatileByte(88, (byte) 0xFF);
+//        last.writeLong(24, Thread.currentThread().getId());
+        return ret;
     }
 
     static class Deallocator implements Runnable {

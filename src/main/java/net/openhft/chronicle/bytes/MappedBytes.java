@@ -111,7 +111,8 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @Override
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
-        if (!bytesStore.inside(offset)) {
+        long check = adding >= 0 ? offset : offset + adding;
+        if (!bytesStore.inside(check)) {
             BytesStore oldBS = bytesStore;
             try {
                 bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);

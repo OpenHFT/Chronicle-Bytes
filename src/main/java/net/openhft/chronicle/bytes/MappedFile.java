@@ -153,7 +153,8 @@ public class MappedFile implements ReferenceCounted {
             long start = System.nanoTime();
             long mappedSize = chunkSize + overlapSize;
             long address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
-            T mbs2 = mappedBytesStoreFactory.create(this, chunk * chunkSize, address, mappedSize, chunkSize);
+            final long safeCapacity = this.chunkSize + overlapSize / 2;
+            T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));
             mbs2.reserve();
             if (newChunkListener != null)
