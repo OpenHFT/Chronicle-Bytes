@@ -148,6 +148,11 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public int peekUnsignedByte(long offset) {
+        return -1;
+    }
+
+    @Override
     public short readShort(long offset) {
         throw new UnsupportedOperationException();
     }

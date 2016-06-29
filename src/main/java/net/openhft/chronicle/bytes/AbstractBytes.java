@@ -252,12 +252,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public int peekUnsignedByte() {
-        try {
-            return readRemaining() > 0 ? bytesStore.readUnsignedByte(readPosition) : -1;
-
-        } catch (BufferUnderflowException e) {
-            return -1;
-        }
+        return readPosition >= writePosition ? -1 : bytesStore.peekUnsignedByte(readPosition);
     }
 
     @Override
@@ -496,6 +491,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public byte readByte(long offset) throws BufferUnderflowException {
         readCheckOffset(offset, 1, true);
         return bytesStore.readByte(offset);
+    }
+
+    @Override
+    public int peekUnsignedByte(long offset) {
+        return bytesStore.peekUnsignedByte(offset);
     }
 
     @Override

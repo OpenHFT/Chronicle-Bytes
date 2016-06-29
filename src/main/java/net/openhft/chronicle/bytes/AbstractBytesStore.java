@@ -7,6 +7,11 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
  */
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
     @Override
+    public int peekUnsignedByte(long offset) {
+        return offset >= readLimit() ? -1 : readUnsignedByte(offset);
+    }
+
+    @Override
     public int hashCode() {
         long h = VanillaBytesStoreHash.INSTANCE.applyAsLong(this);
         h ^= h >> 32;

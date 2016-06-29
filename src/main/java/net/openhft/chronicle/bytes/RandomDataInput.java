@@ -82,6 +82,16 @@ public interface RandomDataInput extends RandomCommon {
         return readByte(offset) & 0xFF;
     }
 
+
+    /**
+     * Read an unsigned byte at an offset, or -1
+     *
+     * @param offset to read
+     * @return the unsigned byte or -1
+     */
+    int peekUnsignedByte(long offset);
+
+
     /**
      * Read a short at an offset
      *

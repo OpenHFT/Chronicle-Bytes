@@ -30,6 +30,11 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         this.underlyingBytesStore = underlyingBytesStore;
     }
 
+    @Override
+    public int peekUnsignedByte(long offset) {
+        throw new UnsupportedOperationException();
+    }
+
     @NotNull
     @Override
     public BytesStore<B, Underlying> copy() {

@@ -27,6 +27,8 @@ import sun.misc.Cleaner;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -38,6 +40,7 @@ public class NativeBytesStore<Underlying>
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
     private static final Field BB_ADDRESS, BB_CAPACITY;
+    static MappedBytes last;
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -45,14 +48,22 @@ public class NativeBytesStore<Underlying>
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
     }
 
+    static {
+        try {
+            last = MappedBytes.mappedBytes(new File("last"), 8);
+        } catch (FileNotFoundException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     @Nullable
     private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
+    protected long address;
     // on release, set this to null.
     @Nullable
     protected Memory memory = OS.memory();
-    protected long address;
-    long maximumLimit;
-    Error releasedHere;
+    protected volatile Error releasedHere;
+    protected long maximumLimit;
     @Nullable
     private Cleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -470,12 +481,12 @@ public class NativeBytesStore<Underlying>
     }
 
     private void performRelease() {
+        memory = null;
         if (refCount.get() > 0) {
             LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
         }
         if (releasedHere == null)
             releasedHere = new Error();
-        memory = null;
         if (cleaner != null)
             cleaner.clean();
     }
@@ -531,7 +542,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     public void setAddress(long address) {
@@ -680,6 +691,18 @@ public class NativeBytesStore<Underlying>
         return len;
     }
 
+    @Override
+    public int peekUnsignedByte(long offset) {
+        final long address = this.address;
+        final Memory memory = this.memory;
+        last.writeLong(0, offset);
+        last.writeLong(16, maximumLimit);
+        last.writeLong(32, address);
+        last.writeBoolean(48, memory != null);
+        return offset >= maximumLimit ? -1 :
+                memory.readByte(address + translate(offset)) & 0xFF;
+    }
+
     static class Deallocator implements Runnable {
 
         private volatile long address, size;
@@ -692,6 +715,7 @@ public class NativeBytesStore<Underlying>
 
         @Override
         public void run() {
+            System.out.println("Release " + Long.toHexString(address));
             if (address == 0)
                 return;
             long addressToFree = address;

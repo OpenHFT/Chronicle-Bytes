@@ -496,6 +496,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public int peekUnsignedByte(long offset) {
+        return offset >= writePosition ? -1 : readByte(offset);
+    }
+
+    @Override
     @ForceInline
     public short readShort(long offset) {
         return bytesStore.readShort(offset);
