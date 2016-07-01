@@ -27,6 +27,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
+    // used for debugging
+    private final String name;
     @Nullable
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
@@ -35,14 +37,24 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected long writeLimit;
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
+    private volatile Thread threadPositionSetBy;
 
-    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
+    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long
+            writePosition, long writeLimit)
+            throws IllegalStateException {
+        this(bytesStore, writePosition, writeLimit, "");
+    }
+
+    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long
+            writePosition, long writeLimit, String name)
             throws IllegalStateException {
         this.bytesStore = bytesStore;
         bytesStore.reserve();
         readPosition = bytesStore.readPosition();
-        this.writePosition = writePosition;
+        this.uncheckedWritePosition(writePosition);
         this.writeLimit = writeLimit;
+        // used for debugging
+        this.name = name;
     }
 
     @Override
@@ -58,7 +70,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (readRemaining > 0 && start < readPosition) {
             bytesStore.move(readPosition, start, readRemaining);
             readPosition = start;
-            writePosition = readPosition + readRemaining;
+            uncheckedWritePosition(readPosition + readRemaining);
         }
         return this;
     }
@@ -76,7 +88,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     public Bytes<Underlying> clear() {
-        readPosition = writePosition = start();
+        long start = start();
+        readPosition = start;
+        uncheckedWritePosition(start);
         writeLimit = capacity();
         return this;
     }
@@ -85,7 +99,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
         if (start() + length > capacity())
             throw new BufferOverflowException();
-        readPosition = writePosition = start() + length;
+        long l = start() + length;
+        readPosition = l;
+        uncheckedWritePosition(l);
         writeLimit = capacity();
         return this;
     }
@@ -170,7 +186,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         if (limit < start()) throw new BufferUnderflowException();
         if (limit > writeLimit())
             throw new BufferUnderflowException();
-        this.writePosition = limit;
+        uncheckedWritePosition(limit);
         return this;
     }
 
@@ -183,7 +199,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new BufferUnderflowException();
         if (position < readPosition())
             this.readPosition = position;
-        this.writePosition = position;
+        uncheckedWritePosition(position);
         return this;
     }
 
@@ -200,7 +216,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException {
         writeCheckOffset(writePosition, bytesToSkip);
-        writePosition += bytesToSkip;
+        uncheckedWritePosition(writePosition + bytesToSkip);
         return this;
     }
 
@@ -632,8 +648,20 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throws BufferOverflowException {
         long oldPosition = writePosition;
         writeCheckOffset(writePosition, adding);
-        writePosition += adding;
+        uncheckedWritePosition(writePosition + adding);
         return oldPosition;
+    }
+
+    void uncheckedWritePosition(long writePosition) {
+        assert checkThreadPositionSetBy() : "ConcurrentModification : Bytes is not thread safe " +
+                "but has been used across threads";
+        this.writePosition = writePosition;
+    }
+
+    private boolean checkThreadPositionSetBy() {
+        if (threadPositionSetBy == null)
+            threadPositionSetBy = Thread.currentThread();
+        return threadPositionSetBy == Thread.currentThread();
     }
 
     protected long prewriteOffsetPositionMoved(long subtracting)
@@ -710,7 +738,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throws BufferOverflowException {
         int length = (int) Math.min(buffer.remaining(), writeRemaining());
         bytesStore.write(writePosition, buffer, buffer.position(), length);
-        writePosition += length;
+        uncheckedWritePosition(writePosition + length);
         buffer.position(buffer.position() + length);
         return this;
     }

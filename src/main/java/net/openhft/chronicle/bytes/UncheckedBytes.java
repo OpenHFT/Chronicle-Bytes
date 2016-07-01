@@ -58,14 +58,14 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> readLimit(long limit) {
-        writePosition = limit;
+        uncheckedWritePosition(limit);
         return this;
     }
 
     @NotNull
     @Override
     public Bytes<Underlying> writePosition(long position) {
-        writePosition = position;
+        uncheckedWritePosition(position);
         return this;
     }
 
@@ -79,7 +79,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip) {
-        writePosition += bytesToSkip;
+        uncheckedWritePosition(writePosition() + bytesToSkip);
         return this;
     }
 
@@ -110,8 +110,8 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     @Override
     protected long writeOffsetPositionMoved(long adding) {
-        long oldPosition = writePosition;
-        writePosition += adding;
+        long oldPosition = writePosition();
+        uncheckedWritePosition(writePosition() + adding);
         return oldPosition;
     }
 

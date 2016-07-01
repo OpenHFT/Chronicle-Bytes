@@ -43,7 +43,12 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     // assume the mapped file is reserved already.
     protected MappedBytes(MappedFile mappedFile) throws IllegalStateException {
-        super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(), NoBytesStore.noBytesStore().writeLimit());
+        this(mappedFile, "");
+    }
+
+    protected MappedBytes(MappedFile mappedFile, String name) throws IllegalStateException {
+        super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(),
+                NoBytesStore.noBytesStore().writeLimit(), name);
         this.mappedFile = mappedFile;
         clear();
     }
@@ -182,7 +187,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
-            writePosition += len;
+            uncheckedWritePosition(writePosition() + len);
         }
     }
 
