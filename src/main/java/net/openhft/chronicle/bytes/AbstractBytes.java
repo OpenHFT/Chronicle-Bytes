@@ -653,8 +653,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     void uncheckedWritePosition(long writePosition) {
-        assert checkThreadPositionSetBy() : "ConcurrentModification : Bytes is not thread safe " +
-                "but has been used across threads";
+//        assert checkThreadPositionSetBy() : "ConcurrentModification : Bytes is not thread safe " +
+        //               "but has been used across threads";
         this.writePosition = writePosition;
     }
 
