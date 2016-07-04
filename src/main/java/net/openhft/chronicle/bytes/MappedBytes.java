@@ -148,6 +148,7 @@ public class MappedBytes extends AbstractBytes<Void> {
                 throw boe;
             }
         }
+        super.writeCheckOffset(offset, adding);
     }
 
     @Override
