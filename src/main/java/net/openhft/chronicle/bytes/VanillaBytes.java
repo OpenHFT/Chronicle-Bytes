@@ -58,7 +58,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     private static boolean isEqual0(char[] chars, NativeBytesStore bs, long address) {
-        long start = System.nanoTime();
+
         Memory memory = bs.memory;
         int i = 0;
         for (; i < chars.length - 3; i += 4) {
@@ -75,9 +75,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             if (b != chars[i])
                 return false;
         }
-        long time = System.nanoTime() - start;
-        if (time > 1.e6)
-            System.out.println("isEquals took " + time / 1e6 + " ms. len=" + chars.length);
+
         return true;
     }
 

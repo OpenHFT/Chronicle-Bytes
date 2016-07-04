@@ -723,7 +723,7 @@ public class NativeBytesStore<Underlying>
 
         @Override
         public void run() {
-            System.out.println("Release " + Long.toHexString(address));
+            //     System.out.println("Release " + Long.toHexString(address));
             if (address == 0)
                 return;
             long addressToFree = address;
