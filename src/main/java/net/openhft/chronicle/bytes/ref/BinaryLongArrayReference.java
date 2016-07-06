@@ -36,7 +36,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private static final long CAPACITY = 0;
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
-    private static final int MAX_TO_STRING = 128;
+    private static final int MAX_TO_STRING = 1024;
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     private BytesStore bytes;
     private long offset;
@@ -161,14 +161,15 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         if (bytes == null)
             return "not set";
         StringBuilder sb = new StringBuilder();
-        sb.append("value: ");
+        sb.append("used: ");
+        long used = getUsed();
+        sb.append(used);
+        sb.append(", value: ");
         String sep = "";
         try {
-            int i, max = (int) Math.min(getCapacity(), MAX_TO_STRING);
+            int i, max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {
                 long valueAt = getValueAt(i);
-                if (valueAt == 0)
-                    break;
                 sb.append(sep).append(valueAt);
                 sep = ", ";
             }
