@@ -57,6 +57,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void uncheckedReadSkipOne();
 
     /**
+     * Read skip -1 when you are sure this is safe. Use at your own risk when you find a performance problem.
+     */
+    void uncheckedReadSkipBackOne();
+
+    /**
      * Perform a set of actions with a temporary bounds mode.
      */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
@@ -93,7 +98,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     byte readByte();
 
+    /**
+     * @return the next unsigned 8 bit value or -1;
+     */
     int readUnsignedByte();
+
+    /**
+     * @return the next unsigned 8 bit value or -1;
+     */
+    int uncheckedReadUnsignedByte();
 
     short readShort() throws BufferUnderflowException;
 

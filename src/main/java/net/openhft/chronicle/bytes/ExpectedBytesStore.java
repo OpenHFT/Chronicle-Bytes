@@ -88,6 +88,11 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
+    public int readVolatileInt(long offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public long readLong(long offset) {
         throw new UnsupportedOperationException();
     }

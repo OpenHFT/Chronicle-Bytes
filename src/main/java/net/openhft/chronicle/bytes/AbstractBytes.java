@@ -217,6 +217,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public void uncheckedReadSkipBackOne() {
+        readPosition--;
+    }
+
+    @Override
     @ForceInline
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException {
@@ -253,6 +258,15 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(1);
             return bytesStore.readUnsignedByte(offset);
 
+        } catch (BufferUnderflowException e) {
+            return -1;
+        }
+    }
+
+    @Override
+    public int uncheckedReadUnsignedByte() {
+        try {
+            return bytesStore.readUnsignedByte(readPosition++);
         } catch (BufferUnderflowException e) {
             return -1;
         }
@@ -531,6 +545,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public int readInt(long offset) throws BufferUnderflowException {
         readCheckOffset(offset, 4, true);
         return bytesStore.readInt(offset);
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 4, true);
+        return bytesStore.readVolatileInt(offset);
     }
 
     @Override

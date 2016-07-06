@@ -694,7 +694,7 @@ public class NativeBytesStore<Underlying>
         final long address = this.address;
         final Memory memory = this.memory;
         final long translate = translate(offset);
-        assert translate >= 0;
+//        assert translate >= 0;
         final long address2 = address + translate;
 //        last.writeLong(8, Thread.currentThread().getId());
 //        last.writeLong(0, offset);

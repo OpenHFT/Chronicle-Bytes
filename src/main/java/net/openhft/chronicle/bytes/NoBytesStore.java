@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 public enum NoBytesStore implements BytesStore {
@@ -174,6 +175,11 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public double readDouble(long offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 

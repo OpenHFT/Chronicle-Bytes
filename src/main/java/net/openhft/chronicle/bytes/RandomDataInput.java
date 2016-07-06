@@ -214,10 +214,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the int value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
-    default int readVolatileInt(long offset) throws BufferUnderflowException {
-        OS.memory().loadFence();
-        return readInt(offset);
-    }
+    int readVolatileInt(long offset) throws BufferUnderflowException;
 
     /**
      * Read a float from memory with a load barrier.

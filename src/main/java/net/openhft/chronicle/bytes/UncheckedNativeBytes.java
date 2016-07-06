@@ -101,6 +101,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         readPosition++;
     }
 
+    @Override
+    public void uncheckedReadSkipBackOne() {
+        readPosition--;
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip) {
@@ -250,6 +255,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public int readUnsignedByte() {
         long offset = readOffsetPositionMoved(1);
         return bytesStore.memory.readByte(bytesStore.address + offset) & 0xFF;
+    }
+
+    @Override
+    public int uncheckedReadUnsignedByte() {
+        return readUnsignedByte();
     }
 
     @Override
@@ -515,6 +525,12 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public int readInt(long offset) {
         return bytesStore.readInt(offset);
+    }
+
+    @Override
+    @ForceInline
+    public int readVolatileInt(long offset) {
+        return bytesStore.readVolatileInt(offset);
     }
 
     @Override
