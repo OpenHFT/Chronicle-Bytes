@@ -52,6 +52,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     S readSkip(long bytesToSkip) throws BufferUnderflowException;
 
     /**
+     * Read skip 1 when you are sure this is safe. Use at your own risk when you find a performance problem.
+     */
+    void uncheckedReadSkipOne();
+
+    /**
      * Perform a set of actions with a temporary bounds mode.
      */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)

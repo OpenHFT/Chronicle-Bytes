@@ -96,6 +96,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @Override
+    public void uncheckedReadSkipOne() {
+        readPosition++;
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip) {

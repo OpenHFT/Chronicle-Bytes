@@ -212,6 +212,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public void uncheckedReadSkipOne() {
+        readPosition++;
+    }
+
+    @Override
     @ForceInline
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException {
