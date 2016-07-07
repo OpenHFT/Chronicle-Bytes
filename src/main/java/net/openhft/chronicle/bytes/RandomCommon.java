@@ -64,7 +64,8 @@ interface RandomCommon extends ReferenceCounted {
      */
     @ForceInline
     default long readRemaining() {
-        return readLimit() - readPosition();
+        long remaining = readLimit() - readPosition();
+        return remaining;
     }
 
     /**
