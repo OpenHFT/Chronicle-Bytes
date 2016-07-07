@@ -264,7 +264,6 @@ public class BytesMarshaller<T> {
             }
         }
 
-
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
             throw new UnsupportedOperationException("TODO");
@@ -303,7 +302,6 @@ public class BytesMarshaller<T> {
                 valueType = Object.class;
             }
         }
-
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {

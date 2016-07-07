@@ -40,6 +40,5 @@ public class StreamingInputStreamTest {
             os.flush();
             assertArrayEquals(test, os.toByteArray());
         }
-
     }
 }

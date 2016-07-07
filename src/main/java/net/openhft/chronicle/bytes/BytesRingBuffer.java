@@ -64,7 +64,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
 
             throw Jvm.rethrow(e);
         }
-
     }
 
     /**
