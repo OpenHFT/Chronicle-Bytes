@@ -35,6 +35,10 @@ import java.nio.ByteBuffer;
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     S readPosition(long position) throws BufferUnderflowException;
 
+    default S readPositionUnlimited(long position) throws BufferUnderflowException {
+        return readLimit(capacity()).readPosition(position);
+    }
+
     default S readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
         readLimit(position + remaining);
         return readPosition(position);

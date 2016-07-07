@@ -171,7 +171,7 @@ public class MappedFile implements ReferenceCounted {
             throws IOException, IllegalStateException, IllegalArgumentException {
         MappedBytesStore mbs = acquireByteStore(position);
         Bytes bytes = mbs.bytesForRead();
-        bytes.readPosition(position);
+        bytes.readPositionUnlimited(position);
         mbs.release();
         return bytes;
     }
