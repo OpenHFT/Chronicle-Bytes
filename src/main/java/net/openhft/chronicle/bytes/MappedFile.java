@@ -23,8 +23,6 @@ import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -44,8 +42,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MappedFile implements ReferenceCounted {
     public static final long DEFAULT_CAPACITY = 1L << 40;
     // A single JVM cannot lock a file more than once.
-    private static final Object GLOBAL_FILE_LOCK = new Object();
-    private static final Logger LOG = LoggerFactory.getLogger(MappedFile.class);
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -57,7 +53,8 @@ public class MappedFile implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
-    private NewChunkListener newChunkListener = null;
+    private NewChunkListener newChunkListener = (filename, chunk, delayMicros) ->
+            Jvm.debug().on(MappedFile.class, "Allocation of " + chunk + " chunk in " + filename + " took " + delayMicros / 1e3 + " ms.");
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity) {
         this.file = file;
@@ -132,12 +129,14 @@ public class MappedFile implements ReferenceCounted {
                     return mbs;
                 }
             }
+            long start = System.nanoTime();
             long minSize = (chunk + 1L) * chunkSize + overlapSize;
             long size = fileChannel.size();
             if (size < minSize) {
                 // handle a possible race condition between processes.
                 try {
-                    synchronized (GLOBAL_FILE_LOCK) {
+                    size = fileChannel.size();
+                    if (size < minSize) {
                         try (FileLock lock = fileChannel.lock()) {
                             size = fileChannel.size();
                             if (size < minSize) {
@@ -150,7 +149,6 @@ public class MappedFile implements ReferenceCounted {
                     throw new IOException("Failed to resize to " + minSize, ioe);
                 }
             }
-            long start = System.nanoTime();
             long mappedSize = chunkSize + overlapSize;
             long address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
             final long safeCapacity = this.chunkSize + overlapSize / 2;

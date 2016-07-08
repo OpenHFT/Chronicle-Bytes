@@ -508,7 +508,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         assert writeCheckOffset0(offset, adding);
     }
 
-    private boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
+    protected boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
         if (offset < start())
             throw new BufferOverflowException();
         if (offset + adding > writeLimit()) {

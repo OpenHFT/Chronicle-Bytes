@@ -49,6 +49,23 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
+    public byte readByte(long offset) {
+        return memory.readByte(address - start + offset);
+    }
+
+    @NotNull
+    @Override
+    public NativeBytesStore<Void> writeOrderedInt(long offset, int i) {
+        memory.writeOrderedInt(address - start + offset, i);
+        return this;
+    }
+
+    @Override
+    long translate(long offset) {
+        return offset - start;
+    }
+
+    @Override
     public long start() {
         return start;
     }

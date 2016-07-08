@@ -22,8 +22,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -37,7 +35,6 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> {
-    private static final Logger LOG = LoggerFactory.getLogger(MappedBytes.class);
     public static boolean CHECKING = false;
     private final MappedFile mappedFile;
 
@@ -137,18 +134,22 @@ public class MappedBytes extends AbstractBytes<Void> {
         if (offset < 0 || offset > capacity() - adding)
             throw new IllegalArgumentException("Offset out of bound " + offset);
         if (!bytesStore.inside(offset)) {
-            BytesStore oldBS = bytesStore;
-            try {
-                bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
-                oldBS.release();
-
-            } catch (IOException | IllegalStateException | IllegalArgumentException e) {
-                BufferOverflowException boe = new BufferOverflowException();
-                boe.initCause(e);
-                throw boe;
-            }
+            acquireNextByteStore(offset);
         }
         super.writeCheckOffset(offset, adding);
+    }
+
+    private void acquireNextByteStore(long offset) {
+        BytesStore oldBS = bytesStore;
+        try {
+            bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
+            oldBS.release();
+
+        } catch (IOException | IllegalStateException | IllegalArgumentException e) {
+            BufferOverflowException boe = new BufferOverflowException();
+            boe.initCause(e);
+            throw boe;
+        }
     }
 
     @Override
@@ -280,6 +281,15 @@ public class MappedBytes extends AbstractBytes<Void> {
     @Override
     public boolean sharedMemory() {
         return true;
+    }
+
+    public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
+        assert writeCheckOffset0(offset, (long) 4);
+        if (!bytesStore.inside(offset)) {
+            acquireNextByteStore(offset);
+        }
+        ((NativeBytesStore) bytesStore).writeOrderedInt(offset, i);
+        return this;
     }
 
 }
