@@ -109,9 +109,8 @@ enum BytesInternal {
     public static void parseUtf8(
             @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
-        if (bytes instanceof Bytes
-                && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore
-                && appendable instanceof StringBuilder) {
+        if (appendable instanceof StringBuilder
+                && bytes.isDirectMemory()) {
             parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
             parseUtf81(bytes, appendable, utflen);
@@ -1466,7 +1465,7 @@ enum BytesInternal {
             throws BufferUnderflowException, IllegalStateException {
         try {
             if (builder instanceof StringBuilder
-                    && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
+                    && bytes.isDirectMemory()) {
                 Bytes vb = (Bytes) bytes;
                 StringBuilder sb = (StringBuilder) builder;
                 sb.setLength(0);

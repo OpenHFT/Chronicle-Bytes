@@ -65,8 +65,9 @@ public class HeapBytesStore<Underlying>
         return new HeapBytesStore<>(bb);
     }
 
-    public static <T> HeapBytesStore<T> uninitialized() {
-        return new HeapBytesStore<>();
+    @Override
+    public boolean isDirectMemory() {
+        return false;
     }
 
     public void init(@NotNull ByteBuffer byteBuffer) {

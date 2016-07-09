@@ -136,7 +136,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         char[] chars = StringUtils.extractChars(s);
         if (bytesStore instanceof NativeBytesStore) {
             NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
-            long address = bs.address + bs.translate(readPosition);
+            long address = bs.address(readPosition);
             return isEqual0(chars, bs, address);
 
         } else {
@@ -171,7 +171,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
-        if (bytesStore() instanceof NativeBytesStore && bytes.bytesStore() instanceof NativeBytesStore && length >= 64) {
+        if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
@@ -201,7 +201,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
         try {
-            if (bytesStore() instanceof NativeBytesStore) {
+            if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
                     write((BytesStore) str, (long) start, end - start);
                     return this;
@@ -222,7 +222,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException {
         try {
-            if (bytesStore() instanceof NativeBytesStore) {
+            if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
                     write((BytesStore) str, 0L, str.length());
                     return this;
@@ -236,7 +236,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return this;
 
         } catch (Exception e) {
-            throw new IndexOutOfBoundsException(e.toString());
+            IndexOutOfBoundsException e2 = new IndexOutOfBoundsException();
+            e2.initCause(e);
+            throw e2;
         }
     }
 
@@ -246,7 +248,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (cs instanceof BytesStore)
             return write((BytesStore) cs);
 
-        if (bytesStore instanceof NativeBytesStore && cs instanceof String)
+        if (isDirectMemory() && cs instanceof String)
             return append8bitNBS_S((String) cs);
         return append8bit0(cs);
     }
@@ -254,7 +256,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull String cs)
             throws BufferOverflowException, BufferUnderflowException {
-        if (bytesStore instanceof NativeBytesStore)
+        if (isDirectMemory())
             return append8bitNBS_S(cs);
         return append8bit0(cs);
     }
@@ -324,8 +326,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @Override
     public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException {
-        if (this.bytesStore instanceof NativeBytesStore &&
-                bytesStore instanceof VanillaBytes && bytesStore.bytesStore() instanceof NativeBytesStore) {
+        if (isDirectMemory() &&
+                bytesStore instanceof VanillaBytes &&
+                bytesStore.isDirectMemory()) {
             VanillaBytes b2 = (VanillaBytes) bytesStore;
             NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
@@ -359,7 +362,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !(bytesStore() instanceof NativeBytesStore))
+        if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !isDirectMemory())
             return super.byteCheckSum();
         byte b = 0;
         NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();

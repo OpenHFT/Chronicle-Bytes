@@ -162,10 +162,10 @@ interface RandomCommon extends ReferenceCounted {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 
-    boolean isNative();
-
     /**
      * @return true if these Bytes use shared memory.
      */
     boolean sharedMemory();
+
+    boolean isDirectMemory();
 }

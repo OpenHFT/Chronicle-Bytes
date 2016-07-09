@@ -46,6 +46,8 @@ public class NativeBytesStore<Underlying>
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
     }
 
+    @Nullable
+    private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
 /*    static {
         try {
             last = MappedBytes.mappedBytes(new File("last"), 8);
@@ -53,9 +55,6 @@ public class NativeBytesStore<Underlying>
             throw new AssertionError(e);
         }
     }*/
-
-    @Nullable
-    private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
     protected long address;
     // on release, set this to null.
     @Nullable
@@ -68,7 +67,6 @@ public class NativeBytesStore<Underlying>
     private boolean elastic;
     @Nullable
     private Underlying underlyingObject;
-
     private NativeBytesStore() {
     }
 
@@ -144,6 +142,11 @@ public class NativeBytesStore<Underlying>
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size, long maxSize) {
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
+    }
+
+    @Override
+    public boolean isDirectMemory() {
+        return true;
     }
 
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
@@ -451,7 +454,7 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
-        if (bytes.isNative()) {
+        if (bytes.isDirectMemory()) {
             memory.copyMemory(bytes.address(offset), address(offsetInRDO), length);
         } else {
             write0(offsetInRDO, bytes, offset, length);
@@ -608,15 +611,15 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long copyTo(@NotNull BytesStore store) throws IllegalStateException {
-        if (store instanceof NativeBytesStore)
-            return copyTo((NativeBytesStore) store);
+        if (store.isDirectMemory())
+            return copyToDirect(store);
         else
             return super.copyTo(store);
     }
 
-    public long copyTo(NativeBytesStore store) {
+    public long copyToDirect(BytesStore store) {
         long addr = address;
-        long addr2 = store.address;
+        long addr2 = store.address(0);
         long read = readRemaining();
         long toWrite = writeRemaining();
         if (toWrite < read)

@@ -175,7 +175,7 @@ public class MappedBytes extends AbstractBytes<Void> {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.bytesStore() instanceof NativeBytesStore && length >= 16) {
+        } else if (bytes.isDirectMemory() && length >= 16) {
             rawCopy(bytes, offset, length);
 
         } else {
@@ -292,4 +292,17 @@ public class MappedBytes extends AbstractBytes<Void> {
         return this;
     }
 
+    @Override
+    public int peekVolatileInt() {
+        readCheckOffset(readPosition, 4, true);
+        MappedBytesStore bytesStore = (MappedBytesStore) (BytesStore) this.bytesStore;
+        long address = bytesStore.address + bytesStore.translate(readPosition);
+        Memory memory = bytesStore.memory;
+        for (int i = 0; i < 128; i++) {
+            int value = memory.readVolatileInt(address);
+            if (value != 0)
+                return value;
+        }
+        return 0;
+    }
 }

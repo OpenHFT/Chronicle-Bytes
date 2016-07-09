@@ -31,6 +31,11 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     @Override
+    public boolean isDirectMemory() {
+        return underlyingBytesStore.isDirectMemory();
+    }
+
+    @Override
     public int peekUnsignedByte(long offset) {
         throw new UnsupportedOperationException();
     }

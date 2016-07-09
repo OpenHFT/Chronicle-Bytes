@@ -307,7 +307,7 @@ public interface Bytes<Underlying> extends
      */
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         return unchecked ?
-                start() == 0 && bytesStore() instanceof NativeBytesStore ?
+                start() == 0 && bytesStore().isDirectMemory() ?
                         new UncheckedNativeBytes<>(this) :
                         new UncheckedBytes<>(this) :
                 this;

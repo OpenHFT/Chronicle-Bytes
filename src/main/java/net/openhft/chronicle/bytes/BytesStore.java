@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.nio.ch.DirectBuffer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -109,9 +108,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return NoBytesStore.noBytesStore();
     }
 
-    default boolean isNative() {
-        return underlyingObject() == null || underlyingObject() instanceof DirectBuffer;
-    }
+    /**
+     * @return whether it uses direct memory or not.
+     */
+    boolean isDirectMemory();
 
     /**
      * @return a copy of this BytesStore.

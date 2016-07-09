@@ -283,4 +283,5 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void copyTo(OutputStream out) throws IOException;
 
     long copyTo(BytesStore to);
+
 }

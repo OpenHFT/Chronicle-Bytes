@@ -58,6 +58,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean isDirectMemory() {
+        return bytesStore.isDirectMemory();
+    }
+
+    @Override
     public void move(long from, long to, long length) {
         long start = start();
         bytesStore.move(from - start, to - start, length);

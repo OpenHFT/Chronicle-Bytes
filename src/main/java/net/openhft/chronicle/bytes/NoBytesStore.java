@@ -40,6 +40,7 @@ public enum NoBytesStore implements BytesStore {
         }
     }
 
+
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return NO_BYTES_STORE;
@@ -181,6 +182,11 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public int readVolatileInt(long offset) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean isDirectMemory() {
+        return true;
     }
 
     @NotNull

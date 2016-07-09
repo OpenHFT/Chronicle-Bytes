@@ -53,6 +53,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         capacity = bytesStore.capacity();
     }
 
+    @Override
+    public boolean isDirectMemory() {
+        return true;
+    }
+
     @NotNull
     public Bytes<Underlying> unchecked(boolean unchecked) {
         return this;
@@ -154,7 +159,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.bytesStore() instanceof NativeBytesStore && length >= 16) {
+        } else if (length >= 16 && bytes.isDirectMemory()) {
             rawCopy(bytes, offset, length);
 
         } else {

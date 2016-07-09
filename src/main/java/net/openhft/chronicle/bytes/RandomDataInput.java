@@ -48,6 +48,10 @@ public interface RandomDataInput extends RandomCommon {
         return charToString;
     }
 
+    default int peekVolatileInt() {
+        return readVolatileInt(readPosition());
+    }
+
     /**
      * Read boolean at an offset
      *
