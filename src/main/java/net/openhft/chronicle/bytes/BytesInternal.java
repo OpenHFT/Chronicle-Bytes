@@ -846,8 +846,8 @@ enum BytesInternal {
     }
 
     public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
-        int len = Maths.toUInt31(maxLength);
-        StringBuilder sb = new StringBuilder(len + 40);
+        int len = Maths.toUInt31(maxLength + 40);
+        StringBuilder sb = new StringBuilder(len);
         long readPosition = bytes.readPosition();
         long readLimit = bytes.readLimit();
         sb.append("[")
@@ -908,7 +908,12 @@ enum BytesInternal {
         }
     }
 
-    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long readPosition, long writePosition, long end) throws BufferUnderflowException {
+    private static void toString(@NotNull RandomDataInput bytes,
+                                 @NotNull Appendable sb,
+                                 long start,
+                                 long readPosition,
+                                 long writePosition,
+                                 long end) throws BufferUnderflowException {
         try {
             // before
             if (start < bytes.start()) start = bytes.start();
@@ -1984,7 +1989,7 @@ enum BytesInternal {
                 for (int j = 0; j < width; j++) {
                     if (j == width / 2)
                         builder.append(' ');
-                    if (i + j < start || i + j >= offset + len) {
+                    if (i + j < offset || i + j >= offset + len) {
                         builder.append("   ");
 
                     } else {
