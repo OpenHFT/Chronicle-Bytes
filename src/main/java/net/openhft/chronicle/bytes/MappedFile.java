@@ -42,6 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class MappedFile implements ReferenceCounted {
     public static final long DEFAULT_CAPACITY = 1L << 40;
     // A single JVM cannot lock a file more than once.
+    private static final Object GLOBAL_FILE_LOCK = new Object();
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -135,12 +136,14 @@ public class MappedFile implements ReferenceCounted {
             if (size < minSize) {
                 // handle a possible race condition between processes.
                 try {
-                    size = fileChannel.size();
-                    if (size < minSize) {
-                        try (FileLock lock = fileChannel.lock()) {
-                            size = fileChannel.size();
-                            if (size < minSize) {
-                                raf.setLength(minSize);
+                    synchronized (GLOBAL_FILE_LOCK) {
+                        size = fileChannel.size();
+                        if (size < minSize) {
+                            try (FileLock lock = fileChannel.lock()) {
+                                size = fileChannel.size();
+                                if (size < minSize) {
+                                    raf.setLength(minSize);
+                                }
                             }
                         }
                     }
