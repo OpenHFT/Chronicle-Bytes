@@ -2003,7 +2003,7 @@ enum BytesInternal {
                 for (int j = 0; j < width; j++) {
                     if (j == width / 2)
                         builder.append(' ');
-                    if (i + j < start || i + j >= offset + len) {
+                    if (i + j < offset || i + j >= offset + len) {
                         builder.append(' ');
 
                     } else {
