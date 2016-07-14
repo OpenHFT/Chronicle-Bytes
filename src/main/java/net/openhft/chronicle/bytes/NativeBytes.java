@@ -78,7 +78,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
             assert size >= 0;
-            writeCheckOffset(size, 1L);
+            writeCheckOffset(size, 0L);
         } catch (BufferOverflowException e) {
             throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
         }
@@ -123,9 +123,16 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             throw new IllegalArgumentException(endOfBuffer + " < 0");
         if (endOfBuffer > capacity())
             throw new BufferOverflowException();
+
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
         long size = (Math.max(endOfBuffer, bytesStore.realCapacity() * 3 / 2) + ps) & ~(ps - 1);
+
+        if (endOfBuffer > 1 << 20)
+            Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity() / 1024 + " KB, " +
+                    "needs " + endOfBuffer / 1024 + " KB, " +
+                    "new-size " + size / 1024 + " KB");
+
         if (capacity() < Long.MAX_VALUE)
             size = Math.min(size, capacity());
         NativeBytesStore store;
