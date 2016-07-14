@@ -213,7 +213,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S writeSome(@NotNull Bytes bytes)
             throws BufferOverflowException {
-        long length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+        long length = Math.min(bytes.readRemaining(), writeRemaining());
+        if (length + writePosition() >= 128 << 10)
+            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
         write(bytes, bytes.readPosition(), length);
         if (length == bytes.readRemaining()) {
             bytes.clear();
