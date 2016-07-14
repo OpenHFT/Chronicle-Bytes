@@ -70,7 +70,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalArgumentException {
-        if (!bytesStore.inside(offset + adding - 1))
+        if (!bytesStore.inside(offset + adding))
             checkResize(offset + adding);
     }
 
@@ -119,6 +119,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     private void resize(long endOfBuffer)
             throws IllegalArgumentException, BufferOverflowException {
+        final long realCapacity = realCapacity();
+        if (endOfBuffer < realCapacity) {
+//            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
+            return;
+        }
         if (endOfBuffer < 0)
             throw new IllegalArgumentException(endOfBuffer + " < 0");
         if (endOfBuffer > capacity())
@@ -126,10 +131,10 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
-        long size = (Math.max(endOfBuffer, bytesStore.realCapacity() * 3 / 2) + ps) & ~(ps - 1);
-
+        long size = (Math.max(endOfBuffer, realCapacity * 3 / 2) + ps) & ~(ps - 1);
+//        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
-            Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity() / 1024 + " KB, " +
+            Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + endOfBuffer / 1024 + " KB, " +
                     "new-size " + size / 1024 + " KB");
 
