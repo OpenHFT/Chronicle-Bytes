@@ -139,7 +139,7 @@ public class MappedFile implements ReferenceCounted {
                     synchronized (GLOBAL_FILE_LOCK) {
                         size = fileChannel.size();
                         if (size < minSize) {
-                            try (FileLock lock = fileChannel.lock()) {
+                            try (FileLock ignore = fileChannel.lock()) {
                                 size = fileChannel.size();
                                 if (size < minSize) {
                                     raf.setLength(minSize);
