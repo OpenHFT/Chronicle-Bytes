@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -115,16 +116,7 @@ public class MappedBytes extends AbstractBytes<Void> {
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         long check = adding >= 0 ? offset : offset + adding;
         if (!bytesStore.inside(check)) {
-            BytesStore oldBS = bytesStore;
-            try {
-                bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
-                oldBS.release();
-
-            } catch (IOException | IllegalStateException | IllegalArgumentException e) {
-                BufferUnderflowException bue = new BufferUnderflowException();
-                bue.initCause(e);
-                throw bue;
-            }
+            acquireNextByteStore(offset);
         }
         super.readCheckOffset(offset, adding, given);
     }
@@ -294,15 +286,32 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @Override
     public int peekVolatileInt() {
-        readCheckOffset(readPosition, 4, true);
+        if (!bytesStore.inside(readPosition)) {
+            acquireNextByteStore(readPosition);
+        }
+
         MappedBytesStore bytesStore = (MappedBytesStore) (BytesStore) this.bytesStore;
         long address = bytesStore.address + bytesStore.translate(readPosition);
         Memory memory = bytesStore.memory;
-        for (int i = 0; i < 128; i++) {
-            int value = memory.readVolatileInt(address);
-            if (value != 0)
-                return value;
+
+        // are we inside a cache line?
+        if ((address & 63) <= 60) {
+            if (memory == null)
+                throw new NullPointerException();
+
+            for (int i = 0; i < 64; i++) {
+                int value = UnsafeMemory.UNSAFE.getIntVolatile(null, address);
+                if (value != 0 && value != 0x80000000)
+                    return value;
+            }
+        } else {
+            for (int i = 0; i < 32; i++) {
+                int value = memory.readVolatileInt(address);
+                if (value != 0)
+                    return value;
+            }
         }
         return 0;
     }
+
 }
