@@ -401,4 +401,18 @@ public class BytesTest {
 			e.printStackTrace();
 		}
     }
+
+    @Test
+    public void testUnwrite() {
+        Bytes bytes = Bytes.elasticByteBuffer();
+        for (int i = 0; i < 26; i++) {
+            bytes.writeUnsignedByte('A' + i);
+        }
+        assertEquals(26, bytes.writePosition());
+        assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+        bytes.unwrite(1, 1);
+        assertEquals(25, bytes.writePosition());
+        assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+    }
+
 }

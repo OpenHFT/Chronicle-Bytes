@@ -322,6 +322,5 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException, IllegalArgumentException {
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
-    
-    
+
 }

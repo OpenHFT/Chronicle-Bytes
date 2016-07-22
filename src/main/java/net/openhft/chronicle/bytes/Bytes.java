@@ -440,4 +440,9 @@ public interface Bytes<Underlying> extends
     default boolean sharedMemory() {
         return bytesStore().sharedMemory();
     }
+
+    default void unwrite(long fromOffset, int count) {
+        write(fromOffset, this, fromOffset + count, readRemaining() - 1);
+        writeSkip(-count);
+    }
 }
