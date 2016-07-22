@@ -299,19 +299,14 @@ public class MappedBytes extends AbstractBytes<Void> {
             if (memory == null)
                 throw new NullPointerException();
 
-            for (int i = 0; i < 64; i++) {
-                int value = UnsafeMemory.UNSAFE.getIntVolatile(null, address);
-                if (value != 0 && value != 0x80000000)
-                    return value;
-            }
+            int value = UnsafeMemory.UNSAFE.getIntVolatile(null, address);
+            if (value != 0 && value != 0x80000000)
+                return value;
+            return UnsafeMemory.UNSAFE.getIntVolatile(null, address);
+
         } else {
-            for (int i = 0; i < 32; i++) {
-                int value = memory.readVolatileInt(address);
-                if (value != 0)
-                    return value;
-            }
+            return memory.readVolatileInt(address);
         }
-        return 0;
     }
 
 }
