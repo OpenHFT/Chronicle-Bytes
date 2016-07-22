@@ -40,7 +40,6 @@ public enum NoBytesStore implements BytesStore {
         }
     }
 
-
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return NO_BYTES_STORE;
