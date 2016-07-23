@@ -859,6 +859,14 @@ enum BytesInternal {
         try {
             long start = Math.max(bytes.start(), readPosition - 64);
             long end = Math.min(readLimit + 64, start + maxLength);
+            try {
+                for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
+                    if (bytes.readLong(end - 8) != 0)
+                        break;
+                }
+            } catch (UnsupportedOperationException | BufferUnderflowException ignored) {
+                // ignore
+            }
             toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
             if (end < bytes.readLimit())
                 sb.append("...");
