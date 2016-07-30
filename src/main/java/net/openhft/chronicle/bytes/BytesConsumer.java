@@ -27,5 +27,4 @@ public interface BytesConsumer {
      */
     boolean read(BytesOut bytes);
 
-    boolean isEmpty();
 }

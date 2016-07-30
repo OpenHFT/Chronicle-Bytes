@@ -36,21 +36,22 @@ public class BinaryLongArrayReferenceTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
     @Test
     public void getSetValues() {
         int length = 128 * 8 + 2 * 8;
-        try (Bytes bytes = Bytes.allocateDirect(length)) {
-            BinaryLongArrayReference.write(bytes, 128);
+        Bytes bytes = Bytes.allocateDirect(length);
+        BinaryLongArrayReference.write(bytes, 128);
 
-            BinaryLongArrayReference array = new BinaryLongArrayReference();
-            array.bytesStore(bytes, 0, length);
+        BinaryLongArrayReference array = new BinaryLongArrayReference();
+        array.bytesStore(bytes, 0, length);
 
-            assertEquals(128, array.getCapacity());
-            for (int i = 0; i < 128; i++)
-                array.setValueAt(i, i + 1);
+        assertEquals(128, array.getCapacity());
+        for (int i = 0; i < 128; i++)
+            array.setValueAt(i, i + 1);
 
-            for (int i = 0; i < 128; i++)
-                assertEquals(i + 1, array.getValueAt(i));
-        }
+        for (int i = 0; i < 128; i++)
+            assertEquals(i + 1, array.getValueAt(i));
+        bytes.release();
     }
 }

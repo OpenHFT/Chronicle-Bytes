@@ -91,4 +91,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     boolean read(@NotNull BytesOut using) throws IllegalStateException;
 
     long readRemaining();
+
+    boolean isEmpty();
 }

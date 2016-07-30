@@ -24,17 +24,19 @@ public class TextLongReferenceTest {
     @Test
     public void testSetValue() {
         final TextLongReference value = new TextLongReference();
-        try (NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value.maxSize())) {
-            value.bytesStore(bytesStore, 0, value.maxSize());
-            int expected = 10;
-            value.setValue(expected);
+        NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value
+                .maxSize());
+        value.bytesStore(bytesStore, 0, value.maxSize());
+        int expected = 10;
+        value.setValue(expected);
 
-            long l = bytesStore.parseLong(TextLongReference.VALUE);
-            System.out.println(l);
+        long l = bytesStore.parseLong(TextLongReference.VALUE);
+        System.out.println(l);
 
 //        System.out.println(Bytes.toHexString(bytes,33, bytes.limit() - 33));
 
-            Assert.assertEquals(expected, value.getValue());
-        }
+        Assert.assertEquals(expected, value.getValue());
+        bytesStore.release();
+
     }
 }
