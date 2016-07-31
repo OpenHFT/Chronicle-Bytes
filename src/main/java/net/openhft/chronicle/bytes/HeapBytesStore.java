@@ -56,6 +56,11 @@ public class HeapBytesStore<Underlying>
     }
 
     @NotNull
+    public static <T> HeapBytesStore<T> uninitialized() {
+        return new HeapBytesStore<>();
+    }
+
+    @NotNull
     static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
         return new HeapBytesStore<>(byteArray);
     }

@@ -141,4 +141,9 @@ public enum BytesUtil {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, bytes);
     }
+
+    @Deprecated
+    public static long utf8Length(CharSequence toWrite) {
+        return AppendableUtil.findUtf8Length(toWrite);
+    }
 }
