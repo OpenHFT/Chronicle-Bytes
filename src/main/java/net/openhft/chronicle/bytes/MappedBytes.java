@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -35,7 +36,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 /**
  * Bytes to wrap memory mapped data.
  */
-public class MappedBytes extends AbstractBytes<Void> {
+public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public static boolean CHECKING = false;
     private final MappedFile mappedFile;
 
@@ -313,4 +314,13 @@ public class MappedBytes extends AbstractBytes<Void> {
         }
     }
 
+    @Override
+    public void close() {
+        this.release();
+    }
+
+    @Override
+    public boolean isClosed() {
+        return this.refCount() <= 0;
+    }
 }
