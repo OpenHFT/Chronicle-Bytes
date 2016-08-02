@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -52,23 +53,33 @@ public class MappedFile implements ReferenceCounted {
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
     private final long capacity;
+    private final boolean readOnly;
     @NotNull
     private final File file;
     private NewChunkListener newChunkListener = (filename, chunk, delayMicros) ->
             Jvm.debug().on(MappedFile.class, "Allocation of " + chunk + " chunk in " + filename + " took " + delayMicros / 1e3 + " ms.");
 
-    protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity) {
+    protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
         this.file = file;
         this.raf = raf;
         this.fileChannel = raf.getChannel();
         this.chunkSize = OS.mapAlign(chunkSize);
         this.overlapSize = OS.mapAlign(overlapSize);
         this.capacity = capacity;
+        this.readOnly = readOnly;
     }
 
-    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
-        RandomAccessFile raf = new RandomAccessFile(file, "rw");
-        return new MappedFile(file, raf, chunkSize, overlapSize, DEFAULT_CAPACITY);
+    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
+        RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+        try {
+            long capacity = readOnly ? raf.length() : DEFAULT_CAPACITY;
+            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+        } catch (IOException e) {
+            Closeable.closeQuietly(raf);
+            FileNotFoundException fnfe = new FileNotFoundException("Unable to open " + file);
+            fnfe.initCause(e);
+            throw fnfe;
+        }
     }
 
     @NotNull
@@ -88,8 +99,26 @@ public class MappedFile implements ReferenceCounted {
 
     @NotNull
     public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
-        return MappedFile.of(file, chunkSize, overlapSize);
+        return mappedFile(file, chunkSize, overlapSize, false);
     }
+
+    @NotNull
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
+        return MappedFile.of(file, chunkSize, overlapSize, readOnly);
+    }
+
+    @NotNull
+    public static MappedFile readOnly(@NotNull File file) throws FileNotFoundException {
+        long chunkSize = file.length();
+        long overlapSize = 0;
+        // Chunks of 4 GB+ not supported on Windows.
+        if (OS.isWindows() && chunkSize > 2 << 30) {
+            chunkSize = 2 << 30;
+            overlapSize = OS.pageSize();
+        }
+        return MappedFile.of(file, chunkSize, overlapSize, true);
+    }
+
 
     public MappedFile withSizes(long chunkSize, long overlapSize) {
         chunkSize = OS.mapAlign(chunkSize);
@@ -97,7 +126,7 @@ public class MappedFile implements ReferenceCounted {
         if (chunkSize == this.chunkSize && overlapSize == this.overlapSize)
             return this;
         try {
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity);
+            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
         } finally {
             release();
         }
@@ -153,7 +182,8 @@ public class MappedFile implements ReferenceCounted {
                 }
             }
             long mappedSize = chunkSize + overlapSize;
-            long address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
+            FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
+            long address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
             final long safeCapacity = this.chunkSize + overlapSize / 2;
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));

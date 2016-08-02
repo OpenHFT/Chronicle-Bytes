@@ -63,13 +63,17 @@ public class MappedBytes extends AbstractBytes<Void> {
 
     @NotNull
     public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException, IllegalStateException {
-        MappedFile rw = MappedFile.of(file, chunkSize, overlapSize);
+        MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
         return mappedBytes(rw);
     }
 
     @NotNull
     public static MappedBytes mappedBytes(MappedFile rw) {
         return CHECKING ? new CheckingMappedBytes(rw) : new MappedBytes(rw);
+    }
+
+    public static MappedBytes readOnly(File file) throws FileNotFoundException {
+        return new MappedBytes(MappedFile.readOnly(file));
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
