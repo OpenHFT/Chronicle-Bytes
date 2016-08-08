@@ -48,6 +48,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     protected MappedBytes(MappedFile mappedFile, String name) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(),
                 NoBytesStore.noBytesStore().writeLimit(), name);
+        assert !mappedFile.isClosed();
         this.mappedFile = mappedFile;
         clear();
     }
@@ -157,7 +158,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void performRelease() {
         super.performRelease();
-        mappedFile.close();
+        mappedFile.release();
     }
 
     @Override

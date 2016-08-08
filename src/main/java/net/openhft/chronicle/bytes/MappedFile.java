@@ -40,7 +40,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * A memory mapped files which can be randomly accessed in chunks.
  * It has overlapping regions to avoid wasting bytes at the end of chunks.
  */
-public class MappedFile implements ReferenceCounted {
+public class MappedFile implements ReferenceCounted, Closeable {
     public static final long DEFAULT_CAPACITY = 1L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = new Object();
@@ -330,5 +330,10 @@ public class MappedFile implements ReferenceCounted {
         } catch (IOException e) {
             throw new IORuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean isClosed() {
+        return closed.get();
     }
 }

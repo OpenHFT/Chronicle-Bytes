@@ -907,9 +907,13 @@ enum BytesInternal {
 
         if (bytes.readRemaining() > size) {
             final Bytes bytes1 = bytes.bytesForRead();
-            bytes1.readLimit(bytes1.readPosition() + size);
-            toString(bytes1, sb);
-            return sb.toString() + "...";
+            try {
+                bytes1.readLimit(bytes1.readPosition() + size);
+                toString(bytes1, sb);
+                return sb.toString() + "...";
+            } finally {
+                bytes1.release();
+            }
         } else {
             toString(bytes, sb);
             return sb.toString();
@@ -1099,20 +1103,20 @@ enum BytesInternal {
             out.writeByte(offset, (byte) (num % 10 + '0'));
         }
     }
-    
+
     /**
      * Appends given long value with given decimalPlaces to RandomDataOutput out
      * @param out
      * @param num
      * @param offset
      * @param decimalPlaces
-     * @param width Maximum width. I will be padded with zeros to the left if necessary
+     * @param width         Maximum width. I will be padded with zeros to the left if necessary
      * @throws IORuntimeException
      * @throws IllegalArgumentException
      * @throws BufferOverflowException
      */
     public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width) throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
-    	if (decimalPlaces == 0) {
+        if (decimalPlaces == 0) {
             append(out, offset, num, width);
             return;
         }
@@ -1132,13 +1136,11 @@ enum BytesInternal {
             endIndex = appendLong1(numberBuffer, num);
         }
         int digits = numberBuffer.length - endIndex;
-        
-        
-        
+
         if (decimalPlaces >= digits) {
-        	int numDigitsRequired = 2+decimalPlaces;
-        	if (numDigitsRequired > width)
-        		throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+            int numDigitsRequired = 2 + decimalPlaces;
+            if (numDigitsRequired > width)
+                throw new IllegalArgumentException("Value do not fit in " + width + " digits");
             out.writeUnsignedByte(offset++, '0');
             out.writeUnsignedByte(offset++, '.');
             while (decimalPlaces-- > digits)
@@ -1146,20 +1148,20 @@ enum BytesInternal {
             out.write(offset++, numberBuffer, endIndex, digits);
             return;
         } else {
-        	int numDigitsRequired = digits+1;
-        	if (numDigitsRequired > width)
-        		throw new IllegalArgumentException("Value do not fit in " + width + " digits");
+            int numDigitsRequired = digits + 1;
+            if (numDigitsRequired > width)
+                throw new IllegalArgumentException("Value do not fit in " + width + " digits");
         }
-        
-       
-        while (width-- > (digits+1)) {
+
+
+        while (width-- > (digits + 1)) {
             out.writeUnsignedByte(offset++, '0');
         }
-        
+
 
         int decimalLength = numberBuffer.length - endIndex - decimalPlaces;
         out.write(offset, numberBuffer, endIndex, decimalLength);
-        offset+=decimalLength;
+        offset += decimalLength;
         out.writeUnsignedByte(offset++, '.');
         out.write(offset++, numberBuffer, endIndex + decimalLength, digits - decimalLength);
     }
@@ -2158,9 +2160,9 @@ enum BytesInternal {
             case 'n':
             case 'N':
                 return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
-            default :
-            	return null;            
-        }        
+            default:
+                return null;
+        }
     }
 
     public static BytesStore subBytes(RandomDataInput from, long start, long length) {
