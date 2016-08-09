@@ -281,7 +281,7 @@ public class MappedFile implements ReferenceCounted, Closeable {
         }
         try {
             raf.close();
-
+            close();
         } catch (IOException e) {
             Jvm.debug().on(getClass(), e);
         }
