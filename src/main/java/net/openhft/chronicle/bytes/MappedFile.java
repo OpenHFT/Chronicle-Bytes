@@ -37,8 +37,8 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
- * A memory mapped files which can be randomly accessed in chunks.
- * It has overlapping regions to avoid wasting bytes at the end of chunks.
+ * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
+ * avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted, Closeable {
     public static final long DEFAULT_CAPACITY = 1L << 40;
@@ -251,8 +251,6 @@ public class MappedFile implements ReferenceCounted, Closeable {
             synchronized (stores) {
                 ReferenceCounted.releaseAll((List) stores);
             }
-            release();
-
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
