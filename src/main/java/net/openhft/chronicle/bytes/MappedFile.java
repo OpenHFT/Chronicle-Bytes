@@ -251,6 +251,8 @@ public class MappedFile implements ReferenceCounted, Closeable {
             synchronized (stores) {
                 ReferenceCounted.releaseAll((List) stores);
             }
+            release();
+
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
@@ -279,7 +281,7 @@ public class MappedFile implements ReferenceCounted, Closeable {
         }
         try {
             raf.close();
-            close();
+            closed.set(true);
         } catch (IOException e) {
             Jvm.debug().on(getClass(), e);
         }
