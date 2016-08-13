@@ -55,7 +55,7 @@ public class MappedMemoryTest {
                 }
 
                 bytesStore.release();
-                mappedFile.close();
+                mappedFile.release();
                 assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
                 LOG.info("With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
@@ -109,7 +109,7 @@ public class MappedMemoryTest {
                 }
                 bytes.release();
 
-                mappedFile.close();
+                mappedFile.release();
                 assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
                 LOG.info("With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {

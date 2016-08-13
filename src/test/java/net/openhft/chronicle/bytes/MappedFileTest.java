@@ -87,7 +87,7 @@ public class MappedFileTest {
         assertEquals(3, bs2.refCount());
         assertEquals("refCount: 2, 0, 3", mf.referenceCounts());
 
-        mf.close();
+        mf.release();
         assertEquals(2, bs.refCount());
         assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
         bs2.release();
