@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
@@ -110,5 +111,10 @@ public class MappedFileTest {
         try (MappedBytes bytes = MappedBytes.readOnly(file)) {
             Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
+    }
+
+    @Test(expected = FileNotFoundException.class)
+    public void readOnlyCantCreateNonExistentFile() throws IOException {
+        MappedBytes.mappedBytes(new File("non_existent_file"), OS.pageSize(), OS.pageSize(), true);
     }
 }
