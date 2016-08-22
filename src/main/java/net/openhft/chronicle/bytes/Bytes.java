@@ -226,26 +226,37 @@ public interface Bytes<Underlying> extends
      */
     static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
             BufferUnderflowException {
-        if (buffer.readRemaining() == 0)
-            return "";
 
-        final long length = Math.min(maxLen + 1, buffer.readRemaining());
+        if (buffer.refCount() == 0)
+            // added because something is crashing the JVM
+            return "<unknown>";
 
-        final StringBuilder builder = new StringBuilder();
+        buffer.reserve();
         try {
-            buffer.readWithLength(length, b -> {
-                while (buffer.readRemaining() > 0) {
-                    if (builder.length() >= maxLen) {
-                        builder.append("...");
-                        break;
+
+            if (buffer.readRemaining() == 0)
+                return "";
+
+            final long length = Math.min(maxLen + 1, buffer.readRemaining());
+
+            final StringBuilder builder = new StringBuilder();
+            try {
+                buffer.readWithLength(length, b -> {
+                    while (buffer.readRemaining() > 0) {
+                        if (builder.length() >= maxLen) {
+                            builder.append("...");
+                            break;
+                        }
+                        builder.append((char) buffer.readByte());
                     }
-                    builder.append((char) buffer.readByte());
-                }
-            });
-        } catch (Exception e) {
-            builder.append(' ').append(e);
+                });
+            } catch (Exception e) {
+                builder.append(' ').append(e);
+            }
+            return builder.toString();
+        } finally {
+            buffer.release();
         }
-        return builder.toString();
     }
 
     /**

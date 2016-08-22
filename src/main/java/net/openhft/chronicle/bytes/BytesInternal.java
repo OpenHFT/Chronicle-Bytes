@@ -846,6 +846,10 @@ enum BytesInternal {
     }
 
     public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
+        if (bytes.refCount() == 0)
+            // added because something is crashing the JVM
+            return "<unknown>";
+
         bytes.reserve();
         try {
             int len = Maths.toUInt31(maxLength + 40);
