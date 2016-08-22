@@ -119,13 +119,16 @@ public class BytesTest {
     @Test
     public void testName() throws IORuntimeException {
         Bytes<Void> bytes = Bytes.allocateDirect(30);
+        try {
+            long expected = 12345L;
+            int offset = 5;
 
-        long expected = 12345L;
-        int offset = 5;
-
-        bytes.writeLong(offset, expected);
-        bytes.writePosition(offset + 8);
-        assertEquals(expected, bytes.readLong(offset));
+            bytes.writeLong(offset, expected);
+            bytes.writePosition(offset + 8);
+            assertEquals(expected, bytes.readLong(offset));
+        } finally {
+            bytes.release();
+        }
     }
 
     /*
@@ -145,81 +148,107 @@ public class BytesTest {
     @Test
     public void testCopy() {
         Bytes<ByteBuffer> bbb = Bytes.wrapForWrite(ByteBuffer.allocateDirect(1024));
-        for (int i = 'a'; i <= 'z'; i++)
-            bbb.writeUnsignedByte(i);
-        bbb.readPositionRemaining(4, 12);
-        BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
-        bbb.writeUnsignedByte(10, '0');
-        assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
+        try {
+            for (int i = 'a'; i <= 'z'; i++)
+                bbb.writeUnsignedByte(i);
+            bbb.readPositionRemaining(4, 12);
+            BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
+            bbb.writeUnsignedByte(10, '0');
+            assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
+        } finally {
+            bbb.release();
+        }
+
     }
 
     @Test
     public void toHexString() {
         Bytes bytes = Bytes.allocateElasticDirect(1020);
-        bytes.append("Hello World");
-        assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
-        bytes.readLimit(bytes.realCapacity());
-        assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
-                "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                "........\n" +
-                "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
+        try {
+            bytes.append("Hello World");
+            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
+            bytes.readLimit(bytes.realCapacity());
+            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "........\n" +
+                    "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
 
-        assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
-                "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                "........\n" +
-                "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                "... truncated", bytes.toHexString(256));
+            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+                    "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "........\n" +
+                    "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                    "... truncated", bytes.toHexString(256));
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test
     public void fromHexString() {
         Bytes bytes = Bytes.elasticByteBuffer();
-        for (int i = 0; i < 259; i++)
-            bytes.writeByte((byte) i);
-        String s = bytes.toHexString();
-        Bytes bytes2 = Bytes.fromHexString(s);
-        assertEquals(s, bytes2.toHexString());
+        try {
+            for (int i = 0; i < 259; i++)
+                bytes.writeByte((byte) i);
+            String s = bytes.toHexString();
+            Bytes bytes2 = Bytes.fromHexString(s);
+            assertEquals(s, bytes2.toHexString());
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test
     public void testCharAt() {
         Bytes b = Bytes.from("Hello World");
-        b.readSkip(6);
-        assertTrue(StringUtils.isEqual("World", b));
+        try {
+            b.readSkip(6);
+            assertTrue(StringUtils.isEqual("World", b));
+        } finally {
+            b.release();
+        }
     }
 
     @Test
     public void internBytes() throws IORuntimeException {
         Bytes b = Bytes.from("Hello World");
-        b.readSkip(6);
-        {
-            StringInterner si = new StringInterner(128);
-            String s = si.intern(b);
-            String s2 = si.intern(b);
-            assertEquals("World", s);
-            assertSame(s, s2);
-        }
-        {
-            UTF8StringInterner si = new UTF8StringInterner(128);
-            String s = si.intern(b);
-            String s2 = si.intern(b);
-            assertEquals("World", s);
-            assertSame(s, s2);
+        try {
+            b.readSkip(6);
+            {
+                StringInterner si = new StringInterner(128);
+                String s = si.intern(b);
+                String s2 = si.intern(b);
+                assertEquals("World", s);
+                assertSame(s, s2);
+            }
+            {
+                UTF8StringInterner si = new UTF8StringInterner(128);
+                String s = si.intern(b);
+                String s2 = si.intern(b);
+                assertEquals("World", s);
+                assertSame(s, s2);
+            }
+        } finally {
+            b.release();
         }
     }
 
     @Test
     public void testStopBitDouble() throws IORuntimeException {
         Bytes b = Bytes.elasticByteBuffer();
-        testSBD(b, -0.0, "00000000 40                                               @                \n");
-        testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
-        testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   ····N            \n");
-        testSBD(b, 0.0, "00000000 00                                               ·                \n");
-        testSBD(b, 1.0, "00000000 9F 7C                                            ·|               \n");
-        testSBD(b, 1024, "00000000 A0 24                                            ·$               \n");
-        testSBD(b, 1000000, "00000000 A0 CB D0 48                                      ···H             \n");
-        testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
-        testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
+        try {
+            testSBD(b, -0.0, "00000000 40                                               @         " +
+                    "       \n");
+            testSBD(b, -1.0, "00000000 DF 7C                                            ·|               \n");
+            testSBD(b, -12345678, "00000000 E0 D9 F1 C2 4E                                   ····N            \n");
+            testSBD(b, 0.0, "00000000 00                                               ·                \n");
+            testSBD(b, 1.0, "00000000 9F 7C                                            ·|               \n");
+            testSBD(b, 1024, "00000000 A0 24                                            ·$               \n");
+            testSBD(b, 1000000, "00000000 A0 CB D0 48                                      ···H             \n");
+            testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
+            testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
+        } finally {
+            b.release();
+        }
     }
 
     private void testSBD(Bytes b, double v, String s) throws IORuntimeException {
@@ -241,12 +270,14 @@ public class BytesTest {
                 Bytes.wrapForWrite(new byte[1]),
                 Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)),
         }) {
-            assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
-            assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
-
-            b.release();
-            assertEquals(count + ": " + b.getClass().getSimpleName(), 0, b.refCount());
-            assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
+            try {
+                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
+                assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
+            } finally {
+                b.release();
+                assertEquals(count + ": " + b.getClass().getSimpleName(), 0, b.refCount());
+                assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
+            }
         }
 
 //        Bytes.allocateElasticDirect(),
@@ -255,21 +286,31 @@ public class BytesTest {
     @Test
     public void testParseUtf8() {
         Bytes bytes = Bytes.allocateElasticDirect();
-        bytes.appendUtf8("starting Hello World");
-        String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
-        assertEquals("starting", s0);
-        String s = bytes.parseUtf8(StopCharTesters.ALL);
-        assertEquals("Hello World", s);
+        try {
+            bytes.appendUtf8("starting Hello World");
+            String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+            assertEquals("starting", s0);
+            String s = bytes.parseUtf8(StopCharTesters.ALL);
+            assertEquals("Hello World", s);
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test
     public void testPartialWrite() {
         Bytes from = Bytes.elasticByteBuffer();
-        from.write("Hello World");
         Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
 
-        to.writeSome(from);
-        assertEquals("World", from.toString());
+        try {
+            from.write("Hello World");
+
+            to.writeSome(from);
+            assertEquals("World", from.toString());
+        } finally {
+            from.release();
+            to.release();
+        }
     }
 
     @Test(expected = BufferOverflowException.class)
@@ -291,33 +332,49 @@ public class BytesTest {
     @Test
     public void testPartialWrite64plus() {
         Bytes from = Bytes.elasticByteBuffer();
-        from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
         Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
 
-        to.writeSome(from);
-        assertTrue("from: " + from, from.toString().startsWith("World "));
+        from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
+
+        try {
+            to.writeSome(from);
+            assertTrue("from: " + from, from.toString().startsWith("World "));
+        } finally {
+            from.release();
+            to.release();
+        }
     }
 
     @Test
     public void testCompact() {
         Bytes from = Bytes.elasticByteBuffer();
-        from.write("Hello World");
-        from.readLong();
-        from.compact();
-        assertEquals("rld", from.toString());
-        assertEquals(0, from.readPosition());
+        try {
+            from.write("Hello World");
+            from.readLong();
+            from.compact();
+            assertEquals("rld", from.toString());
+            assertEquals(0, from.readPosition());
+        } finally {
+            from.release();
+        }
     }
 
     @Test
     public void testParseToBytes() throws IORuntimeException {
         Bytes from = Bytes.allocateDirect(64);
-        from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
         Bytes to = Bytes.allocateDirect(32);
-        for (int i = 0; i < 4; i++) {
-            from.parse8bit(to, StopCharTesters.SPACE_STOP);
-            assertEquals(10, to.readRemaining());
+        try {
+            from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
+
+            for (int i = 0; i < 4; i++) {
+                from.parse8bit(to, StopCharTesters.SPACE_STOP);
+                assertEquals(10, to.readRemaining());
+            }
+            assertEquals(0, from.readRemaining());
+        } finally {
+            from.release();
+            to.release();
         }
-        assertEquals(0, from.readRemaining());
 
     }
 
@@ -326,9 +383,12 @@ public class BytesTest {
         byte[] bytes = "00000".getBytes(ISO_8859_1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
-
-        to.append(0, 1, 5);
-        assertEquals("00001", Bytes.wrapForRead(bb).toString());
+        try {
+            to.append(0, 1, 5);
+            assertEquals("00001", Bytes.wrapForRead(bb).toString());
+        } finally {
+            to.release();
+        }
     }
 
     @Test
@@ -336,9 +396,12 @@ public class BytesTest {
         byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
-
-        to.append(5, 10, 5);
-        assertEquals("WWWWW00010", Bytes.wrapForRead(bb).toString());
+        try {
+            to.append(5, 10, 5);
+            assertEquals("WWWWW00010", Bytes.wrapForRead(bb).toString());
+        } finally {
+            to.release();
+        }
     }
 
     public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
@@ -346,9 +409,12 @@ public class BytesTest {
             byte[] bytes = "000".getBytes(ISO_8859_1);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
             Bytes to = Bytes.wrapForWrite(bb);
-
-            to.append(0, 1000, 5);
-            fail("Should throw Exception");
+            try {
+                to.append(0, 1000, 5);
+                fail("Should throw Exception");
+            } finally {
+                to.release();
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -359,8 +425,11 @@ public class BytesTest {
             byte[] bytes = "000".getBytes(ISO_8859_1);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
             Bytes to = Bytes.wrapForWrite(bb);
-
-            to.append(0, 1000, 3);
+            try {
+                to.append(0, 1000, 3);
+            } finally {
+                to.release();
+            }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
             // TODO Auto-generated catch block
@@ -372,8 +441,11 @@ public class BytesTest {
     public void testAppendDoubleRandomPosition() {
         byte[] bytes = "000000".getBytes(ISO_8859_1);
         Bytes to = Bytes.wrapForWrite(bytes);
-
-        to.append(0, 3.14, 2, 6);
+        try {
+            to.append(0, 3.14, 2, 6);
+        } finally {
+            to.release();
+        }
         assertEquals("003.14", Bytes.wrapForRead(bytes).toString());
     }
 
@@ -381,8 +453,11 @@ public class BytesTest {
         try {
             byte[] bytes = "000000".getBytes(ISO_8859_1);
             Bytes to = Bytes.wrapForWrite(bytes);
-
-            to.append(0, 3.14, 2, 8);
+            try {
+                to.append(0, 3.14, 2, 8);
+            } finally {
+                to.release();
+            }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
             e.printStackTrace();
@@ -394,8 +469,11 @@ public class BytesTest {
         try {
             byte[] bytes = "000000".getBytes(ISO_8859_1);
             Bytes to = Bytes.wrapForWrite(bytes);
-
-            to.append(0, 33333.14, 2, 6);
+            try {
+                to.append(0, 33333.14, 2, 6);
+            } finally {
+                to.release();
+            }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
             // TODO Auto-generated catch block
@@ -406,14 +484,18 @@ public class BytesTest {
     @Test
     public void testUnwrite() {
         Bytes bytes = Bytes.elasticByteBuffer();
-        for (int i = 0; i < 26; i++) {
-            bytes.writeUnsignedByte('A' + i);
+        try {
+            for (int i = 0; i < 26; i++) {
+                bytes.writeUnsignedByte('A' + i);
+            }
+            assertEquals(26, bytes.writePosition());
+            assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+            bytes.unwrite(1, 1);
+            assertEquals(25, bytes.writePosition());
+            assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
+        } finally {
+            bytes.release();
         }
-        assertEquals(26, bytes.writePosition());
-        assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
-        bytes.unwrite(1, 1);
-        assertEquals(25, bytes.writePosition());
-        assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
     }
 
 }

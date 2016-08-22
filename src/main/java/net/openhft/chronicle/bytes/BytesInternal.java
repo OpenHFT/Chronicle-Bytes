@@ -846,7 +846,7 @@ enum BytesInternal {
     }
 
     public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
-        if (bytes.refCount() == 0)
+        if (bytes.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
 

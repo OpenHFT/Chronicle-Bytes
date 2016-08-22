@@ -227,7 +227,7 @@ public interface Bytes<Underlying> extends
     static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
             BufferUnderflowException {
 
-        if (buffer.refCount() == 0)
+        if (buffer.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
 
