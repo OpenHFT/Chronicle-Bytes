@@ -846,34 +846,39 @@ enum BytesInternal {
     }
 
     public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
-        int len = Maths.toUInt31(maxLength + 40);
-        StringBuilder sb = new StringBuilder(len);
-        long readPosition = bytes.readPosition();
-        long readLimit = bytes.readLimit();
-        sb.append("[")
-                .append("pos: ").append(readPosition)
-                .append(", rlim: ").append(readLimit)
-                .append(", wlim: ").append(asSize(bytes.writeLimit()))
-                .append(", cap: ").append(asSize(bytes.capacity()))
-                .append(" ] ");
+        bytes.reserve();
         try {
-            long start = Math.max(bytes.start(), readPosition - 64);
-            long end = Math.min(readLimit + 64, start + maxLength);
+            int len = Maths.toUInt31(maxLength + 40);
+            StringBuilder sb = new StringBuilder(len);
+            long readPosition = bytes.readPosition();
+            long readLimit = bytes.readLimit();
+            sb.append("[")
+                    .append("pos: ").append(readPosition)
+                    .append(", rlim: ").append(readLimit)
+                    .append(", wlim: ").append(asSize(bytes.writeLimit()))
+                    .append(", cap: ").append(asSize(bytes.capacity()))
+                    .append(" ] ");
             try {
-                for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
-                    if (bytes.readLong(end - 8) != 0)
-                        break;
+                long start = Math.max(bytes.start(), readPosition - 64);
+                long end = Math.min(readLimit + 64, start + maxLength);
+                try {
+                    for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
+                        if (bytes.readLong(end - 8) != 0)
+                            break;
+                    }
+                } catch (UnsupportedOperationException | BufferUnderflowException ignored) {
+                    // ignore
                 }
-            } catch (UnsupportedOperationException | BufferUnderflowException ignored) {
-                // ignore
+                toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
+                if (end < bytes.readLimit())
+                    sb.append("...");
+            } catch (Exception e) {
+                sb.append(' ').append(e);
             }
-            toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
-            if (end < bytes.readLimit())
-                sb.append("...");
-        } catch (Exception e) {
-            sb.append(' ').append(e);
-        }
 
+        } finally {
+            bytes.release();
+        }
         return sb.toString();
     }
 
@@ -1106,6 +1111,7 @@ enum BytesInternal {
 
     /**
      * Appends given long value with given decimalPlaces to RandomDataOutput out
+     *
      * @param out
      * @param num
      * @param offset
