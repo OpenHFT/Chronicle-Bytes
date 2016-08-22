@@ -875,11 +875,11 @@ enum BytesInternal {
             } catch (Exception e) {
                 sb.append(' ').append(e);
             }
+            return sb.toString();
 
         } finally {
             bytes.release();
         }
-        return sb.toString();
     }
 
     @NotNull
