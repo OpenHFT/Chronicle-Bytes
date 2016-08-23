@@ -211,7 +211,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
-        if (!(s instanceof String) || pos + length + 5 >= safeLimit()) {
+        if (!(s instanceof String) || pos + length * 3 + 5 >= safeLimit()) {
             super.write8bit(s, start, length);
             return this;
         }
@@ -247,7 +247,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
-        if (!(cs instanceof String) || pos + length + 5 >= safeLimit()) {
+        if (!(cs instanceof String) || pos + length * 3 + 5 >= safeLimit()) {
             super.appendUtf8(cs, start, length);
             return this;
         }
