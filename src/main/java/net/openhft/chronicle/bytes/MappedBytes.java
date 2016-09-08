@@ -137,7 +137,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         super.writeCheckOffset(offset, adding);
     }
 
-    private void acquireNextByteStore(long offset) {
+    private synchronized void acquireNextByteStore(long offset) {
         BytesStore oldBS = bytesStore;
         try {
             bytesStore = (BytesStore) mappedFile.acquireByteStore(offset);
