@@ -39,15 +39,17 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public static boolean CHECKING = false;
     private final MappedFile mappedFile;
+    private final Object owner;
 
     // assume the mapped file is reserved already.
-    protected MappedBytes(MappedFile mappedFile) throws IllegalStateException {
-        this(mappedFile, "");
+    protected MappedBytes(MappedFile mappedFile, Object owner) throws IllegalStateException {
+        this(mappedFile, "", owner);
     }
 
-    protected MappedBytes(MappedFile mappedFile, String name) throws IllegalStateException {
+    protected MappedBytes(MappedFile mappedFile, String name, Object owner) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(),
                 NoBytesStore.noBytesStore().writeLimit(), name);
+        this.owner = owner;
         assert !mappedFile.isClosed();
         this.mappedFile = mappedFile;
         clear();
@@ -66,16 +68,16 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize, Object owner) throws FileNotFoundException, IllegalStateException {
         MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false, owner);
-        return mappedBytes(rw);
+        return mappedBytes(rw, owner);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(MappedFile rw) {
-        return CHECKING ? new CheckingMappedBytes(rw) : new MappedBytes(rw);
+    public static MappedBytes mappedBytes(MappedFile rw, Object owner) {
+        return CHECKING ? new CheckingMappedBytes(rw, owner) : new MappedBytes(rw, owner);
     }
 
     public static MappedBytes readOnly(File file, Object owner) throws FileNotFoundException {
-        return new MappedBytes(MappedFile.readOnly(file, owner));
+        return new MappedBytes(MappedFile.readOnly(file, owner), owner);
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -91,7 +93,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (mappedFile2 == this.mappedFile)
             return this;
         try {
-            return mappedBytes(mappedFile2);
+            return mappedBytes(mappedFile2, owner);
         } finally {
             release();
         }

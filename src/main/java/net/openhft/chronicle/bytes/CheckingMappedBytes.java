@@ -25,8 +25,8 @@ import java.nio.ByteBuffer;
  * Created by peter on 08/03/16.
  */
 public class CheckingMappedBytes extends MappedBytes {
-    public CheckingMappedBytes(MappedFile mappedFile) {
-        super(mappedFile);
+    public CheckingMappedBytes(MappedFile mappedFile, Object owner) {
+        super(mappedFile, owner);
     }
 
     @Override
