@@ -73,7 +73,7 @@ public class MappedMemoryTest {
             try {
 
                 long startTime = System.nanoTime();
-                final Bytes bytes = mappedBytes(tempFile, BLOCK_SIZE / 2, this);
+                final Bytes bytes = mappedBytes(tempFile, BLOCK_SIZE / 2);
 //                bytes.writeLong(1, 1);
                 for (long i = 0; i < BLOCK_SIZE; i += 8) {
                     bytes.writeLong(i);
@@ -124,7 +124,7 @@ public class MappedMemoryTest {
         File tempFile = File.createTempFile("chronicle", "q");
         try {
 
-            final Bytes bytes = mappedBytes(tempFile, OS.pageSize(), this);
+            final Bytes bytes = mappedBytes(tempFile, OS.pageSize());
             char[] chars = new char[OS.pageSize() * 11];
             Arrays.fill(chars, '.');
             chars[chars.length - 1] = '*';

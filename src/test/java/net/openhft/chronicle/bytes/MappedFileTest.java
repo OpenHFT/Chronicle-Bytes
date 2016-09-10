@@ -40,7 +40,6 @@ public class MappedFileTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
-
     @Ignore("todo fix sometimes fails on TC")
     @Test
     public void testReferenceCounts() throws IOException {
@@ -104,11 +103,11 @@ public class MappedFileTest {
     public void largeReadOnlyFile() throws IOException {
         File file = File.createTempFile("largeReadOnlyFile", "deleteme");
         file.deleteOnExit();
-        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize(), this)) {
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize())) {
             bytes.writeLong(3L << 30, 0x12345678); // make the file 3 GB.
         }
 
-        try (MappedBytes bytes = MappedBytes.readOnly(file, this)) {
+        try (MappedBytes bytes = MappedBytes.readOnly(file)) {
             Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
     }
