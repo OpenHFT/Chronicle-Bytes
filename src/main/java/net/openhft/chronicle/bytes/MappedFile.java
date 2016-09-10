@@ -32,8 +32,7 @@ import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -50,16 +49,19 @@ public class MappedFile implements ReferenceCounted {
     private final long chunkSize;
     private final long overlapSize;
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
+    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
     private final boolean readOnly;
     @NotNull
     private final File file;
+    private final Set<Object> owners = Collections.newSetFromMap(Collections.synchronizedMap(new
+            IdentityHashMap<>()));
     private NewChunkListener newChunkListener = (filename, chunk, delayMicros) ->
             Jvm.debug().on(MappedFile.class, "Allocation of " + chunk + " chunk in " + filename + " took " + delayMicros / 1e3 + " ms.");
 
-    protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
+    protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long
+            overlapSize, long capacity, boolean readOnly, Object owner) {
         this.file = file;
         this.raf = raf;
         this.fileChannel = raf.getChannel();
@@ -67,13 +69,16 @@ public class MappedFile implements ReferenceCounted {
         this.overlapSize = OS.mapAlign(overlapSize);
         this.capacity = capacity;
         this.readOnly = readOnly;
+
+        if (owner != null)
+            owners.add(owner);
     }
 
-    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
+    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly, Object owner) throws FileNotFoundException {
         RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
         try {
             long capacity = readOnly ? raf.length() : DEFAULT_CAPACITY;
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly, owner);
         } catch (IOException e) {
             Closeable.closeQuietly(raf);
             FileNotFoundException fnfe = new FileNotFoundException("Unable to open " + file);
@@ -84,31 +89,38 @@ public class MappedFile implements ReferenceCounted {
 
     @NotNull
     public static MappedFile mappedFile(@NotNull File file, long chunkSize) throws FileNotFoundException {
-        return mappedFile(file, chunkSize, OS.pageSize());
+        return mappedFile(file, chunkSize, OS.pageSize(), null);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull String filename, long chunkSize) throws FileNotFoundException {
-        return mappedFile(filename, chunkSize, OS.pageSize());
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, Object owner) throws FileNotFoundException {
+        return mappedFile(file, chunkSize, OS.pageSize(), owner);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long overlapSize) throws FileNotFoundException {
-        return mappedFile(new File(filename), chunkSize, overlapSize);
+    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, Object owner) throws
+            FileNotFoundException {
+        return mappedFile(filename, chunkSize, OS.pageSize(), owner);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
-        return mappedFile(file, chunkSize, overlapSize, false);
+    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long
+            overlapSize, Object owner) throws FileNotFoundException {
+        return mappedFile(new File(filename), chunkSize, overlapSize, owner);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
-        return MappedFile.of(file, chunkSize, overlapSize, readOnly);
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, Object owner) throws FileNotFoundException {
+        return mappedFile(file, chunkSize, overlapSize, false, owner);
     }
 
     @NotNull
-    public static MappedFile readOnly(@NotNull File file) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly, Object owner) throws FileNotFoundException {
+        return MappedFile.of(file, chunkSize, overlapSize, readOnly, owner);
+    }
+
+    @NotNull
+    public static MappedFile readOnly(@NotNull File file, Object owner) throws FileNotFoundException {
         long chunkSize = file.length();
         long overlapSize = 0;
         // Chunks of 4 GB+ not supported on Windows.
@@ -116,17 +128,16 @@ public class MappedFile implements ReferenceCounted {
             chunkSize = 2 << 30;
             overlapSize = OS.pageSize();
         }
-        return MappedFile.of(file, chunkSize, overlapSize, true);
+        return MappedFile.of(file, chunkSize, overlapSize, true, owner);
     }
 
-
-    public MappedFile withSizes(long chunkSize, long overlapSize) {
+    public MappedFile withSizes(long chunkSize, long overlapSize, Object owner) {
         chunkSize = OS.mapAlign(chunkSize);
         overlapSize = OS.mapAlign(overlapSize);
         if (chunkSize == this.chunkSize && overlapSize == this.overlapSize)
             return this;
         try {
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly, owner);
         } finally {
             release();
         }
@@ -237,6 +248,20 @@ public class MappedFile implements ReferenceCounted {
     @Override
     public void release() throws IllegalStateException {
         refCount.release();
+    }
+
+    public void releaseWithOwner(Object owner) throws IllegalStateException {
+        if (owner != null)
+            assert owners.remove(owner) : "owner=" + owner + " not previously reserved";
+        release();
+    }
+
+
+    public void reserveWithOwner(Object owner) throws IllegalStateException {
+        if (owner != null)
+            assert owners.add(owner) : "owner=" + owner + " has already been reserved for this " +
+                    "instance.";
+        reserve();
     }
 
     @Override

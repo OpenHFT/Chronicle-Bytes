@@ -54,18 +54,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException, IllegalStateException {
-        return mappedBytes(new File(filename), chunkSize);
+    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize, Object owner) throws FileNotFoundException, IllegalStateException {
+        return mappedBytes(new File(filename), chunkSize, owner);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException, IllegalStateException {
-        return mappedBytes(file, chunkSize, OS.pageSize());
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, Object owner) throws FileNotFoundException, IllegalStateException {
+        return mappedBytes(file, chunkSize, OS.pageSize(), owner);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException, IllegalStateException {
-        MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize, Object owner) throws FileNotFoundException, IllegalStateException {
+        MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false, owner);
         return mappedBytes(rw);
     }
 
@@ -74,8 +74,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return CHECKING ? new CheckingMappedBytes(rw) : new MappedBytes(rw);
     }
 
-    public static MappedBytes readOnly(File file) throws FileNotFoundException {
-        return new MappedBytes(MappedFile.readOnly(file));
+    public static MappedBytes readOnly(File file, Object owner) throws FileNotFoundException {
+        return new MappedBytes(MappedFile.readOnly(file, owner));
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -87,7 +87,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     public MappedBytes withSizes(long chunkSize, long overlapSize) {
-        MappedFile mappedFile2 = this.mappedFile.withSizes(chunkSize, overlapSize);
+        MappedFile mappedFile2 = this.mappedFile.withSizes(chunkSize, overlapSize, this);
         if (mappedFile2 == this.mappedFile)
             return this;
         try {
