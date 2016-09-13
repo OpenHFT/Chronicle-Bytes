@@ -50,8 +50,8 @@ public class MappedFile implements ReferenceCounted {
     private final long chunkSize;
     private final long overlapSize;
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final AtomicBoolean closed = new AtomicBoolean();
+    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
     private final boolean readOnly;
     @NotNull

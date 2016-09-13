@@ -168,7 +168,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        if (bytes.length > writeRemaining())
+        if (length > writeRemaining())
             throw new BufferOverflowException();
         long position = writePosition();
         ensureCapacity(position + length);

@@ -650,7 +650,10 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
-        if (bytes.length > writeRemaining())
+        if (length + offset > bytes.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
+                    "length=" + length + ", offset=" + offset);
+        if (length > writeRemaining())
             throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, bytes, offset, length);

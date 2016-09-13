@@ -125,9 +125,12 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         this.bytes = bytes;
+
+        assert (offset & 7) == 0 : "offset=" + offset;
         this.offset = (offset + 7) & ~7;
         this.length = length;
     }
+
 
     @Override
     public boolean isNull() {
