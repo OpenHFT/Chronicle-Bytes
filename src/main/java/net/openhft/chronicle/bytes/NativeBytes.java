@@ -149,16 +149,18 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         } else {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
         }
+
+        BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
         try {
-            bytesStore.copyTo(store);
-            bytesStore.release();
+            this.bytesStore.copyTo(store);
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
-        bytesStore = store;
+        this.bytesStore = store;
+        tempStore.release();
 
-        if (bytesStore.underlyingObject() instanceof ByteBuffer) {
-            ByteBuffer byteBuffer = (ByteBuffer) bytesStore.underlyingObject();
+        if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
+            ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
             byteBuffer.position(0);
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
