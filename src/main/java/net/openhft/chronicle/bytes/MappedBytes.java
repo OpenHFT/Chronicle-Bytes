@@ -149,6 +149,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     private void acquireNextByteStore(long offset) {
+
+        if (bytesStore.inside(offset))
+            return;
+
         try {
             BytesStore newBS = mappedFile.acquireByteStore(offset);
             BytesStore oldBS = bytesStore;
