@@ -48,9 +48,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     protected MappedBytes(MappedFile mappedFile, String name) throws IllegalStateException {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(),
                 NoBytesStore.noBytesStore().writeLimit(), name);
+        this.mappedFile = reserve(mappedFile);
         assert !mappedFile.isClosed();
-        this.mappedFile = mappedFile;
         clear();
+    }
+
+    private static MappedFile reserve(MappedFile mappedFile) {
+        mappedFile.reserve();
+        return mappedFile;
     }
 
     @NotNull
@@ -66,7 +71,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException, IllegalStateException {
         MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
-        return mappedBytes(rw);
+        try {
+            return mappedBytes(rw);
+        } finally {
+            rw.release();
+        }
+
     }
 
     @NotNull
@@ -93,6 +103,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         try {
             return mappedBytes(mappedFile2);
         } finally {
+            mappedFile2.release();
             release();
         }
     }
@@ -138,6 +149,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     private void acquireNextByteStore(long offset) {
+
+        if (bytesStore.inside(offset))
+            return;
+
         try {
             BytesStore newBS = mappedFile.acquireByteStore(offset);
             BytesStore oldBS = bytesStore;
