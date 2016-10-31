@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
@@ -75,5 +76,15 @@ public class NativeBytesTest {
     public void testAppendCharArrayNonAscii() {
         Bytes b = Bytes.allocateElasticDirect();
         b.appendUtf8(new char[] {'Δ'}, 0, 1);
+    }
+
+    @Test
+    public void testResizeTwoPagesToThreePages() {
+        long pageSize = OS.pageSize();
+        NativeBytes<Void> nativeBytes = NativeBytes.nativeBytes(2 * pageSize);
+        assertEquals(2 * pageSize, nativeBytes.realCapacity());
+        nativeBytes.writePosition(nativeBytes.realCapacity() - 3);
+        nativeBytes.writeInt(0);
+        assertEquals(3 * pageSize, nativeBytes.realCapacity());
     }
 }

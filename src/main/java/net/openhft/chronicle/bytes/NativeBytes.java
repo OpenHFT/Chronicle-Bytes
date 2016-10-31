@@ -131,7 +131,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
         // grow by 50% rounded up to the next pages size
         long ps = OS.pageSize();
-        long size = (Math.max(endOfBuffer, realCapacity * 3 / 2) + ps) & ~(ps - 1);
+        long mask = ps - 1;
+        long size = (Math.max(endOfBuffer, realCapacity * 3 / 2) + mask) & ~mask;
 //        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
             Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
