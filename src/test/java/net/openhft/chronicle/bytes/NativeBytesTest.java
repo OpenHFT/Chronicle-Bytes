@@ -22,18 +22,38 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.Allocator.HEAP;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
  * Created by daniel on 17/04/15.
  */
+@RunWith(Parameterized.class)
 public class NativeBytesTest {
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { NATIVE }, { HEAP }
+        });
+    }
+
+    private Allocator alloc;
+
+    public NativeBytesTest(Allocator alloc) {
+        this.alloc = alloc;
+    }
 
     private ThreadDump threadDump;
 
@@ -48,7 +68,7 @@ public class NativeBytesTest {
     }
     @Test
     public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
-        Bytes b = Bytes.allocateElasticDirect();
+        Bytes b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(0, b.realCapacity());
@@ -61,7 +81,7 @@ public class NativeBytesTest {
 
     @Test
     public void testWriteBytesWhereResizeNeeded() throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
-        Bytes b = Bytes.allocateElasticDirect(1);
+        Bytes b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(1, b.realCapacity());
@@ -74,7 +94,7 @@ public class NativeBytesTest {
 
     @Test
     public void testAppendCharArrayNonAscii() {
-        Bytes b = Bytes.allocateElasticDirect();
+        Bytes b = alloc.elasticBytes(1);
         b.appendUtf8(new char[] {'Δ'}, 0, 1);
     }
 

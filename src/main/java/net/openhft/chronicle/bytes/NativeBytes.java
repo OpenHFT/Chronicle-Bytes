@@ -29,7 +29,9 @@ import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedC
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 /**
- * Elastic native memory accessor which can wrap either a direct ByteBuffer or malloc'ed memory.
+ * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
+ *
+ * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
@@ -129,9 +131,9 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         if (endOfBuffer > capacity())
             throw new BufferOverflowException();
 
-        // grow by 50% rounded up to the next pages size
-        long ps = OS.pageSize();
-        long mask = ps - 1;
+        // Allocate direct memory of page granularity
+        long mask = isDirectMemory() ? (long) OS.pageSize() - 1 : 0L;
+        // grow by 50%
         long size = (Math.max(endOfBuffer, realCapacity * 3 / 2) + mask) & ~mask;
 //        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
@@ -141,12 +143,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
         if (capacity() < Long.MAX_VALUE)
             size = Math.min(size, capacity());
-        NativeBytesStore store;
+        BytesStore store;
         int position = 0, limit = 0;
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             position = ((ByteBuffer) bytesStore.underlyingObject()).position();
-            store = NativeBytesStore.elasticByteBuffer(Maths.toInt32(size), capacity());
-
+            store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
         } else {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
         }
@@ -165,6 +166,14 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             byteBuffer.position(0);
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
+        }
+    }
+
+    private BytesStore allocateNewByteBufferBackedStore(int size) {
+        if (isDirectMemory()) {
+            return NativeBytesStore.elasticByteBuffer(size, capacity());
+        } else {
+            return HeapBytesStore.wrap(ByteBuffer.allocate(size));
         }
     }
 
