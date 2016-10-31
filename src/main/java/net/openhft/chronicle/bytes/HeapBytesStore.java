@@ -102,7 +102,7 @@ public class HeapBytesStore<Underlying>
     public void move(long from, long to, long length) {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
         //noinspection SuspiciousSystemArraycopy
-        System.arraycopy(underlyingObject, Maths.toUInt31(from), underlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
+        System.arraycopy(realUnderlyingObject, Maths.toUInt31(from), realUnderlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
     }
 
     @NotNull
