@@ -68,6 +68,19 @@ public interface Bytes<Underlying> extends
     }
 
     /**
+     * Returns an elastic wrapper for a heap ByteBuffer which will be resized as required, with
+     * the given initial capacity.
+     */
+    static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
+        HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
+        try {
+            return new NativeBytes<>(bs);
+        } finally {
+            bs.release();
+        }
+    }
+
+    /**
      * @param byteBuffer to read
      * @return a Bytes which wrap a ByteBuffer and is ready for reading.
      */

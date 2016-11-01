@@ -24,14 +24,36 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.Allocator.HEAP;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.*;
 
+@RunWith(Parameterized.class)
 public class BytesTest {
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][] {
+                { NATIVE, NATIVE }, { HEAP, NATIVE }, { NATIVE, HEAP }, { HEAP, HEAP }
+        });
+    }
+
+    private Allocator alloc1;
+    private Allocator alloc2;
+
+    public BytesTest(Allocator alloc1, Allocator alloc2) {
+        this.alloc1 = alloc1;
+        this.alloc2 = alloc2;
+    }
 
     private ThreadDump threadDump;
 
@@ -118,7 +140,7 @@ public class BytesTest {
     */
     @Test
     public void testName() throws IORuntimeException {
-        Bytes<Void> bytes = Bytes.allocateDirect(30);
+        Bytes<?> bytes = alloc1.fixedBytes(30);
         try {
             long expected = 12345L;
             int offset = 5;
@@ -147,7 +169,7 @@ public class BytesTest {
     */
     @Test
     public void testCopy() {
-        Bytes<ByteBuffer> bbb = Bytes.wrapForWrite(ByteBuffer.allocateDirect(1024));
+        Bytes<ByteBuffer> bbb = alloc1.fixedBytes(1024);
         try {
             for (int i = 'a'; i <= 'z'; i++)
                 bbb.writeUnsignedByte(i);
@@ -163,7 +185,7 @@ public class BytesTest {
 
     @Test
     public void toHexString() {
-        Bytes bytes = Bytes.allocateElasticDirect(1020);
+        Bytes bytes = alloc1.elasticBytes(1020);
         try {
             bytes.append("Hello World");
             assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
@@ -185,7 +207,7 @@ public class BytesTest {
 
     @Test
     public void fromHexString() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes bytes = alloc1.elasticBytes(1);
         try {
             for (int i = 0; i < 259; i++)
                 bytes.writeByte((byte) i);
@@ -234,7 +256,7 @@ public class BytesTest {
 
     @Test
     public void testStopBitDouble() throws IORuntimeException {
-        Bytes b = Bytes.elasticByteBuffer();
+        Bytes b = alloc1.elasticBytes(1);
         try {
             testSBD(b, -0.0, "00000000 40                                               @         " +
                     "       \n");
@@ -269,6 +291,7 @@ public class BytesTest {
                 Bytes.wrapForRead(ByteBuffer.allocateDirect(128)),
                 Bytes.wrapForWrite(new byte[1]),
                 Bytes.wrapForWrite(ByteBuffer.allocateDirect(128)),
+                Bytes.elasticHeapByteBuffer(1)
         }) {
             try {
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
@@ -285,7 +308,7 @@ public class BytesTest {
 
     @Test
     public void testParseUtf8() {
-        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes bytes = alloc1.elasticBytes(1);
         try {
             bytes.appendUtf8("starting Hello World");
             String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
@@ -299,8 +322,8 @@ public class BytesTest {
 
     @Test
     public void testPartialWrite() {
-        Bytes from = Bytes.elasticByteBuffer();
-        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+        Bytes from = alloc1.elasticBytes(1);
+        Bytes to = alloc2.fixedBytes(6);
 
         try {
             from.write("Hello World");
@@ -316,14 +339,14 @@ public class BytesTest {
     @Test(expected = BufferOverflowException.class)
     public void testPartialWriteArray() {
         byte[] array = "Hello World".getBytes(ISO_8859_1);
-        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+        Bytes to = alloc1.fixedBytes(6);
         to.write(array);
     }
 
     @Test
     public void testPartialWriteBB() {
         ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes(ISO_8859_1));
-        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+        Bytes to = alloc1.fixedBytes(6);
 
         to.writeSome(bb);
         assertEquals("World", Bytes.wrapForRead(bb).toString());
@@ -331,8 +354,8 @@ public class BytesTest {
 
     @Test
     public void testPartialWrite64plus() {
-        Bytes from = Bytes.elasticByteBuffer();
-        Bytes to = Bytes.wrapForWrite(ByteBuffer.allocateDirect(6));
+        Bytes from = alloc1.elasticBytes(1);
+        Bytes to = alloc2.fixedBytes(6);
 
         from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
 
@@ -347,7 +370,7 @@ public class BytesTest {
 
     @Test
     public void testCompact() {
-        Bytes from = Bytes.elasticByteBuffer();
+        Bytes from = alloc1.elasticBytes(1);
         try {
             from.write("Hello World");
             from.readLong();
@@ -361,8 +384,8 @@ public class BytesTest {
 
     @Test
     public void testParseToBytes() throws IORuntimeException {
-        Bytes from = Bytes.allocateDirect(64);
-        Bytes to = Bytes.allocateDirect(32);
+        Bytes from = alloc1.fixedBytes(64);
+        Bytes to = alloc2.fixedBytes(32);
         try {
             from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
 
@@ -483,7 +506,7 @@ public class BytesTest {
 
     @Test
     public void testUnwrite() {
-        Bytes bytes = Bytes.elasticByteBuffer();
+        Bytes bytes = alloc1.elasticBytes(1);
         try {
             for (int i = 0; i < 26; i++) {
                 bytes.writeUnsignedByte('A' + i);
