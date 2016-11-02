@@ -119,6 +119,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return true;
     }
 
+    // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
             throws IllegalArgumentException, BufferOverflowException {
         final long realCapacity = realCapacity();
