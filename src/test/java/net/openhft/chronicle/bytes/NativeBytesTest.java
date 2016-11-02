@@ -42,20 +42,19 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class NativeBytesTest {
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { NATIVE }, { HEAP }
-        });
-    }
-
     private Allocator alloc;
+    private ThreadDump threadDump;
 
     public NativeBytesTest(Allocator alloc) {
         this.alloc = alloc;
     }
 
-    private ThreadDump threadDump;
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {NATIVE}, {HEAP}
+        });
+    }
 
     @Before
     public void threadDump() {
@@ -71,7 +70,7 @@ public class NativeBytesTest {
         Bytes b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
-        assertEquals(0, b.realCapacity());
+        assertEquals(1, b.realCapacity());
         assertTrue(b.readLimit() < b.writeLimit());
 
         Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));

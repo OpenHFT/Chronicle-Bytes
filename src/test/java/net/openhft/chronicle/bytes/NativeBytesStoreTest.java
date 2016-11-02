@@ -54,11 +54,11 @@ public class NativeBytesStoreTest {
         ByteBuffer bb = bbb.underlyingObject();
         assertNotNull(bb);
 
-        for (int i = 0; i < 16; i++) {
+        for (int i = 0; i < 20; i++) {
             bbb.writeSkip(1000);
             bbb.writeLong(12345);
         }
-        assertEquals(OS.pageSize() * 4, bbb.realCapacity());
+        assertEquals(OS.pageSize() * 5, bbb.realCapacity());
         ByteBuffer bb2 = bbb.underlyingObject();
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
