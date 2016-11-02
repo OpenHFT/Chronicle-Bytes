@@ -122,7 +122,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     private void resize(long endOfBuffer)
             throws IllegalArgumentException, BufferOverflowException {
         final long realCapacity = realCapacity();
-        if (endOfBuffer < realCapacity) {
+        if (endOfBuffer <= realCapacity) {
 //            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
             return;
         }
