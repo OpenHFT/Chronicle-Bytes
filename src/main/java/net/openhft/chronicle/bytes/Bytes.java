@@ -41,6 +41,7 @@ public interface Bytes<Underlying> extends
         BytesOut<Underlying> {
 
     long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
+    int MAX_BYTE_BUFFER_CAPACITY = Integer.MAX_VALUE & ~(OS.pageSize() - 1);
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
@@ -64,7 +65,7 @@ public interface Bytes<Underlying> extends
      * the given initial capacity.
      */
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
-        return elasticByteBuffer(initialCapacity, Integer.MAX_VALUE & ~(OS.pageSize() - 1));
+        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
     }
 
     /**
