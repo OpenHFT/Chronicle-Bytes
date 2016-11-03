@@ -72,8 +72,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalArgumentException {
-        if (!bytesStore.inside(offset + adding))
-            checkResize(offset + adding);
+        if (offset < bytesStore.start())
+            throw new BufferOverflowException();
+        long writeEnd = offset + adding;
+        if (writeEnd > bytesStore.safeLimit())
+            checkResize(writeEnd);
     }
 
     @Override
@@ -122,15 +125,15 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
             throws IllegalArgumentException, BufferOverflowException {
+        if (endOfBuffer < 0)
+            throw new IllegalArgumentException(endOfBuffer + " < 0");
+        if (endOfBuffer > capacity())
+            throw new BufferOverflowException();
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
 //            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
             return;
         }
-        if (endOfBuffer < 0)
-            throw new IllegalArgumentException(endOfBuffer + " < 0");
-        if (endOfBuffer > capacity())
-            throw new BufferOverflowException();
 
         // Allocate direct memory of page granularity
         long mask = isDirectMemory() ? (long) OS.pageSize() - 1 : 0L;
