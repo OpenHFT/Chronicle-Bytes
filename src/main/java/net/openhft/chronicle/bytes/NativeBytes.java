@@ -72,8 +72,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalArgumentException {
-        if (!bytesStore.inside(offset + adding))
-            checkResize(offset + adding);
+        if (offset < bytesStore.start())
+            throw new BufferOverflowException();
+        long writeEnd = offset + adding;
+        if (writeEnd > bytesStore.safeLimit())
+            checkResize(writeEnd);
     }
 
     @Override
@@ -122,31 +125,41 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
             throws IllegalArgumentException, BufferOverflowException {
+        if (endOfBuffer < 0)
+            throw new IllegalArgumentException(endOfBuffer + " < 0");
+        if (endOfBuffer > capacity())
+            throw new BufferOverflowException();
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
 //            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
             return;
         }
-        if (endOfBuffer < 0)
-            throw new IllegalArgumentException(endOfBuffer + " < 0");
-        if (endOfBuffer > capacity())
-            throw new BufferOverflowException();
 
-        // Allocate direct memory of page granularity
-        long mask = isDirectMemory() ? (long) OS.pageSize() - 1 : 0L;
-        // grow by 50%
-        long size = (Math.max(endOfBuffer, realCapacity * 3 / 2) + mask) & ~mask;
+        // Grow by 50%
+        long size = Math.max(endOfBuffer, realCapacity * 3 / 2);
+        // Size must not be more than capacity(), it may break some assumptions in BytesStore or elsewhere
+        size = Math.min(size, capacity());
+        if (isDirectMemory() || size > MAX_BYTE_BUFFER_CAPACITY) {
+            // Allocate direct memory of page granularity
+            size = alignToPageSize(size);
+            // Cap the size with capacity() again
+            size = Math.min(size, capacity());
+        }
+
+        boolean isByteBufferBacked = bytesStore.underlyingObject() instanceof ByteBuffer;
+        if (isByteBufferBacked && size > MAX_BYTE_BUFFER_CAPACITY) {
+            Jvm.warn().on(getClass(), "Going to try to replace ByteBuffer-backed BytesStore with " +
+                    "raw NativeBytesStore to grow to " + size / 1024 + " KB. If later it is assumed that " +
+                    "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown");
+        }
 //        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
             Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + endOfBuffer / 1024 + " KB, " +
                     "new-size " + size / 1024 + " KB");
-
-        if (capacity() < Long.MAX_VALUE)
-            size = Math.min(size, capacity());
         BytesStore store;
-        int position = 0, limit = 0;
-        if (bytesStore.underlyingObject() instanceof ByteBuffer) {
+        int position = 0;
+        if (isByteBufferBacked && size <= MAX_BYTE_BUFFER_CAPACITY) {
             position = ((ByteBuffer) bytesStore.underlyingObject()).position();
             store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
         } else {
@@ -168,6 +181,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
+    }
+
+    private static long alignToPageSize(long size) {
+        long mask = OS.pageSize() - 1;
+        return (size + mask) & ~mask;
     }
 
     private BytesStore allocateNewByteBufferBackedStore(int size) {

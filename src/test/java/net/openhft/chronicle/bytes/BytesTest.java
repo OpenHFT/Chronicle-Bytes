@@ -521,4 +521,27 @@ public class BytesTest {
         }
     }
 
+    @Test(expected = BufferOverflowException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException() {
+        Bytes<ByteBuffer> bytes = alloc1.elasticBytes(4);
+        bytes.writeInt(-1, 1);
+    }
+
+    @Test(expected = BufferOverflowException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException() {
+        Bytes<ByteBuffer> bytes = alloc1.elasticBytes(1);
+        bytes.writeInt(-1, 1);
+    }
+
+    @Test(expected = BufferOverflowException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsBufferOverflowException() {
+        Bytes<ByteBuffer> bytes = alloc1.fixedBytes(4);
+        bytes.writeInt(-1, 1);
+    }
+
+    @Test(expected = BufferOverflowException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
+        Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
+        bytes.writeInt(-1, 1);
+    }
 }

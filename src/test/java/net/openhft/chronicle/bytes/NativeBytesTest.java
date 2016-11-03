@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -27,14 +28,14 @@ import org.junit.runners.Parameterized;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.HEAP;
 import static net.openhft.chronicle.bytes.Allocator.NATIVE;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 /**
  * Created by daniel on 17/04/15.
@@ -105,5 +106,23 @@ public class NativeBytesTest {
         nativeBytes.writePosition(nativeBytes.realCapacity() - 3);
         nativeBytes.writeInt(0);
         assertEquals(3 * pageSize, nativeBytes.realCapacity());
+    }
+
+    @Test
+    public void tryGrowBeyondByteBufferCapacity() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
+        ByteBuffer byteBuffer = bytes.underlyingObject();
+        assertFalse(byteBuffer.isDirect());
+
+        // Trigger growing beyond ByteBuffer
+        bytes.writePosition(bytes.realCapacity() - 1);
+        bytes.writeInt(0);
+
+        assertTrue(bytes.realCapacity() > Integer.MAX_VALUE);
+        assertNull(bytes.underlyingObject());
+
+        // Check this is not a dream
+        bytes.writeInt(Integer.MAX_VALUE + 100L, 42);
+        assertEquals(42, bytes.readInt(Integer.MAX_VALUE + 100L));
     }
 }
