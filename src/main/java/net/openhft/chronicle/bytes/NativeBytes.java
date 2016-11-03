@@ -137,12 +137,14 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
         // Grow by 50%
         long size = Math.max(endOfBuffer, realCapacity * 3 / 2);
+        // Size must not be more than capacity(), it may break some assumptions in BytesStore or elsewhere
+        size = Math.min(size, capacity());
         if (isDirectMemory() || size > MAX_BYTE_BUFFER_CAPACITY) {
             // Allocate direct memory of page granularity
             size = alignToPageSize(size);
+            // Cap the size with capacity() again
+            size = Math.min(size, capacity());
         }
-        // Size must not be more than capacity(), it may break some assumptions in BytesStore or elsewhere
-        size = Math.min(size, capacity());
 
         boolean isByteBufferBacked = bytesStore.underlyingObject() instanceof ByteBuffer;
         if (isByteBufferBacked && size > MAX_BYTE_BUFFER_CAPACITY) {
