@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -90,7 +91,7 @@ public enum BytesUtil {
     }
 
     public static char[] toCharArray(Bytes bytes) {
-        final char[] chars = new char[(int) bytes.readRemaining()];
+        final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
 
         for (int i = 0; i < bytes.readRemaining(); i++) {
             chars[i] = (char) bytes.readUnsignedByte(i + bytes.readPosition());
@@ -102,7 +103,7 @@ public enum BytesUtil {
         final char[] chars = new char[length];
 
         int j = 0;
-        for (long i = 0; i < length; i++) {
+        for (int i = 0; i < length; i++) {
             chars[j++] = (char) bytes.readUnsignedByte(position + i);
         }
         return chars;

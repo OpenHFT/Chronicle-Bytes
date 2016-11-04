@@ -271,7 +271,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public int uncheckedReadUnsignedByte() {
         try {
-            return bytesStore.readUnsignedByte(readPosition++);
+            int unsignedByte = bytesStore.readUnsignedByte(readPosition);
+            readPosition++;
+            return unsignedByte;
         } catch (BufferUnderflowException e) {
             return -1;
         }

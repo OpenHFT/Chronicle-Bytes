@@ -333,7 +333,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
             long i = 0;
-            for (; i < length - 7; i++) {
+            for (; i < length - 7; i += 8) {
                 long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
                 long addr2 = nbs2.address + b2.readPosition() - nbs2.start() + i;
                 long l0 = nbs0.memory.readLong(addr0);
