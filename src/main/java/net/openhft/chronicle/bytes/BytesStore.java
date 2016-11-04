@@ -183,8 +183,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default long copyTo(@NotNull BytesStore store) throws IllegalStateException {
         long copy = min(readRemaining(), store.capacity());
-        int i = 0;
-        for (; i < copy - 7; i++)
+        long i = 0;
+        for (; i < copy - 7; i += 8)
             store.writeLong(i, readLong(i));
         for (; i < copy; i++)
             store.writeByte(i, readByte(i));

@@ -2069,7 +2069,7 @@ enum BytesInternal {
         BytesStore bs1 = b1.bytesStore();
         BytesStore bs2 = b2.bytesStore();
         long i = 0;
-        for (; i < remaining - 7; i++) {
+        for (; i < remaining - 7; i += 8) {
             long l1 = bs1.readLong(b1.readPosition() + i);
             long l2 = bs2.readLong(b2.readPosition() + i);
             if (l1 != l2)

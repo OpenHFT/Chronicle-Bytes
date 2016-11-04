@@ -727,7 +727,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public boolean equalsBytes(@NotNull Bytes b2, long remaining) {
         long i = 0;
         try {
-            for (; i < remaining - 7; i++)
+            for (; i < remaining - 7; i += 8)
                 if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
                     return false;
             for (; i < remaining; i++)
