@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -40,22 +41,21 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class BytesTest {
 
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { NATIVE, NATIVE }, { HEAP, NATIVE }, { NATIVE, HEAP }, { HEAP, HEAP }
-        });
-    }
-
     private Allocator alloc1;
     private Allocator alloc2;
+    private ThreadDump threadDump;
 
     public BytesTest(Allocator alloc1, Allocator alloc2) {
         this.alloc1 = alloc1;
         this.alloc2 = alloc2;
     }
 
-    private ThreadDump threadDump;
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {NATIVE, NATIVE}, {HEAP, NATIVE}, {NATIVE, HEAP}, {HEAP, HEAP}
+        });
+    }
 
     @Before
     public void threadDump() {
@@ -151,6 +151,27 @@ public class BytesTest {
         } finally {
             bytes.release();
         }
+    }
+
+    @Test
+    public void writeHistogram() {
+        Bytes bytes = Bytes.allocateElasticDirect();
+        Histogram hist = new Histogram();
+        hist.sample(10);
+        Histogram hist2 = new Histogram();
+        for (int i = 0; i < 10000; i++)
+            hist2.sample(i);
+
+        bytes.writeHistogram(hist);
+        bytes.writeHistogram(hist2);
+
+        Histogram histB = new Histogram();
+        Histogram histC = new Histogram();
+        bytes.readHistogram(histB);
+        bytes.readHistogram(histC);
+
+        assertEquals(hist, histB);
+        assertEquals(hist2, histC);
     }
 
     /*

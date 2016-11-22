@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.util.Histogram;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -320,5 +321,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default void writePositionRemaining(long position, long length) {
         writeLimit(position + length);
         writePosition(position);
+    }
+
+    default void writeHistogram(Histogram histogram) {
+        BytesInternal.writeHistogram(this, histogram);
     }
 }
