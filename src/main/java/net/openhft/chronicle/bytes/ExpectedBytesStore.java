@@ -22,6 +22,10 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
+/**
+ * @deprecated to be removed in 1.8
+ */
+@Deprecated
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
     private static final int NOT_COMPLETE = 1 << 31;
     private final BytesStore<B, Underlying> underlyingBytesStore;

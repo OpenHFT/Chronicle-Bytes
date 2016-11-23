@@ -338,6 +338,10 @@ public interface Bytes<Underlying> extends
                 this;
     }
 
+    default boolean unchecked() {
+        return false;
+    }
+
     /**
      * @return the size which can be safely read.  If this isElastic() it can be lower than the
      * point it can safely write.

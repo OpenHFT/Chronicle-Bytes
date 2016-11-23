@@ -41,6 +41,28 @@ public enum Allocator {
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocate(capacity);
         }
+    },
+    NATIVE_UNCHECKED {
+        @Override
+        Bytes<ByteBuffer> elasticBytes(int capacity) {
+            return Bytes.elasticByteBuffer(Math.max(128, capacity)).unchecked(true);
+        }
+
+        @Override
+        ByteBuffer byteBuffer(int capacity) {
+            return ByteBuffer.allocateDirect(capacity);
+        }
+    },
+    HEAP_UNCHECKED {
+        @Override
+        Bytes<ByteBuffer> elasticBytes(int capacity) {
+            return Bytes.elasticHeapByteBuffer(Math.max(32, capacity)).unchecked(true);
+        }
+
+        @Override
+        ByteBuffer byteBuffer(int capacity) {
+            return ByteBuffer.allocate(capacity);
+        }
     };
 
     abstract Bytes<ByteBuffer> elasticBytes(int capacity);

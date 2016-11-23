@@ -34,8 +34,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.Allocator.HEAP;
-import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
@@ -51,7 +50,10 @@ public class BytesTest {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE}, {HEAP}
+                {NATIVE},
+                {HEAP},
+                {NATIVE_UNCHECKED},
+                {HEAP_UNCHECKED}
         });
     }
 
@@ -141,7 +143,7 @@ public class BytesTest {
 
     @Test
     public void fromHexString() {
-        Bytes bytes = alloc1.elasticBytes(1);
+        Bytes bytes = alloc1.elasticBytes(260);
         try {
             for (int i = 0; i < 259; i++)
                 bytes.writeByte((byte) i);
@@ -405,12 +407,17 @@ public class BytesTest {
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(4);
+        if (bytes.unchecked())
+            throw new BufferOverflowException();
         bytes.writeInt(-1, 1);
     }
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(1);
+
+        if (bytes.unchecked())
+            throw new BufferOverflowException();
         bytes.writeInt(-1, 1);
     }
 
