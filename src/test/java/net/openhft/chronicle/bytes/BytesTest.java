@@ -28,10 +28,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.PrintWriter;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
@@ -431,5 +433,34 @@ public class BytesTest {
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
         bytes.writeInt(-1, 1);
+    }
+
+    @Test
+    public void testWriter() {
+        Bytes bytes = alloc1.elasticBytes(1);
+        PrintWriter writer = new PrintWriter(bytes.writer());
+        writer.println(1);
+        writer.println("Hello");
+        writer.println(12.34);
+        writer.append('a').append('\n');
+        writer.append("bye\n");
+        writer.append("for now\nxxxx", 0, 8);
+        assertEquals("1\n" +
+                "Hello\n" +
+                "12.34\n" +
+                "a\n" +
+                "bye\n" +
+                "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
+        Scanner scan = new Scanner(bytes.reader());
+        assertEquals(1, scan.nextInt());
+        assertEquals("", scan.nextLine());
+        assertEquals("Hello", scan.nextLine());
+        assertEquals(12.34, scan.nextDouble(), 0.0);
+        assertEquals("", scan.nextLine());
+        assertEquals("a", scan.nextLine());
+        assertEquals("bye", scan.nextLine());
+        assertEquals("for now", scan.nextLine());
+        assertFalse(scan.hasNext());
+
     }
 }
