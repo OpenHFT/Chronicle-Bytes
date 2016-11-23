@@ -101,6 +101,9 @@ public class MappedFileTest {
 
     @Test
     public void largeReadOnlyFile() throws IOException {
+        if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
+            return;
+
         File file = File.createTempFile("largeReadOnlyFile", "deleteme");
         file.deleteOnExit();
         try (MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize())) {
