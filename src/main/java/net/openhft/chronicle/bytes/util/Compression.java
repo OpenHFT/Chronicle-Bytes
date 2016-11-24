@@ -162,4 +162,8 @@ public interface Compression {
     InputStream decompressingStream(InputStream input) throws IORuntimeException;
 
     OutputStream compressingStream(OutputStream output);
+
+    default boolean available() {
+        return true;
+    }
 }

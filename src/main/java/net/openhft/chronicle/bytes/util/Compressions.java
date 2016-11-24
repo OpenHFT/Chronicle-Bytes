@@ -101,6 +101,23 @@ public enum Compressions implements Compression {
         }
     },
     Snappy {
+        final boolean available;
+        {
+            boolean available;
+            try {
+                Class.forName("org.xerial.snappy.Snappy");
+                available = true;
+            } catch (ClassNotFoundException cnfe) {
+                available = false;
+            }
+            this.available = available;
+        }
+
+        @Override
+        public boolean available() {
+            return available;
+        }
+
         @Override
         public byte[] compress(byte[] bytes) {
             try {
