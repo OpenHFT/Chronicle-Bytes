@@ -29,6 +29,7 @@ import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -496,5 +497,16 @@ public class BytesTest {
         sb.setLength(0);
         b.readPosition(0);
         b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+    }
+
+    @Test
+    public void testBigDecimal() {
+        for (double d : new double[]{1.0, 1000.0, 0.1}) {
+            Bytes b = Bytes.allocateElasticDirect();
+            b.writeBigDecimal(new BigDecimal(d));
+
+            BigDecimal bd = b.readBigDecimal();
+            assertEquals(new BigDecimal(d), bd);
+        }
     }
 }
