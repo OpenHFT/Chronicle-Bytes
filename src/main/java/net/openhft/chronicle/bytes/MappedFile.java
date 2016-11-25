@@ -125,8 +125,9 @@ public class MappedFile implements ReferenceCounted {
             File file = File.createTempFile("delete", ".me");
             file.deleteOnExit();
             long mapAlignment = OS.mapAlignment();
-            int chunks = 80;
-            for (int j = 0; j < chunks; j++) {
+            int chunks = 64;
+            int compileThreshold = Jvm.compileThreshold();
+            for (int j = 0; j <= compileThreshold; j += chunks) {
                 try {
                     try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
                         MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
