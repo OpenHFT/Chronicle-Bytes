@@ -32,6 +32,7 @@ import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -119,6 +120,38 @@ public class MappedFile implements ReferenceCounted {
         return MappedFile.of(file, chunkSize, overlapSize, true);
     }
 
+    public static void warmup() {
+        try {
+            File file = File.createTempFile("delete", ".me");
+            file.deleteOnExit();
+            long mapAlignment = OS.mapAlignment();
+            int chunks = 80;
+            for (int j = 0; j < chunks; j++) {
+                try {
+                    try (RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+                        MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
+                        warmup0(mapAlignment, chunks, mappedFile);
+                        mappedFile.release();
+                    }
+                    Thread.yield();
+                    Files.delete(file.toPath());
+                } catch (IOException e) {
+                    Jvm.debug().on(MappedFile.class, "Error during warmup", e);
+                }
+            }
+
+        } catch (IOException e) {
+            Jvm.warn().on(MappedFile.class, "Error during warmup", e);
+        }
+    }
+
+    private static void warmup0(long mapAlignment, int chunks, MappedFile mappedFile) throws IOException {
+        for (int i = 0; i < chunks; i++) {
+            mappedFile.acquireBytesForRead(i * mapAlignment).release();
+            mappedFile.acquireBytesForWrite(i * mapAlignment).release();
+        }
+
+    }
 
     public MappedFile withSizes(long chunkSize, long overlapSize) {
         chunkSize = OS.mapAlign(chunkSize);

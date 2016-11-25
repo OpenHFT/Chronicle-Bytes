@@ -40,6 +40,12 @@ public class MappedFileTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
+    @Test
+    public void testWarmup() throws InterruptedException {
+        MappedFile.warmup();
+    }
+
     @Ignore("todo fix sometimes fails on TC")
     @Test
     public void testReferenceCounts() throws IOException {

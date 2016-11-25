@@ -31,6 +31,7 @@ import org.junit.runners.Parameterized;
 import java.io.PrintWriter;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Scanner;
@@ -461,6 +462,25 @@ public class BytesTest {
         assertEquals("bye", scan.nextLine());
         assertEquals("for now", scan.nextLine());
         assertFalse(scan.hasNext());
+    }
 
+    @Test
+    public void testInvalidUTF8Scan() {
+        int expected = 0;
+        for (int i = 0x80; i <= 0xFF; i++)
+            for (int j = 0x80; j <= 0xFF; j++) {
+                byte[] b = {(byte) i, (byte) j};
+                String s = new String(b, StandardCharsets.UTF_8);
+                if (s.charAt(0) == 65533) {
+                    Bytes bytes = Bytes.wrapForRead(b);
+                    try {
+                        bytes.parseUtf8(StopCharTesters.ALL);
+                        fail(Arrays.toString(b));
+                    } catch (UTFDataFormatRuntimeException e) {
+                        expected++;
+                    }
+                }
+            }
+        assertEquals(14464, expected);
     }
 }

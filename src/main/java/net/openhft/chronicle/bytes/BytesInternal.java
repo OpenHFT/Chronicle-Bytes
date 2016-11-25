@@ -1500,6 +1500,11 @@ enum BytesInternal {
                 AppendableUtil.setLength(builder, 0);
                 readUtf81(bytes, builder, tester);
             }
+        } catch (UTFDataFormatException e) {
+            UTFDataFormatRuntimeException e2 = new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code");
+            e2.initCause(e);
+            throw e2;
+
         } catch (IOException e) {
             throw Jvm.rethrow(e);
         }

@@ -31,6 +31,7 @@ import java.nio.BufferUnderflowException;
 public enum AppendableUtil {
     ;
 
+/*
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
         if (sb instanceof StringBuilder)
@@ -40,6 +41,7 @@ public enum AppendableUtil {
         else
             throw new IllegalArgumentException("" + sb.getClass());
     }
+*/
 
     public static void parseUtf8(BytesStore bs, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utflen);
@@ -97,7 +99,7 @@ public enum AppendableUtil {
         }
     }
 
-    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
+    /*public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
             throws BufferUnderflowException {
@@ -106,7 +108,7 @@ public enum AppendableUtil {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
-    }
+    }*/
 
     public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull Appendable appendable,
