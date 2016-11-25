@@ -500,12 +500,23 @@ public class BytesTest {
     }
 
     @Test
-    public void testBigDecimal() {
+    public void testBigDecimalBinary() {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             Bytes b = Bytes.allocateElasticDirect();
             b.writeBigDecimal(new BigDecimal(d));
 
             BigDecimal bd = b.readBigDecimal();
+            assertEquals(new BigDecimal(d), bd);
+        }
+    }
+
+    @Test
+    public void testBigDecimalText() {
+        for (double d : new double[]{1.0, 1000.0, 0.1}) {
+            Bytes b = Bytes.allocateElasticDirect();
+            b.append(new BigDecimal(d));
+
+            BigDecimal bd = b.parseBigDecimal();
             assertEquals(new BigDecimal(d), bd);
         }
     }

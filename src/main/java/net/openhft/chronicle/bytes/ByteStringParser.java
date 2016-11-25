@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -189,4 +190,9 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     default boolean skipTo(@NotNull StopCharTester tester) {
         return BytesInternal.skipTo(this, tester);
     }
+
+    default BigDecimal parseBigDecimal() {
+        return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
+    }
+
 }
