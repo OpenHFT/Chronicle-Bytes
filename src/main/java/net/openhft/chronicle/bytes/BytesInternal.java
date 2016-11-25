@@ -2218,7 +2218,8 @@ enum BytesInternal {
         int fractionBits = Maths.toUInt31(in.readStopBit());
         long overRange = in.readStopBit();
         long totalCount = in.readStopBit();
-        histogram.init(powersOf2, fractionBits, overRange, totalCount);
+        long floor = in.readStopBit();
+        histogram.init(powersOf2, fractionBits, overRange, totalCount, floor);
         int length = Maths.toUInt31(in.readStopBit());
         int[] ints = histogram.sampleCount();
         for (int i = 0; i < length; i++)
@@ -2230,6 +2231,7 @@ enum BytesInternal {
         out.writeStopBit(histogram.fractionBits());
         out.writeStopBit(histogram.overRange());
         out.writeStopBit(histogram.totalCount());
+        out.writeStopBit(histogram.floor());
         int[] ints = histogram.sampleCount();
         out.writeStopBit(ints.length);
         for (int i : ints)
