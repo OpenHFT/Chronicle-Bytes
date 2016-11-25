@@ -97,7 +97,7 @@ public enum AppendableUtil {
         }
     }
 
-    /*public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
+    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
             throws BufferUnderflowException {
@@ -106,7 +106,7 @@ public enum AppendableUtil {
         } catch (IOException e) {
             throw new AssertionError(e);
         }
-    }*/
+    }
 
     public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull Appendable appendable,
