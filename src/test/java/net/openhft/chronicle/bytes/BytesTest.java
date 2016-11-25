@@ -483,4 +483,18 @@ public class BytesTest {
             }
         assertEquals(14464, expected);
     }
+
+    @Test
+    public void testParseUtf8High() {
+        Bytes b = Bytes.allocateElasticDirect();
+        for (int i = ' '; i < Character.MAX_VALUE; i++)
+            if (Character.isValidCodePoint(i))
+                b.appendUtf8(i);
+        b.appendUtf8(0);
+        StringBuilder sb = new StringBuilder();
+        b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
+        sb.setLength(0);
+        b.readPosition(0);
+        b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+    }
 }
