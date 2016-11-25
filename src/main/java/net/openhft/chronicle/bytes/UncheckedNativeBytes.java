@@ -112,6 +112,26 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileByte(offset);
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileShort(offset);
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileInt(offset);
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileLong(offset);
+    }
+
+    @Override
     public void uncheckedReadSkipOne() {
         readPosition++;
     }
@@ -542,12 +562,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public int readInt(long offset) {
         return bytesStore.readInt(offset);
-    }
-
-    @Override
-    @ForceInline
-    public int readVolatileInt(long offset) {
-        return bytesStore.readVolatileInt(offset);
     }
 
     @Override

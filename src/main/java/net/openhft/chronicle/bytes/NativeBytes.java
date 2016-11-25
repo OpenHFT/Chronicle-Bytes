@@ -64,6 +64,11 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return bytes2;
     }
 
+    private static long alignToPageSize(long size) {
+        long mask = OS.pageSize() - 1;
+        return (size + mask) & ~mask;
+    }
+
     @Override
     public long capacity() {
         return MAX_CAPACITY;
@@ -95,26 +100,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             resize(endOfBuffer);
         else
             throw new BufferOverflowException();
-    }
-
-    @Override
-    public byte readVolatileByte(long offset) throws BufferUnderflowException {
-        return bytesStore.readVolatileByte(offset);
-    }
-
-    @Override
-    public short readVolatileShort(long offset) throws BufferUnderflowException {
-        return bytesStore.readVolatileShort(offset);
-    }
-
-    @Override
-    public int readVolatileInt(long offset) throws BufferUnderflowException {
-        return bytesStore.readVolatileInt(offset);
-    }
-
-    @Override
-    public long readVolatileLong(long offset) throws BufferUnderflowException {
-        return bytesStore.readVolatileLong(offset);
     }
 
     @Override
@@ -181,11 +166,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
-    }
-
-    private static long alignToPageSize(long size) {
-        long mask = OS.pageSize() - 1;
-        return (size + mask) & ~mask;
     }
 
     private BytesStore allocateNewByteBufferBackedStore(int size) {

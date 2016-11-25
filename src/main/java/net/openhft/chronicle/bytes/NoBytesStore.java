@@ -179,8 +179,23 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public int readVolatileInt(long offset) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        throw new BufferUnderflowException();
     }
 
     @Override

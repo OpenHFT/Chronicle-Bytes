@@ -20,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 /**
@@ -98,6 +99,21 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @Override
     public int readVolatileInt(long offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 

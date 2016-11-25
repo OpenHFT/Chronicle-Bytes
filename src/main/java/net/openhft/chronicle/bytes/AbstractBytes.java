@@ -312,6 +312,30 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 1, true);
+        return bytesStore.readVolatileByte(offset);
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 2, true);
+        return bytesStore.readVolatileShort(offset);
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 4, true);
+        return bytesStore.readVolatileInt(offset);
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 8, true);
+        return bytesStore.readVolatileLong(offset);
+    }
+
+    @Override
     @ForceInline
     public long readLong() throws BufferUnderflowException {
         long offset = readOffsetPositionMoved(8);
@@ -552,12 +576,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public int readInt(long offset) throws BufferUnderflowException {
         readCheckOffset(offset, 4, true);
         return bytesStore.readInt(offset);
-    }
-
-    @Override
-    public int readVolatileInt(long offset) throws BufferUnderflowException {
-        readCheckOffset(offset, 4, true);
-        return bytesStore.readVolatileInt(offset);
     }
 
     @Override

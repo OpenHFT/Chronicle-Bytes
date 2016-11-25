@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -192,10 +191,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the byte value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
-    default byte readVolatileByte(long offset) throws BufferUnderflowException {
-        OS.memory().loadFence();
-        return readByte(offset);
-    }
+    byte readVolatileByte(long offset) throws BufferUnderflowException;
 
     /**
      * Read a 16-bit short from memory with a load barrier.
@@ -204,10 +200,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the short value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
-    default short readVolatileShort(long offset) throws BufferUnderflowException {
-        OS.memory().loadFence();
-        return readShort(offset);
-    }
+    short readVolatileShort(long offset) throws BufferUnderflowException;
 
     /**
      * Read a 32-bit int from memory with a load barrier.
@@ -236,11 +229,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the long value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
-    default long readVolatileLong(long offset)
-            throws BufferUnderflowException {
-        OS.memory().loadFence();
-        return readLong(offset);
-    }
+    long readVolatileLong(long offset) throws BufferUnderflowException;
 
     /**
      * Read a 64-bit double from memory with a load barrier.

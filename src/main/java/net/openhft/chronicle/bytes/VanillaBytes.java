@@ -89,6 +89,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        readCheckOffset(offset, 8, true);
+        return bytesStore.readVolatileLong(offset);
+    }
+
+    @Override
     public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         bytesStore(byteStore);
@@ -140,7 +146,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return isEqual0(chars, bs, address);
 
         } else {
-                return isEqual1(chars, bytesStore, readPosition);
+            return isEqual1(chars, bytesStore, readPosition);
         }
     }
 
