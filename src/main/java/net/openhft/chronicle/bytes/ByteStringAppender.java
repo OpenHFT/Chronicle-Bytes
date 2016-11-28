@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
+import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -212,6 +213,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     default B appendTimeMillis(long timeOfDayInMillis) {
         BytesInternal.appendTimeMillis(this, timeOfDayInMillis % 86400_000L);
+        return (B) this;
+    }
+
+    default B append(BigDecimal bigDecimal) {
+        append(bigDecimal.toString());
         return (B) this;
     }
 }

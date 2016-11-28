@@ -317,8 +317,40 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (!bytesStore.inside(offset)) {
             acquireNextByteStore(offset);
         }
-        ((NativeBytesStore) bytesStore).writeOrderedInt(offset, i);
+        bytesStore.writeOrderedInt(offset, i);
         return this;
+    }
+
+    @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset)) {
+            acquireNextByteStore(offset);
+        }
+        return bytesStore.readVolatileByte(offset);
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset)) {
+            acquireNextByteStore(offset);
+        }
+        return bytesStore.readVolatileShort(offset);
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset)) {
+            acquireNextByteStore(offset);
+        }
+        return bytesStore.readVolatileInt(offset);
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset)) {
+            acquireNextByteStore(offset);
+        }
+        return bytesStore.readVolatileLong(offset);
     }
 
     @Override

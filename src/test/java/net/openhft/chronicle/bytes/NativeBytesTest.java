@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -110,6 +109,8 @@ public class NativeBytesTest {
 
     @Test
     public void tryGrowBeyondByteBufferCapacity() {
+        if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
+            return;
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
         ByteBuffer byteBuffer = bytes.underlyingObject();
         assertFalse(byteBuffer.isDirect());

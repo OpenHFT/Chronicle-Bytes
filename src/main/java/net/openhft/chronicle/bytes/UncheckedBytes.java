@@ -36,6 +36,10 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
+    public boolean unchecked() {
+        return true;
+    }
+
     @Override
     void writeCheckOffset(long offset, long adding) {
     }

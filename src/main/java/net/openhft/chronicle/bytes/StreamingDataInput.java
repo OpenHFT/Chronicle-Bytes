@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -233,7 +234,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default int read(@NotNull char[] bytes, int off, int len) {
-        int len2 = (int) Math.min(len, readRemaining());
+        long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        int len2 = (int) Math.min(len, remaining);
         for (int i = 0; i < len2; i++)
             bytes[off + i] = (char) readUnsignedByte();
         return len2;
@@ -284,4 +288,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     long copyTo(BytesStore to);
 
+    default void readHistogram(Histogram histogram) {
+        BytesInternal.readHistogram(this, histogram);
+    }
 }

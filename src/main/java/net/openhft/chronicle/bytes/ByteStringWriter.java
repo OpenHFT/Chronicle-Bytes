@@ -23,17 +23,17 @@ import java.nio.BufferOverflowException;
 /**
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
  */
-public class ByteStringWriter extends Writer {
+class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 
-    public ByteStringWriter(ByteStringAppender out) {
+    ByteStringWriter(ByteStringAppender out) {
         this.out = out;
     }
 
     @Override
     public void write(int c) throws IOException {
         try {
-            out.append(c);
+            out.append((char) c);
 
         } catch (BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);

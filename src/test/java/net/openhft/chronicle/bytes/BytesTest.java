@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -27,35 +28,38 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.PrintWriter;
+import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.Allocator.HEAP;
-import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
 public class BytesTest {
 
+    private Allocator alloc1;
+    private ThreadDump threadDump;
+
+    public BytesTest(Allocator alloc1) {
+        this.alloc1 = alloc1;
+    }
+
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][] {
-                { NATIVE, NATIVE }, { HEAP, NATIVE }, { NATIVE, HEAP }, { HEAP, HEAP }
+        return Arrays.asList(new Object[][]{
+                {NATIVE},
+                {HEAP},
+                {NATIVE_UNCHECKED},
+                {HEAP_UNCHECKED}
         });
     }
-
-    private Allocator alloc1;
-    private Allocator alloc2;
-
-    public BytesTest(Allocator alloc1, Allocator alloc2) {
-        this.alloc1 = alloc1;
-        this.alloc2 = alloc2;
-    }
-
-    private ThreadDump threadDump;
 
     @Before
     public void threadDump() {
@@ -67,77 +71,6 @@ public class BytesTest {
         threadDump.assertNoNewThreads();
     }
 
-    /*
-        public static void testSliceOfBytes(Bytes bytes) {
-            // move the position by 1
-            bytes.readByte();
-            // and reduce the limit
-            long limit1 = bytes.readLimit() - 1;
-            bytes.limit(limit1);
-
-            Bytes bytes1 = bytes.bytes();
-            assertFalse(bytes1.isElastic());
-            assertEquals(1, bytes1.start());
-            assertEquals(limit1, bytes1.capacity());
-            assertEquals(bytes1.limit(), bytes1.capacity());
-            assertEquals(1, bytes1.position());
-
-            // move the position by 8 more
-            bytes1.readLong();
-            // reduce the limit by 8
-            long limit9 = bytes1.limit() - 8;
-            bytes1.limit(limit9);
-
-            Bytes bytes9 = bytes1.bytes();
-            assertEquals(1 + 8, bytes9.start());
-            assertEquals(limit9, bytes9.capacity());
-            assertEquals(bytes9.limit(), bytes9.capacity());
-            assertEquals(9, bytes9.position());
-
-            long num = 0x0123456789ABCDEFL;
-            bytes.writeLong(9, num);
-
-            long num1 = bytes1.readLong(bytes1.start() + 8);
-            assertEquals(Long.toHexString(num1), num, num1);
-            long num9 = bytes9.readLong(bytes9.start());
-            assertEquals(Long.toHexString(num9), num, num9);
-        }
-
-        public static void testSliceOfZeroedBytes(Bytes bytes) {
-            // move the position by 1
-            bytes.readByte();
-            // and reduce the limit
-            bytes.limit(bytes.limit() - 1);
-
-            Bytes bytes1 = bytes.bytes();
-            assertFalse(bytes1.isElastic());
-
-            assertEquals(1, bytes1.start());
-            // capacity is notional in this case.
-    //        assertEquals(bytes.capacity() - 1, bytes1.capacity());
-            assertEquals(bytes1.limit(), bytes1.capacity());
-            assertEquals(1, bytes1.position());
-
-            // move the position by 8 more
-            bytes1.readLong();
-            // reduce the limit by 8
-            bytes1.limit(bytes1.limit() - 8);
-
-            Bytes bytes9 = bytes1.bytes();
-            assertEquals(1 + 8, bytes9.start());
-    //        assertEquals(bytes1.capacity() - 8 - 8, bytes9.capacity());
-            assertEquals(bytes9.limit(), bytes9.capacity());
-            assertEquals(9, bytes9.position());
-
-            long num = 0x0123456789ABCDEFL;
-            bytes.writeLong(9, num);
-
-            long num1 = bytes1.readLong(bytes1.start() + 8);
-            assertEquals(Long.toHexString(num1), num, num1);
-            long num9 = bytes9.readLong(bytes9.start());
-            assertEquals(Long.toHexString(num9), num, num9);
-        }
-    */
     @Test
     public void testName() throws IORuntimeException {
         Bytes<?> bytes = alloc1.fixedBytes(30);
@@ -153,20 +86,27 @@ public class BytesTest {
         }
     }
 
-    /*
+    @Test
+    public void writeHistogram() {
+        Bytes bytes = Bytes.allocateElasticDirect();
+        Histogram hist = new Histogram();
+        hist.sample(10);
+        Histogram hist2 = new Histogram();
+        for (int i = 0; i < 10000; i++)
+            hist2.sample(i);
 
-        @Test
-        public void testSliceOfBytes() {
-            testSliceOfBytes(Bytes.wrap(new byte[1024]));
-            testSliceOfBytes(Bytes.wrap(ByteBuffer.allocate(1024)));
-            testSliceOfBytes(Bytes.wrap(ByteBuffer.allocateDirect(1024)));
-        }
+        bytes.writeHistogram(hist);
+        bytes.writeHistogram(hist2);
 
-        @Test
-        public void testSliceOfZeroedBytes() {
-            testSliceOfZeroedBytes(NativeBytes.vanillaBytes(1024));
-        }
-    */
+        Histogram histB = new Histogram();
+        Histogram histC = new Histogram();
+        bytes.readHistogram(histB);
+        bytes.readHistogram(histC);
+
+        assertEquals(hist, histB);
+        assertEquals(hist2, histC);
+    }
+
     @Test
     public void testCopy() {
         Bytes<ByteBuffer> bbb = alloc1.fixedBytes(1024);
@@ -207,7 +147,7 @@ public class BytesTest {
 
     @Test
     public void fromHexString() {
-        Bytes bytes = alloc1.elasticBytes(1);
+        Bytes bytes = alloc1.elasticBytes(260);
         try {
             for (int i = 0; i < 259; i++)
                 bytes.writeByte((byte) i);
@@ -302,8 +242,6 @@ public class BytesTest {
                 assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
             }
         }
-
-//        Bytes.allocateElasticDirect(),
     }
 
     @Test
@@ -317,22 +255,6 @@ public class BytesTest {
             assertEquals("Hello World", s);
         } finally {
             bytes.release();
-        }
-    }
-
-    @Test
-    public void testPartialWrite() {
-        Bytes from = alloc1.elasticBytes(1);
-        Bytes to = alloc2.fixedBytes(6);
-
-        try {
-            from.write("Hello World");
-
-            to.writeSome(from);
-            assertEquals("World", from.toString());
-        } finally {
-            from.release();
-            to.release();
         }
     }
 
@@ -353,22 +275,6 @@ public class BytesTest {
     }
 
     @Test
-    public void testPartialWrite64plus() {
-        Bytes from = alloc1.elasticBytes(1);
-        Bytes to = alloc2.fixedBytes(6);
-
-        from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
-
-        try {
-            to.writeSome(from);
-            assertTrue("from: " + from, from.toString().startsWith("World "));
-        } finally {
-            from.release();
-            to.release();
-        }
-    }
-
-    @Test
     public void testCompact() {
         Bytes from = alloc1.elasticBytes(1);
         try {
@@ -380,25 +286,6 @@ public class BytesTest {
         } finally {
             from.release();
         }
-    }
-
-    @Test
-    public void testParseToBytes() throws IORuntimeException {
-        Bytes from = alloc1.fixedBytes(64);
-        Bytes to = alloc2.fixedBytes(32);
-        try {
-            from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
-
-            for (int i = 0; i < 4; i++) {
-                from.parse8bit(to, StopCharTesters.SPACE_STOP);
-                assertEquals(10, to.readRemaining());
-            }
-            assertEquals(0, from.readRemaining());
-        } finally {
-            from.release();
-            to.release();
-        }
-
     }
 
     @Test
@@ -524,12 +411,17 @@ public class BytesTest {
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(4);
+        if (bytes.unchecked())
+            throw new BufferOverflowException();
         bytes.writeInt(-1, 1);
     }
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(1);
+
+        if (bytes.unchecked())
+            throw new BufferOverflowException();
         bytes.writeInt(-1, 1);
     }
 
@@ -543,5 +435,89 @@ public class BytesTest {
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
         bytes.writeInt(-1, 1);
+    }
+
+    @Test
+    public void testWriter() {
+        Bytes bytes = alloc1.elasticBytes(1);
+        PrintWriter writer = new PrintWriter(bytes.writer());
+        writer.println(1);
+        writer.println("Hello");
+        writer.println(12.34);
+        writer.append('a').append('\n');
+        writer.append("bye\n");
+        writer.append("for now\nxxxx", 0, 8);
+        assertEquals("1\n" +
+                "Hello\n" +
+                "12.34\n" +
+                "a\n" +
+                "bye\n" +
+                "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
+        Scanner scan = new Scanner(bytes.reader());
+        assertEquals(1, scan.nextInt());
+        assertEquals("", scan.nextLine());
+        assertEquals("Hello", scan.nextLine());
+        assertEquals(12.34, scan.nextDouble(), 0.0);
+        assertEquals("", scan.nextLine());
+        assertEquals("a", scan.nextLine());
+        assertEquals("bye", scan.nextLine());
+        assertEquals("for now", scan.nextLine());
+        assertFalse(scan.hasNext());
+    }
+
+    @Test
+    public void testInvalidUTF8Scan() {
+        int expected = 0;
+        for (int i = 0x80; i <= 0xFF; i++)
+            for (int j = 0x80; j <= 0xFF; j++) {
+                byte[] b = {(byte) i, (byte) j};
+                String s = new String(b, StandardCharsets.UTF_8);
+                if (s.charAt(0) == 65533) {
+                    Bytes bytes = Bytes.wrapForRead(b);
+                    try {
+                        bytes.parseUtf8(StopCharTesters.ALL);
+                        fail(Arrays.toString(b));
+                    } catch (UTFDataFormatRuntimeException e) {
+                        expected++;
+                    }
+                }
+            }
+        assertEquals(14464, expected);
+    }
+
+    @Test
+    public void testParseUtf8High() {
+        Bytes b = Bytes.allocateElasticDirect();
+        for (int i = ' '; i < Character.MAX_VALUE; i++)
+            if (Character.isValidCodePoint(i))
+                b.appendUtf8(i);
+        b.appendUtf8(0);
+        StringBuilder sb = new StringBuilder();
+        b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
+        sb.setLength(0);
+        b.readPosition(0);
+        b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+    }
+
+    @Test
+    public void testBigDecimalBinary() {
+        for (double d : new double[]{1.0, 1000.0, 0.1}) {
+            Bytes b = Bytes.allocateElasticDirect();
+            b.writeBigDecimal(new BigDecimal(d));
+
+            BigDecimal bd = b.readBigDecimal();
+            assertEquals(new BigDecimal(d), bd);
+        }
+    }
+
+    @Test
+    public void testBigDecimalText() {
+        for (double d : new double[]{1.0, 1000.0, 0.1}) {
+            Bytes b = Bytes.allocateElasticDirect();
+            b.append(new BigDecimal(d));
+
+            BigDecimal bd = b.parseBigDecimal();
+            assertEquals(new BigDecimal(d), bd);
+        }
     }
 }

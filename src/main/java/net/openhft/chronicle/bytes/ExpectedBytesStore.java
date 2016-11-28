@@ -20,8 +20,13 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+/**
+ * @deprecated to be removed in 1.8
+ */
+@Deprecated
 public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying> implements BytesStore<B, Underlying> {
     private static final int NOT_COMPLETE = 1 << 31;
     private final BytesStore<B, Underlying> underlyingBytesStore;
@@ -94,6 +99,21 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     @Override
     public int readVolatileInt(long offset) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 

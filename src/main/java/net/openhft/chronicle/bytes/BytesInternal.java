@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.pool.StringInterner;
+import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 
 import java.io.IOException;
@@ -1499,6 +1500,11 @@ enum BytesInternal {
                 AppendableUtil.setLength(builder, 0);
                 readUtf81(bytes, builder, tester);
             }
+        } catch (UTFDataFormatException e) {
+            UTFDataFormatRuntimeException e2 = new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code");
+            e2.initCause(e);
+            throw e2;
+
         } catch (IOException e) {
             throw Jvm.rethrow(e);
         }
@@ -2210,6 +2216,31 @@ enum BytesInternal {
             in.skipTo(StopCharTesters.CONTROL_STOP);
         }
         return out;
+    }
+
+    public static void readHistogram(StreamingDataInput in, Histogram histogram) {
+        int powersOf2 = Maths.toUInt31(in.readStopBit());
+        int fractionBits = Maths.toUInt31(in.readStopBit());
+        long overRange = in.readStopBit();
+        long totalCount = in.readStopBit();
+        long floor = in.readStopBit();
+        histogram.init(powersOf2, fractionBits, overRange, totalCount, floor);
+        int length = Maths.toUInt31(in.readStopBit());
+        int[] ints = histogram.sampleCount();
+        for (int i = 0; i < length; i++)
+            ints[i] = Maths.toUInt31(in.readStopBit());
+    }
+
+    public static void writeHistogram(StreamingDataOutput out, Histogram histogram) {
+        out.writeStopBit(histogram.powersOf2());
+        out.writeStopBit(histogram.fractionBits());
+        out.writeStopBit(histogram.overRange());
+        out.writeStopBit(histogram.totalCount());
+        out.writeStopBit(histogram.floor());
+        int[] ints = histogram.sampleCount();
+        out.writeStopBit(ints.length);
+        for (int i : ints)
+            out.writeStopBit(i);
     }
 
     static class DateCache {

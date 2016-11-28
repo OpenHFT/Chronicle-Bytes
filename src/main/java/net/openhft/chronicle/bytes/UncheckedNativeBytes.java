@@ -53,6 +53,9 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         capacity = bytesStore.capacity();
     }
 
+    public boolean unchecked() {
+        return true;
+    }
     @Override
     public boolean isDirectMemory() {
         return true;
@@ -70,7 +73,14 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public Bytes<Underlying> compact() {
-        return null;
+        long start = start();
+        long readRemaining = readRemaining();
+        if (readRemaining > 0 && start < readPosition) {
+            bytesStore.move(readPosition, start, readRemaining);
+            readPosition = start;
+            writePosition = readPosition + readRemaining;
+        }
+        return this;
     }
 
     @NotNull
@@ -99,6 +109,26 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public Bytes<Underlying> readSkip(long bytesToSkip) {
         readPosition += bytesToSkip;
         return this;
+    }
+
+    @Override
+    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileByte(offset);
+    }
+
+    @Override
+    public short readVolatileShort(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileShort(offset);
+    }
+
+    @Override
+    public int readVolatileInt(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileInt(offset);
+    }
+
+    @Override
+    public long readVolatileLong(long offset) throws BufferUnderflowException {
+        return bytesStore.readVolatileLong(offset);
     }
 
     @Override
@@ -144,6 +174,8 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     protected long writeOffsetPositionMoved(long adding) {
         long oldPosition = writePosition;
+        long writeEnd = oldPosition + adding;
+        assert writeEnd <= bytesStore.safeLimit();
         writePosition += adding;
         return oldPosition;
     }
@@ -530,12 +562,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public int readInt(long offset) {
         return bytesStore.readInt(offset);
-    }
-
-    @Override
-    @ForceInline
-    public int readVolatileInt(long offset) {
-        return bytesStore.readVolatileInt(offset);
     }
 
     @Override

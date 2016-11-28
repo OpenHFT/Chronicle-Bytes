@@ -18,10 +18,13 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.util.Histogram;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -320,5 +323,20 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default void writePositionRemaining(long position, long length) {
         writeLimit(position + length);
         writePosition(position);
+    }
+
+    default void writeHistogram(Histogram histogram) {
+        BytesInternal.writeHistogram(this, histogram);
+    }
+
+    default void writeBigDecimal(BigDecimal bd) {
+        writeBigInteger(bd.unscaledValue());
+        writeStopBit(bd.scale());
+    }
+
+    default void writeBigInteger(BigInteger bi) {
+        byte[] bytes = bi.toByteArray();
+        writeStopBit(bytes.length);
+        write(bytes);
     }
 }

@@ -16,12 +16,15 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -338,6 +341,10 @@ public interface Bytes<Underlying> extends
                 this;
     }
 
+    default boolean unchecked() {
+        return false;
+    }
+
     /**
      * @return the size which can be safely read.  If this isElastic() it can be lower than the
      * point it can safely write.
@@ -469,5 +476,16 @@ public interface Bytes<Underlying> extends
     default void unwrite(long fromOffset, int count) {
         write(fromOffset, this, fromOffset + count, readRemaining() - 1);
         writeSkip(-count);
+    }
+
+    default BigDecimal readBigDecimal() {
+        return new BigDecimal(readBigInteger(), Maths.toUInt31(readStopBit()));
+    }
+
+    default BigInteger readBigInteger() {
+        int length = Maths.toUInt31(readStopBit());
+        byte[] bytes = new byte[length];
+        read(bytes);
+        return new BigInteger(bytes);
     }
 }
