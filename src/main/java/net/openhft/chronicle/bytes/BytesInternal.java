@@ -349,8 +349,11 @@ enum BytesInternal {
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             int count = 0;
-            if (utflen > bytes.readRemaining())
-                throw new BufferUnderflowException();
+            if (utflen > bytes.readRemaining()) {
+                final BufferUnderflowException bue = new BufferUnderflowException();
+                bue.initCause(new IllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
+                throw bue;
+            }
             NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
             long address = nbs.address + nbs.translate(bytes.readPosition());
             Memory memory = nbs.memory;
