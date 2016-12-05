@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 /**
  * User: peter.lawrey
  */
+@Ignore("flaky test - causing heap-dumps in TeamCity")
 public class ByteStoreTest {
     public static final int SIZE = 128;
     private Bytes bytes;
