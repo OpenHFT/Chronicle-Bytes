@@ -72,4 +72,23 @@ public class BytesInternalTest {
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
     }
+
+    @Test
+    public void testParseDouble() {
+        Object[][] tests = {
+                {"-1E-3 ", -1E-3},
+                {"12E3 ", 12E3},
+                {"-1.1E-3 ", -1.1E-3},
+                {"-1.1E3 ", -1.1E3},
+                {"-1.16823E70 ", -1.16823E70},
+                {"1.17045E70 ", 1.17045E70}
+        };
+        for (Object[] objects : tests) {
+            String text = (String) objects[0];
+            double expected = (Double) objects[1];
+
+            assertEquals(expected, Bytes.from(text)
+                    .parseDouble(), 0.0);
+        }
+    }
 }

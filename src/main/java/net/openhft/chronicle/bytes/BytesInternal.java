@@ -1423,30 +1423,53 @@ enum BytesInternal {
                 value <<= 1;
             }
         }
-        for (; decimalPlaces > 0; decimalPlaces--) {
-            exp--;
-            long mod = value % 5;
-            value /= 5;
-            int modDiv = 1;
-            if (value < Long.MAX_VALUE / (1L << 4)) {
-                exp -= 4;
-                value <<= 4;
-                modDiv <<= 4;
+        if (decimalPlaces < 0) {
+            for (; decimalPlaces < 0; decimalPlaces++) {
+                exp++;
+                int mod = 0;
+                if (value > Long.MAX_VALUE / 5 * 4) {
+                    mod = (int) (((value & 0x7) * 5 + 4) >> 3);
+                    value >>= 3;
+                    exp += 3;
+                } else if (value > Long.MAX_VALUE / 5 * 2) {
+                    mod = (int) (((value & 0x3) * 5 + 2) >> 2);
+                    value >>= 2;
+                    exp += 2;
+                } else if (value > Long.MAX_VALUE / 5) {
+                    mod = (int) (((value & 0x1) * 5 + 1) >> 1);
+                    value >>= 1;
+                    exp++;
+                }
+                value *= 5;
+                value += mod;
             }
-            if (value < Long.MAX_VALUE / (1L << 2)) {
-                exp -= 2;
-                value <<= 2;
-                modDiv <<= 2;
+
+        } else {
+            for (; decimalPlaces > 0; decimalPlaces--) {
+                exp--;
+                long mod = value % 5;
+                value /= 5;
+                int modDiv = 1;
+                if (value < Long.MAX_VALUE / (1L << 4)) {
+                    exp -= 4;
+                    value <<= 4;
+                    modDiv <<= 4;
+                }
+                if (value < Long.MAX_VALUE / (1L << 2)) {
+                    exp -= 2;
+                    value <<= 2;
+                    modDiv <<= 2;
+                }
+                if (value < Long.MAX_VALUE / (1L << 1)) {
+                    exp -= 1;
+                    value <<= 1;
+                    modDiv <<= 1;
+                }
+                if (decimalPlaces > 1)
+                    value += modDiv * mod / 5;
+                else
+                    value += (modDiv * mod + 4) / 5;
             }
-            if (value < Long.MAX_VALUE / (1L << 1)) {
-                exp -= 1;
-                value <<= 1;
-                modDiv <<= 1;
-            }
-            if (decimalPlaces > 1)
-                value += modDiv * mod / 5;
-            else
-                value += (modDiv * mod + 4) / 5;
         }
         final double d = Math.scalb((double) value, exp);
         return negative ? -d : d;
@@ -1780,6 +1803,7 @@ enum BytesInternal {
                     ch = in.readUnsignedByte();
                     break;
             }
+            int tens = 0;
             while (true) {
                 if (ch >= '0' && ch <= '9') {
                     while (value >= MAX_VALUE_DIVIDE_10) {
@@ -1792,6 +1816,10 @@ enum BytesInternal {
                 } else if (ch == '.') {
                     decimalPlaces = 0;
 
+                } else if (ch == 'E' || ch == 'e') {
+                    tens = (int) parseLong(in);
+                    break;
+
                 } else {
                     break;
                 }
@@ -1799,8 +1827,10 @@ enum BytesInternal {
                     break;
                 ch = in.readUnsignedByte();
             }
+            if (decimalPlaces < 0)
+                decimalPlaces = 0;
 
-            return asDouble(value, exp, negative, decimalPlaces);
+            return asDouble(value, exp, negative, decimalPlaces - tens);
         } finally {
             ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
         }
