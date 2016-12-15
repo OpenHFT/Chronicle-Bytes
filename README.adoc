@@ -24,7 +24,6 @@ endif::[]
 // Aliases:
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
-:images-dir: images
  
 toc::[]
 
