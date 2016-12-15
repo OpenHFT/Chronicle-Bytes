@@ -90,11 +90,11 @@ enum BytesInternal {
     }
 
     static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b) {
-        if (a.readRemaining() > b.readRemaining())
+        if (a.readRemaining() < b.readRemaining())
             return false;
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        long length = a.readRemaining();
+        long length = b.readRemaining();
         long i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))

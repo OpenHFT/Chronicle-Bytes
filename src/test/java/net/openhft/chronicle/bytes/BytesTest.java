@@ -197,6 +197,15 @@ public class BytesTest {
     }
 
     @Test
+    public void testStartsWith() {
+        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("a")));
+        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aa")));
+        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aaa")));
+        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("aaaa")));
+        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("b")));
+    }
+
+    @Test
     public void testStopBitDouble() throws IORuntimeException {
         Bytes b = alloc1.elasticBytes(1);
         try {
