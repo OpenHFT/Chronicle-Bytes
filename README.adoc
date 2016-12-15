@@ -44,8 +44,7 @@ The API supports.
 
  # Comparison of access to native memory
 
-image::images/customize-data-views-menu.tiff[]
-image::images/customize-data-views.png[]
+
 
  | Access                                              | ByteBuffer       | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes     |
  |===
@@ -66,9 +65,8 @@ image::images/customize-data-views.png[]
 
  # View Bytes in the debugger
 
- When using intellij idea, you can set up a custom render to view the bytes, see the images below :
-
-
-
-
+When using intellij idea, you can set up a custom render to view the bytes, see the images below :
+ 
+image::images/customize-data-views-menu.tiff[]
+image::images/customize-data-views.png[]
 
