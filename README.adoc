@@ -24,7 +24,6 @@ endif::[]
 // Aliases:
 :project-name: Asciidoctor PDF
 :project-handle: asciidoctor-pdf
-:images-dir: images
  
 toc::[]
 
@@ -226,11 +225,8 @@ The API supports.
 
  # View Bytes in the debugger
 
- When using intellij idea
-| you can set up a custom render to view the bytes, see the images below :
+When using intellij idea, you can set up a custom render to view the bytes, see the images below :
 
-
-image::images/customize-data-views-menu.tiff
-images::images/customize-data-views.png
-
+image::images/customize-data-views-menu.tiff[]
+image::images/customize-data-views.png[]
 
