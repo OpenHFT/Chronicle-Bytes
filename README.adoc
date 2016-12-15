@@ -68,6 +68,6 @@ The API supports.
 
 
 image::images/customize-data-views-menu.tiff
-images::images/customize-data-views.png
+image::images/customize-data-views.png
 
 
