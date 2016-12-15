@@ -45,109 +45,16 @@ The API supports.
  # Comparison of access to native memory
 
 
-|===
-
-| Access | ByteBuffer       | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes
-
-|Column 1, row 1
-|Column 2, row 1
-|Column 3, row 1
-|Column 4, row 1
-|Column 5, row 1
-
-
-|Column 1, row 2
-|Column 2, row 2
-|Column 3, row 2
-|Column 4, row 2
-|Column 5, row 2
-
-|Column 1, row 3
-|Column 2, row 3
-|Column 3, row 3
-|Column 4, row 3
-|Column 5, row 3
-
-
-|Column 1, row 4
-|Column 2, row 4
-|Column 3, row 4
-|Column 4, row 4
-|Column 5, row 4
-
-|Column 1, row 5
-|Column 2, row 5
-|Column 3, row 5
-|Column 4, row 5
-|Column 5, row 5
-
-|Column 1, row 6
-|Column 2, row 6
-|Column 3, row 6
-|Column 4, row 6
-|Column 5, row 6
-|Column 6, row 6
-
-|Column 1, row 7
-|Column 2, row 7
-|Column 3, row 7
-|Column 4, row 7
-|Column 5, row 7
-|Column 6, row 7
-
-|Column 1, row 8
-|Column 2, row 8
-|Column 3, row 8
-|Column 4, row 8
-|Column 5, row 8
-
-|Column 1, row 9
-|Column 2, row 9
-|Column 3, row 9
-|Column 4, row 9
-|Column 5, row 9
-
-|Column 1, row 10
-|Column 2, row 10
-|Column 3, row 10
-|Column 4, row 10
-|Column 5, row 10
-|Column 6, row 10
-
-|Column 1, row 11
-|Column 2, row 11
-|Column 3, row 11
-|Column 4, row 11
-|Column 5, row 11
-
-|Column 1, row 12
-|Column 2, row 12
-|Column 3, row 12
-|Column 4, row 12
-|Column 5, row 12
-
-|Column 1, row 13
-|Column 2, row 13
-|Column 3, row 13
-|Column 4, row 13
-|Column 5, row 13
-
-|Column 1, row 14
-|Column 2, row 14
-|Column 3, row 14
-|Column 4, row 14
-|Column 5, row 14
-|===
 
 
 |===
-| Access                                              | ByteBuffer       | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes     |
+| Access | ByteBuffer | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes
 
 | Read/write primitives in native memory
-|  yes
 | yes
-|  yes
-|  yes
+| yes
+| yes
+| yes
 
 | Separate Mutable interfaces
 | run time check
