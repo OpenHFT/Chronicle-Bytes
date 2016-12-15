@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -43,7 +42,7 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
 
-@Ignore("flaky test - causing heap-dumps in TeamCity")
+
 @RunWith(Parameterized.class)
 public class BytesTest {
 
