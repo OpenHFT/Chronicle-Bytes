@@ -129,7 +129,7 @@ The API supports.
 | yes
 |===
 
- # View Bytes in the debugger
+# View Chronicle-Bytes in the debugger
 
 When using intellij idea, you can set up a custom render to view the bytes, see the images below :
 
