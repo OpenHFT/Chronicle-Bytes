@@ -1,7 +1,5 @@
 ## Chronicle-Bytes
 
-
-
 // Settings:
 :experimental:
 :idprefix:
@@ -42,7 +40,7 @@ The API supports.
  - parsing text and writing text directly to off heap bytes.
 
 
-### Comparison of access to native memory
+#### Comparison of access to native memory
 
 |===
 | Access | ByteBuffer | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes
@@ -126,7 +124,7 @@ The API supports.
 | yes
 |===
 
-### View Chronicle-Bytes in the debugger
+#### View Chronicle-Bytes in the debugger
 
 When using intellij idea, you can set up a custom render to view the bytes, see the images below :
 
