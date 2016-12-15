@@ -104,8 +104,7 @@ The API supports.
 | yes
 | yes
 
-| Thread safe read/write
-| CAS and atomic add operations
+| Thread safe read/write, CAS and atomic add operations
 | no
 | no
 | int; long
