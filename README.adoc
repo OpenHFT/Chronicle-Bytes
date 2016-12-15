@@ -1,3 +1,9 @@
+= Readme
+Peter Lawrey, Rob Austin
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+
 = Chronicle-Bytes
 
 // Settings:
