@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,6 +43,11 @@ public class ByteStringAppenderTest {
         threadDump.assertNoNewThreads();
     }
 
+    @Test
+    public void testConvertTo() {
+        assertEquals(Bytes.from("hello"), ObjectUtils.convertTo(Bytes.class, "hello"));
+        assertEquals(Bytes.allocateDirect(2).append(1), ObjectUtils.convertTo(Bytes.class, 1));
+    }
     @Test
     public void testAppend() throws IORuntimeException {
         long expected = 1234;

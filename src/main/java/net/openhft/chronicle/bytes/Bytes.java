@@ -184,6 +184,10 @@ public interface Bytes<Underlying> extends
         return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
+    static Bytes<byte[]> fromString(String text) throws IllegalArgumentException, IllegalStateException {
+        return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
+    }
+
     @Deprecated
     static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) throws IllegalArgumentException, IllegalStateException {
         return from(text);
