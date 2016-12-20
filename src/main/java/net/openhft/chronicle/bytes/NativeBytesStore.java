@@ -144,6 +144,12 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
+    public static NativeBytesStore from(byte[] bytes) {
+        NativeBytesStore nbs = nativeStore(bytes.length);
+        Bytes.wrapForRead(bytes).copyTo(nbs);
+        return nbs;
+    }
+
     @Override
     public boolean isDirectMemory() {
         return true;

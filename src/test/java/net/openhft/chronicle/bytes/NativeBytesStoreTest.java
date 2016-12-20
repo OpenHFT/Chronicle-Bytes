@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -74,6 +75,7 @@ public class NativeBytesStoreTest {
     }
 
     @Test
+    @Ignore("Long running test")
     public void perfCheckSum() throws IORuntimeException {
         NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),

@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -108,6 +109,7 @@ public class NativeBytesTest {
     }
 
     @Test
+    @Ignore("Long running test")
     public void tryGrowBeyondByteBufferCapacity() {
         if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
             return;

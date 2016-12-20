@@ -68,7 +68,7 @@ public class MappedMemoryTest {
     @Test
     public void withMappedNativeBytesTest() throws IOException {
 
-        for (int t = 0; t < 5; t++) {
+        for (int t = 0; t < 3; t++) {
             File tempFile = File.createTempFile("chronicle", "q");
             try {
 
@@ -91,7 +91,7 @@ public class MappedMemoryTest {
     @Test
     public void withRawNativeBytesTess() throws IOException {
 
-        for (int t = 0; t < 5; t++) {
+        for (int t = 0; t < 3; t++) {
             File tempFile = File.createTempFile("chronicle", "q");
             try {
 
