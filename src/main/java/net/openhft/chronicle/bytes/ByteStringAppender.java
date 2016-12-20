@@ -107,7 +107,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f) throws BufferOverflowException {
-        BytesInternal.append((StreamingDataOutput) this, f);
+        BytesInternal.append(this, f);
         return (B) this;
     }
 
@@ -121,7 +121,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d) throws BufferOverflowException {
-        BytesInternal.append((StreamingDataOutput) this, d);
+        BytesInternal.append(this, d);
         return (B) this;
     }
 

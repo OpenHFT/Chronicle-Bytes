@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.pool.BytesPool;
+import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
@@ -26,7 +28,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
-import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 
@@ -53,7 +54,8 @@ enum BytesInternal {
     static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     private static final StringBuilderPool SBP = new StringBuilderPool();
-    private static final StringInterner SI = new StringInterner(4096);
+    private static final BytesPool BP = new BytesPool();
+    private static final StringInternerBytes SI = new StringInternerBytes(4096);
     private static final byte[] Infinity = "Infinity".getBytes(ISO_8859_1);
     private static final byte[] NaN = "NaN".getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
@@ -1496,11 +1498,15 @@ enum BytesInternal {
         return SBP.acquireStringBuilder();
     }
 
+    public static Bytes acquireBytes() {
+        return BP.acquireBytes();
+    }
+
     @Nullable
     @ForceInline
     public static String read8bit(@NotNull StreamingDataInput in) throws BufferUnderflowException, IORuntimeException {
-        StringBuilder sb = acquireStringBuilder();
-        return in.read8bit(sb) ? SI.intern(sb) : null;
+        Bytes bytes = acquireBytes();
+        return in.read8bit(bytes) ? SI.intern(bytes) : null;
     }
 
     @NotNull
@@ -2147,10 +2153,10 @@ enum BytesInternal {
     }
 
     public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(StreamingDataInput input, Class<E> eClass) throws BufferUnderflowException, IORuntimeException {
-        StringBuilder sb = acquireStringBuilder();
-        input.read8bit(sb);
+        Bytes bytes = acquireBytes();
+        input.read8bit(bytes);
 
-        return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(sb);
+        return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
     }
 
     public static void writeFully(@NotNull BytesStore bytes, long offset, long length, StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException {
@@ -2188,7 +2194,7 @@ enum BytesInternal {
     }
 
     public static Boolean parseBoolean(ByteStringParser parser, StopCharTester tester) {
-        StringBuilder sb = acquireStringBuilder();
+        Bytes sb = acquireBytes();
         parseUtf8(parser, sb, tester);
         if (sb.length() == 0)
             return null;

@@ -93,12 +93,14 @@ public class ByteStringParserTest   {
         bytes.append(1234).append(' ');
         bytes.append(123456L).append(' ');
         bytes.append(1.2345).append(' ');
+        bytes.append(0.0012345).append(' ');
 
         assertEquals("word£€)", bytes.parseUtf8(SPACE_STOP));
         assertEquals("word£€)", bytes.parseUtf8(SPACE_STOP));
         assertEquals(1234, bytes.parseLong());
         assertEquals(123456L, bytes.parseLong());
         assertEquals(1.2345, bytes.parseDouble(), 0);
+        assertEquals(0.0012345, bytes.parseDouble(), 0);
     }
 
     @Test

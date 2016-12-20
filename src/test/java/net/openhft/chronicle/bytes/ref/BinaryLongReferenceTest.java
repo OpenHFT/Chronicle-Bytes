@@ -44,6 +44,12 @@ public class BinaryLongReferenceTest {
         assertEquals(0L, nbs.readLong(8));
         assertEquals(2L, nbs.readLong(16));
         assertEquals(0L, nbs.readLong(24));
+
+        ref.setValue(10);
+        assertEquals(10L, nbs.readLong(16));
+        ref.setOrderedValue(20);
+        Thread.yield();
+        assertEquals(20L, nbs.readVolatileLong(16));
         nbs.release();
     }
 }

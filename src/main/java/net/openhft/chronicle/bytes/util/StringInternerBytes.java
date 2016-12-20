@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -34,6 +35,9 @@ public class StringInternerBytes extends StringInterner {
         super(capacity);
     }
 
+    public String intern(@NotNull final Bytes bytes) {
+        return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
+    }
     /**
      * converts the bytes to a ISO-8859-1 String, the end of the string is either the bytes .limit
      * () or a byte containing the stopByte ( which ever comes first ). If the string can be

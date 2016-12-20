@@ -44,6 +44,12 @@ public class BinaryIntReferenceTest {
         assertEquals(0L, nbs.readLong(8));
         assertEquals(2, nbs.readInt(16));
         assertEquals(0L, nbs.readLong(20));
+
+        ref.setValue(10);
+        assertEquals(10L, nbs.readInt(16));
+        ref.setOrderedValue(20);
+        Thread.yield();
+        assertEquals(20L, nbs.readVolatileInt(16));
         nbs.release();
     }
 }
