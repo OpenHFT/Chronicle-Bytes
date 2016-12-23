@@ -42,7 +42,6 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
 
-
 @RunWith(Parameterized.class)
 public class BytesTest {
 
@@ -71,6 +70,22 @@ public class BytesTest {
     @After
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
+    }
+
+    @Test
+    public void writeAdv() {
+        Bytes<?> bytes = alloc1.fixedBytes(32);
+        for (int i = 0; i < 4; i++)
+            bytes.writeIntAdv('1', 1);
+        assertEquals("1111", bytes.toString());
+    }
+
+    @Test
+    public void writeLongAdv() {
+        Bytes<?> bytes = alloc1.fixedBytes(32);
+        for (int i = 0; i < 4; i++)
+            bytes.writeLongAdv('1', 1);
+        assertEquals("1111", bytes.toString());
     }
 
     @Test

@@ -173,10 +173,14 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     protected long writeOffsetPositionMoved(long adding) {
+        return writeOffsetPositionMoved(adding, adding);
+    }
+
+    protected long writeOffsetPositionMoved(long adding, long advance) {
         long oldPosition = writePosition;
         long writeEnd = oldPosition + adding;
         assert writeEnd <= bytesStore.safeLimit();
-        writePosition += adding;
+        writePosition += advance;
         return oldPosition;
     }
 
@@ -630,6 +634,14 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> writeIntAdv(int i, int advance) {
+        long offset = writeOffsetPositionMoved(4, advance);
+        bytesStore.writeInt(offset, i);
+        return this;
+    }
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> prewriteInt(int i) {
         long offset = prewriteOffsetPositionMoved(4);
         bytesStore.writeInt(offset, i);
@@ -641,6 +653,15 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeLong(long i64) {
         long offset = writeOffsetPositionMoved(8);
+        bytesStore.writeLong(offset, i64);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> writeLongAdv(long i64, int advance) {
+        long offset = writeOffsetPositionMoved(8, advance);
         bytesStore.writeLong(offset, i64);
         return this;
     }

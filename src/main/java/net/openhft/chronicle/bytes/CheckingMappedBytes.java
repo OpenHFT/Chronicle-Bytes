@@ -32,11 +32,11 @@ public class CheckingMappedBytes extends MappedBytes {
     }
 
     @Override
-    protected long writeOffsetPositionMoved(long adding) throws BufferOverflowException {
+    protected long writeOffsetPositionMoved(long adding, long advance) throws BufferOverflowException {
         long wp = writePosition();
         if (adding <= 8) {
             long value = 0;
-            switch ((int) adding) {
+            switch ((int) advance) {
                 case 1:
                     value = readByte(wp);
                     break;
@@ -65,7 +65,7 @@ public class CheckingMappedBytes extends MappedBytes {
             if (value != 0)
                 throw new IllegalStateException("Attempting to over-write " + value + " at " + wp);
         }
-        return super.writeOffsetPositionMoved(adding);
+        return super.writeOffsetPositionMoved(adding, advance);
     }
 
     @NotNull

@@ -113,9 +113,9 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     }
 
     @Override
-    protected long writeOffsetPositionMoved(long adding) {
+    protected long writeOffsetPositionMoved(long adding, long advance) {
         long oldPosition = writePosition();
-        uncheckedWritePosition(writePosition() + adding);
+        uncheckedWritePosition(writePosition() + advance);
         return oldPosition;
     }
 

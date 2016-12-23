@@ -694,11 +694,16 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    protected long writeOffsetPositionMoved(long adding)
+    protected final long writeOffsetPositionMoved(long adding)
+            throws BufferOverflowException {
+        return writeOffsetPositionMoved(adding, adding);
+    }
+
+    protected long writeOffsetPositionMoved(long adding, long advance)
             throws BufferOverflowException {
         long oldPosition = writePosition;
         writeCheckOffset(writePosition, adding);
-        uncheckedWritePosition(writePosition + adding);
+        uncheckedWritePosition(writePosition + advance);
         return oldPosition;
     }
 
@@ -740,9 +745,28 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> writeIntAdv(int i, int advance) throws BufferOverflowException {
+        long offset = writeOffsetPositionMoved(4, advance);
+        bytesStore.writeInt(offset, i);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> writeLong(long i64)
             throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(8);
+        bytesStore.writeLong(offset, i64);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
+    public Bytes<Underlying> writeLongAdv(long i64, int advance)
+            throws BufferOverflowException {
+        long offset = writeOffsetPositionMoved(8, advance);
         bytesStore.writeLong(offset, i64);
         return this;
     }

@@ -185,6 +185,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeInt(int i) throws BufferOverflowException;
 
     @NotNull
+    S writeIntAdv(int i, int advance) throws BufferOverflowException;
+
+    @NotNull
     default S writeUnsignedInt(long i)
             throws BufferOverflowException, IllegalArgumentException {
         return writeInt((int) Maths.toUInt32(i));
@@ -192,6 +195,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     S writeLong(long i64) throws BufferOverflowException;
+
+    @NotNull
+    S writeLongAdv(long i64, int advance) throws BufferOverflowException;
 
     @NotNull
     S writeFloat(float f) throws BufferOverflowException;

@@ -1787,7 +1787,11 @@ enum BytesInternal {
         int exp = 0;
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
-        int ch = in.readUnsignedByte();
+        int ch;
+        do {
+            ch = in.readUnsignedByte();
+        } while (ch == ' ');
+
         try {
             switch (ch) {
                 case 'N':
