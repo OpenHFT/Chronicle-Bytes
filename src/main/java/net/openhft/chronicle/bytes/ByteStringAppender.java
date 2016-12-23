@@ -46,7 +46,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(char ch) throws BufferOverflowException {
-            BytesInternal.appendUtf8Char(this, ch);
+        BytesInternal.appendUtf8Char(this, ch);
         return (B) this;
     }
 
@@ -138,6 +138,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(double d, int decimalPlaces) throws BufferOverflowException {
+        if (decimalPlaces < 0)
+            throw new IllegalArgumentException();
         if (decimalPlaces < 20) {
             double d2 = d * Maths.tens(decimalPlaces);
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
@@ -159,7 +161,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end)
             throws IndexOutOfBoundsException, BufferOverflowException {
-            BytesInternal.appendUtf8(this, cs, start, end - start);
+        BytesInternal.appendUtf8(this, cs, start, end - start);
         return (B) this;
     }
 
