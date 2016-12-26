@@ -298,6 +298,7 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public long readLong(long offset) {
+        assert address != 0;
         return memory.readLong(address + translate(offset));
     }
 
