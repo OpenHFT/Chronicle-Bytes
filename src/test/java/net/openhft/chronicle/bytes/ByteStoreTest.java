@@ -516,6 +516,8 @@ public class ByteStoreTest {
             bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ‖‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(1);
+            System.gc();
+            assertEquals(1, bytes.refCount());
             assertEquals("[pos: 0, rlim: 1, wlim: 8EiB, cap: 8EiB ] ‖⒈‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(2);
             bytes.readByte();
@@ -529,6 +531,8 @@ public class ByteStoreTest {
             assertEquals("[pos: 2, rlim: 5, wlim: 8EiB, cap: 8EiB ] ⒈⒉‖⒊⒋⒌‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(6);
             bytes.readByte();
+            System.gc();
+            assertEquals(1, bytes.refCount());
             assertEquals("[pos: 3, rlim: 6, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(7);
             assertEquals("[pos: 3, rlim: 7, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
@@ -536,6 +540,7 @@ public class ByteStoreTest {
             assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊‖⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
         } finally {
             bytes.release();
+            assertEquals(0, bytes.refCount());
         }
     }
 

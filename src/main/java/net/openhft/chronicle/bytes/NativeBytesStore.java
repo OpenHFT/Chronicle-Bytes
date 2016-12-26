@@ -48,13 +48,13 @@ public class NativeBytesStore<Underlying>
 
     @Nullable
     private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
-/*    static {
-        try {
-            last = MappedBytes.mappedBytes(new File("last"), 8);
-        } catch (FileNotFoundException e) {
-            throw new AssertionError(e);
-        }
-    }*/
+    /*    static {
+            try {
+                last = MappedBytes.mappedBytes(new File("last"), 8);
+            } catch (FileNotFoundException e) {
+                throw new AssertionError(e);
+            }
+        }*/
     protected long address;
     // on release, set this to null.
     @Nullable
@@ -67,6 +67,7 @@ public class NativeBytesStore<Underlying>
     private boolean elastic;
     @Nullable
     private Underlying underlyingObject;
+
     private NativeBytesStore() {
     }
 
