@@ -1863,8 +1863,17 @@ enum BytesInternal {
     public static long parseLong(@NotNull StreamingDataInput in) throws BufferUnderflowException {
         long num = 0;
         boolean negative = false;
+        int b = in.peekUnsignedByte();
+        if (b == '0') {
+            in.readSkip(1);
+            b = in.peekUnsignedByte();
+            if (b == 'x' || b == 'X') {
+                in.readSkip(1);
+                return parseLongHexaDecimal(in);
+            }
+        }
         while (in.readRemaining() > 0) {
-            int b = in.readUnsignedByte();
+            b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
@@ -1883,6 +1892,34 @@ enum BytesInternal {
             }
         }
         return negative ? -num : num;
+    }
+
+    private static long parseLongHexaDecimal(StreamingDataInput in) {
+        long num = 0;
+        while (in.readRemaining() > 0) {
+            int b = in.readUnsignedByte();
+            // if (b >= '0' && b <= '9')
+            if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
+                num = (num << 4) + b - '0';
+                // if (b >= 'A' && b <= 'F')
+            } else if ((b - ('A' + Integer.MIN_VALUE)) < 6 + Integer.MIN_VALUE) {
+                num = (num << 4) + b - ('A' - 10);
+                // if (b >= 'a' && b <= 'f')
+            } else if ((b - ('a' + Integer.MIN_VALUE)) < 6 + Integer.MIN_VALUE) {
+                num = (num << 4) + b - ('a' - 10);
+            } else if (b == ']' || b == '}') {
+                in.readSkip(-1);
+                break;
+            } else if (b == '.') {
+                consumeDecimals(in);
+                break;
+            } else if (b == '_') {
+                // ignore
+            } else {
+                break;
+            }
+        }
+        return num;
     }
 
     static void consumeDecimals(@NotNull StreamingDataInput in) {
