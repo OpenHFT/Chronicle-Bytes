@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.algo;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -50,7 +51,7 @@ public class OptimisedBytesStoreHashTest {
     @Test
     @Ignore("TODO FIX")
     public void testApplyAsLong() {
-        NativeBytes b = Bytes.allocateElasticDirect(128);
+        @NotNull NativeBytes b = Bytes.allocateElasticDirect(128);
         b.writeLong(0x0102030405060708L);
         b.writeLong(0x1112131415161718L);
         b.readSkip(1);
@@ -66,7 +67,7 @@ public class OptimisedBytesStoreHashTest {
 
     @Test
     public void sizeMatch() {
-        NativeBytes nb = Bytes.allocateElasticDirect(64);
+        @NotNull NativeBytes nb = Bytes.allocateElasticDirect(64);
         for (int i = 1; i <= 64; i++)
             nb.writeUnsignedByte(i);
 /*
@@ -85,14 +86,14 @@ public class OptimisedBytesStoreHashTest {
     @Test
     @Ignore("Long running, har mean score = 5436")
     public void testRandomness() {
-        SecureRandom rand = new SecureRandom();
+        @NotNull SecureRandom rand = new SecureRandom();
 
         long time = 0, timeCount = 0;
         double scoreSum = 0;
         int runs = 500;
         for (int t = 0; t < runs; t++) {
-            long[] hashs = new long[8192];
-            byte[] init = new byte[hashs.length / 8];
+            @NotNull long[] hashs = new long[8192];
+            @NotNull byte[] init = new byte[hashs.length / 8];
             Bytes b = Bytes.allocateDirect(init.length);
             rand.nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
@@ -135,8 +136,8 @@ public class OptimisedBytesStoreHashTest {
 //        StringBuilder sb = new StringBuilder();
 
         for (int t = 0; t < 500; t++) {
-            long[] hashs = new long[8192];
-            NativeBytes b = Bytes.allocateElasticDirect(8);
+            @NotNull long[] hashs = new long[8192];
+            @NotNull NativeBytes b = Bytes.allocateElasticDirect(8);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
                 b.append(t);
@@ -176,8 +177,8 @@ public class OptimisedBytesStoreHashTest {
     public void testSecureRandomness() {
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {
-            Random rand = new SecureRandom();
-            long[] hashs = new long[8192];
+            @NotNull Random rand = new SecureRandom();
+            @NotNull long[] hashs = new long[8192];
             for (int i = 0; i < hashs.length; i++) {
                 hashs[i] = rand.nextLong();
             }
@@ -203,7 +204,7 @@ public class OptimisedBytesStoreHashTest {
         Bytes bs = Bytes.allocateDirect(8);
         for (int i = 1; i <= 8; i++)
             bs.writeUnsignedByte(i);
-        Bytes bs2 = Bytes.allocateDirect(9).unchecked(true);
+        @NotNull Bytes bs2 = Bytes.allocateDirect(9).unchecked(true);
 
         for (int i = 0; i <= 8; i++) {
             assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),

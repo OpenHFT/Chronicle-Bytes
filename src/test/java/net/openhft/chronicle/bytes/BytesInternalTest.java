@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,12 +42,12 @@ public class BytesInternalTest {
     }
     @Test
     public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
-        VanillaBytes bytes = Bytes.allocateElasticDirect();
-        byte[] bytes2 = new byte[128];
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        @NotNull byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
         bytes.write(bytes2);
 
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
 
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
@@ -55,7 +56,7 @@ public class BytesInternalTest {
 
     @Test
     public void testCompareUTF() throws IORuntimeException {
-        NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
         assertFalse(BytesInternal.compareUtf8(bs, 0, null));
@@ -65,7 +66,7 @@ public class BytesInternalTest {
         assertFalse(BytesInternal.compareUtf8(bs, 0, "test"));
 
         bs.writeUtf8(1, "£€");
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         bs.readUtf8(1, sb);
         assertEquals("£€", sb.toString());
         assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
@@ -75,7 +76,7 @@ public class BytesInternalTest {
 
     @Test
     public void testParseDouble() {
-        Object[][] tests = {
+        @NotNull Object[][] tests = {
                 {"-1E-3 ", -1E-3},
                 {"12E3 ", 12E3},
                 {"-1.1E-3 ", -1.1E-3},
@@ -84,7 +85,7 @@ public class BytesInternalTest {
                 {"1.17045E70 ", 1.17045E70}
         };
         for (Object[] objects : tests) {
-            String text = (String) objects[0];
+            @NotNull String text = (String) objects[0];
             double expected = (Double) objects[1];
 
             assertEquals(expected, Bytes.from(text)

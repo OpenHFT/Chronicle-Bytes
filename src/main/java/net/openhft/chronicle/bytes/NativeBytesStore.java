@@ -119,7 +119,7 @@ public class NativeBytesStore<Underlying>
             memory.setMemory(address, capacity, (byte) 0);
             memory.storeFence();
         }
-        Deallocator deallocator = new Deallocator(address, capacity);
+        @NotNull Deallocator deallocator = new Deallocator(address, capacity);
         return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
@@ -145,8 +145,9 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
     }
 
-    public static NativeBytesStore from(byte[] bytes) {
-        NativeBytesStore nbs = nativeStore(bytes.length);
+    @NotNull
+    public static NativeBytesStore from(@NotNull byte[] bytes) {
+        @NotNull NativeBytesStore nbs = nativeStore(bytes.length);
         Bytes.wrapForRead(bytes).copyTo(nbs);
         return nbs;
     }
@@ -181,7 +182,7 @@ public class NativeBytesStore<Underlying>
     @Override
     public BytesStore<NativeBytesStore<Underlying>, Underlying> copy() throws IllegalStateException {
         if (underlyingObject == null) {
-            NativeBytesStore<Void> copy = of(realCapacity(), false, true);
+            @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
             memory.copyMemory(address, copy.address, capacity());
             return (BytesStore) copy;
 
@@ -196,6 +197,7 @@ public class NativeBytesStore<Underlying>
         }
     }
 
+    @NotNull
     @Override
     public VanillaBytes<Underlying> bytesForWrite() throws IllegalStateException {
         return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
@@ -526,7 +528,7 @@ public class NativeBytesStore<Underlying>
 
     void write8bit(long position, char[] chars, int offset, int length) {
         long addr = address + translate(position);
-        Memory memory = this.memory;
+        @Nullable Memory memory = this.memory;
         for (int i = 0; i < length; i++)
             memory.writeByte(addr + i, (byte) chars[offset + i]);
     }
@@ -569,7 +571,7 @@ public class NativeBytesStore<Underlying>
             throw new BufferOverflowException();
 
         long address = this.address + translate(0);
-        Memory memory = this.memory;
+        @Nullable Memory memory = this.memory;
         if (memory == null) throw new NullPointerException();
         Unsafe unsafe = UnsafeMemory.UNSAFE;
         int i;
@@ -626,7 +628,7 @@ public class NativeBytesStore<Underlying>
             return super.copyTo(store);
     }
 
-    public long copyToDirect(BytesStore store) {
+    public long copyToDirect(@NotNull BytesStore store) {
         long addr = address;
         long addr2 = store.address(0);
         long read = readRemaining();
@@ -657,7 +659,7 @@ public class NativeBytesStore<Underlying>
     }
 
     public int byteCheckSum(long position, long limit) {
-        Memory memory = this.memory;
+        @Nullable Memory memory = this.memory;
         assert memory != null;
         int b = 0;
         long ptr = address + position;
@@ -702,7 +704,7 @@ public class NativeBytesStore<Underlying>
     @Override
     public int peekUnsignedByte(long offset) {
         final long address = this.address;
-        final Memory memory = this.memory;
+        @Nullable final Memory memory = this.memory;
         final long translate = translate(offset);
 //        assert translate >= 0;
         final long address2 = address + translate;

@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.util.ThrowingFunction;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
@@ -31,7 +32,7 @@ import java.io.*;
  */
 public interface Compression {
 
-    static <T> void compress(CharSequence cs, Bytes uncompressed, Bytes compressed) {
+    static <T> void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed) {
         switch (cs.charAt(0)) {
             case 'l':
                 if (StringUtils.isEqual("lzw", cs)) {
@@ -57,7 +58,7 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
-    static void uncompress(CharSequence cs, BytesIn from, BytesOut to) throws IORuntimeException {
+    static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn from, @NotNull BytesOut to) throws IORuntimeException {
         switch (cs.charAt(0)) {
             case 'b':
             case '!':
@@ -92,7 +93,7 @@ public interface Compression {
     }
 
     @Nullable
-    static <T> byte[] uncompress(CharSequence cs, T t, ThrowingFunction<T, byte[], IORuntimeException> bytes) throws IORuntimeException {
+    static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes) throws IORuntimeException {
         switch (cs.charAt(0)) {
             case 'b':
             case '!':
@@ -117,8 +118,8 @@ public interface Compression {
         return null;
     }
 
-    default byte[] compress(byte[] bytes) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    default byte[] compress(@NotNull byte[] bytes) {
+        @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
             output.write(bytes);
 
@@ -128,7 +129,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void compress(BytesIn from, BytesOut to) {
+    default void compress(@NotNull BytesIn from, @NotNull BytesOut to) {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
 
@@ -138,9 +139,9 @@ public interface Compression {
     }
 
     default byte[] uncompress(byte[] bytes) throws IORuntimeException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
-            byte[] buf = new byte[512];
+            @NotNull byte[] buf = new byte[512];
             for (int len; (len = input.read(buf)) > 0; )
                 baos.write(buf, 0, len);
 
@@ -150,7 +151,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void uncompress(BytesIn from, BytesOut to) throws IORuntimeException {
+    default void uncompress(@NotNull BytesIn from, @NotNull BytesOut to) throws IORuntimeException {
         try (InputStream input = decompressingStream(from.inputStream())) {
             to.copyFrom(input);
 

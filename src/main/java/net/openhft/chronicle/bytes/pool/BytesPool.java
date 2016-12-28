@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Created by peter on 20/12/16.
@@ -34,6 +35,7 @@ public class BytesPool {
         return bytes;
     }
 
+    @NotNull
     protected Bytes createBytes() {
         return Bytes.allocateElasticDirect(256);
     }

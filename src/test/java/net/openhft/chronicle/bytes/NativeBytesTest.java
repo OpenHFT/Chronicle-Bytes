@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -101,7 +103,7 @@ public class NativeBytesTest {
     @Test
     public void testResizeTwoPagesToThreePages() {
         long pageSize = OS.pageSize();
-        NativeBytes<Void> nativeBytes = NativeBytes.nativeBytes(2 * pageSize);
+        @NotNull NativeBytes<Void> nativeBytes = NativeBytes.nativeBytes(2 * pageSize);
         assertEquals(2 * pageSize, nativeBytes.realCapacity());
         nativeBytes.writePosition(nativeBytes.realCapacity() - 3);
         nativeBytes.writeInt(0);
@@ -113,8 +115,8 @@ public class NativeBytesTest {
     public void tryGrowBeyondByteBufferCapacity() {
         if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
             return;
-        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
-        ByteBuffer byteBuffer = bytes.underlyingObject();
+        @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
+        @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
         assertFalse(byteBuffer.isDirect());
 
         // Trigger growing beyond ByteBuffer

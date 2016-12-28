@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -37,13 +38,13 @@ public class BytesMarshallableTest {
     @Test
     public void serializePrimitives() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
-        MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
-        MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
+        @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
+        @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
         mb1.writeMarshallable(bytes);
         mb2.writeMarshallable(bytes);
 
-        MyByteable mb3 = new MyByteable();
-        MyByteable mb4 = new MyByteable();
+        @NotNull MyByteable mb3 = new MyByteable();
+        @NotNull MyByteable mb4 = new MyByteable();
         mb3.readMarshallable(bytes);
         mb4.readMarshallable(bytes);
 
@@ -54,13 +55,13 @@ public class BytesMarshallableTest {
     @Test
     public void serializeScalars() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
-        MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
-        MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
+        @NotNull MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
+        @NotNull MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         mb1.writeMarshallable(bytes);
         mb2.writeMarshallable(bytes);
 
-        MyScalars mb3 = new MyScalars();
-        MyScalars mb4 = new MyScalars();
+        @NotNull MyScalars mb3 = new MyScalars();
+        @NotNull MyScalars mb4 = new MyScalars();
         mb3.readMarshallable(bytes);
         mb4.readMarshallable(bytes);
 
@@ -71,17 +72,17 @@ public class BytesMarshallableTest {
     @Test
     public void serializeNested() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
-        MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
-        MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
-        MyScalars ms1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
-        MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
-        MyNested mn1 = new MyNested(mb1, ms1);
-        MyNested mn2 = new MyNested(mb2, ms2);
+        @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
+        @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
+        @NotNull MyScalars ms1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
+        @NotNull MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
+        @NotNull MyNested mn1 = new MyNested(mb1, ms1);
+        @NotNull MyNested mn2 = new MyNested(mb2, ms2);
         mn1.writeMarshallable(bytes);
         mn2.writeMarshallable(bytes);
 
-        MyNested mn3 = new MyNested();
-        MyNested mn4 = new MyNested();
+        @NotNull MyNested mn3 = new MyNested();
+        @NotNull MyNested mn4 = new MyNested();
         mn3.readMarshallable(bytes);
         mn4.readMarshallable(bytes);
 
@@ -113,6 +114,7 @@ public class BytesMarshallableTest {
             this.d = d;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "MyByteable{" +
@@ -152,6 +154,7 @@ public class BytesMarshallableTest {
             this.uuid = uuid;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "MyScalars{" +
@@ -179,6 +182,7 @@ public class BytesMarshallableTest {
             this.scalars = scalars;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return "MyNested{" +

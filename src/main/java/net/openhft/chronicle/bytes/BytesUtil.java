@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -33,8 +34,8 @@ public enum BytesUtil {
     ;
 
     public static boolean bytesEqual(
-            @NotNull RandomDataInput a, long offset,
-            @NotNull RandomDataInput second, long secondOffset, long len)
+            @org.jetbrains.annotations.NotNull @NotNull RandomDataInput a, long offset,
+            @org.jetbrains.annotations.NotNull @NotNull RandomDataInput second, long secondOffset, long len)
             throws BufferUnderflowException {
         long i = 0;
         while (len - i >= 8L) {
@@ -58,7 +59,7 @@ public enum BytesUtil {
         return true;
     }
 
-    public static boolean bytesEqual(CharSequence cs, RandomDataInput bs, long offset, int length) {
+    public static boolean bytesEqual(@Nullable CharSequence cs, @org.jetbrains.annotations.NotNull RandomDataInput bs, long offset, int length) {
         if (cs == null || cs.length() != length)
             return false;
         for (int i = 0; i < length; i++) {
@@ -75,8 +76,8 @@ public enum BytesUtil {
         return o1 != null && o1.equals(o2);
     }
 
-    public static int asInt(@NotNull String str) {
-        ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
+    public static int asInt(@org.jetbrains.annotations.NotNull @NotNull String str) {
+        @org.jetbrains.annotations.NotNull ByteBuffer bb = ByteBuffer.wrap(str.getBytes(StandardCharsets.ISO_8859_1)).order(ByteOrder.nativeOrder());
         return bb.getInt();
     }
 
@@ -90,8 +91,9 @@ public enum BytesUtil {
         return BytesInternal.stopBitLength0(n);
     }
 
-    public static char[] toCharArray(Bytes bytes) {
-        final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
+    @org.jetbrains.annotations.NotNull
+    public static char[] toCharArray(@org.jetbrains.annotations.NotNull Bytes bytes) {
+        @org.jetbrains.annotations.NotNull final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
 
         for (int i = 0; i < bytes.readRemaining(); i++) {
             chars[i] = (char) bytes.readUnsignedByte(i + bytes.readPosition());
@@ -99,8 +101,9 @@ public enum BytesUtil {
         return chars;
     }
 
-    public static char[] toCharArray(Bytes bytes, long position, int length) {
-        final char[] chars = new char[length];
+    @org.jetbrains.annotations.NotNull
+    public static char[] toCharArray(@org.jetbrains.annotations.NotNull Bytes bytes, long position, int length) {
+        @org.jetbrains.annotations.NotNull final char[] chars = new char[length];
 
         int j = 0;
         for (int i = 0; i < length; i++) {
@@ -122,23 +125,23 @@ public enum BytesUtil {
         BytesInternal.parseUtf8(in, appendable, utflen);
     }
 
-    public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
+    public static void appendUtf8(@NotNull StreamingDataOutput out, @org.jetbrains.annotations.NotNull @NotNull CharSequence cs) {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
 
     // used by Chronicle FIX.
-    public static void appendBytesFromStart(Bytes bytes, long startPosition, StringBuilder sb) {
+    public static void appendBytesFromStart(@org.jetbrains.annotations.NotNull Bytes bytes, long startPosition, @org.jetbrains.annotations.NotNull StringBuilder sb) {
         BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
         sb.append('\u2016');
         sb.append(bytes);
     }
 
-    public static void readMarshallable(ReadBytesMarshallable marshallable, BytesIn bytes) {
+    public static void readMarshallable(@org.jetbrains.annotations.NotNull ReadBytesMarshallable marshallable, BytesIn bytes) {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .readMarshallable(marshallable, bytes);
     }
 
-    public static void writeMarshallable(WriteBytesMarshallable marshallable, BytesOut bytes) {
+    public static void writeMarshallable(@org.jetbrains.annotations.NotNull WriteBytesMarshallable marshallable, BytesOut bytes) {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, bytes);
     }

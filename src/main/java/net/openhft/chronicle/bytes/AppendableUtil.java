@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.UTFDataFormatException;
@@ -41,7 +42,7 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void parseUtf8(BytesStore bs, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
+    public static void parseUtf8(@org.jetbrains.annotations.NotNull BytesStore bs, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utflen);
     }
 
@@ -76,7 +77,7 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static <ACS extends Appendable & CharSequence> void append(@NotNull ACS sb, String str) {
+    public static <ACS extends Appendable & CharSequence> void append(@org.jetbrains.annotations.NotNull @NotNull ACS sb, String str) {
         try {
             sb.append(str);
         } catch (IOException e) {
@@ -84,9 +85,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
-                                         @NotNull StringBuilder appendable,
-                                         @NotNull StopCharsTester tester) {
+    public static void read8bitAndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes,
+                                         @org.jetbrains.annotations.NotNull @NotNull StringBuilder appendable,
+                                         @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -97,9 +98,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
-                                        @NotNull Appendable appendable,
-                                        @NotNull StopCharsTester tester)
+    public static void readUTFAndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes,
+                                        @org.jetbrains.annotations.NotNull @NotNull Appendable appendable,
+                                        @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
             throws BufferUnderflowException {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
@@ -108,9 +109,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
-                                         @NotNull Appendable appendable,
-                                         @NotNull StopCharsTester tester)
+    public static void readUtf8AndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes,
+                                         @org.jetbrains.annotations.NotNull @NotNull Appendable appendable,
+                                         @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
             throws BufferUnderflowException, IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -184,11 +185,11 @@ public enum AppendableUtil {
         }
     }
 
-    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
+    public static void parse8bit_SB1(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen)
             throws BufferUnderflowException {
         if (utflen > bytes.readRemaining())
             throw new BufferUnderflowException();
-        NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
+        @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
         long offset = bytes.readPosition();
         int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, utflen);
         bytes.readSkip(count);
@@ -197,7 +198,7 @@ public enum AppendableUtil {
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws BufferUnderflowException {
         if (appendable instanceof StringBuilder) {
-            final StringBuilder sb = (StringBuilder) appendable;
+            @org.jetbrains.annotations.NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
                 parse8bit_SB1((Bytes) bytes, sb, utflen);
             } else {
@@ -221,7 +222,7 @@ public enum AppendableUtil {
         }
     }
 
-    public static long findUtf8Length(@NotNull CharSequence str) throws IndexOutOfBoundsException {
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull CharSequence str) throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
@@ -239,7 +240,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull char[] chars) {
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull char[] chars) {
         int strlen = chars.length;
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {

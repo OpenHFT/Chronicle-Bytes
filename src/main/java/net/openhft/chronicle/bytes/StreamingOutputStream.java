@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
@@ -35,7 +37,7 @@ class StreamingOutputStream extends OutputStream {
         try {
             sdo.write(b, off, len);
 
-        } catch (BufferOverflowException | IllegalArgumentException e) {
+        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }
     }
@@ -45,7 +47,7 @@ class StreamingOutputStream extends OutputStream {
         try {
             sdo.writeUnsignedByte(b);
 
-        } catch (BufferOverflowException | IllegalArgumentException e) {
+        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }
     }

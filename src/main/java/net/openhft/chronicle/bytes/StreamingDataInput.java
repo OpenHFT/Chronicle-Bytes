@@ -34,17 +34,21 @@ import java.nio.ByteBuffer;
  * This data input has a a position() and a limit()
  */
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
+    @NotNull
     S readPosition(long position) throws BufferUnderflowException;
 
+    @NotNull
     default S readPositionUnlimited(long position) throws BufferUnderflowException {
         return readLimit(capacity()).readPosition(position);
     }
 
+    @NotNull
     default S readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
         readLimit(position + remaining);
         return readPosition(position);
     }
 
+    @NotNull
     S readLimit(long limit) throws BufferUnderflowException;
 
     /**
@@ -54,6 +58,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @return this
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
+    @NotNull
     S readSkip(long bytesToSkip) throws BufferUnderflowException;
 
     /**
@@ -148,6 +153,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readUtf8(this);
     }
 
+    @Nullable
     @Deprecated
     default String readUTFΔ()
             throws IORuntimeException, BufferUnderflowException, IllegalArgumentException {
@@ -208,7 +214,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean read8bit(StringBuilder sb)
+    default boolean read8bit(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException {
         sb.setLength(0);
         long len0 = BytesInternal.readStopBit(this);
@@ -263,6 +269,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void nativeRead(long address, long size)
             throws BufferUnderflowException;
 
+    @NotNull
     default <E extends Enum<E>> E readEnum(Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException {
         return BytesInternal.readEnum(this, eClass);
@@ -288,7 +295,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     long copyTo(BytesStore to);
 
-    default void readHistogram(Histogram histogram) {
+    default void readHistogram(@NotNull Histogram histogram) {
         BytesInternal.readHistogram(this, histogram);
     }
 }

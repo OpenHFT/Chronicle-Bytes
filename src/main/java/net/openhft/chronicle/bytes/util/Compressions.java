@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
 import org.xerial.snappy.SnappyInputStream;
 import org.xerial.snappy.SnappyOutputStream;
 
@@ -44,16 +45,16 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public void compress(BytesIn from, BytesOut to) {
+        public void compress(@NotNull BytesIn from, @NotNull BytesOut to) {
             copy(from, to);
         }
 
         @Override
-        public void uncompress(BytesIn from, BytesOut to) {
+        public void uncompress(@NotNull BytesIn from, @NotNull BytesOut to) {
             copy(from, to);
         }
 
-        private void copy(BytesIn from, BytesOut to) {
+        private void copy(@NotNull BytesIn from, @NotNull BytesOut to) {
             long copied = from.copyTo((BytesStore) to);
             to.writeSkip(copied);
         }
@@ -69,17 +70,20 @@ public enum Compressions implements Compression {
         }
     },
     LZW {
+        @NotNull
         @Override
         public InputStream decompressingStream(InputStream input) {
             return new InflaterInputStream(input);
         }
 
+        @NotNull
         @Override
         public OutputStream compressingStream(OutputStream output) {
             return new DeflaterOutputStream(output, new Deflater(Deflater.DEFAULT_COMPRESSION));
         }
     },
     GZIP {
+        @NotNull
         @Override
         public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
@@ -90,6 +94,7 @@ public enum Compressions implements Compression {
             }
         }
 
+        @NotNull
         @Override
         public OutputStream compressingStream(OutputStream output) {
             try {
@@ -138,6 +143,7 @@ public enum Compressions implements Compression {
             }
         }
 
+        @NotNull
         @Override
         public InputStream decompressingStream(InputStream input) throws IORuntimeException {
             try {
@@ -148,6 +154,7 @@ public enum Compressions implements Compression {
             }
         }
 
+        @NotNull
         @Override
         public OutputStream compressingStream(OutputStream output) {
             return new SnappyOutputStream(output);

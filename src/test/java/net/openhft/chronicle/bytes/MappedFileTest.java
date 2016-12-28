@@ -18,6 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 
 import java.io.File;
@@ -50,13 +52,13 @@ public class MappedFileTest {
     @Test
     public void testReferenceCounts() throws IOException {
         new File(OS.TARGET).mkdir();
-        File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
+        @NotNull File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
         tmp.deleteOnExit();
         int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
-        MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0);
+        @NotNull MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0);
         assertEquals("refCount: 1", mf.referenceCounts());
 
-        MappedBytesStore bs = mf.acquireByteStore(chunkSize + (1 << 10));
+        @Nullable MappedBytesStore bs = mf.acquireByteStore(chunkSize + (1 << 10));
         assertEquals(chunkSize, bs.start());
         assertEquals(chunkSize * 2, bs.capacity());
         Bytes bytes = bs.bytesForRead();
@@ -86,7 +88,7 @@ public class MappedFileTest {
         assertEquals(3, bs.refCount());
         assertEquals("refCount: 2, 0, 3", mf.referenceCounts());
 
-        BytesStore bs2 = mf.acquireByteStore(chunkSize + (1 << 10));
+        @Nullable BytesStore bs2 = mf.acquireByteStore(chunkSize + (1 << 10));
         assertEquals(4, bs2.refCount());
         assertEquals("refCount: 2, 0, 4", mf.referenceCounts());
         bytes.release();
@@ -110,13 +112,13 @@ public class MappedFileTest {
         if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
             return;
 
-        File file = File.createTempFile("largeReadOnlyFile", "deleteme");
+        @NotNull File file = File.createTempFile("largeReadOnlyFile", "deleteme");
         file.deleteOnExit();
-        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize())) {
+        try (@NotNull MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize())) {
             bytes.writeLong(3L << 30, 0x12345678); // make the file 3 GB.
         }
 
-        try (MappedBytes bytes = MappedBytes.readOnly(file)) {
+        try (@NotNull MappedBytes bytes = MappedBytes.readOnly(file)) {
             Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
     }

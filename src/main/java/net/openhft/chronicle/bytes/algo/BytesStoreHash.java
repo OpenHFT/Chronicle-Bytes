@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.algo;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.ToLongFunction;
 
@@ -26,7 +27,7 @@ import java.util.function.ToLongFunction;
  * Simple function to derive a long hash from a BytesStore
  */
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
-    static long hash(VanillaBytes b) {
+    static long hash(@NotNull VanillaBytes b) {
         return OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
@@ -41,13 +42,13 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
         return (int) (hash ^ (hash >>> 32));
     }
 
-    static long hash(Bytes b, int length) {
+    static long hash(@NotNull Bytes b, int length) {
         return b.isDirectMemory()
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b, length)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b, length);
     }
 
-    static int hash32(Bytes b, int length) {
+    static int hash32(@NotNull Bytes b, int length) {
         long hash = hash(b, length);
         return (int) (hash ^ (hash >>> 32));
     }

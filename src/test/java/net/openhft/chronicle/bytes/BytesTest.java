@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,18 +107,18 @@ public class BytesTest {
 
     @Test
     public void writeHistogram() {
-        Bytes bytes = Bytes.allocateElasticDirect();
-        Histogram hist = new Histogram();
+        @NotNull Bytes bytes = Bytes.allocateElasticDirect();
+        @NotNull Histogram hist = new Histogram();
         hist.sample(10);
-        Histogram hist2 = new Histogram();
+        @NotNull Histogram hist2 = new Histogram();
         for (int i = 0; i < 10000; i++)
             hist2.sample(i);
 
         bytes.writeHistogram(hist);
         bytes.writeHistogram(hist2);
 
-        Histogram histB = new Histogram();
-        Histogram histC = new Histogram();
+        @NotNull Histogram histB = new Histogram();
+        @NotNull Histogram histC = new Histogram();
         bytes.readHistogram(histB);
         bytes.readHistogram(histC);
 
@@ -168,7 +170,7 @@ public class BytesTest {
         try {
             for (int i = 0; i < 259; i++)
                 bytes.writeByte((byte) i);
-            String s = bytes.toHexString();
+            @NotNull String s = bytes.toHexString();
             Bytes bytes2 = Bytes.fromHexString(s);
             assertEquals(s, bytes2.toHexString());
         } finally {
@@ -193,14 +195,14 @@ public class BytesTest {
         try {
             b.readSkip(6);
             {
-                StringInterner si = new StringInterner(128);
-                String s = si.intern(b);
-                String s2 = si.intern(b);
+                @NotNull StringInterner si = new StringInterner(128);
+                @Nullable String s = si.intern(b);
+                @Nullable String s2 = si.intern(b);
                 assertEquals("World", s);
                 assertSame(s, s2);
             }
             {
-                UTF8StringInterner si = new UTF8StringInterner(128);
+                @NotNull UTF8StringInterner si = new UTF8StringInterner(128);
                 String s = si.intern(b);
                 String s2 = si.intern(b);
                 assertEquals("World", s);
@@ -239,7 +241,7 @@ public class BytesTest {
         }
     }
 
-    private void testSBD(Bytes b, double v, String s) throws IORuntimeException {
+    private void testSBD(@NotNull Bytes b, double v, String s) throws IORuntimeException {
         b.clear();
         b.writeStopBit(v);
         assertEquals(s, b.toHexString());
@@ -248,7 +250,7 @@ public class BytesTest {
     @Test
     public void testOneRelease() {
         int count = 0;
-        for (Bytes b : new Bytes[]{
+        for (@NotNull Bytes b : new Bytes[]{
                 Bytes.allocateDirect(10),
                 Bytes.allocateDirect(new byte[5]),
                 Bytes.allocateElasticDirect(100),
@@ -275,9 +277,9 @@ public class BytesTest {
         Bytes bytes = alloc1.elasticBytes(1);
         try {
             bytes.appendUtf8("starting Hello World");
-            String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+            @NotNull String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
             assertEquals("starting", s0);
-            String s = bytes.parseUtf8(StopCharTesters.ALL);
+            @NotNull String s = bytes.parseUtf8(StopCharTesters.ALL);
             assertEquals("Hello World", s);
         } finally {
             bytes.release();
@@ -286,7 +288,7 @@ public class BytesTest {
 
     @Test(expected = BufferOverflowException.class)
     public void testPartialWriteArray() {
-        byte[] array = "Hello World".getBytes(ISO_8859_1);
+        @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
         Bytes to = alloc1.fixedBytes(6);
         to.write(array);
     }
@@ -316,7 +318,7 @@ public class BytesTest {
 
     @Test
     public void testAppendLongRandomPosition() {
-        byte[] bytes = "00000".getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = "00000".getBytes(ISO_8859_1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
         try {
@@ -329,7 +331,7 @@ public class BytesTest {
 
     @Test
     public void testAppendLongRandomPosition2() {
-        byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
         ByteBuffer bb = ByteBuffer.wrap(bytes);
         Bytes to = Bytes.wrapForWrite(bb);
         try {
@@ -342,7 +344,7 @@ public class BytesTest {
 
     public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
         try {
-            byte[] bytes = "000".getBytes(ISO_8859_1);
+            @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
             Bytes to = Bytes.wrapForWrite(bb);
             try {
@@ -358,7 +360,7 @@ public class BytesTest {
 
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
         try {
-            byte[] bytes = "000".getBytes(ISO_8859_1);
+            @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
             ByteBuffer bb = ByteBuffer.wrap(bytes);
             Bytes to = Bytes.wrapForWrite(bb);
             try {
@@ -375,7 +377,7 @@ public class BytesTest {
 
     @Test
     public void testAppendDoubleRandomPosition() {
-        byte[] bytes = "000000".getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
         Bytes to = Bytes.wrapForWrite(bytes);
         try {
             to.append(0, 3.14, 2, 6);
@@ -387,7 +389,7 @@ public class BytesTest {
 
     public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
         try {
-            byte[] bytes = "000000".getBytes(ISO_8859_1);
+            @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
             Bytes to = Bytes.wrapForWrite(bytes);
             try {
                 to.append(0, 3.14, 2, 8);
@@ -403,7 +405,7 @@ public class BytesTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
         try {
-            byte[] bytes = "000000".getBytes(ISO_8859_1);
+            @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
             Bytes to = Bytes.wrapForWrite(bytes);
             try {
                 to.append(0, 33333.14, 2, 6);
@@ -466,7 +468,7 @@ public class BytesTest {
     @Test
     public void testWriter() {
         Bytes bytes = alloc1.elasticBytes(1);
-        PrintWriter writer = new PrintWriter(bytes.writer());
+        @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
         writer.println(1);
         writer.println("Hello");
         writer.println(12.34);
@@ -479,7 +481,7 @@ public class BytesTest {
                 "a\n" +
                 "bye\n" +
                 "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
-        Scanner scan = new Scanner(bytes.reader());
+        @NotNull Scanner scan = new Scanner(bytes.reader());
         assertEquals(1, scan.nextInt());
         assertEquals("", scan.nextLine());
         assertEquals("Hello", scan.nextLine());
@@ -496,8 +498,8 @@ public class BytesTest {
         int expected = 0;
         for (int i = 0x80; i <= 0xFF; i++)
             for (int j = 0x80; j <= 0xFF; j++) {
-                byte[] b = {(byte) i, (byte) j};
-                String s = new String(b, StandardCharsets.UTF_8);
+                @NotNull byte[] b = {(byte) i, (byte) j};
+                @NotNull String s = new String(b, StandardCharsets.UTF_8);
                 if (s.charAt(0) == 65533) {
                     Bytes bytes = Bytes.wrapForRead(b);
                     try {
@@ -513,12 +515,12 @@ public class BytesTest {
 
     @Test
     public void testParseUtf8High() {
-        Bytes b = Bytes.allocateElasticDirect();
+        @NotNull Bytes b = Bytes.allocateElasticDirect();
         for (int i = ' '; i < Character.MAX_VALUE; i++)
             if (Character.isValidCodePoint(i))
                 b.appendUtf8(i);
         b.appendUtf8(0);
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
         sb.setLength(0);
         b.readPosition(0);
@@ -528,10 +530,10 @@ public class BytesTest {
     @Test
     public void testBigDecimalBinary() {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
-            Bytes b = Bytes.allocateElasticDirect();
+            @NotNull Bytes b = Bytes.allocateElasticDirect();
             b.writeBigDecimal(new BigDecimal(d));
 
-            BigDecimal bd = b.readBigDecimal();
+            @NotNull BigDecimal bd = b.readBigDecimal();
             assertEquals(new BigDecimal(d), bd);
         }
     }
@@ -539,10 +541,10 @@ public class BytesTest {
     @Test
     public void testBigDecimalText() {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
-            Bytes b = Bytes.allocateElasticDirect();
+            @NotNull Bytes b = Bytes.allocateElasticDirect();
             b.append(new BigDecimal(d));
 
-            BigDecimal bd = b.parseBigDecimal();
+            @NotNull BigDecimal bd = b.parseBigDecimal();
             assertEquals(new BigDecimal(d), bd);
         }
     }

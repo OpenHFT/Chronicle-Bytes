@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.*;
 
 /**
@@ -25,13 +27,13 @@ public class PrintVdsoMain {
     public static void main(String[] args) throws IOException, IllegalStateException {
         long start = 0;
         long end = 0;
-        String maps = "/proc/self/maps";
+        @NotNull String maps = "/proc/self/maps";
         if (!new File(maps).exists()) return;
-        BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)));
+        @NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)));
         try {
             for (String line; (line = br.readLine()) != null; ) {
                 if (line.endsWith("[vdso]")) {
-                    String[] parts = line.split("[- ]");
+                    @NotNull String[] parts = line.split("[- ]");
                     start = Long.parseLong(parts[0], 16);
                     end = Long.parseLong(parts[1], 16);
                 }
@@ -43,9 +45,9 @@ public class PrintVdsoMain {
             throw ioe;
         }
         System.out.printf("vdso %x to %x %n", start, end);
-        PointerBytesStore nb = new PointerBytesStore();
+        @NotNull PointerBytesStore nb = new PointerBytesStore();
         nb.set(start, end - start);
-        FileOutputStream fos = new FileOutputStream("vdso.elf");
+        @NotNull FileOutputStream fos = new FileOutputStream("vdso.elf");
         for (Bytes b = nb.bytesForRead(); b.readRemaining() > 0; )
             fos.write(b.readByte());
         fos.close();

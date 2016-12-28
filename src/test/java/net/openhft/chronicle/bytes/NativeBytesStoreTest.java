@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -52,7 +54,7 @@ public class NativeBytesStoreTest {
         Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         assertEquals(Bytes.MAX_CAPACITY, bbb.capacity());
         assertEquals(Bytes.DEFAULT_BYTE_BUFFER_CAPACITY, bbb.realCapacity());
-        ByteBuffer bb = bbb.underlyingObject();
+        @Nullable ByteBuffer bb = bbb.underlyingObject();
         assertNotNull(bb);
 
         for (int i = 0; i < 20; i++) {
@@ -60,16 +62,16 @@ public class NativeBytesStoreTest {
             bbb.writeLong(12345);
         }
         assertEquals(OS.pageSize() * 5, bbb.realCapacity());
-        ByteBuffer bb2 = bbb.underlyingObject();
+        @Nullable ByteBuffer bb2 = bbb.underlyingObject();
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
     }
 
     @Test
     public void testAppendUtf8() {
-        String hi = "Hello World";
-        char[] chars = hi.toCharArray();
-        NativeBytesStore nbs = NativeBytesStore.nativeStore(chars.length);
+        @NotNull String hi = "Hello World";
+        @NotNull char[] chars = hi.toCharArray();
+        @NotNull NativeBytesStore nbs = NativeBytesStore.nativeStore(chars.length);
         nbs.appendUtf8(0, chars, 0, chars.length);
         assertEquals(hi, nbs.toString());
     }
@@ -77,14 +79,14 @@ public class NativeBytesStoreTest {
     @Test
     @Ignore("Long running test")
     public void perfCheckSum() throws IORuntimeException {
-        NativeBytesStore[] nbs = {
+        @NotNull NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),
                 NativeBytesStore.nativeStoreWithFixedCapacity(149),
                 NativeBytesStore.nativeStoreWithFixedCapacity(159),
                 NativeBytesStore.nativeStoreWithFixedCapacity(194)};
-        Random rand = new Random();
-        for (NativeBytesStore nb : nbs) {
-            byte[] bytes = new byte[(int) nb.capacity()];
+        @NotNull Random rand = new Random();
+        for (@NotNull NativeBytesStore nb : nbs) {
+            @NotNull byte[] bytes = new byte[(int) nb.capacity()];
             rand.nextBytes(bytes);
             nb.write(0, bytes);
             assertEquals(Bytes.wrapForRead(bytes).byteCheckSum(), nb.byteCheckSum());
@@ -93,7 +95,7 @@ public class NativeBytesStoreTest {
             int runs = 10000000;
             long start = System.nanoTime();
             for (int i = 0; i < runs; i += 4) {
-                for (NativeBytesStore nb : nbs) {
+                for (@NotNull NativeBytesStore nb : nbs) {
                     bcs = nb.byteCheckSum();
                     if (bcs < 0 || bcs > 255)
                         throw new AssertionError();
@@ -106,7 +108,7 @@ public class NativeBytesStoreTest {
 
     @Test
     public void testCopyTo() {
-        Bytes<ByteBuffer> src = Bytes.elasticByteBuffer().writeUtf8("hello");
+        @NotNull Bytes<ByteBuffer> src = Bytes.elasticByteBuffer().writeUtf8("hello");
         Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
 
         dst.writePosition(src.copyTo(dst));

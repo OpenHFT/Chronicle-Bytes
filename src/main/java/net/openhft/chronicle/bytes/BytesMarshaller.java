@@ -20,6 +20,8 @@ import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
@@ -36,17 +38,17 @@ public class BytesMarshaller<T> {
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
 
-    public BytesMarshaller(Class<T> tClass) {
-        Map<String, Field> map = new LinkedHashMap<>();
+    public BytesMarshaller(@NotNull Class<T> tClass) {
+        @NotNull Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         fields = map.values().stream()
                 .map(FieldAccess::create).toArray(FieldAccess[]::new);
     }
 
-    public static void getAllField(Class clazz, Map<String, Field> map) {
+    public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class)
             getAllField(clazz.getSuperclass(), map);
-        for (Field field : clazz.getDeclaredFields()) {
+        for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
             field.setAccessible(true);
@@ -55,13 +57,13 @@ public class BytesMarshaller<T> {
     }
 
     public void readMarshallable(ReadBytesMarshallable t, BytesIn in) {
-        for (FieldAccess field : fields) {
+        for (@NotNull FieldAccess field : fields) {
             field.read(t, in);
         }
     }
 
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut out) {
-        for (FieldAccess field : fields) {
+        for (@NotNull FieldAccess field : fields) {
             field.write(t, out);
         }
     }
@@ -73,7 +75,8 @@ public class BytesMarshaller<T> {
             this.field = field;
         }
 
-        public static Object create(Field field) {
+        @NotNull
+        public static Object create(@NotNull Field field) {
             Class<?> type = field.getType();
             switch (type.getName()) {
                 case "boolean":
@@ -105,6 +108,7 @@ public class BytesMarshaller<T> {
             }
         }
 
+        @NotNull
         static Class extractClass(Type type0) {
             if (type0 instanceof Class)
                 return (Class) type0;
@@ -114,6 +118,7 @@ public class BytesMarshaller<T> {
                 return Object.class;
         }
 
+        @NotNull
         @Override
         public String toString() {
             return getClass().getSimpleName() + "{" +
@@ -143,7 +148,8 @@ public class BytesMarshaller<T> {
 
         protected abstract void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException;
 
-        protected Supplier<Map> newInstance(Class type) {
+        @NotNull
+        protected Supplier<Map> newInstance(@NotNull Class type) {
             try {
                 return (Supplier<Map>) type.newInstance();
             } catch (IllegalAccessException e) {
@@ -160,15 +166,15 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             Object o2 = field.get(o);
-            String s = o2 == null ? null : o2.toString();
+            @Nullable String s = o2 == null ? null : o2.toString();
             write.writeUtf8(s);
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
-            String s = read.readUtf8();
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException, IORuntimeException {
+            @Nullable String s = read.readUtf8();
             field.set(o, ObjectUtils.convertTo(field.getType(), s));
         }
     }
@@ -180,14 +186,14 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
-            BytesMarshallable o2 = (BytesMarshallable) field.get(o);
+            @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             assert o2 != null;
             o2.writeMarshallable(write);
         }
 
         @Override
         protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
-            BytesMarshallable o2 = (BytesMarshallable) field.get(o);
+            @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             if (!field.getType().isInstance(o2))
                 field.set(o, o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType()));
 
@@ -201,18 +207,18 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
-            BytesStore bytes = (BytesStore) field.get(o);
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            @NotNull BytesStore bytes = (BytesStore) field.get(o);
             long offset = bytes.readPosition();
             long length = bytes.readRemaining();
             write.writeStopBit(length);
             write.write(bytes, offset, length);
         }
 
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException, IORuntimeException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException, IORuntimeException {
             // TODO see if recycling a Bytes is an option.
             long length = read.readStopBit();
-            BytesStore bs = NativeBytesStore.nativeStore(length);
+            @NotNull BytesStore bs = NativeBytesStore.nativeStore(length);
             bs.copyTo((BytesStore) read);
             read.readSkip(length);
             field.set(o, bs);
@@ -222,7 +228,7 @@ public class BytesMarshaller<T> {
     static class ArrayFieldAccess extends FieldAccess {
         private final Class componentType;
 
-        public ArrayFieldAccess(Field field) {
+        public ArrayFieldAccess(@NotNull Field field) {
             super(field);
             componentType = field.getType().getComponentType();
         }
@@ -240,10 +246,11 @@ public class BytesMarshaller<T> {
 
     static class CollectionFieldAccess extends FieldAccess {
         final Supplier<Collection> collectionSupplier;
+        @NotNull
         private final Class componentType;
         private final Class<?> type;
 
-        public CollectionFieldAccess(Field field) {
+        public CollectionFieldAccess(@NotNull Field field) {
             super(field);
             type = field.getType();
             if (type == List.class || type == Collection.class)
@@ -256,7 +263,7 @@ public class BytesMarshaller<T> {
                 collectionSupplier = newInstance(type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) genericType;
+                @NotNull ParameterizedType pType = (ParameterizedType) genericType;
                 Type type0 = pType.getActualTypeArguments()[0];
                 componentType = extractClass(type0);
             } else {
@@ -278,10 +285,12 @@ public class BytesMarshaller<T> {
     static class MapFieldAccess extends FieldAccess {
         final Supplier<Map> collectionSupplier;
         private final Class<?> type;
+        @NotNull
         private final Class keyType;
+        @NotNull
         private final Class valueType;
 
-        public MapFieldAccess(Field field) {
+        public MapFieldAccess(@NotNull Field field) {
             super(field);
             type = field.getType();
             if (type == Map.class)
@@ -292,7 +301,7 @@ public class BytesMarshaller<T> {
                 collectionSupplier = newInstance(type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
-                ParameterizedType pType = (ParameterizedType) genericType;
+                @NotNull ParameterizedType pType = (ParameterizedType) genericType;
                 Type[] actualTypeArguments = pType.getActualTypeArguments();
                 keyType = extractClass(actualTypeArguments[0]);
                 valueType = extractClass(actualTypeArguments[1]);
@@ -320,12 +329,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeBoolean(field.getBoolean(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setBoolean(o, read.readBoolean());
         }
     }
@@ -336,12 +345,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeByte(field.getByte(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setByte(o, read.readByte());
         }
     }
@@ -352,12 +361,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeShort(field.getShort(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setShort(o, read.readShort());
         }
     }
@@ -368,12 +377,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeInt(field.getInt(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setInt(o, read.readInt());
         }
     }
@@ -384,12 +393,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeFloat(field.getFloat(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setFloat(o, read.readFloat());
         }
     }
@@ -400,12 +409,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeLong(field.getLong(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setLong(o, read.readLong());
         }
     }
@@ -416,12 +425,12 @@ public class BytesMarshaller<T> {
         }
 
         @Override
-        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             write.writeDouble(field.getDouble(o));
         }
 
         @Override
-        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setDouble(o, read.readDouble());
         }
     }

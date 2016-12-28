@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.BufferOverflowException;
@@ -35,7 +37,7 @@ class ByteStringWriter extends Writer {
         try {
             out.append((char) c);
 
-        } catch (BufferOverflowException | IllegalArgumentException e) {
+        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
         }
     }
@@ -50,18 +52,21 @@ class ByteStringWriter extends Writer {
         out.append(str, off, off + len);
     }
 
+    @NotNull
     @Override
-    public Writer append(CharSequence csq) throws IOException {
+    public Writer append(@NotNull CharSequence csq) throws IOException {
         out.append(csq);
         return this;
     }
 
+    @NotNull
     @Override
-    public Writer append(CharSequence csq, int start, int end) throws IndexOutOfBoundsException, IOException {
+    public Writer append(@NotNull CharSequence csq, int start, int end) throws IndexOutOfBoundsException, IOException {
         out.append(csq, start, end);
         return this;
     }
 
+    @NotNull
     @Override
     public Writer append(char c) throws IOException {
         out.append(c);

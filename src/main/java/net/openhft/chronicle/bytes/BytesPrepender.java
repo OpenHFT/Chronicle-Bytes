@@ -57,6 +57,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param bytes to prepend to.
      */
+    @NotNull
     B prewrite(byte[] bytes);
 
     /**
@@ -65,6 +66,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param bytes to prepend to.
      */
+    @NotNull
     B prewrite(BytesStore bytes);
 
     /**
@@ -73,6 +75,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param b byte to prepend to.
      */
+    @NotNull
     B prewriteByte(byte b);
 
     /**
@@ -81,6 +84,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param i short to prepend to.
      */
+    @NotNull
     B prewriteShort(short i);
 
     /**
@@ -89,6 +93,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param i integer to prepend to.
      */
+    @NotNull
     B prewriteInt(int i);
 
     /**
@@ -97,5 +102,6 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param l long to prepend to.
      */
+    @NotNull
     B prewriteLong(long l);
 }

@@ -34,7 +34,7 @@ public interface RandomDataInput extends RandomCommon {
 
     @NotNull
     static String[] createCharToString() {
-        String[] charToString = new String[256];
+        @NotNull String[] charToString = new String[256];
         charToString[0] = "\u0660";
         for (int i = 1; i < 21; i++)
             charToString[i] = Character.toString((char) (i + 0x2487));
@@ -369,6 +369,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param length of bytes
      * @return ByteStore copy.
      */
+    @NotNull
     default BytesStore subBytes(long start, long length) {
         return BytesInternal.subBytes(this, start, length);
     }
@@ -488,6 +489,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the char sequence was read
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
+    @org.jetbrains.annotations.Nullable
     @Nullable
     default String readUtf8Limited(long offset, int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
@@ -510,6 +512,7 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.compareUtf8(this, offset, other);
     }
 
+    @NotNull
     default byte[] toByteArray() throws IllegalArgumentException {
         return BytesInternal.toByteArray(this);
     }

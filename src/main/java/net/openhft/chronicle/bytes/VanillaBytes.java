@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -57,9 +58,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
-    private static boolean isEqual0(char[] chars, NativeBytesStore bs, long address) {
+    private static boolean isEqual0(@NotNull char[] chars, @NotNull NativeBytesStore bs, long address) {
 
-        Memory memory = bs.memory;
+        @Nullable Memory memory = bs.memory;
         int i = 0;
         for (; i < chars.length - 3; i += 4) {
             int b = memory.readInt(address + i);
@@ -79,7 +80,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return true;
     }
 
-    private static boolean isEqual1(char[] chars, BytesStore bytesStore, long readPosition) {
+    private static boolean isEqual1(@NotNull char[] chars, @NotNull BytesStore bytesStore, long readPosition) {
         for (int i = 0; i < chars.length; i++) {
             int b = bytesStore.readByte(readPosition + i) & 0xFF;
             if (b != chars[i])
@@ -106,7 +107,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
             throws IllegalStateException {
-        BytesStore oldBS = this.bytesStore;
+        @Nullable BytesStore oldBS = this.bytesStore;
         this.bytesStore = bytesStore;
         bytesStore.reserve();
         oldBS.release();
@@ -137,11 +138,11 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public boolean isEqual(String s) {
+    public boolean isEqual(@Nullable String s) {
         if (s == null || s.length() != readRemaining()) return false;
         char[] chars = StringUtils.extractChars(s);
         if (bytesStore instanceof NativeBytesStore) {
-            NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+            @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
             long address = bs.address(readPosition);
             return isEqual0(chars, bs, address);
 
@@ -160,7 +161,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
-            ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
+            @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
             ByteBuffer slice = bbu.slice();
             slice.position((int) readPosition());
             slice.limit((int) readLimit());
@@ -195,9 +196,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             throws BufferOverflowException, IllegalArgumentException {
         // todo optimise
         if (str instanceof String) {
-            char[] chars = ((String) str).toCharArray();
+            @NotNull char[] chars = ((String) str).toCharArray();
             ensureCapacity(position + length);
-            NativeBytesStore nbs = (NativeBytesStore) bytesStore;
+            @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore;
             nbs.write8bit(position, chars, offset, length);
         } else {
             throw new UnsupportedOperationException();
@@ -225,6 +226,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    @NotNull
     @Override
     public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException {
         try {
@@ -242,7 +244,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return this;
 
         } catch (Exception e) {
-            IndexOutOfBoundsException e2 = new IndexOutOfBoundsException();
+            @NotNull IndexOutOfBoundsException e2 = new IndexOutOfBoundsException();
             e2.initCause(e);
             throw e2;
         }
@@ -267,12 +269,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return append8bit0(cs);
     }
 
-    private Bytes<Underlying> append8bitNBS_S(String s) {
+    @NotNull
+    private Bytes<Underlying> append8bitNBS_S(@NotNull String s) {
         int length = s.length();
         long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
-        NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
+        @Nullable NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
         final long address = bytesStore.address + bytesStore.translate(offset);
-        final Memory memory = bytesStore.memory;
+        @Nullable final Memory memory = bytesStore.memory;
         final char[] chars = StringUtils.extractChars(s);
         if (memory == null)
             throw new AssertionError(bytesStore.releasedHere);
@@ -292,16 +295,17 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return this;
     }
 
+    @NotNull
     public String toString() {
         return bytesStore instanceof NativeBytesStore
                 ? toString2((NativeBytesStore) bytesStore)
                 : toString0();
     }
 
-    private String toString2(NativeBytesStore bytesStore) {
+    private String toString2(@NotNull NativeBytesStore bytesStore) {
         int length = Maths.toUInt31(readRemaining());
-        char[] chars = new char[length];
-        final Memory memory = bytesStore.memory;
+        @NotNull char[] chars = new char[length];
+        @Nullable final Memory memory = bytesStore.memory;
         final long address = bytesStore.address + bytesStore.translate(readPosition());
         for (int i = 0; i < length; i++)
             chars[i] = (char) (memory.readByte(address + i) & 0xFF);
@@ -311,7 +315,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     protected String toString0() {
         int length = Maths.toUInt31(readRemaining());
-        char[] chars = new char[length];
+        @NotNull char[] chars = new char[length];
         for (int i = 0; i < length; i++) {
             chars[i] = (char) (bytesStore.readByte(readPosition() + i) & 0xFF);
         }
@@ -335,9 +339,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&
                 bytesStore.isDirectMemory()) {
-            VanillaBytes b2 = (VanillaBytes) bytesStore;
-            NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
-            NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
+            @NotNull VanillaBytes b2 = (VanillaBytes) bytesStore;
+            @NotNull NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
+            @Nullable NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
             long i = 0;
             for (; i < length - 7; i += 8) {
                 long addr0 = nbs0.address + readPosition() - nbs0.start() + i;
@@ -363,7 +367,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     public void read8Bit(char[] chars, int length) {
         long position = readPosition();
-        NativeBytesStore nbs = (NativeBytesStore) bytesStore();
+        @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore();
         nbs.read8bit(position, chars, length);
     }
 
@@ -371,8 +375,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !isDirectMemory())
             return super.byteCheckSum();
         byte b = 0;
-        NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
-        Memory memory = bytesStore.memory;
+        @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
+        @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
         for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
             b += memory.readByte(bytesStore.address + i);
@@ -380,11 +384,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return b & 0xFF;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         ensureCapacity(writePosition() + length);
         if (bytesStore instanceof NativeBytesStore) {
-            NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+            @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
             long position = nbs.appendUtf8(writePosition(), chars, offset, length);
             writePosition(position);
         } else {
@@ -403,7 +408,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     public int read(@NotNull byte[] bytes) {
         int len = (int) Math.min(bytes.length, readRemaining());
         if (bytesStore instanceof NativeBytesStore) {
-            NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+            @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
             long len2 = nbs.read(readPosition(), bytes, 0, len);
             readSkip(len2);
             return Maths.toUInt31(len2);

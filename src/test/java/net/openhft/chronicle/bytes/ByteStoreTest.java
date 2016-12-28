@@ -18,6 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 
 import java.io.IOException;
@@ -81,7 +83,7 @@ public class ByteStoreTest {
 
     @Test
     public void testCAS() {
-        BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
+        @NotNull BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
         assertEquals(1L, bytes.readLong(0));
     }
@@ -103,7 +105,7 @@ public class ByteStoreTest {
         for (int i = 0; i < bytes.capacity(); i++)
             bytes.writeByte((byte) i);
 
-        byte[] bytes = new byte[(int) this.bytes.capacity()];
+        @NotNull byte[] bytes = new byte[(int) this.bytes.capacity()];
         this.bytes.read(bytes);
         for (int i = 0; i < this.bytes.capacity(); i++)
             Assert.assertEquals((byte) i, bytes[i]);
@@ -175,7 +177,7 @@ public class ByteStoreTest {
     @Test
     public void testWriteReadUtf8() throws IORuntimeException {
         bytes.writeUtf8(null);
-        String[] words = "Hello,World!,Bye£€!".split(",");
+        @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -188,7 +190,7 @@ public class ByteStoreTest {
         assertEquals(25, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         Assert.assertFalse(bytes.readUtf8(sb));
         for (String word : words) {
             Assert.assertTrue(bytes.readUtf8(sb));
@@ -200,7 +202,7 @@ public class ByteStoreTest {
 
     @Test
     public void testWriteReadUTF() throws IORuntimeException {
-        String[] words = "Hello,World!,Bye£€!".split(",");
+        @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -217,15 +219,15 @@ public class ByteStoreTest {
 
     @Test
     public void testWriteReadByteBuffer() {
-        byte[] bytes = "Hello\nWorld!\r\nBye".getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = "Hello\nWorld!\r\nBye".getBytes(ISO_8859_1);
         this.bytes.writeSome(ByteBuffer.wrap(bytes));
 
-        byte[] bytes2 = new byte[bytes.length + 1];
+        @NotNull byte[] bytes2 = new byte[bytes.length + 1];
         ByteBuffer bb2 = ByteBuffer.wrap(bytes2);
         this.bytes.read(bb2);
 
         Assert.assertEquals(bytes.length, bb2.position());
-        byte[] bytes2b = Arrays.copyOf(bytes2, bytes.length);
+        @NotNull byte[] bytes2b = Arrays.copyOf(bytes2, bytes.length);
         Assert.assertTrue(Arrays.equals(bytes, bytes2b));
     }
 
@@ -259,7 +261,7 @@ public class ByteStoreTest {
 
     @Test
     public void testReadWriteStop() throws IORuntimeException {
-        long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
+        @NotNull long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
 //            LOG.info(i + " " + bytes.position());
@@ -385,7 +387,7 @@ public class ByteStoreTest {
 
     @Test
     public void testReadWriteStopBitDouble() {
-        double[] doubles = {
+        @NotNull double[] doubles = {
                 -Double.MAX_VALUE, Double.NEGATIVE_INFINITY,
                 Byte.MIN_VALUE, Byte.MAX_VALUE,
                 Short.MIN_VALUE, Short.MAX_VALUE,
@@ -404,12 +406,12 @@ public class ByteStoreTest {
     @Ignore
     public void testStream() throws IOException {
         bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytesForWrite();
-        GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
+        @NotNull GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
         out.write("Hello world\n".getBytes(ISO_8859_1));
         out.close();
 
-        GZIPInputStream in = new GZIPInputStream(bytes.inputStream());
-        byte[] bytes = new byte[12];
+        @NotNull GZIPInputStream in = new GZIPInputStream(bytes.inputStream());
+        @NotNull byte[] bytes = new byte[12];
         for (int i = 0; i < 12; i++)
             bytes[i] = (byte) in.read();
         Assert.assertEquals(-1, in.read());
@@ -420,14 +422,14 @@ public class ByteStoreTest {
     @Test
     @Ignore
     public void testStream2() throws IOException {
-        OutputStream out = bytes.outputStream();
+        @NotNull OutputStream out = bytes.outputStream();
         out.write(11);
         out.write(22);
         out.write(33);
         out.write(44);
         out.write(55);
 
-        InputStream in = bytes.inputStream();
+        @NotNull InputStream in = bytes.inputStream();
         Assert.assertTrue(in.markSupported());
         Assert.assertEquals(11, in.read());
         in.mark(1);
@@ -511,7 +513,7 @@ public class ByteStoreTest {
     @Test
     public void testToString() {
 
-        Bytes bytes = null;
+        @Nullable Bytes bytes = null;
         try {
             bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ‖‡٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠٠", bytes.toDebugString());
@@ -546,7 +548,7 @@ public class ByteStoreTest {
 
     @Test
     public void testOverflowReadUtf8() throws IORuntimeException {
-        NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {
             bs.readUtf8(10, new StringBuilder());
@@ -558,12 +560,12 @@ public class ByteStoreTest {
 
     @Test
     public void testCopyTo() {
-        final BytesStore bytesStoreOriginal = BytesStore.wrap(new byte[SIZE]);
+        @NotNull final BytesStore bytesStoreOriginal = BytesStore.wrap(new byte[SIZE]);
         for (int i = 0; i < SIZE; i++) {
             final byte randomByte = (byte) ThreadLocalRandom.current().nextInt(Byte.MAX_VALUE);
             bytesStoreOriginal.writeByte(i, randomByte);
         }
-        final BytesStore bytesStoreCopy = BytesStore.wrap(new byte[SIZE]);
+        @NotNull final BytesStore bytesStoreCopy = BytesStore.wrap(new byte[SIZE]);
         bytesStoreOriginal.copyTo(bytesStoreCopy);
         for (int i = 0; i < SIZE; i++)
             assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i));

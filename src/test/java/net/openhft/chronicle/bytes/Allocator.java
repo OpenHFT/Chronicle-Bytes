@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.nio.ByteBuffer;
 
 public enum Allocator {
@@ -32,6 +34,7 @@ public enum Allocator {
         }
     },
     HEAP {
+        @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
             return Bytes.elasticHeapByteBuffer(capacity);
@@ -43,6 +46,7 @@ public enum Allocator {
         }
     },
     NATIVE_UNCHECKED {
+        @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
             return Bytes.elasticByteBuffer(Math.max(128, capacity)).unchecked(true);
@@ -54,6 +58,7 @@ public enum Allocator {
         }
     },
     HEAP_UNCHECKED {
+        @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
             return Bytes.elasticHeapByteBuffer(Math.max(32, capacity)).unchecked(true);

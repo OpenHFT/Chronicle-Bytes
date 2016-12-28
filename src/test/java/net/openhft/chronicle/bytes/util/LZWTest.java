@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -49,25 +50,25 @@ public class LZWTest {
     }
     @Test
     public void testCompress() throws IORuntimeException {
-        byte[] bytes = "hello world".getBytes(ISO_8859_1);
+        @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
         assertTrue(Arrays.equals(bytes, bytes2));
     }
 
     @Test
     public void testCompressionRatio() throws IORuntimeException {
-        byte[] bytes = new byte[1 << 20];
+        @NotNull byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');
-        Random rand = new Random();
+        @NotNull Random rand = new Random();
         for (int i = 0; i < bytes.length; i += 40)
             bytes[rand.nextInt(bytes.length)] = '1';
         byte[] compress = LZW.compress(bytes);
         System.out.println(compress.length);
 
         Bytes bytes2 = Bytes.wrapForRead(bytes);
-        Bytes bytes3 = Bytes.allocateElasticDirect();
+        @NotNull Bytes bytes3 = Bytes.allocateElasticDirect();
         LZW.compress(bytes2, bytes3);
-        byte[] bytes4 = bytes3.toByteArray();
+        @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = LZW.uncompress(bytes4);
 
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
@@ -77,7 +78,7 @@ public class LZWTest {
         assertEquals(compress.length, bytes4.length);
         assertTrue(Arrays.equals(compress, bytes4));
 
-        Bytes bytes6 = Bytes.allocateElasticDirect();
+        @NotNull Bytes bytes6 = Bytes.allocateElasticDirect();
         LZW.uncompress(bytes3, bytes6);
         assertTrue(Arrays.equals(bytes, bytes6.toByteArray()));
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),

@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -33,6 +35,7 @@ public class StreamingInputStream extends InputStream {
         this.in = in;
     }
 
+    @NotNull
     public static StreamingInputStream uninitialized() {
         return new StreamingInputStream();
     }

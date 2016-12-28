@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +80,7 @@ public class ByteStringAppenderTest {
     @Test
     public void testAppendDouble() throws IOException, IORuntimeException {
         testAppendDouble0(-6.895305375646115E24);
-        Random random = new Random(1);
+        @NotNull Random random = new Random(1);
         for (int i = 0; i < 100000; i++) {
             double d = Math.pow(1e32, random.nextDouble()) / 1e6;
             if (i % 3 == 0) d = -d;

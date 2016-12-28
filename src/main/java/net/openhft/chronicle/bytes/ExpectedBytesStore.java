@@ -224,21 +224,25 @@ public class ExpectedBytesStore<B extends BytesStore<B, Underlying>, Underlying>
             return (B) this;
     }
 
+    @NotNull
     @Override
     public B writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
         return writeByte(offset, i8);
     }
 
+    @NotNull
     @Override
     public B writeVolatileShort(long offset, short i16) throws BufferOverflowException {
         return writeShort(offset, i16);
     }
 
+    @NotNull
     @Override
     public B writeVolatileInt(long offset, int i32) throws BufferOverflowException {
         return writeInt(offset, i32);
     }
 
+    @NotNull
     @Override
     public B writeVolatileLong(long offset, long i64) throws BufferOverflowException {
         return writeLong(offset, i64);

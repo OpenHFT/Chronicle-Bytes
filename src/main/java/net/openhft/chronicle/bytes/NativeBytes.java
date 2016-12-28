@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -46,7 +47,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @NotNull
     public static NativeBytes<Void> nativeBytes(long initialCapacity) throws IllegalArgumentException {
-        NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
+        @NotNull NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
             return new NativeBytes<>(store);
 
@@ -151,7 +152,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
         }
 
-        BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
+        @Nullable BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
         try {
             this.bytesStore.copyTo(store);
         } catch (IllegalStateException e) {
@@ -161,13 +162,14 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         tempStore.release();
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
-            ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
+            @Nullable ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
             byteBuffer.position(0);
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
     }
 
+    @NotNull
     private BytesStore allocateNewByteBufferBackedStore(int size) {
         if (isDirectMemory()) {
             return NativeBytesStore.elasticByteBuffer(size, capacity());

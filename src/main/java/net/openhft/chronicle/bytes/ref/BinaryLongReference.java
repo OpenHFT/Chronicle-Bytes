@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Set;
@@ -24,6 +25,7 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BinaryLongReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
+    @Nullable
     private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
     private BytesStore bytes;
     private long offset;
@@ -40,7 +42,7 @@ public class BinaryLongReference implements LongReference {
      */
     public static void forceAllToNotCompleteState() {
         binaryLongReferences.forEach(x -> {
-            BinaryLongReference binaryLongReference = x.get();
+            @Nullable BinaryLongReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
                 binaryLongReference.setValue(LONG_NOT_COMPLETE);
             }

@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,12 +28,12 @@ import static org.junit.Assert.assertEquals;
 public class VanillaBytesTest {
     @Test
     public void testBytesForRead() {
-        byte[] byteArr = new byte[128];
+        @NotNull byte[] byteArr = new byte[128];
         for (int i = 0; i < byteArr.length; i++)
             byteArr[i] = (byte) i;
         Bytes bytes = Bytes.wrapForRead(byteArr);
         bytes.readSkip(8);
-        Bytes bytes2 = bytes.bytesForRead();
+        @NotNull Bytes bytes2 = bytes.bytesForRead();
         assertEquals(128 - 8, bytes2.readRemaining());
         assertEquals(8, bytes2.readPosition());
         assertEquals(8, bytes2.readByte(bytes2.start()));

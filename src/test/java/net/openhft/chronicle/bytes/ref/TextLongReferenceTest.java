@@ -16,6 +16,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
@@ -23,8 +24,8 @@ public class TextLongReferenceTest {
 
     @Test
     public void testSetValue() {
-        final TextLongReference value = new TextLongReference();
-        NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value
+        @NotNull final TextLongReference value = new TextLongReference();
+        @NotNull NativeBytesStore bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value
                 .maxSize());
         value.bytesStore(bytesStore, 0, value.maxSize());
         int expected = 10;

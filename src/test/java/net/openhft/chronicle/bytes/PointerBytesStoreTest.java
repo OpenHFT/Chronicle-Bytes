@@ -17,13 +17,14 @@
 package net.openhft.chronicle.bytes;
 
 import junit.framework.TestCase;
+import org.jetbrains.annotations.NotNull;
 
 public class PointerBytesStoreTest extends TestCase {
 
     public void testWrap() throws IllegalArgumentException {
-        NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
 
-        PointerBytesStore pbs = BytesStore.nativePointer();
+        @NotNull PointerBytesStore pbs = BytesStore.nativePointer();
         pbs.set(nbs.address(nbs.start()), nbs.realCapacity());
 
         long nanoTime = System.nanoTime();

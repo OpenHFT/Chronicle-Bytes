@@ -303,6 +303,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException {
@@ -311,6 +312,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException {
@@ -319,6 +321,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException {
@@ -327,6 +330,7 @@ public class HeapBytesStore<Underlying>
         return this;
     }
 
+    @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException {
@@ -363,7 +367,7 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public HeapBytesStore<Underlying> write(long offsetInRDO,
-                                            RandomDataInput bytes, long offset, long length) {
+                                            @NotNull RandomDataInput bytes, long offset, long length) {
         long i;
         for (i = 0; i < length - 7; i += 8) {
             long x = bytes.readLong(offset + i);

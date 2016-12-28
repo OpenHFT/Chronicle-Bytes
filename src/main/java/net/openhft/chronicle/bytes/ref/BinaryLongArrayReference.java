@@ -19,6 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
@@ -37,7 +38,9 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
     private static final int MAX_TO_STRING = 1024;
+    @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
+    @Nullable
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
@@ -48,7 +51,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
 
     public static void forceAllToNotCompleteState() {
         binaryLongArrayReferences.forEach(x -> {
-            BinaryLongArrayReference binaryLongReference = x.get();
+            @Nullable BinaryLongArrayReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
                 binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
             }
@@ -144,6 +147,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         length = 0;
     }
 
+    @Nullable
     @Override
     public BytesStore bytesStore() {
         return bytes;
@@ -163,12 +167,12 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public String toString() {
         if (bytes == null)
             return "not set";
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         sb.append("used: ");
         long used = getUsed();
         sb.append(used);
         sb.append(", value: ");
-        String sep = "";
+        @NotNull String sep = "";
         try {
             int i, max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {

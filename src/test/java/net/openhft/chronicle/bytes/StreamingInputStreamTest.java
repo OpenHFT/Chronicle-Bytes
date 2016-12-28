@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -45,13 +46,13 @@ public class StreamingInputStreamTest {
     @Test(timeout = 1000)
     public void testReadBlock() throws IOException {
 
-        Bytes b = Bytes.allocateElasticDirect();
-        byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
+        @NotNull Bytes b = Bytes.allocateElasticDirect();
+        @NotNull byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
         b.write(test);
 
-        InputStream is = b.inputStream();
-        try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
-            byte[] buffer = new byte[8];
+        @NotNull InputStream is = b.inputStream();
+        try (@NotNull ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+            @NotNull byte[] buffer = new byte[8];
             for (int len; (len = is.read(buffer)) != -1; )
                 os.write(buffer, 0, len);
             os.flush();

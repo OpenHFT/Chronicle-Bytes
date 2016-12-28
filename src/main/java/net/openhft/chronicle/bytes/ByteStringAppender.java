@@ -33,6 +33,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * @return these Bytes as a Writer
      */
+    @NotNull
     default Writer writer() {
         return new ByteStringWriter(this);
     }
@@ -208,17 +209,20 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    @NotNull
     default B appendDateMillis(long dateInMillis) {
         BytesInternal.appendDateMillis(this, dateInMillis);
         return (B) this;
     }
 
+    @NotNull
     default B appendTimeMillis(long timeOfDayInMillis) {
         BytesInternal.appendTimeMillis(this, timeOfDayInMillis % 86400_000L);
         return (B) this;
     }
 
-    default B append(BigDecimal bigDecimal) {
+    @NotNull
+    default B append(@NotNull BigDecimal bigDecimal) {
         append(bigDecimal.toString());
         return (B) this;
     }

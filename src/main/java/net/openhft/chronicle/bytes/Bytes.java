@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -55,7 +56,7 @@ public interface Bytes<Underlying> extends
     }
 
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
-        NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
+        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -75,8 +76,9 @@ public interface Bytes<Underlying> extends
      * Returns an elastic wrapper for a heap ByteBuffer which will be resized as required, with
      * the given initial capacity.
      */
+    @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
-        HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
+        @NotNull HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
             return new NativeBytes<>(bs);
         } finally {
@@ -88,7 +90,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to read
      * @return a Bytes which wrap a ByteBuffer and is ready for reading.
      */
-    static Bytes<ByteBuffer> wrapForRead(ByteBuffer byteBuffer) {
+    static Bytes<ByteBuffer> wrapForRead(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             Bytes<ByteBuffer> bbb = bs.bytesForRead();
@@ -104,7 +106,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to read
      * @return a Bytes which wrap a ByteBuffer and is ready for writing.
      */
-    static Bytes<ByteBuffer> wrapForWrite(ByteBuffer byteBuffer) {
+    static Bytes<ByteBuffer> wrapForWrite(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             Bytes<ByteBuffer> bbb = bs.bytesForWrite();
@@ -148,8 +150,8 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for reading.
      */
-    static Bytes<byte[]> wrapForRead(byte[] byteArray) {
-        HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
+    static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
+        @NotNull HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
         try {
             return bs.bytesForRead();
         } finally {
@@ -163,8 +165,8 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for writing.
      */
-    static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
-        BytesStore bs = (BytesStore) BytesStore.wrap(byteArray);
+    static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
+        @NotNull BytesStore bs = (BytesStore) BytesStore.wrap(byteArray);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -184,7 +186,7 @@ public interface Bytes<Underlying> extends
         return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
-    static Bytes<byte[]> fromString(String text) throws IllegalArgumentException, IllegalStateException {
+    static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
@@ -200,7 +202,7 @@ public interface Bytes<Underlying> extends
      * @return a new Bytes ready for writing.
      */
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
-        NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
+        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -260,7 +262,7 @@ public interface Bytes<Underlying> extends
 
             final long length = Math.min(maxLen + 1, buffer.readRemaining());
 
-            final StringBuilder builder = new StringBuilder();
+            @NotNull final StringBuilder builder = new StringBuilder();
             try {
                 buffer.readWithLength(length, b -> {
                     while (buffer.readRemaining() > 0) {
@@ -297,7 +299,7 @@ public interface Bytes<Underlying> extends
 
         try {
 
-            final StringBuilder builder = new StringBuilder();
+            @NotNull final StringBuilder builder = new StringBuilder();
             while (buffer.readRemaining() > 0) {
                 builder.append((char) buffer.readByte());
             }
@@ -337,6 +339,7 @@ public interface Bytes<Underlying> extends
      * @return Bytes without bounds checking.
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
+    @NotNull
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         return unchecked ?
                 start() == 0 && bytesStore().isDirectMemory() ?
@@ -406,7 +409,7 @@ public interface Bytes<Underlying> extends
     @NotNull
     default String toHexString(long offset, long maxLength) {
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
-        String ret = BytesInternal.toHexString(this, offset, maxLength2);
+        @NotNull String ret = BytesInternal.toHexString(this, offset, maxLength2);
         return maxLength2 < readLimit() - offset ? ret + "... truncated" : ret;
     }
 
@@ -435,6 +438,7 @@ public interface Bytes<Underlying> extends
      * current limit determines the capacity.
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
+    @NotNull
     @Override
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
@@ -443,6 +447,7 @@ public interface Bytes<Underlying> extends
     /**
      * @return the ByteStore this Bytes wraps.
      */
+    @Nullable
     BytesStore bytesStore();
 
     default boolean isEqual(String s) {
@@ -482,13 +487,15 @@ public interface Bytes<Underlying> extends
         writeSkip(-count);
     }
 
+    @NotNull
     default BigDecimal readBigDecimal() {
         return new BigDecimal(readBigInteger(), Maths.toUInt31(readStopBit()));
     }
 
+    @NotNull
     default BigInteger readBigInteger() {
         int length = Maths.toUInt31(readStopBit());
-        byte[] bytes = new byte[length];
+        @NotNull byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
     }

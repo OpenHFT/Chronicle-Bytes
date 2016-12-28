@@ -28,6 +28,7 @@ public enum NoBytesStore implements BytesStore {
 
     public static final long NO_PAGE;
 
+    @NotNull
     public static final Bytes NO_BYTES;
 
     static {
@@ -35,7 +36,7 @@ public enum NoBytesStore implements BytesStore {
             NO_PAGE = OS.memory().allocate(OS.pageSize());
             NO_BYTES = new VanillaBytes(noBytesStore());
 
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (@NotNull IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
         }
     }
@@ -106,21 +107,25 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeVolatileByte(long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeVolatileShort(long offset, short i16) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeVolatileInt(long offset, int i32) {
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public RandomDataOutput writeVolatileLong(long offset, long i64) {
         throw new UnsupportedOperationException();

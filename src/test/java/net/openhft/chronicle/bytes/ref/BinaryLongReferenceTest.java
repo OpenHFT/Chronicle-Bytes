@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -27,8 +28,8 @@ import static org.junit.Assert.*;
 public class BinaryLongReferenceTest {
     @Test
     public void test() {
-        BinaryLongReference ref = new BinaryLongReference();
-        NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
+        @NotNull BinaryLongReference ref = new BinaryLongReference();
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         ref.bytesStore(nbs, 16, 8);
         assertEquals(0, ref.getValue());
         ref.addAtomicValue(1);

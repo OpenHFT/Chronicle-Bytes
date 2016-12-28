@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -64,7 +65,7 @@ public class AllocationRatesTest {
     private long timeHeapByteBufferAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            ByteBuffer[] bb = new ByteBuffer[BATCH];
+            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
             for (int j = 0; j < BATCH; j++)
                 bb[j] = ByteBuffer.allocate(BUFFER_SIZE);
         }
@@ -74,7 +75,7 @@ public class AllocationRatesTest {
     private long timeDirectByteBufferAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            ByteBuffer[] bb = new ByteBuffer[BATCH];
+            @NotNull ByteBuffer[] bb = new ByteBuffer[BATCH];
             for (int j = 0; j < BATCH; j++)
                 bb[j] = ByteBuffer.allocateDirect(BUFFER_SIZE);
         }
@@ -84,7 +85,7 @@ public class AllocationRatesTest {
     private long timeDirectStoreAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            NativeBytesStore[] ds = new NativeBytesStore[BATCH];
+            @NotNull NativeBytesStore[] ds = new NativeBytesStore[BATCH];
             for (int j = 0; j < BATCH; j++)
                 ds[j] = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {

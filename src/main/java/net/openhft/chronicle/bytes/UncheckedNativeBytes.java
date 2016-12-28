@@ -71,6 +71,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.move(from - start(), to - start(), length);
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> compact() {
         long start = start();
@@ -221,6 +222,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
         if (start() + length > capacity())
@@ -507,7 +509,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @ForceInline
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -515,7 +517,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,
-                                   RandomDataInput bytes, long offset, long length)
+                                   @NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
@@ -696,7 +698,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(byte[] bytes, int offset, int length) {
+    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length) {
         if (length + offset > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
                     "length=" + length + ", offset=" + offset);
@@ -710,7 +712,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> prewrite(byte[] bytes) {
+    public Bytes<Underlying> prewrite(@NotNull byte[] bytes) {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length);
         bytesStore.write(offsetInRDO, bytes);
         return this;
@@ -719,7 +721,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> prewrite(BytesStore bytes) {
+    public Bytes<Underlying> prewrite(@NotNull BytesStore bytes) {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
         bytesStore.write(offsetInRDO, bytes);
         return this;
@@ -766,7 +768,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof Bytes)) return false;
-        Bytes b2 = (Bytes) obj;
+        @NotNull Bytes b2 = (Bytes) obj;
         long remaining = readRemaining();
         return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
     }
@@ -826,7 +828,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     public int byteCheckSum() throws IORuntimeException {
-        NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
+        @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         return bytesStore.byteCheckSum(readPosition(), readLimit());
     }
 
@@ -839,7 +841,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         int length = cs.length();
         long offset = writeOffsetPositionMoved(length);
         long address = bytesStore.address(offset);
-        Memory memory = bytesStore.memory;
+        @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
         int i = 0;
         for (; i < length - 1; i += 2) {
@@ -856,10 +858,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         ensureCapacity(writePosition() + length);
-        NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+        @NotNull NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;

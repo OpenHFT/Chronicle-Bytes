@@ -18,6 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -39,12 +41,12 @@ public class MappedMemoryTest {
     @Test
     public void testRawMemoryMapped() throws IOException {
         for (int t = 0; t < 5; t++) {
-            File tempFile = File.createTempFile("chronicle", "q");
+            @NotNull File tempFile = File.createTempFile("chronicle", "q");
             try {
 
                 long startTime = System.nanoTime();
-                MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
-                MappedBytesStore bytesStore = mappedFile.acquireByteStore(1);
+                @NotNull MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
+                @Nullable MappedBytesStore bytesStore = mappedFile.acquireByteStore(1);
                 long address = bytesStore.address;
 
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
@@ -69,11 +71,11 @@ public class MappedMemoryTest {
     public void withMappedNativeBytesTest() throws IOException {
 
         for (int t = 0; t < 3; t++) {
-            File tempFile = File.createTempFile("chronicle", "q");
+            @NotNull File tempFile = File.createTempFile("chronicle", "q");
             try {
 
                 long startTime = System.nanoTime();
-                final Bytes bytes = mappedBytes(tempFile, BLOCK_SIZE / 2);
+                @NotNull final Bytes bytes = mappedBytes(tempFile, BLOCK_SIZE / 2);
 //                bytes.writeLong(1, 1);
                 for (long i = 0; i < BLOCK_SIZE; i += 8) {
                     bytes.writeLong(i);
@@ -92,12 +94,12 @@ public class MappedMemoryTest {
     public void withRawNativeBytesTess() throws IOException {
 
         for (int t = 0; t < 3; t++) {
-            File tempFile = File.createTempFile("chronicle", "q");
+            @NotNull File tempFile = File.createTempFile("chronicle", "q");
             try {
 
-                MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
+                @NotNull MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
                 long startTime = System.nanoTime();
-                Bytes bytes = mappedFile.acquireBytesForWrite(1);
+                @NotNull Bytes bytes = mappedFile.acquireBytesForWrite(1);
                 for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
                     bytes.writeLong(i);
                 }
@@ -121,15 +123,15 @@ public class MappedMemoryTest {
     @Test
     public void mappedMemoryTest() throws IOException, IORuntimeException {
 
-        File tempFile = File.createTempFile("chronicle", "q");
+        @NotNull File tempFile = File.createTempFile("chronicle", "q");
         try {
 
-            final Bytes bytes = mappedBytes(tempFile, OS.pageSize());
-            char[] chars = new char[OS.pageSize() * 11];
+            @NotNull final Bytes bytes = mappedBytes(tempFile, OS.pageSize());
+            @NotNull char[] chars = new char[OS.pageSize() * 11];
             Arrays.fill(chars, '.');
             chars[chars.length - 1] = '*';
             bytes.writeUtf8(new String(chars));
-            String text = "hello this is some very long text";
+            @NotNull String text = "hello this is some very long text";
             bytes.writeUtf8(text);
 
             bytes.readUtf8();

@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -36,6 +38,7 @@ public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException,
             BufferUnderflowException;
 
+    @Nullable
     BytesStore<B, Underlying> bytesStore();
 
     long offset();

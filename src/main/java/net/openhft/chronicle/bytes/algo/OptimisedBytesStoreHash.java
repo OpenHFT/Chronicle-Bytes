@@ -38,14 +38,14 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
     static long applyAsLong1to7(@NotNull Bytes store, int remaining) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
 
         return hash(readIncompleteLong(address, remaining));
     }
 
     static long applyAsLong8(@NotNull Bytes store) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
 
         return hash0(MEMORY.readLong(address), MEMORY.readInt(address + TOP_BYTES));
@@ -60,7 +60,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     static long applyAsLong9to16(@NotNull Bytes store, int remaining) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -86,7 +86,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     static long applyAsLong17to32(@NotNull Bytes store, int remaining) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -112,7 +112,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     public static long applyAsLong32bytesMultiple(@NotNull Bytes store, int remaining) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
 
@@ -145,7 +145,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     public static long applyAsLongAny(@NotNull Bytes store, int remaining) {
-        final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.address(store.readPosition());
         long h0 = (long) remaining * K0, h1 = 0, h2 = 0, h3 = 0;
 

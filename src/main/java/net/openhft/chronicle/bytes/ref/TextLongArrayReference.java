@@ -20,6 +20,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
@@ -45,6 +46,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private static final int FALS = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRU = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
+    @Nullable
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
@@ -167,6 +169,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         length = 0;
     }
 
+    @Nullable
     @Override
     public BytesStore bytesStore() {
         return bytes;

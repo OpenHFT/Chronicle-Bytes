@@ -74,6 +74,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bb to wrap
      * @return BytesStore
      */
+    @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
                 ? NativeBytesStore.wrap(bb)
@@ -95,8 +96,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param length  of data
      * @return as a BytesStore
      */
+    @NotNull
     static PointerBytesStore wrap(long address, long length) {
-        PointerBytesStore pbs = nativePointer();
+        @NotNull PointerBytesStore pbs = nativePointer();
         pbs.set(address, length);
         return pbs;
     }
@@ -202,6 +204,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param end   last byte exclusive.
      * @return this.
      */
+    @NotNull
     default B zeroOut(long start, long end) throws IllegalArgumentException {
         if (end <= start)
             return (B) this;
@@ -269,6 +272,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return the underlying BytesStore
      */
+    @Nullable
     default BytesStore bytesStore() {
         return this;
     }

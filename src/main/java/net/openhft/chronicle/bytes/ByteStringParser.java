@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Reader;
 import java.math.BigDecimal;
@@ -34,6 +35,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return as a Reader
      */
+    @NotNull
     default Reader reader() {
         return new ByteStringReader(this);
     }
@@ -49,6 +51,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param tester to detect the end of the text.
      * @return true, false, or null if neither.
      */
+    @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester) {
         return BytesInternal.parseBoolean(this, tester);
     }
@@ -65,6 +68,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
         return BytesInternal.parseUtf8(this, stopCharTester);
     }
 
+    @NotNull
     @Deprecated
     default String parseUTF(@NotNull StopCharTester stopCharTester) {
         return parseUtf8(stopCharTester);
@@ -191,6 +195,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
         return BytesInternal.skipTo(this, tester);
     }
 
+    @NotNull
     default BigDecimal parseBigDecimal() {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
     }

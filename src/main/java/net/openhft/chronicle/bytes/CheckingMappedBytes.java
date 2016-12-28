@@ -27,7 +27,7 @@ import java.nio.ByteBuffer;
  */
 @Deprecated
 public class CheckingMappedBytes extends MappedBytes {
-    public CheckingMappedBytes(MappedFile mappedFile) {
+    public CheckingMappedBytes(@NotNull MappedFile mappedFile) {
         super(mappedFile);
     }
 
@@ -114,6 +114,7 @@ public class CheckingMappedBytes extends MappedBytes {
         return super.writeShort(offset, i);
     }
 
+    @NotNull
     @Override
     public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException {
         writePosition(writePosition() + bytesToSkip);

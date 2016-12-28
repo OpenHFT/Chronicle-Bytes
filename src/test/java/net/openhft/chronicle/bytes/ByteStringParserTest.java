@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -169,8 +170,8 @@ public class ByteStringParserTest   {
 
     @Test
     public void testAppendParseUTF() throws IOException {
-        String[] words = "Hello,World!,Bye£€!".split(",");
-        for (String word : words) {
+        @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
+        for (@NotNull String word : words) {
             bytes.append(word).append('\t');
         }
         bytes.append('\t');
@@ -181,7 +182,7 @@ public class ByteStringParserTest   {
         assertEquals("", bytes.parseUtf8(CONTROL_STOP));
 
         bytes.readPosition(0);
-        StringBuilder sb = new StringBuilder();
+        @NotNull StringBuilder sb = new StringBuilder();
         for (String word : words) {
             bytes.parseUtf8(sb, CONTROL_STOP);
             Assert.assertEquals(word, sb.toString());

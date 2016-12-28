@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.bytes.StopCharTesters;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -29,8 +30,8 @@ import static org.junit.Assert.*;
 public class TextIntReferenceTest {
     @Test
     public void test() {
-        TextIntReference ref = new TextIntReference();
-        NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(64);
+        @NotNull TextIntReference ref = new TextIntReference();
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         ref.bytesStore(nbs, 16, ref.maxSize());
         assertEquals(0, ref.getValue());
         ref.addAtomicValue(1);

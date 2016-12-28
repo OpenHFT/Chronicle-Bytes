@@ -25,8 +25,9 @@ public class UncheckedLongReference implements LongReference {
     private long address;
     private Unsafe unsafe;
 
+    @NotNull
     public static LongReference create(BytesStore bytesStore, long offset, int size) {
-        LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
+        @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
         return ref;
     }
@@ -38,6 +39,7 @@ public class UncheckedLongReference implements LongReference {
         unsafe = UnsafeMemory.UNSAFE;
     }
 
+    @NotNull
     @Override
     public BytesStore bytesStore() {
         throw new UnsupportedOperationException();

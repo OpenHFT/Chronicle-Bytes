@@ -41,7 +41,7 @@ public abstract class AbstractInterner<T> {
         mask = n - 1;
     }
 
-    private static int hash32(BytesStore bs, int length) {
+    private static int hash32(@NotNull BytesStore bs, int length) {
         return bs.fastHash(bs.readPosition(), length);
     }
 
@@ -63,14 +63,15 @@ public abstract class AbstractInterner<T> {
         InternerEntry<T> s2 = entries[h2];
         if (s2 != null && s2.bytes.readRemaining() == length && s2.bytes.startsWith(cs))
             return s2.t;
-        T t = getValue(cs, length);
-        final byte[] bytes = new byte[length];
-        BytesStore bs = BytesStore.wrap(bytes);
+        @NotNull T t = getValue(cs, length);
+        @NotNull final byte[] bytes = new byte[length];
+        @NotNull BytesStore bs = BytesStore.wrap(bytes);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
         return t;
     }
 
+    @NotNull
     protected abstract T getValue(BytesStore bs, int length) throws IORuntimeException;
 
     protected boolean toggle() {

@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -28,7 +29,7 @@ public class StringInternerBytesTest {
 
     @Test
     public void testIntern() {
-        StringInternerBytes si = new StringInternerBytes(128);
+        @NotNull StringInternerBytes si = new StringInternerBytes(128);
         for (int i = 0; i < 100; i++) {
             Bytes b = Bytes.from("key" + i);
             si.intern(b, (int) b.readRemaining());

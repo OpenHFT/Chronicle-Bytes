@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -27,10 +28,10 @@ import static org.junit.Assert.assertNotEquals;
 public class HeapByteStoreTest {
     @Test
     public void testEquals() {
-        HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes());
-        HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes());
-        HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes());
-        HeapBytesStore hbs4 = HeapBytesStore.wrap("Hi".getBytes());
+        @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes());
+        @NotNull HeapBytesStore hbs2 = HeapBytesStore.wrap("Hello".getBytes());
+        @NotNull HeapBytesStore hbs3 = HeapBytesStore.wrap("He!!o".getBytes());
+        @NotNull HeapBytesStore hbs4 = HeapBytesStore.wrap("Hi".getBytes());
         assertEquals(hbs, hbs2);
         assertEquals(hbs2, hbs);
         assertNotEquals(hbs, hbs3);

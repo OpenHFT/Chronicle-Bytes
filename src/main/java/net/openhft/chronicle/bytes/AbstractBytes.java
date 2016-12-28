@@ -68,6 +68,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.move(from - start, to - start, length);
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> compact() {
         long start = start();
@@ -100,6 +101,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
         if (start() + length > capacity())
@@ -174,6 +176,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> readPosition(long position) throws BufferUnderflowException {
@@ -185,6 +188,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> readLimit(long limit) throws BufferUnderflowException {
@@ -208,6 +212,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> readSkip(long bytesToSkip)
@@ -235,6 +240,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeLimit(long limit) throws BufferOverflowException {
@@ -649,15 +655,17 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
-    public Bytes<Underlying> prewrite(byte[] bytes) {
+    public Bytes<Underlying> prewrite(@NotNull byte[] bytes) {
         long offset = prewriteOffsetPositionMoved(bytes.length);
         bytesStore.write(offset, bytes);
         return this;
     }
 
+    @NotNull
     @Override
-    public Bytes<Underlying> prewrite(BytesStore bytes) {
+    public Bytes<Underlying> prewrite(@NotNull BytesStore bytes) {
         long offset = prewriteOffsetPositionMoved(bytes.readRemaining());
         bytesStore.write(offset, bytes);
         return this;
@@ -673,6 +681,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> prewriteInt(int i) {
         long offset = prewriteOffsetPositionMoved(4);
@@ -680,6 +689,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> prewriteShort(short i) {
         long offset = prewriteOffsetPositionMoved(2);
@@ -687,6 +697,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> prewriteLong(long l) {
         long offset = prewriteOffsetPositionMoved(8);
@@ -794,7 +805,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(byte[] bytes, int offset, int length)
+    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
         if (length + offset > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
@@ -853,7 +864,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public boolean equals(Object obj) {
         if (!(obj instanceof BytesStore)) return false;
-        BytesStore b2 = (BytesStore) obj;
+        @NotNull BytesStore b2 = (BytesStore) obj;
         long remaining = readRemaining();
         return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
     }

@@ -110,7 +110,7 @@ public class TextIntReference implements IntValue, Byteable {
     }
 
     @Override
-    public void bytesStore(BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != template.length)
             throw new IllegalArgumentException(length + " != " + template.length);
 

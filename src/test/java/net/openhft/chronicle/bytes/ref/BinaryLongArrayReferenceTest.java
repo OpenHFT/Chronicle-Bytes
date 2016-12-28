@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,7 +44,7 @@ public class BinaryLongArrayReferenceTest {
         Bytes bytes = Bytes.allocateDirect(length);
         BinaryLongArrayReference.write(bytes, 128);
 
-        BinaryLongArrayReference array = new BinaryLongArrayReference();
+        @NotNull BinaryLongArrayReference array = new BinaryLongArrayReference();
         array.bytesStore(bytes, 0, length);
 
         assertEquals(128, array.getCapacity());
