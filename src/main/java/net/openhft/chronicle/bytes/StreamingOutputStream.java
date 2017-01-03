@@ -28,6 +28,10 @@ import java.nio.BufferOverflowException;
 public class StreamingOutputStream extends OutputStream {
     private StreamingDataOutput sdo;
 
+    public StreamingOutputStream() {
+        this(NoBytesStore.NO_BYTES);
+    }
+
     public StreamingOutputStream(StreamingDataOutput sdo) {
         this.sdo = sdo;
     }

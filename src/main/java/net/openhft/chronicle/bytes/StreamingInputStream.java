@@ -26,6 +26,9 @@ public class StreamingInputStream extends InputStream {
 
     private StreamingDataInput in;
 
+    public StreamingInputStream() {
+        this(NoBytesStore.NO_BYTES);
+    }
     public StreamingInputStream(StreamingDataInput in) {
         this.in = in;
     }
