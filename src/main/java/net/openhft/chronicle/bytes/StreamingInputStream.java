@@ -16,8 +16,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -26,22 +24,15 @@ import java.io.InputStream;
  */
 public class StreamingInputStream extends InputStream {
 
-    StreamingDataInput in;
-
-    private StreamingInputStream() {
-    }
+    private StreamingDataInput in;
 
     public StreamingInputStream(StreamingDataInput in) {
         this.in = in;
     }
 
-    @NotNull
-    public static StreamingInputStream uninitialized() {
-        return new StreamingInputStream();
-    }
-
-    public void init(StreamingDataInput in) {
+    public StreamingInputStream init(StreamingDataInput in) {
         this.in = in;
+        return this;
     }
 
     @Override
@@ -58,12 +49,12 @@ public class StreamingInputStream extends InputStream {
 
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-            int len2 = in.read(b, off, len);
-            return len2 == 0 ? -1 : len2;
+        int len2 = in.read(b, off, len);
+        return len2 == 0 ? -1 : len2;
     }
 
     @Override
     public int read() throws IOException {
-            return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
     }
 }

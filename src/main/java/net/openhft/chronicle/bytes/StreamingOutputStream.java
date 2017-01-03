@@ -25,11 +25,16 @@ import java.nio.BufferOverflowException;
 /**
  * Created by peter on 17/08/15.
  */
-class StreamingOutputStream extends OutputStream {
-    private final StreamingDataOutput sdo;
+public class StreamingOutputStream extends OutputStream {
+    private StreamingDataOutput sdo;
 
     public StreamingOutputStream(StreamingDataOutput sdo) {
         this.sdo = sdo;
+    }
+
+    public StreamingOutputStream init(StreamingDataOutput sdo) {
+        this.sdo = sdo;
+        return this;
     }
 
     @Override
