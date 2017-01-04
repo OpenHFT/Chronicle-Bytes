@@ -62,17 +62,20 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize) throws FileNotFoundException, IllegalStateException {
+    public static MappedBytes mappedBytes(@NotNull String filename, long chunkSize)
+            throws FileNotFoundException, IllegalStateException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize) throws FileNotFoundException, IllegalStateException {
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize)
+            throws FileNotFoundException, IllegalStateException {
         return mappedBytes(file, chunkSize, OS.pageSize());
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException, IllegalStateException {
+    public static MappedBytes mappedBytes(@NotNull File file, long chunkSize, long overlapSize)
+            throws FileNotFoundException, IllegalStateException {
         @NotNull MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
         try {
             return mappedBytes(rw);
@@ -187,6 +190,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
     }
 
+    @Nullable
+    @Override
+    public MappedBytesStore bytesStore() {
+        return (MappedBytesStore) super.bytesStore();
+    }
+
     @Override
     public long start() {
         return 0L;
@@ -230,10 +239,16 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     @Override
-    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
-        return cs instanceof String
-                ? append8bit0((String) cs, start, end - start)
-                : super.append8bit(cs, start, end);
+    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end)
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
+            IndexOutOfBoundsException {
+        // check the start.
+        long pos = writePosition();
+        writeCheckOffset(pos, 0);
+        if (!(cs instanceof String) || pos + (end - start) * 3 + 5 >= safeLimit()) {
+            return super.append8bit(cs, start, end);
+        }
+        return append8bit0((String) cs, start, end - start);
     }
 
     @NotNull
@@ -264,7 +279,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private MappedBytes append8bit0(String s, int start, int length) {
         char[] chars = StringUtils.extractChars(s);
         long address = address(writePosition());
-        Memory memory = OS.memory();
+        Memory memory = bytesStore().memory;
         int i = 0;
         for (; i < length - 3; i += 4) {
             int c0 = chars[i + start] & 0xff;
@@ -284,7 +299,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length) throws BufferOverflowException, IllegalArgumentException {
+    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length)
+            throws BufferOverflowException, IllegalArgumentException {
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
