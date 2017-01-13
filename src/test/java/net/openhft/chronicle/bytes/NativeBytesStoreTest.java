@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
@@ -26,8 +27,14 @@ import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import javax.crypto.Cipher;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Random;
 
 import static org.junit.Assert.*;
@@ -47,6 +54,36 @@ public class NativeBytesStoreTest {
     @After
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
+    }
+
+    @Test
+    public void testCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        byte[] keyBytes = new SecureRandom().generateSeed(16);
+        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+        Cipher encCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        Cipher decCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        encCipher.init(Cipher.ENCRYPT_MODE, key);
+        decCipher.init(Cipher.DECRYPT_MODE, key);
+
+        String expected = "Hello World!!";
+        while (expected.length() < 100)
+            expected += " 123456789";
+        Bytes bytes = Bytes.allocateDirect(expected.getBytes());
+        Bytes enc = Bytes.allocateElasticDirect();
+        Bytes dec = Bytes.allocateElasticDirect();
+        Histogram hist = new Histogram();
+        for (int t = 0; t < 3; t++) {
+            for (int i = 0; i < 50000; i++) {
+                long start = System.nanoTime();
+                bytes.cipher(encCipher, enc);
+                enc.cipher(decCipher, dec);
+                long time = System.nanoTime() - start;
+                hist.sampleNanos(time);
+            }
+
+            assertEquals(expected, dec.toString());
+            System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
+        }
     }
 
     @Test

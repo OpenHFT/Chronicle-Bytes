@@ -21,6 +21,10 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.Cipher;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.ShortBufferException;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
@@ -513,5 +517,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     default boolean isEmpty() {
         return readRemaining() == 0;
+    }
+
+    default void cipher(Cipher cipher, Bytes outBytes) {
+        try {
+            ByteBuffer in = BytesInternal.asByteBuffer(this);
+            int outputSize = cipher.getOutputSize(Math.toIntExact(readRemaining()));
+            outBytes.ensureCapacity(outputSize);
+            outBytes.readPositionRemaining(0, outputSize);
+            ByteBuffer out = BytesInternal.asByteBuffer2(outBytes);
+            int len = cipher.update(in, out);
+            len += cipher.doFinal(in, out);
+            assert len == out.position();
+            outBytes.readPositionRemaining(0, out.position());
+        } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+            throw new IllegalStateException(e);
+        }
     }
 }
