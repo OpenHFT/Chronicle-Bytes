@@ -52,7 +52,7 @@ public enum AppendableUtil {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
-            ((Bytes) sb).readPosition(newLength);
+            ((Bytes) sb).readPositionRemaining(0, newLength);
         else
             throw new IllegalArgumentException("" + sb.getClass());
     }
