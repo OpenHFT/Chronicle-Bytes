@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -46,6 +47,13 @@ public class NativeBytesStoreTest {
     volatile int bcs;
     private ThreadDump threadDump;
 
+    private static void generate(Bytes bytes, int t) {
+        bytes.clear();
+        bytes.append("hello world ");
+        for (int i = 0; i <= t; i++)
+            bytes.append(t);
+    }
+
     @Before
     public void threadDump() {
         threadDump = new ThreadDump();
@@ -57,7 +65,7 @@ public class NativeBytesStoreTest {
     }
 
     @Test
-    public void testCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testCipherPerf() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         byte[] keyBytes = new SecureRandom().generateSeed(16);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         Cipher encCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -74,6 +82,8 @@ public class NativeBytesStoreTest {
         Histogram hist = new Histogram();
         for (int t = 0; t < 3; t++) {
             for (int i = 0; i < 50000; i++) {
+                enc.clear();
+                dec.clear();
                 long start = System.nanoTime();
                 bytes.cipher(encCipher, enc);
                 enc.cipher(decCipher, dec);
@@ -83,6 +93,44 @@ public class NativeBytesStoreTest {
 
             assertEquals(expected, dec.toString());
             System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
+        }
+    }
+
+    @Test
+    public void testCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        byte[] keyBytes = new SecureRandom().generateSeed(16);
+        SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
+        Cipher encCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        Cipher decCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
+        encCipher.init(Cipher.ENCRYPT_MODE, key);
+        decCipher.init(Cipher.DECRYPT_MODE, key);
+
+        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes enc = Bytes.allocateElasticDirect();
+        Bytes dec = Bytes.allocateElasticDirect();
+
+        for (int t = 0; t < 9; t++) {
+            long pos = enc.writePosition();
+            enc.writeByte((byte) 0);
+            generate(bytes, t);
+            bytes.cipher(encCipher, enc);
+            long len = enc.writePosition() - pos - 1;
+            assertEquals(0, len % 16);
+            enc.writeUnsignedByte(pos, Maths.toUInt8(len));
+            System.out.println(len);
+        }
+        System.out.println("reading");
+        for (int t = 0; t < 9; t++) {
+            int len = enc.readUnsignedByte();
+            System.out.println(len);
+            assertEquals(0, len % 16);
+            long pos = enc.readPosition();
+            enc.readPositionRemaining(pos, len);
+            dec.clear();
+            enc.cipher(decCipher, dec);
+            generate(bytes, t);
+            assertEquals(bytes.toString(), dec.toString());
+            enc.readPositionRemaining(pos + len, 1);
         }
     }
 

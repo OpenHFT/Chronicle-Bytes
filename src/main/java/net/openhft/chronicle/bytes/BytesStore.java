@@ -188,12 +188,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return how many bytes were copied
      */
     default long copyTo(@NotNull BytesStore store) throws IllegalStateException {
+        long readPos = readPosition();
+        long writePos = store.writePosition();
         long copy = min(readRemaining(), store.capacity());
         long i = 0;
         for (; i < copy - 7; i += 8)
-            store.writeLong(i, readLong(i));
+            store.writeLong(writePos + i, readLong(readPos + i));
         for (; i < copy; i++)
-            store.writeByte(i, readByte(i));
+            store.writeByte(writePos + i, readByte(readPos + i));
         return copy;
     }
 
@@ -520,18 +522,30 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     default void cipher(Cipher cipher, Bytes outBytes) {
+        long readPos = outBytes.readPosition();
         try {
-            ByteBuffer in = BytesInternal.asByteBuffer(this);
-            int outputSize = cipher.getOutputSize(Math.toIntExact(readRemaining()));
-            outBytes.ensureCapacity(outputSize);
-            outBytes.readPositionRemaining(0, outputSize);
+            long writePos = outBytes.writePosition();
+            BytesStore inBytes;
+            long size = readRemaining();
+            if (this.isDirectMemory()) {
+                inBytes = this;
+            } else {
+                inBytes = NativeBytesStore.nativeStore(size);
+                this.copyTo(inBytes);
+            }
+            ByteBuffer in = BytesInternal.asByteBuffer(inBytes);
+            int outputSize = cipher.getOutputSize(Math.toIntExact(size));
+            outBytes.ensureCapacity(writePos + outputSize);
+            outBytes.readPositionRemaining(writePos, outputSize);
             ByteBuffer out = BytesInternal.asByteBuffer2(outBytes);
             int len = cipher.update(in, out);
             len += cipher.doFinal(in, out);
             assert len == out.position();
-            outBytes.readPositionRemaining(0, out.position());
+            outBytes.writePosition(writePos + out.position());
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
             throw new IllegalStateException(e);
+        } finally {
+            outBytes.readPosition(readPos);
         }
     }
 }
