@@ -241,7 +241,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         if (bytes == this)
             throw new IllegalArgumentException("you should not write to your self !");
 
-        return write(bytes, bytes.readPosition(), bytes.readRemaining());
+        return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
     }
 
     long realCapacity();
