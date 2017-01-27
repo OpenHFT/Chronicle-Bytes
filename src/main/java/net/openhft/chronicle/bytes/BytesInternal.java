@@ -373,8 +373,6 @@ enum BytesInternal {
             char[] chars = extractChars(sb);
             while (count < utflen) {
                 int c = memory.readByte(address + count);
-                if (c != '\n' && (c < '0' || c > 'F'))
-                    Thread.yield();
                 if (c < 0)
                     break;
                 chars[count++] = (char) c;
