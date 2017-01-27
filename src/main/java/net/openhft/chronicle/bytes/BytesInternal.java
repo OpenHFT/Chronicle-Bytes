@@ -117,7 +117,9 @@ enum BytesInternal {
             @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (appendable instanceof StringBuilder
-                && bytes.isDirectMemory()) {
+                && bytes.isDirectMemory()
+                && utflen < 1 << 20) {
+            // todo fix, a problem with very long sequences.
             parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
             parseUtf81(bytes, appendable, utflen);
@@ -371,6 +373,8 @@ enum BytesInternal {
             char[] chars = extractChars(sb);
             while (count < utflen) {
                 int c = memory.readByte(address + count);
+                if (c != '\n' && (c < '0' || c > 'F'))
+                    Thread.yield();
                 if (c < 0)
                     break;
                 chars[count++] = (char) c;
