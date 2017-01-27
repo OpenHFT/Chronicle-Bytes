@@ -175,7 +175,7 @@ public class MappedFile implements ReferenceCounted {
 
     @Nullable
     public MappedBytesStore acquireByteStore(long position) throws IOException, IllegalArgumentException, IllegalStateException {
-        return acquireByteStore(position, readOnly ? MappedBytesStore::new : ReadOnlyMappedBytesStore::new);
+        return acquireByteStore(position, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
     }
 
     @Nullable
