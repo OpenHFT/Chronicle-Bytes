@@ -42,7 +42,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted {
-    public static final long DEFAULT_CAPACITY = 1L << 40;
+    public static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = new Object();
     @NotNull
