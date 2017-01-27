@@ -119,7 +119,7 @@ enum BytesInternal {
         if (appendable instanceof StringBuilder
                 && bytes.isDirectMemory()
                 && utflen < 1 << 20) {
-            // todo fix, a problem with very long sequences.
+            // todo fix, a problem with very long sequences. #35
             parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
         } else {
             parseUtf81(bytes, appendable, utflen);
