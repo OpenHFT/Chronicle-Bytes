@@ -210,4 +210,36 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         }
         return this;
     }
+
+    public NativeBytes writeSome(Bytes bytes) throws BufferOverflowException {
+        long length = Math.min(bytes.readRemaining(), writeRemaining());
+        if (length + writePosition() >= 1 << 20)
+            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+        long offset = bytes.readPosition();
+        long position = writePosition();
+        ensureCapacity(position + length);
+        if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
+            long address = bytes.address(offset);
+            long address2 = address(writePosition());
+            assert address != 0;
+            assert address2 != 0;
+            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+            if (len > 0) {
+                writeCheckOffset(writePosition(), len);
+                OS.memory().copyMemory(address, address2, len);
+                writeSkip(len);
+            }
+
+        } else {
+            super.write(bytes, offset, length);
+        }
+        if (length == bytes.readRemaining()) {
+            bytes.clear();
+        } else {
+            bytes.readSkip(length);
+            if (bytes.writePosition() > bytes.realCapacity() / 2)
+                bytes.compact();
+        }
+        return this;
+    }
 }
