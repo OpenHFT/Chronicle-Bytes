@@ -80,8 +80,8 @@ public class NativeBytesStoreTest {
         Bytes enc = Bytes.allocateElasticDirect();
         Bytes dec = Bytes.allocateElasticDirect();
         Histogram hist = new Histogram();
-        for (int t = 0; t < 3; t++) {
-            for (int i = 0; i < 50000; i++) {
+        for (int t = 1; t <= 4; t++) {
+            for (int i = 0; i < t * 100000; i++) {
                 enc.clear();
                 dec.clear();
                 long start = System.nanoTime();
