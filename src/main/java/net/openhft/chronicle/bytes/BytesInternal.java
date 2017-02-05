@@ -2394,11 +2394,15 @@ enum BytesInternal {
 
     private static ByteBuffer asByteBuffer(ThreadLocal<ByteBuffer> byteBufferTL, BytesStore bytesStore) {
         ByteBuffer byteBuffer = byteBufferTL.get();
+        assignBytesStoreToByteBuffer(bytesStore, byteBuffer);
+        return byteBuffer;
+    }
+
+    public static void assignBytesStoreToByteBuffer(BytesStore bytesStore, ByteBuffer byteBuffer) {
         long address = bytesStore.address(bytesStore.readPosition());
         long capacity = bytesStore.readRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);
         byteBuffer.clear();
-        return byteBuffer;
     }
 
     static class DateCache {

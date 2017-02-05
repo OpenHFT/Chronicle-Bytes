@@ -82,7 +82,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         } finally {
             rw.release();
         }
-
     }
 
     @NotNull
@@ -97,7 +96,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         } finally {
             rw.release();
         }
-
     }
 
     @NotNull
@@ -165,15 +163,19 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         if (offset < 0 || offset > capacity() - adding)
-            throw new IllegalArgumentException("Offset out of bound " + offset);
+            throw writeIllegalArgumentException(offset);
         if (!bytesStore.inside(offset)) {
             acquireNextByteStore(offset);
         }
-        super.writeCheckOffset(offset, adding);
+//        super.writeCheckOffset(offset, adding);
+    }
+
+    @NotNull
+    private IllegalArgumentException writeIllegalArgumentException(long offset) {
+        return new IllegalArgumentException("Offset out of bound " + offset);
     }
 
     private void acquireNextByteStore(long offset) {
-
         if (bytesStore.inside(offset))
             return;
 
@@ -413,5 +415,24 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public boolean isClosed() {
         return this.refCount() <= 0;
+    }
+
+    @Override
+    public MappedBytes write(BytesStore bytes)
+            throws BufferOverflowException {
+        assert bytes != this : "you should not write to yourself !";
+
+        long offset = bytes.readPosition();
+        long length = Math.min(writeRemaining(), bytes.readRemaining());
+        if (length == 8) {
+            writeLong(bytes.readLong(offset));
+
+        } else if (bytes.isDirectMemory() && length >= 16) {
+            rawCopy(bytes, offset, length);
+
+        } else {
+            BytesInternal.writeFully(bytes, offset, length, this);
+        }
+        return this;
     }
 }

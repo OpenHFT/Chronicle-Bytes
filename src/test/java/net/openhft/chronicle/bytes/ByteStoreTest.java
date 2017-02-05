@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.*;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -28,7 +29,10 @@ import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -48,6 +52,15 @@ public class ByteStoreTest {
     private BytesStore bytesStore;
 
     private ThreadDump threadDump;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        List<Object[]> list = new ArrayList<>();
+        Object[] NO_ARGS = {};
+        for (int i = 0; i < 2; i++)
+            list.add(NO_ARGS);
+        return list;
+    }
 
     @Before
     public void threadDump() {

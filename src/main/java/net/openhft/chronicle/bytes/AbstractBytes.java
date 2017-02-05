@@ -650,7 +650,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeByte(byte i8)
             throws BufferOverflowException {
-        long offset = writeOffsetPositionMoved(1);
+        long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
         return this;
     }

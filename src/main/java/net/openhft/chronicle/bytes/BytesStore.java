@@ -521,7 +521,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return readRemaining() == 0;
     }
 
-    default void cipher(Cipher cipher, Bytes outBytes) {
+    default void cipher(Cipher cipher, Bytes outBytes, ByteBuffer using1, ByteBuffer using2) {
         long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
@@ -533,19 +533,23 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 inBytes = NativeBytesStore.nativeStore(size);
                 this.copyTo(inBytes);
             }
-            ByteBuffer in = BytesInternal.asByteBuffer(inBytes);
+            BytesInternal.assignBytesStoreToByteBuffer(inBytes, using1);
             int outputSize = cipher.getOutputSize(Math.toIntExact(size));
             outBytes.ensureCapacity(writePos + outputSize);
             outBytes.readPositionRemaining(writePos, outputSize);
-            ByteBuffer out = BytesInternal.asByteBuffer2(outBytes);
-            int len = cipher.update(in, out);
-            len += cipher.doFinal(in, out);
-            assert len == out.position();
-            outBytes.writePosition(writePos + out.position());
+            BytesInternal.assignBytesStoreToByteBuffer(outBytes, using2);
+            int len = cipher.update(using1, using2);
+            len += cipher.doFinal(using1, using2);
+            assert len == using2.position();
+            outBytes.writePosition(writePos + using2.position());
         } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
             throw new IllegalStateException(e);
         } finally {
             outBytes.readPosition(readPos);
         }
+    }
+
+    default void cipher(Cipher cipher, Bytes outBytes) {
+        cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
 }

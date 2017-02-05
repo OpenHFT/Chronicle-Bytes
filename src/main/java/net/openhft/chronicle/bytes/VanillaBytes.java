@@ -178,7 +178,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
-        if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
+        if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
