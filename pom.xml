@@ -53,10 +53,7 @@
     </dependencyManagement>
 
     <dependencies>
-        <dependency>
-            <groupId>software.chronicle</groupId>
-            <artifactId>chronicle-wire-enterprise</artifactId>
-        </dependency>
+
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-core</artifactId>
