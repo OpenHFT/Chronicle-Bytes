@@ -31,6 +31,7 @@ import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 @SuppressWarnings("sunapi")
 public class NativeBytesStore<Underlying>
@@ -146,6 +147,11 @@ public class NativeBytesStore<Underlying>
     }
 
     @NotNull
+    public static NativeBytesStore from(@NotNull String text) {
+        return from(text.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @NotNull
     public static NativeBytesStore from(@NotNull byte[] bytes) {
         @NotNull NativeBytesStore nbs = nativeStore(bytes.length);
         Bytes.wrapForRead(bytes).copyTo(nbs);
@@ -249,10 +255,6 @@ public class NativeBytesStore<Underlying>
 
     long translate(long offset) {
         return offset - start();
-    }
-
-    public long start() {
-        return 0L;
     }
 
     @Override
@@ -721,6 +723,31 @@ public class NativeBytesStore<Underlying>
 //        last.writeVolatileByte(88, (byte) 0xFF);
 //        last.writeLong(24, Thread.currentThread().getId());
         return ret;
+    }
+
+    @Override
+    public int fastHash(long offset, int length) {
+        long ret;
+        switch (length) {
+            case 0:
+                return 0;
+            case 1:
+                ret = readByte(offset);
+                break;
+            case 2:
+                ret = readShort(offset);
+                break;
+            case 4:
+                ret = readInt(offset);
+                break;
+            case 8:
+                ret = readInt(offset) * 0x6d0f27bd + readInt(offset + 4);
+                break;
+            default:
+                return super.fastHash(offset, length);
+        }
+        long hash = ret * 0x855dd4db;
+        return (int) (hash ^ (hash >> 32));
     }
 
     static class Deallocator implements Runnable {

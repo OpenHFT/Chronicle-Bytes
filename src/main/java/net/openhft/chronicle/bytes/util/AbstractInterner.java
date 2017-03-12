@@ -47,10 +47,20 @@ public abstract class AbstractInterner<T> {
 
     public T intern(@NotNull Bytes cs)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+        return intern((BytesStore) cs, (int) cs.readRemaining());
+    }
+
+    public T intern(@NotNull BytesStore cs)
+            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         return intern(cs, (int) cs.readRemaining());
     }
 
     public T intern(@NotNull Bytes cs, int length)
+            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+        return intern((BytesStore) cs, length);
+    }
+
+    public T intern(@NotNull BytesStore cs, int length)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         if (length> entries.length)
             return getValue(cs, length);

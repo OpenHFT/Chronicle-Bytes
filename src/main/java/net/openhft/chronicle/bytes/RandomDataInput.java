@@ -535,17 +535,22 @@ public interface RandomDataInput extends RandomCommon {
     default int fastHash(long offset, int length) {
         long hash = 0;
         int i = 0;
+        if (length >= 4) {
+            hash = readInt(offset + i);
+            i += 4;
+        }
         for (; i < length - 3; i += 4) {
+            hash *= 0x6d0f27bd;
             hash += readInt(offset + i);
-            hash *= 0x6d0f27bdL;
         }
         if (i < length - 1) {
-            hash += readShort(offset + i);
             hash *= 0x6d0f27bdL;
+            hash += readShort(offset + i);
             i += 2;
         }
         if (i < length)
             hash += readByte(offset + i);
+        hash *= 0x855dd4db;
         return (int) (hash ^ (hash >> 32));
     }
 }
