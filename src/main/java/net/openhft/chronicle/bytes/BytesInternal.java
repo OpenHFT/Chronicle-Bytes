@@ -106,9 +106,20 @@ enum BytesInternal {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
                 return false;
         }
-        for (; i < length; i++) {
+        if (i < length - 3) {
+            if (a.readInt(aPos + i) != b.readInt(bPos + i))
+                return false;
+            i += 4;
+        }
+        if (i < length - 1) {
+            if (a.readShort(aPos + i) != b.readShort(bPos + i))
+                return false;
+            i += 2;
+        }
+        if (i < length) {
             if (a.readByte(aPos + i) != b.readByte(bPos + i))
                 return false;
+//            i ++;
         }
         return true;
     }
