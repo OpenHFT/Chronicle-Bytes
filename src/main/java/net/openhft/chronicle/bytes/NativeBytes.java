@@ -31,7 +31,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
- *
+ * <p>
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
@@ -141,7 +141,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 //        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
             Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
-                    "needs " + endOfBuffer / 1024 + " KB, " +
+                    "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
         BytesStore store;
         int position = 0;
