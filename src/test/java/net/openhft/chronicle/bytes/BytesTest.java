@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -34,6 +35,7 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,6 +75,96 @@ public class BytesTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
+    @Test
+    public void testIndexOfAtEnd() {
+        String sourceStr = "A string of some data";
+        String subStr = "ta";
+        testIndexOf(sourceStr, subStr);
+    }
+
+
+    @Test
+    public void testIndexOfEmptySubStr() {
+        String sourceStr = "A string of some data";
+        String subStr = "";
+        testIndexOf(sourceStr, subStr);
+    }
+
+    @Test
+    public void testIndexOfEmptySubStrAndSource() {
+        String sourceStr = "";
+        String subStr = "";
+        testIndexOf(sourceStr, subStr);
+    }
+
+    @Test
+    public void testIndexOfEmptySource() {
+        String sourceStr = "";
+        String subStr = "some";
+        testIndexOf(sourceStr, subStr);
+    }
+
+
+    @Test
+    public void testIndexOfExactMatch() {
+        String sourceStr = "some";
+        String subStr = "some";
+        testIndexOf(sourceStr, subStr);
+    }
+
+    @Test
+    public void testIndexOfIncorrectExactMatch() {
+        String sourceStr = "some";
+        String subStr = " some";
+        testIndexOf(sourceStr, subStr);
+    }
+
+
+    @Test
+    public void testIndexOfExactMatchAtChar1() {
+        String sourceStr = " some";
+        String subStr = "some";
+        testIndexOf(sourceStr, subStr);
+    }
+
+    @Test
+    public void testIndexOfLastChar() {
+        String sourceStr = " some";
+        String subStr = "e";
+        testIndexOf(sourceStr, subStr);
+    }
+
+    @Test
+    public void testIndexOfExactMatchAfterReadSkip() {
+        String sourceStr = " some";
+        String subStr = "some";
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
+        source.readSkip(1);
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        Assert.assertEquals(0, source.indexOf(subBytes));
+    }
+
+
+    @Test
+    public void testIndexOfExactMatchAfterReadSkipOnSubStr() {
+        String sourceStr = "some";
+        String subStr = " some";
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        subBytes.readSkip(1);
+
+        Assert.assertEquals(0, source.indexOf(subBytes));
+        Assert.assertTrue(subBytes.readPosition() == 1);
+        Assert.assertTrue(source.readPosition() == 0);
+    }
+
+    private static void testIndexOf(String sourceStr, String subStr) {
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
+    }
+
 
     @Test
     public void writeAdv() {

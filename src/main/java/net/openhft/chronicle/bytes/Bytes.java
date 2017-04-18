@@ -499,4 +499,95 @@ public interface Bytes<Underlying> extends
         read(bytes);
         return new BigInteger(bytes);
     }
+
+    /**
+     * Returns the index within this bytes of the first occurrence of the
+     * specified sub-bytes.
+     * <p>
+     * <p>The returned index is the smallest value <i>k</i> for which:
+     * <blockquote><pre>
+     * this.startsWith(bytes, <i>k</i>)
+     * </pre></blockquote>
+     * If no such value of <i>k</i> exists, then {@code -1} is returned.
+     *
+     * @param source the sub-bytes to search for.
+     * @return the index of the first occurrence of the specified sub-bytes,
+     * or {@code -1} if there is no such occurrence.
+     */
+    default long indexOf(Bytes<?> source) {
+        return indexOf(source, 0);
+    }
+
+    /**
+     * Returns the index within this bytes of the first occurrence of the
+     * specified subbytes.
+     * <p>
+     * <p>The returned index is the smallest value <i>k</i> for which:
+     * <blockquote><pre>
+     * this.startsWith(bytes, <i>k</i>)
+     * </pre></blockquote>
+     * If no such value of <i>k</i> exists, then {@code -1} is returned.
+     *
+     * @param source    the sub-bytes to search for.
+     * @param fromIndex start the seach from this offset
+     * @return the index of the first occurrence of the specified sub-bytes,
+     * or {@code -1} if there is no such occurrence.
+     */
+    default long indexOf(@NotNull Bytes source, int fromIndex) {
+        return indexOf(this, source, fromIndex);
+    }
+
+    /**
+     * Code shared by String and StringBuffer to do searches. The
+     * source is the character array being searched, and the target
+     * is the string being searched for.
+     *
+     * @param source    the read bytes being searched.
+     * @param target    the read bytes being searched for.
+     * @param fromIndex the index to begin searching from,
+     */
+    static long indexOf(@NotNull Bytes source, @NotNull Bytes target, int fromIndex) {
+
+        long sourceOffset = source.readPosition();
+        long targetOffset = target.readPosition();
+        long sourceCount = source.readRemaining();
+        long targetCount = target.readRemaining();
+
+        if (fromIndex >= sourceCount) {
+            return (targetCount == 0 ? sourceCount : -1);
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (targetCount == 0) {
+            return fromIndex;
+        }
+
+        byte firstByte = target.readByte(targetOffset);
+        long max = sourceOffset + (sourceCount - targetCount);
+
+        for (long i = sourceOffset + fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (source.readByte(i) != firstByte) {
+                while (++i <= max && source.readByte(i) != firstByte) ;
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                long j = i + 1;
+                long end = j + targetCount - 1;
+                for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
+                    ;
+                }
+
+                if (j == end) {
+                    /* Found whole string. */
+                    return i - sourceOffset;
+                }
+            }
+        }
+        return -1;
+    }
+
+
 }
