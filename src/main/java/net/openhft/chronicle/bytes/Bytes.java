@@ -514,7 +514,7 @@ public interface Bytes<Underlying> extends
      * @return the index of the first occurrence of the specified sub-bytes,
      * or {@code -1} if there is no such occurrence.
      */
-    default long indexOf(Bytes<?> source) {
+    default long indexOf(Bytes source) {
         return indexOf(source, 0);
     }
 

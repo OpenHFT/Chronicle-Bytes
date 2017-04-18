@@ -35,7 +35,6 @@ import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
@@ -139,9 +138,9 @@ public class BytesTest {
     public void testIndexOfExactMatchAfterReadSkip() {
         String sourceStr = " some";
         String subStr = "some";
-        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         source.readSkip(1);
-        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         Assert.assertEquals(0, source.indexOf(subBytes));
     }
 
@@ -150,8 +149,8 @@ public class BytesTest {
     public void testIndexOfExactMatchAfterReadSkipOnSubStr() {
         String sourceStr = "some";
         String subStr = " some";
-        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
-        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         subBytes.readSkip(1);
 
         Assert.assertEquals(0, source.indexOf(subBytes));
@@ -160,8 +159,8 @@ public class BytesTest {
     }
 
     private static void testIndexOf(String sourceStr, String subStr) {
-        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(Charset.forName("ISO-8859-1")));
-        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(Charset.forName("ISO-8859-1")));
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
