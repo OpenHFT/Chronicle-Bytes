@@ -741,7 +741,7 @@ public class NativeBytesStore<Underlying>
                 ret = readInt(offset);
                 break;
             case 8:
-                ret = readInt(offset) * 0x6d0f27bd + readInt(offset + 4);
+                ret = readInt(offset) * 0x6d0f27bdL + readInt(offset + 4);
                 break;
             default:
                 return super.fastHash(offset, length);
