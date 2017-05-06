@@ -333,6 +333,58 @@ public interface Bytes<Underlying> extends
     }
 
     /**
+     * Code shared by String and StringBuffer to do searches. The
+     * source is the character array being searched, and the target
+     * is the string being searched for.
+     *
+     * @param source    the read bytes being searched.
+     * @param target    the read bytes being searched for.
+     * @param fromIndex the index to begin searching from,
+     */
+    static long indexOf(@NotNull Bytes source, @NotNull Bytes target, int fromIndex) {
+
+        long sourceOffset = source.readPosition();
+        long targetOffset = target.readPosition();
+        long sourceCount = source.readRemaining();
+        long targetCount = target.readRemaining();
+
+        if (fromIndex >= sourceCount) {
+            return (targetCount == 0 ? sourceCount : -1);
+        }
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (targetCount == 0) {
+            return fromIndex;
+        }
+
+        byte firstByte = target.readByte(targetOffset);
+        long max = sourceOffset + (sourceCount - targetCount);
+
+        for (long i = sourceOffset + fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (source.readByte(i) != firstByte) {
+                while (++i <= max && source.readByte(i) != firstByte) ;
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                long j = i + 1;
+                long end = j + targetCount - 1;
+                for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
+                    ;
+                }
+
+                if (j == end) {
+                    /* Found whole string. */
+                    return i - sourceOffset;
+                }
+            }
+        }
+        return -1;
+    }
+
+    /**
      * Return a Bytes which is optionally unchecked.  This allows bounds checks to be turned off.
      *
      * @param unchecked if true, minimal bounds checks will be performed.
@@ -537,57 +589,6 @@ public interface Bytes<Underlying> extends
         return indexOf(this, source, fromIndex);
     }
 
-    /**
-     * Code shared by String and StringBuffer to do searches. The
-     * source is the character array being searched, and the target
-     * is the string being searched for.
-     *
-     * @param source    the read bytes being searched.
-     * @param target    the read bytes being searched for.
-     * @param fromIndex the index to begin searching from,
-     */
-    static long indexOf(@NotNull Bytes source, @NotNull Bytes target, int fromIndex) {
-
-        long sourceOffset = source.readPosition();
-        long targetOffset = target.readPosition();
-        long sourceCount = source.readRemaining();
-        long targetCount = target.readRemaining();
-
-        if (fromIndex >= sourceCount) {
-            return (targetCount == 0 ? sourceCount : -1);
-        }
-        if (fromIndex < 0) {
-            fromIndex = 0;
-        }
-        if (targetCount == 0) {
-            return fromIndex;
-        }
-
-        byte firstByte = target.readByte(targetOffset);
-        long max = sourceOffset + (sourceCount - targetCount);
-
-        for (long i = sourceOffset + fromIndex; i <= max; i++) {
-            /* Look for first character. */
-            if (source.readByte(i) != firstByte) {
-                while (++i <= max && source.readByte(i) != firstByte) ;
-            }
-
-            /* Found first character, now look at the rest of v2 */
-            if (i <= max) {
-                long j = i + 1;
-                long end = j + targetCount - 1;
-                for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
-                    ;
-                }
-
-                if (j == end) {
-                    /* Found whole string. */
-                    return i - sourceOffset;
-                }
-            }
-        }
-        return -1;
-    }
-
+    Bytes<Underlying> clear();
 
 }
