@@ -34,7 +34,7 @@ import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 /**
- * Created by peter on 30/08/15.
+ * Created by peter on 30/08/15..
  */
 public enum BytesUtil {
     ;
