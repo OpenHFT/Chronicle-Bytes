@@ -119,32 +119,6 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the
-     * expected ones. An AssertionError is thrown if unexpected data is written, an
-     * UnsupportedOperationException is thrown if a read is attempted.
-     *
-     * @param text expected
-     * @return the expected buffer as Bytes
-     */
-    @NotNull
-    static Bytes<byte[]> expect(@NotNull String text) {
-        return expect(wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1)));
-    }
-
-    /**
-     * A Bytes suitable for writing to for testing purposes. It checks the writes made are the
-     * expected ones. An AssertionError is thrown if unexpected data is written, an
-     * UnsupportedOperationException is thrown if a read is attempted.
-     *
-     * @param bytesStore expected
-     * @return the expected buffer as Bytes
-     */
-    @NotNull
-    static <B extends BytesStore<B, Underlying>, Underlying> Bytes<Underlying> expect(BytesStore<B, Underlying> bytesStore) {
-        return new VanillaBytes<>(new ExpectedBytesStore<>(bytesStore));
-    }
-
-    /**
      * Wrap the byte[] ready for reading
      *
      * @param byteArray to wrap

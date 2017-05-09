@@ -38,7 +38,6 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * Bytes to wrap memory mapped data.
  */
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
-    public static boolean CHECKING = false;
     @NotNull
     private final MappedFile mappedFile;
 
@@ -100,7 +99,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     public static MappedBytes mappedBytes(@NotNull MappedFile rw) {
-        return CHECKING ? new CheckingMappedBytes(rw) : new MappedBytes(rw);
+        return new MappedBytes(rw);
     }
 
     @NotNull

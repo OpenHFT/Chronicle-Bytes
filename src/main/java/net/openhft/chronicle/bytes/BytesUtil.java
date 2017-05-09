@@ -49,6 +49,7 @@ public enum BytesUtil {
         URL url = classLoader.getResource(name);
         if (url == null)
             return Bytes.wrapForRead(IOTools.readFile(name));
+
         try (FileChannel fc = new FileInputStream(url.getFile()).getChannel()) {
             ByteBuffer bb = ByteBuffer.allocateDirect(Math.toIntExact(fc.size()));
             do {
