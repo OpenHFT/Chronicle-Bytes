@@ -19,12 +19,18 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
+import sun.reflect.Reflection;
 
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 
 /**
@@ -32,6 +38,28 @@ import java.nio.charset.StandardCharsets;
  */
 public enum BytesUtil {
     ;
+
+    public static Bytes readFile(@NotNull String name) throws IOException {
+        ClassLoader classLoader;
+        try {
+            classLoader = Reflection.getCallerClass().getClassLoader();
+        } catch (Throwable e) {
+            classLoader = Thread.currentThread().getContextClassLoader();
+        }
+        URL url = classLoader.getResource(name);
+        if (url == null)
+            return Bytes.wrapForRead(IOTools.readFile(name));
+        try (FileChannel fc = new FileInputStream(url.getFile()).getChannel()) {
+            ByteBuffer bb = ByteBuffer.allocateDirect(Math.toIntExact(fc.size()));
+            do {
+                if (fc.read(bb) < 0)
+                    break;
+            } while (bb.remaining() > 0);
+
+            bb.flip();
+            return Bytes.wrapForRead(bb);
+        }
+    }
 
     public static boolean bytesEqual(
             @org.jetbrains.annotations.NotNull @NotNull RandomDataInput a, long offset,
