@@ -211,5 +211,7 @@ public class OptimisedBytesStoreHashTest {
                     Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.address(0), i)));
             bs2.writeUnsignedByte(i + 1);
         }
+        bs.release();
+        bs2.release();
     }
 }
