@@ -32,12 +32,17 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 /**
  * Created by peter on 30/08/15..
  */
 public enum BytesUtil {
     ;
+
+    static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
     public static Bytes readFile(@NotNull String name) throws IOException {
         ClassLoader classLoader;
@@ -180,15 +185,12 @@ public enum BytesUtil {
         return AppendableUtil.findUtf8Length(toWrite);
     }
 
-//    static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
-
     public static boolean register(AbstractBytes bytes) {
-//        bytesCreated.put(bytes, new Throwable("Created here"));
+        bytesCreated.put(bytes, new Throwable("Created here"));
         return true;
     }
 
     public static void checkRegisteredBytes() {
-/*
         int count = 0;
         for (Map.Entry<AbstractBytes, Throwable> entry : bytesCreated.entrySet()) {
             AbstractBytes key = entry.getKey();
@@ -201,6 +203,5 @@ public enum BytesUtil {
         bytesCreated.clear();
         if (count != 0)
         throw new IllegalStateException("Bytes not released properly " + count);
-*/
     }
 }

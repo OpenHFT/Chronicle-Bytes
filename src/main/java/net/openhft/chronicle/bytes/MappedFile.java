@@ -68,10 +68,49 @@ public class MappedFile implements ReferenceCounted {
         this.overlapSize = OS.mapAlign(overlapSize);
         this.capacity = capacity;
         this.readOnly = readOnly;
+
+        assert registerMappedFile(this);
     }
 
+//    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
+
+    private static boolean registerMappedFile(MappedFile mappedFile) {
+//        MAPPED_FILE_THROWABLE_MAP.put(mappedFile, new Throwable("Created here"));
+        return true;
+    }
+
+    public static void checkMappedFiles() {
+
+/*
+        int[] count = {0};
+        for (Map.Entry<MappedFile, Throwable> entry : MAPPED_FILE_THROWABLE_MAP.entrySet()) {
+            entry.getKey().check(entry.getValue(), count);
+        }
+        MAPPED_FILE_THROWABLE_MAP.clear();
+        if (count[0] > 0)
+            throw new AssertionError("Count: " + count[0]);
+*/
+    }
+
+/*
+    private void check(Throwable throwable, int[] count) {
+        for (int i = 0; i < stores.size(); i++) {
+            WeakReference<MappedBytesStore> storeRef = stores.get(i);
+            if (storeRef == null)
+                continue;
+            @Nullable MappedBytesStore mbs = storeRef.get();
+            if (mbs != null && mbs.refCount() > 0) {
+                mbs.release();
+                throwable.printStackTrace();
+                count[0]++;
+            }
+        }
+    }
+*/
+
     @NotNull
-    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
+    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
+            throws FileNotFoundException {
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
         try {
             long capacity = readOnly ? raf.length() : DEFAULT_CAPACITY;
@@ -95,17 +134,20 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long overlapSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long overlapSize)
+            throws FileNotFoundException {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize)
+            throws FileNotFoundException {
         return mappedFile(file, chunkSize, overlapSize, false);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
+            throws FileNotFoundException {
         return MappedFile.of(file, chunkSize, overlapSize, readOnly);
     }
 
@@ -174,12 +216,14 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @Nullable
-    public MappedBytesStore acquireByteStore(long position) throws IOException, IllegalArgumentException, IllegalStateException {
+    public MappedBytesStore acquireByteStore(long position)
+            throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(position, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
     }
 
     @Nullable
-    public <T extends MappedBytesStore> T acquireByteStore(long position, @NotNull MappedBytesStoreFactory<T> mappedBytesStoreFactory) throws IOException, IllegalArgumentException, IllegalStateException {
+    public <T extends MappedBytesStore> T acquireByteStore(long position, @NotNull MappedBytesStoreFactory<T> mappedBytesStoreFactory)
+            throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
         if (position < 0)
@@ -281,7 +325,6 @@ public class MappedFile implements ReferenceCounted {
     public long refCount() {
         return refCount.get();
     }
-
 
     private void performRelease() {
         for (int i = 0; i < stores.size(); i++) {
