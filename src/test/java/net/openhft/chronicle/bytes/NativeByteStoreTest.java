@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -26,6 +27,12 @@ import static org.junit.Assert.assertNotEquals;
  * Created by peter on 20/12/16.
  */
 public class NativeByteStoreTest {
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Test
     public void testEquals() {
         @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());

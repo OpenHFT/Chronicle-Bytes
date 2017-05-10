@@ -47,7 +47,6 @@ public class NativeBytesTest {
 
     private Allocator alloc;
     private ThreadDump threadDump;
-
     public NativeBytesTest(Allocator alloc) {
         this.alloc = alloc;
     }
@@ -57,6 +56,11 @@ public class NativeBytesTest {
         return Arrays.asList(new Object[][]{
                 {NATIVE}, {HEAP}
         });
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     @Before
@@ -79,6 +83,7 @@ public class NativeBytesTest {
         Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap0);
         assertEquals("Hello World, Have a great day!", b.toString());
+        b.release();
     }
 
     @Test
@@ -92,12 +97,14 @@ public class NativeBytesTest {
         Bytes<byte[]> wrap1 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap1);
         assertEquals("Hello World, Have a great day!", b.toString());
+        b.release();
     }
 
     @Test
     public void testAppendCharArrayNonAscii() {
         Bytes b = alloc.elasticBytes(1);
         b.appendUtf8(new char[] {'Δ'}, 0, 1);
+        b.release();
     }
 
     @Test
@@ -108,6 +115,8 @@ public class NativeBytesTest {
         nativeBytes.writePosition(nativeBytes.realCapacity() - 3);
         nativeBytes.writeInt(0);
         assertEquals(3 * pageSize, nativeBytes.realCapacity());
+
+        nativeBytes.release();
     }
 
     @Test

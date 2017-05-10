@@ -30,9 +30,15 @@ import java.util.Random;
 import static org.junit.Assert.assertEquals;
 
 public class ByteStringAppenderTest {
-    Bytes bytes = Bytes.elasticByteBuffer();
 
+    Bytes bytes = Bytes.elasticByteBuffer();
     private ThreadDump threadDump;
+
+    @After
+    public void checkRegisteredBytes() {
+        bytes.release();
+        BytesUtil.checkRegisteredBytes();
+    }
 
     @Before
     public void threadDump() {
@@ -47,7 +53,9 @@ public class ByteStringAppenderTest {
     @Test
     public void testConvertTo() {
         assertEquals(Bytes.from("hello"), ObjectUtils.convertTo(Bytes.class, "hello"));
-        assertEquals(Bytes.allocateDirect(2).append(1), ObjectUtils.convertTo(Bytes.class, 1));
+        VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
+        assertEquals(bytes.append(1), ObjectUtils.convertTo(Bytes.class, 1));
+        bytes.release();
     }
     @Test
     public void testAppend() throws IORuntimeException {

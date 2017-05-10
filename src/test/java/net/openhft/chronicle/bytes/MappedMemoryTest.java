@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.After;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -32,10 +33,14 @@ import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
 
 public class MappedMemoryTest {
-
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MappedMemoryTest.class);
     private static final long SHIFT = 27L;
     private static long BLOCK_SIZE = 1L << SHIFT;
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
 
     // on i7-3970X ~ 3.3 ns
     @Test

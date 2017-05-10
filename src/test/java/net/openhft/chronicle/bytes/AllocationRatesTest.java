@@ -51,6 +51,7 @@ public class AllocationRatesTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
     @Test
     public void compareAllocationRates() {
         for (int i = 0; i < 5; i++) {

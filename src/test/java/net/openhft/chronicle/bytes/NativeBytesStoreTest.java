@@ -54,6 +54,11 @@ public class NativeBytesStoreTest {
             bytes.append(t);
     }
 
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Before
     public void threadDump() {
         threadDump = new ThreadDump();
@@ -94,6 +99,10 @@ public class NativeBytesStoreTest {
             assertEquals(expected, dec.toString());
             System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
         }
+
+        bytes.release();
+        enc.release();
+        dec.release();
     }
 
     @Test
@@ -150,6 +159,8 @@ public class NativeBytesStoreTest {
         @Nullable ByteBuffer bb2 = bbb.underlyingObject();
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
+
+        bbb.release();
     }
 
     @Test
@@ -198,5 +209,8 @@ public class NativeBytesStoreTest {
 
         dst.writePosition(src.copyTo(dst));
         assertEquals(src, dst);
+
+        src.release();
+        dst.release();
     }
 }

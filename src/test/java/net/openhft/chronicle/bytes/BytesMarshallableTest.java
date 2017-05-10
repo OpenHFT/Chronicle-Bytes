@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -35,6 +36,12 @@ import static org.junit.Assert.assertEquals;
  * Created by Peter on 20/04/2016.
  */
 public class BytesMarshallableTest {
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Test
     public void serializePrimitives() throws IORuntimeException {
         Bytes bytes = Bytes.elasticByteBuffer();
@@ -50,6 +57,7 @@ public class BytesMarshallableTest {
 
         assertEquals(mb1.toString(), mb3.toString());
         assertEquals(mb2.toString(), mb4.toString());
+        bytes.release();
     }
 
     @Test
@@ -67,6 +75,7 @@ public class BytesMarshallableTest {
 
         assertEquals(mb1.toString(), mb3.toString());
         assertEquals(mb2.toString(), mb4.toString());
+        bytes.release();
     }
 
     @Test
@@ -88,6 +97,7 @@ public class BytesMarshallableTest {
 
         assertEquals(mn1.toString(), mn3.toString());
         assertEquals(mn2.toString(), mn4.toString());
+        bytes.release();
     }
 
     static class MyByteable implements BytesMarshallable {

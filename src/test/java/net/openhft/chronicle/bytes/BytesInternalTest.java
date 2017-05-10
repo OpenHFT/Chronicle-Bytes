@@ -40,6 +40,12 @@ public class BytesInternalTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Test
     public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
@@ -52,6 +58,7 @@ public class BytesInternalTest {
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, 0), sb.toString());
+        bytes.release();
     }
 
     @Test

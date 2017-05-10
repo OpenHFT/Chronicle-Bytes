@@ -42,14 +42,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
-     * @deprecated Use from(CharSequence) instead.
-     */
-    @Deprecated
-    static BytesStore wrap(@NotNull CharSequence cs) {
-        return from(cs);
-    }
-
-    /**
      * This method builds a BytesStore using the bytes in a CharSequence. This chars are encoded
      * using ISO_8859_1
      *

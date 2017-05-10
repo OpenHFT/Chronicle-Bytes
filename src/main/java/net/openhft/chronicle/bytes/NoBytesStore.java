@@ -205,7 +205,7 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public boolean isDirectMemory() {
-        return true;
+        return false;
     }
 
     @NotNull

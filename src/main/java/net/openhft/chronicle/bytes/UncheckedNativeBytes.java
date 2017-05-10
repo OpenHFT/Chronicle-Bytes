@@ -34,9 +34,10 @@ import java.nio.ByteBuffer;
  */
 public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     protected final long capacity;
+    private final Bytes<Underlying> underlyingBytes;
+    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     @Nullable
     protected NativeBytesStore<Underlying> bytesStore;
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long readPosition;
     protected long writePosition;
     protected long writeLimit;
@@ -44,7 +45,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
-        underlyingBytes.reserve();
+        this.underlyingBytes = underlyingBytes;
         this.bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
@@ -290,8 +291,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     void performRelease() {
-        this.bytesStore.release();
-        this.bytesStore = null;
+        this.underlyingBytes.release();
     }
 
     @Override

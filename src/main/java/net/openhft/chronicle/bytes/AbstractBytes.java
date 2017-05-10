@@ -55,6 +55,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         this.writeLimit = writeLimit;
         // used for debugging
         this.name = name;
+
+        if (bytesStore.isDirectMemory())
+            assert BytesUtil.register(this);
     }
 
     @Override

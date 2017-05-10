@@ -36,5 +36,7 @@ public class PrewriteTest {
         bytes.prewriteLong(0x3837363534333231L);
         bytes.prewriteShort((short) 0x3130);
         assertEquals("01123456781234,words,hi,1234", bytes.toString());
+
+        bytes.release();
     }
 }

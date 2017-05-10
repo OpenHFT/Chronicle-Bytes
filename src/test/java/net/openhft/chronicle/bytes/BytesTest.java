@@ -50,7 +50,6 @@ public class BytesTest {
 
     private Allocator alloc1;
     private ThreadDump threadDump;
-
     public BytesTest(Allocator alloc1) {
         this.alloc1 = alloc1;
     }
@@ -63,6 +62,17 @@ public class BytesTest {
                 {NATIVE_UNCHECKED},
                 {HEAP_UNCHECKED}
         });
+    }
+
+    private static void testIndexOf(String sourceStr, String subStr) {
+        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
+        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
+        Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     @Before
@@ -81,7 +91,6 @@ public class BytesTest {
         String subStr = "ta";
         testIndexOf(sourceStr, subStr);
     }
-
 
     @Test
     public void testIndexOfEmptySubStr() {
@@ -104,7 +113,6 @@ public class BytesTest {
         testIndexOf(sourceStr, subStr);
     }
 
-
     @Test
     public void testIndexOfExactMatch() {
         String sourceStr = "some";
@@ -118,7 +126,6 @@ public class BytesTest {
         String subStr = " some";
         testIndexOf(sourceStr, subStr);
     }
-
 
     @Test
     public void testIndexOfExactMatchAtChar1() {
@@ -144,7 +151,6 @@ public class BytesTest {
         Assert.assertEquals(0, source.indexOf(subBytes));
     }
 
-
     @Test
     public void testIndexOfExactMatchAfterReadSkipOnSubStr() {
         String sourceStr = "some";
@@ -158,19 +164,13 @@ public class BytesTest {
         Assert.assertTrue(source.readPosition() == 0);
     }
 
-    private static void testIndexOf(String sourceStr, String subStr) {
-        final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
-        final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
-        Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
-    }
-
-
     @Test
     public void writeAdv() {
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
             bytes.writeIntAdv('1', 1);
         assertEquals("1111", bytes.toString());
+        bytes.release();
     }
 
     @Test
@@ -179,6 +179,7 @@ public class BytesTest {
         for (int i = 0; i < 4; i++)
             bytes.writeLongAdv('1', 1);
         assertEquals("1111", bytes.toString());
+        bytes.release();
     }
 
     @Test
@@ -264,6 +265,7 @@ public class BytesTest {
             @NotNull String s = bytes.toHexString();
             Bytes bytes2 = Bytes.fromHexString(s);
             assertEquals(s, bytes2.toHexString());
+            bytes2.release();
         } finally {
             bytes.release();
         }
@@ -367,13 +369,16 @@ public class BytesTest {
     public void testParseUtf8() {
         Bytes bytes = alloc1.elasticBytes(1);
         try {
+            assertEquals(1, bytes.refCount());
             bytes.appendUtf8("starting Hello World");
             @NotNull String s0 = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
             assertEquals("starting", s0);
             @NotNull String s = bytes.parseUtf8(StopCharTesters.ALL);
             assertEquals("Hello World", s);
+            assertEquals(1, bytes.refCount());
         } finally {
             bytes.release();
+            assertEquals(0, bytes.refCount());
         }
     }
 
@@ -381,7 +386,11 @@ public class BytesTest {
     public void testPartialWriteArray() {
         @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
         Bytes to = alloc1.fixedBytes(6);
-        to.write(array);
+        try {
+            to.write(array);
+        } finally {
+            to.release();
+        }
     }
 
     @Test
@@ -391,6 +400,7 @@ public class BytesTest {
 
         to.writeSome(bb);
         assertEquals("World", Bytes.wrapForRead(bb).toString());
+        to.release();
     }
 
     @Test
@@ -530,30 +540,46 @@ public class BytesTest {
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(4);
-        if (bytes.unchecked())
-            throw new BufferOverflowException();
-        bytes.writeInt(-1, 1);
+        try {
+            if (bytes.unchecked())
+                throw new BufferOverflowException();
+            bytes.writeInt(-1, 1);
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.elasticBytes(1);
 
-        if (bytes.unchecked())
-            throw new BufferOverflowException();
-        bytes.writeInt(-1, 1);
+        try {
+            if (bytes.unchecked())
+                throw new BufferOverflowException();
+            bytes.writeInt(-1, 1);
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(4);
-        bytes.writeInt(-1, 1);
+        try {
+            bytes.writeInt(-1, 1);
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
-        bytes.writeInt(-1, 1);
+        try {
+            bytes.writeInt(-1, 1);
+        } finally {
+            bytes.release();
+        }
     }
 
     @Test
@@ -582,6 +608,7 @@ public class BytesTest {
         assertEquals("bye", scan.nextLine());
         assertEquals("for now", scan.nextLine());
         assertFalse(scan.hasNext());
+        bytes.release();
     }
 
     @Test

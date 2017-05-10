@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -9,6 +10,12 @@ import static org.junit.Assert.fail;
  * Created by peter on 17/01/2017.
  */
 public class AppendableUtilTest {
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
     @Test
     public void setLength() {
         StringBuilder sb = new StringBuilder("hello world");
@@ -26,6 +33,7 @@ public class AppendableUtilTest {
         } catch (IllegalArgumentException iae) {
             // expected.
         }
+        b.release();
     }
 
 }

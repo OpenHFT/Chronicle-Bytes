@@ -16,11 +16,20 @@
 
 package net.openhft.chronicle.bytes;
 
-import junit.framework.TestCase;
 import org.jetbrains.annotations.NotNull;
+import org.junit.After;
+import org.junit.Test;
 
-public class PointerBytesStoreTest extends TestCase {
+import static org.junit.Assert.assertEquals;
 
+public class PointerBytesStoreTest {
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
+
+    @Test
     public void testWrap() throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
 

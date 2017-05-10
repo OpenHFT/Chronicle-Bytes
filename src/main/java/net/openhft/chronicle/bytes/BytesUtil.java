@@ -179,4 +179,28 @@ public enum BytesUtil {
     public static long utf8Length(CharSequence toWrite) {
         return AppendableUtil.findUtf8Length(toWrite);
     }
+
+//    static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
+
+    public static boolean register(AbstractBytes bytes) {
+//        bytesCreated.put(bytes, new Throwable("Created here"));
+        return true;
+    }
+
+    public static void checkRegisteredBytes() {
+/*
+        int count = 0;
+        for (Map.Entry<AbstractBytes, Throwable> entry : bytesCreated.entrySet()) {
+            AbstractBytes key = entry.getKey();
+            if (key.refCount() != 0) {
+                System.err.println("Bytes " + key.getClass() + " refCount=" + key.refCount());
+                entry.getValue().printStackTrace();
+                count++;
+            }
+        }
+        bytesCreated.clear();
+        if (count != 0)
+        throw new IllegalStateException("Bytes not released properly " + count);
+*/
+    }
 }

@@ -34,8 +34,13 @@ import static org.junit.Assert.assertEquals;
 
 public class ByteStringParserTest   {
     Bytes bytes = Bytes.elasticByteBuffer();
-
     private ThreadDump threadDump;
+
+    @After
+    public void checkRegisteredBytes() {
+        bytes.release();
+        BytesUtil.checkRegisteredBytes();
+    }
 
     @Before
     public void threadDump() {

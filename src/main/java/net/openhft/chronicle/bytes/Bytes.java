@@ -164,11 +164,6 @@ public interface Bytes<Underlying> extends
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
-    @Deprecated
-    static Bytes<byte[]> wrapForRead(@NotNull CharSequence text) throws IllegalArgumentException, IllegalStateException {
-        return from(text);
-    }
-
     /**
      * Allocate a fixed size buffer read for writing.
      *
@@ -367,11 +362,12 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
-        return unchecked ?
-                start() == 0 && bytesStore().isDirectMemory() ?
-                        new UncheckedNativeBytes<>(this) :
-                        new UncheckedBytes<>(this) :
-                this;
+        if (unchecked) {
+            return start() == 0 && bytesStore().isDirectMemory() ?
+                    new UncheckedNativeBytes<>(this) :
+                    new UncheckedBytes<>(this);
+        }
+        return this;
     }
 
     default boolean unchecked() {

@@ -30,8 +30,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class MappedFileTest {
-
     private ThreadDump threadDump;
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
+    }
 
     @Before
     public void threadDump() {

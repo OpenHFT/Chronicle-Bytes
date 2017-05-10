@@ -46,11 +46,11 @@ import static org.junit.Assert.assertFalse;
  */
 
 public class ByteStoreTest {
+
     public static final int SIZE = 128;
     private Bytes bytes;
     private ByteBuffer byteBuffer;
     private BytesStore bytesStore;
-
     private ThreadDump threadDump;
 
     @Parameterized.Parameters
@@ -60,6 +60,11 @@ public class ByteStoreTest {
         for (int i = 0; i < 2; i++)
             list.add(NO_ARGS);
         return list;
+    }
+
+    @After
+    public void checkRegisteredBytes() {
+        BytesUtil.checkRegisteredBytes();
     }
 
     @Before
@@ -153,7 +158,9 @@ public class ByteStoreTest {
     @Test
     public void testCapacity() {
         assertEquals(SIZE, bytes.capacity());
-        assertEquals(10, Bytes.allocateDirect(10).capacity());
+        VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
+        assertEquals(10, bytes.capacity());
+        bytes.release();
     }
 
     @Test
