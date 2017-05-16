@@ -81,6 +81,7 @@ public class OptimisedBytesStoreHashTest {
             assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
         for (int i = 17; i <= 32; i++)
             assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
+        nb.release();
     }
 
     @Test

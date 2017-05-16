@@ -49,5 +49,6 @@ public class TextIntReferenceTest {
         bytes.readPosition(16);
         assertEquals("!!atomic { locked: false, value: 0000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
         nbs.release();
+        bytes.release();
     }
 }
