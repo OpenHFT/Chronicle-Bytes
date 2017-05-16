@@ -17,6 +17,8 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.bytes.NativeBytes;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -37,6 +39,8 @@ public class BytesPool {
 
     @NotNull
     protected Bytes createBytes() {
-        return Bytes.allocateElasticDirect(256);
+        NativeBytes<Void> bytes = Bytes.allocateElasticDirect(256);
+        assert BytesUtil.unregister(bytes);
+        return bytes;
     }
 }

@@ -204,4 +204,9 @@ public enum BytesUtil {
         if (count != 0)
         throw new IllegalStateException("Bytes not released properly " + count);
     }
+
+    public static boolean unregister(Bytes bytes) {
+        bytesCreated.remove(bytes);
+        return true;
+    }
 }
