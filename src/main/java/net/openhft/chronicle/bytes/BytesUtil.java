@@ -24,13 +24,13 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 import sun.reflect.Reflection;
 
-import java.io.FileInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.IdentityHashMap;
@@ -52,18 +52,17 @@ public enum BytesUtil {
             classLoader = Thread.currentThread().getContextClassLoader();
         }
         URL url = classLoader.getResource(name);
+        if (url == null && name.startsWith("/"))
+            url = classLoader.getResource(name.substring(1));
         if (url == null)
             return Bytes.wrapForRead(IOTools.readFile(name));
 
-        try (FileChannel fc = new FileInputStream(url.getFile()).getChannel()) {
-            ByteBuffer bb = ByteBuffer.allocateDirect(Math.toIntExact(fc.size()));
-            do {
-                if (fc.read(bb) < 0)
-                    break;
-            } while (bb.remaining() > 0);
-
-            bb.flip();
-            return Bytes.wrapForRead(bb);
+        try (InputStream in = url.openStream()) {
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            byte[] arr = new byte[1024];
+            for (int len; (len = in.read(arr)) > 0; )
+                bos.write(arr, 0, len);
+            return Bytes.wrapForRead(bos.toByteArray());
         }
     }
 
@@ -202,7 +201,7 @@ public enum BytesUtil {
         }
         bytesCreated.clear();
         if (count != 0)
-        throw new IllegalStateException("Bytes not released properly " + count);
+            throw new IllegalStateException("Bytes not released properly " + count);
     }
 
     public static boolean unregister(Bytes bytes) {
