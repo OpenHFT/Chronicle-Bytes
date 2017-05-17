@@ -310,7 +310,7 @@ public interface Bytes<Underlying> extends
      * @param target    the read bytes being searched for.
      * @param fromIndex the index to begin searching from,
      */
-    static long indexOf(@NotNull Bytes source, @NotNull Bytes target, int fromIndex) {
+    static int indexOf(@NotNull BytesStore source, @NotNull BytesStore target, int fromIndex) {
 
         long sourceOffset = source.readPosition();
         long targetOffset = target.readPosition();
@@ -318,7 +318,7 @@ public interface Bytes<Underlying> extends
         long targetCount = target.readRemaining();
 
         if (fromIndex >= sourceCount) {
-            return (targetCount == 0 ? sourceCount : -1);
+            return Math.toIntExact(targetCount == 0 ? sourceCount : -1);
         }
         if (fromIndex < 0) {
             fromIndex = 0;
@@ -346,7 +346,7 @@ public interface Bytes<Underlying> extends
 
                 if (j == end) {
                     /* Found whole string. */
-                    return i - sourceOffset;
+                    return Math.toIntExact(i - sourceOffset);
                 }
             }
         }
@@ -555,6 +555,11 @@ public interface Bytes<Underlying> extends
      * @return the index of the first occurrence of the specified sub-bytes,
      * or {@code -1} if there is no such occurrence.
      */
+    default int indexOf(@NotNull BytesStore source, int fromIndex) {
+        return indexOf(this, source, fromIndex);
+    }
+
+    @Deprecated
     default long indexOf(@NotNull Bytes source, int fromIndex) {
         return indexOf(this, source, fromIndex);
     }
