@@ -648,6 +648,7 @@ enum BytesInternal {
         return offset;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     public static Bytes asBytes(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput bytes, long position, long limit)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
@@ -1751,7 +1752,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester)
+    public static void parseUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable builder, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
             throws IllegalArgumentException, BufferUnderflowException, IORuntimeException {
         AppendableUtil.setLength(builder, 0);
         try {
@@ -1762,7 +1763,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parse8bit(@NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
+    public static void parse8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder builder, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester) {
         builder.setLength(0);
         AppendableUtil.read8bitAndAppend(bytes, builder, tester);
     }
@@ -2258,7 +2259,7 @@ enum BytesInternal {
     }
 
     @org.jetbrains.annotations.NotNull
-    public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@org.jetbrains.annotations.NotNull StreamingDataInput input, Class<E> eClass)
+    public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@org.jetbrains.annotations.NotNull StreamingDataInput input, @org.jetbrains.annotations.NotNull Class<E> eClass)
             throws BufferUnderflowException, IORuntimeException {
         Bytes bytes = acquireBytes();
         input.read8bit(bytes);
@@ -2348,6 +2349,7 @@ enum BytesInternal {
         throw new IllegalArgumentException("Stop byte " + stopByte + " not found");
     }
 
+    @org.jetbrains.annotations.NotNull
     public static Bytes fromHexString(@org.jetbrains.annotations.NotNull String s) {
         Bytes in = Bytes.from(s);
         Bytes out = Bytes.elasticByteBuffer();
@@ -2395,21 +2397,21 @@ enum BytesInternal {
             out.writeStopBit(i);
     }
 
-    public static ByteBuffer asByteBuffer(BytesStore bytesStore) {
+    public static ByteBuffer asByteBuffer(@org.jetbrains.annotations.NotNull BytesStore bytesStore) {
         return asByteBuffer(BYTE_BUFFER_TL, bytesStore);
     }
 
-    public static ByteBuffer asByteBuffer2(BytesStore bytesStore) {
+    public static ByteBuffer asByteBuffer2(@org.jetbrains.annotations.NotNull BytesStore bytesStore) {
         return asByteBuffer(BYTE_BUFFER2_TL, bytesStore);
     }
 
-    private static ByteBuffer asByteBuffer(ThreadLocal<ByteBuffer> byteBufferTL, BytesStore bytesStore) {
+    private static ByteBuffer asByteBuffer(@org.jetbrains.annotations.NotNull ThreadLocal<ByteBuffer> byteBufferTL, @org.jetbrains.annotations.NotNull BytesStore bytesStore) {
         ByteBuffer byteBuffer = byteBufferTL.get();
         assignBytesStoreToByteBuffer(bytesStore, byteBuffer);
         return byteBuffer;
     }
 
-    public static void assignBytesStoreToByteBuffer(BytesStore bytesStore, ByteBuffer byteBuffer) {
+    public static void assignBytesStoreToByteBuffer(@org.jetbrains.annotations.NotNull BytesStore bytesStore, @org.jetbrains.annotations.NotNull ByteBuffer byteBuffer) {
         long address = bytesStore.address(bytesStore.readPosition());
         long capacity = bytesStore.readRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);

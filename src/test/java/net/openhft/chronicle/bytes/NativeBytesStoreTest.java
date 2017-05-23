@@ -47,7 +47,7 @@ public class NativeBytesStoreTest {
     volatile int bcs;
     private ThreadDump threadDump;
 
-    private static void generate(Bytes bytes, int t) {
+    private static void generate(@NotNull Bytes bytes, int t) {
         bytes.clear();
         bytes.append("hello world ");
         for (int i = 0; i <= t; i++)

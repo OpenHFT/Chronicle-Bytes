@@ -211,7 +211,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return this;
     }
 
-    public NativeBytes writeSome(Bytes bytes) throws BufferOverflowException {
+    @NotNull
+    public NativeBytes writeSome(@NotNull Bytes bytes) throws BufferOverflowException {
         long length = Math.min(bytes.readRemaining(), writeRemaining());
         if (length + writePosition() >= 1 << 20)
             length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());

@@ -44,7 +44,7 @@ public enum BytesUtil {
 
     static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
-    public static Bytes readFile(@NotNull String name) throws IOException {
+    public static Bytes readFile(@org.jetbrains.annotations.NotNull @NotNull String name) throws IOException {
         ClassLoader classLoader;
         try {
             classLoader = Reflection.getCallerClass().getClassLoader();
@@ -145,20 +145,20 @@ public enum BytesUtil {
         return chars;
     }
 
-    public static long readStopBit(StreamingDataInput in) throws IORuntimeException {
+    public static long readStopBit(@org.jetbrains.annotations.NotNull StreamingDataInput in) throws IORuntimeException {
         return BytesInternal.readStopBit(in);
     }
 
-    public static void writeStopBit(StreamingDataOutput out, long n) {
+    public static void writeStopBit(@org.jetbrains.annotations.NotNull StreamingDataOutput out, long n) {
         BytesInternal.writeStopBit(out, n);
     }
 
     public static void parseUtf8(
-            @NotNull StreamingDataInput in, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+            @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
         BytesInternal.parseUtf8(in, appendable, utflen);
     }
 
-    public static void appendUtf8(@NotNull StreamingDataOutput out, @org.jetbrains.annotations.NotNull @NotNull CharSequence cs) {
+    public static void appendUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, @org.jetbrains.annotations.NotNull @NotNull CharSequence cs) {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
 
@@ -180,7 +180,7 @@ public enum BytesUtil {
     }
 
     @Deprecated
-    public static long utf8Length(CharSequence toWrite) {
+    public static long utf8Length(@org.jetbrains.annotations.NotNull CharSequence toWrite) {
         return AppendableUtil.findUtf8Length(toWrite);
     }
 

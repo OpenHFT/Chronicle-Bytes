@@ -64,7 +64,7 @@ public class BytesTest {
         });
     }
 
-    private static void testIndexOf(String sourceStr, String subStr) {
+    private static void testIndexOf(@NotNull String sourceStr, @NotNull String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));

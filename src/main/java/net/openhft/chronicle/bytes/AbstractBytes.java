@@ -202,6 +202,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writePosition(long position) throws BufferOverflowException {
@@ -234,6 +235,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         readPosition--;
     }
 
+    @NotNull
     @Override
     @ForceInline
     public Bytes<Underlying> writeSkip(long bytesToSkip)
@@ -484,6 +486,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException, IllegalArgumentException {
@@ -492,6 +495,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException, IllegalArgumentException {
@@ -500,6 +504,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException, IllegalArgumentException {
@@ -508,6 +513,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @NotNull
     @Override
     public Bytes<Underlying> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException, IllegalArgumentException {

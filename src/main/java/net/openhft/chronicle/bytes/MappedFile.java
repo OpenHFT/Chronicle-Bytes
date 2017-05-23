@@ -279,6 +279,7 @@ public class MappedFile implements ReferenceCounted {
     /**
      * Convenience method so you don't need to release the BytesStore
      */
+    @NotNull
     public Bytes acquireBytesForRead(long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
         @Nullable MappedBytesStore mbs = acquireByteStore(position);

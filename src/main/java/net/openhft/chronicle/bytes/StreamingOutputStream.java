@@ -36,6 +36,7 @@ public class StreamingOutputStream extends OutputStream {
         this.sdo = sdo;
     }
 
+    @NotNull
     public StreamingOutputStream init(StreamingDataOutput sdo) {
         this.sdo = sdo;
         return this;

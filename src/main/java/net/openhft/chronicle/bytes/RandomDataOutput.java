@@ -222,18 +222,24 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     @NotNull
     R writeDouble(long offset, double d) throws BufferOverflowException;
 
+    @NotNull
     R writeVolatileByte(long offset, byte i8) throws BufferOverflowException;
 
+    @NotNull
     R writeVolatileShort(long offset, short i16) throws BufferOverflowException;
 
+    @NotNull
     R writeVolatileInt(long offset, int i32) throws BufferOverflowException;
 
+    @NotNull
     R writeVolatileLong(long offset, long i64) throws BufferOverflowException;
 
+    @NotNull
     default R writeVolatileFloat(long offset, float f) throws BufferOverflowException {
         return writeVolatileInt(offset, Float.floatToRawIntBits(f));
     }
 
+    @NotNull
     default R writeVolatileDouble(long offset, double d) throws BufferOverflowException {
         return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
     }

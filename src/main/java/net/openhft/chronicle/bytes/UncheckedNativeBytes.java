@@ -34,6 +34,7 @@ import java.nio.ByteBuffer;
  */
 public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     protected final long capacity;
+    @NotNull
     private final Bytes<Underlying> underlyingBytes;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     @Nullable

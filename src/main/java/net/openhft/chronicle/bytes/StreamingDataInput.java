@@ -270,7 +270,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException;
 
     @NotNull
-    default <E extends Enum<E>> E readEnum(Class<E> eClass)
+    default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException {
         return BytesInternal.readEnum(this, eClass);
     }

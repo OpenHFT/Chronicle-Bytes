@@ -23,11 +23,13 @@ import java.nio.ByteBuffer;
 public enum Allocator {
 
     NATIVE {
+        @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
             return Bytes.elasticByteBuffer(capacity);
         }
 
+        @NotNull
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocateDirect(capacity);
@@ -40,6 +42,7 @@ public enum Allocator {
             return Bytes.elasticHeapByteBuffer(capacity);
         }
 
+        @NotNull
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocate(capacity);
@@ -52,6 +55,7 @@ public enum Allocator {
             return Bytes.elasticByteBuffer(Math.max(128, capacity)).unchecked(true);
         }
 
+        @NotNull
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocateDirect(capacity);
@@ -64,13 +68,16 @@ public enum Allocator {
             return Bytes.elasticHeapByteBuffer(Math.max(32, capacity)).unchecked(true);
         }
 
+        @NotNull
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocate(capacity);
         }
     };
 
+    @NotNull
     abstract Bytes<ByteBuffer> elasticBytes(int capacity);
+    @NotNull
     abstract ByteBuffer byteBuffer(int capacity);
     Bytes<ByteBuffer> fixedBytes(int capacity) {
         return Bytes.wrapForWrite(byteBuffer(capacity));

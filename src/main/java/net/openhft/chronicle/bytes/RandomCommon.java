@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteOrder;
@@ -107,11 +108,13 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return the streaming bytes for reading.
      */
+    @NotNull
     Bytes bytesForRead() throws IllegalStateException;
 
     /**
      * @return the streaming bytes for writing.
      */
+    @NotNull
     Bytes bytesForWrite() throws IllegalStateException;
 
     /**

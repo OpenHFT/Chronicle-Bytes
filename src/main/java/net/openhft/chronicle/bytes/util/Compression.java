@@ -138,7 +138,7 @@ public interface Compression {
         }
     }
 
-    default byte[] uncompress(byte[] bytes) throws IORuntimeException {
+    default byte[] uncompress(@NotNull byte[] bytes) throws IORuntimeException {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
             @NotNull byte[] buf = new byte[512];

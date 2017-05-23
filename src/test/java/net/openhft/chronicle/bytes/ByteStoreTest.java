@@ -53,6 +53,7 @@ public class ByteStoreTest {
     private BytesStore bytesStore;
     private ThreadDump threadDump;
 
+    @NotNull
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         List<Object[]> list = new ArrayList<>();

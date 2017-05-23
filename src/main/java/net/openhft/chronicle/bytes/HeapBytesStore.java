@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
@@ -35,6 +36,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @SuppressWarnings("sunapi")
 public class HeapBytesStore<Underlying>
         extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
+    @Nullable
     private static final Memory MEMORY = OS.memory();
     private final AtomicLong refCount = new AtomicLong(1);
     @NotNull

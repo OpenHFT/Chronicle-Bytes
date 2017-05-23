@@ -416,8 +416,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this.refCount() <= 0;
     }
 
+    @NotNull
     @Override
-    public MappedBytes write(BytesStore bytes)
+    public MappedBytes write(@NotNull BytesStore bytes)
             throws BufferOverflowException {
         assert bytes != this : "you should not write to yourself !";
 

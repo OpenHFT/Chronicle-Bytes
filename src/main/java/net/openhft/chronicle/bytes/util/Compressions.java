@@ -34,6 +34,7 @@ import java.util.zip.*;
  */
 public enum Compressions implements Compression {
     Binary {
+        @NotNull
         @Override
         public byte[] compress(byte[] bytes) {
             return bytes;
@@ -72,20 +73,20 @@ public enum Compressions implements Compression {
     LZW {
         @NotNull
         @Override
-        public InputStream decompressingStream(InputStream input) {
+        public InputStream decompressingStream(@NotNull InputStream input) {
             return new InflaterInputStream(input);
         }
 
         @NotNull
         @Override
-        public OutputStream compressingStream(OutputStream output) {
+        public OutputStream compressingStream(@NotNull OutputStream output) {
             return new DeflaterOutputStream(output, new Deflater(Deflater.DEFAULT_COMPRESSION));
         }
     },
     GZIP {
         @NotNull
         @Override
-        public InputStream decompressingStream(InputStream input) throws IORuntimeException {
+        public InputStream decompressingStream(@NotNull InputStream input) throws IORuntimeException {
             try {
                 return new GZIPInputStream(input);
 
@@ -96,7 +97,7 @@ public enum Compressions implements Compression {
 
         @NotNull
         @Override
-        public OutputStream compressingStream(OutputStream output) {
+        public OutputStream compressingStream(@NotNull OutputStream output) {
             try {
                 return new GZIPOutputStream(output);
 
@@ -123,6 +124,7 @@ public enum Compressions implements Compression {
             return available;
         }
 
+        @NotNull
         @Override
         public byte[] compress(byte[] bytes) {
             try {
@@ -133,8 +135,9 @@ public enum Compressions implements Compression {
             }
         }
 
+        @NotNull
         @Override
-        public byte[] uncompress(byte[] bytes) throws IORuntimeException {
+        public byte[] uncompress(@NotNull byte[] bytes) throws IORuntimeException {
             try {
                 return org.xerial.snappy.Snappy.uncompress(bytes);
 

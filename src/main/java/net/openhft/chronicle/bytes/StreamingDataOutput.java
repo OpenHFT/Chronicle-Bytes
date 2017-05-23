@@ -36,8 +36,10 @@ import java.nio.ByteBuffer;
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
 
+    @org.jetbrains.annotations.NotNull
     S writePosition(long position) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeLimit(long limit) throws BufferOverflowException;
 
@@ -48,11 +50,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return this
      * @throws BufferOverflowException if the offset is outside the limits of the Bytes
      */
+    @org.jetbrains.annotations.NotNull
     S writeSkip(long bytesToSkip) throws BufferOverflowException;
 
     /**
      * @return Bytes as an OutputStream
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default OutputStream outputStream() {
         return new StreamingOutputStream(this);
@@ -64,12 +68,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param x long to write
      * @return this.
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeStopBit(long x) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, x);
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeStopBit(double d) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, d);
@@ -83,6 +89,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param cs the string value to be written. Can be null.
      * @throws BufferOverflowException if there is not enough space left
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeUtf8(CharSequence cs)
             throws BufferOverflowException {
@@ -90,6 +97,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeUtf8(String s)
             throws BufferOverflowException {
@@ -97,12 +105,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     @Deprecated
     default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         return writeUtf8(cs);
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S write8bit(@Nullable CharSequence cs)
             throws BufferOverflowException {
@@ -118,8 +128,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return write8bit(cs, 0, cs.length());
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write8bit(@NotNull CharSequence s, int start, int length)
+    default S write8bit(@org.jetbrains.annotations.NotNull @NotNull CharSequence s, int start, int length)
             throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         writeStopBit(length);
         for (int i = 0; i < length; i++) {
@@ -129,6 +140,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S write(CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
@@ -138,8 +150,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return write(cs, 0, cs.length());
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@NotNull CharSequence s, int start, int length)
+    default S write(@org.jetbrains.annotations.NotNull @NotNull CharSequence s, int start, int length)
             throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
@@ -148,6 +161,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S write8bit(@Nullable @NotNull String s)
             throws BufferOverflowException {
@@ -158,8 +172,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write8bit(@NotNull BytesStore sdi)
+    default S write8bit(@org.jetbrains.annotations.NotNull @NotNull BytesStore sdi)
             throws BufferOverflowException {
         long offset = sdi.readPosition();
         long readRemaining = sdi.readLimit() - offset;
@@ -168,59 +183,72 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeByte(byte i8) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeUnsignedByte(int i)
             throws BufferOverflowException, IllegalArgumentException {
         return writeByte((byte) Maths.toUInt8(i));
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeShort(short i16) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeUnsignedShort(int u16)
             throws BufferOverflowException, IllegalArgumentException {
         return writeShort((short) Maths.toUInt16(u16));
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeInt24(int i) throws BufferOverflowException {
         writeUnsignedShort(i);
         return writeUnsignedByte(i >> 16);
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeInt(int i) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeIntAdv(int i, int advance) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeUnsignedInt(long i)
             throws BufferOverflowException, IllegalArgumentException {
         return writeInt((int) Maths.toUInt32(i));
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeLong(long i64) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeLongAdv(long i64, int advance) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeFloat(float f) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeDouble(double d) throws BufferOverflowException;
 
     /**
      * Write all data or fail.
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@NotNull BytesStore bytes)
+    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes)
             throws BufferOverflowException {
         assert bytes != this : "you should not write to yourself !";
 
@@ -229,8 +257,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     long realCapacity();
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S writeSome(@NotNull Bytes bytes)
+    default S writeSome(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes)
             throws BufferOverflowException {
         long length = Math.min(bytes.readRemaining(), writeRemaining());
         if (length + writePosition() >= 1<< 20)
@@ -249,15 +278,17 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Write all data or fail.
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@NotNull BytesStore bytes, long offset, long length)
+    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@NotNull byte[] bytes) throws BufferOverflowException {
+    default S write(@org.jetbrains.annotations.NotNull @NotNull byte[] bytes) throws BufferOverflowException {
         write(bytes, 0, bytes.length);
         return (S) this;
     }
@@ -265,20 +296,25 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Write all data or fail.
      */
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeSome(ByteBuffer buffer) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeBoolean(boolean flag) throws BufferOverflowException {
         return writeByte(flag ? (byte) 'Y' : 0);
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeOrderedInt(int i) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     S writeOrderedLong(long i) throws BufferOverflowException;
 
@@ -291,23 +327,26 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     void nativeWrite(long address, long size)
             throws BufferOverflowException;
 
-    default <E extends Enum<E>> void writeEnum(@NotNull E e)
+    default <E extends Enum<E>> void writeEnum(@org.jetbrains.annotations.NotNull @NotNull E e)
             throws BufferOverflowException {
         write8bit(e.name());
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S appendUtf8(@NotNull CharSequence cs)
+    default S appendUtf8(@org.jetbrains.annotations.NotNull @NotNull CharSequence cs)
             throws BufferOverflowException {
         return appendUtf8(cs, 0, cs.length());
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
     default S appendUtf8(int codepoint) throws BufferOverflowException {
         BytesInternal.appendUtf8Char(this, codepoint);
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     default S appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
         int i;
@@ -328,14 +367,15 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @org.jetbrains.annotations.NotNull
     @NotNull
-    default S appendUtf8(@NotNull CharSequence cs, int offset, int length)
+    default S appendUtf8(@org.jetbrains.annotations.NotNull @NotNull CharSequence cs, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
         BytesInternal.appendUtf8(this, cs, offset, length);
         return (S) this;
     }
 
-    default void copyFrom(@NotNull InputStream input) throws IOException, BufferOverflowException, IllegalArgumentException {
+    default void copyFrom(@org.jetbrains.annotations.NotNull @NotNull InputStream input) throws IOException, BufferOverflowException, IllegalArgumentException {
         BytesInternal.copy(input, this);
     }
 
@@ -344,16 +384,16 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writePosition(position);
     }
 
-    default void writeHistogram(@NotNull Histogram histogram) {
+    default void writeHistogram(@org.jetbrains.annotations.NotNull @NotNull Histogram histogram) {
         BytesInternal.writeHistogram(this, histogram);
     }
 
-    default void writeBigDecimal(@NotNull BigDecimal bd) {
+    default void writeBigDecimal(@org.jetbrains.annotations.NotNull @NotNull BigDecimal bd) {
         writeBigInteger(bd.unscaledValue());
         writeStopBit(bd.scale());
     }
 
-    default void writeBigInteger(@NotNull BigInteger bi) {
+    default void writeBigInteger(@org.jetbrains.annotations.NotNull @NotNull BigInteger bi) {
         byte[] bytes = bi.toByteArray();
         writeStopBit(bytes.length);
         write(bytes);

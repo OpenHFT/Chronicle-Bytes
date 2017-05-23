@@ -313,6 +313,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return StringUtils.newString(chars);
     }
 
+    @NotNull
     protected String toString0() {
         int length = Maths.toUInt31(readRemaining());
         @NotNull char[] chars = new char[length];

@@ -27,6 +27,7 @@ public class BinaryLongReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
     @Nullable
     private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
+    @Nullable
     private BytesStore bytes;
     private long offset;
 

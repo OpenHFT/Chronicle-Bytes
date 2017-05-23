@@ -287,6 +287,7 @@ public interface Bytes<Underlying> extends
      * @param bytes the bytes to wrap
      * @return a direct byte buffer contain the {@code bytes}
      */
+    @NotNull
     static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
         Bytes<Void> result = allocateDirect(bytes.length);
         try {
@@ -297,7 +298,7 @@ public interface Bytes<Underlying> extends
         return result;
     }
 
-    static Bytes fromHexString(String s) {
+    static Bytes fromHexString(@NotNull String s) {
         return BytesInternal.fromHexString(s);
     }
 
@@ -481,6 +482,7 @@ public interface Bytes<Underlying> extends
      *
      * @return this
      */
+    @NotNull
     Bytes<Underlying> compact();
 
     /**
@@ -536,7 +538,7 @@ public interface Bytes<Underlying> extends
      * @return the index of the first occurrence of the specified sub-bytes,
      * or {@code -1} if there is no such occurrence.
      */
-    default long indexOf(Bytes source) {
+    default long indexOf(@NotNull Bytes source) {
         return indexOf(source, 0);
     }
 
@@ -564,6 +566,7 @@ public interface Bytes<Underlying> extends
         return indexOf(this, source, fromIndex);
     }
 
+    @NotNull
     Bytes<Underlying> clear();
 
 }

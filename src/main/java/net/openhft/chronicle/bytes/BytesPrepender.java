@@ -34,6 +34,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @return this
      * @throws BufferOverflowException if the length &gt; capacity() - start()
      */
+    @NotNull
     B clearAndPad(long length) throws BufferOverflowException;
 
     /**

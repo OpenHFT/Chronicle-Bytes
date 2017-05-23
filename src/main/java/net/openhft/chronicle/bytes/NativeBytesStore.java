@@ -641,6 +641,7 @@ public class NativeBytesStore<Underlying>
         return read;
     }
 
+    @NotNull
     @Override
     public ByteBuffer toTemporaryDirectByteBuffer() {
         ByteBuffer bb = ByteBuffer.allocateDirect(0);

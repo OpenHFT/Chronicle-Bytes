@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.ByteOrder;
 
@@ -33,6 +34,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     INSTANCE;
 
+    @Nullable
     public static final Memory MEMORY = OS.memory();
     public static final boolean IS_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;

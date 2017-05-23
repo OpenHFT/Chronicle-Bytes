@@ -119,6 +119,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
+    @NotNull
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return bytesForWrite()
                 .readLimit(writeLimit());
@@ -127,6 +128,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a Bytes for writing to this BytesStore
      */
+    @NotNull
     default Bytes<Underlying> bytesForWrite() throws IllegalStateException {
         return new VanillaBytes<>(this, writePosition(), writeLimit());
     }
@@ -191,7 +193,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return copy;
     }
 
-    default void copyTo(OutputStream out) throws IOException {
+    default void copyTo(@NotNull OutputStream out) throws IOException {
         BytesInternal.copy(this, out);
     }
 
@@ -350,6 +352,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return BytesInternal.startsWith(this, bytesStore);
     }
 
+    @NotNull
     default String to8bitString() throws IllegalArgumentException {
         return BytesInternal.to8bitString(this);
     }
@@ -513,7 +516,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return readRemaining() == 0;
     }
 
-    default void cipher(Cipher cipher, Bytes outBytes, ByteBuffer using1, ByteBuffer using2) {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2) {
         long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
@@ -534,14 +537,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             len += cipher.doFinal(using1, using2);
             assert len == using2.position();
             outBytes.writePosition(writePos + using2.position());
-        } catch (ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (@NotNull ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
             throw new IllegalStateException(e);
         } finally {
             outBytes.readPosition(readPos);
         }
     }
 
-    default void cipher(Cipher cipher, Bytes outBytes) {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes) {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
 }
