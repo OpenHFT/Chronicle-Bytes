@@ -156,8 +156,8 @@ public class MappedFile implements ReferenceCounted {
         long chunkSize = file.length();
         long overlapSize = 0;
         // Chunks of 4 GB+ not supported on Windows.
-        if (OS.isWindows() && chunkSize > 2 << 30) {
-            chunkSize = 2 << 30;
+        if (OS.isWindows() && chunkSize > 2L << 30) {
+            chunkSize = 2L << 30;
             overlapSize = OS.pageSize();
         }
         return MappedFile.of(file, chunkSize, overlapSize, true);
@@ -243,7 +243,7 @@ public class MappedFile implements ReferenceCounted {
             long start = System.nanoTime();
             long minSize = (chunk + 1L) * chunkSize + overlapSize;
             long size = fileChannel.size();
-            if (size < minSize) {
+            if (size < minSize && !readOnly) {
                 // handle a possible race condition between processes.
                 try {
                     synchronized (GLOBAL_FILE_LOCK) {

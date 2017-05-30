@@ -17,12 +17,14 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
@@ -44,11 +46,14 @@ public enum BytesUtil {
     static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
     public static Bytes readFile(@org.jetbrains.annotations.NotNull String name) throws IOException {
-        URL url = urlFor(name);
-        String pathname = url.getFile();
-        File file = new File(pathname);
-        return pathname.endsWith(".gz") || !file.exists()
-                ? Bytes.wrapForRead(readAsBytes(open(url)))
+        File file = new File(name);
+        URL url = null;
+        if (!file.exists()) {
+            url = urlFor(name);
+            file = new File(url.getFile());
+        }
+        return name.endsWith(".gz") || !file.exists() || OS.isWindows()
+                ? Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)))
                 : MappedFile.readOnly(file).acquireBytesForRead(0);
 
     }
