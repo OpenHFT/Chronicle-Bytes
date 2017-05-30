@@ -19,14 +19,11 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.Nullable;
-import sun.reflect.Reflection;
 
-import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -36,6 +33,8 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
 
+import static net.openhft.chronicle.core.io.IOTools.*;
+
 /**
  * Created by peter on 30/08/15..
  */
@@ -44,26 +43,14 @@ public enum BytesUtil {
 
     static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
-    public static Bytes readFile(@org.jetbrains.annotations.NotNull @NotNull String name) throws IOException {
-        ClassLoader classLoader;
-        try {
-            classLoader = Reflection.getCallerClass().getClassLoader();
-        } catch (Throwable e) {
-            classLoader = Thread.currentThread().getContextClassLoader();
-        }
-        URL url = classLoader.getResource(name);
-        if (url == null && name.startsWith("/"))
-            url = classLoader.getResource(name.substring(1));
-        if (url == null)
-            return Bytes.wrapForRead(IOTools.readFile(name));
+    public static Bytes readFile(@org.jetbrains.annotations.NotNull String name) throws IOException {
+        URL url = urlFor(name);
+        String pathname = url.getFile();
+        File file = new File(pathname);
+        return pathname.endsWith(".gz") || !file.exists()
+                ? Bytes.wrapForRead(readAsBytes(open(url)))
+                : MappedFile.readOnly(file).acquireBytesForRead(0);
 
-        try (InputStream in = url.openStream()) {
-            ByteArrayOutputStream bos = new ByteArrayOutputStream();
-            byte[] arr = new byte[1024];
-            for (int len; (len = in.read(arr)) > 0; )
-                bos.write(arr, 0, len);
-            return Bytes.wrapForRead(bos.toByteArray());
-        }
     }
 
     public static boolean bytesEqual(
@@ -154,7 +141,8 @@ public enum BytesUtil {
     }
 
     public static void parseUtf8(
-            @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, Appendable appendable, int utflen) throws UTFDataFormatRuntimeException {
+            @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, Appendable appendable, int utflen)
+            throws UTFDataFormatRuntimeException {
         BytesInternal.parseUtf8(in, appendable, utflen);
     }
 
