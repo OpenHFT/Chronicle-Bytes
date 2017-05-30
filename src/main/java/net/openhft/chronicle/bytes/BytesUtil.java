@@ -17,7 +17,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -52,9 +51,9 @@ public enum BytesUtil {
             url = urlFor(name);
             file = new File(url.getFile());
         }
-        return name.endsWith(".gz") || !file.exists() || OS.isWindows()
-                ? Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)))
-                : MappedFile.readOnly(file).acquireBytesForRead(0);
+        return // name.endsWith(".gz") || !file.exists() || OS.isWindows() ?
+                Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
+        //: MappedFile.readOnly(file).acquireBytesForRead(0);
 
     }
 
