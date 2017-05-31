@@ -1909,6 +1909,13 @@ enum BytesInternal {
                 return false;
             }
         }
+        int ch;
+        if (Character.isLetterOrDigit(ch = in.readUnsignedByte())) {
+            in.readPosition(position);
+            return false;
+        }
+        while (Character.isWhitespace(ch) && ch >= ' ')
+            ch = in.readUnsignedByte();
         return true;
     }
 
