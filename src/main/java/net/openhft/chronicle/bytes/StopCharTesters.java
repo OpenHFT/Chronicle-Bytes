@@ -26,6 +26,12 @@ public enum StopCharTesters implements StopCharTester {
             return ch < ' ' || ch == ',';
         }
     },
+    COMMA_SPACE_STOP {
+        @Override
+        public boolean isStopChar(int ch) {
+            return ch <= ' ' || ch == ',';
+        }
+    },
     CONTROL_STOP {
         @Override
         public boolean isStopChar(int ch) {
