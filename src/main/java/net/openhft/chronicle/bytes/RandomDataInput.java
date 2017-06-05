@@ -269,13 +269,20 @@ public interface RandomDataInput extends RandomCommon {
         return len;
     }
 
+    /**
+     * Copy data from this RandomDataInput to the ByteBuffer. The minimum of {@link #readRemaining()} and
+     * {@link ByteBuffer#remaining()}. Starting from {@link #start()} in this RandomDataInput and from {@link
+     * ByteBuffer#position()} of the given bb. Does NOT change the position or limit or mark of the given ByteBuffer.
+     * Returns the number of the copied bytes.
+     */
     default int copyTo(@NotNull ByteBuffer bb) throws BufferUnderflowException {
+        int pos = bb.position();
         int len = (int) Math.min(bb.remaining(), readRemaining());
         int i;
         for (i = 0; i < len - 7; i += 8)
-            bb.putLong(i, readLong(start() + i));
-        for (i = 0; i < len; i++)
-            bb.put(i, readByte(start() + i));
+            bb.putLong(pos + i, readLong(start() + i));
+        for (; i < len; i++)
+            bb.put(pos + i, readByte(start() + i));
         return len;
     }
 
@@ -374,7 +381,7 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.subBytes(this, start, length);
     }
 
-    default int findByte(byte stopByte) {
+    default long findByte(byte stopByte) {
         return BytesInternal.findByte(this, stopByte);
     }
 

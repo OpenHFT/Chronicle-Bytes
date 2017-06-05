@@ -2347,9 +2347,10 @@ enum BytesInternal {
         return ret;
     }
 
-    public static int findByte(@org.jetbrains.annotations.NotNull RandomDataInput bytes, byte stopByte) {
+    public static long findByte(@org.jetbrains.annotations.NotNull RandomDataInput bytes, byte stopByte) {
         long start = bytes.readPosition();
-        for (int i = 0; i < Integer.MAX_VALUE; i++) {
+        long remaining = bytes.readRemaining();
+        for (long i = 0; i < remaining; i++) {
             if (bytes.readByte(start + i) == stopByte)
                 return i;
         }

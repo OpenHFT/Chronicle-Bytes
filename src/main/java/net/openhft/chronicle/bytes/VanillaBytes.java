@@ -280,8 +280,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (memory == null)
             throw new AssertionError(bytesStore.releasedHere);
 
-        int i = 0;
-        for (i = 0; i < length - 4; i += 4) {
+        int i;
+        for (i = 0; i < length - 3; i += 4) {
             int c0 = chars[i] & 0xFF;
             int c1 = chars[i + 1] & 0xFF;
             int c2 = chars[i + 2] & 0xFF;
