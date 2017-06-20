@@ -136,6 +136,7 @@ public enum NoBytesStore implements BytesStore {
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {
         if (length != 0)
             throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
@@ -149,6 +150,7 @@ public enum NoBytesStore implements BytesStore {
     public RandomDataOutput write(long offsetInRDO, RandomDataInput bytes, long offset, long length) {
         if (length != 0)
             throw new UnsupportedOperationException();
+        return null;
     }
 
     @Override
