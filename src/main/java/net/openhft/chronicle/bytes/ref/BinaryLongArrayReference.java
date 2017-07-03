@@ -134,7 +134,6 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         this.length = length;
     }
 
-
     @Override
     public boolean isNull() {
         return bytes == null;
