@@ -202,6 +202,44 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return 0L;
     }
 
+    @NotNull
+    @Override
+    public Bytes<Void> writePosition(long position) throws BufferOverflowException {
+        if (position > writeLimit)
+            throw new BufferOverflowException();
+        if (position < 0L)
+            throw new BufferUnderflowException();
+        if (position < readPosition)
+            this.readPosition = position;
+        this.writePosition = position;
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> clear() {
+        long start = 0L;
+        readPosition = start;
+        this.writePosition = start;
+        writeLimit = mappedFile.capacity();
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeByte(byte i8) throws BufferOverflowException {
+        long oldPosition = writePosition;
+        if (writePosition < 0 || writePosition > capacity() - (long) 1)
+            throw writeIllegalArgumentException(writePosition);
+        if (!bytesStore.inside(writePosition)) {
+            acquireNextByteStore(writePosition);
+        }
+        this.writePosition = writePosition + (long) 1;
+        long offset = oldPosition;
+        bytesStore.writeByte(offset, i8);
+        return this;
+    }
+
     @Override
     protected void performRelease() {
         super.performRelease();
