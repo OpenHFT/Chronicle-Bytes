@@ -36,165 +36,146 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
     @NotNull
     @Override
     public NativeBytesStore<Void> zeroOut(long start, long end) throws IllegalArgumentException {
-        checkReadOnly();
-        return super.zeroOut(start, end);
+        throw checkReadOnly();
     }
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
-        checkReadOnly();
-        return super.compareAndSwapInt(offset, expected, value);
+        throw checkReadOnly();
     }
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
-        checkReadOnly();
-        return super.compareAndSwapLong(offset, expected, value);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeByte(long offset, byte i8) {
-        checkReadOnly();
-        return super.writeByte(offset, i8);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeShort(long offset, short i16) {
-        checkReadOnly();
-        return super.writeShort(offset, i16);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeInt(long offset, int i32) {
-        checkReadOnly();
-        return super.writeInt(offset, i32);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeLong(long offset, long i64) {
-        checkReadOnly();
-        return super.writeLong(offset, i64);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeOrderedLong(long offset, long i) {
-        checkReadOnly();
-        return super.writeOrderedLong(offset, i);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeFloat(long offset, float f) {
-        checkReadOnly();
-        return super.writeFloat(offset, f);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeDouble(long offset, double d) {
-        checkReadOnly();
-        return super.writeDouble(offset, d);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeVolatileByte(long offset, byte i8) {
-        checkReadOnly();
-        return super.writeVolatileByte(offset, i8);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeVolatileShort(long offset, short i16) {
-        checkReadOnly();
-        return super.writeVolatileShort(offset, i16);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeVolatileInt(long offset, int i32) {
-        checkReadOnly();
-        return super.writeVolatileInt(offset, i32);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeVolatileLong(long offset, long i64) {
-        checkReadOnly();
-        return super.writeVolatileLong(offset, i64);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> write(long offsetInRDO, byte[] bytes, int offset, int length) {
-        checkReadOnly();
-        return super.write(offsetInRDO, bytes, offset, length);
+        throw checkReadOnly();
     }
 
     @Override
     public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
-        checkReadOnly();
-        super.write(offsetInRDO, bytes, offset, length);
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> write(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
-        checkReadOnly();
-        return super.write(offsetInRDO, bytes, offset, length);
+        throw checkReadOnly();
     }
 
     @Override
     public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length) {
-        checkReadOnly();
-        super.write0(offsetInRDO, bytes, offset, length);
+        throw checkReadOnly();
     }
 
     @Override
     public void nativeWrite(long address, long position, long size) {
-        checkReadOnly();
-        super.nativeWrite(address, position, size);
+        throw checkReadOnly();
     }
 
     @Override
     void write8bit(long position, char[] chars, int offset, int length) {
-        checkReadOnly();
-        super.write8bit(position, chars, offset, length);
+        throw checkReadOnly();
     }
 
     @Override
     public long appendUTF(long pos, char[] chars, int offset, int length) {
-        checkReadOnly();
-        return super.appendUTF(pos, chars, offset, length);
+        throw checkReadOnly();
     }
 
     @Override
     public long appendUtf8(long pos, char[] chars, int offset, int length) {
-        checkReadOnly();
-        return super.appendUtf8(pos, chars, offset, length);
-    }
-
-    private void checkReadOnly() {
-        throw new IllegalStateException("Read Only");
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
-        checkReadOnly();
-        return super.bytesForWrite();
+        throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> writeOrderedInt(long offset, int i) {
-        checkReadOnly();
-        return super.writeOrderedInt(offset, i);
+        throw checkReadOnly();
+    }
+
+    private IllegalStateException checkReadOnly() {
+        throw new IllegalStateException("Read Only");
+    }
+
+    @Override
+    public boolean readWrite() {
+        return false;
     }
 }

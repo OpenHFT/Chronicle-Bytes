@@ -569,4 +569,8 @@ public interface Bytes<Underlying> extends
     @NotNull
     Bytes<Underlying> clear();
 
+    @Override
+    default boolean readWrite() {
+        return bytesStore().readWrite();
+    }
 }
