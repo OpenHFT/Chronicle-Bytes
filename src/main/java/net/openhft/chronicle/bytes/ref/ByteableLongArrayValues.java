@@ -17,8 +17,9 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
+import net.openhft.chronicle.bytes.DynamicallySized;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
-public interface ByteableLongArrayValues extends LongArrayValues, Byteable {
+public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {
     long sizeInBytes(long var1);
 }
