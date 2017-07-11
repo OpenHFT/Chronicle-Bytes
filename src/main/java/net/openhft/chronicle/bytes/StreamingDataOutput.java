@@ -307,7 +307,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeBoolean(boolean flag) throws BufferOverflowException {
-        return writeByte(flag ? (byte) 'Y' : 0);
+        return writeByte(flag ? (byte) 'Y' : (byte) 'N');
     }
 
     @org.jetbrains.annotations.NotNull
