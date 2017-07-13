@@ -253,8 +253,8 @@ public class NativeBytesStore<Underlying>
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
-    long translate(long offset) {
-        return offset - start();
+    protected long translate(long offset) {
+        return offset;
     }
 
     @Override
@@ -751,6 +751,10 @@ public class NativeBytesStore<Underlying>
         return (int) (hash ^ (hash >> 32));
     }
 
+    public long safeLimit() {
+        return maximumLimit;
+    }
+
     static class Deallocator implements Runnable {
 
         private volatile long address, size;
@@ -771,4 +775,5 @@ public class NativeBytesStore<Underlying>
             OS.memory().freeMemory(addressToFree, size);
         }
     }
+
 }
