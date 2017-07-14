@@ -61,7 +61,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    long translate(long offset) {
+    protected long translate(long offset) {
         return offset - start;
     }
 

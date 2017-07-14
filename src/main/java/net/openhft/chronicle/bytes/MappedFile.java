@@ -165,7 +165,9 @@ public class MappedFile implements ReferenceCounted {
 
     public static void warmup() {
         try {
-            @NotNull File file = File.createTempFile("delete", ".me");
+            Jvm.disableDebugHandler();
+
+            @NotNull File file = File.createTempFile("delete", "me");
             file.deleteOnExit();
             long mapAlignment = OS.mapAlignment();
             int chunks = 64;
@@ -187,6 +189,8 @@ public class MappedFile implements ReferenceCounted {
         } catch (IOException e) {
             Jvm.warn().on(MappedFile.class, "Error during warmup", e);
         }
+
+        Jvm.resetExceptionHandlers();
     }
 
     private static void warmup0(long mapAlignment, int chunks, @NotNull MappedFile mappedFile) throws IOException {

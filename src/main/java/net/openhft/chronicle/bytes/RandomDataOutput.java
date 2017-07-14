@@ -67,7 +67,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     default R writeBoolean(long offset, boolean flag)
             throws BufferOverflowException {
         try {
-            return writeByte(offset, flag ? 'Y' : 0);
+            return writeByte(offset, flag ? 'Y' : 'N');
 
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);

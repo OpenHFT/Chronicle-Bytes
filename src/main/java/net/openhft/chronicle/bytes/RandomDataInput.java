@@ -61,7 +61,7 @@ public interface RandomDataInput extends RandomCommon {
     @ForceInline
     default boolean readBoolean(long offset)
             throws BufferUnderflowException {
-        return readByte(offset) != 0;
+        return BytesUtil.byteToBoolean(readByte(offset));
     }
 
     /**

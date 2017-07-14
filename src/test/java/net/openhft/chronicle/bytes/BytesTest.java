@@ -44,7 +44,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
-
 @RunWith(Parameterized.class)
 public class BytesTest {
 

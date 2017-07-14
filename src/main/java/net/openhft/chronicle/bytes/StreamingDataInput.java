@@ -103,7 +103,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default boolean readBoolean() {
-        return readByte() != 0;
+        byte b = readByte();
+        return BytesUtil.byteToBoolean(b);
     }
 
     byte readByte();

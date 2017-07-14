@@ -257,13 +257,18 @@ public class ByteStoreTest {
         for (int i = 0; i < 32; i++)
             bytes.writeBoolean(i, (i & 3) == 0);
         bytes.writePosition(32);
-        for (int i = 32; i < 64; i++)
-            bytes.writeBoolean((i & 5) == 0);
+        for (int i = 32; i < 64; i++) {
+            boolean flag = (i & 5) == 0;
+            bytes.writeBoolean(flag);
+        }
 
         for (int i = 0; i < 32; i++)
             assertEquals((i & 3) == 0, bytes.readBoolean());
-        for (int i = 32; i < 64; i++)
-            assertEquals((i & 5) == 0, bytes.readBoolean(i));
+        for (int i = 32; i < 64; i++) {
+            boolean actual = bytes.readBoolean(i);
+            boolean expected = (i & 5) == 0;
+            assertEquals(expected, actual);
+        }
     }
 
     @Test

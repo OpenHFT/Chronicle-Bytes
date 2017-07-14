@@ -200,4 +200,8 @@ public enum BytesUtil {
         bytesCreated.remove(bytes);
         return true;
     }
+
+    public static boolean byteToBoolean(byte b) {
+        return b != 0 && b != 'N' && b != 'n';
+    }
 }

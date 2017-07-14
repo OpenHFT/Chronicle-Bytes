@@ -66,6 +66,7 @@ enum BytesInternal {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
+    private static final int MAX_STRING_LEN = Integer.getInteger("bytes.max-string-len", 128 * 1024);
 
     static {
         try {
@@ -949,7 +950,7 @@ enum BytesInternal {
             throws IllegalStateException {
 
         // the output will be no larger than this
-        final int size = 1024;
+        final int size = MAX_STRING_LEN;
         @org.jetbrains.annotations.NotNull final StringBuilder sb = new StringBuilder(size);
 
         if (bytes.readRemaining() > size) {

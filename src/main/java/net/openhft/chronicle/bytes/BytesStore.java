@@ -547,4 +547,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes) {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
+
+    /**
+     * @return whether this BytesStore is writable.
+     */
+    default boolean readWrite() {
+        return true;
+    }
 }
