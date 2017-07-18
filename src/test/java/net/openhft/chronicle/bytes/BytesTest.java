@@ -41,8 +41,15 @@ import java.util.Collection;
 import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.Allocator.*;
-import static org.junit.Assert.*;
+import static net.openhft.chronicle.bytes.Allocator.HEAP;
+import static net.openhft.chronicle.bytes.Allocator.HEAP_UNCHECKED;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE_UNCHECKED;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class BytesTest {
