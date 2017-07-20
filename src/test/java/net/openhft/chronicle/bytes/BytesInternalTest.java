@@ -25,7 +25,9 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class BytesInternalTest {
 
@@ -79,6 +81,17 @@ public class BytesInternalTest {
         assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
+    }
+
+    @Test
+    public void shouldHandleDifferentSizedStores() throws Exception {
+        final BytesStore storeOfThirtyTwoBytes = Bytes.elasticHeapByteBuffer(32).bytesStore();
+        storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
+
+        final BytesStore longerBuffer = Bytes.elasticHeapByteBuffer(512).bytesStore();
+        longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
+
+        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 512));
     }
 
     @Test

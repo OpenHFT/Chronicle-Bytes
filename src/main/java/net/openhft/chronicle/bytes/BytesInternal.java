@@ -2227,20 +2227,26 @@ enum BytesInternal {
         @org.jetbrains.annotations.Nullable BytesStore bs1 = b1.bytesStore();
         @org.jetbrains.annotations.Nullable BytesStore bs2 = b2.bytesStore();
         long i = 0;
-        for (; i < remaining - 7; i += 8) {
+        for (; i < remaining - 7 &&
+                canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
+                canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
             long l1 = bs1.readLong(b1.readPosition() + i);
             long l2 = bs2.readLong(b2.readPosition() + i);
             if (l1 != l2)
                 return false;
         }
-        if (i < remaining - 3) {
+        if (i < remaining - 3 &&
+                canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
+                canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
             int i1 = bs1.readInt(b1.readPosition() + i);
             int i2 = bs2.readInt(b2.readPosition() + i);
             if (i1 != i2)
                 return false;
             i += 4;
         }
-        for (; i < remaining; i++) {
+        for (; i < remaining &&
+                canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
+                canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
             byte i1 = bs1.readByte(b1.readPosition() + i);
             byte i2 = bs2.readByte(b2.readPosition() + i);
             if (i1 != i2)
@@ -2437,5 +2443,10 @@ enum BytesInternal {
         DateCache() {
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
+    }
+
+    private static boolean canReadBytesAt(
+            final BytesStore bs, final long offset, final int length) {
+        return bs.readLimit() - offset >= length;
     }
 }
