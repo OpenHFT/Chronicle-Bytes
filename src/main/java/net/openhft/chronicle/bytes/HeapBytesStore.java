@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
@@ -29,6 +31,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Function;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
@@ -221,18 +224,6 @@ public class HeapBytesStore<Underlying>
         return MEMORY.readVolatileLong(realUnderlyingObject, dataOffset + offset);
     }
 
-    private void checkOffset(long offset, int size) throws BufferUnderflowException {
-        if (offset < start() || offset + size > capacity) {
-            throw new BufferUnderflowException();
-        }
-    }
-
-    private void writeCheckOffset(long offset, int size) throws BufferOverflowException {
-        if (offset < start() || offset + size > capacity) {
-            throw new BufferOverflowException();
-        }
-    }
-
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b)
@@ -405,5 +396,22 @@ public class HeapBytesStore<Underlying>
     @Override
     public boolean sharedMemory() {
         return false;
+    }
+
+    private void checkOffset(long offset, int size) throws BufferUnderflowException {
+        checkBounds(offset, size, DecoratedBufferUnderflowException::new);
+    }
+
+    private void writeCheckOffset(long offset, int size) throws BufferOverflowException {
+        checkBounds(offset, size, DecoratedBufferOverflowException::new);
+    }
+
+    private void checkBounds(final long offset, final int size,
+                             final Function<String, RuntimeException> exceptionFunction) {
+        if (offset < start() || offset + size > capacity) {
+            throw exceptionFunction.apply(
+                    String.format("Offset: %d, start: %d, size: %d, capacity: %d",
+                            offset, start(), size, capacity));
+        }
     }
 }
