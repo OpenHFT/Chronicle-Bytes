@@ -982,7 +982,7 @@ enum BytesInternal {
             if (readPosition >= start && bytes instanceof Bytes) {
                 long last = Math.min(readPosition, end);
                 toString(bytes, sb, start, last);
-                sb.append('\u2016');
+                sb.append('\u01C1');
             }
             toString(bytes, sb, Math.max(readPosition, start), Math.min(writePosition, end));
             if (writePosition <= end) {
