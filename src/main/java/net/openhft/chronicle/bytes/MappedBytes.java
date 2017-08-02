@@ -235,8 +235,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             acquireNextByteStore(writePosition);
         }
         this.writePosition = writePosition + (long) 1;
-        long offset = oldPosition;
-        bytesStore.writeByte(offset, i8);
+        bytesStore.writeByte(oldPosition, i8);
         return this;
     }
 

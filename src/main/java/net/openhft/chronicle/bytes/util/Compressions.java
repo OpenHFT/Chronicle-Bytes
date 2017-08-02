@@ -29,7 +29,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.zip.*;
 
-/**
+/*
  * Created by peter.lawrey on 09/12/2015.
  */
 public enum Compressions implements Compression {

@@ -27,7 +27,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 
-/**
+/*
  * Created by peter.lawrey on 09/12/2015.
  */
 public interface Compression {

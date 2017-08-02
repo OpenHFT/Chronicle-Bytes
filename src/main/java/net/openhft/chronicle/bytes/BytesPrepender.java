@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-/**
+/*
  * Created by peter on 12/09/15.
  */
 public interface BytesPrepender<B extends BytesPrepender<B>> {

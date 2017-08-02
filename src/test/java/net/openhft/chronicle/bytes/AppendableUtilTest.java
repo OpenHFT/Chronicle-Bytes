@@ -6,7 +6,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-/**
+/*
  * Created by peter on 17/01/2017.
  */
 public class AppendableUtilTest {

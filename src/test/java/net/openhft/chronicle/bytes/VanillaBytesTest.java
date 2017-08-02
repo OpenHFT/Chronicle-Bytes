@@ -22,7 +22,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/**
+/*
  * Created by Peter on 17/06/2016.
  */
 public class VanillaBytesTest {

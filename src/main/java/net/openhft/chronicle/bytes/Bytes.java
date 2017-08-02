@@ -342,7 +342,6 @@ public interface Bytes<Underlying> extends
                 long j = i + 1;
                 long end = j + targetCount - 1;
                 for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
-                    ;
                 }
 
                 if (j == end) {

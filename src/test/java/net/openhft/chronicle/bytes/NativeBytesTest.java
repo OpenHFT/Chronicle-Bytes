@@ -39,7 +39,7 @@ import static net.openhft.chronicle.bytes.Allocator.HEAP;
 import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.*;
 
-/**
+/*
  * Created by daniel on 17/04/15.
  */
 @RunWith(Parameterized.class)

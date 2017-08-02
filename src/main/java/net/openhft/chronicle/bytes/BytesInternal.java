@@ -180,9 +180,7 @@ enum BytesInternal {
         }
         if (utfLen == -1)
             return other == null;
-        if (other == null)
-            return false;
-        return compareUtf8(input, offset, utfLen, other);
+        return other != null && compareUtf8(input, offset, utfLen, other);
     }
 
     private static boolean compareUtf8(

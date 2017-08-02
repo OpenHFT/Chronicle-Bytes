@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
@@ -89,7 +90,7 @@ public abstract class AbstractInterner<T> {
     }
 
     public int valueCount() {
-        return (int) Stream.of(entries).filter(s -> s != null).count();
+        return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }
 
     static class InternerEntry<T> {

@@ -693,7 +693,7 @@ public class NativeBytesStore<Underlying>
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
         int i;
-        final long offset2 = UnsafeMemory.UNSAFE.ARRAY_BYTE_BASE_OFFSET + offset;
+        final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
         final long address = this.address + translate(offsetInRDI);
         for (i = 0; i < len - 7; i += 8)
             UnsafeMemory.UNSAFE.putLong(bytes, offset2 + i, memory.readLong(address + i));

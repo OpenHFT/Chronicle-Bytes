@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,7 @@ import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
+    @UsedViaReflection
     private final String name;
     @Nullable
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
@@ -58,8 +60,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         // used for debugging
         this.name = name;
 
-        if (bytesStore.isDirectMemory())
-            assert BytesUtil.register(this);
+        assert !bytesStore.isDirectMemory() || BytesUtil.register(this);
     }
 
     @Override

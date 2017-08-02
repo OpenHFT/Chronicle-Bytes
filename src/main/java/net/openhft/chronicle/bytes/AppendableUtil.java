@@ -26,7 +26,7 @@ import java.io.UTFDataFormatException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-/**
+/*
  * Created by peter on 30/08/15.
  */
 public enum AppendableUtil {
@@ -241,10 +241,8 @@ public enum AppendableUtil {
     }
 
     public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull char[] chars) {
-        int strlen = chars.length;
-        long utflen = strlen;/* use charAt instead of copying String to char array */
-        for (int i = 0; i < strlen; i++) {
-            char c = chars[i];
+        long utflen = chars.length;/* use charAt instead of copying String to char array */
+        for (char c : chars) {
             if (c <= 0x007F) {
                 continue;
             }

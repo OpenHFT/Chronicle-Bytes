@@ -32,7 +32,7 @@ import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-/**
+/*
  * Created by peter.lawrey on 09/12/2015.
  */
 public class LZWTest {

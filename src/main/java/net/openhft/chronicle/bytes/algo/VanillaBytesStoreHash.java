@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteOrder;
 
-/**
+/*
  * Created by peter on 28/06/15.
  */
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {

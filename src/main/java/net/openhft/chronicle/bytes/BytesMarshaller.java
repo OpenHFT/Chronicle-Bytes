@@ -30,7 +30,7 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Supplier;
 
-/**
+/*
  * Created by Peter on 19/04/2016.
  */
 public class BytesMarshaller<T> {

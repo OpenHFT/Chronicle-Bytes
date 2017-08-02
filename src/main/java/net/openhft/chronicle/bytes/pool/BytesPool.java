@@ -21,7 +21,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.jetbrains.annotations.NotNull;
 
-/**
+/*
  * Created by peter on 20/12/16.
  */
 public class BytesPool {

@@ -40,7 +40,7 @@ import java.util.Random;
 
 import static org.junit.Assert.*;
 
-/**
+/*
  * Created by peter.lawrey on 27/02/15.
  */
 public class NativeBytesStoreTest {

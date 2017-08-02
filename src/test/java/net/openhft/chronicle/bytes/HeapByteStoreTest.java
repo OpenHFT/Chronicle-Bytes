@@ -22,7 +22,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-/**
+/*
  * Created by peter on 20/12/16.
  */
 public class HeapByteStoreTest {
