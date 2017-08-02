@@ -21,5 +21,6 @@ import net.openhft.chronicle.bytes.DynamicallySized;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {
+    @Override
     long sizeInBytes(long var1);
 }

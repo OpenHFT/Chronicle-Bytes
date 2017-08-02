@@ -379,6 +379,7 @@ public interface Bytes<Underlying> extends
      * @return the size which can be safely read.  If this isElastic() it can be lower than the
      * point it can safely write.
      */
+    @Override
     default long safeLimit() {
         return bytesStore().safeLimit();
     }
@@ -386,6 +387,7 @@ public interface Bytes<Underlying> extends
     /**
      * @return is the readPosition at the start and the writeLimit at the end.
      */
+    @Override
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
@@ -393,6 +395,7 @@ public interface Bytes<Underlying> extends
     /**
      * @return if isElastic, this can be much lower than the virtual capacity().
      */
+    @Override
     default long realCapacity() {
         return BytesStore.super.realCapacity();
     }
@@ -400,6 +403,7 @@ public interface Bytes<Underlying> extends
     /**
      * @return a copy of this Bytes from position() to limit().
      */
+    @Override
     BytesStore<Bytes<Underlying>, Underlying> copy();
 
     /**
@@ -470,6 +474,7 @@ public interface Bytes<Underlying> extends
     /**
      * @return the ByteStore this Bytes wraps.
      */
+    @Override
     @Nullable
     BytesStore bytesStore();
 
@@ -566,6 +571,7 @@ public interface Bytes<Underlying> extends
         return indexOf(this, source, fromIndex);
     }
 
+    @Override
     @NotNull
     Bytes<Underlying> clear();
 

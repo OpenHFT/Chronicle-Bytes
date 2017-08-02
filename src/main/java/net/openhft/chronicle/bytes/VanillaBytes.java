@@ -205,6 +205,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    @Override
     @NotNull
     public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
         try {
@@ -250,6 +251,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException {
@@ -261,6 +263,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return append8bit0(cs);
     }
 
+    @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull String cs)
             throws BufferOverflowException, BufferUnderflowException {
@@ -372,6 +375,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         nbs.read8bit(position, chars, length);
     }
 
+    @Override
     public int byteCheckSum() throws IORuntimeException {
         if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !isDirectMemory())
             return super.byteCheckSum();
@@ -406,6 +410,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return super.toTemporaryDirectByteBuffer();
     }
 
+    @Override
     public int read(@NotNull byte[] bytes) {
         int len = (int) Math.min(bytes.length, readRemaining());
         if (bytesStore instanceof NativeBytesStore) {

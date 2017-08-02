@@ -39,6 +39,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return new VanillaBytes<>(this);
     }
 
+    @Override
     public boolean inside(long offset) {
         return start <= offset && offset < safeLimit;
     }

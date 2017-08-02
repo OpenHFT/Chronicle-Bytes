@@ -45,6 +45,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      */
+    @Override
     @NotNull
     default B append(char ch) throws BufferOverflowException {
         BytesInternal.appendUtf8Char(this, ch);
@@ -58,6 +59,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      */
+    @Override
     @NotNull
     default B append(@NotNull CharSequence cs) throws BufferOverflowException {
         return append(cs, 0, cs.length());
@@ -159,6 +161,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      */
+    @Override
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end)
             throws IndexOutOfBoundsException, BufferOverflowException {

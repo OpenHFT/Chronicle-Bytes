@@ -31,6 +31,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
         super(capacity);
     }
 
+    @Override
     @NotNull
     protected String getValue(@NotNull BytesStore cs, int length) {
         StringBuilder sb = SBP.acquireStringBuilder();

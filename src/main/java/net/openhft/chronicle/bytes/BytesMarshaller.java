@@ -215,6 +215,7 @@ public class BytesMarshaller<T> {
             write.write(bytes, offset, length);
         }
 
+        @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException, IORuntimeException {
             // TODO see if recycling a Bytes is an option.
             long length = read.readStopBit();

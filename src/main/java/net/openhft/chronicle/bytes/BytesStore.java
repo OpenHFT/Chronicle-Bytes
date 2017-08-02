@@ -109,6 +109,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return whether it uses direct memory or not.
      */
+    @Override
     boolean isDirectMemory();
 
     /**
@@ -119,6 +120,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
      */
+    @Override
     @NotNull
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         return bytesForWrite()
@@ -128,6 +130,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a Bytes for writing to this BytesStore
      */
+    @Override
     @NotNull
     default Bytes<Underlying> bytesForWrite() throws IllegalStateException {
         return new VanillaBytes<>(this, writePosition(), writeLimit());
@@ -145,6 +148,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return the actual capacity available before resizing.
      */
+    @Override
     default long realCapacity() {
         return capacity();
     }
@@ -152,6 +156,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return The maximum limit you can set.
      */
+    @Override
     long capacity();
 
     /**
@@ -204,6 +209,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param end   last byte exclusive.
      * @return this.
      */
+    @Override
     @NotNull
     default B zeroOut(long start, long end) throws IllegalArgumentException {
         if (end <= start)

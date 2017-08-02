@@ -300,6 +300,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
+    @Override
     @NotNull
     public MappedBytes write8bit(CharSequence s, int start, int length) {
         // check the start.
@@ -377,6 +378,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return true;
     }
 
+    @Override
     @NotNull
     public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         assert writeCheckOffset0(offset, (long) 4);

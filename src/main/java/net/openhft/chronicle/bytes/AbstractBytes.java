@@ -97,6 +97,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return isPresent;
     }
 
+    @Override
     @NotNull
     public Bytes<Underlying> clear() {
         long start = start();
@@ -127,6 +128,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return writePosition;
     }
 
+    @Override
     @ForceInline
     public long writeLimit() {
         return writeLimit;
@@ -545,6 +547,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @Override
     @NotNull
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
@@ -554,6 +557,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+    @Override
     @ForceInline
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
@@ -561,6 +565,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
 
+    @Override
     @NotNull
     @ForceInline
     public Bytes<Underlying> write(long offsetInRDO,

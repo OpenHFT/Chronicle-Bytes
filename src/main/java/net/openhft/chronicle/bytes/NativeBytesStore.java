@@ -542,6 +542,7 @@ public class NativeBytesStore<Underlying>
             chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
     }
 
+    @Override
     public long readIncompleteLong(long offset) {
         int remaining = (int) Math.min(8, readRemaining() - offset);
         long l = 0;
@@ -688,6 +689,7 @@ public class NativeBytesStore<Underlying>
         return false;
     }
 
+    @Override
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
         int i;
@@ -751,6 +753,7 @@ public class NativeBytesStore<Underlying>
         return (int) (hash ^ (hash >> 32));
     }
 
+    @Override
     public long safeLimit() {
         return maximumLimit;
     }

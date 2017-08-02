@@ -88,6 +88,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
      * @return false if this queue is empty, or a populated buffer if the element was retried
      * @throws IllegalStateException is the {@code using} buffer is not large enough
      */
+    @Override
     boolean read(@NotNull BytesOut using) throws IllegalStateException;
 
     long readRemaining();

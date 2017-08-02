@@ -31,11 +31,13 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         readPosition(underlyingBytes.readPosition());
     }
 
+    @Override
     @NotNull
     public Bytes<Underlying> unchecked(boolean unchecked) {
         return this;
     }
 
+    @Override
     public boolean unchecked() {
         return true;
     }
@@ -140,6 +142,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
+    @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException {
