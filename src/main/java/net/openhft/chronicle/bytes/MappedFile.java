@@ -64,7 +64,7 @@ public class MappedFile implements ReferenceCounted {
         this.raf = raf;
         this.fileChannel = raf.getChannel();
         this.chunkSize = OS.mapAlign(chunkSize);
-        this.overlapSize = OS.mapAlign(overlapSize);
+        this.overlapSize = overlapSize > 0 && overlapSize < 64 << 10 ? chunkSize : OS.mapAlign(overlapSize);
         this.capacity = capacity;
         this.readOnly = readOnly;
 
