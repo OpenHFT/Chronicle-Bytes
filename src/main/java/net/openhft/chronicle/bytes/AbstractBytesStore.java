@@ -20,7 +20,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 
 /*
- * Created by peter on 07/05/16.
+ * Created by Peter Lawrey on 07/05/16.
  */
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         implements BytesStore<B, Underlying> {

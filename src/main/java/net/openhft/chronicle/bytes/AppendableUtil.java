@@ -27,7 +27,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /*
- * Created by peter on 30/08/15.
+ * Created by Peter Lawrey on 30/08/15.
  */
 public enum AppendableUtil {
     ;

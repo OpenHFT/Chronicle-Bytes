@@ -22,7 +22,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /*
- * Created by peter on 17/08/15.
+ * Created by Peter Lawrey on 17/08/15.
  */
 public class StreamingInputStream extends InputStream {
 

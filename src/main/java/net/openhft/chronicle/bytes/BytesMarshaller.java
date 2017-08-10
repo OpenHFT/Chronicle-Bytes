@@ -31,7 +31,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 /*
- * Created by Peter on 19/04/2016.
+ * Created by Peter Lawrey on 19/04/2016.
  */
 public class BytesMarshaller<T> {
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL

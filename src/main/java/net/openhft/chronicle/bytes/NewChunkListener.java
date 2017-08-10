@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 /*
- * Created by peter on 12/02/2016.
+ * Created by Peter Lawrey on 12/02/2016.
  */
 @FunctionalInterface
 public interface NewChunkListener {

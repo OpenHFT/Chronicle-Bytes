@@ -23,7 +23,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /*
- * Created by peter on 12/09/15.
+ * Created by Peter Lawrey on 12/09/15.
  */
 public interface BytesPrepender<B extends BytesPrepender<B>> {
 

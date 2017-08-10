@@ -29,7 +29,7 @@ import java.nio.ByteOrder;
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 
 /*
- * Created by peter on 28/06/15.
+ * Created by Peter Lawrey on 28/06/15.
  */
 public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     INSTANCE;

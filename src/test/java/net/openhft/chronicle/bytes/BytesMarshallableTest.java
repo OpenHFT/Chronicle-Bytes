@@ -33,7 +33,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 
 /*
- * Created by Peter on 20/04/2016.
+ * Created by Peter Lawrey on 20/04/2016.
  */
 public class BytesMarshallableTest {
 

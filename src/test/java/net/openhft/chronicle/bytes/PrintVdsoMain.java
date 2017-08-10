@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 
 /*
- * Created by peter on 12/07/15.
+ * Created by Peter Lawrey on 12/07/15.
  */
 public class PrintVdsoMain {
     public static void main(String[] args) throws IOException, IllegalStateException {

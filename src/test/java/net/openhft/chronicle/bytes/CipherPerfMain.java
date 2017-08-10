@@ -5,7 +5,7 @@ import java.security.Security;
 import java.util.Map;
 
 /*
- * Created by peter on 07/02/2017.
+ * Created by Peter Lawrey on 07/02/2017.
  */
 public class CipherPerfMain {
     public static void main(String[] args) {
