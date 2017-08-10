@@ -60,7 +60,7 @@ public class NativeBytesStore<Underlying>
     // on release, set this to null.
     @Nullable
     protected Memory memory = OS.memory();
-    protected volatile Error releasedHere;
+    protected volatile Throwable releasedHere;
     protected long maximumLimit;
     @Nullable
     private Cleaner cleaner;
@@ -497,8 +497,9 @@ public class NativeBytesStore<Underlying>
         if (refCount.get() > 0) {
             LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
         }
-        if (releasedHere == null)
-            releasedHere = new Error();
+        if (releasedHere == null) {
+            assert (releasedHere = new Throwable()) != null;
+        }
         if (cleaner != null)
             cleaner.clean();
     }
