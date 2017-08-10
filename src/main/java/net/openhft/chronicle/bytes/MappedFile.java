@@ -20,7 +20,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -112,15 +111,17 @@ public class MappedFile implements ReferenceCounted {
     public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
             throws FileNotFoundException {
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
-        try {
-            long capacity = readOnly ? raf.length() : DEFAULT_CAPACITY;
+//        try {
+        long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
             return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+/*
         } catch (IOException e) {
             Closeable.closeQuietly(raf);
             @NotNull FileNotFoundException fnfe = new FileNotFoundException("Unable to open " + file);
             fnfe.initCause(e);
             throw fnfe;
         }
+*/
     }
 
     @NotNull
