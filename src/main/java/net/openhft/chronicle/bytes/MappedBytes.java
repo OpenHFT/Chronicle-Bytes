@@ -150,6 +150,32 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
     }
 
+    @NotNull
+    @Override
+    public Bytes<Void> readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
+        long limit = position + remaining;
+        if (!bytesStore.inside(position)) {
+            acquireNextByteStore(position);
+        } else if (!bytesStore.inside(limit)) {
+            acquireNextByteStore(limit);
+        }
+
+        if (writeLimit < limit)
+            writeLimit(limit);
+        readLimit(limit);
+        return readPosition(position);
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> readPosition(long position) throws BufferUnderflowException {
+        if (!bytesStore.inside(position)) {
+            acquireNextByteStore(position);
+        }
+
+        return super.readPosition(position);
+    }
+
     @Override
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         long check = adding >= 0 ? offset : offset + adding;
