@@ -113,7 +113,7 @@ public class MappedFile implements ReferenceCounted {
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
 //        try {
         long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+        return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
 /*
         } catch (IOException e) {
             Closeable.closeQuietly(raf);
@@ -276,8 +276,11 @@ public class MappedFile implements ReferenceCounted {
             } catch (IOException e) {
                 // sometimes on Windows it doesn't like read only, but not always or on all systems.
                 if (readOnly && e.getMessage().equals("Not enough storage is available to process this command")) {
+                    Jvm.warn().on(getClass(), "Mapping " + file + " as READ_ONLY failed, switching to READ_WRITE");
                     address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
                     readOnly = false;
+                } else {
+                    throw e;
                 }
             }
             final long safeCapacity = this.chunkSize + overlapSize / 2;
