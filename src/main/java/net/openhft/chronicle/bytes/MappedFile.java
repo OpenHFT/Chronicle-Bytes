@@ -53,7 +53,7 @@ public class MappedFile implements ReferenceCounted {
     private final AtomicBoolean closed = new AtomicBoolean();
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
-    private final boolean readOnly;
+    private boolean readOnly;
     @NotNull
     private final File file;
     private NewChunkListener newChunkListener = (filename, chunk, delayMicros) ->
@@ -269,7 +269,17 @@ public class MappedFile implements ReferenceCounted {
             }
             long mappedSize = chunkSize + overlapSize;
             FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
-            long address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
+            long address = 0;
+            try {
+                address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
+
+            } catch (IOException e) {
+                // sometimes on Windows it doesn't like read only, but not always or on all systems.
+                if (readOnly && e.getMessage().equals("Not enough storage is available to process this command")) {
+                    address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
+                    readOnly = false;
+                }
+            }
             final long safeCapacity = this.chunkSize + overlapSize / 2;
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));
