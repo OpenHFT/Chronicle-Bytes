@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -235,6 +236,70 @@ public enum AppendableUtil {
 
             } else {
                 utflen += 2;
+            }
+        }
+        return utflen;
+    }
+
+    @Java9
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull byte[] bytes, byte coder) {
+        long utflen;
+
+        if (coder == 0) {
+            int strlen = bytes.length;
+            utflen = bytes.length;
+
+            //noinspection ForLoopReplaceableByForEach
+            for (int i = 0; i < strlen; i++) {
+                int b = (bytes[i] & 0xFF);
+
+                if (b > 0x007F) {
+                    utflen++;
+                }
+            }
+        } else {
+            int strlen = bytes.length;
+            utflen = 0;/* use charAt instead of copying String to char array */
+            for (int i = 0; i < strlen; i+=2) {
+                char c = (char)(((bytes[i+1] & 0xFF) << 8) | (bytes[i] & 0xFF));
+
+                if (c <= 0x007F) {
+                    utflen += 1;
+                    continue;
+                }
+                if (c <= 0x07FF) {
+                    utflen += 2;
+                } else {
+                    utflen += 3;
+                }
+            }
+        }
+
+        return utflen;
+    }
+
+    @Java9
+    public static long findUtf8Length(@org.jetbrains.annotations.NotNull @NotNull byte[] chars) {
+        long utflen = 0; /* use charAt instead of copying String to char array */
+        int strlen = chars.length;
+        for (int i = 0; i < strlen; i++) {
+            int c = chars[i] & 0xFF; // unsigned byte
+
+            if (c == 0) { // we have hit end of string
+                break;
+            }
+
+            if (c >= 0xF0) {
+                utflen += 4;
+                i+= 3;
+            } else if (c >= 0xE0) {
+                utflen += 3;
+                i+= 2;
+            } else if (c >= 0xC0) {
+                utflen += 2;
+                i+= 1;
+            } else {
+                utflen += 1;
             }
         }
         return utflen;

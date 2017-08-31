@@ -44,6 +44,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 import static net.openhft.chronicle.core.util.StringUtils.setCount;
 
@@ -334,10 +335,19 @@ enum BytesInternal {
     public static void parse8bit1(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen) {
         assert bytes.readRemaining() >= utflen;
         sb.ensureCapacity(utflen);
-        char[] chars = StringUtils.extractChars(sb);
-        for (int count = 0; count < utflen; count++) {
-            int c = bytes.readUnsignedByte();
-            chars[count] = (char) c;
+
+        if (Jvm.isJava9Plus()) {
+            byte[] sbBytes = extractBytes(sb);
+            for (int count = 0; count < utflen; count++) {
+                int c = bytes.readUnsignedByte();
+                sbBytes[count] = (byte) c;
+            }
+        } else {
+            char[] chars = StringUtils.extractChars(sb);
+            for (int count = 0; count < utflen; count++) {
+                int c = bytes.readUnsignedByte();
+                chars[count] = (char) c;
+            }
         }
         StringUtils.setLength(sb, utflen);
     }
@@ -380,12 +390,23 @@ enum BytesInternal {
             long address = nbs.address + nbs.translate(bytes.readPosition());
             @org.jetbrains.annotations.Nullable Memory memory = nbs.memory;
             sb.ensureCapacity(utflen);
-            char[] chars = extractChars(sb);
-            while (count < utflen) {
-                int c = memory.readByte(address + count);
-                if (c < 0)
-                    break;
-                chars[count++] = (char) c;
+
+            if (Jvm.isJava9Plus()) {
+                sb.setLength(utflen);
+                while (count < utflen) {
+                    byte c = memory.readByte(address + count);
+                    if (c < 0)
+                        break;
+                    sb.setCharAt(count++, (char)c); // This is not as fast as it could be.
+                }
+            } else {
+                char[] chars = extractChars(sb);
+                while (count < utflen) {
+                    int c = memory.readByte(address + count);
+                    if (c < 0)
+                        break;
+                    chars[count++] = (char) c;
+                }
             }
             bytes.readSkip(count);
             setCount(sb, count);
@@ -405,13 +426,24 @@ enum BytesInternal {
             long address = bytes.address + bytes.translate(offset);
             @org.jetbrains.annotations.Nullable Memory memory = bytes.memory;
             sb.ensureCapacity(utflen);
-            char[] chars = extractChars(sb);
             int count = 0;
-            while (count < utflen) {
-                int c = memory.readByte(address + count);
-                if (c < 0)
-                    break;
-                chars[count++] = (char) c;
+
+            if (Jvm.isJava9Plus()) {
+                sb.setLength(utflen);
+                while (count < utflen) {
+                    byte c = memory.readByte(address + count);
+                    if (c < 0)
+                        break;
+                    sb.setCharAt(count++, (char)c);
+                }
+            } else {
+                char[] chars = extractChars(sb);
+                while (count < utflen) {
+                    int c = memory.readByte(address + count);
+                    if (c < 0)
+                        break;
+                    chars[count++] = (char) c;
+                }
             }
             setCount(sb, count);
             if (count < utflen)
@@ -425,11 +457,20 @@ enum BytesInternal {
         long address = nbs.address + nbs.translate(offset);
         @org.jetbrains.annotations.Nullable Memory memory = nbs.memory;
         sb.ensureCapacity(utflen);
-        char[] chars = extractChars(sb);
         int count = 0;
-        while (count < utflen) {
-            int c = memory.readByte(address + count) & 0xFF;
-            chars[count++] = (char) c;
+
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = extractBytes(sb);
+            while (count < utflen) {
+                byte b = memory.readByte(address + count);
+                bytes[count++] = b;
+            }
+        } else {
+            char[] chars = extractChars(sb);
+            while (count < utflen) {
+                int c = memory.readByte(address + count) & 0xFF;
+                chars[count++] = (char) c;
+            }
         }
         setCount(sb, count);
         return count;
@@ -567,10 +608,19 @@ enum BytesInternal {
             bytes.writeStopBit(-1);
             return;
         }
-        char[] chars = extractChars(str);
-        long utfLength = AppendableUtil.findUtf8Length(chars);
-        bytes.writeStopBit(utfLength);
-        bytes.appendUtf8(chars, 0, chars.length);
+
+        if (Jvm.isJava9Plus()) {
+            byte[] strBytes = extractBytes(str);
+            byte coder = StringUtils.getStringCoder(str);
+            long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
+            bytes.writeStopBit(utfLength);
+            bytes.appendUtf8(strBytes, 0, str.length(), coder);
+        } else {
+            char[] chars = extractChars(str);
+            long utfLength = AppendableUtil.findUtf8Length(chars);
+            bytes.writeStopBit(utfLength);
+            bytes.appendUtf8(chars, 0, chars.length);
+        }
     }
 
     @ForceInline
@@ -1591,20 +1641,35 @@ enum BytesInternal {
         @org.jetbrains.annotations.Nullable NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0, len = Maths.toInt32(bytes.readRemaining());
         long address = nb.address + nb.translate(bytes.readPosition());
-
-        final char[] chars = StringUtils.extractChars(appendable);
         @org.jetbrains.annotations.Nullable Memory memory = nb.memory;
-        for (; i < len && i < chars.length; i++) {
-            int c = memory.readByte(address + i);
-            if (c < 0) // we have hit a non-ASCII character.
-                break;
-            if (tester.isStopChar(c)) {
-                bytes.readSkip(i + 1);
-                StringUtils.setCount(appendable, i);
-                return;
+
+        if (Jvm.isJava9Plus()) {
+            int appendableLength = appendable.capacity();
+            for (; i < len && i < appendableLength; i++) {
+                int c = memory.readByte(address + i);
+                if (c < 0) // we have hit a non-ASCII character.
+                    break;
+                if (tester.isStopChar(c)) {
+                    bytes.readSkip(i + 1);
+                    StringUtils.setCount(appendable, i);
+                    return;
+                }
+                appendable.append((char) c);
             }
-            chars[i] = (char) c;
+        } else {
+            final char[] chars = StringUtils.extractChars(appendable);
+            for (; i < len && i < chars.length; i++) {
+                int c = memory.readByte(address + i);
+                if (c < 0) // we have hit a non-ASCII character.
+                    break;
+                if (tester.isStopChar(c)) {
+                    bytes.readSkip(i + 1);
+                    StringUtils.setCount(appendable, i);
+                    return;
+                }
+                chars[i] = (char) c;
 //            appendable.append((char) c);
+            }
         }
         StringUtils.setCount(appendable, i);
         bytes.readSkip(i);
