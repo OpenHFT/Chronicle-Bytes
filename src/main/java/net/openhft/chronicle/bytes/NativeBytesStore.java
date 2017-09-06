@@ -16,14 +16,21 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
+import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.Cleaner;
 import sun.misc.Unsafe;
 import sun.nio.ch.DirectBuffer;
 
@@ -39,7 +46,8 @@ public class NativeBytesStore<Underlying>
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
     private static final Field BB_ADDRESS, BB_CAPACITY;
-//    static MappedBytes last;
+    private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
+    //    static MappedBytes last;
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -63,7 +71,7 @@ public class NativeBytesStore<Underlying>
     protected volatile Throwable releasedHere;
     protected long maximumLimit;
     @Nullable
-    private Cleaner cleaner;
+    private WeakReferenceCleaner cleaner;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private boolean elastic;
     @Nullable
@@ -85,7 +93,7 @@ public class NativeBytesStore<Underlying>
             long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic) {
         setAddress(address);
         this.maximumLimit = maximumLimit;
-        cleaner = deallocator == null ? null : Cleaner.create(this, deallocator);
+        this.cleaner = deallocator == null ? null : WeakReferenceCleaner.newCleaner(this, deallocator);
         underlyingObject = null;
         this.elastic = elastic;
     }
@@ -168,7 +176,6 @@ public class NativeBytesStore<Underlying>
         underlyingObject = (Underlying) bb;
         setAddress(((DirectBuffer) bb).address());
         this.maximumLimit = bb.capacity();
-        cleaner = ((DirectBuffer) bb).cleaner();
     }
 
     public void uninit() {
@@ -500,8 +507,11 @@ public class NativeBytesStore<Underlying>
         if (releasedHere == null) {
             assert (releasedHere = new Throwable()) != null;
         }
-        if (cleaner != null)
+        if (cleaner != null) {
             cleaner.clean();
+        } else if (underlyingObject instanceof ByteBuffer) {
+            CLEANER_SERVICE.clean((ByteBuffer) underlyingObject);
+        }
     }
 
     @NotNull
