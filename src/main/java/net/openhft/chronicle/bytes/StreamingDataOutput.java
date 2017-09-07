@@ -36,6 +36,8 @@ import java.nio.ByteBuffer;
  * <p>The use of this instance is single threaded, though the use of the data
  */
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
+    int JAVA9_STRING_CODER_LATIN = 0;
+    int JAVA9_STRING_CODER_UTF16 = 1;
 
     @org.jetbrains.annotations.NotNull
     S writePosition(long position) throws BufferOverflowException;
@@ -381,13 +383,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     default S appendUtf8(byte[] bytes, int offset, int length, byte coder)
             throws BufferOverflowException, IllegalArgumentException {
-        if (coder == 0) { // LATIN1
+        if (coder == JAVA9_STRING_CODER_LATIN) {
             for (int i = 0; i < length; i++) {
                 byte b = bytes[offset + i];
                 int b2 = (b & 0xFF);
                 BytesInternal.appendUtf8Char(this, b2);
             }
-        } else { // UTF16
+        } else {
+            assert coder == JAVA9_STRING_CODER_UTF16;
             for (int i = 0; i < 2*length; i+=2) {
                 byte b1 = bytes[2*offset + i];
                 byte b2 = bytes[2*offset + i + 1];
