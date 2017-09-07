@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.Nullable;
@@ -372,6 +373,67 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S appendUtf8(@org.jetbrains.annotations.NotNull @NotNull CharSequence cs, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
         BytesInternal.appendUtf8(this, cs, offset, length);
+        return (S) this;
+    }
+
+    // length is number of characters (not bytes)
+    @Java9
+    @org.jetbrains.annotations.NotNull
+    default S appendUtf8(byte[] bytes, int offset, int length, byte coder)
+            throws BufferOverflowException, IllegalArgumentException {
+        if (coder == 0) { // LATIN1
+            for (int i = 0; i < length; i++) {
+                byte b = bytes[offset + i];
+                int b2 = (b & 0xFF);
+                BytesInternal.appendUtf8Char(this, b2);
+            }
+        } else { // UTF16
+            for (int i = 0; i < 2*length; i+=2) {
+                byte b1 = bytes[2*offset + i];
+                byte b2 = bytes[2*offset + i + 1];
+
+                int uBE = ((b2 & 0xFF) << 8) | b1 & 0xFF;
+                BytesInternal.appendUtf8Char(this, uBE);
+            }
+        }
+        return (S) this;
+    }
+
+    @Java9
+    @org.jetbrains.annotations.NotNull
+    default S appendUtf8(byte[] bytes, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException {
+        for (int i = 0; i < length; i++) {
+            int b = bytes[offset+i] & 0xFF; // unsigned byte
+
+            if (b >= 0xF0) {
+                int b2 = bytes[offset+i+1] & 0xFF; // unsigned byte
+                int b3 = bytes[offset+i+2] & 0xFF; // unsigned byte
+                int b4 = bytes[offset+i+3] & 0xFF; // unsigned byte
+                this.writeByte((byte) b4);
+                this.writeByte((byte) b3);
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 3;
+            } else if (b >= 0xE0) {
+                int b2 = bytes[offset+i+1] & 0xFF; // unsigned byte
+                int b3 = bytes[offset+i+2] & 0xFF; // unsigned byte
+                this.writeByte((byte) b3);
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 2;
+            } else if (b >= 0xC0) {
+                int b2 = bytes[offset+i + 1] & 0xFF; // unsigned byte
+                this.writeByte((byte) b2);
+                this.writeByte((byte) b);
+
+                i+= 1;
+            } else {
+                this.writeByte((byte) b);
+            }
+        }
         return (S) this;
     }
 

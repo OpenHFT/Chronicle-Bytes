@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 
 /**
@@ -326,10 +327,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
-        char[] chars = extractChars(s);
-        long utfLength = AppendableUtil.findUtf8Length(chars);
-        writeStopBit(utfLength);
-        appendUtf8(chars, 0, chars.length);
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = extractBytes(s);
+            byte coder = StringUtils.getStringCoder(s);
+            long utfLength = AppendableUtil.findUtf8Length(bytes, coder);
+            writeStopBit(utfLength);
+            appendUtf8(bytes, 0, bytes.length, coder);
+        } else {
+            char[] chars = extractChars(s);
+            long utfLength = AppendableUtil.findUtf8Length(chars);
+            writeStopBit(utfLength);
+            appendUtf8(chars, 0, chars.length);
+        }
         return this;
     }
 
@@ -350,23 +359,43 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     private MappedBytes append8bit0(String s, int start, int length) {
-        char[] chars = StringUtils.extractChars(s);
-        long address = address(writePosition());
-        Memory memory = bytesStore().memory;
-        int i = 0;
-        for (; i < length - 3; i += 4) {
-            int c0 = chars[i + start] & 0xff;
-            int c1 = chars[i + start + 1] & 0xff;
-            int c2 = chars[i + start + 2] & 0xff;
-            int c3 = chars[i + start + 3] & 0xff;
-            memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
-            address += 4;
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = StringUtils.extractBytes(s);
+            long address = address(writePosition());
+            Memory memory = bytesStore().memory;
+            int i = 0;
+            for (; i < length - 3; i += 4) {
+                int c0 = bytes[i + start] & 0xff;
+                int c1 = bytes[i + start + 1] & 0xff;
+                int c2 = bytes[i + start + 2] & 0xff;
+                int c3 = bytes[i + start + 3] & 0xff;
+                memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                address += 4;
+            }
+            for (; i < length; i++) {
+                byte c = bytes[i + start];
+                memory.writeByte(address++, c);
+            }
+            writeSkip(length);
+        } else {
+            char[] chars = StringUtils.extractChars(s);
+            long address = address(writePosition());
+            Memory memory = bytesStore().memory;
+            int i = 0;
+            for (; i < length - 3; i += 4) {
+                int c0 = chars[i + start] & 0xff;
+                int c1 = chars[i + start + 1] & 0xff;
+                int c2 = chars[i + start + 2] & 0xff;
+                int c3 = chars[i + start + 3] & 0xff;
+                memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                address += 4;
+            }
+            for (; i < length; i++) {
+                char c = chars[i + start];
+                memory.writeByte(address++, (byte) c);
+            }
+            writeSkip(length);
         }
-        for (; i < length; i++) {
-            char c = chars[i + start];
-            memory.writeByte(address++, (byte) c);
-        }
-        writeSkip(length);
         return this;
     }
 
@@ -382,26 +411,50 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             return this;
         }
 
-        char[] chars = StringUtils.extractChars((String) cs);
-        long address = address(pos);
-        Memory memory = OS.memory();
-        int i = 0;
-        non_ascii:
-        {
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = StringUtils.extractBytes((String) cs);
+            long address = address(pos);
+            Memory memory = OS.memory();
+            int i = 0;
+            non_ascii:
+            {
+                for (; i < length; i++) {
+                    byte c = bytes[i + start];
+                    if (c > 127) {
+                        writeSkip(i);
+                        break non_ascii;
+                    }
+                    memory.writeByte(address++, c);
+                }
+                writeSkip(length);
+                return this;
+            }
+            for (; i < length; i++) {
+                byte c = bytes[i + start];
+                appendUtf8(c);
+            }
+        } else {
+            char[] chars = StringUtils.extractChars((String) cs);
+            long address = address(pos);
+            Memory memory = OS.memory();
+            int i = 0;
+            non_ascii:
+            {
+                for (; i < length; i++) {
+                    char c = chars[i + start];
+                    if (c > 127) {
+                        writeSkip(i);
+                        break non_ascii;
+                    }
+                    memory.writeByte(address++, (byte) c);
+                }
+                writeSkip(length);
+                return this;
+            }
             for (; i < length; i++) {
                 char c = chars[i + start];
-                if (c > 127) {
-                    writeSkip(i);
-                    break non_ascii;
-                }
-                memory.writeByte(address++, (byte) c);
+                appendUtf8(c);
             }
-            writeSkip(length);
-            return this;
-        }
-        for (; i < length; i++) {
-            char c = chars[i + start];
-            appendUtf8(c);
         }
         return this;
     }

@@ -16,9 +16,11 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -58,6 +60,35 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         }
     }
 
+    @Java9
+    private static boolean isEqual0(@NotNull byte[] bytes, byte coder, @NotNull NativeBytesStore bs, long address) {
+
+        @Nullable Memory memory = bs.memory;
+
+        if (coder == 0) {
+            int i = 0;
+            for (; i < bytes.length; i++) {
+                byte b = memory.readByte(address + i);
+                char c = (char)(bytes[i] & 0xFF);
+                if (b != c) {
+                    return false;
+                }
+            }
+        } else {
+            int i = 0;
+            for (; i < bytes.length; i++) {
+                byte b = memory.readByte(address + i);
+                char c = (char)(((bytes[i+1] & 0xFF) << 8) | (bytes[i] & 0xFF));
+
+                if (b != c) {
+                    return false;
+                }
+            }
+        }
+
+        return true;
+    }
+
     private static boolean isEqual0(@NotNull char[] chars, @NotNull NativeBytesStore bs, long address) {
 
         @Nullable Memory memory = bs.memory;
@@ -84,6 +115,25 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         for (int i = 0; i < chars.length; i++) {
             int b = bytesStore.readByte(readPosition + i) & 0xFF;
             if (b != chars[i])
+                return false;
+        }
+        return true;
+    }
+
+    @Java9
+    private static boolean isEqual1(@NotNull byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition) {
+        for (int i = 0; i < bytes.length; i++) {
+            int b = bytesStore.readByte(readPosition + i) & 0xFF;
+            char c;
+
+            if (coder == 0) {
+                c = (char)(bytes[i] & 0xFF);
+            } else {
+                c = (char) (((bytes[i + 1] & 0xFF) << 8) | (bytes[i] & 0xFF));
+                i++;
+            }
+
+            if (b != c)
                 return false;
         }
         return true;
@@ -140,14 +190,28 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public boolean isEqual(@Nullable String s) {
         if (s == null || s.length() != readRemaining()) return false;
-        char[] chars = StringUtils.extractChars(s);
-        if (bytesStore instanceof NativeBytesStore) {
-            @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
-            long address = bs.address(readPosition);
-            return isEqual0(chars, bs, address);
 
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = StringUtils.extractBytes(s);
+            byte coder = StringUtils.getStringCoder(s);
+            if (bytesStore instanceof NativeBytesStore) {
+                @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+                long address = bs.address(readPosition);
+                return isEqual0(bytes, coder, bs, address);
+
+            } else {
+                return isEqual1(bytes, coder, bytesStore, readPosition);
+            }
         } else {
-            return isEqual1(chars, bytesStore, readPosition);
+            char[] chars = StringUtils.extractChars(s);
+            if (bytesStore instanceof NativeBytesStore) {
+                @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+                long address = bs.address(readPosition);
+                return isEqual0(chars, bs, address);
+
+            } else {
+                return isEqual1(chars, bytesStore, readPosition);
+            }
         }
     }
 
@@ -215,7 +279,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
                     return this;
                 }
                 if (str instanceof String) {
-                    appendUtf8(StringUtils.extractChars((String) str), start, end - start);
+                    if (Jvm.isJava9Plus()) {
+                        byte coder = StringUtils.getStringCoder((String) str);
+                        appendUtf8(StringUtils.extractBytes((String) str), start, end - start, coder);
+                    } else {
+                        appendUtf8(StringUtils.extractChars((String) str), start, end - start);
+                    }
+
                     return this;
                 }
             }
@@ -237,7 +307,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
                     return this;
                 }
                 if (str instanceof String) {
-                    appendUtf8(StringUtils.extractChars((String) str), 0, str.length());
+                    if (Jvm.isJava9Plus()) {
+                        String str1 = (String) str;
+                        byte coder = StringUtils.getStringCoder(str1);
+                        appendUtf8(StringUtils.extractBytes(str1), 0, str.length(), coder);
+                    } else {
+                        appendUtf8(StringUtils.extractChars((String) str), 0, str.length());
+                    }
                     return this;
                 }
             }
@@ -279,21 +355,31 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         @Nullable NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
         final long address = bytesStore.address + bytesStore.translate(offset);
         @Nullable final Memory memory = bytesStore.memory;
-        final char[] chars = StringUtils.extractChars(s);
+
         if (memory == null)
             throw new AssertionError(bytesStore.releasedHere);
 
-        int i;
-        for (i = 0; i < length - 3; i += 4) {
-            int c0 = chars[i] & 0xFF;
-            int c1 = chars[i + 1] & 0xFF;
-            int c2 = chars[i + 2] & 0xFF;
-            int c3 = chars[i + 3] & 0xFF;
-            memory.writeInt(address + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
-        }
-        for (; i < length; i++) {
-            int c0 = chars[i];
-            memory.writeByte(address + i, (byte) c0);
+        if (Jvm.isJava9Plus()) {
+            final byte[] chars = StringUtils.extractBytes(s);
+
+            int i;
+            for (i = 0; i < length; i++) {
+                memory.writeByte(address + i, chars[i]);
+            }
+        } else {
+            final char[] chars = StringUtils.extractChars(s);
+            int i;
+            for (i = 0; i < length - 3; i += 4) {
+                int c0 = chars[i] & 0xFF;
+                int c1 = chars[i + 1] & 0xFF;
+                int c2 = chars[i + 2] & 0xFF;
+                int c3 = chars[i + 3] & 0xFF;
+                memory.writeInt(address + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+            }
+            for (; i < length; i++) {
+                int c0 = chars[i];
+                memory.writeByte(address + i, (byte) c0);
+            }
         }
         return this;
     }
