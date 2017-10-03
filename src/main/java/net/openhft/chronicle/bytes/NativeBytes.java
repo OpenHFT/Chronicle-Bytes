@@ -245,4 +245,24 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         }
         return this;
     }
+
+    @Override
+    protected long writeOffsetPositionMoved(long adding, long advance) throws BufferOverflowException {
+        long oldPosition = writePosition;
+        if (writePosition < bytesStore.start())
+            throw new BufferOverflowException();
+        long writeEnd = writePosition + adding;
+        if (writeEnd > bytesStore.safeLimit())
+            checkResize(writeEnd);
+        this.writePosition = writePosition + advance;
+        return oldPosition;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> writeByte(byte i8) throws BufferOverflowException {
+        long offset = writeOffsetPositionMoved(1, 1);
+        bytesStore.writeByte(offset, i8);
+        return this;
+    }
 }
