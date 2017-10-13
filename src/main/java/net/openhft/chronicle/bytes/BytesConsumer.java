@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+@FunctionalInterface
 public interface BytesConsumer {
 
     /**

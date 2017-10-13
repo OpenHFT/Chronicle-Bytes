@@ -26,6 +26,7 @@ import java.util.function.ToLongFunction;
 /**
  * Simple function to derive a long hash from a BytesStore
  */
+@FunctionalInterface
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
     static long hash(@NotNull VanillaBytes b) {
         return OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
