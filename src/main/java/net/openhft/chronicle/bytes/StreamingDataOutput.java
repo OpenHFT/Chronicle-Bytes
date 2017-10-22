@@ -85,6 +85,37 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    @NotNull
+    default S writeStopBitDecimal(double d) throws BufferOverflowException {
+        boolean negative = d < 0;
+        double ad = Math.abs(d);
+        long value;
+        int scale = 0;
+        if ((long) ad == ad) {
+            value = (long) ad * 10;
+
+        } else {
+            double factor = 1;
+            while (scale < 9) {
+                double v = ad * factor;
+                if (v >= 1e14 || (long) v == v)
+                    break;
+                factor *= 10;
+                scale++;
+            }
+            value = Math.round(ad * factor);
+            while (scale > 0 && value % 10 == 0) {
+                value /= 10;
+                scale--;
+            }
+            value = value * 10 + scale;
+        }
+        if (negative)
+            value = -value;
+        BytesInternal.writeStopBit(this, value);
+        return (S) this;
+    }
+
     /**
      * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded
      * i.e. one byte longer for short strings, but is not limited in length. 2) The string can be null.
@@ -265,7 +296,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S writeSome(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes)
             throws BufferOverflowException {
         long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1<< 20)
+        if (length + writePosition() >= 1 << 20)
             length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
         write(bytes, bytes.readPosition(), length);
         if (length == bytes.readRemaining()) {
@@ -391,9 +422,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             }
         } else {
             assert coder == JAVA9_STRING_CODER_UTF16;
-            for (int i = 0; i < 2*length; i+=2) {
-                byte b1 = bytes[2*offset + i];
-                byte b2 = bytes[2*offset + i + 1];
+            for (int i = 0; i < 2 * length; i += 2) {
+                byte b1 = bytes[2 * offset + i];
+                byte b2 = bytes[2 * offset + i + 1];
 
                 int uBE = ((b2 & 0xFF) << 8) | b1 & 0xFF;
                 BytesInternal.appendUtf8Char(this, uBE);
@@ -407,32 +438,32 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S appendUtf8(byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
         for (int i = 0; i < length; i++) {
-            int b = bytes[offset+i] & 0xFF; // unsigned byte
+            int b = bytes[offset + i] & 0xFF; // unsigned byte
 
             if (b >= 0xF0) {
-                int b2 = bytes[offset+i+1] & 0xFF; // unsigned byte
-                int b3 = bytes[offset+i+2] & 0xFF; // unsigned byte
-                int b4 = bytes[offset+i+3] & 0xFF; // unsigned byte
+                int b2 = bytes[offset + i + 1] & 0xFF; // unsigned byte
+                int b3 = bytes[offset + i + 2] & 0xFF; // unsigned byte
+                int b4 = bytes[offset + i + 3] & 0xFF; // unsigned byte
                 this.writeByte((byte) b4);
                 this.writeByte((byte) b3);
                 this.writeByte((byte) b2);
                 this.writeByte((byte) b);
 
-                i+= 3;
+                i += 3;
             } else if (b >= 0xE0) {
-                int b2 = bytes[offset+i+1] & 0xFF; // unsigned byte
-                int b3 = bytes[offset+i+2] & 0xFF; // unsigned byte
+                int b2 = bytes[offset + i + 1] & 0xFF; // unsigned byte
+                int b3 = bytes[offset + i + 2] & 0xFF; // unsigned byte
                 this.writeByte((byte) b3);
                 this.writeByte((byte) b2);
                 this.writeByte((byte) b);
 
-                i+= 2;
+                i += 2;
             } else if (b >= 0xC0) {
-                int b2 = bytes[offset+i + 1] & 0xFF; // unsigned byte
+                int b2 = bytes[offset + i + 1] & 0xFF; // unsigned byte
                 this.writeByte((byte) b2);
                 this.writeByte((byte) b);
 
-                i+= 1;
+                i += 1;
             } else {
                 this.writeByte((byte) b);
             }

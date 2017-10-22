@@ -102,6 +102,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readStopBitDouble(this);
     }
 
+    @NotNull
+    default double readStopBitDecimal() throws BufferOverflowException {
+        long value = readStopBit();
+        int scale = (int) (Math.abs(value) % 10);
+        value /= 10;
+        return (double) value / Maths.tens(scale);
+    }
+
     default boolean readBoolean() {
         byte b = readByte();
         return BytesUtil.byteToBoolean(b);
