@@ -15,7 +15,7 @@ public class StopBitDecimalTest {
     public void testDecimals() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(16);
         Random rand = new Random();
-        for (int i = 0; i < 10000; i++) {
+        for (int i = 0; i < 10_000; i++) {
             rand.setSeed(i);
             bytes.clear();
             int scale = rand.nextInt(10);
