@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -201,7 +203,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static class BytesFieldAccess extends FieldAccess<BytesStore> {
+    static class BytesFieldAccess extends FieldAccess<Bytes> {
         public BytesFieldAccess(Field field) {
             super(field);
         }
@@ -217,11 +219,17 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException, IORuntimeException {
-            // TODO see if recycling a Bytes is an option.
-            long length = read.readStopBit();
-            @NotNull BytesStore bs = NativeBytesStore.nativeStore(length);
-            bs.copyTo((BytesStore) read);
-            read.readSkip(length);
+            @NotNull Bytes bytes = (Bytes) field.get(o);
+            int length = Maths.toUInt31(read.readStopBit());
+            @NotNull Bytes bs;
+            if (bytes == null) {
+                bs = Bytes.elasticHeapByteBuffer(length);
+            } else {
+                bs = bytes;
+            }
+            Object uo = bs.underlyingObject();
+            read.read(((ByteBuffer) uo).array(), 0, length);
+            bs.readLimit(length);
             field.set(o, bs);
         }
     }
