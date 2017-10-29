@@ -307,4 +307,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void readHistogram(@NotNull Histogram histogram) {
         BytesInternal.readHistogram(this, histogram);
     }
+
+    default void readWithLength(Bytes bytes) {
+        bytes.clear();
+        int length = Maths.toUInt31(readStopBit());
+        int i;
+        for (i = 0; i < length - 7; i++)
+            bytes.writeLong(readLong());
+        for (; i < length; i++)
+            bytes.writeByte(readByte());
+    }
 }

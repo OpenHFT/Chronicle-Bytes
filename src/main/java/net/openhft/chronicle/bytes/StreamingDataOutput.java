@@ -494,4 +494,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writeStopBit(bytes.length);
         write(bytes);
     }
+
+    default void writeWithLength(BytesStore bytes) {
+        writeStopBit(bytes.readRemaining());
+        write(bytes);
+    }
 }
