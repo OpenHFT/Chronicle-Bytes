@@ -41,6 +41,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     private final MappedFile mappedFile;
+    private final boolean backingFileIsReadOnly;
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
@@ -51,6 +52,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         super(NoBytesStore.noBytesStore(), NoBytesStore.noBytesStore().writePosition(),
                 NoBytesStore.noBytesStore().writeLimit(), name);
         this.mappedFile = reserve(mappedFile);
+        this.backingFileIsReadOnly = !mappedFile.file().canWrite();
         assert !mappedFile.isClosed();
         clear();
     }
@@ -283,6 +285,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public boolean isElastic() {
         return true;
+    }
+
+    public boolean isBackingFileReadOnly() {
+        return backingFileIsReadOnly;
     }
 
     @NotNull
