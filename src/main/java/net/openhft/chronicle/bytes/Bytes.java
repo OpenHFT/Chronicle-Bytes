@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -578,4 +579,20 @@ public interface Bytes<Underlying> extends
     default boolean readWrite() {
         return bytesStore().readWrite();
     }
+
+    default void readWithLength(long length, @NotNull BytesOut<Underlying> bytesOut)
+            throws BufferUnderflowException, IORuntimeException {
+        if (length > readRemaining())
+            throw new BufferUnderflowException();
+        long limit0 = readLimit();
+        long limit = readPosition() + length;
+        try {
+            readLimit(limit);
+            bytesOut.write(this);
+        } finally {
+            readLimit(limit0);
+            readPosition(limit);
+        }
+    }
+
 }

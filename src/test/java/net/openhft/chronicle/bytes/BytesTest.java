@@ -39,6 +39,7 @@ import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
@@ -266,6 +267,19 @@ public class BytesTest {
             bytes2.release();
         } finally {
             bytes.release();
+        }
+    }
+
+    @Test
+    public void testReadWithLength() throws Exception {
+        Bytes b = Bytes.from("Hello World");
+        final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
+        try {
+            b.readWithLength(2, bytesOut);
+            assertThat(bytesOut.toString(), is("He"));
+        } finally {
+            b.release();
+            bytesOut.release();
         }
     }
 
