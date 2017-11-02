@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
+import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -74,6 +75,24 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
+    default void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
+            throws BufferUnderflowException, IORuntimeException {
+        if (length > readRemaining())
+            throw new BufferUnderflowException();
+        long limit0 = readLimit();
+        long limit = readPosition() + length;
+        try {
+            readLimit(limit);
+            bytesConsumer.accept((S) this, sb, toBytes);
+        } finally {
+            readLimit(limit0);
+            readPosition(limit);
+        }
+    }
+
+    /**
+     * Perform a set of actions with a temporary bounds mode.
+     */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException {
         if (length > readRemaining())
@@ -89,6 +108,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
+
     @NotNull
     default InputStream inputStream() {
         return new StreamingInputStream(this);
@@ -102,7 +122,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readStopBitDouble(this);
     }
 
-    @NotNull
     default double readStopBitDecimal() throws BufferOverflowException {
         long value = readStopBit();
         int scale = (int) (Math.abs(value) % 10);
