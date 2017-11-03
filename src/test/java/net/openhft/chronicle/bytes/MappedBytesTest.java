@@ -11,7 +11,7 @@ public class MappedBytesTest {
 
     @Test
     public void shouldNotBeReadOnly() throws Exception {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 1024);
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10);
         assertFalse(bytes.isBackingFileReadOnly());
         bytes.writeUtf8(null); // used to blow up.
         assertNull(bytes.readUtf8());
