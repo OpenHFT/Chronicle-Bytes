@@ -32,9 +32,6 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
-import static net.openhft.chronicle.core.util.StringUtils.extractChars;
-
 /**
  * Bytes to wrap memory mapped data.
  */
@@ -333,24 +330,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
-        if (Jvm.isJava9Plus()) {
-            byte[] bytes = extractBytes(s);
-            byte coder = StringUtils.getStringCoder(s);
-            long utfLength = AppendableUtil.findUtf8Length(bytes, coder);
-            writeStopBit(utfLength);
-            appendUtf8(bytes, 0, bytes.length, coder);
-        } else {
-            char[] chars = extractChars(s);
-            long utfLength = AppendableUtil.findUtf8Length(chars);
-            writeStopBit(utfLength);
-            appendUtf8(chars, 0, chars.length);
-        }
+        BytesInternal.writeUtf8(this, s);
         return this;
     }
 
     @Override
     @NotNull
     public MappedBytes write8bit(CharSequence s, int start, int length) {
+        if (s == null) {
+            writeStopBit(-1);
+            return this;
+        }
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
@@ -364,7 +354,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    private MappedBytes append8bit0(String s, int start, int length) {
+    private MappedBytes append8bit0(@NotNull String s, int start, int length) {
         if (Jvm.isJava9Plus()) {
             byte[] bytes = StringUtils.extractBytes(s);
             long address = address(writePosition());

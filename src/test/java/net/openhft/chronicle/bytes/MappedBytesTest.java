@@ -5,15 +5,17 @@ import org.junit.Test;
 import java.io.File;
 import java.io.RandomAccessFile;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MappedBytesTest {
 
     @Test
     public void shouldNotBeReadOnly() throws Exception {
-        assertFalse(MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 1024).
-                isBackingFileReadOnly());
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 1024);
+        assertFalse(bytes.isBackingFileReadOnly());
+        bytes.writeUtf8(null); // used to blow up.
+        assertNull(bytes.readUtf8());
+        bytes.release();
     }
 
     @Test
@@ -26,5 +28,6 @@ public class MappedBytesTest {
 
         assertTrue(mappedBytes.
                 isBackingFileReadOnly());
+        mappedBytes.release();
     }
 }
