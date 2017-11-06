@@ -49,6 +49,26 @@ public class TextBytes implements Bytes {
         return fromText(new StringReader(text.toString()));
     }
 
+    @Override
+    public long readRemaining() {
+        return base.readRemaining();
+    }
+
+    @Override
+    public long writeRemaining() {
+        return base.writeRemaining();
+    }
+
+    @Override
+    public long readLimit() {
+        return base.readLimit();
+    }
+
+    @Override
+    public long writeLimit() {
+        return base.writeLimit();
+    }
+
     @NotNull
     @Override
     public String toHexString() {

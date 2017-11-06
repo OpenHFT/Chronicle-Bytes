@@ -17,6 +17,13 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.util.ObjectUtils;
+import org.jetbrains.annotations.NotNull;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.util.function.Function;
+
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
@@ -25,6 +32,27 @@ public interface BytesOut<Underlying> extends
         ByteStringAppender<Bytes<Underlying>>,
         BytesPrepender<Bytes<Underlying>> {
 
+    /**
+     * Proxy an interface so each message called is written to a file for replay.
+     *
+     * @param tClass     primary interface
+     * @param additional any additional interfaces
+     * @return a proxy which implements the primary interface (additional interfaces have to be
+     * cast)
+     */
+    @NotNull
+    default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional) {
+        Class[] interfaces = ObjectUtils.addAll(tClass, additional);
+
+        //noinspection unchecked
+        return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces,
+                new BinaryBytesMethodWriterInvocationHandler(MethodEncoderLookup.BY_ANNOTATION, this));
+    }
+
+    @NotNull
+    default <T> BytesMethodWriterBuilder<T> bytesMethodWriterBuilder(Function<Method, MethodEncoder> methodEncoderFunction, @NotNull Class<T> tClass) {
+        return new BytesMethodWriterBuilder<>(tClass, new BinaryBytesMethodWriterInvocationHandler(methodEncoderFunction, this));
+    }
 
     /**
      * Do these Bytes support saving comments

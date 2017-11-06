@@ -17,10 +17,28 @@
 
 package net.openhft.chronicle.bytes;
 
+import org.jetbrains.annotations.NotNull;
+
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
 public interface BytesIn<Underlying> extends
         StreamingDataInput<Bytes<Underlying>>,
         ByteStringParser<Bytes<Underlying>> {
+    /**
+     * Reads messages from this tails as methods.  It returns a BooleanSupplier which returns
+     *
+     * @param objects which implement the methods serialized to the file.
+     * @return a reader which will read one Excerpt at a time
+     */
+    @NotNull
+    default BytesMethodReader bytesMethodReader(Object... objects) {
+        return new BytesMethodReaderBuilder(this).build(objects);
+    }
+
+    @NotNull
+    default BytesMethodReaderBuilder bytesMethodReaderBuilder() {
+        return new BytesMethodReaderBuilder(this);
+    }
+
 }
