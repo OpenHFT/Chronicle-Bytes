@@ -39,7 +39,7 @@ public class BytesMethodWriterBuilderTest {
 
         m.myNested(mn2);
 
-        assertEquals("201\n" +
+        assertEquals("01                                              # myByteable\n" +
                 "   4e                                              # flag\n" +
                 "   01                                              # b\n" +
                 "   02 00                                           # s\n" +
@@ -48,7 +48,7 @@ public class BytesMethodWriterBuilderTest {
                 "   00 00 b0 40                                     # f\n" +
                 "   06 00 00 00 00 00 00 00                         # l\n" +
                 "   cd cc cc cc cc cc 1e 40                         # d\n" +
-                "01\n" +
+                "01                                              # myByteable\n" +
                 "   59                                              # flag\n" +
                 "   0b                                              # b\n" +
                 "   16 00                                           # s\n" +
@@ -57,7 +57,7 @@ public class BytesMethodWriterBuilderTest {
                 "   8f c2 b1 40                                     # f\n" +
                 "   42 00 00 00 00 00 00 00                         # l\n" +
                 "   e1 7a 14 ae 47 71 53 40                         # d\n" +
-                "02\n" +
+                "02                                              # myScalars\n" +
                 "   05 48 65 6c 6c 6f                               # s\n" +
                 "   01 31                                           # bi\n" +
                 "   02 31 30                                        # bd\n" +
@@ -70,7 +70,7 @@ public class BytesMethodWriterBuilderTest {
                 "   24 30 30 30 30 30 30 30 31 2d 32 33 34 35 2d 36\n" +
                 "   37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61\n" +
                 "   62 63 64 65 66\n" +
-                "03\n" +
+                "03                                              # myNested\n" +
                 "                                                # byteable\n" +
                 "      59                                              # flag\n" +
                 "      0b                                              # b\n" +
