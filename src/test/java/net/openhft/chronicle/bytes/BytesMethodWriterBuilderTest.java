@@ -18,7 +18,7 @@ public class BytesMethodWriterBuilderTest {
 
     @Test
     public void testPrimitives() {
-        Bytes<?> bytes = new TextBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         IBytesMethod m = bytes.bytesMethodWriter(IBytesMethod.class);
 
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
@@ -39,7 +39,7 @@ public class BytesMethodWriterBuilderTest {
 
         m.myNested(mn2);
 
-        assertEquals("01\n" +
+        assertEquals("201\n" +
                 "   4e                                              # flag\n" +
                 "   01                                              # b\n" +
                 "   02 00                                           # s\n" +
@@ -107,14 +107,4 @@ public class BytesMethodWriterBuilderTest {
                 "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n", out.toString());
     }
 
-    interface IBytesMethod {
-        @MethodId(1L)
-        void myByteable(MyByteable byteable);
-
-        @MethodId(2L)
-        void myScalars(MyScalars scalars);
-
-        @MethodId(3L)
-        void myNested(MyNested nested);
-    }
 }

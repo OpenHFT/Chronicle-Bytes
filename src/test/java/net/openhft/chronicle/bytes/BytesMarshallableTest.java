@@ -44,7 +44,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializePrimitives() throws IORuntimeException {
-        Bytes bytes = new TextBytes();
+        Bytes bytes = new HexDumpBytes();
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
         bytes.comment("mb1").writeUnsignedByte(1);
@@ -86,7 +86,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializeScalars() throws IORuntimeException {
-        Bytes bytes = new TextBytes();
+        Bytes bytes = new HexDumpBytes();
         @NotNull MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         @NotNull MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         bytes.comment("mb1").writeUnsignedByte(1);
@@ -123,7 +123,7 @@ public class BytesMarshallableTest {
                         "   35 66 30 2d 62 66 62 64 2d 63 33 30 37 34 34 33\n" +
                         "   65 32 38 61 34\n", bytes.toHexString());
 */
-        Bytes bytes2 = TextBytes.fromText(bytes.toHexString());
+        Bytes bytes2 = HexDumpBytes.fromText(bytes.toHexString());
         for (int i = 0; i < 2; i++) {
             @NotNull MyScalars mb3 = new MyScalars();
             @NotNull MyScalars mb4 = new MyScalars();
@@ -143,7 +143,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializeNested() throws IORuntimeException {
-        Bytes bytes = new TextBytes();
+        Bytes bytes = new HexDumpBytes();
 
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);

@@ -12,7 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class TextBytes implements Bytes {
+public class HexDumpBytes implements Bytes {
     private static final int NUMBER_WRAP = 16;
     private static final int COMMENT_START = NUMBER_WRAP * 3;
 
@@ -23,16 +23,16 @@ public class TextBytes implements Bytes {
     private long startOfLine = 0;
     private int indent = 0;
 
-    public TextBytes() {
+    public HexDumpBytes() {
     }
 
-    TextBytes(BytesStore base, Bytes text) {
+    HexDumpBytes(BytesStore base, Bytes text) {
         this.base.write(base);
         this.text.write(text);
     }
 
-    public static TextBytes fromText(Reader reader) {
-        TextBytes tb = new TextBytes();
+    public static HexDumpBytes fromText(Reader reader) {
+        HexDumpBytes tb = new HexDumpBytes();
         Reader reader2 = new TextBytesReader(reader, tb.text);
         try (Scanner sc = new Scanner(reader2)) {
             while (sc.hasNext()) {
@@ -45,7 +45,7 @@ public class TextBytes implements Bytes {
         return tb;
     }
 
-    public static TextBytes fromText(CharSequence text) {
+    public static HexDumpBytes fromText(CharSequence text) {
         return fromText(new StringReader(text.toString()));
     }
 
@@ -86,7 +86,13 @@ public class TextBytes implements Bytes {
     public Bytes comment(CharSequence comment) {
         if (this.comment.readRemaining() > 0 || comment.length() == 0)
             newLine();
-        this.comment.clear().append(comment);
+        if (comment.length() > 0 && comment.charAt(0) == '#') {
+            indent = 0;
+            this.text.append('#').append(comment).append('\n');
+            startOfLine = this.text.writePosition();
+        } else {
+            this.comment.clear().append(comment);
+        }
         return this;
     }
 
@@ -119,7 +125,7 @@ public class TextBytes implements Bytes {
 
     @Override
     public BytesStore copy() {
-        return new TextBytes(base, text);
+        return new HexDumpBytes(base, text);
     }
 
     @Override
