@@ -47,17 +47,17 @@ public class BytesTest {
 
     private Allocator alloc1;
     private ThreadDump threadDump;
-    public BytesTest(Allocator alloc1) {
+    public BytesTest(String name, Allocator alloc1) {
         this.alloc1 = alloc1;
     }
 
-    @Parameterized.Parameters
+    @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE},
-                {HEAP},
-                {NATIVE_UNCHECKED},
-                {HEAP_UNCHECKED}
+                {"Native", NATIVE},
+                {"Heap", HEAP},
+                {"Native Unchecked", NATIVE_UNCHECKED},
+                {"Heap Unchecked", HEAP_UNCHECKED}
         });
     }
 

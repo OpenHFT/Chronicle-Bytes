@@ -536,6 +536,7 @@ public class ByteStoreTest {
         assertEquals(11 * 11, bytesStore.readDouble(8L), 0.0);
     }
 
+    @Ignore("wip")
     @Test
     public void testToString() {
 

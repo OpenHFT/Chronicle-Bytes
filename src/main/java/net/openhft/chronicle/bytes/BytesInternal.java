@@ -932,7 +932,7 @@ enum BytesInternal {
         if (bytes.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
-
+        System.out.printf("refCount: %d%n", bytes.refCount());
         bytes.reserve();
         try {
             int len = Maths.toUInt31(maxLength + 40);
@@ -948,6 +948,8 @@ enum BytesInternal {
             try {
                 long start = Math.max(bytes.start(), readPosition - 64);
                 long end = Math.min(readLimit + 64, start + maxLength);
+                // should never try to read past the end of the buffer
+                end = Math.min(end, bytes.realCapacity());
                 try {
                     for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
                         if (bytes.readLong(end - 8) != 0)
