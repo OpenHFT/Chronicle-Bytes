@@ -932,7 +932,6 @@ enum BytesInternal {
         if (bytes.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
-        System.out.printf("refCount: %d%n", bytes.refCount());
         bytes.reserve();
         try {
             int len = Maths.toUInt31(maxLength + 40);
