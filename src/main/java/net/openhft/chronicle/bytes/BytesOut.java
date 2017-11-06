@@ -24,4 +24,34 @@ public interface BytesOut<Underlying> extends
         StreamingDataOutput<Bytes<Underlying>>,
         ByteStringAppender<Bytes<Underlying>>,
         BytesPrepender<Bytes<Underlying>> {
+
+
+    /**
+     * Do these Bytes support saving comments
+     *
+     * @return true if comments are kept
+     */
+    default boolean retainsComments() {
+        return false;
+    }
+
+    /**
+     * Add comment as approriate for the toHexString format
+     *
+     * @param comment to add (or ignore)
+     * @return this
+     */
+    default BytesOut<Underlying> comment(CharSequence comment) {
+        return this;
+    }
+
+    /**
+     * Adjust the indent for nested data
+     *
+     * @param n +1 indent in, -1 reduce indenting
+     * @return this.
+     */
+    default BytesOut<Underlying> indent(int n) {
+        return this;
+    }
 }

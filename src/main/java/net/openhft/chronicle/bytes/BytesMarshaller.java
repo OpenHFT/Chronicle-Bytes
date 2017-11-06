@@ -65,9 +65,11 @@ public class BytesMarshaller<T> {
     }
 
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut out) {
+        out.indent(+1);
         for (@NotNull FieldAccess field : fields) {
             field.write(t, out);
         }
+        out.indent(-1);
     }
 
     static abstract class FieldAccess<T> {
@@ -130,6 +132,7 @@ public class BytesMarshaller<T> {
 
         void write(Object o, BytesOut write) {
             try {
+                write.comment(field.getName());
                 getValue(o, write);
             } catch (IllegalAccessException iae) {
                 throw new AssertionError(iae);
