@@ -64,7 +64,9 @@ public class BytesTextMethodTester<T> {
         if (setup != null) {
             Bytes bytes0 = HexDumpBytes.fromText(BytesUtil.readFile(setup));
 
-            BytesMethodReader reader0 = bytes0.bytesMethodReader(components);
+            BytesMethodReader reader0 = bytes0.bytesMethodReaderBuilder()
+                    .defaultParselet(this::unknownMessageId)
+                    .build(components);
             while (reader0.readOne()) {
                 bytes2.clear();
             }
@@ -81,7 +83,9 @@ public class BytesTextMethodTester<T> {
                 continue;
             Bytes bytes = HexDumpBytes.fromText(text2);
 
-            BytesMethodReader reader = bytes.bytesMethodReader(components);
+            BytesMethodReader reader = bytes.bytesMethodReaderBuilder()
+                    .defaultParselet(this::unknownMessageId)
+                    .build(components);
 
             while (reader.readOne()) {
                 if (bytes.readRemaining() > 1)
@@ -97,6 +101,11 @@ public class BytesTextMethodTester<T> {
             actual = afterRun.apply(actual);
         }
         return this;
+    }
+
+    private void unknownMessageId(long id, BytesIn b) {
+        System.out.println("Unknown message id " + Long.toHexString(id));
+        b.readPosition(b.readLimit());
     }
 
     public String expected() {

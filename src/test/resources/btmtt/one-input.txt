@@ -1,4 +1,4 @@
-01                                              # myByteable
+81 01                                           # myByteable
    4e                                              # flag
    01                                              # b
    02 00                                           # s
@@ -8,7 +8,7 @@
    06 00 00 00 00 00 00 00                         # l
    cd cc cc cc cc cc 1e 40                         # d
 ### End Of Block
-01                                              # myByteable
+81 01                                           # myByteable
    59                                              # flag
    0b                                              # b
    16 00                                           # s
@@ -18,7 +18,7 @@
    42 00 00 00 00 00 00 00                         # l
    e1 7a 14 ae 47 71 53 40                         # d
 ### End Of Block
-02                                              # myScalars
+82 01                                           # myScalars
    05 48 65 6c 6c 6f                               # s
    01 31                                           # bi
    02 31 30                                        # bd
@@ -32,7 +32,7 @@
    37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61
    62 63 64 65 66
 ### End Of Block
-03                                              # myNested
+83 01                                           # myNested
                                                 # byteable
       59                                              # flag
       0b                                              # b
