@@ -9,7 +9,11 @@ import static junit.framework.TestCase.assertEquals;
 public class BytesTextMethodTesterTest {
     @Test
     public void run() throws IOException {
-        BytesTextMethodTester tester = new BytesTextMethodTester<>("btmtt/one-input.txt", IBMImpl::new, IBytesMethod.class, "btmtt/one-output.txt");
+        BytesTextMethodTester tester = new BytesTextMethodTester<>(
+                "btmtt/one-input.txt",
+                IBMImpl::new,
+                IBytesMethod.class,
+                "btmtt/one-output.txt");
         tester.run();
         assertEquals(tester.expected(), tester.actual());
     }
