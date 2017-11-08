@@ -39,7 +39,7 @@ public class BytesMethodWriterBuilderTest {
 
         m.myNested(mn2);
 
-        assertEquals("01                                              # myByteable\n" +
+        assertEquals("81 01                                           # myByteable\n" +
                 "   4e                                              # flag\n" +
                 "   01                                              # b\n" +
                 "   02 00                                           # s\n" +
@@ -48,7 +48,7 @@ public class BytesMethodWriterBuilderTest {
                 "   00 00 b0 40                                     # f\n" +
                 "   06 00 00 00 00 00 00 00                         # l\n" +
                 "   cd cc cc cc cc cc 1e 40                         # d\n" +
-                "01                                              # myByteable\n" +
+                "81 01                                           # myByteable\n" +
                 "   59                                              # flag\n" +
                 "   0b                                              # b\n" +
                 "   16 00                                           # s\n" +
@@ -57,7 +57,7 @@ public class BytesMethodWriterBuilderTest {
                 "   8f c2 b1 40                                     # f\n" +
                 "   42 00 00 00 00 00 00 00                         # l\n" +
                 "   e1 7a 14 ae 47 71 53 40                         # d\n" +
-                "02                                              # myScalars\n" +
+                "82 01                                           # myScalars\n" +
                 "   05 48 65 6c 6c 6f                               # s\n" +
                 "   01 31                                           # bi\n" +
                 "   02 31 30                                        # bd\n" +
@@ -70,7 +70,7 @@ public class BytesMethodWriterBuilderTest {
                 "   24 30 30 30 30 30 30 30 31 2d 32 33 34 35 2d 36\n" +
                 "   37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61\n" +
                 "   62 63 64 65 66\n" +
-                "03                                              # myNested\n" +
+                "83 01                                           # myNested\n" +
                 "                                                # byteable\n" +
                 "      59                                              # flag\n" +
                 "      0b                                              # b\n" +
@@ -104,7 +104,8 @@ public class BytesMethodWriterBuilderTest {
         assertEquals("* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
                 "* myByteable[MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}]\n" +
                 "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
-                "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n", out.toString());
+                        "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n",
+                out.toString().replaceAll("\r", ""));
     }
 
 }
