@@ -10,10 +10,10 @@ public class BytesTextMethodTesterTest {
     @Test
     public void run() throws IOException {
         BytesTextMethodTester tester = new BytesTextMethodTester<>(
-                "btmtt/one-input.txt",
+                "btmtt/prim-input.txt",
                 IBMImpl::new,
                 IBytesMethod.class,
-                "btmtt/one-output.txt");
+                "btmtt/prim-output.txt");
         tester.run();
         assertEquals(tester.expected(), tester.actual());
     }
