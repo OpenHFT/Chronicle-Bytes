@@ -239,14 +239,14 @@ public class BytesTest {
         Bytes bytes = alloc1.elasticBytes(1020);
         try {
             bytes.append("Hello World");
-            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64                Hello Wo rld     \n", bytes.toHexString());
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64                Hello Wo rld     \n", bytes.toHexString());
             bytes.readLimit(bytes.realCapacity());
-            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
                     "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
                     "000003f0 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", bytes.toHexString());
 
-            assertEquals("00000000 48 65 6C 6C 6F 20 57 6F  72 6C 64 00 00 00 00 00 Hello Wo rld·····\n" +
+            assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 00 00 00 00 00 Hello Wo rld·····\n" +
                     "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
                     "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
@@ -350,7 +350,7 @@ public class BytesTest {
     private void testSBD(@NotNull Bytes b, double v, String s) throws IORuntimeException {
         b.clear();
         b.writeStopBit(v);
-        assertEquals(s, b.toHexString());
+        assertEquals(s, b.toHexString().toUpperCase());
     }
 
     @Test
@@ -721,7 +721,7 @@ public class BytesTest {
     public void testAppendBase16() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
         for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
-            String s = Long.toHexString(value).toUpperCase();
+            String s = Long.toHexString(value).toLowerCase();
             b.clear().appendBase16(value);
             assertEquals(s, b.toString());
         }

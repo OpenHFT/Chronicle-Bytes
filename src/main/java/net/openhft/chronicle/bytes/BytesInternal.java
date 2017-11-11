@@ -52,7 +52,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  */
 enum BytesInternal {
     ;
-    static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
+    static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
