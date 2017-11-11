@@ -59,7 +59,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param bytes to prepend to.
      */
     @NotNull
-    B prewrite(byte[] bytes);
+    B prewrite(byte[] bytes) throws BufferOverflowException;
 
     /**
      * Write backward in binary a byte
@@ -68,7 +68,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param bytes to prepend to.
      */
     @NotNull
-    B prewrite(BytesStore bytes);
+    B prewrite(BytesStore bytes) throws BufferOverflowException;
 
     /**
      * Write backward in binary a byte
@@ -77,7 +77,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param b byte to prepend to.
      */
     @NotNull
-    B prewriteByte(byte b);
+    B prewriteByte(byte b) throws BufferOverflowException;
 
     /**
      * Write backward in binary a 2 byte int
@@ -86,7 +86,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i short to prepend to.
      */
     @NotNull
-    B prewriteShort(short i);
+    B prewriteShort(short i) throws BufferOverflowException;
 
     /**
      * Write backward in binary a 4 byte int
@@ -95,7 +95,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i integer to prepend to.
      */
     @NotNull
-    B prewriteInt(int i);
+    B prewriteInt(int i) throws BufferOverflowException;
 
     /**
      * Write backward in binary an 8 byte long
@@ -104,5 +104,5 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param l long to prepend to.
      */
     @NotNull
-    B prewriteLong(long l);
+    B prewriteLong(long l) throws BufferOverflowException;
 }

@@ -271,11 +271,19 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long address(long offset) throws BufferOverflowException {
+    public long addressForRead(long offset) throws BufferUnderflowException {
+        if (offset != 0)
+            throw new BufferUnderflowException();
+        return NO_PAGE;
+    }
+
+    @Override
+    public long addressForWrite(long offset) throws BufferOverflowException {
         if (offset != 0)
             throw new BufferOverflowException();
         return NO_PAGE;
     }
+
 
     @NotNull
     @Override

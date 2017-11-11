@@ -20,6 +20,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.util.function.LongSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -40,23 +42,27 @@ public class TextLongReference implements LongReference {
     private BytesStore bytes;
     private long offset;
 
-    public static void write(@NotNull Bytes bytes, long value) {
+    public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
         long position = bytes.writePosition();
         bytes.write(template);
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    private long withLock(@NotNull LongSupplier call) {
+    private long withLock(@NotNull LongSupplier call) throws IllegalStateException, BufferUnderflowException {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
-            throw new IllegalStateException();
-        while (true) {
-            if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
-                long t = call.getAsLong();
-                bytes.writeOrderedInt(valueOffset, FALSE);
-                return t;
+            throw new IllegalStateException("Not a lock value");
+        try {
+            while (true) {
+                if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
+                    long t = call.getAsLong();
+                    bytes.writeOrderedInt(valueOffset, FALSE);
+                    return t;
+                }
             }
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 

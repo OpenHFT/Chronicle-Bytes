@@ -42,17 +42,25 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
-        return new NativeBytes<>(noBytesStore());
+        try {
+            return new NativeBytes<>(noBytesStore());
+        } catch (IllegalStateException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
     public static NativeBytes<Void> nativeBytes(long initialCapacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
-            return new NativeBytes<>(store);
+            try {
+                return new NativeBytes<>(store);
 
-        } finally {
-            store.release();
+            } finally {
+                store.release();
+            }
+        } catch (IllegalStateException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -60,9 +68,13 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         long remaining = bytes.readRemaining();
         NativeBytes<Void> bytes2;
 
-        bytes2 = Bytes.allocateElasticDirect(remaining);
-        bytes2.write(bytes, 0, remaining);
-        return bytes2;
+        try {
+            bytes2 = Bytes.allocateElasticDirect(remaining);
+            bytes2.write(bytes, 0, remaining);
+            return bytes2;
+        } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     private static long alignToPageSize(long size) {
@@ -77,7 +89,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         if (offset < bytesStore.start())
             throw new BufferOverflowException();
         long writeEnd = offset + adding;
@@ -96,7 +108,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     private void checkResize(long endOfBuffer)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         if (isElastic())
             resize(endOfBuffer);
         else
@@ -110,9 +122,9 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
-            throws IllegalArgumentException, BufferOverflowException {
+            throws BufferOverflowException {
         if (endOfBuffer < 0)
-            throw new IllegalArgumentException(endOfBuffer + " < 0");
+            throw new BufferOverflowException();
         if (endOfBuffer > capacity())
             throw new BufferOverflowException();
         final long realCapacity = realCapacity();
@@ -145,21 +157,27 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
                     "new-size " + size / 1024 + " KB");
         BytesStore store;
         int position = 0;
-        if (isByteBufferBacked && size <= MAX_BYTE_BUFFER_CAPACITY) {
-            position = ((ByteBuffer) bytesStore.underlyingObject()).position();
-            store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-        } else {
-            store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+        try {
+            if (isByteBufferBacked && size <= MAX_BYTE_BUFFER_CAPACITY) {
+                position = ((ByteBuffer) bytesStore.underlyingObject()).position();
+                store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
+            } else {
+                store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+            }
+        } catch (IllegalArgumentException e) {
+            BufferOverflowException boe = new BufferOverflowException();
+            boe.initCause(e);
+            throw boe;
         }
 
         @Nullable BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
-        try {
             this.bytesStore.copyTo(store);
+        this.bytesStore = store;
+        try {
+            tempStore.release();
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
-        this.bytesStore = store;
-        tempStore.release();
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
@@ -195,8 +213,8 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         long position = writePosition();
         ensureCapacity(position + length);
         if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
-            long address = bytes.address(offset);
-            long address2 = address(writePosition());
+            long address = bytes.addressForRead(offset);
+            long address2 = addressForWrite(writePosition());
             assert address != 0;
             assert address2 != 0;
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
@@ -214,36 +232,40 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     @NotNull
-    public NativeBytes writeSome(@NotNull Bytes bytes) throws BufferOverflowException {
-        long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1 << 20)
-            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-        long offset = bytes.readPosition();
-        long position = writePosition();
-        ensureCapacity(position + length);
-        if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
-            long address = bytes.address(offset);
-            long address2 = address(writePosition());
-            assert address != 0;
-            assert address2 != 0;
-            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-            if (len > 0) {
-                writeCheckOffset(writePosition(), len);
-                OS.memory().copyMemory(address, address2, len);
-                writeSkip(len);
-            }
+    public NativeBytes writeSome(@NotNull Bytes bytes) {
+        try {
+            long length = Math.min(bytes.readRemaining(), writeRemaining());
+            if (length + writePosition() >= 1 << 20)
+                length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+            long offset = bytes.readPosition();
+            long position = writePosition();
+            ensureCapacity(position + length);
+            if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
+                long address = bytes.addressForRead(offset);
+                long address2 = addressForWrite(writePosition());
+                assert address != 0;
+                assert address2 != 0;
+                long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+                if (len > 0) {
+                    writeCheckOffset(writePosition(), len);
+                    OS.memory().copyMemory(address, address2, len);
+                    writeSkip(len);
+                }
 
-        } else {
-            super.write(bytes, offset, length);
+            } else {
+                super.write(bytes, offset, length);
+            }
+            if (length == bytes.readRemaining()) {
+                bytes.clear();
+            } else {
+                bytes.readSkip(length);
+                if (bytes.writePosition() > bytes.realCapacity() / 2)
+                    bytes.compact();
+            }
+            return this;
+        } catch (IllegalArgumentException | BufferUnderflowException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
-        if (length == bytes.readRemaining()) {
-            bytes.clear();
-        } else {
-            bytes.readSkip(length);
-            if (bytes.writePosition() > bytes.realCapacity() / 2)
-                bytes.compact();
-        }
-        return this;
     }
 
     @Override

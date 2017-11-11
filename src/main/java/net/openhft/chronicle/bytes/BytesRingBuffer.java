@@ -23,6 +23,7 @@ import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
+import java.nio.BufferOverflowException;
 
 /**
  * @author Rob Austin.
@@ -86,10 +87,10 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
      *
      * @param using Bytes to read into.
      * @return false if this queue is empty, or a populated buffer if the element was retried
-     * @throws IllegalStateException is the {@code using} buffer is not large enough
+     * @throws BufferOverflowException is the {@code using} buffer is not large enough
      */
     @Override
-    boolean read(@NotNull BytesOut using) throws IllegalStateException;
+    boolean read(@NotNull BytesOut using) throws BufferOverflowException;
 
     long readRemaining();
 

@@ -156,9 +156,13 @@ public enum BytesUtil {
 
     // used by Chronicle FIX.
     public static void appendBytesFromStart(@org.jetbrains.annotations.NotNull Bytes bytes, long startPosition, @org.jetbrains.annotations.NotNull StringBuilder sb) {
-        BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
-        sb.append('\u2016');
-        sb.append(bytes);
+        try {
+            BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
+            sb.append('\u2016');
+            sb.append(bytes);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
     }
 
     public static void readMarshallable(@org.jetbrains.annotations.NotNull ReadBytesMarshallable marshallable, BytesIn bytes) {

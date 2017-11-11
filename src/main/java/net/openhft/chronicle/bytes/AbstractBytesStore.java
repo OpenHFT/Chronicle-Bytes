@@ -19,13 +19,15 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 
+import java.nio.BufferUnderflowException;
+
 /*
  * Created by Peter Lawrey on 07/05/16.
  */
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         implements BytesStore<B, Underlying> {
     @Override
-    public int peekUnsignedByte(long offset) {
+    public int peekUnsignedByte(long offset) throws BufferUnderflowException {
         return offset >= readLimit() ? -1 : readUnsignedByte(offset);
     }
 

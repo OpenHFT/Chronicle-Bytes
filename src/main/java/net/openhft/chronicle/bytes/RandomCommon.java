@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 interface RandomCommon extends ReferenceCounted {
@@ -91,15 +92,26 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Obtain the underlying address.  This is for expert users only.
+     * Obtain the underlying addressForRead.  This is for expert users only.
      *
-     * @param offset within this buffer. address(start()) is the actual address of the first byte.
-     * @return the underlying address of the buffer
+     * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
+     * @return the underlying addressForRead of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
-     * @throws IllegalArgumentException      if the offset is before the start() or the after the capacity()
+     * @throws BufferUnderflowException      if the offset is before the start() or the after the capacity()
      */
-    long address(long offset)
-            throws UnsupportedOperationException, IllegalArgumentException;
+    long addressForRead(long offset)
+            throws UnsupportedOperationException, BufferUnderflowException;
+
+    /**
+     * Obtain the underlying addressForRead.  This is for expert users only.
+     *
+     * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
+     * @return the underlying addressForRead of the buffer
+     * @throws UnsupportedOperationException if the underlying buffer is on the heap
+     * @throws BufferOverflowException       if the offset is before the start() or the after the capacity()
+     */
+    long addressForWrite(long offset)
+            throws UnsupportedOperationException, BufferOverflowException;
 
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
@@ -126,7 +138,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapInt(long offset, int expected, int value)
-            throws BufferOverflowException, IllegalArgumentException;
+            throws BufferOverflowException;
 
     /**
      * Perform a 64-bit CAS at a given offset.
@@ -137,7 +149,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapLong(long offset, long expected, long value)
-            throws BufferOverflowException, IllegalArgumentException;
+            throws BufferOverflowException;
 
     /**
      * Perform a 32-bit float CAS at a given offset.
@@ -148,7 +160,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapFloat(long offset, float expected, float value)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
     }
 
@@ -161,7 +173,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapDouble(long offset, double expected, double value)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 

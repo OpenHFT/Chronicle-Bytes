@@ -374,7 +374,12 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long address(long offset) throws UnsupportedOperationException {
+    public long addressForRead(long offset) throws UnsupportedOperationException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long addressForWrite(long offset) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 

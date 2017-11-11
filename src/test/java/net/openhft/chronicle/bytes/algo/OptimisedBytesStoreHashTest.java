@@ -209,7 +209,7 @@ public class OptimisedBytesStoreHashTest {
 
         for (int i = 0; i <= 8; i++) {
             assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),
-                    Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.address(0), i)));
+                    Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)));
             bs2.writeUnsignedByte(i + 1);
         }
         bs.release();

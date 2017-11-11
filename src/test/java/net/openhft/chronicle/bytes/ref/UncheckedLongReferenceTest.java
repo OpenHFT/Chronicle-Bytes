@@ -39,7 +39,7 @@ public class UncheckedLongReferenceTest {
         assertFalse(ref.compareAndSwapValue(0, 1));
         assertTrue(ref.compareAndSwapValue(-1, 2));
         assertEquals(8, ref.maxSize());
-        assertEquals(nbs.address(16), ref.offset());
+        assertEquals(nbs.addressForRead(16), ref.offset());
         try {
             assertEquals(nbs, ref.bytesStore());
             fail();

@@ -189,7 +189,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         if (offset < 0 || offset > capacity() - adding)
-            throw writeIllegalArgumentException(offset);
+            throw writeBufferOverflowException(offset);
         if (!bytesStore.inside(offset)) {
             acquireNextByteStore(offset, false);
         }
@@ -197,8 +197,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    private IllegalArgumentException writeIllegalArgumentException(long offset) {
-        return new IllegalArgumentException("Offset out of bound " + offset);
+    private BufferOverflowException writeBufferOverflowException(long offset) {
+        BufferOverflowException exception = new BufferOverflowException();
+        exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
+        return exception;
     }
 
     private void acquireNextByteStore(long offset, boolean set) {
@@ -264,7 +266,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> writeByte(byte i8) throws BufferOverflowException {
         long oldPosition = writePosition;
         if (writePosition < 0 || writePosition > capacity() - (long) 1)
-            throw writeIllegalArgumentException(writePosition);
+            throw writeBufferOverflowException(writePosition);
         if (!bytesStore.inside(writePosition)) {
             acquireNextByteStore(writePosition, false);
         }
@@ -274,7 +276,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
-    protected void performRelease() {
+    protected void performRelease() throws IllegalStateException {
         super.performRelease();
         mappedFile.release();
     }
@@ -308,7 +310,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws BufferOverflowException, BufferUnderflowException {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
-            OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
+            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             uncheckedWritePosition(writePosition() + len);
         }
     }
@@ -354,10 +356,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    private MappedBytes append8bit0(@NotNull String s, int start, int length) {
+    private MappedBytes append8bit0(@NotNull String s, int start, int length) throws BufferOverflowException {
         if (Jvm.isJava9Plus()) {
             byte[] bytes = StringUtils.extractBytes(s);
-            long address = address(writePosition());
+            long address = addressForWrite(writePosition());
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
@@ -375,7 +377,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             writeSkip(length);
         } else {
             char[] chars = StringUtils.extractChars(s);
-            long address = address(writePosition());
+            long address = addressForWrite(writePosition());
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
@@ -409,7 +411,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         if (Jvm.isJava9Plus()) {
             byte[] bytes = StringUtils.extractBytes((String) cs);
-            long address = address(pos);
+            long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
             non_ascii:
@@ -431,7 +433,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             }
         } else {
             char[] chars = StringUtils.extractChars((String) cs);
-            long address = address(pos);
+            long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
             non_ascii:

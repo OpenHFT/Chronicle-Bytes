@@ -197,7 +197,7 @@ public enum AppendableUtil {
     }
 
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IOException {
         if (appendable instanceof StringBuilder) {
             @org.jetbrains.annotations.NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {

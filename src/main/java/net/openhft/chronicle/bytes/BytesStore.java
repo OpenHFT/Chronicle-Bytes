@@ -21,12 +21,10 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.ShortBufferException;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -78,7 +76,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @return a PointerBytesStore which can be set to any address
+     * @return a PointerBytesStore which can be set to any addressForRead
      */
     @NotNull
     static PointerBytesStore nativePointer() {
@@ -86,7 +84,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Return the address and length as a BytesStore
+     * Return the addressForRead and length as a BytesStore
      *
      * @param address for the start
      * @param length  of data
@@ -115,16 +113,21 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a copy of this BytesStore.
      */
-    BytesStore<B, Underlying> copy() throws IllegalArgumentException;
+    BytesStore<B, Underlying> copy();
 
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
+     * @throws IllegalStateException if this Bytes has been released.
      */
     @Override
     @NotNull
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
-        return bytesForWrite()
-                .readLimit(writeLimit());
+        try {
+            return bytesForWrite()
+                    .readLimit(writeLimit());
+        } catch (BufferUnderflowException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -186,15 +189,19 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param store to copy to
      * @return how many bytes were copied
      */
-    default long copyTo(@NotNull BytesStore store) throws IllegalStateException {
+    default long copyTo(@NotNull BytesStore store) {
         long readPos = readPosition();
         long writePos = store.writePosition();
         long copy = min(readRemaining(), store.capacity());
         long i = 0;
-        for (; i < copy - 7; i += 8)
-            store.writeLong(writePos + i, readLong(readPos + i));
-        for (; i < copy; i++)
-            store.writeByte(writePos + i, readByte(readPos + i));
+        try {
+            for (; i < copy - 7; i += 8)
+                store.writeLong(writePos + i, readLong(readPos + i));
+            for (; i < copy; i++)
+                store.writeByte(writePos + i, readByte(readPos + i));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
         return copy;
     }
 
@@ -211,18 +218,22 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default B zeroOut(long start, long end) throws IllegalArgumentException {
+    default B zeroOut(long start, long end) {
         if (end <= start)
             return (B) this;
         if (start < start())
-            throw new IllegalArgumentException(start + " < " + start());
+            start = start();
         if (end > capacity())
-            throw new IllegalArgumentException(end + " > " + capacity());
+            end = capacity();
         long i = start;
-        for (; i < end - 7; i += 8L)
-            writeLong(i, 0L);
-        for (; i < end; i++)
-            writeByte(i, 0);
+        try {
+            for (; i < end - 7; i += 8L)
+                writeLong(i, 0L);
+            for (; i < end; i++)
+                writeByte(i, 0);
+        } catch (BufferOverflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
         return (B) this;
     }
 
@@ -304,8 +315,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default int byteCheckSum() throws IORuntimeException {
         byte b = 0;
-        for (long i = readPosition(); i < readLimit(); i++)
-            b += readByte(i);
+        try {
+            for (long i = readPosition(); i < readLimit(); i++)
+                b += readByte(i);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
         return b & 0xFF;
     }
 
@@ -317,10 +332,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default long longCheckSum() {
         long sum = 0;
         long i;
-        for (i = readPosition(); i < readLimit() - 7; i += 8)
-            sum += readLong(i);
-        if (i < readLimit())
-            sum += readIncompleteLong(i);
+        try {
+            for (i = readPosition(); i < readLimit() - 7; i += 8)
+                sum += readLong(i);
+            if (i < readLimit())
+                sum += readIncompleteLong(i);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
         return sum;
     }
 
@@ -331,7 +350,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return true if its the last character.
      */
     default boolean endsWith(char c) {
-        return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
+        try {
+            return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -341,7 +364,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return true if its the last character.
      */
     default boolean startsWith(char c) {
-        return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
+        try {
+            return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -370,10 +397,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default byte addAndGetByteNotAtomic(long offset, byte adding) {
-        byte r = (byte) (readByte(offset) + adding);
-        writeByte(offset, r);
-        return r;
+    default byte addAndGetByteNotAtomic(long offset, byte adding) throws BufferUnderflowException {
+        try {
+            byte r = (byte) (readByte(offset) + adding);
+            writeByte(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -384,10 +415,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetUnsignedByteNotAtomic(long offset, int adding) {
-        int r = (readUnsignedByte(offset) + adding) & 0xFF;
-        writeByte(offset, (byte) r);
-        return r;
+    default int addAndGetUnsignedByteNotAtomic(long offset, int adding) throws BufferUnderflowException {
+        try {
+            int r = (readUnsignedByte(offset) + adding) & 0xFF;
+            writeByte(offset, (byte) r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -397,10 +432,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default short addAndGetShortNotAtomic(long offset, short adding) {
-        short r = (short) (readShort(offset) + adding);
-        writeByte(offset, r);
-        return r;
+    default short addAndGetShortNotAtomic(long offset, short adding) throws BufferUnderflowException {
+        try {
+            short r = (short) (readShort(offset) + adding);
+            writeByte(offset, r);
+            return r;
+        } catch (BufferOverflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -411,10 +450,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetUnsignedShortNotAtomic(long offset, int adding) {
-        int r = (readUnsignedShort(offset) + adding) & 0xFFFF;
-        writeShort(offset, (short) r);
-        return r;
+    default int addAndGetUnsignedShortNotAtomic(long offset, int adding) throws BufferUnderflowException {
+        try {
+            int r = (readUnsignedShort(offset) + adding) & 0xFFFF;
+            writeShort(offset, (short) r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -424,10 +467,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetIntNotAtomic(long offset, int adding) {
-        int r = readInt(offset) + adding;
-        writeInt(offset, r);
-        return r;
+    default int addAndGetIntNotAtomic(long offset, int adding) throws BufferUnderflowException {
+        try {
+            int r = readInt(offset) + adding;
+            writeInt(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -438,10 +485,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default long addAndGetUnsignedIntNotAtomic(long offset, long adding) {
-        long r = (readUnsignedInt(offset) + adding) & 0xFFFFFFFFL;
-        writeInt(offset, (int) r);
-        return r;
+    default long addAndGetUnsignedIntNotAtomic(long offset, int adding) throws BufferUnderflowException {
+        try {
+            int r = readInt(offset) + adding;
+            writeInt(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -451,10 +502,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default long addAndGetLongNotAtomic(long offset, long adding) {
-        long r = readLong(offset) + adding;
-        writeLong(offset, r);
-        return r;
+    default long addAndGetLongNotAtomic(long offset, long adding) throws BufferUnderflowException {
+        try {
+            long r = readLong(offset) + adding;
+            writeLong(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -464,10 +519,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default float addAndGetFloatNotAtomic(long offset, float adding) {
-        float r = readFloat(offset) + adding;
-        writeFloat(offset, r);
-        return r;
+    default float addAndGetFloatNotAtomic(long offset, float adding) throws BufferUnderflowException {
+        try {
+            float r = readFloat(offset) + adding;
+            writeFloat(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -477,10 +536,14 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default double addAndGetDoubleNotAtomic(long offset, double adding) {
-        double r = readDouble(offset) + adding;
-        writeDouble(offset, r);
-        return r;
+    default double addAndGetDoubleNotAtomic(long offset, double adding) throws BufferUnderflowException {
+        try {
+            double r = readDouble(offset) + adding;
+            writeDouble(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -488,7 +551,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param isPresent if there is data, or false if not.
      */
-    default void isPresent(boolean isPresent) {
+    default void isPresent(boolean isPresent) throws IllegalArgumentException {
         if (!isPresent)
             throw new IllegalArgumentException("isPresent=" + false + " not supported");
     }
@@ -500,7 +563,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return true;
     }
 
-    void move(long from, long to, long length);
+    void move(long from, long to, long length) throws BufferUnderflowException;
 
     /**
      * Write a value which is not smaller.
@@ -508,13 +571,17 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param offset  to write to
      * @param atLeast value it is at least.
      */
-    default void writeMaxLong(long offset, long atLeast) {
-        for (; ; ) {
-            long v = readVolatileLong(offset);
-            if (v >= atLeast)
-                return;
-            if (compareAndSwapLong(offset, v, atLeast))
-                return;
+    default void writeMaxLong(long offset, long atLeast) throws BufferUnderflowException {
+        try {
+            for (; ; ) {
+                long v = readVolatileLong(offset);
+                if (v >= atLeast)
+                    return;
+                if (compareAndSwapLong(offset, v, atLeast))
+                    return;
+            }
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -522,7 +589,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return readRemaining() == 0;
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2) {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2) throws IllegalStateException {
         long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
@@ -543,14 +610,19 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             len += cipher.doFinal(using1, using2);
             assert len == using2.position();
             outBytes.writePosition(writePos + using2.position());
-        } catch (@NotNull ShortBufferException | IllegalBlockSizeException | BadPaddingException e) {
+
+        } catch (@NotNull Exception e) {
             throw new IllegalStateException(e);
         } finally {
-            outBytes.readPosition(readPos);
+            try {
+                outBytes.readPosition(readPos);
+            } catch (BufferUnderflowException e) {
+                throw new IllegalStateException(e);
+            }
         }
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes) {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes) throws IllegalStateException {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
 

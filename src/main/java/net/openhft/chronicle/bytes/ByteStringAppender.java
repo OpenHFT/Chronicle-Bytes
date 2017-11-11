@@ -62,7 +62,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @Override
     @NotNull
     default B append(@NotNull CharSequence cs) throws BufferOverflowException {
-        return append(cs, 0, cs.length());
+        try {
+            return append(cs, 0, cs.length());
+        } catch (IndexOutOfBoundsException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -185,12 +189,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException {
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
         return append8bit(cs, 0, cs.length());
     }
 
     default B append8bit(@NotNull String cs)
-            throws BufferOverflowException, BufferUnderflowException {
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
         return append8bit(cs, 0, cs.length());
     }
 

@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.util.function.IntSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -41,23 +43,31 @@ public class TextIntReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
-    public static void write(@NotNull Bytes bytes, int value) {
+    public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
         long position = bytes.writePosition();
         bytes.write(template);
-        bytes.append(position + VALUE, value, DIGITS);
+        try {
+            bytes.append(position + VALUE, value, DIGITS);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    private int withLock(@NotNull IntSupplier call) {
+    private int withLock(@NotNull IntSupplier call) throws BufferUnderflowException {
         long valueOffset = offset + LOCKED;
         int value = bytes.readVolatileInt(valueOffset);
         if (value != FALSE && value != TRUE)
             throw new IllegalStateException();
-        while (true) {
-            if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
-                int t = call.getAsInt();
-                bytes.writeOrderedInt(valueOffset, FALSE);
-                return t;
+        try {
+            while (true) {
+                if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
+                    int t = call.getAsInt();
+                    bytes.writeOrderedInt(valueOffset, FALSE);
+                    return t;
+                }
             }
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 

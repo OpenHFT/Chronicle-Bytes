@@ -47,7 +47,7 @@ public interface RandomDataInput extends RandomCommon {
         return charToString;
     }
 
-    default int peekVolatileInt() {
+    default int peekVolatileInt() throws BufferUnderflowException {
         return readVolatileInt(readPosition());
     }
 
@@ -91,7 +91,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the unsigned byte or -1
      */
-    int peekUnsignedByte(long offset);
+    int peekUnsignedByte(long offset) throws BufferUnderflowException;
 
     /**
      * Read a short at an offset
@@ -377,7 +377,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return ByteStore copy.
      */
     @NotNull
-    default BytesStore subBytes(long start, long length) {
+    default BytesStore subBytes(long start, long length) throws BufferUnderflowException {
         return BytesInternal.subBytes(this, start, length);
     }
 
@@ -525,21 +525,29 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     default long read(long offsetInRDI, byte[] bytes, int offset, int length) {
-        int len = (int) Math.min(length, readLimit() - offsetInRDI);
-        for (int i = 0; i < len; i++)
-            bytes[offset + i] = readByte(offsetInRDI + i);
-        return len;
+        try {
+            int len = (int) Math.min(length, readLimit() - offsetInRDI);
+            for (int i = 0; i < len; i++)
+                bytes[offset + i] = readByte(offsetInRDI + i);
+            return len;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    default ByteBuffer toTemporaryDirectByteBuffer() {
+    default ByteBuffer toTemporaryDirectByteBuffer() throws IllegalArgumentException {
         int len = Maths.toUInt31(readRemaining());
-        ByteBuffer bb = ByteBuffer.allocateDirect(len);
-        copyTo(bb);
-        bb.clear();
-        return bb;
+        try {
+            ByteBuffer bb = ByteBuffer.allocateDirect(len);
+            copyTo(bb);
+            bb.clear();
+            return bb;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    default int fastHash(long offset, int length) {
+    default int fastHash(long offset, int length) throws BufferUnderflowException {
         long hash = 0;
         int i = 0;
         if (length >= 4) {

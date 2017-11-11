@@ -35,8 +35,8 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> zeroOut(long start, long end) throws IllegalArgumentException {
-        throw checkReadOnly();
+    public NativeBytesStore<Void> zeroOut(long start, long end) {
+        return this;
     }
 
     @Override
@@ -170,7 +170,7 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
         throw checkReadOnly();
     }
 
-    private IllegalStateException checkReadOnly() {
+    private IllegalStateException checkReadOnly() throws IllegalStateException {
         throw new IllegalStateException("Read Only");
     }
 

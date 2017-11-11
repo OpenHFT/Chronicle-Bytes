@@ -34,7 +34,7 @@ public class PointerBytesStoreTest {
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
 
         @NotNull PointerBytesStore pbs = BytesStore.nativePointer();
-        pbs.set(nbs.address(nbs.start()), nbs.realCapacity());
+        pbs.set(nbs.addressForRead(nbs.start()), nbs.realCapacity());
 
         long nanoTime = System.nanoTime();
         pbs.writeLong(0L, nanoTime);

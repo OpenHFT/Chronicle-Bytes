@@ -27,8 +27,12 @@ public class HexDumpBytes implements Bytes {
     }
 
     HexDumpBytes(BytesStore base, Bytes text) {
-        this.base.write(base);
-        this.text.write(text);
+        try {
+            this.base.write(base);
+            this.text.write(text);
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public static HexDumpBytes fromText(Reader reader) {
@@ -41,6 +45,8 @@ public class HexDumpBytes implements Bytes {
                 else
                     sc.nextLine(); // assume it's a comment
             }
+        } catch (BufferOverflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
         }
         return tb;
     }
@@ -167,17 +173,22 @@ public class HexDumpBytes implements Bytes {
     }
 
     @Override
-    public long address(long offset) throws UnsupportedOperationException, IllegalArgumentException {
+    public long addressForRead(long offset) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException, IllegalArgumentException {
+    public long addressForWrite(long offset) throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalArgumentException {
+    public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 

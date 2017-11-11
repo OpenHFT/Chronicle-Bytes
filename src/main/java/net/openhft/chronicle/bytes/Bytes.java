@@ -155,7 +155,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
-    static Bytes<byte[]> from(@NotNull CharSequence text) throws IllegalArgumentException, IllegalStateException {
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
         if (text instanceof BytesStore)
             return ((BytesStore) text).copy().bytesForRead();
         return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));

@@ -35,7 +35,7 @@ public class UncheckedLongReference implements LongReference {
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
-        address = bytes.address(offset);
+        address = bytes.addressForRead(offset);
         unsafe = UnsafeMemory.UNSAFE;
     }
 
@@ -57,7 +57,7 @@ public class UncheckedLongReference implements LongReference {
 
     @NotNull
     public String toString() {
-        return address == 0 ? "address is 0" : "value: " + getValue();
+        return address == 0 ? "addressForRead is 0" : "value: " + getValue();
     }
 
     @Override

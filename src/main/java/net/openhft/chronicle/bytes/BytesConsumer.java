@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import java.nio.BufferOverflowException;
+
 @FunctionalInterface
 public interface BytesConsumer {
 
@@ -26,6 +28,6 @@ public interface BytesConsumer {
      * @param bytes to read into
      * @return false if this queue is empty
      */
-    boolean read(BytesOut bytes);
+    boolean read(BytesOut bytes) throws BufferOverflowException;
 
 }

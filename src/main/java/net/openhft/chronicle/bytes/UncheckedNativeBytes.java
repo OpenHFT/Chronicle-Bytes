@@ -214,7 +214,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
-            OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
+            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             writeSkip(len);
         }
     }
@@ -763,10 +763,17 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
+
     @Override
-    public long address(long offset) {
-        return bytesStore.address(offset);
+    public long addressForRead(long offset) throws BufferUnderflowException {
+        return bytesStore.addressForRead(offset);
     }
+
+    @Override
+    public long addressForWrite(long offset) throws BufferOverflowException {
+        return bytesStore.addressForWrite(offset);
+    }
+
 
     @Override
     public int hashCode() {
@@ -850,22 +857,26 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         }
         int length = cs.length();
         long offset = writeOffsetPositionMoved(length);
-        long address = bytesStore.address(offset);
+        long address = bytesStore.addressForWrite(offset);
         @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
-        int i = 0;
-        for (; i < length - 1; i += 2) {
-            char c = cs.charAt(i);
-            char c2 = cs.charAt(i + 1);
-            memory.writeByte(address + i, (byte) c);
-            memory.writeByte(address + i + 1, (byte) c2);
-        }
-        for (; i < length; i++) {
-            char c = cs.charAt(i);
-            memory.writeByte(address + i, (byte) c);
-        }
+        try {
+            int i = 0;
+            for (; i < length - 1; i += 2) {
+                char c = cs.charAt(i);
+                char c2 = cs.charAt(i + 1);
+                memory.writeByte(address + i, (byte) c);
+                memory.writeByte(address + i + 1, (byte) c2);
+            }
+            for (; i < length; i++) {
+                char c = cs.charAt(i);
+                memory.writeByte(address + i, (byte) c);
+            }
 
-        return this;
+            return this;
+        } catch (IndexOutOfBoundsException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull

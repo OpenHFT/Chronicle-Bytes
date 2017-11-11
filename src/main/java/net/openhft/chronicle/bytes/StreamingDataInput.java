@@ -220,7 +220,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default boolean read8bit(@NotNull Bytes b)
-            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
+            throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
         b.clear();
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -238,7 +238,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        AppendableUtil.parse8bit(this, sb, len);
+        try {
+            AppendableUtil.parse8bit(this, sb, len);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
         return true;
     }
 
@@ -249,7 +253,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        AppendableUtil.parse8bit(this, sb, len);
+        try {
+            AppendableUtil.parse8bit(this, sb, len);
+        } catch (IOException e) {
+            throw new IORuntimeException(e);
+        }
         return true;
     }
 

@@ -37,7 +37,7 @@ class ByteStringWriter extends Writer {
         try {
             out.append((char) c);
 
-        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
+        } catch (@NotNull BufferOverflowException e) {
             throw new IOException(e);
         }
     }
@@ -48,7 +48,7 @@ class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(String str, int off, int len) throws IndexOutOfBoundsException, IOException {
+    public void write(String str, int off, int len) throws IOException {
         out.append(str, off, off + len);
     }
 
@@ -61,7 +61,7 @@ class ByteStringWriter extends Writer {
 
     @NotNull
     @Override
-    public Writer append(@NotNull CharSequence csq, int start, int end) throws IndexOutOfBoundsException, IOException {
+    public Writer append(@NotNull CharSequence csq, int start, int end) throws IOException {
         out.append(csq, start, end);
         return this;
     }

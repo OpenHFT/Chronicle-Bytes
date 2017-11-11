@@ -202,7 +202,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         if (s == null)
             writeStopBit(-1);
         else
-            write8bit(s, 0, s.length());
+            write8bit(s, 0, (int) Math.min(writeRemaining(), s.length()));
         return (S) this;
     }
 
@@ -211,7 +211,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write8bit(@org.jetbrains.annotations.NotNull @NotNull BytesStore sdi)
             throws BufferOverflowException {
         long offset = sdi.readPosition();
-        long readRemaining = sdi.readLimit() - offset;
+        long readRemaining = Math.min(writeRemaining(), sdi.readLimit() - offset);
         writeStopBit(readRemaining);
         write(sdi, offset, readRemaining);
         return (S) this;
@@ -282,31 +282,37 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes)
-            throws BufferOverflowException {
+    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes) {
         assert bytes != this : "you should not write to yourself !";
 
-        return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
+        try {
+            return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     long realCapacity();
 
     @org.jetbrains.annotations.NotNull
     @NotNull
-    default S writeSome(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes)
-            throws BufferOverflowException {
-        long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1 << 20)
-            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-        write(bytes, bytes.readPosition(), length);
-        if (length == bytes.readRemaining()) {
-            bytes.clear();
-        } else {
-            bytes.readSkip(length);
-            if (bytes.writePosition() > bytes.realCapacity() / 2)
-                bytes.compact();
+    default S writeSome(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes) {
+        try {
+            long length = Math.min(bytes.readRemaining(), writeRemaining());
+            if (length + writePosition() >= 1 << 20)
+                length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+            write(bytes, bytes.readPosition(), length);
+            if (length == bytes.readRemaining()) {
+                bytes.clear();
+            } else {
+                bytes.readSkip(length);
+                if (bytes.writePosition() > bytes.realCapacity() / 2)
+                    bytes.compact();
+            }
+            return (S) this;
+        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
         }
-        return (S) this;
     }
 
     /**
@@ -315,7 +321,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     @NotNull
     default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes, long offset, long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
+            throws BufferOverflowException, BufferUnderflowException {
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
@@ -332,7 +338,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @org.jetbrains.annotations.NotNull
     @NotNull
-    S write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException;
+    S write(byte[] bytes, int offset, int length) throws BufferOverflowException;
 
     @org.jetbrains.annotations.NotNull
     @NotNull

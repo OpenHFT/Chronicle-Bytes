@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.Reader;
 import java.math.BigDecimal;
-import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
@@ -81,12 +80,12 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharTester to check if the end has been reached.
      */
     @ForceInline
-    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
+    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) throws BufferUnderflowException {
         BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
     @Deprecated
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) {
+    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) throws BufferUnderflowException {
         parseUtf8(buffer, stopCharTester);
     }
 
@@ -98,13 +97,13 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException {
         BytesInternal.parseUtf8(this, buffer, stopCharsTester);
     }
 
     @Deprecated
     default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException {
         parseUtf8(buffer, stopCharsTester);
     }
 
@@ -116,7 +115,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, BufferOverflowException {
+            throws BufferUnderflowException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
@@ -131,7 +130,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      */
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException {
+            throws BufferUnderflowException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else

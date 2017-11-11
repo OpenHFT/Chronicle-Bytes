@@ -165,7 +165,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
-            OS.memory().copyMemory(bytes.address(offset), address(writePosition()), len);
+            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             writeSkip(len);
         }
     }

@@ -128,8 +128,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     @NotNull
     default R writeInt24(long offset, int i) throws BufferOverflowException {
-        writeUnsignedShort(offset, i);
-        return writeUnsignedByte(offset + 2, i >> 16);
+        writeShort(offset, (short) i);
+        return writeByte(offset + 2, (byte) (i >> 16));
     }
 
     /**
@@ -246,20 +246,15 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     @NotNull
     default R write(long offsetInRDO, @NotNull byte[] bytes) throws BufferOverflowException {
-        try {
             return write(offsetInRDO, bytes, 0, bytes.length);
-
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @NotNull
     R write(long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException;
+            throws BufferOverflowException;
 
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
-            throws BufferOverflowException, IllegalArgumentException;
+            throws BufferOverflowException;
 
     @NotNull
     default R write(long offsetInRDO, @NotNull BytesStore bytes)
@@ -274,7 +269,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     @NotNull
     R write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
-            throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException;
+            throws BufferOverflowException, BufferUnderflowException;
 
     /**
      * Zero out the bytes between the start and the end.
@@ -285,17 +280,17 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R zeroOut(long start, long end) throws IllegalArgumentException;
+    R zeroOut(long start, long end);
 
     @NotNull
     default R append(long offset, long value, int digits)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
     
     @NotNull
-    default R append(long offset, double value, int decimalPlaces, int digits) throws BufferOverflowException, IllegalArgumentException {
+    default R append(long offset, double value, int decimalPlaces, int digits) throws BufferOverflowException {
         if (decimalPlaces < 20) {
             double d2 = value * Maths.tens(decimalPlaces);
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
@@ -314,7 +309,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param position in BytesStore to copy to
      * @param size     in bytes
      */
-    void nativeWrite(long address, long position, long size);
+    void nativeWrite(long address, long position, long size) throws BufferOverflowException;
 
     /**
      * Writes the given {@code cs} to this {@code RandomDataOutput} from the given {@code offset},
@@ -346,7 +341,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
     default long writeUtf8Limited(long offset, @Nullable CharSequence cs, int maxUtf8Len)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException {
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
 
