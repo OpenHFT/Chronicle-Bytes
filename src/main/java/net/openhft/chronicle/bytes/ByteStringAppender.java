@@ -85,6 +85,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    @NotNull
+    default B appendBase16(long value) throws BufferOverflowException {
+        BytesInternal.appendBase16(this, value);
+        return (B) this;
+    }
+
     /**
      * Append a long in decimal with a given number of decimal places. Print value * 10^-decimalPlaces
      *

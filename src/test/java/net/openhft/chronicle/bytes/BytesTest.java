@@ -47,6 +47,7 @@ public class BytesTest {
 
     private Allocator alloc1;
     private ThreadDump threadDump;
+
     public BytesTest(String name, Allocator alloc1) {
         this.alloc1 = alloc1;
     }
@@ -701,5 +702,29 @@ public class BytesTest {
 
         b.release();
         b2.release();
+    }
+
+    @Test
+    public void testAppendBase() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
+            for (int base : new int[]{10, 16}) {
+                String s = Long.toString(value, base);
+                b.clear().appendBase(value, base);
+                assertEquals(s, b.toString());
+            }
+        }
+        b.release();
+    }
+
+    @Test
+    public void testAppendBase16() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
+            String s = Long.toHexString(value).toUpperCase();
+            b.clear().appendBase16(value);
+            assertEquals(s, b.toString());
+        }
+        b.release();
     }
 }

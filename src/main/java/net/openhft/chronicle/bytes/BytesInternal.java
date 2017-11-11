@@ -44,9 +44,7 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
-import static net.openhft.chronicle.core.util.StringUtils.extractChars;
-import static net.openhft.chronicle.core.util.StringUtils.setCount;
+import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
  * Utility methods to support common functionality in this package. This is not intended to be
@@ -54,7 +52,7 @@ import static net.openhft.chronicle.core.util.StringUtils.setCount;
  */
 enum BytesInternal {
     ;
-    static final char[] HEXI_DECIMAL = "0123456789ABCDEF".toCharArray();
+    static final char[] HEXADECIMAL = "0123456789ABCDEF".toCharArray();
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
@@ -397,7 +395,7 @@ enum BytesInternal {
                     byte c = memory.readByte(address + count);
                     if (c < 0)
                         break;
-                    sb.setCharAt(count++, (char)c); // This is not as fast as it could be.
+                    sb.setCharAt(count++, (char) c); // This is not as fast as it could be.
                 }
             } else {
                 char[] chars = extractChars(sb);
@@ -434,7 +432,7 @@ enum BytesInternal {
                     byte c = memory.readByte(address + count);
                     if (c < 0)
                         break;
-                    sb.setCharAt(count++, (char)c);
+                    sb.setCharAt(count++, (char) c);
                 }
             } else {
                 char[] chars = extractChars(sb);
@@ -1123,9 +1121,23 @@ enum BytesInternal {
         } else {
             if (base == 10)
                 appendLong0(out, num);
+            else if (base == 16)
+                appendBase16(out, num);
             else
                 out.write(Long.toString(num, base));
         }
+    }
+
+    public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
+            throws IllegalArgumentException, BufferOverflowException {
+        Bytes b = acquireBytes();
+        do {
+            int digit = (int) (num & 0xF);
+            num >>>= 4;
+            b.writeUnsignedByte(HEXADECIMAL[digit]);
+        } while (num > 0);
+        for (int i = (int) (b.writePosition() - 1); i >= 0; i--)
+            out.writeByte(b.readByte(i));
     }
 
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int decimalPlaces)
@@ -2235,8 +2247,8 @@ enum BytesInternal {
                     } else {
                         builder.append(' ');
                         int ch = bytes.readUnsignedByte(i + j);
-                        builder.append(HEXI_DECIMAL[ch >> 4]);
-                        builder.append(HEXI_DECIMAL[ch & 15]);
+                        builder.append(HEXADECIMAL[ch >> 4]);
+                        builder.append(HEXADECIMAL[ch & 15]);
                     }
                 }
                 builder.append(' ');
@@ -2497,6 +2509,11 @@ enum BytesInternal {
         byteBuffer.clear();
     }
 
+    private static boolean canReadBytesAt(
+            final BytesStore bs, final long offset, final int length) {
+        return bs.readLimit() - offset >= length;
+    }
+
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
@@ -2507,10 +2524,5 @@ enum BytesInternal {
         DateCache() {
             dateFormat.setTimeZone(TimeZone.getTimeZone("GMT"));
         }
-    }
-
-    private static boolean canReadBytesAt(
-            final BytesStore bs, final long offset, final int length) {
-        return bs.readLimit() - offset >= length;
     }
 }
