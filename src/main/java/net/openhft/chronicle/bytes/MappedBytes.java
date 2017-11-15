@@ -162,7 +162,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         if (writeLimit < limit)
             writeLimit(limit);
-        readLimit(limit);
+
+        boolean debug = false;
+        assert debug = true;
+        if (debug)
+            readLimit(limit);
+        else
+            uncheckedWritePosition(limit);
+
         return readPosition(position);
     }
 
@@ -556,4 +563,5 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
         return this;
     }
+
 }

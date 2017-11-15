@@ -211,16 +211,23 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> readLimit(long limit) throws BufferUnderflowException {
-        if (limit < start()) {
-            throw new DecoratedBufferUnderflowException(
-                    String.format("readLimit failed. Limit: %d < start: %d", limit, start()));
-        }
-        if (limit > writeLimit()) {
-            throw new DecoratedBufferUnderflowException(
-                    String.format("readLimit failed. Limit: %d > writeLimit: %d", limit, writeLimit()));
-        }
+        if (limit < start())
+            return limitLessThanStart(limit);
+        else if (limit > writeLimit())
+            return limitGreaterThanWriteLimit(limit);
+
         uncheckedWritePosition(limit);
         return this;
+    }
+
+    private Bytes<Underlying> limitGreaterThanWriteLimit(long limit) {
+        throw new DecoratedBufferUnderflowException(
+                String.format("readLimit failed. Limit: %d > writeLimit: %d", limit, writeLimit()));
+    }
+
+    private Bytes<Underlying> limitLessThanStart(long limit) {
+        throw new DecoratedBufferUnderflowException(
+                String.format("readLimit failed. Limit: %d < start: %d", limit, start()));
     }
 
     @NotNull
