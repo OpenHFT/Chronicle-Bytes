@@ -28,8 +28,8 @@ public class BinaryLongReference implements LongReference {
     @Nullable
     private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
     @Nullable
-    private BytesStore bytes;
-    private long offset;
+    protected BytesStore bytes;
+    protected long offset;
 
     /**
      * only used for testing
