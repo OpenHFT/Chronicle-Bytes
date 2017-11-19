@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
     @Override
     public long maxSize() {
-        return 16;
+        return 2 * 8;
     }
 
     @NotNull
