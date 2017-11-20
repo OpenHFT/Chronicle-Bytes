@@ -44,7 +44,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializePrimitives() throws IORuntimeException {
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
         bytes.comment("mb1").writeUnsignedByte(1);
@@ -86,7 +86,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializeScalars() throws IORuntimeException {
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
         @NotNull MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         @NotNull MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
         bytes.comment("mb1").writeUnsignedByte(1);
@@ -143,7 +143,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializeNested() throws IORuntimeException {
-        Bytes bytes = new HexDumpBytes();
+        Bytes<?> bytes = new HexDumpBytes();
 
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);

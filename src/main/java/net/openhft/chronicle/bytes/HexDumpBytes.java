@@ -13,9 +13,10 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 public class HexDumpBytes implements Bytes {
+
+    static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final int NUMBER_WRAP = 16;
     private static final int COMMENT_START = NUMBER_WRAP * 3;
-
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
     private final Bytes base = Bytes.elasticHeapByteBuffer(128);
     private final Bytes text = Bytes.elasticHeapByteBuffer(128);
@@ -147,7 +148,7 @@ public class HexDumpBytes implements Bytes {
     @Override
     @Nullable
     public BytesStore bytesStore() {
-        return this;
+        return base;
     }
 
     @Override
@@ -174,7 +175,7 @@ public class HexDumpBytes implements Bytes {
 
     @Override
     public long addressForRead(long offset) throws UnsupportedOperationException {
-        throw new UnsupportedOperationException();
+        return base.addressForRead(offset);
     }
 
     @Override
@@ -184,12 +185,20 @@ public class HexDumpBytes implements Bytes {
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        if (base.compareAndSwapInt(offset & 0xFFFFFFFFL, expected, value)) {
+            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+            return true;
+        }
+        return false;
     }
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        if (base.compareAndSwapLong(offset & 0xFFFFFFFFL, expected, value)) {
+            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+            return true;
+        }
+        return false;
     }
 
     @Override
@@ -239,13 +248,15 @@ public class HexDumpBytes implements Bytes {
     @Override
     @NotNull
     public RandomDataOutput writeInt(long offset, int i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        return writeOrderedInt(offset, i);
     }
 
     @Override
     @NotNull
     public RandomDataOutput writeOrderedInt(long offset, int i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeOrderedInt(offset & 0xFFFFFFFFL, i);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+        return this;
     }
 
     @Override
@@ -327,13 +338,15 @@ public class HexDumpBytes implements Bytes {
     @Override
     @NotNull
     public StreamingDataInput readLimit(long limit) throws BufferUnderflowException {
-        return base.readLimit(limit);
+        base.readLimit(limit);
+        return this;
     }
 
     @Override
     @NotNull
     public StreamingDataInput readSkip(long bytesToSkip) throws BufferUnderflowException {
-        return base.readSkip(bytesToSkip);
+        base.readSkip(bytesToSkip);
+        return this;
     }
 
     @Override
@@ -419,29 +432,33 @@ public class HexDumpBytes implements Bytes {
     @Override
     @NotNull
     public StreamingDataOutput writePosition(long position) throws BufferOverflowException {
-        return base.writePosition(position);
+        base.writePosition(position);
+        return this;
     }
 
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeLimit(long limit) throws BufferOverflowException {
-        return base.writeLimit(limit);
+        base.writeLimit(limit);
+        return this;
     }
 
     @Override
     @NotNull
     public StreamingDataOutput writeSkip(long bytesToSkip) throws BufferOverflowException {
-        return base.writeSkip(bytesToSkip);
+        base.writeSkip(bytesToSkip);
+        return this;
     }
 
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeByte(byte i8) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeByte(i8);
+            base.writeByte(i8);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -449,11 +466,12 @@ public class HexDumpBytes implements Bytes {
 
     @Override
     public long writePosition() {
-        return base.writePosition();
+        return base.writePosition() | (text.writePosition() << 32);
     }
 
     private void copyToText(long pos) {
-        if (pos < writePosition()) {
+        long end = base.writePosition();
+        if (pos < end) {
             doIndent();
             do {
                 int value = base.readUnsignedByte(pos++);
@@ -466,7 +484,19 @@ public class HexDumpBytes implements Bytes {
                 if (value < 16)
                     text.append('0');
                 text.appendBase(value, 16);
-            } while (pos < writePosition());
+            } while (pos < end);
+        }
+    }
+
+    private void copyToText(long pos, long tpos, int length) {
+        if (tpos > 0 && text.readUnsignedByte(tpos) <= ' ')
+            tpos++;
+        while (length-- > 0) {
+            int value = base.readUnsignedByte(pos++);
+            text.writeUnsignedByte(tpos++, HEXADECIMAL[value >> 4]);
+            text.writeUnsignedByte(tpos++, HEXADECIMAL[value & 0xF]);
+            if (length > 0)
+                text.writeUnsignedByte(tpos++, ' ');
         }
     }
 
@@ -482,9 +512,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeShort(short i16) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeShort(i16);
+            base.writeShort(i16);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -495,9 +526,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeInt(int i) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeInt(i);
+            base.writeInt(i);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -508,9 +540,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeIntAdv(int i, int advance) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeIntAdv(i, advance);
+            base.writeIntAdv(i, advance);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -521,9 +554,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeLong(long i64) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeLong(i64);
+            base.writeLong(i64);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -534,9 +568,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeLongAdv(long i64, int advance) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeLongAdv(i64, advance);
+            base.writeLongAdv(i64, advance);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -547,9 +582,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeFloat(float f) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeFloat(f);
+            base.writeFloat(f);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -560,9 +596,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeDouble(double d) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeDouble(d);
+            base.writeDouble(d);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -573,9 +610,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.write(bytes, offset, length);
+            base.write(bytes, offset, length);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -586,9 +624,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeSome(ByteBuffer buffer) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeSome(buffer);
+            base.writeSome(buffer);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -599,9 +638,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeOrderedInt(int i) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeOrderedInt(i);
+            base.writeOrderedInt(i);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -612,9 +652,10 @@ public class HexDumpBytes implements Bytes {
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput writeOrderedLong(long i) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.writeOrderedLong(i);
+            base.writeOrderedLong(i);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -623,9 +664,9 @@ public class HexDumpBytes implements Bytes {
 
     @Override
     public void nativeWrite(long address, long size) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            base.nativeWrite(address, size);
+            nativeWrite(address, size);
 
         } finally {
             copyToText(pos);
@@ -635,9 +676,10 @@ public class HexDumpBytes implements Bytes {
     @Override
     @NotNull
     public BytesPrepender clearAndPad(long length) throws BufferOverflowException {
-        long pos = writePosition();
+        long pos = base.writePosition();
         try {
-            return base.clearAndPad(length);
+            base.clearAndPad(length);
+            return this;
 
         } finally {
             copyToText(pos);
@@ -700,7 +742,6 @@ public class HexDumpBytes implements Bytes {
         return base.readInt(offset);
     }
 
-
     @Override
     public long readLong(long offset) throws BufferUnderflowException {
         return base.readLong(offset);
@@ -739,6 +780,11 @@ public class HexDumpBytes implements Bytes {
     @Override
     public void nativeRead(long position, long address, long size) throws BufferUnderflowException {
         base.nativeRead(position, address, size);
+    }
+
+    @Override
+    public long readPosition() {
+        return base.readPosition() | (text.readPosition() << 32);
     }
 
     private static class TextBytesReader extends Reader {
