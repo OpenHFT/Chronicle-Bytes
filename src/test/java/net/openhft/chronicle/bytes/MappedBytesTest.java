@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import org.junit.After;
 import org.junit.Test;
 
 import java.io.File;
@@ -44,5 +45,10 @@ public class MappedBytesTest {
         } finally {
             mb.release();
         }
+    }
+
+    @After
+    public void clearInterrupt() {
+        Thread.interrupted();
     }
 }

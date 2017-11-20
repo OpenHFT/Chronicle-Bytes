@@ -211,7 +211,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     // require protection from concurrent mutation to bytesStore field
-    private synchronized void acquireNextByteStore(long offset, boolean set) {
+    private synchronized void acquireNextByteStore(long offset, boolean set) throws BufferOverflowException {
         if (bytesStore.inside(offset))
             return;
 
