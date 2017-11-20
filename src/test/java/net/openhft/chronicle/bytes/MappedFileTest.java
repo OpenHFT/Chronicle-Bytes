@@ -139,6 +139,10 @@ public class MappedFileTest {
         } finally {
             mf.release();
         }
+    }
 
+    @After
+    public void clearInterrupt() {
+        Thread.interrupted();
     }
 }
