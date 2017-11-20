@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.util.Annotations;
+
 import java.lang.reflect.Method;
 import java.util.function.Function;
 
@@ -9,12 +11,8 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
     @Override
     public MethodEncoder apply(Method method) {
-        MethodId methodId = method.getAnnotation(MethodId.class);
-        if (methodId == null) {
-            methodId = findAnnotation(method.getDeclaringClass(), method.getName(), method.getParameterTypes());
-            if (methodId == null)
-                return null;
-        }
+        MethodId methodId = Annotations.getAnnotation(method, MethodId.class);
+        if (methodId == null) return null;
         long messageId = methodId.value();
         return new MethodEncoder() {
             @Override
@@ -42,31 +40,4 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
         };
     }
 
-    private MethodId findAnnotation(Class<?> aClass, String name, Class<?>[] parameterTypes) {
-        MethodId methodId = null;
-        try {
-            Method m = aClass.getMethod(name, parameterTypes);
-            methodId = m.getAnnotation(MethodId.class);
-            if (methodId != null)
-                return methodId;
-        } catch (NoSuchMethodException e) {
-            // ignored
-        }
-        Class<?> superclass = aClass.getSuperclass();
-        if (!(superclass == null || superclass == Object.class)) {
-            methodId = findAnnotation(superclass, name, parameterTypes);
-            if (methodId != null)
-                return methodId;
-        }
-        for (Class<?> iClass : aClass.getInterfaces()) {
-            methodId = findAnnotation(iClass, name, parameterTypes);
-            if (methodId != null)
-                return methodId;
-        }
-        return null;
-    }
-
-    private MethodId findAnnotation(Class aClass, Method method, Class<MethodId> methodIdClass) {
-        return null;
-    }
 }
