@@ -415,7 +415,7 @@ public class MappedFile implements ReferenceCounted {
             return fileChannel.size();
 
         } catch (IOException e) {
-            throw new IORuntimeException(e);
+            throw fileChannel.isOpen() ? new IORuntimeException(e) : new IllegalStateException(e);
         }
     }
 

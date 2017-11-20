@@ -23,6 +23,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
@@ -125,5 +126,19 @@ public class MappedFileTest {
         try (@NotNull MappedBytes bytes = MappedBytes.readOnly(file)) {
             Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void interrupted() throws FileNotFoundException {
+        Thread.currentThread().interrupt();
+        String filename = OS.TARGET + "/interrupted-" + System.nanoTime();
+        new File(filename).deleteOnExit();
+        MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0);
+        try {
+            mf.actualSize();
+        } finally {
+            mf.release();
+        }
+
     }
 }

@@ -1,8 +1,10 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.RandomAccessFile;
 
 import static org.junit.Assert.*;
@@ -29,5 +31,18 @@ public class MappedBytesTest {
         assertTrue(mappedBytes.
                 isBackingFileReadOnly());
         mappedBytes.release();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void interrupted() throws FileNotFoundException {
+        Thread.currentThread().interrupt();
+        File file = new File(OS.TARGET + "/interrupted-" + System.nanoTime());
+        file.deleteOnExit();
+        MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10);
+        try {
+            mb.realCapacity();
+        } finally {
+            mb.release();
+        }
     }
 }
