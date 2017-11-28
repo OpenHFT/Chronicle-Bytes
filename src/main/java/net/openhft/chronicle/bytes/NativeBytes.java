@@ -287,4 +287,19 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         bytesStore.writeByte(offset, i8);
         return this;
     }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> write8bit(@Nullable BytesStore bs)
+            throws BufferOverflowException {
+        if (bs == null) {
+            writeStopBit(-1);
+        } else {
+            long offset = bs.readPosition();
+            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
+            writeStopBit(readRemaining);
+            write(bs, offset, readRemaining);
+        }
+        return this;
+    }
 }

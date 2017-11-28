@@ -197,7 +197,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write8bit(@Nullable @NotNull String s)
+    default S write8bit(@Nullable String s)
             throws BufferOverflowException {
         if (s == null)
             writeStopBit(-1);
@@ -208,12 +208,16 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write8bit(@org.jetbrains.annotations.NotNull @NotNull BytesStore sdi)
+    default S write8bit(@Nullable BytesStore bs)
             throws BufferOverflowException {
-        long offset = sdi.readPosition();
-        long readRemaining = Math.min(writeRemaining(), sdi.readLimit() - offset);
-        writeStopBit(readRemaining);
-        write(sdi, offset, readRemaining);
+        if (bs == null) {
+            writeStopBit(-1);
+        } else {
+            long offset = bs.readPosition();
+            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
+            writeStopBit(readRemaining);
+            write(bs, offset, readRemaining);
+        }
         return (S) this;
     }
 
