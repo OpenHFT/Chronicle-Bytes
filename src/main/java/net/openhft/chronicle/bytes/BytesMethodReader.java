@@ -62,6 +62,11 @@ public class BytesMethodReader implements MethodReader {
         }
     }
 
+    @Override
+    public MethodReaderInterceptor methodReaderInterceptor() {
+        throw new UnsupportedOperationException();
+    }
+
     public boolean readOne() {
         if (in.readRemaining() < 1)
             return false;
