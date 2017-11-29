@@ -6,9 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
 
-public class BytesMethodWriterBuilder<T> implements Supplier<T> {
+public class BytesMethodWriterBuilder<T> implements MethodWriterBuilder<T> {
 
     private final List<Class> interfaces = new ArrayList<>();
     @NotNull
@@ -41,10 +40,9 @@ public class BytesMethodWriterBuilder<T> implements Supplier<T> {
         return this;
     }
 
-    // Builder terminology
-    @NotNull
-    public T build() {
-        return get();
+    @Override
+    public MethodWriterBuilder<T> recordHistory(boolean recordHistory) {
+        throw new UnsupportedOperationException();
     }
 
     // Supplier terminology
@@ -55,4 +53,21 @@ public class BytesMethodWriterBuilder<T> implements Supplier<T> {
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(classLoader, interfacesArr, handler);
     }
+
+    @Override
+    public MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MethodWriterBuilder<T> genericEvent(String genericEvent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public MethodWriterBuilder<T> useMethodIds(boolean useMethodIds) {
+        // always true
+        return this;
+    }
+
 }

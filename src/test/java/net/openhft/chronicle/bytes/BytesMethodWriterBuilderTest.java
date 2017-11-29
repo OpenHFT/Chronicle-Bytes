@@ -95,7 +95,7 @@ public class BytesMethodWriterBuilderTest {
                 "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString());
 
         StringWriter out = new StringWriter();
-        BytesMethodReader reader = bytes.bytesMethodReader(Mocker.logging(IBytesMethod.class, "* ", out));
+        MethodReader reader = bytes.bytesMethodReader(Mocker.logging(IBytesMethod.class, "* ", out));
 
         for (int i = 0; i < 4; i++) {
             assertTrue(reader.readOne());

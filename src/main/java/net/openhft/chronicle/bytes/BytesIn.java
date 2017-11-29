@@ -32,7 +32,7 @@ public interface BytesIn<Underlying> extends
      * @return a reader which will read one Excerpt at a time
      */
     @NotNull
-    default BytesMethodReader bytesMethodReader(Object... objects) {
+    default MethodReader bytesMethodReader(Object... objects) {
         return new BytesMethodReaderBuilder(this).build(objects);
     }
 

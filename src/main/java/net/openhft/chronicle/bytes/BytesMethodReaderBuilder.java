@@ -2,7 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-public class BytesMethodReaderBuilder {
+public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn in;
     private BytesParselet defaultParselet = createDefaultParselet();
     private MethodEncoderLookup methodEncoderLookup = MethodEncoderLookup.BY_ANNOTATION;
@@ -37,6 +37,11 @@ public class BytesMethodReaderBuilder {
         return this;
     }
 
+
+    @Override
+    public MethodReaderBuilder methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
+        throw new UnsupportedOperationException();
+    }
 
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet, methodEncoderLookup, objects);

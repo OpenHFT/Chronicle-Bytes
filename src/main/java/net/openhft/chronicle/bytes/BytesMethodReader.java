@@ -8,7 +8,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 
-public class BytesMethodReader {
+public class BytesMethodReader implements MethodReader {
     private final BytesIn in;
     private final BytesParselet defaultParselet;
     private final MethodEncoderLookup methodEncoderLookup;
@@ -78,5 +78,15 @@ public class BytesMethodReader {
         }
 
         return true;
+    }
+
+    @Override
+    public MethodReader closeIn(boolean closeIn) {
+        return this;
+    }
+
+    @Override
+    public void close() {
+
     }
 }
