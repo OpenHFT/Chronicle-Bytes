@@ -28,21 +28,19 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
-Peter Lawrey, Rob Austin
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
-
 // Badges
 ifdef::badges[]
 image:http://img.shields.io/coveralls/{project-repo}/master.svg["Coverage Status", link="https://coveralls.io/r/{project-repo}?branch=master"]
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 endif::[]
 
-
- 
-
 toc::[]
+
+Peter Lawrey, Rob Austin
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+
 
 === Chronicle-Bytes
 Chronicle Bytes contains all the low level memory access wrappers.  It is built on Chronicle Core's direct memory and OS system call access.
