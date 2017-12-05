@@ -3,6 +3,9 @@
 // GitHub customization
 ifdef::env-github[]
 :badges:
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
 endif::[]
 
 // Badges
@@ -11,9 +14,7 @@ image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-byt
 endif::[]
 
 Peter Lawrey, Rob Austin
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
+
 
 toc::[]
 
