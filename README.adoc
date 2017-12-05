@@ -28,6 +28,11 @@ ifdef::env-github[]
 :warning-caption: :warning:
 endif::[]
 
+Peter Lawrey, Rob Austin
+:toc: manual
+:css-signature: demo
+:toc-placement: preamble
+
 // Badges
 ifdef::badges[]
 image:http://img.shields.io/coveralls/{project-repo}/master.svg["Coverage Status", link="https://coveralls.io/r/{project-repo}?branch=master"]
@@ -36,10 +41,6 @@ endif::[]
 
 
  
-Peter Lawrey, Rob Austin
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
 
 toc::[]
 
