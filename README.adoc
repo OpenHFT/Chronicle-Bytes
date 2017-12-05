@@ -1,14 +1,14 @@
 = Chronicle-Bytes
  
-
-// GitHub customization
-ifdef::env-github[]
-:badges:
 :css-signature: demo
 :toc:
 :toc-placement!:
 :icons:
 :source-highlighter: highlight
+
+// GitHub customization
+ifdef::env-github[]
+:badges:
 endif::[]
 
 // Badges
