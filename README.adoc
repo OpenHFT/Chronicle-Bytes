@@ -1,3 +1,33 @@
+
+= Asciidoctor Maven Plugin
+// Metadata
+:release-version: 1.5.6
+// Settings
+:idprefix:
+:idseparator: -
+ifdef::env-github,env-browser[]
+:toc: preamble
+endif::[]
+ifndef::env-github[:icons: font]
+// URIs
+:project-repo: asciidoctor/asciidoctor-maven-plugin
+:uri-repo: https://github.com/{project-repo}
+:uri-asciidoc: http://asciidoc.org
+:uri-asciidoctor: http://asciidoctor.org
+:uri-examples: https://github.com/asciidoctor/asciidoctor-maven-examples
+:uri-maven: http://maven.apache.org
+// GitHub customization
+ifdef::env-github[]
+:badges:
+:tag: master
+:!toc-title:
+:tip-caption: :bulb:
+:note-caption: :paperclip:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
+
 // Badges
 // Badges
 ifdef::badges[]
