@@ -1,15 +1,17 @@
 = Chronicle-Bytes
  
-:css-signature: demo
-:toc: macro
-:toc-placement!:
-:icons:
-:source-highlighter: highlight
+
 
 // GitHub customization
 ifdef::env-github[]
 :badges:
 endif::[]
+
+:css-signature: demo
+:toc: macro
+:toc-placement!:
+:icons:
+:source-highlighter: highlight
 
 // Badges
 ifdef::badges[]
