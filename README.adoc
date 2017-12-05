@@ -11,10 +11,7 @@ ifdef::env-github[]
 :badges:
 endif::[]
 
-// Badges
-ifdef::badges[]
-image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
-endif::[]
+
 
 === Chronicle-Bytes
 
