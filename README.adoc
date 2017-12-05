@@ -34,29 +34,7 @@ image:http://img.shields.io/coveralls/{project-repo}/master.svg["Coverage Status
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 endif::[]
 
-// Settings:
-:experimental:
-:idprefix:
-:idseparator: -
-ifndef::env-github[:icons: font]
-ifdef::env-github,env-browser[]
-:toc: macro
-:toclevels: 1
-endif::[]
-ifdef::env-github[]
-:status:
-:outfilesuffix: .adoc
-:!toc-title:
-:caution-caption: :fire:
-:important-caption: :exclamation:
-:note-caption: :paperclip:
-:tip-caption: :bulb:
-:warning-caption: :warning:
-endif::[]
-// Aliases:
-:project-name: Asciidoctor PDF
-:project-handle: asciidoctor-pdf
- 
+
 
 === Chronicle-Bytes
  
