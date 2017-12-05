@@ -35,9 +35,6 @@ image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-byt
 endif::[]
 
 
-
-=== Chronicle-Bytes
- 
  
 Peter Lawrey, Rob Austin
 :toc: manual
@@ -46,7 +43,7 @@ Peter Lawrey, Rob Austin
 
 toc::[]
 
-
+=== Chronicle-Bytes
 Chronicle Bytes contains all the low level memory access wrappers.  It is built on Chronicle Core's direct memory and OS system call access.
 
 Chronicle Bytes has a similar purpose to Java NIO's ByteBuffer with some extensions.
