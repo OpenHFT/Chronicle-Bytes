@@ -1,16 +1,11 @@
--= Readme
- += Chronicle-Bytes
- +
+= Readme
+= Chronicle-Bytes
+ 
   Peter Lawrey, Rob Austin
   :toc: manual
   :css-signature: demo
   :toc-placement: preamble
   
-  
-= Chronicle-Bytes
-
-
-
 // Metadata
 :release-version: 1.5.6
 // Settings
