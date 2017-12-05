@@ -6,11 +6,6 @@
 :icons:
 :source-highlighter: highlight
 
-// GitHub customization
-ifdef::env-github[]
-:badges:
-endif::[]
-
 
 
 === Chronicle-Bytes
