@@ -2,7 +2,6 @@
  
 :toc: manual
 :css-signature: demo
-:toc-placement: preamble
 :toc-placement!: 
 
 // GitHub customization
