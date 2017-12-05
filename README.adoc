@@ -3,12 +3,6 @@
 // GitHub customization
 ifdef::env-github[]
 :badges:
-:tag: master
-:tip-caption: :bulb:
-:note-caption: :paperclip:
-:important-caption: :heavy_exclamation_mark:
-:caution-caption: :fire:
-:warning-caption: :warning:
 endif::[]
 
 // Badges
