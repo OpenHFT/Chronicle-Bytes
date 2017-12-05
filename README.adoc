@@ -1,5 +1,5 @@
 
-= Asciidoctor Maven Plugin
+= Chronicle-Bytes
 // Metadata
 :release-version: 1.5.6
 // Settings
@@ -34,7 +34,7 @@ image:http://img.shields.io/coveralls/{project-repo}/master.svg["Coverage Status
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 endif::[]
 
-= Chronicle-Bytes
+
 
 Peter Lawrey, Rob Austin
 :toc: manual
