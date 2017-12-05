@@ -1,10 +1,5 @@
 = Chronicle-Bytes
  
-Peter Lawrey, Rob Austin
-:toc: manual
-:css-signature: demo
-:toc-placement: preamble
-  
 // Metadata
 :release-version: 1.5.6
 // Settings
