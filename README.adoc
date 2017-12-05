@@ -4,10 +4,38 @@ Peter Lawrey, Rob Austin
 :toc: manual
 :css-signature: demo
 :toc-placement: preamble
+  
+// Metadata
+:release-version: 1.5.6
+// Settings
+:idprefix:
+:idseparator: -
+ifdef::env-github,env-browser[]
+:toc: preamble
+endif::[]
+ifndef::env-github[:icons: font]
+// URIs
+:project-repo: asciidoctor/asciidoctor-maven-plugin
+:uri-repo: https://github.com/{project-repo}
+:uri-asciidoc: http://asciidoc.org
+:uri-asciidoctor: http://asciidoctor.org
+:uri-examples: https://github.com/asciidoctor/asciidoctor-maven-examples
+:uri-maven: http://maven.apache.org
+// GitHub customization
+ifdef::env-github[]
 :badges:
+:tag: master
+:!toc-title:
+:tip-caption: :bulb:
+:note-caption: :paperclip:
+:important-caption: :heavy_exclamation_mark:
+:caution-caption: :fire:
+:warning-caption: :warning:
+endif::[]
 
 // Badges
 ifdef::badges[]
+image:http://img.shields.io/coveralls/{project-repo}/master.svg["Coverage Status", link="https://coveralls.io/r/{project-repo}?branch=master"]
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 endif::[]
 
@@ -151,4 +179,3 @@ When using intellij idea, you can set up a custom render to view the bytes, see 
 
 image::images/customize-data-views-menu.tiff[]
 image::images/customize-data-views.png[]
-
