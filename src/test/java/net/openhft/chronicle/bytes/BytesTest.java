@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Locale;
 import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -597,6 +598,7 @@ public class BytesTest {
 
     @Test
     public void testWriter() {
+
         Bytes bytes = alloc1.elasticBytes(1);
         @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
         writer.println(1);
@@ -612,6 +614,7 @@ public class BytesTest {
                 "bye\n" +
                 "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
         @NotNull Scanner scan = new Scanner(bytes.reader());
+        scan.useLocale(Locale.ENGLISH);
         assertEquals(1, scan.nextInt());
         assertEquals("", scan.nextLine());
         assertEquals("Hello", scan.nextLine());
