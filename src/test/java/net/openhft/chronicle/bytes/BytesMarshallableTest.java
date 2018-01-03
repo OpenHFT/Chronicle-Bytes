@@ -22,6 +22,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -220,5 +221,34 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @Test
+    public void serializeBytes() throws IOException {
+        Bytes<?> bytes = new HexDumpBytes();
+        try (@NotNull MyBytes mb1 = new MyBytes(Bytes.from("hello"), Bytes.allocateElasticDirect().append("2"));
+             @NotNull MyBytes mb2 = new MyBytes(Bytes.from("byeee"), Bytes.allocateElasticDirect().append('b'))) {
+            bytes.comment("mb1").writeUnsignedByte(1);
+            mb1.writeMarshallable(bytes);
+            bytes.comment("mb2").writeUnsignedByte(2);
+            mb2.writeMarshallable(bytes);
+
+            Bytes bytes2 = HexDumpBytes.fromText(bytes.toHexString());
+            for (int i = 0; i < 2; i++) {
+                try (@NotNull MyBytes mb3 = new MyBytes();
+                     @NotNull MyBytes mb4 = new MyBytes(Bytes.from("already"), Bytes.allocateElasticDirect().append("value"))) {
+                    assertEquals(1, bytes.readUnsignedByte());
+                    mb3.readMarshallable(bytes);
+                    assertEquals(2, bytes.readUnsignedByte());
+                    mb4.readMarshallable(bytes);
+
+                    assertEquals(mb1.toString(), mb3.toString());
+                    assertEquals(mb2.toString(), mb4.toString());
+
+                    bytes.release();
+
+                    bytes = bytes2;
+                }
+            }
+        }
+    }
 }
 

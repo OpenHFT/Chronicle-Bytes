@@ -214,6 +214,7 @@ public class BytesMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             @NotNull BytesStore bytes = (BytesStore) field.get(o);
+            assert bytes != null : "Can't serialise null bytes";
             long offset = bytes.readPosition();
             long length = bytes.readRemaining();
             write.writeStopBit(length);
@@ -231,7 +232,12 @@ public class BytesMarshaller<T> {
                 bs = bytes;
             }
             Object uo = bs.underlyingObject();
-            read.read(((ByteBuffer) uo).array(), 0, length);
+            if (uo instanceof ByteBuffer && ! (bs.bytesStore() instanceof NativeBytesStore)) {
+                read.read(((ByteBuffer) uo).array(), 0, length);
+            } else {
+                bs.clear();
+                read.read(bs, length);
+            }
             bs.readLimit(length);
             field.set(o, bs);
         }

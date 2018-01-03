@@ -290,6 +290,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             buffer.put(readByte());
     }
 
+    default void read(@NotNull Bytes bytes, int length) {
+        int len2 = (int) Math.min(length, readRemaining());
+        for (int i = 0; i < len2; i++)
+            bytes.writeByte(readByte());
+    }
+
     int readVolatileInt() throws BufferUnderflowException;
 
     long readVolatileLong() throws BufferUnderflowException;
