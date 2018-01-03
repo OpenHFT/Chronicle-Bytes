@@ -294,8 +294,8 @@ public interface RandomDataInput extends RandomCommon {
      * @return the long which might be padded.
      */
     default long readIncompleteLong(long offset) {
-        long left = readRemaining() - offset;
-        long l = 0;
+        long left = readLimit() - offset;
+        long l;
         try {
             if (left >= 8)
                 return readLong(offset);
