@@ -63,6 +63,7 @@ public class OptimisedBytesStoreHashTest {
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
                 OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
+        b.release();
     }
 
     @Test
