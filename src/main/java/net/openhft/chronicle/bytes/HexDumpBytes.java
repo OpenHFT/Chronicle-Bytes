@@ -14,7 +14,7 @@ import java.util.regex.Pattern;
 
 public class HexDumpBytes implements Bytes {
 
-    static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
+    private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final int NUMBER_WRAP = 16;
     private static final int COMMENT_START = NUMBER_WRAP * 3;
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
@@ -146,7 +146,7 @@ public class HexDumpBytes implements Bytes {
     }
 
     @Override
-    @Nullable
+    @NotNull
     public BytesStore bytesStore() {
         return base;
     }

@@ -33,7 +33,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
     @UsedViaReflection
     private final String name;
-    @Nullable
+    @NotNull
     protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long readPosition;
@@ -996,7 +996,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.nativeWrite(address, position, size);
     }
 
-    @Nullable
+    @NotNull
     @Override
     public BytesStore bytesStore() {
         return bytesStore;

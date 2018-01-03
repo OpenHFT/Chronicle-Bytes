@@ -196,10 +196,9 @@ public class BytesTest {
         }
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void writeHistogram() {
-        @NotNull Bytes bytes = alloc1.elasticBytes(16);
+        @NotNull Bytes bytes = alloc1.elasticBytes(0xFFFFF);
         @NotNull Histogram hist = new Histogram();
         hist.sample(10);
         @NotNull Histogram hist2 = new Histogram();
@@ -647,10 +646,9 @@ public class BytesTest {
         assertEquals(14464, expected);
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testParseUtf8High() {
-        @NotNull Bytes b = alloc1.elasticBytes(16);
+        @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
         for (int i = ' '; i < Character.MAX_VALUE; i++)
             if (Character.isValidCodePoint(i))
                 b.appendUtf8(i);
@@ -675,11 +673,10 @@ public class BytesTest {
         }
     }
 
-    @Ignore("TODO FIX")
     @Test
     public void testBigDecimalText() {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
-            @NotNull Bytes b = alloc1.elasticBytes(16);
+            @NotNull Bytes b = alloc1.elasticBytes(0xFFFF);
             b.append(new BigDecimal(d));
 
             @NotNull BigDecimal bd = b.parseBigDecimal();

@@ -61,7 +61,7 @@ public class NativeBytesStore<Underlying>
         }*/
     protected long address;
     // on release, set this to null.
-    @Nullable
+    @NotNull
     protected Memory memory = OS.memory();
     protected volatile Throwable releasedHere;
     protected long maximumLimit;

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -356,6 +357,7 @@ public interface Bytes<Underlying> extends
 
     /**
      * Return a Bytes which is optionally unchecked.  This allows bounds checks to be turned off.
+     * Note: this means that the result is no longer elastic, even if <code>this</code> is elastic.
      *
      * @param unchecked if true, minimal bounds checks will be performed.
      * @return Bytes without bounds checking.
@@ -364,6 +366,8 @@ public interface Bytes<Underlying> extends
     @NotNull
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         if (unchecked) {
+            if (isElastic())
+                Jvm.warn().on(getClass(), "Wrapping elastic bytes with unchecked() will convert it to fixed capacity!");
             return start() == 0 && bytesStore().isDirectMemory() ?
                     new UncheckedNativeBytes<>(this) :
                     new UncheckedBytes<>(this);

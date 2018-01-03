@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runners.Parameterized;
 
@@ -45,15 +44,10 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-/**
- * User: peter.lawrey
- */
-
 public class ByteStoreTest {
 
-    public static final int SIZE = 128;
+    private static final int SIZE = 128;
     private Bytes bytes;
-    private ByteBuffer byteBuffer;
     private BytesStore bytesStore;
     private ThreadDump threadDump;
 
@@ -84,8 +78,7 @@ public class ByteStoreTest {
 
     @Before
     public void beforeTest() {
-        byteBuffer = ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder());
-        bytesStore = BytesStore.wrap(byteBuffer);
+        bytesStore = BytesStore.wrap(ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder()));
         bytes = bytesStore.bytesForWrite();
         bytes.clear();
     }
@@ -433,7 +426,6 @@ public class ByteStoreTest {
     }
 
     @Test
-    @Ignore
     public void testStream() throws IOException {
         bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytesForWrite();
         @NotNull GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
@@ -450,7 +442,6 @@ public class ByteStoreTest {
     }
 
     @Test
-    @Ignore
     public void testStream2() throws IOException {
         @NotNull OutputStream out = bytes.outputStream();
         out.write(11);
@@ -460,23 +451,19 @@ public class ByteStoreTest {
         out.write(55);
 
         @NotNull InputStream in = bytes.inputStream();
-        Assert.assertTrue(in.markSupported());
-        Assert.assertEquals(11, in.read());
-        in.mark(1);
+        assertFalse(in.markSupported());
+        assertEquals(11, in.read());
         assertEquals(1, bytes.readPosition());
-        Assert.assertEquals(22, in.read());
+        assertEquals(22, in.read());
         assertEquals(2, bytes.readPosition());
+        assertEquals(33, in.read());
 
-        Assert.assertEquals(33, in.read());
-        in.reset();
-
-        assertEquals(1, bytes.readPosition());
-        Assert.assertEquals(22, in.read());
-
-        Assert.assertEquals(2, in.skip(2));
+        assertEquals(1, in.skip(1));
         assertEquals(4, bytes.readPosition());
-        assertEquals(SIZE - 4, bytes.readRemaining());
-        Assert.assertEquals(55, in.read());
+        assertEquals(1, bytes.readRemaining());
+        assertEquals(55, in.read());
+
+        assertEquals(-1, in.read());
         in.close();
     }
 
@@ -543,9 +530,8 @@ public class ByteStoreTest {
     @Test
     public void testToString() {
 
-        @Nullable Bytes bytes = null;
+        @Nullable Bytes bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
         try {
-            bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(1);
             System.gc();

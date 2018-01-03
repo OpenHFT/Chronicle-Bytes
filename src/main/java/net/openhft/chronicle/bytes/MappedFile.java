@@ -220,13 +220,13 @@ public class MappedFile implements ReferenceCounted {
         return file;
     }
 
-    @Nullable
+    @NotNull
     public MappedBytesStore acquireByteStore(long position)
             throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(position, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
     }
 
-    @Nullable
+    @NotNull
     public <T extends MappedBytesStore> T acquireByteStore(long position, @NotNull MappedBytesStoreFactory<T> mappedBytesStoreFactory)
             throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
@@ -269,7 +269,7 @@ public class MappedFile implements ReferenceCounted {
             }
             long mappedSize = chunkSize + overlapSize;
             FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
-            long address = 0;
+            long address;
             try {
                 address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
 

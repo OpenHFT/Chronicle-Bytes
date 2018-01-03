@@ -37,7 +37,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     private final Bytes<Underlying> underlyingBytes;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
-    @Nullable
+    @NotNull
     protected NativeBytesStore<Underlying> bytesStore;
     protected long readPosition;
     protected long writePosition;
