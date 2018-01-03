@@ -124,7 +124,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         try {
             return bytesForWrite()
-                    .readLimit(writeLimit());
+                    .readLimit(writeLimit())
+                    .readPosition(start());
         } catch (BufferUnderflowException e) {
             throw new IllegalStateException(e);
         }

@@ -53,7 +53,6 @@ public class MappedFileTest {
         MappedFile.warmup();
     }
 
-    @Ignore("todo fix sometimes fails on TC")
     @Test
     public void testReferenceCounts() throws IOException {
         new File(OS.TARGET).mkdir();
@@ -89,22 +88,23 @@ public class MappedFileTest {
         } catch (BufferUnderflowException e) {
             // expected
         }
-        assertEquals(2, mf.refCount());
+        assertEquals(1, mf.refCount());
         assertEquals(3, bs.refCount());
-        assertEquals("refCount: 2, 0, 3", mf.referenceCounts());
+        assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
 
         @Nullable BytesStore bs2 = mf.acquireByteStore(chunkSize + (1 << 10));
         assertEquals(4, bs2.refCount());
-        assertEquals("refCount: 2, 0, 4", mf.referenceCounts());
+        assertEquals("refCount: 1, 0, 4", mf.referenceCounts());
         bytes.release();
         assertEquals(3, bs2.refCount());
-        assertEquals("refCount: 2, 0, 3", mf.referenceCounts());
+        assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
 
         mf.release();
         assertEquals(2, bs.refCount());
-        assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
+        assertEquals(0, mf.refCount());
+        assertEquals("refCount: 0, 0, 2", mf.referenceCounts());
+
         bs2.release();
-        assertEquals(1, mf.refCount());
         assertEquals(1, bs.refCount());
         bs.release();
         assertEquals(0, bs.refCount());
