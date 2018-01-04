@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,6 +61,40 @@ public class BytesInternalTest {
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, 0), sb.toString());
+        bytes.release();
+    }
+
+    @Test
+    public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        @NotNull byte[] bytes2 = new byte[length];
+        Arrays.fill(bytes2, (byte) '!');
+        bytes.write(bytes2);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        BytesInternal.parseUtf8(bytes, sb, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, 0), sb.toString());
+        bytes.release();
+    }
+
+    @Test
+    public void testWriteLongString() throws IORuntimeException {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++)
+            sb.append('!');
+
+        String test = sb.toString();
+        BytesInternal.writeUtf8(bytes, test);
+
+        sb.setLength(0);
+        assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
+
         bytes.release();
     }
 
