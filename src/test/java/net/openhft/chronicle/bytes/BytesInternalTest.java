@@ -65,7 +65,7 @@ public class BytesInternalTest {
     }
 
     @Test
-    public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
+    public void testParseUTF8_LongString() throws UTFDataFormatRuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = 1 << 29;
         @NotNull byte[] bytes2 = new byte[length];
@@ -77,11 +77,63 @@ public class BytesInternalTest {
         BytesInternal.parseUtf8(bytes, sb, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, 0), sb.toString());
+
         bytes.release();
     }
 
     @Test
-    public void testWriteLongString() throws IORuntimeException {
+    public void testParseUTF81_LongString() throws UTFDataFormatRuntimeException {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        @NotNull byte[] bytes2 = new byte[length];
+        Arrays.fill(bytes2, (byte) '!');
+        bytes.write(bytes2);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        BytesInternal.parseUtf81(bytes, sb, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, 0), sb.toString());
+
+        bytes.release();
+    }
+
+    @Test
+    public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        @NotNull byte[] bytes2 = new byte[length];
+        Arrays.fill(bytes2, (byte) '!');
+        bytes.write(bytes2);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        BytesInternal.parseUtf8_SB1(bytes, sb, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, 0), sb.toString());
+
+        bytes.release();
+    }
+
+    @Test
+    public void testParse8bit_LongString() throws Exception {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        @NotNull byte[] bytes2 = new byte[length];
+        Arrays.fill(bytes2, (byte) '!');
+        bytes.write(bytes2);
+
+        @NotNull StringBuilder sb = new StringBuilder();
+
+        BytesInternal.parse8bit(0, bytes, sb, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, 0), sb.toString());
+
+        bytes.release();
+    }
+
+    @Test
+    public void testWriteUtf8LongString() throws IORuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = 1 << 29;
         StringBuilder sb = new StringBuilder(length);
@@ -95,6 +147,44 @@ public class BytesInternalTest {
         sb.setLength(0);
         assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
 
+        bytes.release();
+    }
+
+    @Test
+    public void testAppendUtf8LongString() throws Exception {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++)
+            sb.append('!');
+
+        String test = sb.toString();
+        BytesInternal.appendUtf8(bytes, test, 0, length);
+
+        sb.setLength(0);
+        BytesInternal.parse8bit(0, bytes, sb, length);
+
+        assertEquals(test, sb.toString());
+        bytes.release();
+    }
+
+    @Test
+    public void testAppend8bitLongString() throws Exception {
+        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        int length = 1 << 29;
+        StringBuilder sb = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++)
+            sb.append('!');
+
+        String test = sb.toString();
+        BytesInternal.append8bit(0, bytes, test, 0, length);
+
+        sb.setLength(0);
+        BytesInternal.parse8bit(0, bytes, sb, length);
+
+        assertEquals(test, sb.toString());
         bytes.release();
     }
 
