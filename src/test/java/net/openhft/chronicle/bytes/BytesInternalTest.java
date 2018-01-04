@@ -1,5 +1,5 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2018 higherfrequencytrading.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -24,7 +24,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
-import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
