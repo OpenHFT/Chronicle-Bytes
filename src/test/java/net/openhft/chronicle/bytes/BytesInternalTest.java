@@ -25,11 +25,19 @@ import org.junit.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class BytesInternalTest {
+
+    public static final int LENGTH;
+
+    static {
+        long totalMemory = Runtime.getRuntime().totalMemory();
+        int maxLength = 1 << 29;
+        LENGTH = (int) Math.min(totalMemory / 9, maxLength);
+        if (LENGTH < maxLength)
+            System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
+    }
 
     private ThreadDump threadDump;
 
@@ -66,7 +74,7 @@ public class BytesInternalTest {
     @Test
     public void testParseUTF8_LongString() throws UTFDataFormatRuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
@@ -75,7 +83,9 @@ public class BytesInternalTest {
 
         BytesInternal.parseUtf8(bytes, sb, length);
         assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, 0), sb.toString());
+        String actual = sb.toString();
+        sb = null; // free some memory.
+        assertEquals(new String(bytes2, 0), actual);
 
         bytes.release();
     }
@@ -83,7 +93,7 @@ public class BytesInternalTest {
     @Test
     public void testParseUTF81_LongString() throws UTFDataFormatRuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
@@ -100,7 +110,7 @@ public class BytesInternalTest {
     @Test
     public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
@@ -117,7 +127,7 @@ public class BytesInternalTest {
     @Test
     public void testParse8bit_LongString() throws Exception {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
@@ -134,7 +144,7 @@ public class BytesInternalTest {
     @Test
     public void testWriteUtf8LongString() throws IORuntimeException {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++)
@@ -152,7 +162,7 @@ public class BytesInternalTest {
     @Test
     public void testAppendUtf8LongString() throws Exception {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++)
@@ -171,7 +181,7 @@ public class BytesInternalTest {
     @Test
     public void testAppend8bitLongString() throws Exception {
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        int length = 1 << 29;
+        int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
         for (int i = 0; i < length; i++)
