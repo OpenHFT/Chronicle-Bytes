@@ -28,7 +28,9 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertThat;
 
 public class StreamingInputStreamTest {
     private ThreadDump threadDump;
@@ -43,12 +45,22 @@ public class StreamingInputStreamTest {
         threadDump.assertNoNewThreads();
     }
 
+    // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
+    @Test
+    public void readOfZeroShouldReturnZero() throws IOException {
+        @NotNull Bytes b = Bytes.allocateElasticDirect();
+        prepareBytes(b);
+
+        @NotNull InputStream is = b.inputStream();
+        assertThat(is.read(new byte[5], 0, 0), is(0));
+        b.release();
+    }
+
     @Test(timeout = 1000)
     public void testReadBlock() throws IOException {
 
         @NotNull Bytes b = Bytes.allocateElasticDirect();
-        @NotNull byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
-        b.write(test);
+        @NotNull byte[] test = prepareBytes(b);
 
         @NotNull InputStream is = b.inputStream();
         try (@NotNull ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -60,5 +72,11 @@ public class StreamingInputStreamTest {
         }
 
         b.release();
+    }
+
+    private byte[] prepareBytes(final Bytes b) {
+        @NotNull byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
+        b.write(test);
+        return test;
     }
 }
