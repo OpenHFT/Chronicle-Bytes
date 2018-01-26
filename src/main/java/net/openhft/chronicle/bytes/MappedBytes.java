@@ -242,7 +242,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public Bytes<Void> readSkip(long bytesToSkip)
             throws BufferUnderflowException {
-
+        if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
         if (!bytesStore.inside(check)) {
             acquireNextByteStore(this.readPosition, false);
