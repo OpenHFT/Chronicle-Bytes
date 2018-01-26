@@ -39,6 +39,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
+    private volatile Thread lastAccessedThread;
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
@@ -153,6 +154,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
+        assert singleThreadedAccess();
         long limit = position + remaining;
         if (!bytesStore.inside(position)) {
             acquireNextByteStore(position, true);
@@ -176,6 +178,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> readPosition(long position) throws BufferUnderflowException {
+        assert singleThreadedAccess();
         if (bytesStore.inside(position)) {
             return super.readPosition(position);
         } else {
@@ -186,6 +189,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
+        assert singleThreadedAccess();
         long check = adding >= 0 ? offset : offset + adding;
         if (!bytesStore.inside(check)) {
             acquireNextByteStore(offset, false);
@@ -195,6 +199,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
+        assert singleThreadedAccess();
         if (offset < 0 || offset > capacity() - adding)
             throw writeBufferOverflowException(offset);
         if (!bytesStore.inside(offset)) {
@@ -249,6 +254,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writePosition(long position) throws BufferOverflowException {
+        assert singleThreadedAccess();
         if (position > writeLimit)
             throw new BufferOverflowException();
         if (position < 0L)
@@ -272,6 +278,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writeByte(byte i8) throws BufferOverflowException {
+        assert singleThreadedAccess();
         long oldPosition = writePosition;
         if (writePosition < 0 || writePosition > capacity() - (long) 1)
             throw writeBufferOverflowException(writePosition);
@@ -302,6 +309,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
+        assert singleThreadedAccess();
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -328,6 +336,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
             IndexOutOfBoundsException {
+        assert singleThreadedAccess();
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
@@ -340,6 +349,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
+        assert singleThreadedAccess();
         BytesInternal.writeUtf8(this, s);
         return this;
     }
@@ -347,6 +357,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     @NotNull
     public MappedBytes write8bit(CharSequence s, int start, int length) {
+        assert singleThreadedAccess();
         if (s == null) {
             writeStopBit(-1);
             return this;
@@ -365,6 +376,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     private MappedBytes append8bit0(@NotNull String s, int start, int length) throws BufferOverflowException {
+        assert singleThreadedAccess();
         if (Jvm.isJava9Plus()) {
             byte[] bytes = StringUtils.extractBytes(s);
             long address = addressForWrite(writePosition());
@@ -409,6 +421,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public Bytes<Void> appendUtf8(CharSequence cs, int start, int length)
             throws BufferOverflowException, IllegalArgumentException {
+        assert singleThreadedAccess();
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
@@ -473,6 +486,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     @NotNull
     public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
+        assert singleThreadedAccess();
         assert writeCheckOffset0(offset, (long) 4);
         if (!bytesStore.inside(offset)) {
             acquireNextByteStore(offset, false);
@@ -548,6 +562,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public MappedBytes write(@NotNull BytesStore bytes)
             throws BufferOverflowException {
+        assert singleThreadedAccess();
         assert bytes != this : "you should not write to yourself !";
 
         long offset = bytes.readPosition();
@@ -564,4 +579,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
+    private synchronized boolean singleThreadedAccess() {
+        if (lastAccessedThread == null) {
+            lastAccessedThread = Thread.currentThread();
+        }
+        return lastAccessedThread == Thread.currentThread();
+    }
 }
