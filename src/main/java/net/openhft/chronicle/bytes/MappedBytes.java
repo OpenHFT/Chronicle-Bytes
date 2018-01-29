@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -34,8 +33,12 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.StringUtils.*;
+
 /**
  * Bytes to wrap memory mapped data.
+ *
+ * NOTE These Bytes are single Threaded as are all Bytes.
  */
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
@@ -201,7 +204,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert singleThreadedAccess();
-        if (offset < 0 || offset > capacity() - adding)
+        if (offset < 0 || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException(offset);
         if (!bytesStore.inside(offset)) {
             acquireNextByteStore(offset, false);
@@ -218,12 +221,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     // require protection from concurrent mutation to bytesStore field
     private synchronized void acquireNextByteStore(long offset, boolean set) throws BufferOverflowException {
-        if (bytesStore.inside(offset))
+        @Nullable BytesStore oldBS = bytesStore;
+        if (oldBS.inside(offset))
             return;
 
         try {
             @Nullable BytesStore newBS = mappedFile.acquireByteStore(offset);
-            @Nullable BytesStore oldBS = bytesStore;
             bytesStore = newBS;
             oldBS.release();
 
@@ -240,6 +243,20 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             readPosition = offset;
         }
     }
+
+    @NotNull
+    @Override
+    public Bytes<Void> readSkip(long bytesToSkip)
+            throws BufferUnderflowException {
+        if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
+        long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
+        if (!bytesStore.inside(check)) {
+            acquireNextByteStore(this.readPosition, false);
+        }
+        this.readPosition += bytesToSkip;
+        return this;
+    }
+
 
     @Nullable
     @Override
@@ -347,14 +364,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return append8bit0((String) cs, start, end - start);
     }
 
-    @NotNull
-    @Override
-    public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
-        assert singleThreadedAccess();
-        BytesInternal.writeUtf8(this, s);
-        return this;
-    }
-
     @Override
     @NotNull
     public MappedBytes write8bit(CharSequence s, int start, int length) {
@@ -379,7 +388,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private MappedBytes append8bit0(@NotNull String s, int start, int length) throws BufferOverflowException {
         assert singleThreadedAccess();
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = StringUtils.extractBytes(s);
+            byte[] bytes = extractBytes(s);
             long address = addressForWrite(writePosition());
             Memory memory = bytesStore().memory;
             int i = 0;
@@ -397,7 +406,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             }
             writeSkip(length);
         } else {
-            char[] chars = StringUtils.extractChars(s);
+            char[] chars = extractChars(s);
             long address = addressForWrite(writePosition());
             Memory memory = bytesStore().memory;
             int i = 0;
@@ -432,7 +441,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
 
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = StringUtils.extractBytes((String) cs);
+            byte[] bytes = extractBytes((String) cs);
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
@@ -454,7 +463,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 appendUtf8(c);
             }
         } else {
-            char[] chars = StringUtils.extractChars((String) cs);
+            char[] chars = extractChars((String) cs);
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
@@ -577,6 +586,108 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         } else {
             BytesInternal.writeFully(bytes, offset, length, this);
         }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUtf8(CharSequence str) throws BufferOverflowException {
+        assert singleThreadedAccess();
+        if (str instanceof String) {
+            writeUtf8((String) str);
+            return this;
+        }
+        if (str == null) {
+            this.writeStopBit(-1);
+
+        } else {
+            try {
+                long utfLength = AppendableUtil.findUtf8Length(str);
+                this.writeStopBit(utfLength);
+                BytesInternal.appendUtf8(this, str, 0, str.length());
+            } catch (IndexOutOfBoundsException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> writeUtf8(String str) throws BufferOverflowException {
+        assert singleThreadedAccess();
+        if (str == null) {
+            writeStopBit(-1);
+            return this;
+        }
+
+        try {
+            if (Jvm.isJava9Plus()) {
+                byte[] strBytes = extractBytes(str);
+                byte coder = getStringCoder(str);
+                long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
+                writeStopBit(utfLength);
+                appendUtf8(strBytes, 0, str.length(), coder);
+            } else {
+                char[] chars = extractChars(str);
+                long utfLength = AppendableUtil.findUtf8Length(chars);
+                writeStopBit(utfLength);
+                appendUtf8(chars, 0, chars.length);
+            }
+            return this;
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+        assert singleThreadedAccess();
+        if (writePosition < 0 || writePosition > capacity() - (long) 1 + length)
+            throw writeBufferOverflowException(writePosition);
+        int i;
+        ascii:
+        {
+            for (i = 0; i < length; i++) {
+                char c = chars[offset + i];
+                if (c > 0x007F)
+                    break ascii;
+                long oldPosition = writePosition;
+                if ((writePosition & 0xff) == 0 && !bytesStore.inside(writePosition)) {
+                    acquireNextByteStore(writePosition, false);
+                }
+                this.writePosition = writePosition + (long) 1;
+                bytesStore.writeByte(oldPosition, (byte) c);
+            }
+            return this;
+        }
+        for (; i < length; i++) {
+            char c = chars[offset + i];
+            BytesInternal.appendUtf8Char(this, c);
+        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBit(long n) throws BufferOverflowException {
+        assert singleThreadedAccess();
+        if ((n & ~0x7F) == 0) {
+            writeByte((byte) (n & 0x7f));
+            return this;
+        }
+        if ((~n & ~0x7F) == 0) {
+            writeByte((byte) (0x80L | ~n));
+            writeByte((byte) 0);
+            return this;
+        }
+
+        if ((n & ~0x3FFF) == 0) {
+            writeByte((byte) ((n & 0x7f) | 0x80));
+            writeByte((byte) (n >> 7));
+            return this;
+        }
+        BytesInternal.writeStopBit0(this, n);
         return this;
     }
 

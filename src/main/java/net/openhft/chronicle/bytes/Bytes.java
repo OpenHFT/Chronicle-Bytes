@@ -20,6 +20,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -599,4 +600,28 @@ public interface Bytes<Underlying> extends
         }
     }
 
+    default <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object) {
+        if (object == null) object = ObjectUtils.newInstance(tClass);
+        int length = readUnsignedShort();
+        long limit = readLimit();
+        long end = readPosition() + length;
+        try {
+            readLimit(end);
+            object.readMarshallable(this);
+        } finally {
+            readPosition(end);
+            readLimit(limit);
+        }
+        return object;
+    }
+
+    default void writeMarshallableLength16(WriteBytesMarshallable marshallable) {
+        long position = writePosition();
+        writeUnsignedShort(0);
+        marshallable.writeMarshallable(this);
+        long length = writePosition() - position - 2;
+        if (length >= 1 << 16)
+            throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
+        writeUnsignedShort(position, (int) length);
+    }
 }
