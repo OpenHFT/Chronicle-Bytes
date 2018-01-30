@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -161,53 +162,62 @@ public class BytesMarshallableTest {
         bytes.comment("mn2").writeUnsignedByte(2);
         mn2.writeMarshallable(bytes);
 
+
+        final String expected = "01                                              # mn1\n" +
+                "                                                # byteable\n" +
+                "      4e                                              # flag\n" +
+                "      01                                              # b\n" +
+                "      02 00                                           # s\n" +
+                "      01 33                                           # c\n" +
+                "      04 00 00 00                                     # i\n" +
+                "      00 00 b0 40                                     # f\n" +
+                "      06 00 00 00 00 00 00 00                         # l\n" +
+                "      cd cc cc cc cc cc 1e 40                         # d\n" +
+                "                                                # scalars\n" +
+                "      05 48 65 6c 6c 6f                               # s\n" +
+                "      01 31                                           # bi\n" +
+                "      02 31 30                                        # bd\n" +
+                "      0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
+                "      0c 31 32 3a 33 35 3a 35 36 2e 37 37 35          # time\n" +
+                "      17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 33 # dateTime\n" +
+                "      35 3a 35 36 2e 37 37 35 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
+                "      2d 30 36 54 31 32 3a 33 35 3a 35 36 2e 37 37 35\n" +
+                "      5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
+                "      24 30 30 30 30 30 30 30 31 2d 32 33 34 35 2d 36\n" +
+                "      37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61\n" +
+                "      62 63 64 65 66\n" +
+                "02                                              # mn2\n" +
+                "                                                # byteable\n" +
+                "      59                                              # flag\n" +
+                "      0b                                              # b\n" +
+                "      16 00                                           # s\n" +
+                "      01 54                                           # c\n" +
+                "      2c 00 00 00                                     # i\n" +
+                "      8f c2 b1 40                                     # f\n" +
+                "      42 00 00 00 00 00 00 00                         # l\n" +
+                "      e1 7a 14 ae 47 71 53 40                         # d\n" +
+                "                                                # scalars\n" +
+                "      05 57 6f 72 6c 64                               # s\n" +
+                "      01 30                                           # bi\n" +
+                "      01 30                                           # bd\n" +
+                "      0a 32 30 31 36 2d 31 30 2d 30 35                # date\n" +
+                (Jvm.isJava9Plus() ?
+                        "      0c 30 32 3a 33 34 3a 35 36 2e 37 37 35          # time\n" :
+                        "      0c 30 31 3a 33 34 3a 35 36 2e 37 37 35          # time\n") +
+                (Jvm.isJava9Plus() ?
+                        "      17 32 30 31 36 2d 31 30 2d 30 35 54 30 32 3a 33 # dateTime\n" :
+                        "      17 32 30 31 36 2d 31 30 2d 30 35 54 30 31 3a 33 # dateTime\n") +
+                "      34 3a 35 36 2e 37 37 35 2c 32 30 31 36 2d 31 30 # zonedDateTime\n" +
+                (Jvm.isJava9Plus() ?
+                        "      2d 30 35 54 30 32 3a 33 34 3a 35 36 2e 37 37 35\n" :
+                        "      2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37 37 35\n") +
+                "      2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f 4c 6f\n" +
+                "      6e 64 6f 6e 5d 24 31 31 31 31 31 31 31 31 2d 31 # uuid\n" +
+                "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
+                "      32 32 32 32 32 32 32 32 32 32\n";
+
         assertEquals(
-                "01                                              # mn1\n" +
-                        "                                                # byteable\n" +
-                        "      4e                                              # flag\n" +
-                        "      01                                              # b\n" +
-                        "      02 00                                           # s\n" +
-                        "      01 33                                           # c\n" +
-                        "      04 00 00 00                                     # i\n" +
-                        "      00 00 b0 40                                     # f\n" +
-                        "      06 00 00 00 00 00 00 00                         # l\n" +
-                        "      cd cc cc cc cc cc 1e 40                         # d\n" +
-                        "                                                # scalars\n" +
-                        "      05 48 65 6c 6c 6f                               # s\n" +
-                        "      01 31                                           # bi\n" +
-                        "      02 31 30                                        # bd\n" +
-                        "      0a 32 30 31 37 2d 31 31 2d 30 36                # date\n" +
-                        "      0c 31 32 3a 33 35 3a 35 36 2e 37 37 35          # time\n" +
-                        "      17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 33 # dateTime\n" +
-                        "      35 3a 35 36 2e 37 37 35 27 32 30 31 37 2d 31 31 # zonedDateTime\n" +
-                        "      2d 30 36 54 31 32 3a 33 35 3a 35 36 2e 37 37 35\n" +
-                        "      5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid\n" +
-                        "      24 30 30 30 30 30 30 30 31 2d 32 33 34 35 2d 36\n" +
-                        "      37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61\n" +
-                        "      62 63 64 65 66\n" +
-                        "02                                              # mn2\n" +
-                        "                                                # byteable\n" +
-                        "      59                                              # flag\n" +
-                        "      0b                                              # b\n" +
-                        "      16 00                                           # s\n" +
-                        "      01 54                                           # c\n" +
-                        "      2c 00 00 00                                     # i\n" +
-                        "      8f c2 b1 40                                     # f\n" +
-                        "      42 00 00 00 00 00 00 00                         # l\n" +
-                        "      e1 7a 14 ae 47 71 53 40                         # d\n" +
-                        "                                                # scalars\n" +
-                        "      05 57 6f 72 6c 64                               # s\n" +
-                        "      01 30                                           # bi\n" +
-                        "      01 30                                           # bd\n" +
-                        "      0a 32 30 31 36 2d 31 30 2d 30 35                # date\n" +
-                        "      0c 30 31 3a 33 34 3a 35 36 2e 37 37 35          # time\n" +
-                        "      17 32 30 31 36 2d 31 30 2d 30 35 54 30 31 3a 33 # dateTime\n" +
-                        "      34 3a 35 36 2e 37 37 35 2c 32 30 31 36 2d 31 30 # zonedDateTime\n" +
-                        "      2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37 37 35\n" +
-                        "      2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f 4c 6f\n" +
-                        "      6e 64 6f 6e 5d 24 31 31 31 31 31 31 31 31 2d 31 # uuid\n" +
-                        "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
-                        "      32 32 32 32 32 32 32 32 32 32\n", bytes.toHexString());
+                expected, bytes.toHexString());
 
         @NotNull MyNested mn3 = new MyNested();
         @NotNull MyNested mn4 = new MyNested();
