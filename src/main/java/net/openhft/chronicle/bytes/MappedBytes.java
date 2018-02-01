@@ -42,6 +42,8 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  */
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
+    private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
+            Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     @NotNull
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
@@ -692,6 +694,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     private boolean singleThreadedAccess() {
+        if (!ENFORCE_SINGLE_THREADED_ACCESS) {
+            return true;
+        }
         if (lastAccessedThread == null) {
             lastAccessedThread = Thread.currentThread();
         }
