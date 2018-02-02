@@ -53,11 +53,10 @@ public class MappedFile implements ReferenceCounted {
     private final AtomicBoolean closed = new AtomicBoolean();
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
-    private boolean readOnly;
     @NotNull
     private final File file;
-    private NewChunkListener newChunkListener = (filename, chunk, delayMicros) ->
-            Jvm.debug().on(MappedFile.class, "Allocation of " + chunk + " chunk in " + filename + " took " + delayMicros / 1e3 + " ms.");
+    private boolean readOnly;
+    private NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
         this.file = file;
@@ -69,6 +68,16 @@ public class MappedFile implements ReferenceCounted {
         this.readOnly = readOnly;
 
         assert registerMappedFile(this);
+    }
+
+    static void logNewChunk(String filename, int chunk, long delayMicros) {
+        // avoid a GC while trying to memory map.
+        String message = BytesInternal.acquireStringBuilder()
+                .append("Allocation of ").append(chunk)
+                .append(" chunk in ").append(filename)
+                .append(" took ").append(delayMicros / 1e3).append(" ms.")
+                .toString();
+        Jvm.debug().on(MappedFile.class, message);
     }
 
 //    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
