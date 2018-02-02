@@ -35,5 +35,7 @@ public class ReadLenientTest {
         assertEquals(0, bytes.readUnsignedInt());
         assertEquals(0.0, bytes.readFloat(), 0.0);
         assertEquals(0.0, bytes.readDouble(), 0.0);
+
+        bytes.release();
     }
 }
