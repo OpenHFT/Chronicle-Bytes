@@ -222,6 +222,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default boolean read8bit(@NotNull Bytes b)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
         b.clear();
+        if (readRemaining() <= 0)
+            return false;
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
@@ -350,4 +352,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         for (; i < length; i++)
             bytes.writeByte(readByte());
     }
+
+    /**
+     * When there is no more data to read, return zero, false and empty string.
+     *
+     * @param lenient if true, return nothing rather than error.
+     */
+    void lenient(boolean lenient);
+
+    boolean lenient();
 }

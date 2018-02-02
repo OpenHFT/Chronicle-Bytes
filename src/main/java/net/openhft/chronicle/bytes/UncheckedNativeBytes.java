@@ -818,6 +818,16 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public void lenient(boolean lenient) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public boolean lenient() {
+        return false;
+    }
+
+    @Override
     @ForceInline
     public void nativeWrite(long address, long size) {
         bytesStore.nativeWrite(address, writePosition(), size);

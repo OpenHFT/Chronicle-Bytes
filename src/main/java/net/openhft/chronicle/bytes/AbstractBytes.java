@@ -42,6 +42,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
     private volatile Thread threadPositionSetBy;
+    private boolean lenient = false;
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long
             writePosition, long writeLimit)
@@ -352,15 +353,25 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public short readShort() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(2);
-        return bytesStore.readShort(offset);
+        try {
+            long offset = readOffsetPositionMoved(2);
+            return bytesStore.readShort(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
     @ForceInline
     public int readInt() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(4);
-        return bytesStore.readInt(offset);
+        try {
+            long offset = readOffsetPositionMoved(4);
+            return bytesStore.readInt(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
@@ -390,36 +401,61 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public long readLong() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(8);
-        return bytesStore.readLong(offset);
+        try {
+            long offset = readOffsetPositionMoved(8);
+            return bytesStore.readLong(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
     @ForceInline
     public float readFloat() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(4);
-        return bytesStore.readFloat(offset);
+        try {
+            long offset = readOffsetPositionMoved(4);
+            return bytesStore.readFloat(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
     @ForceInline
     public double readDouble() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(8);
-        return bytesStore.readDouble(offset);
+        try {
+            long offset = readOffsetPositionMoved(8);
+            return bytesStore.readDouble(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
     @ForceInline
     public int readVolatileInt() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(4);
-        return bytesStore.readVolatileInt(offset);
+        try {
+            long offset = readOffsetPositionMoved(4);
+            return bytesStore.readVolatileInt(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     @Override
     @ForceInline
     public long readVolatileLong() throws BufferUnderflowException {
-        long offset = readOffsetPositionMoved(8);
-        return bytesStore.readVolatileLong(offset);
+        try {
+            long offset = readOffsetPositionMoved(8);
+            return bytesStore.readVolatileLong(offset);
+        } catch (BufferUnderflowException e) {
+            if (lenient) return 0;
+            throw e;
+        }
     }
 
     protected long readOffsetPositionMoved(long adding)
@@ -1010,6 +1046,16 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public void lastDecimalPlaces(int lastDecimalPlaces) {
         this.lastDecimalPlaces = Math.max(0, lastDecimalPlaces);
+    }
+
+    @Override
+    public void lenient(boolean lenient) {
+        this.lenient = lenient;
+    }
+
+    @Override
+    public boolean lenient() {
+        return lenient;
     }
 }
 

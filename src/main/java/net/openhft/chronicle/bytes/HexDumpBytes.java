@@ -787,6 +787,16 @@ public class HexDumpBytes implements Bytes {
         return base.readPosition() | (text.readPosition() << 32);
     }
 
+    @Override
+    public void lenient(boolean lenient) {
+        base.lenient(lenient);
+    }
+
+    @Override
+    public boolean lenient() {
+        return base.lenient();
+    }
+
     private static class TextBytesReader extends Reader {
         private final Reader reader;
         private final Bytes base;

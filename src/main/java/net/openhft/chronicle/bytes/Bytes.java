@@ -529,6 +529,11 @@ public interface Bytes<Underlying> extends
     @NotNull
     default BigInteger readBigInteger() {
         int length = Maths.toUInt31(readStopBit());
+        if (length == 0)
+            if (lenient())
+                return BigInteger.ZERO;
+            else
+                throw new BufferUnderflowException();
         @NotNull byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
@@ -591,12 +596,15 @@ public interface Bytes<Underlying> extends
             throw new BufferUnderflowException();
         long limit0 = readLimit();
         long limit = readPosition() + length;
+        boolean lenient = lenient();
         try {
+            lenient(true);
             readLimit(limit);
             bytesOut.write(this);
         } finally {
             readLimit(limit0);
             readPosition(limit);
+            lenient(lenient);
         }
     }
 
@@ -605,12 +613,15 @@ public interface Bytes<Underlying> extends
         int length = readUnsignedShort();
         long limit = readLimit();
         long end = readPosition() + length;
+        boolean lenient = lenient();
         try {
+            lenient(true);
             readLimit(end);
             object.readMarshallable(this);
         } finally {
             readPosition(end);
             readLimit(limit);
+            lenient(lenient);
         }
         return object;
     }
