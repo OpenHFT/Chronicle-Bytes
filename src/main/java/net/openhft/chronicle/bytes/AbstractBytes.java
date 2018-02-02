@@ -254,6 +254,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> readSkip(long bytesToSkip)
             throws BufferUnderflowException {
+        if (lenient)
+            bytesToSkip = Math.min(bytesToSkip, readRemaining());
         readOffsetPositionMoved(bytesToSkip);
         return this;
     }
