@@ -21,16 +21,21 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.*;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
+import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 
 public class MappedFileTest {
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder();
     private ThreadDump threadDump;
 
     @After
@@ -51,6 +56,29 @@ public class MappedFileTest {
     @Test
     public void testWarmup() throws InterruptedException {
         MappedFile.warmup();
+    }
+
+    @Test
+    public void shouldReleaseReferenceWhenNewStoreIsAcquired() throws IOException
+    {
+        final File file = tmpDir.newFile();
+        // this is what it will end up as
+        final long chunkSize = OS.mapAlign(64);
+        final MappedFile mappedFile = MappedFile.mappedFile(file, 64);
+        final MappedBytesStore first = mappedFile.acquireByteStore(1);
+
+        assertThat(first.refCount(), is(1L));
+
+        final MappedBytesStore second = mappedFile.acquireByteStore(1 + chunkSize);
+
+        assertThat(first.refCount(), is(1L));
+        assertThat(second.refCount(), is(1L));
+
+        final MappedBytesStore third = mappedFile.acquireByteStore(1 + chunkSize + chunkSize);
+
+        assertThat(first.refCount(), is(1L));
+        assertThat(second.refCount(), is(1L));
+        assertThat(third.refCount(), is(1L));
     }
 
     @Test
@@ -89,24 +117,23 @@ public class MappedFileTest {
             // expected
         }
         assertEquals(1, mf.refCount());
-        assertEquals(3, bs.refCount());
-        assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+        assertEquals(2, bs.refCount());
+        assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
 
         @Nullable BytesStore bs2 = mf.acquireByteStore(chunkSize + (1 << 10));
-        assertEquals(4, bs2.refCount());
-        assertEquals("refCount: 1, 0, 4", mf.referenceCounts());
-        bytes.release();
         assertEquals(3, bs2.refCount());
         assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+        bytes.release();
+        assertEquals(2, bs2.refCount());
+        assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
 
         mf.release();
-        assertEquals(2, bs.refCount());
+        assertEquals(1, bs.refCount());
         assertEquals(0, mf.refCount());
-        assertEquals("refCount: 0, 0, 2", mf.referenceCounts());
+        assertEquals("refCount: 0, 0, 1", mf.referenceCounts());
 
         bs2.release();
-        assertEquals(1, bs.refCount());
-        bs.release();
+        assertEquals(0, bs2.refCount());
         assertEquals(0, bs.refCount());
         assertEquals(0, mf.refCount());
         assertEquals("refCount: 0, 0, 0", mf.referenceCounts());

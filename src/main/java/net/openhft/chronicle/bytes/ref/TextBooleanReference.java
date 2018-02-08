@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.BooleanValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,9 +32,16 @@ public class TextBooleanReference implements BooleanValue, Byteable {
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
+    private final StoreRef ref = new StoreRef();
+
+    public TextBooleanReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
+
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
-        this.bytes = bytes;
+        acceptNewBytesStore(bytes);
         this.offset = offset;
     }
 
@@ -70,5 +78,14 @@ public class TextBooleanReference implements BooleanValue, Byteable {
     public static void write(final boolean value, final BytesStore bytes, long offset) {
         bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
         bytes.writeByte(offset + 4, (byte) 'e');
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

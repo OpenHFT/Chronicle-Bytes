@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -42,6 +43,14 @@ public class TextIntReference implements IntValue, Byteable {
     private static final int DIGITS = 10;
     private BytesStore bytes;
     private long offset;
+
+    private final StoreRef ref = new StoreRef();
+
+    public TextIntReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
+
 
     public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
         long position = bytes.writePosition();
@@ -124,7 +133,7 @@ public class TextIntReference implements IntValue, Byteable {
         if (length != template.length)
             throw new IllegalArgumentException(length + " != " + template.length);
 
-        this.bytes = bytes;
+        acceptNewBytesStore(bytes);
         this.offset = offset;
 
         if (bytes.readInt(offset) == UNINITIALIZED)
@@ -149,5 +158,14 @@ public class TextIntReference implements IntValue, Byteable {
     @NotNull
     public String toString() {
         return "value: " + getValue();
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

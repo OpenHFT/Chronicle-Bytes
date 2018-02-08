@@ -16,6 +16,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,6 +31,13 @@ public class BinaryLongReference implements LongReference {
     @Nullable
     protected BytesStore bytes;
     protected long offset;
+
+    private final StoreRef ref = new StoreRef();
+
+    public BinaryLongReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
 
     /**
      * only used for testing
@@ -55,8 +63,7 @@ public class BinaryLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize())
             throw new IllegalArgumentException();
-
-        this.bytes = bytes.bytesStore();
+        acceptNewBytesStore(bytes);
         this.offset = offset;
     }
 
@@ -115,5 +122,14 @@ public class BinaryLongReference implements LongReference {
         if (value == LONG_NOT_COMPLETE && binaryLongReferences != null)
             binaryLongReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(offset, expected, value);
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -41,6 +42,13 @@ public class TextLongReference implements LongReference {
     private static final int DIGITS = 20;
     private BytesStore bytes;
     private long offset;
+
+    private final StoreRef ref = new StoreRef();
+
+    public TextLongReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
 
     public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
         long position = bytes.writePosition();
@@ -71,7 +79,7 @@ public class TextLongReference implements LongReference {
         if (length != template.length)
             throw new IllegalArgumentException();
 
-        this.bytes = bytes;
+        acceptNewBytesStore(bytes);
         this.offset = offset;
 
         if (bytes.readLong(offset) == UNINITIALIZED)
@@ -144,5 +152,14 @@ public class TextLongReference implements LongReference {
             }
             return LONG_FALSE;
         }) == LONG_TRUE;
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -29,12 +30,20 @@ public class BinaryIntReference implements IntValue, Byteable {
     private BytesStore bytes;
     private long offset;
 
+    private final StoreRef ref = new StoreRef();
+
+    public BinaryIntReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
+
+
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize())
             throw new IllegalArgumentException();
 
-        this.bytes = bytes.bytesStore();
+        acceptNewBytesStore(bytes);
         this.offset = offset;
     }
 
@@ -91,5 +100,14 @@ public class BinaryIntReference implements IntValue, Byteable {
     @Override
     public boolean compareAndSwapValue(int expected, int value) {
         return bytes.compareAndSwapInt(offset, expected, value);
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

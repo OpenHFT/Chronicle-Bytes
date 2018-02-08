@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,6 +51,13 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
+
+    private final StoreRef ref = new StoreRef();
+
+    public TextLongArrayReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
 
     public static void write(@NotNull Bytes bytes, long capacity) {
         long start = bytes.writePosition();
@@ -152,7 +160,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
-        this.bytes = bytes;
+        acceptNewBytesStore(bytes);
         this.offset = offset;
         this.length = length;
     }
@@ -201,5 +209,14 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     @Override
     public long sizeInBytes(long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }

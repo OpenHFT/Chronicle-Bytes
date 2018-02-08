@@ -33,7 +33,9 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.util.StringUtils.*;
+import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
+import static net.openhft.chronicle.core.util.StringUtils.extractChars;
+import static net.openhft.chronicle.core.util.StringUtils.getStringCoder;
 
 /**
  * Bytes to wrap memory mapped data.

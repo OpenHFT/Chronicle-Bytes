@@ -131,18 +131,19 @@ public class MappedMemoryTest {
         @NotNull File tempFile = File.createTempFile("chronicle", "q");
         try {
 
-            @NotNull final Bytes bytes = mappedBytes(tempFile, OS.pageSize());
+            @NotNull Bytes bytes = mappedBytes(tempFile, OS.pageSize());
+            assertEquals(1, bytes.refCount());
+            bytes.reserve();
             @NotNull char[] chars = new char[OS.pageSize() * 11];
             Arrays.fill(chars, '.');
             chars[chars.length - 1] = '*';
             bytes.writeUtf8(new String(chars));
             @NotNull String text = "hello this is some very long text";
             bytes.writeUtf8(text);
-
-            bytes.readUtf8();
-            assertEquals(text, bytes.readUtf8());
+            final String textValue = bytes.toString();
+            assertEquals(text, textValue.substring(chars.length + 4));
             bytes.release();
-            assertEquals(0, bytes.refCount());
+            assertEquals(1, bytes.refCount());
         } finally {
             tempFile.delete();
         }

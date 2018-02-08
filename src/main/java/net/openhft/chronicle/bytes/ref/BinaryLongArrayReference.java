@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,6 +45,13 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     private BytesStore bytes;
     private long offset;
     private long length = VALUES;
+
+    private final StoreRef ref = new StoreRef();
+
+    public BinaryLongArrayReference()
+    {
+        WeakReferenceCleaner.newCleaner(this, ref::clean);
+    }
 
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -127,7 +135,7 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) throws BufferUnderflowException, IllegalArgumentException {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
-        this.bytes = bytes;
+        acceptNewBytesStore(bytes);
 
         assert (offset & 7) == 0 : "offset=" + offset;
         this.offset = (offset + 7) & ~7;
@@ -198,6 +206,15 @@ public class BinaryLongArrayReference implements ByteableLongArrayValues {
         if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
             binaryLongArrayReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(VALUES + offset + (index << 3), expected, value);
+    }
+
+    private void acceptNewBytesStore(final BytesStore bytes) {
+        if (this.bytes != null) {
+            this.bytes.release();
+        }
+        this.bytes = bytes.bytesStore();
+        ref.b = this.bytes;
+        this.bytes.reserve();
     }
 }
 
