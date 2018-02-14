@@ -96,6 +96,7 @@ public class MappedFileTest {
         Bytes bytes = bs.bytesForRead();
 
         assertNotNull(bytes.toString()); // show it doesn't blow up.
+        assertNotNull(bs.toString()); // show it doesn't blow up.
         assertEquals(chunkSize, bytes.start());
         assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
         assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
