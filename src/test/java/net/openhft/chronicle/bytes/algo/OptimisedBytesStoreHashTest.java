@@ -85,8 +85,8 @@ public class OptimisedBytesStoreHashTest {
         nb.release();
     }
 
-    @Test
-    @Ignore("Long running, har mean score = 5436")
+    //@Test
+    //@Ignore("Long running, har mean score = 5436")
     public void testRandomness() {
         @NotNull SecureRandom rand = new SecureRandom();
 
@@ -130,8 +130,8 @@ public class OptimisedBytesStoreHashTest {
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
     }
 
-    @Test
-    @Ignore("Long running, avg score = 5414, avg time 0.043 us")
+    //@Test
+    //@Ignore("Long running, avg score = 5414, avg time 0.043 us")
     public void testSmallRandomness() throws IOException {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
@@ -174,8 +174,8 @@ public class OptimisedBytesStoreHashTest {
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);
     }
 
-    @Test
-    @Ignore("Only run for comparison, avg score = 6843")
+    //@Test
+    //@Ignore("Only run for comparison, avg score = 6843")
     public void testSecureRandomness() {
         long scoreSum = 0;
         for (int t = 0; t < 500; t++) {

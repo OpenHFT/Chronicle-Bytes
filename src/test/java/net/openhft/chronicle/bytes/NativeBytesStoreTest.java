@@ -172,8 +172,8 @@ public class NativeBytesStoreTest {
         assertEquals(hi, nbs.toString());
     }
 
-    @Test
-    @Ignore("Long running test")
+    //@Test
+    //@Ignore("Long running test")
     public void perfCheckSum() throws IORuntimeException {
         @NotNull NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),

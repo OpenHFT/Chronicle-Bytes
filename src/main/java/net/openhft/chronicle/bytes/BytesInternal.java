@@ -1008,18 +1008,18 @@ enum BytesInternal {
         final int size = MAX_STRING_LEN;
         @org.jetbrains.annotations.NotNull final StringBuilder sb = new StringBuilder(size);
 
-        final Bytes bytes1 = bytes.bytesForRead();
-        try {
-            if (bytes.readRemaining() > size) {
+        if (bytes.readRemaining() > size) {
+            final Bytes bytes1 = bytes.bytesForRead();
+            try {
                 bytes1.readLimit(bytes1.readPosition() + size);
                 toString(bytes1, sb);
                 return sb.toString() + "...";
-            } else {
-                toString(bytes1, sb);
-                return sb.toString();
+            } finally {
+                bytes1.release();
             }
-        } finally {
-            bytes1.release();
+        } else {
+            toString(bytes, sb);
+            return sb.toString();
         }
     }
 

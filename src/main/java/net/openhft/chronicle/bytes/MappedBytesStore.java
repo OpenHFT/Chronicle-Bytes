@@ -70,4 +70,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     public long start() {
         return start;
     }
+
+    @Override
+    public long readPosition() {
+        return start();
+    }
 }

@@ -119,8 +119,8 @@ public class NativeBytesTest {
         nativeBytes.release();
     }
 
-    @Test
-    @Ignore("Long running test")
+    //@Test
+    //@Ignore("Long running test")
     public void tryGrowBeyondByteBufferCapacity() {
         if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
             return;
