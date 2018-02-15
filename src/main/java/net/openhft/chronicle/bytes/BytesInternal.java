@@ -216,14 +216,14 @@ enum BytesInternal {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     if ((char) c != other.charAt(charI))
                         return false;
                     break;
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
@@ -240,7 +240,7 @@ enum BytesInternal {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
@@ -260,7 +260,7 @@ enum BytesInternal {
                 }
                 // TODO add code point of characters > 0xFFFF support.
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + (offset - limit + utfLen));
             }
@@ -352,21 +352,21 @@ enum BytesInternal {
 
     public static void parse8bit1(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen) throws IOException {
 
-            assert bytes.readRemaining() >= utflen;
-            for (int count = 0; count < utflen; count++) {
-                int c = bytes.readUnsignedByte();
-                appendable.append((char) c);
-            }
+        assert bytes.readRemaining() >= utflen;
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte();
+            appendable.append((char) c);
+        }
     }
 
     public static void parse8bit1(long offset, @org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen)
             throws BufferUnderflowException, IOException {
 
-            assert bytes.realCapacity() >= utflen + offset;
-            for (int count = 0; count < utflen; count++) {
-                int c = bytes.readUnsignedByte(offset + count);
-                appendable.append((char) c);
-            }
+        assert bytes.realCapacity() >= utflen + offset;
+        for (int count = 0; count < utflen; count++) {
+            int c = bytes.readUnsignedByte(offset + count);
+            appendable.append((char) c);
+        }
     }
 
     public static void parseUtf8_SB1(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen)
@@ -483,14 +483,14 @@ enum BytesInternal {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     count++;
                     appendable.append((char) c);
                     break;
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     count += 2;
                     if (count > utflen)
                         throw new UTFDataFormatRuntimeException(
@@ -506,7 +506,7 @@ enum BytesInternal {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     count += 3;
                     if (count > utflen)
                         throw new UTFDataFormatRuntimeException(
@@ -525,7 +525,7 @@ enum BytesInternal {
                 }
                 // TODO add code point of characters > 0xFFFF support.
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + count);
             }
@@ -546,13 +546,13 @@ enum BytesInternal {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     appendable.append((char) c);
                     break;
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
@@ -568,7 +568,7 @@ enum BytesInternal {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
@@ -587,7 +587,7 @@ enum BytesInternal {
                 }
                 // TODO add code point of characters > 0xFFFF support.
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + (offset - limit + utflen));
             }
@@ -1008,18 +1008,18 @@ enum BytesInternal {
         final int size = MAX_STRING_LEN;
         @org.jetbrains.annotations.NotNull final StringBuilder sb = new StringBuilder(size);
 
-        if (bytes.readRemaining() > size) {
-            final Bytes bytes1 = bytes.bytesForRead();
-            try {
+        final Bytes bytes1 = bytes.bytesForRead();
+        try {
+            if (bytes.readRemaining() > size) {
                 bytes1.readLimit(bytes1.readPosition() + size);
                 toString(bytes1, sb);
                 return sb.toString() + "...";
-            } finally {
-                bytes1.release();
+            } else {
+                toString(bytes1, sb);
+                return sb.toString();
             }
-        } else {
-            toString(bytes, sb);
-            return sb.toString();
+        } finally {
+            bytes1.release();
         }
     }
 
@@ -1711,7 +1711,7 @@ enum BytesInternal {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     if (tester.isStopChar(c))
                         return;
                     appendable.append((char) c);
@@ -1719,7 +1719,7 @@ enum BytesInternal {
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
@@ -1733,7 +1733,7 @@ enum BytesInternal {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
@@ -1750,7 +1750,7 @@ enum BytesInternal {
                 }
 
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
                             "malformed input around byte ");
             }
@@ -1789,7 +1789,7 @@ enum BytesInternal {
                 case 5:
                 case 6:
                 case 7:
-                /* 0xxxxxxx */
+                    /* 0xxxxxxx */
                     if (tester.isStopChar(c))
                         return;
                     appendable.append((char) c);
@@ -1797,7 +1797,7 @@ enum BytesInternal {
 
                 case 12:
                 case 13: {
-                /* 110x xxxx 10xx xxxx */
+                    /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
@@ -1811,7 +1811,7 @@ enum BytesInternal {
                 }
 
                 case 14: {
-                /* 1110 xxxx 10xx xxxx 10xx xxxx */
+                    /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
@@ -1828,7 +1828,7 @@ enum BytesInternal {
                 }
 
                 default:
-                /* 10xx xxxx, 1111 xxxx */
+                    /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
                             "malformed input around byte ");
             }
