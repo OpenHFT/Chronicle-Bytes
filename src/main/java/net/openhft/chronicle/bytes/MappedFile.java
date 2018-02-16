@@ -361,18 +361,18 @@ public class MappedFile implements ReferenceCounted {
                 continue;
             @Nullable MappedBytesStore mbs = storeRef.get();
             if (mbs != null) {
-                long count = mbs.refCount();
-                if (count > 0) {
+                // this MappedFile is the only referrer to the MappedBytesStore at this point,
+                // so ensure that it is released
+                while (mbs.refCount() != 0) {
                     try {
                         mbs.release();
 
                     } catch (IllegalStateException e) {
                         Jvm.debug().on(getClass(), e);
                     }
-                    if (count > 1)
-                        continue;
                 }
             }
+
             stores.set(i, null);
         }
         try {
