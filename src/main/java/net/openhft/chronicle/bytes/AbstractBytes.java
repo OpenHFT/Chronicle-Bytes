@@ -16,25 +16,24 @@
 
 package net.openhft.chronicle.bytes;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
-    @UsedViaReflection
-    private final String name;
-    @NotNull
-    protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
+    @UsedViaReflection private final String name;
+    @NotNull protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long readPosition;
     protected long writePosition;
@@ -44,14 +43,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     private volatile Thread threadPositionSetBy;
     private boolean lenient = false;
 
-    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long
-            writePosition, long writeLimit)
+    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
         this(bytesStore, writePosition, writeLimit, "");
     }
 
-    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long
-            writePosition, long writeLimit, String name)
+    AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit, String name)
             throws IllegalStateException {
         this.bytesStore = bytesStore;
         bytesStore.reserve();
@@ -81,7 +78,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         try {
             long start = start();
             long readRemaining = readRemaining();
-            if (readRemaining > 0 && start < readPosition) {
+            if ((readRemaining > 0) && (start < readPosition)) {
                 bytesStore.move(readPosition, start, readRemaining);
                 readPosition = start;
                 uncheckedWritePosition(readPosition + readRemaining);
@@ -116,10 +113,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
-        if (start() + length > capacity()) {
+        if ((start() + length) > capacity()) {
             throw new DecoratedBufferOverflowException(
-                    String.format("clearAndPad failed. Start: %d + length: %d > capacity: %d",
-                            start(), length, capacity()));
+                    String.format("clearAndPad failed. Start: %d + length: %d > capacity: %d", start(), length, capacity()));
         }
         long l = start() + length;
         readPosition = l;
@@ -178,16 +174,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @ForceInline
-    public boolean compareAndSwapInt(long offset, int expected, int value)
-            throws BufferOverflowException {
+    public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         return bytesStore.compareAndSwapInt(offset, expected, value);
     }
 
     @Override
     @ForceInline
-    public boolean compareAndSwapLong(long offset, long expected, long value)
-            throws BufferOverflowException {
+    public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
@@ -197,8 +191,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> readPosition(long position) throws BufferUnderflowException {
         if (position < start()) {
-            throw new DecoratedBufferUnderflowException(
-                    String.format("readPosition failed. Position: %d < start: %d", position, start()));
+            throw new DecoratedBufferUnderflowException(String.format("readPosition failed. Position: %d < start: %d", position, start()));
         }
         if (position > readLimit()) {
             throw new DecoratedBufferUnderflowException(
@@ -212,23 +205,22 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @ForceInline
     public Bytes<Underlying> readLimit(long limit) throws BufferUnderflowException {
-        if (limit < start())
+        if (limit < start()) {
             return limitLessThanStart(limit);
-        else if (limit > writeLimit())
+        } else if (limit > writeLimit()) {
             return limitGreaterThanWriteLimit(limit);
+        }
 
         uncheckedWritePosition(limit);
         return this;
     }
 
     private Bytes<Underlying> limitGreaterThanWriteLimit(long limit) {
-        throw new DecoratedBufferUnderflowException(
-                String.format("readLimit failed. Limit: %d > writeLimit: %d", limit, writeLimit()));
+        throw new DecoratedBufferUnderflowException(String.format("readLimit failed. Limit: %d > writeLimit: %d", limit, writeLimit()));
     }
 
     private Bytes<Underlying> limitLessThanStart(long limit) {
-        throw new DecoratedBufferUnderflowException(
-                String.format("readLimit failed. Limit: %d < start: %d", limit, start()));
+        throw new DecoratedBufferUnderflowException(String.format("readLimit failed. Limit: %d < start: %d", limit, start()));
     }
 
     @NotNull
@@ -240,11 +232,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
                     String.format("writePosition failed. Position: %d > writeLimit: %d", position, writeLimit()));
         }
         if (position < start()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("writePosition failed. Position: %d < start: %d", position, start()));
+            throw new DecoratedBufferOverflowException(String.format("writePosition failed. Position: %d < start: %d", position, start()));
         }
-        if (position < readPosition())
+        if (position < readPosition()) {
             this.readPosition = position;
+        }
         uncheckedWritePosition(position);
         return this;
     }
@@ -252,10 +244,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> readSkip(long bytesToSkip)
-            throws BufferUnderflowException {
-        if (lenient)
+    public Bytes<Underlying> readSkip(long bytesToSkip) throws BufferUnderflowException {
+        if (lenient) {
             bytesToSkip = Math.min(bytesToSkip, readRemaining());
+        }
         readOffsetPositionMoved(bytesToSkip);
         return this;
     }
@@ -273,8 +265,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeSkip(long bytesToSkip)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeSkip(long bytesToSkip) throws BufferOverflowException {
         writeCheckOffset(writePosition, bytesToSkip);
         uncheckedWritePosition(writePosition + bytesToSkip);
         return this;
@@ -285,16 +276,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     public Bytes<Underlying> writeLimit(long limit) throws BufferOverflowException {
         if (limit < start()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("writeLimit failed. Limit: %d < start: %d",
-                            limit, start()));
+            throw new DecoratedBufferOverflowException(String.format("writeLimit failed. Limit: %d < start: %d", limit, start()));
         }
         long capacity = capacity();
         if (limit > capacity) {
             assert false : "cant set limit=" + limit + " > " + "capacity=" + capacity;
-            throw new DecoratedBufferOverflowException(
-                    String.format("writeLimit failed. Limit: %d > capacity: %d",
-                            limit, capacity));
+            throw new DecoratedBufferOverflowException(String.format("writeLimit failed. Limit: %d > capacity: %d", limit, capacity));
         }
         this.writeLimit = limit;
         return this;
@@ -359,7 +346,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(2);
             return bytesStore.readShort(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -371,7 +360,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(4);
             return bytesStore.readInt(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -407,7 +398,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(8);
             return bytesStore.readLong(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -419,7 +412,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(4);
             return bytesStore.readFloat(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -431,7 +426,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(8);
             return bytesStore.readDouble(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -443,7 +440,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(4);
             return bytesStore.readVolatileInt(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
@@ -455,13 +454,14 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             long offset = readOffsetPositionMoved(8);
             return bytesStore.readVolatileLong(offset);
         } catch (BufferUnderflowException e) {
-            if (lenient) return 0;
+            if (lenient) {
+                return 0;
+            }
             throw e;
         }
     }
 
-    protected long readOffsetPositionMoved(long adding)
-            throws BufferUnderflowException {
+    protected long readOffsetPositionMoved(long adding) throws BufferUnderflowException {
         long offset = readPosition;
         readCheckOffset(readPosition, adding, false);
         readPosition += adding;
@@ -487,8 +487,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeByte(long offset, byte i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeByte(long offset, byte i) throws BufferOverflowException {
         writeCheckOffset(offset, 1);
         bytesStore.writeByte(offset, i);
         return this;
@@ -497,8 +496,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeShort(long offset, short i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeShort(long offset, short i) throws BufferOverflowException {
         writeCheckOffset(offset, 2);
         bytesStore.writeShort(offset, i);
         return this;
@@ -507,8 +505,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeInt(long offset, int i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeInt(long offset, int i) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeInt(offset, i);
         return this;
@@ -517,8 +514,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedInt(long offset, int i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeOrderedInt(offset, i);
         return this;
@@ -527,8 +523,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeLong(long offset, long i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeLong(long offset, long i) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeLong(offset, i);
         return this;
@@ -537,8 +532,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedLong(long offset, long i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeOrderedLong(long offset, long i) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeOrderedLong(offset, i);
         return this;
@@ -547,8 +541,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeFloat(long offset, float d)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeFloat(long offset, float d) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeFloat(offset, d);
         return this;
@@ -557,8 +550,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeDouble(long offset, double d)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeDouble(long offset, double d) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeDouble(offset, d);
         return this;
@@ -566,8 +558,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeVolatileByte(long offset, byte i8)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
         writeCheckOffset(offset, 1);
         bytesStore.writeVolatileByte(offset, i8);
         return this;
@@ -575,8 +566,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeVolatileShort(long offset, short i16)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeVolatileShort(long offset, short i16) throws BufferOverflowException {
         writeCheckOffset(offset, 2);
         bytesStore.writeVolatileShort(offset, i16);
         return this;
@@ -584,8 +574,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeVolatileInt(long offset, int i32)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeVolatileInt(long offset, int i32) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         bytesStore.writeVolatileInt(offset, i32);
         return this;
@@ -593,8 +582,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeVolatileLong(long offset, long i64)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeVolatileLong(long offset, long i64) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         bytesStore.writeVolatileLong(offset, i64);
         return this;
@@ -603,8 +591,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @NotNull
     @ForceInline
-    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException {
+    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -612,8 +599,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @ForceInline
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
-            throws BufferOverflowException {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -621,8 +607,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @NotNull
     @ForceInline
-    public Bytes<Underlying> write(long offsetInRDO,
-                                   RandomDataInput bytes, long offset, long length)
+    public Bytes<Underlying> write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
@@ -630,25 +615,19 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @ForceInline
-    void writeCheckOffset(long offset, long adding)
-            throws BufferOverflowException {
+    void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert writeCheckOffset0(offset, adding);
     }
 
     protected boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
         if (offset < start()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("writeCheckOffset0 failed. Offset: %d < start: %d",
-                            offset, start()));
+            throw new DecoratedBufferOverflowException(String.format("writeCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
         }
-        if (offset + adding > writeLimit()) {
-            assert offset + adding <= writeLimit() : "cant add bytes past the limit : limit=" + writeLimit() +
-                    ",offset=" +
-                    offset +
-                    ",adding=" + adding;
+        if ((offset + adding) > writeLimit()) {
+            assert (offset + adding) <= writeLimit() : "cant add bytes past the limit : limit=" + writeLimit() + ",offset=" + offset
+                    + ",adding=" + adding;
             throw new DecoratedBufferOverflowException(
-                    String.format("writeCheckOffset0 failed. Offset: %d + adding > writeLimit: %d",
-                            offset, adding, writeLimit()));
+                    String.format("writeCheckOffset0 failed. Offset: %d + adding %d> writeLimit: %d", offset, adding, writeLimit()));
         }
         return true;
     }
@@ -701,50 +680,44 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @ForceInline
-    void readCheckOffset(long offset, long adding, boolean given)
-            throws BufferUnderflowException {
+    void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         assert readCheckOffset0(offset, adding, given);
     }
 
     @ForceInline
     private boolean readCheckOffset0(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (offset < start()) {
-            throw new DecoratedBufferUnderflowException(
-                    String.format("readCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
+            throw new DecoratedBufferUnderflowException(String.format("readCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
         }
         long limit0 = given ? writeLimit() : readLimit();
-        if (offset + adding > limit0) {
-//          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-            //                  offset +
-            //                ",adding=" + adding;
-            throw new DecoratedBufferUnderflowException(
-                    String.format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)",
-                            offset, adding, limit0, given));
+        if ((offset + adding) > limit0) {
+            // assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
+            // offset +
+            // ",adding=" + adding;
+            throw new DecoratedBufferUnderflowException(String
+                    .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit0, given));
         }
         return true;
     }
 
     @ForceInline
-    void prewriteCheckOffset(long offset, long subtracting)
-            throws BufferOverflowException {
+    void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
         assert prewriteCheckOffset0(offset, subtracting);
     }
 
     @ForceInline
     private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
-        if (offset - subtracting < start()) {
+        if ((offset - subtracting) < start()) {
             throw new DecoratedBufferOverflowException(
-                    String.format("prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d",
-                            offset, subtracting, start()));
+                    String.format("prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d", offset, subtracting, start()));
         }
         long limit0 = readLimit();
         if (offset > limit0) {
-//          assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-            //                  offset +
-            //                ",adding=" + adding;
+            // assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
+            // offset +
+            // ",adding=" + adding;
             throw new DecoratedBufferOverflowException(
-                    String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d",
-                            offset, limit0));
+                    String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d", offset, limit0));
         }
         return true;
     }
@@ -752,8 +725,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeByte(byte i8)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeByte(byte i8) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -778,8 +750,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> prewriteByte(byte i8)
-            throws BufferOverflowException {
+    public Bytes<Underlying> prewriteByte(byte i8) throws BufferOverflowException {
         long offset = prewriteOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -809,13 +780,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    protected final long writeOffsetPositionMoved(long adding)
-            throws BufferOverflowException {
+    protected final long writeOffsetPositionMoved(long adding) throws BufferOverflowException {
         return writeOffsetPositionMoved(adding, adding);
     }
 
-    protected long writeOffsetPositionMoved(long adding, long advance)
-            throws BufferOverflowException {
+    protected long writeOffsetPositionMoved(long adding, long advance) throws BufferOverflowException {
         long oldPosition = writePosition;
         writeCheckOffset(writePosition, adding);
         uncheckedWritePosition(writePosition + advance);
@@ -827,13 +796,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     private boolean checkThreadPositionSetBy() {
-        if (threadPositionSetBy == null)
+        if (threadPositionSetBy == null) {
             threadPositionSetBy = Thread.currentThread();
+        }
         return threadPositionSetBy == Thread.currentThread();
     }
 
-    protected long prewriteOffsetPositionMoved(long subtracting)
-            throws BufferOverflowException {
+    protected long prewriteOffsetPositionMoved(long subtracting) throws BufferOverflowException {
         prewriteCheckOffset(readPosition, subtracting);
         return readPosition -= subtracting;
     }
@@ -841,8 +810,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeShort(short i16)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeShort(short i16) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(2);
         bytesStore.writeShort(offset, i16);
         return this;
@@ -869,8 +837,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeLong(long i64)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeLong(long i64) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(8);
         bytesStore.writeLong(offset, i64);
         return this;
@@ -879,8 +846,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeLongAdv(long i64, int advance)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeLongAdv(long i64, int advance) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(8, advance);
         bytesStore.writeLong(offset, i64);
         return this;
@@ -889,8 +855,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeFloat(float f)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeFloat(float f) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(4);
         bytesStore.writeFloat(offset, f);
         return this;
@@ -899,8 +864,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeDouble(double d)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeDouble(double d) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(8);
         bytesStore.writeDouble(offset, d);
         return this;
@@ -909,15 +873,13 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
-            throws BufferOverflowException {
-        if (length + offset > bytes.length)
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
-                    "length=" + length + ", offset=" + offset);
+    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length) throws BufferOverflowException {
+        if ((length + offset) > bytes.length) {
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+        }
         if (length > writeRemaining()) {
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d",
-                            length, writeRemaining()));
+                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
         }
         long offsetInRDO = writeOffsetPositionMoved(length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
@@ -927,8 +889,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeSome(@NotNull ByteBuffer buffer)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeSome(@NotNull ByteBuffer buffer) throws BufferOverflowException {
         int length = (int) Math.min(buffer.remaining(), writeRemaining());
         bytesStore.write(writePosition, buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition + length);
@@ -939,8 +900,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedInt(int i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeOrderedInt(int i) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(4);
         bytesStore.writeOrderedInt(offset, i);
         return this;
@@ -949,8 +909,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
-    public Bytes<Underlying> writeOrderedLong(long i)
-            throws BufferOverflowException {
+    public Bytes<Underlying> writeOrderedLong(long i) throws BufferOverflowException {
         long offset = writeOffsetPositionMoved(8);
         bytesStore.writeOrderedLong(offset, i);
         return this;
@@ -975,21 +934,27 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof BytesStore)) return false;
+        if (!(obj instanceof BytesStore)) {
+            return false;
+        }
         @NotNull BytesStore b2 = (BytesStore) obj;
         long remaining = readRemaining();
-        return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
+        return (b2.readRemaining() == remaining) && equalsBytes(b2, remaining);
     }
 
     public boolean equalsBytes(@NotNull BytesStore b2, long remaining) {
         try {
             long i = 0;
-            for (; i < remaining - 7; i += 8)
-                if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
+            for (; i < (remaining - 7); i += 8) {
+                if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i)) {
                     return false;
-            for (; i < remaining; i++)
-                if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
+                }
+            }
+            for (; i < remaining; i++) {
+                if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i)) {
                     return false;
+                }
+            }
             return true;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
@@ -1060,4 +1025,3 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return lenient;
     }
 }
-
