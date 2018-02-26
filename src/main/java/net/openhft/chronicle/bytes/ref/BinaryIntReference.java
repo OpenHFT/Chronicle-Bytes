@@ -15,46 +15,23 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 /**
  * This class acts as a Binary 32-bit in values. c.f. TextIntReference
  */
-public class BinaryIntReference implements IntValue, Byteable {
-    @Nullable
-    private BytesStore bytes;
-    private long offset;
-
-    private final StoreRef ref = new StoreRef();
-
-    public BinaryIntReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
-
+public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())
             throw new IllegalArgumentException();
-
-        acceptNewBytesStore(bytes);
-        this.offset = offset;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
+        super.bytesStore(bytes, offset, length);
     }
 
     @Override
@@ -100,14 +77,5 @@ public class BinaryIntReference implements IntValue, Byteable {
     @Override
     public boolean compareAndSwapValue(int expected, int value) {
         return bytes.compareAndSwapInt(offset, expected, value);
-    }
-
-    private void acceptNewBytesStore(final BytesStore bytes) {
-        if (this.bytes != null) {
-            this.bytes.release();
-        }
-        this.bytes = bytes.bytesStore();
-        ref.b = this.bytes;
-        this.bytes.reserve();
     }
 }

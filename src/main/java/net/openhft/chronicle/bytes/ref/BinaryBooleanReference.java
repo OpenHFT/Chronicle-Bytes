@@ -1,9 +1,8 @@
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.BooleanValue;
+import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -11,35 +10,14 @@ import java.nio.BufferUnderflowException;
 /**
  * Created by Rob Austin
  */
-public class BinaryBooleanReference implements BooleanValue, Byteable {
-
-    private BytesStore bytes;
-    private long offset;
-
-    private final StoreRef ref = new StoreRef();
-
-    public BinaryBooleanReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
+public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
     @Override
-    public void bytesStore(final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())
             throw new IllegalArgumentException();
 
-        acceptNewBytesStore(bytes);
-        this.offset = offset;
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
+        super.bytesStore(bytes, offset, length);
     }
 
     @Override
@@ -65,14 +43,5 @@ public class BinaryBooleanReference implements BooleanValue, Byteable {
     @Override
     public void setValue(final boolean flag) {
         bytes.writeByte(offset, flag ? TRUE : FALSE);
-    }
-
-    private void acceptNewBytesStore(final BytesStore bytes) {
-        if (this.bytes != null) {
-            this.bytes.release();
-        }
-        this.bytes = bytes.bytesStore();
-        ref.b = this.bytes;
-        this.bytes.reserve();
     }
 }

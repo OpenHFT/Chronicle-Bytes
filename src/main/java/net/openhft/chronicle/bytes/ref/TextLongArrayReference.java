@@ -18,10 +18,8 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
@@ -30,7 +28,7 @@ The format for a long array in text is
 { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
 
-public class TextLongArrayReference implements ByteableLongArrayValues {
+public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION3 = ", values: [ ".getBytes(ISO_8859_1);
@@ -47,17 +45,7 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     private static final int FALS = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRU = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
-    @Nullable
-    private BytesStore bytes;
-    private long offset;
     private long length = VALUES;
-
-    private final StoreRef ref = new StoreRef();
-
-    public TextLongArrayReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
 
     public static void write(@NotNull Bytes bytes, long capacity) {
         long start = bytes.writePosition();
@@ -157,11 +145,10 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
-        acceptNewBytesStore(bytes);
-        this.offset = offset;
+        super.bytesStore(bytes, offset, length);
         this.length = length;
     }
 
@@ -175,17 +162,6 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
         bytes = null;
         offset = 0;
         length = 0;
-    }
-
-    @Nullable
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
     }
 
     @Override
@@ -209,14 +185,5 @@ public class TextLongArrayReference implements ByteableLongArrayValues {
     @Override
     public long sizeInBytes(long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
-    }
-
-    private void acceptNewBytesStore(final BytesStore bytes) {
-        if (this.bytes != null) {
-            this.bytes.release();
-        }
-        this.bytes = bytes.bytesStore();
-        ref.b = this.bytes;
-        this.bytes.reserve();
     }
 }

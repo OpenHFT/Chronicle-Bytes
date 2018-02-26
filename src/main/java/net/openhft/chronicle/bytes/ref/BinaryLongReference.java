@@ -16,28 +16,19 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
-public class BinaryLongReference implements LongReference {
+public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
     @Nullable
     private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
-    @Nullable
-    protected BytesStore bytes;
-    protected long offset;
-
-    private final StoreRef ref = new StoreRef();
-
-    public BinaryLongReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
 
     /**
      * only used for testing
@@ -60,21 +51,11 @@ public class BinaryLongReference implements LongReference {
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())
             throw new IllegalArgumentException();
-        acceptNewBytesStore(bytes);
-        this.offset = offset;
-    }
 
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
+        super.bytesStore(bytes, offset, length);
     }
 
     @Override
@@ -122,14 +103,5 @@ public class BinaryLongReference implements LongReference {
         if (value == LONG_NOT_COMPLETE && binaryLongReferences != null)
             binaryLongReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(offset, expected, value);
-    }
-
-    private void acceptNewBytesStore(final BytesStore bytes) {
-        if (this.bytes != null) {
-            this.bytes.release();
-        }
-        this.bytes = bytes.bytesStore();
-        ref.b = this.bytes;
-        this.bytes.reserve();
     }
 }

@@ -26,14 +26,6 @@ public class UncheckedLongReference implements LongReference {
     private long address;
     private Unsafe unsafe;
 
-    private final StoreRef ref = new StoreRef();
-
-    public UncheckedLongReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
-
-
     @NotNull
     public static LongReference create(BytesStore bytesStore, long offset, int size) {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
@@ -45,7 +37,6 @@ public class UncheckedLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
         address = bytes.addressForRead(offset);
-        ref.b = bytes;
         bytes.reserve();
         unsafe = UnsafeMemory.UNSAFE;
     }

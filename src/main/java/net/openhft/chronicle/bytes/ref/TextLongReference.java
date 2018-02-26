@@ -18,7 +18,6 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -30,7 +29,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 /**
  * reference to an array fo 32-bit in values in Text wire format.
  */
-public class TextLongReference implements LongReference {
+public class TextLongReference extends AbstractReference implements LongReference {
     static final int VALUE = 33;
     private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = BytesUtil.asInt("fals");
@@ -40,15 +39,6 @@ public class TextLongReference implements LongReference {
     private static final long LONG_FALSE = 0L;
     private static final int LOCKED = 19;
     private static final int DIGITS = 20;
-    private BytesStore bytes;
-    private long offset;
-
-    private final StoreRef ref = new StoreRef();
-
-    public TextLongReference()
-    {
-        WeakReferenceCleaner.newCleaner(this, ref::clean);
-    }
 
     public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
         long position = bytes.writePosition();
@@ -75,25 +65,14 @@ public class TextLongReference implements LongReference {
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         if (length != template.length)
             throw new IllegalArgumentException();
 
-        acceptNewBytesStore(bytes);
-        this.offset = offset;
+        super.bytesStore(bytes, offset, length);
 
         if (bytes.readLong(offset) == UNINITIALIZED)
             bytes.write(offset, template);
-    }
-
-    @Override
-    public BytesStore bytesStore() {
-        return bytes;
-    }
-
-    @Override
-    public long offset() {
-        return offset;
     }
 
     @Override
@@ -152,14 +131,5 @@ public class TextLongReference implements LongReference {
             }
             return LONG_FALSE;
         }) == LONG_TRUE;
-    }
-
-    private void acceptNewBytesStore(final BytesStore bytes) {
-        if (this.bytes != null) {
-            this.bytes.release();
-        }
-        this.bytes = bytes.bytesStore();
-        ref.b = this.bytes;
-        this.bytes.reserve();
     }
 }
