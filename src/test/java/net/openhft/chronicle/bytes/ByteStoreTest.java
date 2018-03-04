@@ -232,7 +232,7 @@ public class ByteStoreTest {
             assertEquals(word, bytes.readUtf8());
         }
         assertEquals("", bytes.readUtf8());
-        assertEquals(null, bytes.readUtf8());
+        assertEquals("", bytes.readUtf8());
     }
 
     @Test

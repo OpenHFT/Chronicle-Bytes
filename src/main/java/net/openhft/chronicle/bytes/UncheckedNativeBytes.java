@@ -56,6 +56,14 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public void ensureCapacity(long size) throws IllegalArgumentException {
+        if (size > realCapacity()) {
+            underlyingBytes.ensureCapacity(size);
+            bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
+        }
+    }
+
+    @Override
     public boolean unchecked() {
         return true;
     }
@@ -907,5 +915,17 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public void lastDecimalPlaces(int lastDecimalPlaces) {
         this.lastDecimalPlaces = Math.max(0, lastDecimalPlaces);
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> write(@NotNull BytesStore bytes) {
+        assert bytes != this : "you should not write to yourself !";
+
+        try {
+            return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 }

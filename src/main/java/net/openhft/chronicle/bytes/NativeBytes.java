@@ -302,4 +302,12 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         }
         return this;
     }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> writeLong(long i64) throws BufferOverflowException {
+        long offset = writeOffsetPositionMoved(8L, 8L);
+        bytesStore.writeLong(offset, i64);
+        return this;
+    }
 }

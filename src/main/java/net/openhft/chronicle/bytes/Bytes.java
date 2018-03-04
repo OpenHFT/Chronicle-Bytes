@@ -368,7 +368,7 @@ public interface Bytes<Underlying> extends
     default Bytes<Underlying> unchecked(boolean unchecked) throws IllegalStateException {
         if (unchecked) {
             if (isElastic())
-                Jvm.warn().on(getClass(), "Wrapping elastic bytes with unchecked() will convert it to fixed capacity!");
+                Jvm.debug().on(getClass(), "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
             return start() == 0 && bytesStore().isDirectMemory() ?
                     new UncheckedNativeBytes<>(this) :
                     new UncheckedBytes<>(this);

@@ -26,9 +26,20 @@ import java.nio.BufferUnderflowException;
  * Fast unchecked version of AbstractBytes
  */
 public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
+    final Bytes underlyingBytes;
+
     public UncheckedBytes(@NotNull Bytes underlyingBytes) throws IllegalStateException {
         super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
+        this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
+    }
+
+    @Override
+    public void ensureCapacity(long size) throws IllegalArgumentException {
+        if (size > realCapacity()) {
+            underlyingBytes.ensureCapacity(size);
+            bytesStore = underlyingBytes.bytesStore();
+        }
     }
 
     @Override
