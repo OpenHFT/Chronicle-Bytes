@@ -310,4 +310,9 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         bytesStore.writeLong(offset, i64);
         return this;
     }
+
+    @Override
+    public long readRemaining() {
+        return writePosition - readPosition;
+    }
 }
