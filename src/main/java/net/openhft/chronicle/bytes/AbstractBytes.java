@@ -16,19 +16,18 @@
 
 package net.openhft.chronicle.bytes;
 
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-import java.nio.ByteBuffer;
-
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
@@ -641,7 +640,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int peekUnsignedByte(long offset) throws BufferUnderflowException {
-        return bytesStore.peekUnsignedByte(offset);
+        return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
     }
 
     @Override
