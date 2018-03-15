@@ -26,7 +26,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-bytes</artifactId>
-    <version>1.11.3-SNAPSHOT</version>
+    <version>1.11.3</version>
     <name>OpenHFT/Chronicle-Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -240,7 +240,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
         </developerConnection>
-        <tag>master</tag>
+        <tag>chronicle-bytes-1.11.3</tag>
     </scm>
 
 </project>
