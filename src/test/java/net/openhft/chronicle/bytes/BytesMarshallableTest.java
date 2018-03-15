@@ -235,7 +235,7 @@ public class BytesMarshallableTest {
     public void serializeBytes() throws IOException {
         Bytes<?> bytes = new HexDumpBytes();
         try (@NotNull MyBytes mb1 = new MyBytes(Bytes.from("hello"), Bytes.allocateElasticDirect().append("2"));
-             @NotNull MyBytes mb2 = new MyBytes(Bytes.from("byeee"), Bytes.allocateElasticDirect().append('b'))) {
+             @NotNull MyBytes mb2 = new MyBytes(Bytes.from("byeee"), null)) {
             bytes.comment("mb1").writeUnsignedByte(1);
             mb1.writeMarshallable(bytes);
             bytes.comment("mb2").writeUnsignedByte(2);
