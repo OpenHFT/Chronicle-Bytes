@@ -90,8 +90,52 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @param byteBuffer to read
-     * @return a Bytes which wrap a ByteBuffer and is ready for reading.
+     * Wrap the ByteBuffer ready for reading
+     * Method for convenience only - might not be ideal for performance (creates garbage).
+     * To avoid garbage, use something like this example:
+     * <pre>{@code
+     * import net.openhft.chronicle.bytes.Bytes;
+     * import java.nio.ByteBuffer;
+     *
+     * public class ChronicleBytesWithByteBufferExampleTest {
+     *     private static final String HELLO_WORLD = "hello world";
+     *
+     *     public static void main(String[] args) throws InterruptedException {
+     *         //setup Bytes and ByteBuffer to write from
+     *         Bytes b = Bytes.elasticByteBuffer();
+     *         ByteBuffer toWriteFrom = ByteBuffer.allocate(HELLO_WORLD.length());
+     *         toWriteFrom.put(HELLO_WORLD.getBytes(), 0, HELLO_WORLD.length());
+     *         toWriteFrom.flip();
+     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
+     *
+     *         doWrite(b, toWriteFrom);
+     *         ByteBuffer byteBuffer = doRead(b);
+     *
+     *         //check result
+     *         final StringBuilder sb = new StringBuilder();
+     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
+     *             sb.append((char) byteBuffer.get());
+     *         }
+     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
+     *     }
+     *
+     *     private static void doWrite(Bytes b, ByteBuffer toWrite) {
+     *         //no garbage when writing to Bytes from ByteBuffer
+     *         b.clear();
+     *         b.write(b.writePosition(), toWrite, toWrite.position(), toWrite.limit());
+     *     }
+     *
+     *     private static ByteBuffer doRead(Bytes b) {
+     *         //no garbage when getting the underlying ByteBuffer
+     *         assert b.underlyingObject() instanceof ByteBuffer;
+     *         ByteBuffer byteBuffer = (ByteBuffer) b.underlyingObject();
+     *         return byteBuffer;
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param byteBuffer to wrap
+     * @return a Bytes which wraps the provided ByteBuffer and is ready for reading.
      */
     static Bytes<ByteBuffer> wrapForRead(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
@@ -106,8 +150,52 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @param byteBuffer to read
-     * @return a Bytes which wrap a ByteBuffer and is ready for writing.
+     * Wrap the ByteBuffer ready for writing
+     * Method for convenience only - might not be ideal for performance (creates garbage).
+     * To avoid garbage, use something like this example:
+     * <pre>{@code
+     * import net.openhft.chronicle.bytes.Bytes;
+     * import java.nio.ByteBuffer;
+     *
+     * public class ChronicleBytesWithByteBufferExampleTest {
+     *     private static final String HELLO_WORLD = "hello world";
+     *
+     *     public static void main(String[] args) throws InterruptedException {
+     *         //setup Bytes and ByteBuffer to write from
+     *         Bytes b = Bytes.elasticByteBuffer();
+     *         ByteBuffer toWriteFrom = ByteBuffer.allocate(HELLO_WORLD.length());
+     *         toWriteFrom.put(HELLO_WORLD.getBytes(), 0, HELLO_WORLD.length());
+     *         toWriteFrom.flip();
+     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
+     *
+     *         doWrite(b, toWriteFrom);
+     *         ByteBuffer byteBuffer = doRead(b);
+     *
+     *         //check result
+     *         final StringBuilder sb = new StringBuilder();
+     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
+     *             sb.append((char) byteBuffer.get());
+     *         }
+     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
+     *     }
+     *
+     *     private static void doWrite(Bytes b, ByteBuffer toWrite) {
+     *         //no garbage when writing to Bytes from ByteBuffer
+     *         b.clear();
+     *         b.write(b.writePosition(), toWrite, toWrite.position(), toWrite.limit());
+     *     }
+     *
+     *     private static ByteBuffer doRead(Bytes b) {
+     *         //no garbage when getting the underlying ByteBuffer
+     *         assert b.underlyingObject() instanceof ByteBuffer;
+     *         ByteBuffer byteBuffer = (ByteBuffer) b.underlyingObject();
+     *         return byteBuffer;
+     *     }
+     * }
+     * }</pre>
+     *
+     * @param byteBuffer to wrap
+     * @return a Bytes which wraps the provided ByteBuffer and is ready for writing.
      */
     static Bytes<ByteBuffer> wrapForWrite(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
@@ -123,6 +211,45 @@ public interface Bytes<Underlying> extends
 
     /**
      * Wrap the byte[] ready for reading
+     * Method for convenience only - might not be ideal for performance (creates garbage).
+     * To avoid garbage, use something like this example:
+     * <pre>{@code
+     * import net.openhft.chronicle.bytes.Bytes;
+     * import java.nio.charset.Charset;
+     *
+     * public class ChronicleBytesWithPrimByteArrayExampleTest {
+     *     private static final Charset ISO_8859 = Charset.forName("ISO-8859-1");
+     *     private static final String HELLO_WORLD = "hello world";
+     *
+     *     public static void main(String[] args) {
+     *         //setup Bytes and byte[]s to write from and read to
+     *         Bytes b = Bytes.elasticByteBuffer();
+     *         byte[] toWriteFrom = HELLO_WORLD.getBytes(ISO_8859);
+     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
+     *
+     *         doWrite(b, toWriteFrom);
+     *         doRead(b, toReadTo);
+     *
+     *         //check result
+     *         final StringBuilder sb = new StringBuilder();
+     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
+     *             sb.append((char) toReadTo[i]);
+     *         }
+     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
+     *     }
+     *
+     *     private static void doWrite(Bytes b, byte[] toWrite) {
+     *         //no garbage when writing to Bytes from byte[]
+     *         b.clear();
+     *         b.write(toWrite);
+     *     }
+     *
+     *     private static void doRead(Bytes b, byte[] toReadTo) {
+     *         //no garbage when reading from Bytes into byte[]
+     *         b.read( toReadTo, 0, HELLO_WORLD.length());
+     *     }
+     * }
+     * }</pre>
      *
      * @param byteArray to wrap
      * @return the Bytes ready for reading.
@@ -138,6 +265,45 @@ public interface Bytes<Underlying> extends
 
     /**
      * Wrap the byte[] ready for writing
+     * Method for convenience only - might not be ideal for performance (creates garbage).
+     * To avoid garbage, use something like this example:
+     * <pre>{@code
+     * import net.openhft.chronicle.bytes.Bytes;
+     * import java.nio.charset.Charset;
+     *
+     * public class ChronicleBytesWithPrimByteArrayExampleTest {
+     *     private static final Charset ISO_8859 = Charset.forName("ISO-8859-1");
+     *     private static final String HELLO_WORLD = "hello world";
+     *
+     *     public static void main(String[] args) {
+     *         //setup Bytes and byte[]s to write from and read to
+     *         Bytes b = Bytes.elasticByteBuffer();
+     *         byte[] toWriteFrom = HELLO_WORLD.getBytes(ISO_8859);
+     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
+     *
+     *         doWrite(b, toWriteFrom);
+     *         doRead(b, toReadTo);
+     *
+     *         //check result
+     *         final StringBuilder sb = new StringBuilder();
+     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
+     *             sb.append((char) toReadTo[i]);
+     *         }
+     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
+     *     }
+     *
+     *     private static void doWrite(Bytes b, byte[] toWrite) {
+     *         //no garbage when writing to Bytes from byte[]
+     *         b.clear();
+     *         b.write(toWrite);
+     *     }
+     *
+     *     private static void doRead(Bytes b, byte[] toReadTo) {
+     *         //no garbage when reading from Bytes into byte[]
+     *         b.read( toReadTo, 0, HELLO_WORLD.length());
+     *     }
+     * }
+     * }</pre>
      *
      * @param byteArray to wrap
      * @return the Bytes ready for writing.
