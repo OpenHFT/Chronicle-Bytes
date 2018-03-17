@@ -2144,7 +2144,7 @@ enum BytesInternal {
         long num = 0;
         boolean negative = false;
         while (true) {
-            int b = in.readUnsignedByte(offset++);
+            int b = in.peekUnsignedByte(offset++);
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
                 num = num * 10 + b - '0';

@@ -24,7 +24,10 @@ import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -194,6 +197,25 @@ public class BytesTest {
         } finally {
             bytes.release();
         }
+    }
+
+    @Test
+    public void readUnsignedByte() {
+        Bytes<?> bytes = alloc1.fixedBytes(30);
+        try {
+            bytes.writeInt(0x11111111);
+            bytes.readLimit(1);
+
+            assertEquals(0x11, bytes.readUnsignedByte(0));
+            assertEquals(-1, bytes.peekUnsignedByte(1));
+
+            // as the offset is given it only needs to be under the writeLimit.
+            assertEquals(0x11, bytes.readUnsignedByte(1));
+
+        } finally {
+            bytes.release();
+        }
+
     }
 
     @Test

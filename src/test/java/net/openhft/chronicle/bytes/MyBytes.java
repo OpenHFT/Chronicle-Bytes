@@ -17,8 +17,8 @@ class MyBytes implements BytesMarshallable, Closeable {
 
     @Override
     public void close() throws IOException {
-        bytes1.release();
-        bytes2.release();
+        if (bytes1 != null) bytes1.release();
+        if (bytes2 != null) bytes2.release();
     }
 
     @Override

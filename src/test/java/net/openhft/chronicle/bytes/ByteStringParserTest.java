@@ -55,10 +55,19 @@ public class ByteStringParserTest   {
 
     @Test
     public void testParseLong() {
-        long expected = 123L;
+        long expected = 123456789012345678L;
         bytes.append(expected);
+        Bytes bytes2 = Bytes.elasticHeapByteBuffer((int) bytes.readRemaining());
 
+        Assert.assertEquals(expected, bytes.parseLong(0));
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes));
+
+        bytes2.append(expected);
+        Assert.assertEquals(expected, bytes2.parseLong(0));
+        Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
+        bytes2.release();
+
+
     }
 
     @Test

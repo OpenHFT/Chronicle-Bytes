@@ -214,7 +214,10 @@ public class BytesMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
             @NotNull BytesStore bytes = (BytesStore) field.get(o);
-            assert bytes != null : "Can't serialise null bytes";
+            if (bytes == null) {
+                write.writeStopBit(-1);
+                return;
+            }
             long offset = bytes.readPosition();
             long length = bytes.readRemaining();
             write.writeStopBit(length);
@@ -224,7 +227,14 @@ public class BytesMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException, IORuntimeException {
             @NotNull Bytes bytes = (Bytes) field.get(o);
-            int length = Maths.toUInt31(read.readStopBit());
+            long stopBit = read.readStopBit();
+            if (stopBit == -1) {
+                if (bytes != null)
+                    bytes.release();
+                field.set(o, null);
+                return;
+            }
+            int length = Maths.toUInt31(stopBit);
             @NotNull Bytes bs;
             if (bytes == null) {
                 bs = Bytes.elasticHeapByteBuffer(length);
