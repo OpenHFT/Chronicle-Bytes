@@ -59,7 +59,7 @@ public class BytesMarshallableTest {
                         "   4e                                              # flag\n" +
                         "   01                                              # b\n" +
                         "   02 00                                           # s\n" +
-                        "   01 33                                           # c\n" +
+                        "   33                                              # c\n" +
                         "   04 00 00 00                                     # i\n" +
                         "   00 00 b0 40                                     # f\n" +
                         "   06 00 00 00 00 00 00 00                         # l\n" +
@@ -68,7 +68,7 @@ public class BytesMarshallableTest {
                         "   59                                              # flag\n" +
                         "   0b                                              # b\n" +
                         "   16 00                                           # s\n" +
-                        "   01 54                                           # c\n" +
+                        "   54                                              # c\n" +
                         "   2c 00 00 00                                     # i\n" +
                         "   8f c2 b1 40                                     # f\n" +
                         "   42 00 00 00 00 00 00 00                         # l\n" +
@@ -168,7 +168,7 @@ public class BytesMarshallableTest {
                 "      4e                                              # flag\n" +
                 "      01                                              # b\n" +
                 "      02 00                                           # s\n" +
-                "      01 33                                           # c\n" +
+                "      33                                              # c\n" +
                 "      04 00 00 00                                     # i\n" +
                 "      00 00 b0 40                                     # f\n" +
                 "      06 00 00 00 00 00 00 00                         # l\n" +
@@ -191,7 +191,7 @@ public class BytesMarshallableTest {
                 "      59                                              # flag\n" +
                 "      0b                                              # b\n" +
                 "      16 00                                           # s\n" +
-                "      01 54                                           # c\n" +
+                "      54                                              # c\n" +
                 "      2c 00 00 00                                     # i\n" +
                 "      8f c2 b1 40                                     # f\n" +
                 "      42 00 00 00 00 00 00 00                         # l\n" +
