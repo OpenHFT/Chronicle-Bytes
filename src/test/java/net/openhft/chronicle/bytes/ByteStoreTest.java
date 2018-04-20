@@ -483,11 +483,22 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testAddAndGetLong() {
+    public void testAddAndGetLongNative() {
         bytesStore = NativeBytesStore.nativeStore(128);
 
+        checkAddAndGetLong();
+    }
+
+    @Test
+    public void testAddAndGetLong() {
+        bytesStore = BytesStore.wrap(new byte[128]);
+
+        checkAddAndGetLong();
+    }
+
+    private void checkAddAndGetLong() {
         for (int i = 0; i < 10; i++)
-            bytesStore.addAndGetLong(0L, 10);
+            assertEquals((i + 1) * 10, bytesStore.addAndGetLong(0L, 10));
         assertEquals(100, bytesStore.readLong(0L));
         assertEquals(0, bytesStore.readLong(8L));
 

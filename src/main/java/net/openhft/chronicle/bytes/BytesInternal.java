@@ -2197,7 +2197,6 @@ enum BytesInternal {
 
     public static int addAndGetInt(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, int adding)
             throws BufferUnderflowException {
-        // TODO use Memory.addAndGetInt
         try {
             for (; ; ) {
                 int value = in.readVolatileInt(offset);
@@ -2212,7 +2211,6 @@ enum BytesInternal {
 
     public static long addAndGetLong(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, long adding)
             throws BufferUnderflowException {
-        // TODO use Memory.addAndGetLong
         try {
             for (; ; ) {
                 long value = in.readVolatileLong(offset);

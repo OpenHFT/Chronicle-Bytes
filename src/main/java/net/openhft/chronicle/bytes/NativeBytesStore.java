@@ -270,6 +270,18 @@ public class NativeBytesStore<Underlying>
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
+    @Override
+    @ForceInline
+    public long addAndGetLong(long offset, long adding) throws BufferUnderflowException {
+        return memory.addLong(address + translate(offset), adding);
+    }
+
+    @Override
+    @ForceInline
+    public int addAndGetInt(long offset, int adding) throws BufferUnderflowException {
+        return memory.addInt(address + translate(offset), adding);
+    }
+
     protected long translate(long offset) {
         return offset;
     }
