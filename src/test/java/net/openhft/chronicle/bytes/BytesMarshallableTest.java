@@ -162,7 +162,6 @@ public class BytesMarshallableTest {
         bytes.comment("mn2").writeUnsignedByte(2);
         mn2.writeMarshallable(bytes);
 
-
         final String expected = "01                                              # mn1\n" +
                 "                                                # byteable\n" +
                 "      4e                                              # flag\n" +

@@ -41,6 +41,5 @@ public interface BytesIn<Underlying> extends
         return new BytesMethodReaderBuilder(this);
     }
 
-
     <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object);
 }

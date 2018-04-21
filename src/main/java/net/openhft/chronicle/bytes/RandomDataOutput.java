@@ -246,7 +246,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     @NotNull
     default R write(long offsetInRDO, @NotNull byte[] bytes) throws BufferOverflowException {
-            return write(offsetInRDO, bytes, 0, bytes.length);
+        return write(offsetInRDO, bytes, 0, bytes.length);
     }
 
     @NotNull
@@ -288,13 +288,13 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
-    
+
     @NotNull
     default R append(long offset, double value, int decimalPlaces, int digits) throws BufferOverflowException {
         if (decimalPlaces < 20) {
             double d2 = value * Maths.tens(decimalPlaces);
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
-            	BytesInternal.appendDecimal(this, Math.round(d2), offset, decimalPlaces, digits);
+                BytesInternal.appendDecimal(this, Math.round(d2), offset, decimalPlaces, digits);
                 return (R) this;
             }
         }

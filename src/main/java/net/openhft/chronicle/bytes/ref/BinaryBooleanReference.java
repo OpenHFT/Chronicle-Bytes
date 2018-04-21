@@ -12,6 +12,9 @@ import java.nio.BufferUnderflowException;
  */
 public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
+    private static final byte FALSE = (byte) 0xB0;
+    private static final byte TRUE = (byte) 0xB1;
+
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())
@@ -24,9 +27,6 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
     public long maxSize() {
         return 1;
     }
-
-    private static final byte FALSE = (byte) 0xB0;
-    private static final byte TRUE = (byte) 0xB1;
 
     @Override
     public boolean getValue() {

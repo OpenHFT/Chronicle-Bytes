@@ -63,7 +63,7 @@ public abstract class AbstractInterner<T> {
 
     public T intern(@NotNull BytesStore cs, int length)
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
-        if (length> entries.length)
+        if (length > entries.length)
             return getValue(cs, length);
         int hash = hash32(cs, length);
         int h = hash & mask;

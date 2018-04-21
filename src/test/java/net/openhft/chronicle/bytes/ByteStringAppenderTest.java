@@ -58,6 +58,7 @@ public class ByteStringAppenderTest {
         assertEquals(bytes.append(1), ObjectUtils.convertTo(Bytes.class, 1));
         bytes.release();
     }
+
     @Test
     public void testAppend() throws IORuntimeException {
         long expected = 1234;

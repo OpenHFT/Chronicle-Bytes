@@ -68,7 +68,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             int i = 0;
             for (; i < bytes.length; i++) {
                 byte b = memory.readByte(address + i);
-                char c = (char)(bytes[i] & 0xFF);
+                char c = (char) (bytes[i] & 0xFF);
                 if (b != c) {
                     return false;
                 }
@@ -77,7 +77,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             int i = 0;
             for (; i < bytes.length; i++) {
                 byte b = memory.readByte(address + i);
-                char c = (char)(((bytes[i+1] & 0xFF) << 8) | (bytes[i] & 0xFF));
+                char c = (char) (((bytes[i + 1] & 0xFF) << 8) | (bytes[i] & 0xFF));
 
                 if (b != c) {
                     return false;
@@ -126,7 +126,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             char c;
 
             if (coder == 0) {
-                c = (char)(bytes[i] & 0xFF);
+                c = (char) (bytes[i] & 0xFF);
             } else {
                 c = (char) (((bytes[i + 1] & 0xFF) << 8) | (bytes[i] & 0xFF));
                 i++;

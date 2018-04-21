@@ -512,8 +512,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset the offset in this {@code RandomDataInput} where the char sequence to compare
      *               is written
      * @param other  the second char sequence to compare
-     *               @throws IORuntimeException if the contents are not a valid string.
      * @return {@code true} if two char sequences are equal
+     * @throws IORuntimeException if the contents are not a valid string.
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other) throws IORuntimeException {
         return BytesInternal.compareUtf8(this, offset, other);

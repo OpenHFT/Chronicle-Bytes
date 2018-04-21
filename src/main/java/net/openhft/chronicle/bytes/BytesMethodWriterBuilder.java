@@ -33,7 +33,6 @@ public class BytesMethodWriterBuilder<T> implements MethodWriterBuilder<T> {
         return this;
     }
 
-
     @NotNull
     public BytesMethodWriterBuilder<T> onClose(Closeable closeable) {
         handler.onClose(closeable);

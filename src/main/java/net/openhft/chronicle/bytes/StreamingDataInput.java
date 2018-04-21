@@ -108,7 +108,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
-
     @NotNull
     default InputStream inputStream() {
         return new StreamingInputStream(this);

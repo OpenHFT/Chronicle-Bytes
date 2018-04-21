@@ -31,8 +31,10 @@ import java.nio.ByteBuffer;
 
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
-    @UsedViaReflection private final String name;
-    @NotNull protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
+    @UsedViaReflection
+    private final String name;
+    @NotNull
+    protected BytesStore<Bytes<Underlying>, Underlying> bytesStore;
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     protected long readPosition;
     protected long writePosition;

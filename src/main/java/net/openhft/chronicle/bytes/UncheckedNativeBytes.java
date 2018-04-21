@@ -67,6 +67,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public boolean unchecked() {
         return true;
     }
+
     @Override
     public boolean isDirectMemory() {
         return true;
@@ -657,6 +658,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.writeInt(offset, i);
         return this;
     }
+
     @NotNull
     @Override
     @ForceInline
@@ -771,7 +773,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-
     @Override
     public long addressForRead(long offset) throws BufferUnderflowException {
         return bytesStore.addressForRead(offset);
@@ -781,7 +782,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public long addressForWrite(long offset) throws BufferOverflowException {
         return bytesStore.addressForWrite(offset);
     }
-
 
     @Override
     public int hashCode() {

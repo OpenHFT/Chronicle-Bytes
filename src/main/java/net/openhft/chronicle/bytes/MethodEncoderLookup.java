@@ -8,7 +8,6 @@ import java.util.function.Function;
 public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
     BY_ANNOTATION;
 
-
     @Override
     public MethodEncoder apply(Method method) {
         MethodId methodId = Annotations.getAnnotation(method, MethodId.class);

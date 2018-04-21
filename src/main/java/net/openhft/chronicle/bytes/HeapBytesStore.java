@@ -395,7 +395,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public boolean equals(Object obj) {
-            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     @Override

@@ -10,7 +10,6 @@ ifdef::badges[]
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 endif::[]
 
-
 :css-signature: demo
 :toc: macro
 :toc-placement!:
@@ -34,7 +33,6 @@ The API supports.
  - compressed data types such as stop bit encoding.
  - elastic ByteBuffer wrappers which resize as required.
  - parsing text and writing text directly to off heap bytes.
-
 
 === Comparison of access to native memory
 
@@ -125,4 +123,5 @@ The API supports.
 When using intellij idea, you can set up a custom render to view the bytes, see the images below :
 
 image::images/customize-data-views-menu.tiff[]
+
 image::images/customize-data-views.png[]

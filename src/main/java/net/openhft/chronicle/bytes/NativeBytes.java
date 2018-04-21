@@ -171,7 +171,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         }
 
         @Nullable BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
-            this.bytesStore.copyTo(store);
+        this.bytesStore.copyTo(store);
         this.bytesStore = store;
         try {
             tempStore.release();

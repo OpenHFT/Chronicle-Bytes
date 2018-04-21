@@ -32,7 +32,7 @@ import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
 
-public class ByteStringParserTest   {
+public class ByteStringParserTest {
     @NotNull
     Bytes bytes = Bytes.elasticByteBuffer();
     private ThreadDump threadDump;
@@ -66,7 +66,6 @@ public class ByteStringParserTest   {
         Assert.assertEquals(expected, bytes2.parseLong(0));
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
         bytes2.release();
-
 
     }
 

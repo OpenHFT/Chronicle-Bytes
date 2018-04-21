@@ -33,13 +33,11 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
-import static net.openhft.chronicle.core.util.StringUtils.extractChars;
-import static net.openhft.chronicle.core.util.StringUtils.getStringCoder;
+import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
  * Bytes to wrap memory mapped data.
- *
+ * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
@@ -260,7 +258,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         this.readPosition += bytesToSkip;
         return this;
     }
-
 
     @Nullable
     @Override

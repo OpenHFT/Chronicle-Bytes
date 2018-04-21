@@ -260,8 +260,8 @@ public enum AppendableUtil {
         } else {
             int strlen = bytes.length;
             utflen = 0;/* use charAt instead of copying String to char array */
-            for (int i = 0; i < strlen; i+=2) {
-                char c = (char)(((bytes[i+1] & 0xFF) << 8) | (bytes[i] & 0xFF));
+            for (int i = 0; i < strlen; i += 2) {
+                char c = (char) (((bytes[i + 1] & 0xFF) << 8) | (bytes[i] & 0xFF));
 
                 if (c <= 0x007F) {
                     utflen += 1;
@@ -291,13 +291,13 @@ public enum AppendableUtil {
 
             if (c >= 0xF0) {
                 utflen += 4;
-                i+= 3;
+                i += 3;
             } else if (c >= 0xE0) {
                 utflen += 3;
-                i+= 2;
+                i += 2;
             } else if (c >= 0xC0) {
                 utflen += 2;
-                i+= 1;
+                i += 1;
             } else {
                 utflen += 1;
             }

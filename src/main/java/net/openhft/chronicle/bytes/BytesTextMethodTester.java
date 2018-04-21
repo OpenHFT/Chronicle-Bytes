@@ -73,7 +73,6 @@ public class BytesTextMethodTester<T> {
             bytes2.clear();
         }
 
-
         // expected
         expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
 
