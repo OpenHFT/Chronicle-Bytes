@@ -11,8 +11,6 @@ import java.util.function.Consumer;
 public class BytesMethodReader implements MethodReader {
     private final BytesIn in;
     private final BytesParselet defaultParselet;
-    private final MethodEncoderLookup methodEncoderLookup;
-    private final Object[] objects;
     private final List<Consumer<BytesIn>> methodEncoders = new ArrayList<>();
     private final Map<Long, Consumer<BytesIn>> methodEncoderMap = new LinkedHashMap<>();
 
@@ -23,8 +21,6 @@ public class BytesMethodReader implements MethodReader {
 
         this.in = in;
         this.defaultParselet = defaultParselet;
-        this.methodEncoderLookup = methodEncoderLookup;
-        this.objects = objects;
 
         for (Object object : objects) {
             for (Method method : object.getClass().getMethods()) {

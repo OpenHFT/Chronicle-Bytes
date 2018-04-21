@@ -618,6 +618,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             try {
                 outBytes.readPosition(readPos);
             } catch (BufferUnderflowException e) {
+                //noinspection ThrowFromFinallyBlock
                 throw new IllegalStateException(e);
             }
         }

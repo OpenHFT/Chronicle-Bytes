@@ -165,7 +165,6 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
      * @return the significant digits
-     * @throws BufferUnderflowException
      */
     default long parseLongDecimal() throws BufferUnderflowException {
         return BytesInternal.parseLongDecimal(this);

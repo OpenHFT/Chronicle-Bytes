@@ -32,8 +32,8 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
             @Override
             public Object[] decode(Object[] lastObjects, BytesIn in) {
-                for (int i = 0; i < lastObjects.length; i++)
-                    ((BytesMarshallable) lastObjects[i]).readMarshallable(in);
+                for (Object lastObject : lastObjects)
+                    ((BytesMarshallable) lastObject).readMarshallable(in);
                 return lastObjects;
             }
         };

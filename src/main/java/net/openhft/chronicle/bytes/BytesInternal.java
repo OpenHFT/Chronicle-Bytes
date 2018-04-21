@@ -1127,12 +1127,17 @@ enum BytesInternal {
             out.writeByte((byte) '0');
 
         } else {
-            if (base == 10)
-                appendLong0(out, num);
-            else if (base == 16)
-                appendBase16(out, num);
-            else
-                out.write(Long.toString(num, base));
+            switch (base) {
+                case 10:
+                    appendLong0(out, num);
+                    break;
+                case 16:
+                    appendBase16(out, num);
+                    break;
+                default:
+                    out.write(Long.toString(num, base));
+                    break;
+            }
         }
     }
 
@@ -1232,14 +1237,7 @@ enum BytesInternal {
     /**
      * Appends given long value with given decimalPlaces to RandomDataOutput out
      *
-     * @param out
-     * @param num
-     * @param offset
-     * @param decimalPlaces
      * @param width         Maximum width. I will be padded with zeros to the left if necessary
-     * @throws IORuntimeException
-     * @throws IllegalArgumentException
-     * @throws BufferOverflowException
      */
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
             throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
