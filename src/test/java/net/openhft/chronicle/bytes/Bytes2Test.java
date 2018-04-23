@@ -99,6 +99,22 @@ public class Bytes2Test {
     }
 
     @Test
+    public void testWrite64plus() {
+        Bytes from = alloc1.fixedBytes(128);
+        Bytes to = alloc2.fixedBytes(128);
+
+        from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
+
+        try {
+            to.write(from);
+            assertEquals(from.toString(), to.toString());
+        } finally {
+            from.release();
+            to.release();
+        }
+    }
+
+    @Test
     public void testParseToBytes() throws IORuntimeException {
         Bytes from = alloc1.fixedBytes(64);
         Bytes to = alloc2.fixedBytes(32);

@@ -252,8 +252,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
             if (len > 0) {
+                long address = bytes.addressForRead(offset);
+                long address2 = addressForWrite(writePosition());
+                assert address != 0;
+                assert address2 != 0;
                 writeCheckOffset(writePosition(), len);
-                OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
+                OS.memory().copyMemory(address, address2, len);
                 writeSkip(len);
             }
 
