@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Simple Bytes implementation which is not Elastic.
  */
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
-        implements Byteable<Bytes<Underlying>, Underlying> {
+        implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
@@ -525,5 +525,23 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return (int) (len2);
         }
         return super.read(bytes);
+    }
+
+    @Override
+    public int compareTo(@NotNull CharSequence cs) {
+        int len1 = bytesStore.length();
+        int len2 = cs.length();
+        int lim = Math.min(len1, len2);
+
+        int k = 0;
+        while (k < lim) {
+            char c1 = bytesStore.charAt(k);
+            char c2 = cs.charAt(k);
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return len1 - len2;
     }
 }
