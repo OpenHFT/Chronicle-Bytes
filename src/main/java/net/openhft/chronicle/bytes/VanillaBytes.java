@@ -529,9 +529,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @Override
     public int compareTo(@NotNull CharSequence cs) {
-        int len1 = bytesStore.length();
+        long len1 = readRemaining();
         int len2 = cs.length();
-        int lim = Math.min(len1, len2);
+        long lim = Math.min(len1, len2);
 
         int k = 0;
         while (k < lim) {
@@ -542,6 +542,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             }
             k++;
         }
-        return len1 - len2;
+        return (int) (len1 - len2);
     }
 }
