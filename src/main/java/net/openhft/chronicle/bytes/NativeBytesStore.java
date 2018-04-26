@@ -532,7 +532,7 @@ public class NativeBytesStore<Underlying>
             assert (releasedHere = new Throwable()) != null;
         }
         if (cleaner != null) {
-            cleaner.clean();
+            cleaner.scheduleForClean();
         } else if (underlyingObject instanceof ByteBuffer) {
             CLEANER_SERVICE.clean((ByteBuffer) underlyingObject);
         }
