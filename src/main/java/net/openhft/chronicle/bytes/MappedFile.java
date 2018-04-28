@@ -243,6 +243,12 @@ public class MappedFile implements ReferenceCounted {
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
         int chunk = (int) (position / chunkSize);
+        boolean readOnly = this.readOnly;
+        if (readOnly && OS.isWindows()) {
+            Jvm.warn().on(getClass(), "Read only mode not supported on Windows, defaulting to read/write");
+            readOnly = false;
+        }
+
         synchronized (stores) {
             while (stores.size() <= chunk) {
                 stores.add(null);
@@ -287,7 +293,7 @@ public class MappedFile implements ReferenceCounted {
                 if (readOnly && e.getMessage().equals("Not enough storage is available to process this command")) {
                     Jvm.warn().on(getClass(), "Mapping " + file + " as READ_ONLY failed, switching to READ_WRITE");
                     address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
-                    readOnly = false;
+                    this.readOnly = false;
                 } else {
                     throw e;
                 }
