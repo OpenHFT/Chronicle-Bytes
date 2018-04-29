@@ -315,14 +315,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return unsigned byte sum.
      */
     default int byteCheckSum() throws IORuntimeException {
-        byte b = 0;
-        try {
-            for (long i = readPosition(); i < readLimit(); i++)
-                b += readByte(i);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        return byteCheckSum(readPosition(), readLimit());
+    }
+
+    default int byteCheckSum(long start, long end) {
+        int sum = 0;
+        for (long i = start; i < end; i++) {
+            sum += readByte(i);
         }
-        return b & 0xFF;
+        return sum & 0xFF;
     }
 
     /**
@@ -634,4 +635,5 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default boolean readWrite() {
         return true;
     }
+
 }

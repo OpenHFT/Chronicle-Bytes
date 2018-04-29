@@ -477,15 +477,21 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !isDirectMemory())
-            return super.byteCheckSum();
+    public int byteCheckSum(int start, int end) throws IORuntimeException {
         byte b = 0;
         @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
-        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += memory.readByte(bytesStore.address + i);
+        long addr = bytesStore.addressForRead(start);
+        int i = 0, len = end - start;
+        for (; i < len - 3; i += 4) {
+            b += memory.readByte(addr + i)
+                    + memory.readByte(addr + i + 1)
+                    + memory.readByte(addr + i + 2)
+                    + memory.readByte(addr + i + 3);
+        }
+        for (; i < len; i++) {
+            b += memory.readByte(addr + i);
         }
         return b & 0xFF;
     }

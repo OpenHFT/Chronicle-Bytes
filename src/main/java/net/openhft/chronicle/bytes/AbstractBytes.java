@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -1024,5 +1025,25 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public boolean lenient() {
         return lenient;
+    }
+
+    @Override
+    public int byteCheckSum() throws IORuntimeException {
+        return byteCheckSum(readPosition(), readLimit());
+    }
+
+    @Override
+    public int byteCheckSum(long start, long end) {
+        if (end < Integer.MAX_VALUE && isDirectMemory())
+            return byteCheckSum((int) start, (int) end);
+        return Bytes.super.byteCheckSum(start, end);
+    }
+
+    public int byteCheckSum(int start, int end) {
+        int sum = 0;
+        for (int i = start; i < end; i++) {
+            sum += readByte(i);
+        }
+        return sum & 0xFF;
     }
 }
