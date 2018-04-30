@@ -308,6 +308,10 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         }
     }
 
+    public int readUnsignedByte(long offset) throws BufferUnderflowException {
+        return readByte(offset) & 0xFF;
+    }
+
     @Override
     public int uncheckedReadUnsignedByte() {
         try {
