@@ -305,6 +305,10 @@ public class NativeBytesStore<Underlying>
         return memory.readByte(address + translate(offset));
     }
 
+    public int readUnsignedByte(long offset) throws BufferUnderflowException {
+        return readByte(offset) & 0xFF;
+    }
+
     public void checkReleased() {
         if (releasedHere != null)
             throw new InternalError("Accessing a released resource", releasedHere);
