@@ -609,6 +609,21 @@ public class HexDumpBytes implements Bytes {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
+    public StreamingDataOutput writeDoubleAndInt(double d, int i) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeDouble(d);
+            base.writeInt(i);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    @NotNull
+    @net.openhft.chronicle.core.annotation.NotNull
     public StreamingDataOutput write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {

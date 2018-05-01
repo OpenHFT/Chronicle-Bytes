@@ -281,6 +281,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     S writeDouble(double d) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
+    @NotNull
+    S writeDoubleAndInt(double d, int i) throws BufferOverflowException;
+
     /**
      * Write all data or fail.
      */
