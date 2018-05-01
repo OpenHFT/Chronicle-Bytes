@@ -409,6 +409,17 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testReadWriteDoubleAndInt() {
+        for (long i = 0; i < 48; i += 12)
+            bytes.writeDoubleAndInt(i, (int) i);
+
+        for (long i = 0; i < 48; i += 12) {
+            assertEquals(i, bytes.readDouble(), 0);
+            assertEquals(i, bytes.readInt());
+        }
+    }
+
+    @Test
     public void testReadWriteStopBitDouble() {
         @NotNull double[] doubles = {
                 -Double.MAX_VALUE, Double.NEGATIVE_INFINITY,

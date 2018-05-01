@@ -716,6 +716,16 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> writeDoubleAndInt(double d, int i) {
+        long offset = writeOffsetPositionMoved(12);
+        bytesStore.writeDouble(offset, d);
+        bytesStore.writeInt(offset + 8, i);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length) {
         if (length + offset > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
