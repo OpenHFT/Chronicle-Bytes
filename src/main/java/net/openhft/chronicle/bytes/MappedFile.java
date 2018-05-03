@@ -55,7 +55,7 @@ public class MappedFile implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
-    private boolean readOnly;
+    private final boolean readOnly;
     private NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
@@ -119,6 +119,11 @@ public class MappedFile implements ReferenceCounted {
     @NotNull
     public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
             throws FileNotFoundException {
+//        if (readOnly && OS.isWindows()) {
+//            Jvm.warn().on(MappedFile.class, "Read only mode not supported on Windows, defaulting to read/write");
+//            readOnly = false;
+//        }
+
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
 //        try {
         long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
@@ -243,11 +248,6 @@ public class MappedFile implements ReferenceCounted {
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
         int chunk = (int) (position / chunkSize);
-        boolean readOnly = this.readOnly;
-        if (readOnly && OS.isWindows()) {
-            Jvm.warn().on(getClass(), "Read only mode not supported on Windows, defaulting to read/write");
-            readOnly = false;
-        }
 
         synchronized (stores) {
             while (stores.size() <= chunk) {
@@ -284,20 +284,9 @@ public class MappedFile implements ReferenceCounted {
             }
             long mappedSize = chunkSize + overlapSize;
             FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
-            long address;
-            try {
-                address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
+            long startOfMap = chunk * chunkSize;
+            long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
-            } catch (IOException e) {
-                // sometimes on Windows it doesn't like read only, but not always or on all systems.
-                if (readOnly && e.getMessage().equals("Not enough storage is available to process this command")) {
-                    Jvm.warn().on(getClass(), "Mapping " + file + " as READ_ONLY failed, switching to READ_WRITE");
-                    address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
-                    this.readOnly = false;
-                } else {
-                    throw e;
-                }
-            }
             final long safeCapacity = this.chunkSize + overlapSize / 2;
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));
