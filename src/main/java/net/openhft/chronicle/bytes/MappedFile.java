@@ -374,6 +374,7 @@ public class MappedFile implements ReferenceCounted {
                 stores.set(i, null);
             }
         } finally {
+            closeQuietly(raf.getChannel());
             closeQuietly(raf);
             closeQuietly(fileChannel);
             closed.set(true);
