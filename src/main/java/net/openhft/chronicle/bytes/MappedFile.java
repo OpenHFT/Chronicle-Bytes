@@ -30,18 +30,21 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+
 /**
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted {
-    public static final long DEFAULT_CAPACITY = 128L << 40;
+    private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = new Object();
     @NotNull
@@ -70,7 +73,7 @@ public class MappedFile implements ReferenceCounted {
         assert registerMappedFile(this);
     }
 
-    static void logNewChunk(String filename, int chunk, long delayMicros) {
+    private static void logNewChunk(String filename, int chunk, long delayMicros) {
         // avoid a GC while trying to memory map.
         String message = BytesInternal.acquireStringBuilder()
                 .append("Allocation of ").append(chunk)
@@ -283,7 +286,7 @@ public class MappedFile implements ReferenceCounted {
                 }
             }
             long mappedSize = chunkSize + overlapSize;
-            FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
+            MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
             long startOfMap = chunk * chunkSize;
             long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
@@ -350,31 +353,30 @@ public class MappedFile implements ReferenceCounted {
     }
 
     private void performRelease() {
-        for (int i = 0; i < stores.size(); i++) {
-            WeakReference<MappedBytesStore> storeRef = stores.get(i);
-            if (storeRef == null)
-                continue;
-            @Nullable MappedBytesStore mbs = storeRef.get();
-            if (mbs != null) {
-                // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                // so ensure that it is released
-                while (mbs.refCount() != 0) {
-                    try {
-                        mbs.release();
-
-                    } catch (IllegalStateException e) {
-                        Jvm.debug().on(getClass(), e);
+        try {
+            for (int i = 0; i < stores.size(); i++) {
+                WeakReference<MappedBytesStore> storeRef = stores.get(i);
+                if (storeRef == null)
+                    continue;
+                @Nullable MappedBytesStore mbs = storeRef.get();
+                if (mbs != null) {
+                    // this MappedFile is the only referrer to the MappedBytesStore at this point,
+                    // so ensure that it is released
+                    while (mbs.refCount() != 0) {
+                        try {
+                            mbs.release();
+                        } catch (IllegalStateException e) {
+                            Jvm.debug().on(getClass(), e);
+                        }
                     }
                 }
-            }
 
-            stores.set(i, null);
-        }
-        try {
-            raf.close();
+                stores.set(i, null);
+            }
+        } finally {
+            closeQuietly(raf);
+            closeQuietly(fileChannel);
             closed.set(true);
-        } catch (IOException e) {
-            Jvm.debug().on(getClass(), e);
         }
     }
 
