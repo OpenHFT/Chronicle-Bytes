@@ -309,6 +309,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param address of the memory.
      * @param size    in bytes.
      */
+    @Deprecated(/*to be removed in 1.13*/)
     void nativeRead(long address, long size)
             throws BufferUnderflowException;
 

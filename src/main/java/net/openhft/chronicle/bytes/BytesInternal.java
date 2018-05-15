@@ -1117,7 +1117,8 @@ enum BytesInternal {
             if (num == Long.MIN_VALUE) {
                 if (base == 10)
                     out.write(MIN_VALUE_TEXT);
-                else out.write(Long.toString(Long.MIN_VALUE, base));
+                else
+                    out.write(Long.toString(Long.MIN_VALUE, base));
                 return;
             }
             out.writeByte((byte) '-');
@@ -1141,6 +1142,33 @@ enum BytesInternal {
         }
     }
 
+    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, int num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            out.writeByte((byte) '-');
+            if (num == Integer.MIN_VALUE) {
+                appendLong0(out, -(long) num);
+                return;
+            }
+            num = -num;
+        }
+        appendInt0(out, num);
+    }
+
+    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.write(MIN_VALUE_TEXT);
+                return;
+            }
+            out.writeByte((byte) '-');
+            num = -num;
+        }
+        appendLong0(out, num);
+    }
+
+
     public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
         Bytes b = acquireBytes();
@@ -1156,7 +1184,7 @@ enum BytesInternal {
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int decimalPlaces)
             throws IllegalArgumentException, BufferOverflowException {
         if (decimalPlaces == 0) {
-            append(out, num, 10);
+            appendBase10(out, num);
             return;
         }
 
@@ -1237,7 +1265,7 @@ enum BytesInternal {
     /**
      * Appends given long value with given decimalPlaces to RandomDataOutput out
      *
-     * @param width         Maximum width. I will be padded with zeros to the left if necessary
+     * @param width Maximum width. I will be padded with zeros to the left if necessary
      */
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
             throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
@@ -1293,14 +1321,81 @@ enum BytesInternal {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
     }
 
+    private static void appendInt0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, int num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 10) {
+            out.writeByte((byte) ('0' + num));
+
+        } else if (num < 100) {
+            out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
+
+        } else {
+            byte[] numberBuffer = NUMBER_BUFFER.get();
+            // Extract digits into the end of the numberBuffer
+            int endIndex = appendInt1(numberBuffer, num);
+
+            // Bulk copy the digits into the front of the buffer
+            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        }
+    }
+
     private static void appendLong0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        byte[] numberBuffer = NUMBER_BUFFER.get();
-        // Extract digits into the end of the numberBuffer
-        int endIndex = appendLong1(numberBuffer, num);
+        if (num < 10) {
+            out.writeByte((byte) ('0' + num));
 
-        // Bulk copy the digits into the front of the buffer
-        out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        } else if (num < 100) {
+            out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
+
+        } else {
+            byte[] numberBuffer = NUMBER_BUFFER.get();
+            // Extract digits into the end of the numberBuffer
+            int endIndex = appendLong1(numberBuffer, num);
+
+            // Bulk copy the digits into the front of the buffer
+            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        }
+    }
+
+    private static int appendInt1(byte[] numberBuffer, int num) {
+        numberBuffer[19] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 19;
+        numberBuffer[18] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 18;
+        numberBuffer[17] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 17;
+        numberBuffer[16] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 16;
+        numberBuffer[15] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 15;
+        numberBuffer[14] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 14;
+        numberBuffer[13] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 13;
+        numberBuffer[12] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 12;
+        numberBuffer[11] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 11;
+        numberBuffer[10] = (byte) (num % 10L + '0');
+        return 10;
     }
 
     private static int appendLong1(byte[] numberBuffer, long num) {

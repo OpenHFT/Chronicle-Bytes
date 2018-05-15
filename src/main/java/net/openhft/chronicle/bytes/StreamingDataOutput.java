@@ -372,6 +372,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param address to write to.
      * @param size    in bytes.
      */
+    @Deprecated(/*to be removed in 1.13*/)
     void nativeWrite(long address, long size)
             throws BufferOverflowException;
 

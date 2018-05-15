@@ -78,8 +78,25 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
+    default B append(int value) throws BufferOverflowException {
+        BytesInternal.appendBase10(this, value);
+        return (B) this;
+    }
+
+    /**
+     * Append a long in decimal
+     *
+     * @param value to append
+     * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     */
+    @NotNull
     default B append(long value) throws BufferOverflowException {
-        BytesInternal.append(this, value, 10);
+        if (value == (int) value)
+            BytesInternal.appendBase10(this, (int) value);
+        else
+            BytesInternal.appendBase10(this, value);
         return (B) this;
     }
 
