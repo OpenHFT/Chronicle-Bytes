@@ -30,10 +30,10 @@ public class StringInternerBytesTest {
     @Test
     public void testIntern() {
         @NotNull StringInternerBytes si = new StringInternerBytes(128);
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < 128; i++) {
             Bytes b = Bytes.from("key" + i);
             si.intern(b, (int) b.readRemaining());
         }
-        assertEquals(86, si.valueCount());
+        assertEquals(97, si.valueCount());
     }
 }
