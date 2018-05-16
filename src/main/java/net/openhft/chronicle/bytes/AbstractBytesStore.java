@@ -17,7 +17,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 
 import java.nio.BufferUnderflowException;
 
@@ -33,9 +33,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Un
 
     @Override
     public int hashCode() {
-        long h = VanillaBytesStoreHash.INSTANCE.applyAsLong(this);
-        h ^= h >> 32;
-        return (int) h;
+        return BytesStoreHash.hash32(this);
     }
 
     @Override

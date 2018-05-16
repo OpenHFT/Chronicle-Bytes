@@ -50,18 +50,20 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         return applyAsLong(store, remaining);
     }
 
-    public long applyAsLong(@NotNull BytesStore store, int remaining) {
-        long start = store.readPosition();
-        if (remaining <= 8) {
-            long l = store.readIncompleteLong(start);
+
+    @Override
+    public long applyAsLong(BytesStore bytes, long length) {
+        long start = bytes.readPosition();
+        if (length <= 8) {
+            long l = bytes.readIncompleteLong(start);
             return agitate(l * K0 + (l >> 32) * K1);
         }
         // use two hashes so that when they are combined the 64-bit hash is more random.
-        long h0 = (long) remaining * K0;
+        long h0 = (long) length * K0;
         long h1 = 0, h2 = 0, h3 = 0;
         int i;
         // optimise chunks of 32 bytes but this is the same as the next loop.
-        for (i = 0; i < remaining - 31; i += 32) {
+        for (i = 0; i < length - 31; i += 32) {
             if (i > 0) {
                 h0 *= K0;
                 h1 *= K1;
@@ -69,14 +71,14 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
                 h3 *= K3;
             }
             long addrI = start + i;
-            long l0 = store.readLong(addrI);
-            int l0a = store.readInt(addrI + HI_BYTES);
-            long l1 = store.readLong(addrI + 8);
-            int l1a = store.readInt(addrI + 8 + HI_BYTES);
-            long l2 = store.readLong(addrI + 16);
-            int l2a = store.readInt(addrI + 16 + HI_BYTES);
-            long l3 = store.readLong(addrI + 24);
-            int l3a = store.readInt(addrI + 24 + HI_BYTES);
+            long l0 = bytes.readLong(addrI);
+            int l0a = bytes.readInt(addrI + HI_BYTES);
+            long l1 = bytes.readLong(addrI + 8);
+            int l1a = bytes.readInt(addrI + 8 + HI_BYTES);
+            long l2 = bytes.readLong(addrI + 16);
+            int l2a = bytes.readInt(addrI + 16 + HI_BYTES);
+            long l3 = bytes.readLong(addrI + 24);
+            int l3a = bytes.readInt(addrI + 24 + HI_BYTES);
 
             h0 += (l0 + l1a - l2a) * M0;
             h1 += (l1 + l2a - l3a) * M1;
@@ -85,7 +87,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         }
 
         // perform a hash of the end.
-        int left = remaining - i;
+        long left = length - i;
         if (left > 0) {
             if (i > 0) {
                 h0 *= K0;
@@ -95,13 +97,13 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
             }
 
             long addrI = start + i;
-            long l0 = store.readIncompleteLong(addrI);
+            long l0 = bytes.readIncompleteLong(addrI);
             int l0a = (int) (l0 >> 32);
-            long l1 = store.readIncompleteLong(addrI + 8);
+            long l1 = bytes.readIncompleteLong(addrI + 8);
             int l1a = (int) (l1 >> 32);
-            long l2 = store.readIncompleteLong(addrI + 16);
+            long l2 = bytes.readIncompleteLong(addrI + 16);
             int l2a = (int) (l2 >> 32);
-            long l3 = store.readIncompleteLong(addrI + 24);
+            long l3 = bytes.readIncompleteLong(addrI + 24);
             int l3a = (int) (l3 >> 32);
 
             h0 += (l0 + l1a - l2a) * M0;

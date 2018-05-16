@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -796,9 +796,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int hashCode() {
-        long h = VanillaBytesStoreHash.INSTANCE.applyAsLong(this);
-        h ^= h >> 32;
-        return (int) h;
+        return BytesStoreHash.hash32(this);
     }
 
     @Override

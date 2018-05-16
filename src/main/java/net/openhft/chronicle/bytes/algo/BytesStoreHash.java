@@ -16,9 +16,8 @@
 
 package net.openhft.chronicle.bytes.algo;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.VanillaBytes;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.ToLongFunction;
@@ -26,31 +25,28 @@ import java.util.function.ToLongFunction;
 /**
  * Simple function to derive a long hash from a BytesStore
  */
-@FunctionalInterface
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
-    static long hash(@NotNull VanillaBytes b) {
-        return OptimisedBytesStoreHash.INSTANCE.applyAsLong(b);
-    }
-
-    static long hash(BytesStore b) {
-        return b instanceof Bytes && b.isDirectMemory()
-                ? OptimisedBytesStoreHash.INSTANCE.applyAsLong((Bytes) b)
+    static long hash(@NotNull BytesStore b) {
+        return b.isDirectMemory() && b.bytesStore() instanceof NativeBytesStore
+                ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
-    static int hash32(Bytes b) {
-        long hash = hash(b);
-        return (int) (hash ^ (hash >>> 32));
-    }
-
-    static long hash(@NotNull Bytes b, int length) {
-        return b.isDirectMemory()
+    static long hash(@NotNull BytesStore b, long length) {
+        return b.isDirectMemory() && b.bytesStore() instanceof NativeBytesStore
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b, length)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b, length);
     }
 
-    static int hash32(@NotNull Bytes b, int length) {
+    static int hash32(BytesStore b) {
+        long hash = hash(b);
+        return (int) (hash ^ (hash >>> 32));
+    }
+
+    static int hash32(@NotNull BytesStore b, int length) {
         long hash = hash(b, length);
         return (int) (hash ^ (hash >>> 32));
     }
+
+    long applyAsLong(BytesStore bytes, long length);
 }
