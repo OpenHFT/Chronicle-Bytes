@@ -880,4 +880,28 @@ public class BytesTest {
             b.release();
         }
     }
+
+    @Test
+    public void testTimeMillis() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.appendTimeMillis(12345678L);
+            assertEquals("03:25:45.678", b.toString());
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testDateTimeMillis() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.appendDateMillis(12345 * 86400_000L);
+            assertEquals("20031020", b.toString());
+
+        } finally {
+            b.release();
+        }
+    }
 }

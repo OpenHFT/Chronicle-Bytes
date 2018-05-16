@@ -137,6 +137,16 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
             BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
     }
 
+    default void parse8bit(Bytes buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException {
+        BytesInternal.parse8bit(this, buffer, stopCharsTester);
+    }
+
+    default void parse8bit(StringBuilder buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException {
+        BytesInternal.parse8bit(this, buffer, stopCharsTester);
+    }
+
     /**
      * parse text as a long integer. The terminating character is consumed.
      *
