@@ -39,7 +39,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
     public static long agitate(long l) {
-        l += Long.rotateLeft(l, 22);
+        l ^= Long.rotateLeft(l, 26);
         l ^= Long.rotateRight(l, 17);
         return l;
     }

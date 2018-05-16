@@ -850,10 +850,16 @@ public class BytesTest {
             assertEquals(0, b.hashCode());
             b.clear();
             b.writeLong(1);
-            assertEquals(0x6e6fca5d, b.hashCode());
+            assertEquals(0x152ad77e, b.hashCode());
             b.clear();
             b.writeLong(2);
-            assertEquals(0xdcdf94ba, b.hashCode());
+            assertEquals(0x2a55aefc, b.hashCode());
+            b.clear();
+            b.writeLong(3);
+            assertEquals(0x7f448df2, b.hashCode());
+            b.clear();
+            b.writeLong(4);
+            assertEquals(0x54ab5df8, b.hashCode());
 
         } finally {
             b.release();
