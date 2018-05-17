@@ -402,9 +402,21 @@ enum BytesInternal {
             }
             bytes.readSkip(count);
             setCount(sb, count);
-            if (count < utflen)
-                parseUtf82(bytes, sb, utflen, count);
+            if (count < utflen) {
+
+
+                long rp0 = bytes.readPosition();
+                try {
+                    parseUtf82(bytes, sb, utflen, count);
+                } catch (UTFDataFormatRuntimeException e) {
+                    long rp = Math.max(rp0 - 128, 0);
+                    throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200));
+                }
+            }
+
         } catch (IOException e) {
+
+
             throw Jvm.rethrow(e);
         }
     }
@@ -526,6 +538,8 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
+
+
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + count);
             }
