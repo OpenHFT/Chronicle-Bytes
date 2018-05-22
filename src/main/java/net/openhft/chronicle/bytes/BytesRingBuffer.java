@@ -55,9 +55,13 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     }
 
     static long sizeFor(long capacity) {
+        return sizeFor(capacity, 1);
+    }
+
+    static long sizeFor(long capacity, int numReaders) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class);
-            return (long) sizeFor.invoke(null, capacity);
+            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
+            return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
