@@ -8,4 +8,6 @@ import org.jetbrains.annotations.NotNull;
 public interface RingBufferReader {
 
     boolean read(@NotNull final BytesOut using);
+
+    boolean isEmpty();
 }
