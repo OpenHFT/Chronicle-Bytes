@@ -74,6 +74,9 @@ public class MappedFile implements ReferenceCounted {
     }
 
     private static void logNewChunk(String filename, int chunk, long delayMicros) {
+        if (!Jvm.isDebugEnabled(MappedFile.class))
+            return;
+
         // avoid a GC while trying to memory map.
         String message = BytesInternal.acquireStringBuilder()
                 .append("Allocation of ").append(chunk)
