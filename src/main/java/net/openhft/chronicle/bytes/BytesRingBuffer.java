@@ -34,10 +34,15 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
 
     @NotNull
     static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
+        return newInstance(bytesStore, 1);
+    }
+
+    @NotNull
+    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int numReaders) {
         try {
             @NotNull final Class<BytesRingBuffer> aClass = clazz();
-            final Constructor<BytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class);
-            return constructor.newInstance(bytesStore);
+            final Constructor<BytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class, int.class);
+            return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
