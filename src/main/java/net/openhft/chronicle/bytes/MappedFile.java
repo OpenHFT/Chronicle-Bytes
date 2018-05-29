@@ -184,6 +184,14 @@ public class MappedFile implements ReferenceCounted {
         return MappedFile.of(file, chunkSize, overlapSize, true);
     }
 
+    @NotNull
+    public static MappedFile mappedFile(@NotNull File file, long capacity, long chunkSize, long overlapSize, boolean readOnly)
+            throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+        raf.setLength(capacity);
+        return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+    }
+
     public static void warmup() {
         try {
             Jvm.disableDebugHandler();
