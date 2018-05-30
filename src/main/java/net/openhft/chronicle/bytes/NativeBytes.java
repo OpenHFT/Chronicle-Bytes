@@ -226,21 +226,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             long offset = bytes.readPosition();
             long position = writePosition();
             ensureCapacity(position + length);
-            if (length >= 32 && isDirectMemory() && bytes.isDirectMemory()) {
-                long address = bytes.addressForRead(offset);
-                long address2 = addressForWrite(writePosition());
-                assert address != 0;
-                assert address2 != 0;
-                long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-                if (len > 0) {
-                    writeCheckOffset(writePosition(), len);
-                    OS.memory().copyMemory(address, address2, len);
-                    writeSkip(len);
-                }
-
-            } else {
-                super.write(bytes, offset, length);
-            }
+            optimisedWrite(bytes, offset, length);
             if (length == bytes.readRemaining()) {
                 bytes.clear();
             } else {

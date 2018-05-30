@@ -249,22 +249,23 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
-        if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
-            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-            if (len > 0) {
-                long address = bytes.addressForRead(offset);
-                long address2 = addressForWrite(writePosition());
-                assert address != 0;
-                assert address2 != 0;
-                writeCheckOffset(writePosition(), len);
-                OS.memory().copyMemory(address, address2, len);
-                writeSkip(len);
-            }
+        optimisedWrite(bytes, offset, length);
+        return this;
+    }
 
+    protected void optimisedWrite(@NotNull BytesStore bytes, long offset, long length) {
+        if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
+            writeCheckOffset(writePosition(), length);
+            assert offset + length <= bytes.readLimit();
+            long address = bytes.addressForRead(offset);
+            long address2 = addressForWrite(writePosition());
+            assert address != 0;
+            assert address2 != 0;
+            OS.memory().copyMemory(address, address2, length);
+            writeSkip(length);
         } else {
             super.write(bytes, offset, length);
         }
-        return this;
     }
 
     public void write(long position, @NotNull CharSequence str, int offset, int length)
