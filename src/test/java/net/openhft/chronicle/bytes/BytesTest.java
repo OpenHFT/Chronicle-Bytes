@@ -904,4 +904,22 @@ public class BytesTest {
             b.release();
         }
     }
+
+    @Test
+    public void testWriteOffset() {
+        int length = 128;
+        Bytes from = NativeBytes.nativeBytes(length).unchecked(true);
+        Bytes to = alloc1.elasticBytes(length);
+
+        for (int i = 0; i< length; i++)
+            from.write(i, Bytes.from("a"), 0L, 1);
+
+        try {
+            to.write(from, 0L, length);
+            assertEquals(from.readLong(0), to.readLong(0));
+        } finally {
+            from.release();
+            to.release();
+        }
+    }
 }

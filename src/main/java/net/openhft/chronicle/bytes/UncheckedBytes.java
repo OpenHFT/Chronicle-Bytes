@@ -144,7 +144,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.underlyingObject() == null && length >= 32) {
+        } else if (bytes.underlyingObject() == null && bytesStore.isDirectMemory() && length >= 32) {
             rawCopy(bytes, offset, length);
 
         } else {
@@ -173,7 +173,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException {
-        long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+        long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
