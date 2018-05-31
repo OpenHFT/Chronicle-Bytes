@@ -255,14 +255,16 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     protected void optimisedWrite(@NotNull BytesStore bytes, long offset, long length) {
         if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
-            writeCheckOffset(writePosition(), length);
-            assert offset + length <= bytes.readLimit();
-            long address = bytes.addressForRead(offset);
-            long address2 = addressForWrite(writePosition());
-            assert address != 0;
-            assert address2 != 0;
-            OS.memory().copyMemory(address, address2, length);
-            writeSkip(length);
+            long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
+            if (len > 0) {
+                long address = bytes.addressForRead(offset);
+                long address2 = addressForWrite(writePosition());
+                assert address != 0;
+                assert address2 != 0;
+                writeCheckOffset(writePosition(), len);
+                OS.memory().copyMemory(address, address2, len);
+                writeSkip(len);
+            }
         } else {
             super.write(bytes, offset, length);
         }
