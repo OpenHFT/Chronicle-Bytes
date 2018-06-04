@@ -300,7 +300,6 @@ public class MappedFile implements ReferenceCounted {
             MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
             long startOfMap = chunk * chunkSize;
             long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
-
             final long safeCapacity = this.chunkSize + overlapSize / 2;
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));

@@ -176,6 +176,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return start() <= offset && offset < safeLimit();
     }
 
+    default boolean inside(long offset, int buffer) {
+        return start() <= offset && offset + buffer < safeLimit();
+    }
+
     /**
      * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying
      * data.
