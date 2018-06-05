@@ -17,6 +17,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
 /*
@@ -42,4 +43,28 @@ public interface BytesIn<Underlying> extends
     }
 
     <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object);
+
+    default <T> T readObject(Class<T> componentType) {
+        if (BytesMarshallable.class.isAssignableFrom(componentType)) {
+            BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance((Class<T>) componentType);
+            bm.readMarshallable(this);
+            return (T) bm;
+        }
+        if (Enum.class.isAssignableFrom(componentType)) {
+            return (T) readEnum((Class) componentType);
+        }
+        switch (componentType.getName()) {
+            case "java.lang.String":
+                return (T) readUtf8();
+            case "java.lang.Double":
+                return (T) (Double) readDouble();
+            case "java.lang.Long":
+                return (T) (Long) readLong();
+            case "java.lang.Integer":
+                return (T) (Integer) readInt();
+
+            default:
+                throw new UnsupportedOperationException("Unsupported " + componentType);
+        }
+    }
 }

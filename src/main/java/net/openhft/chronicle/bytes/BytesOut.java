@@ -50,10 +50,48 @@ public interface BytesOut<Underlying> extends
                 new BinaryBytesMethodWriterInvocationHandler(MethodEncoderLookup.BY_ANNOTATION, this));
     }
 
+    @Deprecated(/*is it used?*/)
     @NotNull
     default <T> MethodWriterBuilder<T> bytesMethodWriterBuilder(Function<Method, MethodEncoder> methodEncoderFunction, @NotNull Class<T> tClass) {
         return new BytesMethodWriterBuilder<>(tClass, new BinaryBytesMethodWriterInvocationHandler(methodEncoderFunction, this));
     }
 
     void writeMarshallableLength16(WriteBytesMarshallable marshallable);
+
+    /**
+     * Write a limit set of writeObject types.
+     *
+     * @param componentType expected.
+     * @param obj           of componentType
+     */
+    default void writeObject(Class componentType, Object obj) {
+        if (componentType != obj.getClass())
+            throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
+        if (obj instanceof BytesMarshallable) {
+            ((BytesMarshallable) obj).writeMarshallable(this);
+            return;
+        }
+        if (obj instanceof Enum) {
+            writeEnum((Enum) obj);
+            return;
+        }
+        switch (componentType.getName()) {
+            case "java.lang.String":
+                writeUtf8((String) obj);
+                return;
+            case "java.lang.Double":
+                writeDouble((Double) obj);
+                return;
+            case "java.lang.Long":
+                writeLong((Long) obj);
+                return;
+            case "java.lang.Integer":
+                writeInt((Integer) obj);
+                return;
+
+            default:
+                throw new UnsupportedOperationException("Not supported " + componentType);
+        }
+    }
+
 }
