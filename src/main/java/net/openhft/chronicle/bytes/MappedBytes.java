@@ -735,4 +735,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
         return isSingleThreaded;
     }
+
+    @Override
+    public boolean isDirectMemory() {
+        return true;
+    }
 }
