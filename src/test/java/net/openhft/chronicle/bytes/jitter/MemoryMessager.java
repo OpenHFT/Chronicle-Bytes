@@ -6,7 +6,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 
 public class MemoryMessager {
 
-    public static final int NOT_READY = 0x8000000;
+    public static final int NOT_READY = Integer.MIN_VALUE;
     private final MappedBytes bytes;
     private long address;
 
@@ -41,7 +41,7 @@ public class MemoryMessager {
     public long consumeBytes() {
         int length = length();
         if (length == 0x0 || length == NOT_READY)
-            throw new AssertionError();
+            throw new AssertionError("length: "+length);
 
         bytes.readSkip(4);
         long ret = bytes.readLong();
