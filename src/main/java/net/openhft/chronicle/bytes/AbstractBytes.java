@@ -572,25 +572,41 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @NotNull
-
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        long remaining = length;
+        while (remaining > 0) {
+            int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
+            writeCheckOffset(offsetInRDO, copy);
+            bytesStore.write(offsetInRDO, bytes, offset, copy);
+            offsetInRDO += copy;
+            offset += copy;
+            remaining -= copy;
+        }
         return this;
     }
 
     @Override
+    @Deprecated(/*Is this used?*/)
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
+
     }
 
     @Override
     @NotNull
     public Bytes<Underlying> write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+
+        long remaining = length;
+        while (remaining > 0) {
+            int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
+            writeCheckOffset(offset, copy);
+            bytesStore.write(offsetInRDO, bytes, offset, copy);
+            offsetInRDO += copy;
+            offset += copy;
+            remaining -= copy;
+        }
         return this;
     }
 
@@ -847,9 +863,19 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
             throw new DecoratedBufferOverflowException(
                     String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
         }
-        long offsetInRDO = writeOffsetPositionMoved(length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        int remaining = length;
+        while (remaining > 0) {
+            int copy = Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
+            long offsetInRDO = writeOffsetPositionMoved(copy);
+            bytesStore.write(offsetInRDO, bytes, offset, copy);
+            offset += copy;
+            remaining -= copy;
+        }
         return this;
+    }
+
+    protected int safeCopySize() {
+        return 64 << 10;
     }
 
     @NotNull

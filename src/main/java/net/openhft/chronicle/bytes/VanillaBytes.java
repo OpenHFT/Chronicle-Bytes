@@ -254,7 +254,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     protected void optimisedWrite(@NotNull BytesStore bytes, long offset, long length) {
-        if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
+        if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
             if (len > 0) {
                 long address = bytes.addressForRead(offset);
