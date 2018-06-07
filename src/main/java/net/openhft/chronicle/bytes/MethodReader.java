@@ -9,6 +9,10 @@ public interface MethodReader extends Closeable {
 
     boolean readOne();
 
+    default boolean quickReadOne() {
+        return readOne();
+    }
+
     /**
      * Call close on the input when closed
      */

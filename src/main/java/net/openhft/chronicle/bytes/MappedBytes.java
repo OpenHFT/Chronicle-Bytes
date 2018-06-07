@@ -740,4 +740,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public boolean isDirectMemory() {
         return true;
     }
+
+    public MappedBytes write8bit(@Nullable BytesStore bs)
+            throws BufferOverflowException {
+        if (bs == null) {
+            writeStopBit(-1);
+        } else {
+            long offset = bs.readPosition();
+            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
+            writeStopBit(readRemaining);
+            write(bs, offset, readRemaining);
+        }
+        return this;
+    }
 }
