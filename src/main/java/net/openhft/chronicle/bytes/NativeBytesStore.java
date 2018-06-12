@@ -526,7 +526,8 @@ public class NativeBytesStore<Underlying>
         return address + translate(offset);
     }
 
-    private void performRelease() {
+    // this is synchronized to ensure that setting memory = null gets flushed
+    private synchronized void performRelease() {
         memory = null;
         if (refCount.get() > 0) {
             LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
