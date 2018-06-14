@@ -38,10 +38,10 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     }
 
     @NotNull
-    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int numReaders) {
+    static MultiReaderBytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int numReaders) {
         try {
-            @NotNull final Class<BytesRingBuffer> aClass = clazz();
-            final Constructor<BytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class, int.class);
+            @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
+            final Constructor<MultiReaderBytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class, int.class);
             return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {
@@ -53,9 +53,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     }
 
     @NotNull
-    static Class<BytesRingBuffer> clazz() throws ClassNotFoundException {
+    static Class<MultiReaderBytesRingBuffer> clazz() throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
-        return (Class<BytesRingBuffer>) Class.forName(
+        return (Class<MultiReaderBytesRingBuffer>) Class.forName(
                 "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
     }
 
