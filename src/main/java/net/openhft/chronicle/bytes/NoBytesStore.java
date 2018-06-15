@@ -235,6 +235,11 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public boolean inside(long offset, int buffer) {
+        return false;
+    }
+
+    @Override
     public long copyTo(BytesStore store) {
         // nothing to copy.
         return 0L;

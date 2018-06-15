@@ -227,6 +227,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         super.readCheckOffset(offset, adding, given);
     }
 
+    @Nullable
+    @Override
+    public String read8bit() throws IORuntimeException, BufferUnderflowException {
+        return BytesInternal.read8bit(this);
+    }
+
     @Override
     protected void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert singleThreadedAccess();
