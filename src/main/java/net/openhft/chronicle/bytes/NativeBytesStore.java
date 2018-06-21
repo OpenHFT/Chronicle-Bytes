@@ -40,7 +40,7 @@ public class NativeBytesStore<Underlying>
         extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
-    private static final Field BB_ADDRESS, BB_CAPACITY;
+    private static final Field BB_ADDRESS, BB_CAPACITY, BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
     //    static MappedBytes last;
 
@@ -48,6 +48,7 @@ public class NativeBytesStore<Underlying>
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
         BB_ADDRESS = Jvm.getField(directBB, "address");
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
+        BB_ATT = Jvm.getField(directBB, "att");
     }
 
     @Nullable
@@ -691,7 +692,7 @@ public class NativeBytesStore<Underlying>
         try {
             BB_ADDRESS.setLong(bb, address);
             BB_CAPACITY.setInt(bb, Maths.toUInt31(readRemaining()));
-
+            BB_ATT.set(bb, this);
         } catch (Exception e) {
             throw new AssertionError(e);
         }

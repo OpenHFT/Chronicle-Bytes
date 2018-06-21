@@ -171,6 +171,18 @@ public class NativeBytesStoreTest {
         assertEquals(hi, nbs.toString());
     }
 
+    @Test
+    public void testToTempByteBuf() {
+        @NotNull String hi = "Hello World";
+        @NotNull char[] chars = hi.toCharArray();
+        NativeBytesStore<Void> bs = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(128);
+        bs.appendUtf8(0, chars, 0, chars.length);
+        ByteBuffer bb = bs.toTemporaryDirectByteBuffer();
+        for (int i = 0; i < chars.length; i++) {
+            assertEquals(bb.get(i), (byte) chars[i]);
+        }
+    }
+
     //@Test
     //@Ignore("Long running test")
     public void perfCheckSum() throws IORuntimeException {
