@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -106,6 +107,85 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         } finally {
             rw.release();
         }
+    }
+
+    public MappedBytes write(long offsetInRDO, byte[] bytes, int offset, int length) {
+
+        long wp = offsetInRDO;
+        if ((length + offset) > bytes.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+
+        if (length > writeRemaining())
+            throw new DecoratedBufferOverflowException(
+                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+
+        int remaining = length;
+        long chunkSize = mappedFile.chunkSize();
+
+        while (remaining > 0) {
+
+            int safeCopySize = (int) (chunkSize - (wp % chunkSize));
+            int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
+            acquireNextByteStore(wp, false);
+            bytesStore.write(wp, bytes, offset, copy);
+            offset += copy;
+            wp += copy;
+            remaining -= copy;
+        }
+        return this;
+
+    }
+
+    public MappedBytes write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
+            throws BufferOverflowException, BufferUnderflowException {
+
+        long wp = offsetInRDO;
+
+        if (length > writeRemaining())
+            throw new DecoratedBufferOverflowException(
+                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+
+        long remaining = length;
+        long chunkSize = mappedFile.chunkSize();
+
+        while (remaining > 0) {
+
+            int safeCopySize = (int) (chunkSize - (wp % chunkSize));
+            long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
+            acquireNextByteStore(wp, false);
+            bytesStore.write(wp, bytes, offset, copy);
+            offset += copy;
+            wp += copy;
+            remaining -= copy;
+        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytes write(@NotNull byte[] bytes, int offset, int length) throws BufferOverflowException {
+        long wp = writePosition;
+        if ((length + offset) > bytes.length) {
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+        }
+        if (length > writeRemaining()) {
+            throw new DecoratedBufferOverflowException(
+                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+        }
+        int remaining = length;
+
+        while (remaining > 0) {
+            int safeCopySize = (int) (mappedFile.chunkSize() - (wp % mappedFile.chunkSize()));
+            int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
+            long l = writeOffsetPositionMoved(wp);
+
+            bytesStore.write(l, bytes, offset, copy);
+            offset += copy;
+            wp += copy;
+            remaining -= copy;
+
+        }
+        return this;
     }
 
     @NotNull
