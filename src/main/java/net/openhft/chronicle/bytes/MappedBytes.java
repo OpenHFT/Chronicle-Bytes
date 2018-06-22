@@ -120,11 +120,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                     String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
 
         int remaining = length;
-        long chunkSize = mappedFile.chunkSize();
 
         while (remaining > 0) {
 
-            int safeCopySize = (int) (chunkSize - (wp % chunkSize));
+            int safeCopySize = safeCopySize(wp);
             int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
@@ -146,11 +145,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                     String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
 
         long remaining = length;
-        long chunkSize = mappedFile.chunkSize();
 
         while (remaining > 0) {
-
-            int safeCopySize = (int) (chunkSize - (wp % chunkSize));
+            int safeCopySize = safeCopySize(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
@@ -159,6 +156,15 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             remaining -= copy;
         }
         return this;
+    }
+
+    private int safeCopySize(long writePosition) {
+        return (int) (mappedFile.chunkSize() - (writePosition % mappedFile.chunkSize()));
+    }
+
+    @Override
+    protected int safeCopySize() {
+        return safeCopySize(writePosition);
     }
 
     @NotNull
@@ -175,10 +181,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         int remaining = length;
 
         while (remaining > 0) {
-            int safeCopySize = (int) (mappedFile.chunkSize() - (wp % mappedFile.chunkSize()));
+            int safeCopySize = safeCopySize(wp);
             int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             long l = writeOffsetPositionMoved(wp);
-
             bytesStore.write(l, bytes, offset, copy);
             offset += copy;
             wp += copy;
