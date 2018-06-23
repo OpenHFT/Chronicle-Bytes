@@ -123,13 +123,19 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         while (remaining > 0) {
 
-            int safeCopySize = safeCopySize(wp);
+            int safeCopySize = safeCopySizeWithoutOverlap(wp);
+      
             int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            acquireNextByteStore(wp, false);
+            acquireNextByteStore0(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
             wp += copy;
             remaining -= copy;
+
+            if (remaining < mappedFile.overlapSize()) {
+                bytesStore.write(wp, bytes, offset, remaining);
+                return this;
+            }
         }
         return this;
 
@@ -147,49 +153,58 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         long remaining = length;
 
         while (remaining > 0) {
-            int safeCopySize = safeCopySize(wp);
+
+            int safeCopySize = safeCopySizeWithoutOverlap(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            acquireNextByteStore(wp, false);
+            acquireNextByteStore0(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
+
             offset += copy;
             wp += copy;
             remaining -= copy;
+
+            if (remaining < mappedFile.overlapSize()) {
+                bytesStore.write(wp, bytes, offset, remaining);
+                return this;
+            }
         }
         return this;
     }
 
-    private int safeCopySize(long writePosition) {
+    @NotNull
+    @Override
+    public MappedBytes write(@NotNull BytesStore bytes)
+            throws BufferOverflowException {
+        assert singleThreadedAccess();
+        assert bytes != this : "you should not write to yourself !";
+
+        write(writePosition, bytes);
+        writePosition += bytes.length();
+        return this;
+    }
+
+    @NotNull
+    public MappedBytes write(long offsetInRDO, @NotNull BytesStore bytes)
+            throws BufferOverflowException {
+        write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
+        return this;
+    }
+
+    private int safeCopySizeWithoutOverlap(long writePosition) {
         return (int) (mappedFile.chunkSize() - (writePosition % mappedFile.chunkSize()));
     }
 
     @Override
     protected int safeCopySize() {
-        return safeCopySize(writePosition);
+        return safeCopySizeWithoutOverlap(writePosition);
     }
 
     @NotNull
     @Override
     public MappedBytes write(@NotNull byte[] bytes, int offset, int length) throws BufferOverflowException {
         long wp = writePosition;
-        if ((length + offset) > bytes.length) {
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
-        }
-        if (length > writeRemaining()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
-        }
-        int remaining = length;
-
-        while (remaining > 0) {
-            int safeCopySize = safeCopySize(wp);
-            int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            long l = writeOffsetPositionMoved(wp);
-            bytesStore.write(l, bytes, offset, copy);
-            offset += copy;
-            wp += copy;
-            remaining -= copy;
-
-        }
+        write(wp, bytes, offset, length);
+        writePosition = +length;
         return this;
     }
 
@@ -338,10 +353,15 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     // require protection from concurrent mutation to bytesStore field
     private synchronized void acquireNextByteStore(long offset, boolean set) throws BufferOverflowException {
-        @Nullable BytesStore oldBS = bytesStore;
-        if (oldBS.inside(offset))
+
+        if (bytesStore.inside(offset))
             return;
 
+        acquireNextByteStore0(offset, set);
+    }
+
+    private synchronized void acquireNextByteStore0(final long offset, final boolean set) {
+        @Nullable BytesStore oldBS = bytesStore;
         try {
             @Nullable BytesStore newBS = mappedFile.acquireByteStore(offset);
             bytesStore = newBS;
@@ -686,26 +706,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this.refCount() <= 0;
     }
 
-    @NotNull
-    @Override
-    public MappedBytes write(@NotNull BytesStore bytes)
-            throws BufferOverflowException {
-        assert singleThreadedAccess();
-        assert bytes != this : "you should not write to yourself !";
 
-        long offset = bytes.readPosition();
-        long length = Math.min(writeRemaining(), bytes.readRemaining());
-        if (length == 8) {
-            writeLong(bytes.readLong(offset));
-
-        } else if (bytes.isDirectMemory() && length <= Math.min(safeCopySize(), writeRemaining())) {
-            rawCopy(bytes, offset, length);
-
-        } else {
-            BytesInternal.writeFully(bytes, offset, length, this);
-        }
-        return this;
-    }
 
     @NotNull
     @Override

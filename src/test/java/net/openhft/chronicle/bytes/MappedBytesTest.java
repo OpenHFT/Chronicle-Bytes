@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class MappedBytesTest {
 
     final private String
-            text = "It's ten years since the iPhone was first unveiled and Apple has marked " +
+            smallText = "It's ten years since the iPhone was first unveiled and Apple has marked " +
             "the occas" +
             "ion with a new iPhone that doesn't just jump one generation, it jumps several. " +
             "Apple has leapt straight from iPhone 7 (via the iPhone 8, reviewed here) all the way " +
@@ -25,11 +25,25 @@ public class MappedBytesTest {
             "the mobile phone again like the original iPhone did, or is Apple now just playing catch-up " +
             "with the rest of the industry? (For a comparison with one rival device, see iPhone X vs LG G7.)\n";
 
+    private final StringBuilder largeTextBuilder = new StringBuilder();
+
+    private String text;
+
+    {
+
+        for (int i = 0; i < 200; i++) {
+            largeTextBuilder.append(smallText);
+        }
+
+        text = largeTextBuilder.toString();
+
+    }
+
     @Test
     public void testWriteBytes() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
-             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 4 << 10, 4 << 10);) {
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10);) {
 
             // write
             bytesW.write(Bytes.from(text));
@@ -48,7 +62,7 @@ public class MappedBytesTest {
     public void testWriteBytesWithOffset() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
-             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 4 << 10, 4 << 10);) {
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10);) {
 
             int offset = 10;
 
@@ -68,7 +82,7 @@ public class MappedBytesTest {
     public void testWriteBytesWithOffsetAndTextShift() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
-             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 4 << 10, 4 << 10);) {
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10);) {
             int offset = 10;
             int shift = 128;
 
