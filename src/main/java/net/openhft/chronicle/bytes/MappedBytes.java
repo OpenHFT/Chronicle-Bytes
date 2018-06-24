@@ -177,9 +177,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws BufferOverflowException {
         assert singleThreadedAccess();
         assert bytes != this : "you should not write to yourself !";
-
+        long remaining = bytes.readRemaining();
         write(writePosition, bytes);
-        writePosition += bytes.length();
+        writePosition += remaining;
         return this;
     }
 
