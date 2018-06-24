@@ -194,20 +194,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return (int) (mappedFile.chunkSize() - (writePosition % mappedFile.chunkSize()));
     }
 
-    @Override
-    protected int safeCopySize() {
-        return safeCopySizeWithoutOverlap(writePosition);
-    }
-
-    @NotNull
-    @Override
-    public MappedBytes write(@NotNull byte[] bytes, int offset, int length) throws BufferOverflowException {
-        long wp = writePosition;
-        write(wp, bytes, offset, length);
-        writePosition = +length;
-        return this;
-    }
-
     @NotNull
     public static MappedBytes mappedBytes(@NotNull MappedFile rw) {
         return new MappedBytes(rw);
