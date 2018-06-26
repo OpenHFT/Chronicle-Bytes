@@ -109,6 +109,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
     }
 
+    public MappedBytes write(byte[] bytes, int offset, int length) {
+        write(writePosition, bytes, offset, length);
+        writePosition += Math.min(length, bytes.length - offset);
+        return this;
+    }
+    
     public MappedBytes write(long offsetInRDO, byte[] bytes, int offset, int length) {
 
         long wp = offsetInRDO;
