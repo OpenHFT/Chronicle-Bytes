@@ -30,13 +30,11 @@ public class MappedBytesTest {
     private String text;
 
     {
-
         for (int i = 0; i < 200; i++) {
             largeTextBuilder.append(smallText);
         }
 
         text = largeTextBuilder.toString();
-
     }
 
     @Test
@@ -59,6 +57,27 @@ public class MappedBytesTest {
     }
 
     @Test
+    public void testWriteReadBytes() throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);) {
+
+            // write
+            bytesW.write(Bytes.from(text));
+            long wp = bytesW.writePosition;
+            Assert.assertEquals(text.length(), bytesW.writePosition);
+
+            // read
+            bytesR.readLimit(wp);
+
+            Assert.assertEquals(text, bytesR.toString());
+        }
+
+    }
+
+
+
+    @Test
     public void testWriteBytesWithOffset() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
@@ -77,6 +96,28 @@ public class MappedBytesTest {
             Assert.assertEquals(text, bytesR.toString());
         }
     }
+
+    @Test
+    public void testWriteReadBytesWithOffset() throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);) {
+
+            int offset = 10;
+
+            // write
+            bytesW.write(offset, Bytes.from(text));
+            long wp = text.length() + offset;
+            Assert.assertEquals(0, bytesW.writePosition);
+
+            // read
+            bytesR.readLimit(wp);
+            bytesR.readPosition(offset);
+            Assert.assertEquals(text, bytesR.toString());
+        }
+    }
+
+
 
     @Test
     public void testWriteBytesWithOffsetAndTextShift() throws IOException {
@@ -98,6 +139,25 @@ public class MappedBytesTest {
         }
     }
 
+    @Test
+    public void testWriteReadBytesWithOffsetAndTextShift() throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
+             MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);) {
+            int offset = 10;
+            int shift = 128;
+
+            //write
+            bytesW.write(offset, Bytes.from(text), shift, text.length() - shift);
+            Assert.assertEquals(0, bytesW.writePosition);
+
+            // read
+            bytesR.readLimit(offset + (text.length() - shift));
+            bytesR.readPosition(offset);
+            String actual = bytesR.toString();
+            Assert.assertEquals(text.substring(shift), actual);
+        }
+    }
     //see https://github.com/OpenHFT/Chronicle-Bytes/issues/66"
     @Test
     public void testLargeWrites() throws IOException {
