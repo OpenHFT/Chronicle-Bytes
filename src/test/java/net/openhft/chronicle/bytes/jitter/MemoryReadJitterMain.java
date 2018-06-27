@@ -36,6 +36,7 @@ public class MemoryReadJitterMain {
 
         final Histogram histoRead = new Histogram();
         final Histogram histoWrite = new Histogram();
+        final Histogram histoReadWrite = new Histogram();
 
         Thread reader = new Thread(() -> {
             try {
@@ -59,12 +60,15 @@ public class MemoryReadJitterMain {
                         }
                     }
                     long startTimeNs = System.nanoTime();
+                    Jvm.safepoint();
                     long last = mm.consumeBytes();
                     if (found)
                         Jvm.safepoint();
                     else
                         Jvm.safepoint();
-                    histoRead.sampleNanos(System.nanoTime() - startTimeNs);
+                    long now = System.nanoTime();
+                    histoRead.sampleNanos(now - startTimeNs);
+                    histoReadWrite.sampleNanos(now - mm.firstLong());
                     lastRead.lazySet(last);
                     if (found)
                         Jvm.safepoint();
@@ -90,7 +94,7 @@ public class MemoryReadJitterMain {
         int subSampler = 0;
         do {
             long startTimeNs = System.nanoTime();
-            mm.writeMessage(size, ++count);
+            mm.writeMessage(size, ++count, startTimeNs);
             histoWrite.sampleNanos(System.nanoTime() - startTimeNs);
             long start1 = System.nanoTime();
             while (System.nanoTime() < start1 + sampleNS) {
@@ -116,7 +120,8 @@ public class MemoryReadJitterMain {
         System.gc();// give it time to release the file so the delete on exit will work on windows.
 
         System.out.println("size="+size+" padTo="+padTo);
-        System.out.println("histoRead="+histoRead.toMicrosFormat());
-        System.out.println("histoWrite="+histoWrite.toMicrosFormat());
+        System.out.println("histoRead     ="+histoRead.toMicrosFormat());
+        System.out.println("histoWrite    ="+histoWrite.toMicrosFormat());
+        System.out.println("histoReadWrite="+histoReadWrite.toMicrosFormat());
     }
 }

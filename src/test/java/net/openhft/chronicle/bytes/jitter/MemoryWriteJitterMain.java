@@ -37,6 +37,7 @@ public class MemoryWriteJitterMain {
 
         final Histogram histoRead = new Histogram();
         final Histogram histoWrite = new Histogram();
+        final Histogram histoReadWrite = new Histogram();
 
         Thread writer = new Thread(() -> {
             try {
@@ -45,9 +46,13 @@ public class MemoryWriteJitterMain {
                 int intervalNS = (int) (1e9 / throughput);
                 while (running) {
                     writing = true;
+                    Jvm.safepoint();
                     long startTimeNs = System.nanoTime();
-                    mm.writeMessage(size, ++count);
-                    histoWrite.sampleNanos(System.nanoTime() - startTimeNs);
+                    mm.writeMessage(size, ++count, startTimeNs);
+                    long now = System.nanoTime();
+                    Jvm.safepoint();
+                    histoWrite.sampleNanos(now - startTimeNs);
+                    histoReadWrite.sampleNanos(now - mm.firstLong());
                     writing = false;
                     long start = System.nanoTime();
                     Thread.yield();
@@ -81,9 +86,9 @@ public class MemoryWriteJitterMain {
                         StringBuilder sb = new StringBuilder();
                         sb.append(PROFILE_OF_THE_THREAD);
                         Jvm.trimStackTrace(sb, stes);
-                        if (sb.indexOf("MemoryWriteJitterMain.java:53") < 0
-                                && sb.indexOf("MemoryWriteJitterMain.java:55") < 0
-                                && sb.indexOf("MemoryWriteJitterMain.java:56") < 0)
+                        if (sb.indexOf("MemoryWriteJitterMain.java:58") < 0
+                                && sb.indexOf("MemoryWriteJitterMain.java:59") < 0
+                                && sb.indexOf("MemoryWriteJitterMain.java:60") < 0)
                             System.out.println(sb);
                     }
                 }
@@ -101,7 +106,8 @@ public class MemoryWriteJitterMain {
         System.gc();// give it time to release the file so the delete on exit will work on windows.
 
         System.out.println("size="+size+" padTo="+padTo);
-        System.out.println("histoRead="+histoRead.toMicrosFormat());
-        System.out.println("histoWrite="+histoWrite.toMicrosFormat());
+        System.out.println("histoRead     ="+histoRead.toMicrosFormat());
+        System.out.println("histoWrite    ="+histoWrite.toMicrosFormat());
+        System.out.println("histoReadWrite="+histoReadWrite.toMicrosFormat());
     }
 }
