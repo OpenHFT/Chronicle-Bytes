@@ -52,7 +52,6 @@ public class MemoryWriteJitterMain {
                     long now = System.nanoTime();
                     Jvm.safepoint();
                     histoWrite.sampleNanos(now - startTimeNs);
-                    histoReadWrite.sampleNanos(now - mm.firstLong());
                     writing = false;
                     long start = System.nanoTime();
                     Thread.yield();
@@ -97,7 +96,9 @@ public class MemoryWriteJitterMain {
             if (length > 0x0) {
                 long startTimeNs = System.nanoTime();
                 mm.consumeBytes();
-                histoRead.sampleNanos(System.nanoTime() - startTimeNs);
+                long now = System.nanoTime();
+                histoRead.sampleNanos(now - startTimeNs);
+                histoReadWrite.sampleNanos(now - mm.firstLong());
             }
 
         } while (System.currentTimeMillis() < start0 + runTime * 1_000);
