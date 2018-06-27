@@ -174,7 +174,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             double d2 = d * Maths.tens(decimalPlaces);
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency
-                long round = (long) (d2 + 0.5);
+                long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
                 return appendDecimal(round, decimalPlaces);
             }
         }
