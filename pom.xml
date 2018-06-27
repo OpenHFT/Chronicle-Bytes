@@ -26,7 +26,7 @@
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-bytes</artifactId>
-    <version>1.16.4-SNAPSHOT</version>
+    <version>1.16.16-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -37,7 +37,6 @@
 
     <dependencyManagement>
         <dependencies>
-
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom
@@ -49,7 +48,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-bom</artifactId>
-                <version>1.16.24-SNAPSHOT</version>
+                <version>1.16.63</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
