@@ -361,7 +361,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         } else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize())) {
             rawCopy(bytes, offset, length);
 
-        } else {
+        } else if (length > 0) {
             BytesInternal.writeFully(bytes, offset, length, this);
         }
         return this;
