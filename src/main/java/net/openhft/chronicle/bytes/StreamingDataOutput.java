@@ -80,6 +80,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @org.jetbrains.annotations.NotNull
     @NotNull
+    default S writeStopBit(char x) throws BufferOverflowException {
+        BytesInternal.writeStopBit(this, x);
+        return (S) this;
+    }
+
+    @org.jetbrains.annotations.NotNull
+    @NotNull
     default S writeStopBit(double d) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, d);
         return (S) this;

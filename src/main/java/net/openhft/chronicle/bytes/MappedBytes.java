@@ -779,6 +779,26 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
+    @Override
+    public long readStopBit() throws IORuntimeException {
+        long offset = readOffsetPositionMoved(1);
+        byte l = bytesStore.readByte(offset);
+
+        if (l >= 0)
+            return l;
+        return BytesInternal.readStopBit0(this, l);
+    }
+
+    @Override
+    public char readStopBitChar() throws IORuntimeException {
+        long offset = readOffsetPositionMoved(1);
+        byte l = bytesStore.readByte(offset);
+
+        if (l >= 0)
+            return (char) l;
+        return (char) BytesInternal.readStopBit0(this, l);
+    }
+
     @NotNull
     @Override
     public Bytes<Void> writeStopBit(long n) throws BufferOverflowException {
@@ -790,6 +810,23 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if ((~n & ~0x7F) == 0) {
             writeByte((byte) (0x80L | ~n));
             writeByte((byte) 0);
+            return this;
+        }
+
+        if ((n & ~0x3FFF) == 0) {
+            writeByte((byte) ((n & 0x7f) | 0x80));
+            writeByte((byte) (n >> 7));
+            return this;
+        }
+        BytesInternal.writeStopBit0(this, n);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBit(char n) throws BufferOverflowException {
+        if ((n & ~0x7F) == 0) {
+            writeByte((byte) (n & 0x7f));
             return this;
         }
 

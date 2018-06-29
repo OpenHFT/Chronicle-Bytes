@@ -839,6 +839,20 @@ enum BytesInternal {
         return offset;
     }
 
+    public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, char n)
+            throws BufferOverflowException {
+        if ((n & ~0x7F) == 0) {
+            out.writeByte((byte) (n & 0x7f));
+            return;
+        }
+        if ((n & ~0x3FFF) == 0) {
+            out.writeByte((byte) ((n & 0x7f) | 0x80));
+            out.writeByte((byte) (n >> 7));
+            return;
+        }
+        writeStopBit0(out, n);
+    }
+
     public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
@@ -1091,6 +1105,15 @@ enum BytesInternal {
         }
 
         bytes.release();
+    }
+
+    @ForceInline
+    public static char readStopBitChar(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+            throws IORuntimeException {
+        int l;
+        if ((l = in.readByte()) >= 0)
+            return (char) l;
+        return (char) readStopBit0(in, l);
     }
 
     @ForceInline

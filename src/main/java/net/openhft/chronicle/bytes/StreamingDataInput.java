@@ -117,6 +117,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readStopBit(this);
     }
 
+    default char readStopBitChar() throws IORuntimeException {
+        return BytesInternal.readStopBitChar(this);
+    }
+
     default double readStopBitDouble() {
         return BytesInternal.readStopBitDouble(this);
     }

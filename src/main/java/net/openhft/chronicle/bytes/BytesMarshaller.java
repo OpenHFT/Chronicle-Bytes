@@ -447,7 +447,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
-            field.setChar(o, (char) read.readStopBit());
+            field.setChar(o, read.readStopBitChar());
         }
     }
 
