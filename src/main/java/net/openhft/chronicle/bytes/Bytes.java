@@ -309,7 +309,7 @@ public interface Bytes<Underlying> extends
      * @return the Bytes ready for writing.
      */
     static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
-        @NotNull BytesStore bs = (BytesStore) BytesStore.wrap(byteArray);
+        @NotNull BytesStore bs = BytesStore.wrap(byteArray);
         try {
             return bs.bytesForWrite();
         } finally {

@@ -34,10 +34,15 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
 
     @NotNull
     static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
+        return newInstance(bytesStore, 1);
+    }
+
+    @NotNull
+    static MultiReaderBytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int numReaders) {
         try {
-            @NotNull final Class<BytesRingBuffer> aClass = clazz();
-            final Constructor<BytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class);
-            return constructor.newInstance(bytesStore);
+            @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
+            final Constructor<MultiReaderBytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class, int.class);
+            return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
@@ -48,16 +53,20 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     }
 
     @NotNull
-    static Class<BytesRingBuffer> clazz() throws ClassNotFoundException {
+    static Class<MultiReaderBytesRingBuffer> clazz() throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
-        return (Class<BytesRingBuffer>) Class.forName(
+        return (Class<MultiReaderBytesRingBuffer>) Class.forName(
                 "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
     }
 
     static long sizeFor(long capacity) {
+        return sizeFor(capacity, 1);
+    }
+
+    static long sizeFor(long capacity, int numReaders) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class);
-            return (long) sizeFor.invoke(null, capacity);
+            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
+            return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +

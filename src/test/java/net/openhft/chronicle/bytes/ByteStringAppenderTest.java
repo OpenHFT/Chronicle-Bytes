@@ -23,17 +23,34 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
+@RunWith(Parameterized.class)
 public class ByteStringAppenderTest {
 
     @NotNull
-    Bytes bytes = Bytes.elasticByteBuffer();
     private ThreadDump threadDump;
+    private Bytes bytes;
+
+    public ByteStringAppenderTest(String name, boolean direct) {
+        bytes = direct ? Bytes.allocateElasticDirect() : Bytes.elasticByteBuffer();
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"heap", false},
+                {"native", true}
+        });
+    }
 
     @After
     public void checkRegisteredBytes() {
@@ -60,11 +77,30 @@ public class ByteStringAppenderTest {
     }
 
     @Test
-    public void testAppend() throws IORuntimeException {
-        long expected = 1234;
-        bytes.append(expected);
+    public void testAppendInt() throws IORuntimeException {
+        for (int expected = 1; expected != 0; expected *= 2) {
+            bytes.append(expected);
+            bytes.append(",");
+            bytes.append(-expected);
+            bytes.append(",");
 
-        assertEquals(expected, bytes.parseLong());
+            assertEquals(expected, (int) bytes.parseLong());
+            assertEquals(-expected, (int) bytes.parseLong());
+        }
+    }
+
+    @Test
+    public void testAppend() throws IORuntimeException {
+        for (long expected = 1; expected != 0; expected *= 2) {
+            bytes.clear();
+            bytes.append(expected);
+            bytes.append(",");
+            bytes.append(-expected);
+            bytes.append(",");
+//            System.out.println(bytes);
+            assertEquals(expected, bytes.parseLong());
+            assertEquals(-expected, bytes.parseLong());
+        }
     }
 
     @Test

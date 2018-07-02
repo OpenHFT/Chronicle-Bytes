@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -68,9 +69,9 @@ public class OptimisedBytesStoreHashTest {
 
     @Test
     public void sizeMatch() {
-        @NotNull NativeBytes nb = Bytes.allocateElasticDirect(64);
+        @NotNull NativeBytesStore nb = NativeBytesStore.nativeStore(64);
         for (int i = 1; i <= 64; i++)
-            nb.writeUnsignedByte(i);
+            nb.writeUnsignedByte(i - 1, i);
 /*
         assertEquals(0L, applyAsLong1to7(nb, 0));
         for (int i = 1; i <= 7; i++)

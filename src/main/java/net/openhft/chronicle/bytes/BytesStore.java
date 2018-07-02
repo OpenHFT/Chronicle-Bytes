@@ -176,6 +176,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return start() <= offset && offset < safeLimit();
     }
 
+    default boolean inside(long offset, int buffer) {
+        return start() <= offset && offset + buffer < safeLimit();
+    }
+
     /**
      * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying
      * data.
@@ -315,14 +319,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return unsigned byte sum.
      */
     default int byteCheckSum() throws IORuntimeException {
-        byte b = 0;
-        try {
-            for (long i = readPosition(); i < readLimit(); i++)
-                b += readByte(i);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        return byteCheckSum(readPosition(), readLimit());
+    }
+
+    default int byteCheckSum(long start, long end) {
+        int sum = 0;
+        for (long i = start; i < end; i++) {
+            sum += readByte(i);
         }
-        return b & 0xFF;
+        return sum & 0xFF;
     }
 
     /**
@@ -330,6 +335,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @return signed long sum.
      */
+    @Deprecated(/* remove in 1.13 */)
     default long longCheckSum() {
         long sum = 0;
         long i;
@@ -398,6 +404,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
+    @Deprecated(/* remove in 1.13 */)
     default byte addAndGetByteNotAtomic(long offset, byte adding) throws BufferUnderflowException {
         try {
             byte r = (byte) (readByte(offset) + adding);
@@ -451,6 +458,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
+    @Deprecated(/* remove in 1.13 */)
     default int addAndGetUnsignedShortNotAtomic(long offset, int adding) throws BufferUnderflowException {
         try {
             int r = (readUnsignedShort(offset) + adding) & 0xFFFF;
@@ -486,6 +494,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
+    @Deprecated(/* remove in 1.13 */)
     default long addAndGetUnsignedIntNotAtomic(long offset, int adding) throws BufferUnderflowException {
         try {
             int r = readInt(offset) + adding;
@@ -503,6 +512,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
+    @Deprecated(/* remove in 1.13 */)
     default long addAndGetLongNotAtomic(long offset, long adding) throws BufferUnderflowException {
         try {
             long r = readLong(offset) + adding;
@@ -537,6 +547,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
+    @Deprecated(/* remove in 1.13 */)
     default double addAndGetDoubleNotAtomic(long offset, double adding) throws BufferUnderflowException {
         try {
             double r = readDouble(offset) + adding;
@@ -552,6 +563,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param isPresent if there is data, or false if not.
      */
+    @Deprecated(/* remove in 1.13 */)
     default void isPresent(boolean isPresent) throws IllegalArgumentException {
         if (!isPresent)
             throw new IllegalArgumentException("isPresent=" + false + " not supported");
@@ -560,6 +572,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return if there is data, or false if not.
      */
+    @Deprecated(/* remove in 1.13 */)
     default boolean isPresent() {
         return true;
     }
@@ -618,6 +631,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             try {
                 outBytes.readPosition(readPos);
             } catch (BufferUnderflowException e) {
+                //noinspection ThrowFromFinallyBlock
                 throw new IllegalStateException(e);
             }
         }
@@ -633,4 +647,5 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default boolean readWrite() {
         return true;
     }
+
 }

@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 /**
  * thrown when the TcpChannelHub drops its connection to the server
  */
+// TODO Move to network where it is used.
 public class ConnectionDroppedException extends IORuntimeException {
     public ConnectionDroppedException(String message) {
         super(message);

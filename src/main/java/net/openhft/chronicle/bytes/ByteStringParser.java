@@ -137,6 +137,16 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
             BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
     }
 
+    default void parse8bit(Bytes buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException {
+        BytesInternal.parse8bit(this, buffer, stopCharsTester);
+    }
+
+    default void parse8bit(StringBuilder buffer, @NotNull StopCharsTester stopCharsTester)
+            throws BufferUnderflowException {
+        BytesInternal.parse8bit(this, buffer, stopCharsTester);
+    }
+
     /**
      * parse text as a long integer. The terminating character is consumed.
      *
@@ -165,7 +175,6 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
      * @return the significant digits
-     * @throws BufferUnderflowException
      */
     default long parseLongDecimal() throws BufferUnderflowException {
         return BytesInternal.parseLongDecimal(this);

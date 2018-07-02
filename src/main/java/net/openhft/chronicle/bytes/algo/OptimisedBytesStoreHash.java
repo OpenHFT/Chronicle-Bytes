@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes.algo;
 
-import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
@@ -31,7 +31,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 /*
  * Created by Peter Lawrey on 28/06/15.
  */
-public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
+public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
 
     @Nullable
@@ -39,16 +39,14 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     public static final boolean IS_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
-    static long applyAsLong1to7(@NotNull Bytes store, int remaining) {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
-        final long address = bytesStore.addressForRead(store.readPosition());
+    static long applyAsLong1to7(@NotNull BytesStore store, int remaining) {
+        final long address = store.addressForRead(store.readPosition());
 
         return hash(readIncompleteLong(address, remaining));
     }
 
-    static long applyAsLong8(@NotNull Bytes store) {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
-        final long address = bytesStore.addressForRead(store.readPosition());
+    static long applyAsLong8(@NotNull BytesStore store) {
+        final long address = store.addressForRead(store.readPosition());
 
         return hash0(MEMORY.readLong(address), MEMORY.readInt(address + TOP_BYTES));
     }
@@ -61,7 +59,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
         return agitate(l * K0 + hi * K1);
     }
 
-    static long applyAsLong9to16(@NotNull Bytes store, int remaining) {
+    static long applyAsLong9to16(@NotNull BytesStore store, int remaining) {
         @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -87,7 +85,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    static long applyAsLong17to32(@NotNull Bytes store, int remaining) {
+    static long applyAsLong17to32(@NotNull BytesStore store, int remaining) {
         @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -113,7 +111,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    public static long applyAsLong32bytesMultiple(@NotNull Bytes store, int remaining) {
+    public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, int remaining) {
         @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
@@ -146,10 +144,10 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    public static long applyAsLongAny(@NotNull Bytes store, int remaining) {
+    public static long applyAsLongAny(@NotNull BytesStore store, long remaining) {
         @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
-        long h0 = (long) remaining * K0, h1 = 0, h2 = 0, h3 = 0;
+        long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
 
         int i;
         for (i = 0; i < remaining - 31; i += 32) {
@@ -174,7 +172,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
             h2 += (l2 + l3a - l0a) * M2;
             h3 += (l3 + l0a - l1a) * M3;
         }
-        int left = remaining - i;
+        long left = remaining - i;
         if (left > 0) {
             if (i > 0) {
                 h0 *= K0;
@@ -185,9 +183,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
             long addrI = address + i;
             if (left <= 16) {
 
-                long l0 = readIncompleteLong(addrI, left);
+                long l0 = readIncompleteLong(addrI, (int) left);
                 int l0a = (int) (l0 >> 32);
-                long l1 = readIncompleteLong(addrI + 8, left - 8);
+                long l1 = readIncompleteLong(addrI + 8, (int) (left - 8));
                 int l1a = (int) (l1 >> 32);
                 final long l2 = 0;
                 final int l2a = 0;
@@ -204,9 +202,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
                 int l0a = MEMORY.readInt(addrI + TOP_BYTES);
                 long l1 = MEMORY.readLong(addrI + 8);
                 int l1a = MEMORY.readInt(addrI + 8 + TOP_BYTES);
-                long l2 = readIncompleteLong(addrI + 16, left - 16);
+                long l2 = readIncompleteLong(addrI + 16, (int) (left - 16));
                 int l2a = (int) (l2 >> 32);
-                long l3 = readIncompleteLong(addrI + 24, left - 24);
+                long l3 = readIncompleteLong(addrI + 24, (int) (left - 24));
                 int l3a = (int) (l3 >> 32);
 
                 h0 += (l0 + l1a - l2a) * M0;
@@ -250,26 +248,27 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<Bytes> {
     }
 
     @Override
-    public long applyAsLong(@NotNull Bytes store) {
+    public long applyAsLong(@NotNull BytesStore store) {
         final int remaining = Maths.toInt32(store.readRemaining());
         return applyAsLong(store, remaining);
     }
 
-    public long applyAsLong(@NotNull Bytes store, int remaining) {
+    @Override
+    public long applyAsLong(@NotNull BytesStore store, long remaining) {
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;
             } else if (remaining < 8) {
-                return applyAsLong1to7(store, remaining);
+                return applyAsLong1to7(store, (int) remaining);
             } else if (remaining == 8) {
                 return applyAsLong8(store);
             } else {
-                return applyAsLong9to16(store, remaining);
+                return applyAsLong9to16(store, (int) remaining);
             }
         } else if (remaining <= 32) {
-            return applyAsLong17to32(store, remaining);
+            return applyAsLong17to32(store, (int) remaining);
         } else if ((remaining & 31) == 0) {
-            return applyAsLong32bytesMultiple(store, remaining);
+            return applyAsLong32bytesMultiple(store, (int) remaining);
         } else {
             return applyAsLongAny(store, remaining);
         }

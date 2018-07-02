@@ -78,8 +78,25 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
+    default B append(int value) throws BufferOverflowException {
+        BytesInternal.appendBase10(this, value);
+        return (B) this;
+    }
+
+    /**
+     * Append a long in decimal
+     *
+     * @param value to append
+     * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     */
+    @NotNull
     default B append(long value) throws BufferOverflowException {
-        BytesInternal.append(this, value, 10);
+        if (value == (int) value)
+            BytesInternal.appendBase10(this, (int) value);
+        else
+            BytesInternal.appendBase10(this, value);
         return (B) this;
     }
 
@@ -156,7 +173,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         if (decimalPlaces < 20) {
             double d2 = d * Maths.tens(decimalPlaces);
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
-                return appendDecimal(Math.round(d2), decimalPlaces);
+                // changed from java.lang.Math.round(d2) as this was shown up to cause latency
+                long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
+                return appendDecimal(round, decimalPlaces);
             }
         }
         return append(d);

@@ -16,6 +16,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import java.util.List;
+
 /**
  * @author Rob Austin.
  */
@@ -33,9 +35,13 @@ public interface BytesRingBufferStats {
      */
     long capacity();
 
-    long getAndClearReadCount();
-
     long getAndClearWriteCount();
 
     long maxCopyTimeNs();
+
+    long getAndClearMissedWriteCount();
+
+    long getAndClearContentionCount();
+
+    List<RingBufferReaderStats> readers();
 }

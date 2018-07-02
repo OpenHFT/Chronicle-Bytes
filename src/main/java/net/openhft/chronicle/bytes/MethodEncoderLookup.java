@@ -8,7 +8,6 @@ import java.util.function.Function;
 public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
     BY_ANNOTATION;
 
-
     @Override
     public MethodEncoder apply(Method method) {
         MethodId methodId = Annotations.getAnnotation(method, MethodId.class);
@@ -33,8 +32,8 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
             @Override
             public Object[] decode(Object[] lastObjects, BytesIn in) {
-                for (int i = 0; i < lastObjects.length; i++)
-                    ((BytesMarshallable) lastObjects[i]).readMarshallable(in);
+                for (Object lastObject : lastObjects)
+                    ((BytesMarshallable) lastObject).readMarshallable(in);
                 return lastObjects;
             }
         };

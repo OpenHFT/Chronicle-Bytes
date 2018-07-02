@@ -402,9 +402,21 @@ enum BytesInternal {
             }
             bytes.readSkip(count);
             setCount(sb, count);
-            if (count < utflen)
-                parseUtf82(bytes, sb, utflen, count);
+            if (count < utflen) {
+
+
+                long rp0 = bytes.readPosition();
+                try {
+                    parseUtf82(bytes, sb, utflen, count);
+                } catch (UTFDataFormatRuntimeException e) {
+                    long rp = Math.max(rp0 - 128, 0);
+                    throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200));
+                }
+            }
+
         } catch (IOException e) {
+
+
             throw Jvm.rethrow(e);
         }
     }
@@ -526,6 +538,8 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
+
+
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + count);
             }
@@ -825,6 +839,20 @@ enum BytesInternal {
         return offset;
     }
 
+    public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, char n)
+            throws BufferOverflowException {
+        if ((n & ~0x7F) == 0) {
+            out.writeByte((byte) (n & 0x7f));
+            return;
+        }
+        if ((n & ~0x3FFF) == 0) {
+            out.writeByte((byte) ((n & 0x7f) | 0x80));
+            out.writeByte((byte) (n >> 7));
+            return;
+        }
+        writeStopBit0(out, n);
+    }
+
     public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
@@ -1080,6 +1108,15 @@ enum BytesInternal {
     }
 
     @ForceInline
+    public static char readStopBitChar(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+            throws IORuntimeException {
+        int l;
+        if ((l = in.readByte()) >= 0)
+            return (char) l;
+        return (char) readStopBit0(in, l);
+    }
+
+    @ForceInline
     public static long readStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
             throws IORuntimeException {
         long l;
@@ -1117,7 +1154,8 @@ enum BytesInternal {
             if (num == Long.MIN_VALUE) {
                 if (base == 10)
                     out.write(MIN_VALUE_TEXT);
-                else out.write(Long.toString(Long.MIN_VALUE, base));
+                else
+                    out.write(Long.toString(Long.MIN_VALUE, base));
                 return;
             }
             out.writeByte((byte) '-');
@@ -1127,14 +1165,46 @@ enum BytesInternal {
             out.writeByte((byte) '0');
 
         } else {
-            if (base == 10)
-                appendLong0(out, num);
-            else if (base == 16)
-                appendBase16(out, num);
-            else
-                out.write(Long.toString(num, base));
+            switch (base) {
+                case 10:
+                    appendLong0(out, num);
+                    break;
+                case 16:
+                    appendBase16(out, num);
+                    break;
+                default:
+                    out.write(Long.toString(num, base));
+                    break;
+            }
         }
     }
+
+    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, int num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            out.writeByte((byte) '-');
+            if (num == Integer.MIN_VALUE) {
+                appendLong0(out, -(long) num);
+                return;
+            }
+            num = -num;
+        }
+        appendInt0(out, num);
+    }
+
+    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.write(MIN_VALUE_TEXT);
+                return;
+            }
+            out.writeByte((byte) '-');
+            num = -num;
+        }
+        appendLong0(out, num);
+    }
+
 
     public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
@@ -1151,7 +1221,7 @@ enum BytesInternal {
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int decimalPlaces)
             throws IllegalArgumentException, BufferOverflowException {
         if (decimalPlaces == 0) {
-            append(out, num, 10);
+            appendBase10(out, num);
             return;
         }
 
@@ -1232,14 +1302,7 @@ enum BytesInternal {
     /**
      * Appends given long value with given decimalPlaces to RandomDataOutput out
      *
-     * @param out
-     * @param num
-     * @param offset
-     * @param decimalPlaces
-     * @param width         Maximum width. I will be padded with zeros to the left if necessary
-     * @throws IORuntimeException
-     * @throws IllegalArgumentException
-     * @throws BufferOverflowException
+     * @param width Maximum width. I will be padded with zeros to the left if necessary
      */
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
             throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
@@ -1295,14 +1358,81 @@ enum BytesInternal {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
     }
 
+    private static void appendInt0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, int num)
+            throws IllegalArgumentException, BufferOverflowException {
+        if (num < 10) {
+            out.writeByte((byte) ('0' + num));
+
+        } else if (num < 100) {
+            out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
+
+        } else {
+            byte[] numberBuffer = NUMBER_BUFFER.get();
+            // Extract digits into the end of the numberBuffer
+            int endIndex = appendInt1(numberBuffer, num);
+
+            // Bulk copy the digits into the front of the buffer
+            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        }
+    }
+
     private static void appendLong0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        byte[] numberBuffer = NUMBER_BUFFER.get();
-        // Extract digits into the end of the numberBuffer
-        int endIndex = appendLong1(numberBuffer, num);
+        if (num < 10) {
+            out.writeByte((byte) ('0' + num));
 
-        // Bulk copy the digits into the front of the buffer
-        out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        } else if (num < 100) {
+            out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
+
+        } else {
+            byte[] numberBuffer = NUMBER_BUFFER.get();
+            // Extract digits into the end of the numberBuffer
+            int endIndex = appendLong1(numberBuffer, num);
+
+            // Bulk copy the digits into the front of the buffer
+            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
+        }
+    }
+
+    private static int appendInt1(byte[] numberBuffer, int num) {
+        numberBuffer[19] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 19;
+        numberBuffer[18] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 18;
+        numberBuffer[17] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 17;
+        numberBuffer[16] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 16;
+        numberBuffer[15] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 15;
+        numberBuffer[14] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 14;
+        numberBuffer[13] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 13;
+        numberBuffer[12] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 12;
+        numberBuffer[11] = (byte) (num % 10L + '0');
+        num /= 10;
+        if (num <= 0)
+            return 11;
+        numberBuffer[10] = (byte) (num % 10L + '0');
+        return 10;
     }
 
     private static int appendLong1(byte[] numberBuffer, long num) {
@@ -2197,7 +2327,6 @@ enum BytesInternal {
 
     public static int addAndGetInt(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, int adding)
             throws BufferUnderflowException {
-        // TODO use Memory.addAndGetInt
         try {
             for (; ; ) {
                 int value = in.readVolatileInt(offset);
@@ -2212,7 +2341,6 @@ enum BytesInternal {
 
     public static long addAndGetLong(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, long adding)
             throws BufferUnderflowException {
-        // TODO use Memory.addAndGetLong
         try {
             for (; ; ) {
                 long value = in.readVolatileLong(offset);

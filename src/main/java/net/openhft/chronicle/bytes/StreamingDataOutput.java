@@ -80,6 +80,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @org.jetbrains.annotations.NotNull
     @NotNull
+    default S writeStopBit(char x) throws BufferOverflowException {
+        BytesInternal.writeStopBit(this, x);
+        return (S) this;
+    }
+
+    @org.jetbrains.annotations.NotNull
+    @NotNull
     default S writeStopBit(double d) throws BufferOverflowException {
         BytesInternal.writeStopBit(this, d);
         return (S) this;
@@ -281,6 +288,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     S writeDouble(double d) throws BufferOverflowException;
 
+    @org.jetbrains.annotations.NotNull
+    @NotNull
+    S writeDoubleAndInt(double d, int i) throws BufferOverflowException;
+
     /**
      * Write all data or fail.
      */
@@ -368,6 +379,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param address to write to.
      * @param size    in bytes.
      */
+    @Deprecated(/*to be removed in 1.13*/)
     void nativeWrite(long address, long size)
             throws BufferOverflowException;
 

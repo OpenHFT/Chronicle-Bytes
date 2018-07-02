@@ -67,7 +67,6 @@ public class ByteStringParserTest {
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
         bytes2.release();
 
-
     }
 
     @Test

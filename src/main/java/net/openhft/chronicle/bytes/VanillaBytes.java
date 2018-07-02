@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Simple Bytes implementation which is not Elastic.
  */
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
-        implements Byteable<Bytes<Underlying>, Underlying> {
+        implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
@@ -249,18 +249,25 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
-        if (length >= 24 && isDirectMemory() && bytes.isDirectMemory()) {
-            long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+        optimisedWrite(bytes, offset, length);
+        return this;
+    }
+
+    protected void optimisedWrite(@NotNull BytesStore bytes, long offset, long length) {
+        if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
+            long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
             if (len > 0) {
+                long address = bytes.addressForRead(offset);
+                long address2 = addressForWrite(writePosition());
+                assert address != 0;
+                assert address2 != 0;
                 writeCheckOffset(writePosition(), len);
-                OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
+                OS.memory().copyMemory(address, address2, len);
                 writeSkip(len);
             }
-
         } else {
             super.write(bytes, offset, length);
         }
-        return this;
     }
 
     public void write(long position, @NotNull CharSequence str, int offset, int length)
@@ -473,15 +480,21 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     }
 
     @Override
-    public int byteCheckSum() throws IORuntimeException {
-        if (readLimit() >= Integer.MAX_VALUE || start() != 0 || !isDirectMemory())
-            return super.byteCheckSum();
+    public int byteCheckSum(int start, int end) throws IORuntimeException {
         byte b = 0;
         @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
-        for (int i = (int) readPosition(), lim = (int) readLimit(); i < lim; i++) {
-            b += memory.readByte(bytesStore.address + i);
+        long addr = bytesStore.addressForRead(start);
+        int i = 0, len = end - start;
+        for (; i < len - 3; i += 4) {
+            b += memory.readByte(addr + i)
+                    + memory.readByte(addr + i + 1)
+                    + memory.readByte(addr + i + 2)
+                    + memory.readByte(addr + i + 3);
+        }
+        for (; i < len; i++) {
+            b += memory.readByte(addr + i);
         }
         return b & 0xFF;
     }
@@ -521,5 +534,23 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             return (int) (len2);
         }
         return super.read(bytes);
+    }
+
+    @Override
+    public int compareTo(@NotNull CharSequence cs) {
+        long len1 = readRemaining();
+        int len2 = cs.length();
+        long lim = Math.min(len1, len2);
+
+        int k = 0;
+        while (k < lim) {
+            char c1 = bytesStore.charAt(k);
+            char c2 = cs.charAt(k);
+            if (c1 != c2) {
+                return c1 - c2;
+            }
+            k++;
+        }
+        return (int) (len1 - len2);
     }
 }

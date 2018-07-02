@@ -30,18 +30,21 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.nio.channels.FileChannel;
+import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+
 /**
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
 public class MappedFile implements ReferenceCounted {
-    public static final long DEFAULT_CAPACITY = 128L << 40;
+    private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = new Object();
     @NotNull
@@ -55,7 +58,7 @@ public class MappedFile implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
-    private boolean readOnly;
+    private final boolean readOnly;
     private NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
     protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
@@ -70,7 +73,10 @@ public class MappedFile implements ReferenceCounted {
         assert registerMappedFile(this);
     }
 
-    static void logNewChunk(String filename, int chunk, long delayMicros) {
+    private static void logNewChunk(String filename, int chunk, long delayMicros) {
+        if (!Jvm.isDebugEnabled(MappedFile.class))
+            return;
+
         // avoid a GC while trying to memory map.
         String message = BytesInternal.acquireStringBuilder()
                 .append("Allocation of ").append(chunk)
@@ -119,6 +125,11 @@ public class MappedFile implements ReferenceCounted {
     @NotNull
     public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
             throws FileNotFoundException {
+//        if (readOnly && OS.isWindows()) {
+//            Jvm.warn().on(MappedFile.class, "Read only mode not supported on Windows, defaulting to read/write");
+//            readOnly = false;
+//        }
+
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
 //        try {
         long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
@@ -171,6 +182,14 @@ public class MappedFile implements ReferenceCounted {
             overlapSize = OS.pageSize();
         }
         return MappedFile.of(file, chunkSize, overlapSize, true);
+    }
+
+    @NotNull
+    public static MappedFile mappedFile(@NotNull File file, long capacity, long chunkSize, long overlapSize, boolean readOnly)
+            throws IOException {
+        RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+        raf.setLength(capacity);
+        return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
     }
 
     public static void warmup() {
@@ -243,6 +262,7 @@ public class MappedFile implements ReferenceCounted {
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
         int chunk = (int) (position / chunkSize);
+
         synchronized (stores) {
             while (stores.size() <= chunk) {
                 stores.add(null);
@@ -277,21 +297,9 @@ public class MappedFile implements ReferenceCounted {
                 }
             }
             long mappedSize = chunkSize + overlapSize;
-            FileChannel.MapMode mode = readOnly ? FileChannel.MapMode.READ_ONLY : FileChannel.MapMode.READ_WRITE;
-            long address;
-            try {
-                address = OS.map(fileChannel, mode, chunk * chunkSize, mappedSize);
-
-            } catch (IOException e) {
-                // sometimes on Windows it doesn't like read only, but not always or on all systems.
-                if (readOnly && e.getMessage().equals("Not enough storage is available to process this command")) {
-                    Jvm.warn().on(getClass(), "Mapping " + file + " as READ_ONLY failed, switching to READ_WRITE");
-                    address = OS.map(fileChannel, FileChannel.MapMode.READ_WRITE, chunk * chunkSize, mappedSize);
-                    readOnly = false;
-                } else {
-                    throw e;
-                }
-            }
+            MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
+            long startOfMap = chunk * chunkSize;
+            long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final long safeCapacity = this.chunkSize + overlapSize / 2;
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, safeCapacity);
             stores.set(chunk, new WeakReference<>(mbs2));
@@ -355,31 +363,31 @@ public class MappedFile implements ReferenceCounted {
     }
 
     private void performRelease() {
-        for (int i = 0; i < stores.size(); i++) {
-            WeakReference<MappedBytesStore> storeRef = stores.get(i);
-            if (storeRef == null)
-                continue;
-            @Nullable MappedBytesStore mbs = storeRef.get();
-            if (mbs != null) {
-                // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                // so ensure that it is released
-                while (mbs.refCount() != 0) {
-                    try {
-                        mbs.release();
-
-                    } catch (IllegalStateException e) {
-                        Jvm.debug().on(getClass(), e);
+        try {
+            for (int i = 0; i < stores.size(); i++) {
+                WeakReference<MappedBytesStore> storeRef = stores.get(i);
+                if (storeRef == null)
+                    continue;
+                @Nullable MappedBytesStore mbs = storeRef.get();
+                if (mbs != null) {
+                    // this MappedFile is the only referrer to the MappedBytesStore at this point,
+                    // so ensure that it is released
+                    while (mbs.refCount() != 0) {
+                        try {
+                            mbs.release();
+                        } catch (IllegalStateException e) {
+                            Jvm.debug().on(getClass(), e);
+                        }
                     }
                 }
-            }
 
-            stores.set(i, null);
-        }
-        try {
-            raf.close();
+                stores.set(i, null);
+            }
+        } finally {
+            closeQuietly(raf.getChannel());
+            closeQuietly(raf);
+            closeQuietly(fileChannel);
             closed.set(true);
-        } catch (IOException e) {
-            Jvm.debug().on(getClass(), e);
         }
     }
 

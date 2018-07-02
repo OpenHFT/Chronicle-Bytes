@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -220,7 +221,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
-        long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+        long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
@@ -716,6 +717,16 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     @ForceInline
+    public Bytes<Underlying> writeDoubleAndInt(double d, int i) {
+        long offset = writeOffsetPositionMoved(12);
+        bytesStore.writeDouble(offset, d);
+        bytesStore.writeInt(offset + 8, i);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    @ForceInline
     public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length) {
         if (length + offset > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
@@ -773,7 +784,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-
     @Override
     public long addressForRead(long offset) throws BufferUnderflowException {
         return bytesStore.addressForRead(offset);
@@ -784,10 +794,9 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.addressForWrite(offset);
     }
 
-
     @Override
     public int hashCode() {
-        throw new UnsupportedOperationException("todo");
+        return BytesStoreHash.hash32(this);
     }
 
     @Override
@@ -903,7 +912,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         ensureCapacity(writePosition() + length);
-        @NotNull NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
+        @NotNull NativeBytesStore nbs = this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;

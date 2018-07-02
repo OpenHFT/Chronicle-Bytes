@@ -102,6 +102,11 @@ interface RandomCommon extends ReferenceCounted {
     long addressForRead(long offset)
             throws UnsupportedOperationException, BufferUnderflowException;
 
+    default long addressForRead(long offset, int buffer)
+            throws UnsupportedOperationException, BufferUnderflowException {
+        return addressForRead(offset);
+    }
+
     /**
      * Obtain the underlying addressForRead.  This is for expert users only.
      *

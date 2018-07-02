@@ -108,7 +108,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
-
     @NotNull
     default InputStream inputStream() {
         return new StreamingInputStream(this);
@@ -116,6 +115,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default long readStopBit() throws IORuntimeException {
         return BytesInternal.readStopBit(this);
+    }
+
+    default char readStopBitChar() throws IORuntimeException {
+        return BytesInternal.readStopBitChar(this);
     }
 
     default double readStopBitDouble() {
@@ -310,6 +313,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param address of the memory.
      * @param size    in bytes.
      */
+    @Deprecated(/*to be removed in 1.13*/)
     void nativeRead(long address, long size)
             throws BufferUnderflowException;
 

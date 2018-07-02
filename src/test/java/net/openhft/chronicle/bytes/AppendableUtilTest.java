@@ -36,4 +36,14 @@ public class AppendableUtilTest {
         b.release();
     }
 
+    @Test
+    public void setCharAt() {
+        StringBuilder sb = new StringBuilder("hello world");
+        Bytes b = Bytes.elasticHeapByteBuffer(16).append("Hello World");
+        AppendableUtil.setCharAt(sb, 5, 'X');
+        AppendableUtil.setCharAt(b, 5, 'X');
+        assertEquals("helloXworld", sb.toString());
+        assertEquals("HelloXWorld", b.toString());
+    }
+
 }

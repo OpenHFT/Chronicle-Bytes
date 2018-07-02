@@ -87,6 +87,8 @@ public class BytesMarshaller<T> {
                     return new BooleanFieldAccess(field);
                 case "byte":
                     return new ByteFieldAccess(field);
+                case "char":
+                    return new CharFieldAccess(field);
                 case "short":
                     return new ShortFieldAccess(field);
                 case "int":
@@ -98,8 +100,8 @@ public class BytesMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
-                    if (type.isArray())
-                        return new ArrayFieldAccess(field);
+//                    if (type.isArray())
+//                        return new ArrayFieldAccess(field);
                     if (Collection.class.isAssignableFrom(type))
                         return new CollectionFieldAccess(field);
                     if (Map.class.isAssignableFrom(type))
@@ -253,6 +255,7 @@ public class BytesMarshaller<T> {
         }
     }
 
+/*
     static class ArrayFieldAccess extends FieldAccess {
         private final Class componentType;
 
@@ -271,6 +274,7 @@ public class BytesMarshaller<T> {
             throw new UnsupportedOperationException("TODO");
         }
     }
+*/
 
     static class CollectionFieldAccess extends FieldAccess {
         final Supplier<Collection> collectionSupplier;
@@ -301,12 +305,37 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
-            throw new UnsupportedOperationException("TODO");
+            Collection c = (Collection) field.get(o);
+            if (c == null) {
+                write.writeStopBit(-1);
+                return;
+            }
+            write.writeStopBit(c.size());
+            if (c.isEmpty())
+                return;
+            if (c instanceof Random && c instanceof List) {
+                List l = (List) c;
+                for (int i = 0, size = l.size(); i < size; i++)
+                    write.writeObject(componentType, l.get(i));
+            } else {
+                for (Object o2 : c) {
+                    write.writeObject(componentType, o2);
+                }
+            }
         }
 
         @Override
         protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
-            throw new UnsupportedOperationException("TODO");
+            Collection c = (Collection) field.get(o);
+            int length = Maths.toInt32(read.readStopBit());
+            if (length < 0) {
+                if (c != null)
+                    field.set(o, null);
+                return;
+            }
+            c.clear();
+            for (int i = 0; i < length; i++)
+                c.add(read.readObject(componentType));
         }
     }
 
@@ -342,12 +371,35 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
-            throw new UnsupportedOperationException("TODO");
+            Map<?, ?> m = (Map) field.get(o);
+            if (m == null) {
+                write.writeStopBit(-1);
+                return;
+            }
+            write.writeStopBit(m.size());
+            for (Map.Entry<?, ?> entry : m.entrySet()) {
+                write.writeObject(keyType, entry.getKey());
+                write.writeObject(valueType, entry.getValue());
+            }
         }
 
         @Override
         protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
-            throw new UnsupportedOperationException("TODO");
+            Map m = (Map) field.get(o);
+            long length = read.readStopBit();
+            if (length < 0) {
+                if (m != null)
+                    field.set(o, null);
+                return;
+            }
+            if (m == null) {
+                field.set(o, m = new LinkedHashMap<>());
+            } else {
+                m.clear();
+            }
+            for (int i = 0; i < length; i++) {
+                m.put(read.readObject(keyType), read.readObject(valueType));
+            }
         }
     }
 
@@ -380,6 +432,22 @@ public class BytesMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setByte(o, read.readByte());
+        }
+    }
+
+    static class CharFieldAccess extends FieldAccess {
+        public CharFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            write.writeStopBit(field.getChar(o));
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            field.setChar(o, read.readStopBitChar());
         }
     }
 

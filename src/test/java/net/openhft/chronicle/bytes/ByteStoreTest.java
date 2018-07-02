@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -24,7 +25,6 @@ import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -32,10 +32,7 @@ import java.io.OutputStream;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -50,16 +47,6 @@ public class ByteStoreTest {
     private Bytes bytes;
     private BytesStore bytesStore;
     private ThreadDump threadDump;
-
-    @NotNull
-    @Parameterized.Parameters
-    public static Collection<Object[]> data() {
-        List<Object[]> list = new ArrayList<>();
-        Object[] NO_ARGS = {};
-        for (int i = 0; i < 2; i++)
-            list.add(NO_ARGS);
-        return list;
-    }
 
     @After
     public void checkRegisteredBytes() {
@@ -409,6 +396,17 @@ public class ByteStoreTest {
     }
 
     @Test
+    public void testReadWriteDoubleAndInt() {
+        for (long i = 0; i < 48; i += 12)
+            bytes.writeDoubleAndInt(i, (int) i);
+
+        for (long i = 0; i < 48; i += 12) {
+            assertEquals(i, bytes.readDouble(), 0);
+            assertEquals(i, bytes.readInt());
+        }
+    }
+
+    @Test
     public void testReadWriteStopBitDouble() {
         @NotNull double[] doubles = {
                 -Double.MAX_VALUE, Double.NEGATIVE_INFINITY,
@@ -483,11 +481,22 @@ public class ByteStoreTest {
     }
 
     @Test
-    public void testAddAndGetLong() {
+    public void testAddAndGetLongNative() {
         bytesStore = NativeBytesStore.nativeStore(128);
 
+        checkAddAndGetLong();
+    }
+
+    @Test
+    public void testAddAndGetLong() {
+        bytesStore = BytesStore.wrap(new byte[128]);
+
+        checkAddAndGetLong();
+    }
+
+    private void checkAddAndGetLong() {
         for (int i = 0; i < 10; i++)
-            bytesStore.addAndGetLong(0L, 10);
+            assertEquals((i + 1) * 10, bytesStore.addAndGetLong(0L, 10));
         assertEquals(100, bytesStore.readLong(0L));
         assertEquals(0, bytesStore.readLong(8L));
 
@@ -585,5 +594,16 @@ public class ByteStoreTest {
         bytesStoreOriginal.copyTo(bytesStoreCopy);
         for (int i = 0; i < SIZE; i++)
             assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i));
+    }
+
+    @Test
+    public void testEmpty() {
+        assertEquals(0, BytesStore.empty().realCapacity());
+    }
+
+    @Test(expected = DecoratedBufferOverflowException.class)
+    public void testClearAndPadTooMuch() {
+        Bytes b = bytesStore.bytesForWrite();
+        b.clearAndPad(SIZE + 1);
     }
 }

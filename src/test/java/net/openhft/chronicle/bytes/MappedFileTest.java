@@ -133,7 +133,7 @@ public class MappedFileTest {
 
     @Test
     public void largeReadOnlyFile() throws IOException {
-        if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
+        if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE || OS.isWindows())
             return;
 
         @NotNull File file = File.createTempFile("largeReadOnlyFile", "deleteme");

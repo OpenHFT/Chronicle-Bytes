@@ -34,6 +34,6 @@ public class StringInternerBytesTest {
             Bytes b = Bytes.from("key" + i);
             si.intern(b, (int) b.readRemaining());
         }
-        assertEquals(82, si.valueCount());
+        assertEquals(89, si.valueCount());
     }
 }

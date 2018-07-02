@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -24,10 +25,7 @@ import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -748,5 +746,180 @@ public class BytesTest {
             assertEquals(s, b.toString());
         }
         b.release();
+    }
+
+    @Test
+    public void testMove() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.append("Hello World");
+            b.move(3, 1, 3);
+            assertEquals("Hlo o World", b.toString());
+            b.move(3, 5, 3);
+            assertEquals("Hlo o o rld", b.toString());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void testReadPosition() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.readPosition(17);
+            Assume.assumeFalse(b.unchecked());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void testReadPositionTooSmall() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.readPosition(-1);
+            Assume.assumeFalse(b.unchecked());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void testReadLimit() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.readPosition(b.writeLimit() + 1);
+            Assume.assumeFalse(b.unchecked());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test(expected = DecoratedBufferUnderflowException.class)
+    public void testReadLimitTooSmall() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.readPosition(b.start() - 1);
+            Assume.assumeFalse(b.unchecked());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void uncheckedSkip() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.uncheckedReadSkipOne();
+            assertEquals(1, b.readPosition());
+            b.uncheckedReadSkipBackOne();
+            assertEquals(0, b.readPosition());
+            b.writeUnsignedByte('H');
+            b.writeUnsignedByte(0xFF);
+            assertEquals('H', b.uncheckedReadUnsignedByte());
+            assertEquals(0xFF, b.uncheckedReadUnsignedByte());
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void readVolatile() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.writeVolatileByte(0, (byte) 1);
+            b.writeVolatileShort(1, (short) 2);
+            b.writeVolatileInt(3, 3);
+            b.writeVolatileLong(7, 4);
+            assertEquals(1, b.readVolatileByte(0));
+            assertEquals(2, b.readVolatileShort(1));
+            assertEquals(3, b.readVolatileInt(3));
+            assertEquals(4, b.readVolatileLong(7));
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testHashCode() {
+
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.writeLong(0);
+            assertEquals(0, b.hashCode());
+            b.clear();
+            b.writeLong(1);
+            assertEquals(0x152ad77e, b.hashCode());
+            b.clear();
+            b.writeLong(2);
+            assertEquals(0x2a55aefc, b.hashCode());
+            b.clear();
+            b.writeLong(3);
+            assertEquals(0x7f448df2, b.hashCode());
+            b.clear();
+            b.writeLong(4);
+            assertEquals(0x54ab5df8, b.hashCode());
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testEnum() {
+
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.writeEnum(HEAP);
+            b.writeEnum(NATIVE);
+            assertEquals(HEAP, b.readEnum(Allocator.class));
+            assertEquals(NATIVE, b.readEnum(Allocator.class));
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testTimeMillis() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.appendTimeMillis(12345678L);
+            assertEquals("03:25:45.678", b.toString());
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testDateTimeMillis() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            b.appendDateMillis(12345 * 86400_000L);
+            assertEquals("20031020", b.toString());
+
+        } finally {
+            b.release();
+        }
+    }
+
+    @Test
+    public void testWriteOffset() {
+        int length = 128;
+        Bytes from = NativeBytes.nativeBytes(length).unchecked(true);
+        Bytes to = alloc1.elasticBytes(length);
+
+        for (int i = 0; i< length; i++)
+            from.write(i, Bytes.from("a"), 0L, 1);
+
+        try {
+            to.write(from, 0L, length);
+            assertEquals(from.readLong(0), to.readLong(0));
+        } finally {
+            from.release();
+            to.release();
+        }
     }
 }
