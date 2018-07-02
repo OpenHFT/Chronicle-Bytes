@@ -109,7 +109,6 @@ public class BytesMethodWriterBuilderTest {
         }
         assertFalse(reader.readOne());
 
-
         final String expected =
                 Jvm.isJava9Plus() ?
                         "* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
