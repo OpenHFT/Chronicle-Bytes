@@ -77,8 +77,10 @@ public enum Allocator {
 
     @NotNull
     abstract Bytes<ByteBuffer> elasticBytes(int capacity);
+
     @NotNull
     abstract ByteBuffer byteBuffer(int capacity);
+
     Bytes<ByteBuffer> fixedBytes(int capacity) {
         return Bytes.wrapForWrite(byteBuffer(capacity));
     }

@@ -38,6 +38,7 @@ public class Bytes2Test {
     private Allocator alloc1;
     private Allocator alloc2;
     private ThreadDump threadDump;
+
     public Bytes2Test(Allocator alloc1, Allocator alloc2) {
         this.alloc1 = alloc1;
         this.alloc2 = alloc2;

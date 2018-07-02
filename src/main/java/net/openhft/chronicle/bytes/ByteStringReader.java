@@ -32,7 +32,7 @@ public class ByteStringReader extends Reader {
 
     @Override
     public int read() {
-            return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
     }
 
     @Override

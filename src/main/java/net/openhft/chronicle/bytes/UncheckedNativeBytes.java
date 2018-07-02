@@ -67,6 +67,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public boolean unchecked() {
         return true;
     }
+
     @Override
     public boolean isDirectMemory() {
         return true;
@@ -657,6 +658,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         bytesStore.writeInt(offset, i);
         return this;
     }
+
     @NotNull
     @Override
     @ForceInline

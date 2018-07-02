@@ -38,6 +38,7 @@ public class StringInternerBytes extends StringInterner {
     public String intern(@NotNull final Bytes bytes) {
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
+
     /**
      * converts the bytes to a ISO-8859-1 String, the end of the string is either the bytes .limit
      * () or a byte containing the stopByte ( which ever comes first ). If the string can be

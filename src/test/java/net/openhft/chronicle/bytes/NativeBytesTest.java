@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -47,6 +46,7 @@ public class NativeBytesTest {
 
     private Allocator alloc;
     private ThreadDump threadDump;
+
     public NativeBytesTest(Allocator alloc) {
         this.alloc = alloc;
     }
@@ -72,6 +72,7 @@ public class NativeBytesTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
     @Test
     public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = alloc.elasticBytes(1);
@@ -103,7 +104,7 @@ public class NativeBytesTest {
     @Test
     public void testAppendCharArrayNonAscii() {
         Bytes b = alloc.elasticBytes(1);
-        b.appendUtf8(new char[] {'Δ'}, 0, 1);
+        b.appendUtf8(new char[]{'Δ'}, 0, 1);
         b.release();
     }
 

@@ -242,7 +242,7 @@ public class BytesMarshaller<T> {
                 bs = bytes;
             }
             Object uo = bs.underlyingObject();
-            if (uo instanceof ByteBuffer && ! (bs.bytesStore() instanceof NativeBytesStore)) {
+            if (uo instanceof ByteBuffer && !(bs.bytesStore() instanceof NativeBytesStore)) {
                 read.read(((ByteBuffer) uo).array(), 0, length);
             } else {
                 bs.clear();

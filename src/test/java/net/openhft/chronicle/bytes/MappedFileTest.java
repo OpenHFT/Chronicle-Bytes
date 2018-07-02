@@ -29,9 +29,7 @@ import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
 import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class MappedFileTest {
     @Rule
@@ -59,8 +57,7 @@ public class MappedFileTest {
     }
 
     @Test
-    public void shouldReleaseReferenceWhenNewStoreIsAcquired() throws IOException
-    {
+    public void shouldReleaseReferenceWhenNewStoreIsAcquired() throws IOException {
         final File file = tmpDir.newFile();
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);

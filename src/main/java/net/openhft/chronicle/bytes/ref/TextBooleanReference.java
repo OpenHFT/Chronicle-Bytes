@@ -27,6 +27,11 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
+    public static void write(final boolean value, final BytesStore bytes, long offset) {
+        bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
+        bytes.writeByte(offset + 4, (byte) 'e');
+    }
+
     @Override
     public long maxSize() {
         return 5;
@@ -45,10 +50,5 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     @Override
     public void setValue(final boolean value) {
         write(value, bytes, offset);
-    }
-
-    public static void write(final boolean value, final BytesStore bytes, long offset) {
-        bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
-        bytes.writeByte(offset + 4, (byte) 'e');
     }
 }

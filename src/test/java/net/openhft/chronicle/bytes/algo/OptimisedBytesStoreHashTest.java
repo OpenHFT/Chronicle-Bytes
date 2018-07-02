@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -48,6 +47,7 @@ public class OptimisedBytesStoreHashTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
+
     @Test
     public void testApplyAsLong() {
         @NotNull NativeBytes b = Bytes.allocateElasticDirect(128);

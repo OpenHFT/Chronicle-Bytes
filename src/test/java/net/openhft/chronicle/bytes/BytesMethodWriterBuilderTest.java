@@ -110,17 +110,16 @@ public class BytesMethodWriterBuilderTest {
         assertFalse(reader.readOne());
 
 
-
         final String expected =
                 Jvm.isJava9Plus() ?
-                "* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
-                "* myByteable[MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}]\n" +
-                "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
-                "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=02:34:56.775, dateTime=2016-10-05T02:34:56.775, zonedDateTime=2016-10-05T02:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n" :
-                "* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
-                "* myByteable[MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}]\n" +
-                "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
-                "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n";
+                        "* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
+                                "* myByteable[MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}]\n" +
+                                "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
+                                "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=02:34:56.775, dateTime=2016-10-05T02:34:56.775, zonedDateTime=2016-10-05T02:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n" :
+                        "* myByteable[MyByteable{flag=false, b=1, s=2, c=3, i=4, f=5.5, l=6, d=7.7}]\n" +
+                                "* myByteable[MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}]\n" +
+                                "* myScalars[MyScalars{s='Hello', bi=1, bd=10, date=2017-11-06, time=12:35:56.775, dateTime=2017-11-06T12:35:56.775, zonedDateTime=2017-11-06T12:35:56.775Z[Europe/London], uuid=00000001-2345-6789-0000-000000abcdef}]\n" +
+                                "* myNested[MyNested{byteable=MyByteable{flag=true, b=11, s=22, c=T, i=44, f=5.555, l=66, d=77.77}, scalars=MyScalars{s='World', bi=0, bd=0, date=2016-10-05, time=01:34:56.775, dateTime=2016-10-05T01:34:56.775, zonedDateTime=2016-10-05T01:34:56.775+01:00[Europe/London], uuid=11111111-1111-1111-2222-222222222222}}]\n";
 
         System.out.println(expected);
         System.out.println(out.toString().replaceAll("\n", ""));
