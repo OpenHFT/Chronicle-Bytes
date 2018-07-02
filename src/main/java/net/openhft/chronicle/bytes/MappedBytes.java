@@ -109,12 +109,22 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
     }
 
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull MappedFile rw) {
+        return new MappedBytes(rw);
+    }
+
+    @NotNull
+    public static MappedBytes readOnly(@NotNull File file) throws FileNotFoundException {
+        return new MappedBytes(MappedFile.readOnly(file));
+    }
+
     public MappedBytes write(byte[] bytes, int offset, int length) {
         write(writePosition, bytes, offset, length);
         writePosition += Math.min(length, bytes.length - offset);
         return this;
     }
-    
+
     public MappedBytes write(long offsetInRDO, byte[] bytes, int offset, int length) {
 
         long wp = offsetInRDO;
@@ -130,7 +140,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         while (remaining > 0) {
 
             int safeCopySize = safeCopySizeWithoutOverlap(wp);
-      
+
             int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             acquireNextByteStore0(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
@@ -198,16 +208,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private int safeCopySizeWithoutOverlap(long writePosition) {
         return (int) (mappedFile.chunkSize() - (writePosition % mappedFile.chunkSize()));
-    }
-
-    @NotNull
-    public static MappedBytes mappedBytes(@NotNull MappedFile rw) {
-        return new MappedBytes(rw);
-    }
-
-    @NotNull
-    public static MappedBytes readOnly(@NotNull File file) throws FileNotFoundException {
-        return new MappedBytes(MappedFile.readOnly(file));
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -697,7 +697,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public boolean isClosed() {
         return this.refCount() <= 0;
     }
-
 
 
     @NotNull

@@ -911,7 +911,7 @@ public class BytesTest {
         Bytes from = NativeBytes.nativeBytes(length).unchecked(true);
         Bytes to = alloc1.elasticBytes(length);
 
-        for (int i = 0; i< length; i++)
+        for (int i = 0; i < length; i++)
             from.write(i, Bytes.from("a"), 0L, 1);
 
         try {

@@ -106,9 +106,9 @@ public class MemoryWriteJitterMain {
         mf.release();
         System.gc();// give it time to release the file so the delete on exit will work on windows.
 
-        System.out.println("size="+size+" padTo="+padTo);
-        System.out.println("histoRead     ="+histoRead.toMicrosFormat());
-        System.out.println("histoWrite    ="+histoWrite.toMicrosFormat());
-        System.out.println("histoReadWrite="+histoReadWrite.toMicrosFormat());
+        System.out.println("size=" + size + " padTo=" + padTo);
+        System.out.println("histoRead     =" + histoRead.toMicrosFormat());
+        System.out.println("histoWrite    =" + histoWrite.toMicrosFormat());
+        System.out.println("histoReadWrite=" + histoReadWrite.toMicrosFormat());
     }
 }

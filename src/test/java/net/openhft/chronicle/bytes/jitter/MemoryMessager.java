@@ -60,7 +60,7 @@ public class MemoryMessager {
     public long consumeBytes() {
         int length = length();
         if (length == 0x0 || length == NOT_READY)
-            throw new AssertionError("length: "+length);
+            throw new AssertionError("length: " + length);
 
         Jvm.safepoint();
         bytes.readSkip(4);

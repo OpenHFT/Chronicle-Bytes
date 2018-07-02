@@ -76,7 +76,6 @@ public class MappedBytesTest {
     }
 
 
-
     @Test
     public void testWriteBytesWithOffset() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
@@ -118,7 +117,6 @@ public class MappedBytesTest {
     }
 
 
-
     @Test
     public void testWriteBytesWithOffsetAndTextShift() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
@@ -158,6 +156,7 @@ public class MappedBytesTest {
             Assert.assertEquals(text.substring(shift), actual);
         }
     }
+
     //see https://github.com/OpenHFT/Chronicle-Bytes/issues/66"
     @Test
     public void testLargeWrites() throws IOException {
