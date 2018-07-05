@@ -534,11 +534,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     @NotNull
     @ForceInline
-    public Bytes<Underlying> write(long offsetInRDO,
-                                   @NotNull RandomDataInput bytes, long offset, long length)
+    public Bytes<Underlying> write(long writeOffset,
+                                   @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferUnderflowException, BufferOverflowException {
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        writeCheckOffset(writeOffset, length);
+        bytesStore.write(writeOffset, bytes, readOffset, length);
         return this;
     }
 

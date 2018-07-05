@@ -157,10 +157,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
-    public MappedBytes write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
+    public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
 
-        long wp = offsetInRDO;
+        long wp = writeOffset;
 
         if (length > writeRemaining())
             throw new DecoratedBufferOverflowException(
@@ -173,14 +173,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             int safeCopySize = safeCopySizeWithoutOverlap(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             acquireNextByteStore0(wp, false);
-            bytesStore.write(wp, bytes, offset, copy);
+            bytesStore.write(wp, bytes, readOffset, copy);
 
-            offset += copy;
+            readOffset += copy;
             wp += copy;
             remaining -= copy;
 
             if (remaining < mappedFile.overlapSize()) {
-                bytesStore.write(wp, bytes, offset, remaining);
+                bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
         }

@@ -269,7 +269,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     }
 
     @NotNull
-    R write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
+    R write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException;
 
     /**

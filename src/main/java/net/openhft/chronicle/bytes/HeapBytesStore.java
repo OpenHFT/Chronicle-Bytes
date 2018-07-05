@@ -359,16 +359,16 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(long offsetInRDO,
-                                            @NotNull RandomDataInput bytes, long offset, long length) {
+    public HeapBytesStore<Underlying> write(long writeOffset,
+                                            @NotNull RandomDataInput bytes, long readOffset, long length) {
         long i;
         for (i = 0; i < length - 7; i += 8) {
-            long x = bytes.readLong(offset + i);
-            writeLong(offsetInRDO + i, x);
+            long x = bytes.readLong(readOffset + i);
+            writeLong(writeOffset + i, x);
         }
         for (; i < length; i++) {
-            byte x = bytes.readByte(offset + i);
-            writeByte(offsetInRDO + i, x);
+            byte x = bytes.readByte(readOffset + i);
+            writeByte(writeOffset + i, x);
         }
         return this;
     }

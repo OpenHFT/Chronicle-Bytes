@@ -595,16 +595,16 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @NotNull
-    public Bytes<Underlying> write(long offsetInRDO, RandomDataInput bytes, long offset, long length)
+    public Bytes<Underlying> write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
 
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
-            writeCheckOffset(offsetInRDO, copy);
-            bytesStore.write(offsetInRDO, bytes, offset, copy);
-            offsetInRDO += copy;
-            offset += copy;
+            writeCheckOffset(writeOffset, copy);
+            bytesStore.write(writeOffset, bytes, readOffset, copy);
+            writeOffset += copy;
+            readOffset += copy;
             remaining -= copy;
         }
         return this;

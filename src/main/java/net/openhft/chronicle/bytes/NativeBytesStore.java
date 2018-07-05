@@ -493,12 +493,12 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> write(
-            long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+            long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         if (bytes.isDirectMemory()) {
-            memory.copyMemory(bytes.addressForRead(offset), addressForWrite(offsetInRDO), length);
+            memory.copyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
         } else {
-            write0(offsetInRDO, bytes, offset, length);
+            write0(writeOffset, bytes, readOffset, length);
         }
         return this;
     }

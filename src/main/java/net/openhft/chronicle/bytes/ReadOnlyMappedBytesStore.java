@@ -128,7 +128,7 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> write(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+    public NativeBytesStore<Void> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         throw checkReadOnly();
     }

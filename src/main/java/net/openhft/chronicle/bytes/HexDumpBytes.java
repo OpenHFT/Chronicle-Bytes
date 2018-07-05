@@ -320,7 +320,7 @@ public class HexDumpBytes implements Bytes {
 
     @Override
     @NotNull
-    public RandomDataOutput write(long offsetInRDO, RandomDataInput bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
+    public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
