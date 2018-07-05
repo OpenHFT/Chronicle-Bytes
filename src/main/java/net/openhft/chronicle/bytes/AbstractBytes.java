@@ -601,7 +601,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
-            writeCheckOffset(offset, copy);
+            writeCheckOffset(offsetInRDO, copy);
             bytesStore.write(offsetInRDO, bytes, offset, copy);
             offsetInRDO += copy;
             offset += copy;
