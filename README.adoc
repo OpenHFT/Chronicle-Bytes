@@ -152,6 +152,49 @@ float f32 = bytes.readFloat();
 double f64 = bytes.readDouble();
 ----
 
+=== Writing and reading using offsets
+
+Instead of streaming the data, sometimes you need to control the placement of data, possibly at random.
+
+.Write and read primitive by offset
+[source, Java]
+----
+Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+bytes.writeBoolean(0, true);
+bytes.writeByte(1, (byte) 1);
+bytes.writeUnsignedByte(2, 2);
+bytes.writeShort(3, (short) 3);
+bytes.writeUnsignedShort(5, 4);
+bytes.writeInt(7, 6);
+bytes.writeUnsignedInt(11, 7);
+bytes.writeLong(15, 8);
+bytes.writeFloat(23, 9);
+bytes.writeDouble(27, 10);
+bytes.writePosition(35);
+
+System.out.println(bytes.toHexString());
+
+boolean flag = bytes.readBoolean(0);
+byte s8 = bytes.readByte(1);
+int u8 = bytes.readUnsignedByte(2);
+short s16 = bytes.readShort(3);
+int u16 = bytes.readUnsignedShort(5);
+int s32 = bytes.readInt(7);
+long u32 = bytes.readUnsignedInt(11);
+long s64 = bytes.readLong(15);
+float f32 = bytes.readFloat(23);
+double f64 = bytes.readDouble(27);
+----
+
+prints
+
+----
+00000000 59 01 02 03 00 04 00 06  00 00 00 07 00 00 00 08 Y······· ········
+00000010 00 00 00 00 00 00 00 00  00 10 41 00 00 00 00 00 ········ ··A·····
+00000020 00 24 40                                         ·$@
+----
+
+NOTE: While HexDumpBytes supports the offset methods, you need to provide the offset in binary and the dump making it more complex to use.
 
 === Comparison of access to native memory
 
