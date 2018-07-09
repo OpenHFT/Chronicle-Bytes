@@ -253,8 +253,15 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     @NotNull
     default S writeInt24(int i) throws BufferOverflowException {
-        writeUnsignedShort(i);
-        return writeUnsignedByte(i >> 16);
+        writeUnsignedShort((short) i);
+        return writeUnsignedByte((i >>> 16) & 0xFF);
+    }
+
+    @org.jetbrains.annotations.NotNull
+    @NotNull
+    default S writeUnsignedInt24(int i) throws BufferOverflowException {
+        writeUnsignedShort((short) i);
+        return writeUnsignedByte(i >>> 16);
     }
 
     @org.jetbrains.annotations.NotNull

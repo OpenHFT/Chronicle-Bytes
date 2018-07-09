@@ -155,6 +155,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return readShort() & 0xFFFF;
     }
 
+    default int readInt24() throws BufferUnderflowException {
+        return readUnsignedShort() | (readUnsignedByte() << 24 >> 8);
+    }
+
     default int readUnsignedInt24() throws BufferUnderflowException {
         return readUnsignedShort() | (readUnsignedByte() << 16);
     }

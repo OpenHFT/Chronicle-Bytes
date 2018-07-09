@@ -18,6 +18,8 @@ public class PrimitiveTest {
         bytes.comment("s16").writeShort((short) 3);
         bytes.comment("u16").writeUnsignedShort(4);
         bytes.comment("char").writeStopBit('5'); // char
+        bytes.comment("s24").writeInt24(-6_666_666);
+        bytes.comment("u24").writeUnsignedInt24(16_666_666);
         bytes.comment("s32").writeInt(6);
         bytes.comment("u32").writeUnsignedInt(7);
         bytes.comment("s64").writeLong(8);
@@ -32,6 +34,8 @@ public class PrimitiveTest {
         short s16 = bytes.readShort();
         int u16 = bytes.readUnsignedShort();
         char ch = bytes.readStopBitChar();
+        int s24 = bytes.readInt24();
+        long u24 = bytes.readUnsignedInt24();
         int s32 = bytes.readInt();
         long u32 = bytes.readUnsignedInt();
         long s64 = bytes.readLong();
@@ -44,6 +48,8 @@ public class PrimitiveTest {
         assertEquals(3, s16);
         assertEquals(4, u16);
         assertEquals('5', ch);
+        assertEquals(-6_666_666, s24);
+        assertEquals(16_666_666, u24);
         assertEquals(6, s32);
         assertEquals(7, u32);
         assertEquals(8, s64);
