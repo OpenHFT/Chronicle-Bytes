@@ -239,7 +239,7 @@ double f64 = bytes.parseDouble();
 double f64b = bytes.parseDouble();
 ----
 
-NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`
+NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`, Unsigned int can use the `long` method.
 
 === Comparison of access to native memory
 
