@@ -282,6 +282,31 @@ String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
 String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
 ----
 
+Binary strings are prefixed with a https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoded] length.
+
+[source, Java]
+----
+HexDumpBytes bytes = new HexDumpBytes();
+bytes.comment("write8bit").write8bit((String) null);
+bytes.comment("writeUtf8").writeUtf8(null);
+
+System.out.println(bytes.toHexString());
+
+String a = bytes.read8bit();
+String b = bytes.readUtf8();
+assertEquals(null, a);
+assertEquals(null, b);
+----
+
+prints
+
+----
+80 00                                           # write8bit
+80 00                                           # writeUtf8
+----
+
+NOTE: `80 00` is the stop bit encoding for `-1` or `~0`
+
 === Compare and Set operation
 
 In binary, you can atomically replace an `int` or `long` on condition that it is an expected value.

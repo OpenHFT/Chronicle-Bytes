@@ -35,4 +35,18 @@ public class StringsTest {
         assertSame(b, c); // uses a string pool
         assertSame(b, d); // uses a string pool
     }
+
+    @Test
+    public void testNull() {
+        HexDumpBytes bytes = new HexDumpBytes();
+        bytes.comment("write8bit").write8bit((String) null);
+        bytes.comment("writeUtf8").writeUtf8(null);
+
+        System.out.println(bytes.toHexString());
+
+        String a = bytes.read8bit();
+        String b = bytes.readUtf8();
+        assertEquals(null, a);
+        assertEquals(null, b);
+    }
 }
