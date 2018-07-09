@@ -682,8 +682,19 @@ public interface Bytes<Underlying> extends
         return bytesStore().sharedMemory();
     }
 
+    /**
+     * will unwrite from the offset upto the current write position of the destination bytes
+     *
+     * @param fromOffset the offset from the target byytes
+     * @param count      the number of bytes to un-write
+     */
     default void unwrite(long fromOffset, int count) {
-        write(fromOffset, this, fromOffset + count, readRemaining() - 1);
+        long wp = writePosition();
+
+        if (wp < fromOffset)
+            return;
+
+        write(fromOffset, this, fromOffset + count, wp - fromOffset);
         writeSkip(-count);
     }
 
