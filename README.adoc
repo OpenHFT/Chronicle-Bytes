@@ -422,6 +422,129 @@ bf 7c                                           # Infinity
 
 To read these you need either `long x = bytes.readStopBit()` or `double d = bytes.readStopBitDouble()`
 
+=== BytesMarshallable objects
+
+Chronicle Bytes supports serializing simple objects where the type is not stored.  This is similar to`RawWire` in Chronicle Wire.
+
+[source, Java]
+----
+@NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
+@NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
+ZonedDateTime zdt1 = ZonedDateTime.parse("2017-11-06T12:35:56.775Z[Europe/London]");
+ZonedDateTime zdt2 = ZonedDateTime.parse("2016-10-05T01:34:56.775Z[Europe/London]");
+UUID uuid1 = new UUID(0x123456789L, 0xABCDEF);
+UUID uuid2 = new UUID(0x1111111111111111L, 0x2222222222222222L);
+@NotNull MyScalars ms1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, zdt1.toLocalDate(), zdt1.toLocalTime(), zdt1.toLocalDateTime(), zdt1, uuid1);
+@NotNull MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, zdt2.toLocalDate(), zdt2.toLocalTime(), zdt2.toLocalDateTime(), zdt2, uuid2);
+@NotNull MyNested mn1 = new MyNested(mb1, ms1);
+@NotNull MyNested mn2 = new MyNested(mb2, ms2);
+bytes.comment("mn1").writeUnsignedByte(1);
+mn1.writeMarshallable(bytes);
+bytes.comment("mn2").writeUnsignedByte(2);
+mn2.writeMarshallable(bytes);
+----
+
+.MyByteable data structure
+[source, Java]
+----
+class MyByteable implements BytesMarshallable {
+    boolean flag;
+    byte b;
+    short s;
+    char c;
+    int i;
+    float f;
+    long l;
+    double d;
+
+    public MyByteable(boolean flag, byte b, short s, char c, int i, float f, long l, double d) {
+        this.flag = flag;
+        this.b = b;
+        this.s = s;
+        this.c = c;
+        this.i = i;
+        this.f = f;
+        this.l = l;
+        this.d = d;
+    }
+----
+
+.MyScalars data structure
+[source, Java]
+----
+class MyScalars implements BytesMarshallable {
+    String s;
+    BigInteger bi;
+    BigDecimal bd;
+    LocalDate date;
+    LocalTime time;
+    LocalDateTime dateTime;
+    ZonedDateTime zonedDateTime;
+    UUID uuid;
+
+    public MyScalars(String s, BigInteger bi, BigDecimal bd, LocalDate date, LocalTime time, LocalDateTime dateTime, ZonedDateTime zonedDateTime, UUID uuid) {
+        this.s = s;
+        this.bi = bi;
+        this.bd = bd;
+        this.date = date;
+        this.time = time;
+        this.dateTime = dateTime;
+        this.zonedDateTime = zonedDateTime;
+        this.uuid = uuid;
+    }
+----
+
+prints
+
+----
+01                                              # mn1
+                                                # byteable
+      4e                                              # flag
+      01                                              # b
+      02 00                                           # s
+      33                                              # c
+      04 00 00 00                                     # i
+      00 00 b0 40                                     # f
+      06 00 00 00 00 00 00 00                         # l
+      cd cc cc cc cc cc 1e 40                         # d
+                                                # scalars
+      05 48 65 6c 6c 6f                               # s
+      01 31                                           # bi
+      02 31 30                                        # bd
+      0a 32 30 31 37 2d 31 31 2d 30 36                # date
+      0c 31 32 3a 33 35 3a 35 36 2e 37 37 35          # time
+      17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a 33 # dateTime
+      35 3a 35 36 2e 37 37 35 27 32 30 31 37 2d 31 31 # zonedDateTime
+      2d 30 36 54 31 32 3a 33 35 3a 35 36 2e 37 37 35
+      5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f 6e 5d # uuid
+      24 30 30 30 30 30 30 30 31 2d 32 33 34 35 2d 36
+      37 38 39 2d 30 30 30 30 2d 30 30 30 30 30 30 61
+      62 63 64 65 66
+02                                              # mn2
+                                                # byteable
+      59                                              # flag
+      0b                                              # b
+      16 00                                           # s
+      54                                              # c
+      2c 00 00 00                                     # i
+      8f c2 b1 40                                     # f
+      42 00 00 00 00 00 00 00                         # l
+      e1 7a 14 ae 47 71 53 40                         # d
+                                                # scalars
+      05 57 6f 72 6c 64                               # s
+      01 30                                           # bi
+      01 30                                           # bd
+      0a 32 30 31 36 2d 31 30 2d 30 35                # date
+      0c 30 31 3a 33 34 3a 35 36 2e 37 37 35          # time
+      17 32 30 31 36 2d 31 30 2d 30 35 54 30 31 3a 33 # dateTime
+      34 3a 35 36 2e 37 37 35 2c 32 30 31 36 2d 31 30 # zonedDateTime
+      2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37 37 35
+      2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f 4c 6f
+      6e 64 6f 6e 5d 24 31 31 31 31 31 31 31 31 2d 31 # uuid
+      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32
+      32 32 32 32 32 32 32 32 32 32
+----
+
 === Comparison of access to native memory
 
 |===

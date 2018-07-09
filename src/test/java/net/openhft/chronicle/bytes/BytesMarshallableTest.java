@@ -216,6 +216,8 @@ public class BytesMarshallableTest {
                 "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
                 "      32 32 32 32 32 32 32 32 32 32\n";
 
+        System.out.println(bytes.toHexString());
+
         assertEquals(
                 expected, bytes.toHexString());
 
@@ -295,6 +297,7 @@ public class BytesMarshallableTest {
     public void nested() {
         Bytes<?> bytes = new HexDumpBytes();
         BM1 bm1 = new BM1();
+        bm1.num = 5;
         bm1.bm2.text = "hello";
         bm1.bm3.value = 1234567890L;
 
@@ -306,7 +309,8 @@ public class BytesMarshallableTest {
         assertEquals(bm1b.bm3.value, bm1.bm3.value);
 
         assertEquals(
-                "                                                # bm2\n" +
+                "   05 00 00 00                                     # num\n" +
+                        "                                                # bm2\n" +
                         "      05 68 65 6c 6c 6f                               # text\n" +
                         "                                                # bm3\n" +
                         "      d2 02 96 49 00 00 00 00                         # value\n", bytes.toHexString());
@@ -321,6 +325,7 @@ public class BytesMarshallableTest {
     }
 
     static class BM1 implements BytesMarshallable {
+        int num;
         BM2 bm2 = new BM2();
         BM3 bm3 = new BM3();
     }
