@@ -202,6 +202,45 @@ prints
 
 NOTE: While HexDumpBytes supports the offset methods, you need to provide the offset in binary and the dump making it more complex to use.
 
+=== Working wth text
+
+You can also write and read text to Bytes for low level, direct to native memory text processing.
+
+.Writing primitives as text
+[source, Java]
+----
+Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+bytes.append(true).append('\n');
+bytes.append(1).append('\n');
+bytes.append(2L).append('\n');
+bytes.append('3').append('\n');
+bytes.append(4.1f).append('\n');
+bytes.append(5.2).append('\n');
+bytes.append(6.2999999, 3).append('\n');
+
+System.out.println(bytes.toHexString());
+----
+
+prints
+----
+00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·
+00000010 36 2e 33 30 30 0a                                6.300·
+----
+
+.Reading primitives as text
+[source, Java]
+----
+boolean flag = bytes.parseBoolean();
+int s32 = bytes.parseInt();
+long s64 = bytes.parseLong();
+String ch = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+float f32 = bytes.parseFloat();
+double f64 = bytes.parseDouble();
+double f64b = bytes.parseDouble();
+----
+
+NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`
+
 === Comparison of access to native memory
 
 |===

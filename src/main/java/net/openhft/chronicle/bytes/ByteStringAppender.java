@@ -70,7 +70,20 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Append a long in decimal
+     * Append a boolean as T or F
+     *
+     * @param flag to append
+     * @return this
+     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     */
+    @NotNull
+    default B append(boolean flag) throws BufferOverflowException {
+        return append(flag ? 'T' : 'F');
+    }
+
+    /**
+     * Append an int in decimal
      *
      * @param value to append
      * @return this
@@ -137,8 +150,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(float f) throws BufferOverflowException {
-        BytesInternal.append(this, f);
-        return (B) this;
+        float f2 = Math.abs(f);
+        if (f2 > 1e6 || f2 < 1e-3) {
+            return append(Float.toString(f));
+        }
+        int precision = (int) Math.floor(6 - Math.log10(f2));
+        long tens = Maths.tens(precision);
+        return append((double) Math.round(f * tens) / tens);
     }
 
     /**

@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -54,6 +55,12 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     default Boolean parseBoolean(@NotNull StopCharTester tester) {
         return BytesInternal.parseBoolean(this, tester);
     }
+
+    @Nullable
+    default Boolean parseBoolean() {
+        return BytesInternal.parseBoolean(this, StopCharTesters.NON_ALPHA_DIGIT);
+    }
+
 
     /**
      * parse text with UTF-8 decoding as character terminated.
@@ -148,6 +155,16 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     /**
+     * parse text as an int. The terminating character is consumed.
+     *
+     * @return an int.
+     */
+    @ForceInline
+    default int parseInt() throws BufferUnderflowException {
+        return Maths.toInt32(BytesInternal.parseLong(this));
+    }
+
+    /**
      * parse text as a long integer. The terminating character is consumed.
      *
      * @return a long.
@@ -158,13 +175,23 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     /**
+     * parse text as a float decimal. The terminating character is consumed.
+     * <p>
+     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     *
+     * @return a float.
+     */
+    default float parseFloat() throws BufferUnderflowException {
+        return (float) BytesInternal.parseDouble(this);
+    }
+
+    /**
      * parse text as a double decimal. The terminating character is consumed.
      * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
      * @return a double.
      */
-    @ForceInline
     default double parseDouble() throws BufferUnderflowException {
         return BytesInternal.parseDouble(this);
     }

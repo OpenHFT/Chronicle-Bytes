@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -95,5 +96,35 @@ public class PrimitiveTest {
         assertEquals(8, s64);
         assertEquals(9, f32, 0.0);
         assertEquals(10, f64, 0.0);
+    }
+
+    @Test
+    public void testTextPrimitive() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+        bytes.append(true).append('\n');
+        bytes.append(1).append('\n');
+        bytes.append(2L).append('\n');
+        bytes.append('3').append('\n');
+        bytes.append(4.1f).append('\n');
+        bytes.append(5.2).append('\n');
+        bytes.append(6.2999999, 3).append('\n');
+
+        System.out.println(bytes.toHexString());
+
+        boolean flag = bytes.parseBoolean();
+        int s32 = bytes.parseInt();
+        long s64 = bytes.parseLong();
+        String ch = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
+        float f32 = bytes.parseFloat();
+        double f64 = bytes.parseDouble();
+        double f64b = bytes.parseDouble();
+
+        assertEquals(true, flag);
+        assertEquals(1, s32);
+        assertEquals(2, s64);
+        assertEquals("3", ch);
+        assertEquals(4.1, f32, 1e-6);
+        assertEquals(5.2, f64, 0.0);
+        assertEquals(6.2999999, f64b, 0.5e-4);
     }
 }
