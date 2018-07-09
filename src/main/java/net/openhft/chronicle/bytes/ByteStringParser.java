@@ -132,6 +132,16 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     /**
      * parse text with ISO-8859-1 decoding as character terminated.
      *
+     * @param stopCharTester to check if the end has been reached.
+     */
+    default String parse8bit(@NotNull StopCharTester stopCharTester)
+            throws BufferUnderflowException {
+        return BytesInternal.parse8bit(this, stopCharTester);
+    }
+
+    /**
+     * parse text with ISO-8859-1 decoding as character terminated.
+     *
      * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */

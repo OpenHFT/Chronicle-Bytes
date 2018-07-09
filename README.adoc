@@ -241,6 +241,40 @@ double f64b = bytes.parseDouble();
 
 NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`, Unsigned int can use the `long` method.
 
+=== Reading and writing Strings
+
+Chronicle Bytes supports two encodings, ISO-8859-1 and UTF-8.
+It also supports writing these as binary with a length prefix, and a string which should be terminated.
+Bytes expects Strings to be read to a buffer for futher processing, possibly with a String pool.
+
+[source, Java]
+----
+HexDumpBytes bytes = new HexDumpBytes();
+bytes.comment("write8bit").write8bit("£ 1");
+bytes.comment("writeUtf8").writeUtf8("£ 1");
+bytes.comment("append8bit").append8bit("£ 1").append('\n');
+bytes.comment("appendUtf8").appendUtf8("£ 1").append('\n');
+
+System.out.println(bytes.toHexString());
+----
+
+prints
+
+----
+03 a3 20 31                                     # write8bit
+04 c2 a3 20 31                                  # writeUtf8
+a3 20 31 0a                                     # append8bit
+c2 a3 20 31 0a                                  # appendUtf8
+----
+
+[source, Java]
+----
+String a = bytes.read8bit();
+String b = bytes.readUtf8();
+String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
+String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
+----
+
 === Comparison of access to native memory
 
 |===

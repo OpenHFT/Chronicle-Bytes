@@ -2688,6 +2688,12 @@ enum BytesInternal {
         return bs.readLimit() - offset >= length;
     }
 
+    public static String parse8bit(ByteStringParser bsp, StopCharTester stopCharTester) {
+        StringBuilder sb = BytesInternal.acquireStringBuilder();
+        BytesInternal.parse8bit(bsp, sb, stopCharTester);
+        return BytesInternal.SI.intern(sb);
+    }
+
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
