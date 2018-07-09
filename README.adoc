@@ -34,6 +34,125 @@ The API supports.
  - elastic ByteBuffer wrappers which resize as required.
  - parsing text and writing text directly to off heap bytes.
 
+=== Data types supported
+
+|===
+| operation	| Indexed or streaming	| binary	| text
+| read/write binary primitives	| both	| float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong	| double, int, long, char, double with precision
+| read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string
+| read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
+| data driven tests	| from files	| no	| yes
+| CAS	| indexed	| byte, short, int, long, float, double	|
+| volatile read/write	| indexed	| byte, short, int, long, float, double	|
+| peek	| both	| unsigned byte	|
+| stop bit compression	| streaming	| int,long, double, float, char	|
+| search	| from start	| indexOf string, findByte	|
+| addAndGet	| indexed	| float, double, int, long	|
+| copy	| from start	| write, copy	|
+| hash	| from start	| byteSum, fastHash	|
+| bytes marshallable	| streaming	| nested data structures, expected types only.	|
+|===
+
+=== Creating Bytes
+
+.Bytes which wraps an on heap ByteBuffer
+[source, Java]
+----
+Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+ByteBuffer bb = bytes.underlying();
+----
+
+.Bytes which wraps a direct ByteBuffer
+[source, Java]
+----
+Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
+ByteBuffer bb = bytes.underlying();
+----
+
+.Bytes which wraps some native memory
+[source, Java]
+----
+Bytes bytes = Bytes.allocateElasticDirect(64);
+long address = bytes.address();
+bytes.release(); // when it can be freed.
+----
+
+.Bytes which will wrap some native memory when used
+[source, Java]
+----
+Bytes bytes = Bytes.allocateElasticDirect();
+// use the bytes
+bytes.release(); // when it can be freed.
+----
+
+=== Flipping Bytes
+
+ByteBuffer needs to be flipped to switch between reading and writing.
+
+Bytes holds a read position and a write position allowing you to write and immediately read without flipping.
+
+NOTE: The writePosition is the readLimit.
+
+=== Writing to a Hexadecimal dump
+
+Writing to a hexadecimal dump is useful for documenting the format for messages written.
+We have used the hexadecimal dump here.
+
+.Writing primitives as binary and dumping
+[source, java]
+----
+// only used for documentation
+HexDumpBytes bytes = new HexDumpBytes();
+bytes.comment("true").writeBoolean(true);
+bytes.comment("s8").writeByte((byte) 1);
+bytes.comment("u8").writeUnsignedByte(2);
+bytes.comment("s16").writeShort((short) 3);
+bytes.comment("u16").writeUnsignedShort(4);
+bytes.comment("char").writeUnsignedShort('5'); // char
+bytes.comment("s32").writeInt(6);
+bytes.comment("u32").writeUnsignedShort(7);
+bytes.comment("s64").writeLong(8);
+bytes.comment("f32").writeFloat(9);
+bytes.comment("f64").writeDouble(10);
+
+System.out.println(bytes.toHexString());
+----
+
+prints
+
+----
+59                                              # true
+01                                              # s8
+02                                              # u8
+03 00                                           # s16
+04 00                                           # u16
+35                                              # char
+06 00 00 00                                     # s32
+07 00 00 00                                     # u32
+08 00 00 00 00 00 00 00                         # s64
+00 00 10 41                                     # f32
+00 00 00 00 00 00 24 40                         # f64
+----
+
+to read this data you can use
+
+.Reading the primitive values above
+[source, java]
+----
+boolean flag = bytes.readBoolean();
+byte s8 = bytes.readByte();
+int u8 = bytes.readUnsignedByte();
+short s16 = bytes.readShort();
+int u16 = bytes.readUnsignedShort();
+char ch = bytes.readStopBitChar();
+int s32 = bytes.readInt();
+long u32 = bytes.readUnsignedInt();
+long s64 = bytes.readLong();
+float f32 = bytes.readFloat();
+double f64 = bytes.readDouble();
+----
+
+
 === Comparison of access to native memory
 
 |===
