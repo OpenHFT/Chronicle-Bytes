@@ -195,7 +195,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         if (base.compareAndSwapLong(offset & 0xFFFFFFFFL, expected, value)) {
-            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
             return true;
         }
         return false;

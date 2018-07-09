@@ -222,6 +222,7 @@ System.out.println(bytes.toHexString());
 ----
 
 prints
+
 ----
 00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·
 00000010 36 2e 33 30 30 0a                                6.300·
@@ -241,7 +242,7 @@ double f64b = bytes.parseDouble();
 
 NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`, Unsigned int can use the `long` method.
 
-=== Reading and writing Strings
+=== Reading and Writing Strings
 
 Chronicle Bytes supports two encodings, ISO-8859-1 and UTF-8.
 It also supports writing these as binary with a length prefix, and a string which should be terminated.
@@ -274,6 +275,52 @@ String b = bytes.readUtf8();
 String c = bytes.parse8bit(StopCharTesters.CONTROL_STOP);
 String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
 ----
+
+=== Compare and Set operation
+
+In binary, you can atomically replace an `int` or `long` on condition that it is an expected value.
+
+.Write two fields, remember where the `int` and `long` are
+[source, Java]
+----
+HexDumpBytes bytes = new HexDumpBytes();
+
+bytes.comment("s32").writeUtf8("s32");
+long s32 = bytes.writePosition();
+bytes.writeInt(0);
+
+bytes.comment("s64").writeUtf8("s64");
+long s64 = bytes.writePosition();
+bytes.writeLong(0);
+
+System.out.println(bytes.toHexString());
+----
+
+prints
+
+----
+03 73 33 32 00 00 00 00                         # s32
+03 73 36 34 00 00 00 00 00 00 00 00             # s64
+----
+
+.CAS two fields
+[source, Java]
+----
+assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE));
+assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE));
+
+System.out.println(bytes.toHexString());
+----
+
+prints
+
+----
+03 73 33 32 ff ff ff 7f                         # s32
+03 73 36 34 ff ff ff ff ff ff ff 7f             # s64
+----
+
+INFO: You might wonder, how is the hex dump updated as well as the binary? The `readPosition` actually holds the write position for both, which is why it has to be computed in this case.
+
 
 === Comparison of access to native memory
 
