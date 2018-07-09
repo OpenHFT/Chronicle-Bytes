@@ -395,6 +395,8 @@ bf 7e                                           # NaN
 bf 7c                                           # Infinity
 ----
 
+To read these you need either `long x = bytes.readStopBit()` or `double d = bytes.readStopBitDouble()`
+
 === Comparison of access to native memory
 
 |===
