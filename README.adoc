@@ -245,7 +245,7 @@ NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `i
 
 Chronicle Bytes supports two encodings, ISO-8859-1 and UTF-8.
 It also supports writing these as binary with a length prefix, and a string which should be terminated.
-Bytes expects Strings to be read to a buffer for futher processing, possibly with a String pool.
+Bytes expects Strings to be read to a buffer for further processing, possibly with a String pool.
 
 [source, Java]
 ----
