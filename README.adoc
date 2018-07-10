@@ -814,7 +814,7 @@ NOTE: Creating and maintain such tests can be an overhead you don't need.  In th
 
 === View Chronicle-Bytes in the debugger
 
-When using intellij idea, you can set up a custom render to view the bytes, see the images below :
+When using intellij idea, you can set up a custom renderer to view the bytes, see the images below :
 
 image::images/customize-data-views-menu.tiff[]
 
