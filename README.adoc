@@ -42,7 +42,7 @@ The API supports.
 | read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string
 | read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
 | data driven tests	| from files	| no	| yes
-| CAS	| indexed	| byte, short, int, long, float, double	|
+| CAS	| indexed	| int, long	|
 | volatile read/write	| indexed	| byte, short, int, long, float, double	|
 | peek	| both	| unsigned byte	|
 | stop bit compression	| streaming	| int,long, double, float, char	|
