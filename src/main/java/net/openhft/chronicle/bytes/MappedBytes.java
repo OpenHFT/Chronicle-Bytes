@@ -139,10 +139,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         while (remaining > 0) {
 
-            int safeCopySize = safeCopySizeWithoutOverlap(wp);
+            long safeCopySize = safeCopySizeWithoutOverlap(wp);
 
-            int copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            acquireNextByteStore0(wp, false);
+            // remaining is an int and safeCopySize is >= 0.
+            int copy = (int) Math.min(remaining, safeCopySize); // copy 64 KB at a time.
+            acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
             wp += copy;
@@ -159,6 +160,26 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
+        if (readOffset + length <= bytes.realCapacity() && length <= 80)
+            writeLittle(writeOffset, bytes, readOffset, length);
+        else
+            write0(writeOffset, bytes, readOffset, length);
+        return this;
+    }
+
+    private void writeLittle(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
+        writeCheckOffset(writeOffset, (length + 7) & ~7);
+        while (length > 0) {
+            long read = bytes.readLong(readOffset);
+            bytesStore.writeLong(writeOffset, read);
+            length -= 8;
+            readOffset += 8;
+            writeOffset += 8;
+        }
+    }
+
+    public MappedBytes write0(long writeOffset, RandomDataInput bytes, long readOffset, long length)
+            throws BufferOverflowException, BufferUnderflowException {
 
         long wp = writeOffset;
 
@@ -170,9 +191,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         while (remaining > 0) {
 
-            int safeCopySize = safeCopySizeWithoutOverlap(wp);
+            long safeCopySize = safeCopySizeWithoutOverlap(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            acquireNextByteStore0(wp, false);
+            acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, readOffset, copy);
 
             readOffset += copy;
@@ -206,8 +227,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    private int safeCopySizeWithoutOverlap(long writePosition) {
-        return (int) (mappedFile.chunkSize() - (writePosition % mappedFile.chunkSize()));
+    private long safeCopySizeWithoutOverlap(long writePosition) {
+        return mappedFile.chunkSize() - writePosition % mappedFile.chunkSize();
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -343,15 +364,15 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return exception;
     }
 
-    // require protection from concurrent mutation to bytesStore field
-    private synchronized void acquireNextByteStore(long offset, boolean set) throws BufferOverflowException {
-
+    private void acquireNextByteStore(long offset, boolean set) throws BufferOverflowException {
         if (bytesStore.inside(offset))
             return;
 
         acquireNextByteStore0(offset, set);
     }
 
+    // DON'T call this directly.
+    // TODO Check whether we need synchronized; original comment; require protection from concurrent mutation to bytesStore field
     private synchronized void acquireNextByteStore0(final long offset, final boolean set) {
         @Nullable BytesStore oldBS = bytesStore;
         try {
