@@ -137,22 +137,25 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         int remaining = length;
 
+        acquireNextByteStore(wp, false);
+
         while (remaining > 0) {
 
-            long safeCopySize = safeCopySizeWithoutOverlap(wp);
+            long copySize = copySize(wp);
 
             // remaining is an int and safeCopySize is >= 0.
-            int copy = (int) Math.min(remaining, safeCopySize); // copy 64 KB at a time.
+            int copy = (int) Math.min(remaining, copySize); // copy 64 KB at a time.
             acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
             wp += copy;
             remaining -= copy;
 
-            if (remaining < mappedFile.overlapSize()) {
-                bytesStore.write(wp, bytes, offset, remaining);
+            if (remaining == 0)
                 return this;
-            }
+
+            // move to the next chunk
+            acquireNextByteStore0(wp, false);
         }
         return this;
 
@@ -189,9 +192,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         long remaining = length;
 
+        acquireNextByteStore(wp, false);
+
         while (remaining > 0) {
 
-            long safeCopySize = safeCopySizeWithoutOverlap(wp);
+            long safeCopySize = copySize(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
             acquireNextByteStore(wp, false);
             bytesStore.write(wp, bytes, readOffset, copy);
@@ -200,10 +205,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             wp += copy;
             remaining -= copy;
 
-            if (remaining < mappedFile.overlapSize()) {
-                bytesStore.write(wp, bytes, readOffset, remaining);
+            if (remaining == 0)
                 return this;
-            }
+
+            // move to the next chunk
+            acquireNextByteStore0(wp, false);
         }
         return this;
     }
@@ -227,8 +233,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    private long safeCopySizeWithoutOverlap(long writePosition) {
-        return mappedFile.chunkSize() - writePosition % mappedFile.chunkSize();
+    private long copySize(long writePosition) {
+        return bytesStore.capacity() - writePosition % bytesStore.capacity();
     }
 
     public void setNewChunkListener(NewChunkListener listener) {

@@ -157,12 +157,53 @@ public class MappedBytesTest {
         }
     }
 
-    //see https://github.com/OpenHFT/Chronicle-Bytes/issues/66"
+
     @Test
     public void testLargeWrites() throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, 64 << 10);
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 <<
+                10, 64 << 10);
 
-        byte[] largeBytes = new byte[60 << 10];
+        byte[] largeBytes = new byte[130 << 10];
+        bytes.writePosition(0);
+        bytes.write(largeBytes);
+        bytes.writePosition(0);
+        bytes.write(64, largeBytes);
+        bytes.writePosition(0);
+        bytes.write(largeBytes, 64, largeBytes.length - 64);
+        bytes.writePosition(0);
+        bytes.write(64, largeBytes, 64, largeBytes.length - 64);
+
+        bytes.writePosition(0);
+        bytes.write(Bytes.wrapForRead(largeBytes));
+        bytes.writePosition(0);
+        Bytes<byte[]> bytes1 = Bytes.wrapForRead(largeBytes);
+        bytes.write(64, bytes1);
+        bytes.writePosition(0);
+        bytes.write(Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
+        bytes.writePosition(0);
+        bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
+
+        Bytes bytes2 = Bytes.allocateDirect(largeBytes);
+        bytes.writePosition(0);
+        bytes.write(bytes2);
+        bytes.writePosition(0);
+        bytes.write(64, bytes2);
+        bytes.writePosition(0);
+        bytes.write(bytes2, 64L, largeBytes.length - 64L);
+        bytes.writePosition(0);
+        bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
+
+        bytes2.release();
+        bytes.release();
+
+    }
+
+    @Test
+    public void testLargeWrites2() throws IOException {
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
+                10, 128 << 10);
+
+        byte[] largeBytes = new byte[500 << 10];
         bytes.writePosition(0);
         bytes.write(largeBytes);
         bytes.writePosition(0);
