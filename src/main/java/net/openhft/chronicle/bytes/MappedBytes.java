@@ -214,7 +214,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining < mappedFile.overlapSize()) {
+            if (remaining <= mappedFile.overlapSize()) {
                 bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
