@@ -3,7 +3,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.OS;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -160,11 +159,10 @@ public class MappedBytesTest {
 
     //see https://github.com/OpenHFT/Chronicle-Bytes/issues/66"
     @Test
-    @Ignore
     public void testLargeWrites() throws IOException {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, 64 << 10);
 
-        byte[] largeBytes = new byte[300 << 10];
+        byte[] largeBytes = new byte[60 << 10];
         bytes.writePosition(0);
         bytes.write(largeBytes);
         bytes.writePosition(0);
