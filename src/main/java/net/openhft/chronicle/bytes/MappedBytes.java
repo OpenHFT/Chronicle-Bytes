@@ -145,7 +145,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
             // remaining is an int and safeCopySize is >= 0.
             int copy = (int) Math.min(remaining, copySize); // copy 64 KB at a time.
-            acquireNextByteStore(wp, false);
+
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
             wp += copy;
@@ -198,7 +198,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
             long safeCopySize = copySize(wp);
             long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
-            acquireNextByteStore(wp, false);
+
             bytesStore.write(wp, bytes, readOffset, copy);
 
             readOffset += copy;
