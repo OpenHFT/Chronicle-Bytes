@@ -167,6 +167,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
+/*
     public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         if (readOffset + length <= bytes.realCapacity() && length <= 80)
@@ -186,8 +187,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             writeOffset += 8;
         }
     }
+*/
 
-    public MappedBytes write0(long writeOffset, RandomDataInput bytes, long readOffset, long length)
+    public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
 
         long wp = writeOffset;
