@@ -154,8 +154,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
+            if (remaining <= mappedFile.overlapSize()) {
+                bytesStore.write(wp, bytes, offset, remaining);
+                return this;
+            }
+
             // move to the next chunk
             acquireNextByteStore0(wp, false);
+
         }
         return this;
 
@@ -208,6 +214,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
+            if (remaining < mappedFile.overlapSize()) {
+                bytesStore.write(wp, bytes, readOffset, remaining);
+                return this;
+            }
+
             // move to the next chunk
             acquireNextByteStore0(wp, false);
         }
@@ -234,7 +245,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     private long copySize(long writePosition) {
-        return bytesStore.capacity() - writePosition % bytesStore.capacity();
+        long size = mappedFile.chunkSize();
+        return size - writePosition % size;
     }
 
     public void setNewChunkListener(NewChunkListener listener) {

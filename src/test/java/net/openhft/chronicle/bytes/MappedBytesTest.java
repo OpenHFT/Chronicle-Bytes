@@ -160,10 +160,10 @@ public class MappedBytesTest {
 
     @Test
     public void testLargeWrites() throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 <<
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
                 10, 64 << 10);
 
-        byte[] largeBytes = new byte[130 << 10];
+        byte[] largeBytes = new byte[500 << 10];
         bytes.writePosition(0);
         bytes.write(largeBytes);
         bytes.writePosition(0);
