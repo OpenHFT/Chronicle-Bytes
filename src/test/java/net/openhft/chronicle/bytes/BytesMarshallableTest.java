@@ -314,7 +314,12 @@ public class BytesMarshallableTest {
                         "      05 68 65 6c 6c 6f                               # text\n" +
                         "                                                # bm3\n" +
                         "      d2 02 96 49 00 00 00 00                         # value\n", bytes.toHexString());
-
+        assertEquals("# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+                "   05 00 00 00                                     # num\n" +
+                "                                                # bm2\n" +
+                "      05 68 65 6c 6c 6f                               # text\n" +
+                "                                                # bm3\n" +
+                "      d2 02 96 49 00 00 00 00                         # value\n", bm1.toString());
     }
 
     static class MyCollections implements BytesMarshallable {
@@ -328,6 +333,11 @@ public class BytesMarshallableTest {
         int num;
         BM2 bm2 = new BM2();
         BM3 bm3 = new BM3();
+
+        @Override
+        public String toString() {
+            return $toString();
+        }
     }
 
     static class BM2 implements BytesMarshallable {

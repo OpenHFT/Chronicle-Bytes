@@ -31,4 +31,10 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     default void writeMarshallable(BytesOut bytes) {
         BytesUtil.writeMarshallable(this, bytes);
     }
+
+    default String $toString() {
+        HexDumpBytes bytes = new HexDumpBytes();
+        writeMarshallable(bytes);
+        return "# " + getClass().getName() + "\n" + bytes.toHexString();
+    }
 }
