@@ -762,45 +762,53 @@ public class BytesTest {
         }
     }
 
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test
     public void testReadPosition() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.readPosition(17);
-            Assume.assumeFalse(b.unchecked());
+            assertTrue(b.unchecked());
+        } catch (DecoratedBufferUnderflowException ex) {
+            assertFalse(b.unchecked());
         } finally {
             b.release();
         }
     }
 
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test
     public void testReadPositionTooSmall() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.readPosition(-1);
-            Assume.assumeFalse(b.unchecked());
+            assertTrue(b.unchecked());
+        } catch (DecoratedBufferUnderflowException ex) {
+            assertFalse(b.unchecked());
         } finally {
             b.release();
         }
     }
 
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test
     public void testReadLimit() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.readPosition(b.writeLimit() + 1);
-            Assume.assumeFalse(b.unchecked());
+            assertTrue(b.unchecked());
+        } catch (DecoratedBufferUnderflowException ex) {
+            assertFalse(b.unchecked());
         } finally {
             b.release();
         }
     }
 
-    @Test(expected = DecoratedBufferUnderflowException.class)
+    @Test
     public void testReadLimitTooSmall() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.readPosition(b.start() - 1);
-            Assume.assumeFalse(b.unchecked());
+            assertTrue(b.unchecked());
+        } catch (DecoratedBufferUnderflowException ex) {
+            assertFalse(b.unchecked());
         } finally {
             b.release();
         }
