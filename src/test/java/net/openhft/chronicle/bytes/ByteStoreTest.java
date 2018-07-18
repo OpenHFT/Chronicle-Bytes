@@ -182,7 +182,7 @@ public class ByteStoreTest {
     @Test
     public void testWriteReadUtf8() throws IORuntimeException {
         bytes.writeUtf8(null);
-        @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
+        @NotNull String[] words = new String[] { "Hello","World!","Bye£€!","" };
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -192,7 +192,7 @@ public class ByteStoreTest {
             assertEquals(word, bytes.readUtf8());
         }
         assertEquals(null, bytes.readUtf8());
-        assertEquals(25, bytes.readPosition()); // check the size
+        assertEquals(26, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
         @NotNull StringBuilder sb = new StringBuilder();
@@ -219,7 +219,7 @@ public class ByteStoreTest {
             assertEquals(word, bytes.readUtf8());
         }
         assertEquals("", bytes.readUtf8());
-        assertEquals("", bytes.readUtf8());
+        assertEquals(null, bytes.readUtf8());
     }
 
     @Test

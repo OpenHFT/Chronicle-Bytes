@@ -100,8 +100,8 @@ public class BytesMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
-//                    if (type.isArray())
-//                        return new ArrayFieldAccess(field);
+                    if (type.isArray())
+                        throw new UnsupportedOperationException("TODO");
                     if (Collection.class.isAssignableFrom(type))
                         return new CollectionFieldAccess(field);
                     if (Map.class.isAssignableFrom(type))

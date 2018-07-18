@@ -185,7 +185,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     @Nullable
     default String readUtf8()
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
-        return peekUnsignedByte() == 0 ? "" : BytesInternal.readUtf8(this);
+        return BytesInternal.readUtf8(this);
     }
 
     @Nullable
@@ -216,7 +216,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
-        BytesInternal.parseUtf8(this, sb, len);
+        if (len > 0)
+            BytesInternal.parseUtf8(this, sb, len);
         return true;
     }
 
