@@ -54,7 +54,7 @@ The API supports.
 |===
 
 
-=== Data types Explained
+=== Data types explained
 
 |===
 | operation	|  explained |
