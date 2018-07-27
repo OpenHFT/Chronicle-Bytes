@@ -54,7 +54,8 @@ The API supports.
 |===
 
 
-Data types Explained
+=== Data types Explained
+
 |===
 | operation	|  explained |
 | read/write binary primitives	|  to read an write primitive data stuctures stored in a binary from |
