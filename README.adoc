@@ -38,10 +38,10 @@ The API supports.
 
 |===
 | operation	| Indexed or streaming	| binary	| text | 
-| read/write binary primitives	| both	| float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong	| double, int, long, char, double with precision | 
-| read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string | 
-| read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal | 
-| data driven tests	| from files	| no	| yes | 
+| read/write binary primitives	| both	| float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong	| double, int, long, char, double with precision | |
+| read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string | |
+| read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal | |
+| data driven tests	| from files	| no	| yes |  |
 | CAS	| indexed	| int, long	| | 
 | volatile read/write	| indexed	| byte, short, int, long, float, double	| | 
 | peek	| both	| unsigned byte	| | 
