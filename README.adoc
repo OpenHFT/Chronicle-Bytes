@@ -64,7 +64,7 @@ The API supports.
 | data driven tests	| https://en.wikipedia.org/wiki/Data-driven_testing |
 | CAS	| an atomic instruction used in multithreading to achieve synchronization. It compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value. |
 | volatile read/write	|  http://tutorials.jenkov.com/java-concurrency/volatile.html |
-| peek	| https://en.wikipedia.org/wiki/Peek_(data_type_operation) |
+| peek	|  peek is an operation which returns the value of the bytes without effecting its read position |
 | stop bit compression	|  https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding |
 | search	|  is any algorithm which solves the search problem, namely, to retrieve information stored within some data structure |
 | addAndGet	| atomically adds the given value to the current value. | 
