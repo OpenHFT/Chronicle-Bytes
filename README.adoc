@@ -61,7 +61,7 @@ The API supports.
 | read/write binary primitives	|  to read an write primitive data stuctures stored in a binary from |
 | read/write text	| to read an write text data |
 | read/write other	| to read an write other data |
-| data driven tests	| simualar to https://cucumber.io but in chronicle bytes |
+| data driven tests	| simualar to https://en.wikipedia.org/wiki/Cucumber_(software) but in chronicle bytes |
 | CAS	| an atomic instruction used in multithreading to achieve synchronization. It compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value. |
 | volatile read/write	|  http://tutorials.jenkov.com/java-concurrency/volatile.html |
 | peek	| https://en.wikipedia.org/wiki/Peek_(data_type_operation) |
