@@ -37,19 +37,19 @@ The API supports.
 === Data types supported
 
 |===
-| operation	| Indexed or streaming	| binary	| text
+| operation	| Indexed or streaming	| binary	| text | description 
 | read/write binary primitives	| both	| float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong	| double, int, long, char, double with precision
 | read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string
 | read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
 | data driven tests	| from files	| no	| yes
-| CAS	| indexed	| int, long	|
-| volatile read/write	| indexed	| byte, short, int, long, float, double	|
+| CAS	| indexed	| int, long	| https://en.wikipedia.org/wiki/Compare-and-swap
+| volatile read/write	| indexed	| byte, short, int, long, float, double	| http://tutorials.jenkov.com/java-concurrency/volatile.html
 | peek	| both	| unsigned byte	|
 | stop bit compression	| streaming	| int,long, double, float, char	|
-| search	| from start	| indexOf string, findByte	|
-| addAndGet	| indexed	| float, double, int, long	|
+| search	| from start	| indexOf string, findByte	| https://stackoverflow.com/questions/5022956/space-efficient-long-representation
+| addAndGet	| indexed	| float, double, int, long	| Atomically adds the given value to the current value.
 | copy	| from start	| write, copy	|
-| hash	| from start	| byteSum, fastHash	|
+| hash	| from start	| byteSum, fastHash	| https://en.wikipedia.org/wiki/Hash_function
 | bytes marshallable	| streaming	| nested data structures, expected types only.	|
 |===
 
