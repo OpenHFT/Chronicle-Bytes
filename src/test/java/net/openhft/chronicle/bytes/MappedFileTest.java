@@ -160,6 +160,13 @@ public class MappedFileTest {
         }
     }
 
+    @Test
+    public void testCreateMappedFile() throws IOException {
+        File file = File.createTempFile("mappedFile", "mf");
+        MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
+        mappedFile.release();
+    }
+
     @After
     public void clearInterrupt() {
         Thread.interrupted();
