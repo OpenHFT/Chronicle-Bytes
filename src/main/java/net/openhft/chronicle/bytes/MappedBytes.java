@@ -511,13 +511,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    // interface
+    public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
+        assert length < safeCopySize();
+        this.acquireNextByteStore(writePosition(), false);
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
+        // xxxx what if len < length?
         if (len > 0) {
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             uncheckedWritePosition(writePosition() + len);
         }
+        return len;
     }
 
     @NotNull
