@@ -164,8 +164,12 @@ public class MappedFileTest {
     public void testCreateMappedFile() throws IOException {
         File file = File.createTempFile("mappedFile", "");
         file.deleteOnExit();
+
         MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
+        MappedFile mappedFile2 = MappedFile.mappedFile(file, 1024, 256, 256, false);
+
         mappedFile.release();
+        mappedFile2.release();
     }
 
     @After
