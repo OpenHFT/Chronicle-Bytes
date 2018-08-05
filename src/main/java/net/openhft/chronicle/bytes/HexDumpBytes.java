@@ -116,8 +116,11 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     public BytesOut indent(int n) {
         indent += n;
-        if (lineLength() > 0)
+        if (lineLength() > 0) {
             newLine();
+            long wp = this.base.writePosition();
+            appendOffset(wp);
+        }
         return this;
     }
 
@@ -127,23 +130,24 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     private void newLine() {
         if (this.comment.readRemaining() > 0) {
-            while (lineLength() < COMMENT_START - 2)
+            while (lineLength() < COMMENT_START - 3)
                 this.text.append("   ");
             while (lineLength() < COMMENT_START)
                 this.text.append(' ');
-
             this.text.append("# ");
             this.text.append(comment);
             comment.clear();
         }
         this.text.append('\n');
-        appendOffset(this.base.writePosition());
         startOfLine = this.text.writePosition();
     }
 
     private void appendOffset(long offset) {
         if (offsetFormat == null) return;
         offsetFormat.append(offset, this.text);
+        long wp = text.writePosition();
+        if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
+            text.append(' ');
     }
 
     @Override
@@ -488,20 +492,22 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     private void copyToText(long pos) {
-        if (text.writePosition() == 0 && offsetFormat != null) {
-            appendOffset(0L);
+        if (lineLength() == 0 && offsetFormat != null) {
+            appendOffset(pos);
             startOfLine = text.writePosition();
         }
 
-            long end = base.writePosition();
+        long end = base.writePosition();
         if (pos < end) {
             doIndent();
             do {
-                int value = base.readUnsignedByte(pos++);
+                int value = base.readUnsignedByte(pos);
                 if (lineLength() >= COMMENT_START - 1) {
                     newLine();
+                    appendOffset(pos);
                     doIndent();
                 }
+                pos++;
                 long wp = text.writePosition();
                 if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
                     text.append(' ');
