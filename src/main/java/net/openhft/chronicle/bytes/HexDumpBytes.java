@@ -1,11 +1,13 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
+import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -18,9 +20,12 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     private static final int NUMBER_WRAP = 16;
     private static final int COMMENT_START = NUMBER_WRAP * 3;
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
+    private static final Field LONG_VALUE = Jvm.getField(Long.class, "value");
+
     private final Bytes<ByteBuffer> base = Bytes.elasticHeapByteBuffer(128);
     private final Bytes<ByteBuffer> text = Bytes.elasticHeapByteBuffer(128);
     private final Bytes<ByteBuffer> comment = Bytes.elasticHeapByteBuffer(64);
+    private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
     private int indent = 0;
 
@@ -54,6 +59,11 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     public static HexDumpBytes fromText(CharSequence text) {
         return fromText(new StringReader(text.toString()));
+    }
+
+    public HexDumpBytes offsetFormat(OffsetFormat offsetFormat) {
+        this.offsetFormat = offsetFormat;
+        return this;
     }
 
     @Override
@@ -127,7 +137,13 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
             comment.clear();
         }
         this.text.append('\n');
+        appendOffset(this.base.writePosition());
         startOfLine = this.text.writePosition();
+    }
+
+    private void appendOffset(long offset) {
+        if (offsetFormat == null) return;
+        offsetFormat.append(offset, this.text);
     }
 
     @Override
@@ -215,11 +231,13 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     public void reserve() throws IllegalStateException {
         base.reserve();
+        text.reserve();
     }
 
     @Override
     public void release() throws IllegalStateException {
         base.release();
+        text.release();
     }
 
     @Override
@@ -470,7 +488,12 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     private void copyToText(long pos) {
-        long end = base.writePosition();
+        if (text.writePosition() == 0 && offsetFormat != null) {
+            appendOffset(0L);
+            startOfLine = text.writePosition();
+        }
+
+            long end = base.writePosition();
         if (pos < end) {
             doIndent();
             do {
@@ -479,11 +502,9 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
                     newLine();
                     doIndent();
                 }
-                if (lineLength() > 0)
+                if (text.peekUnsignedByte(text.writePosition() - 1) > ' ')
                     text.append(' ');
-                if (value < 16)
-                    text.append('0');
-                text.appendBase(value, 16);
+                text.appendBase16(value, 2);
             } while (pos < end);
         }
     }

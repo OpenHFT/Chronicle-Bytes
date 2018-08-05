@@ -1170,7 +1170,7 @@ enum BytesInternal {
                     appendLong0(out, num);
                     break;
                 case 16:
-                    appendBase16(out, num);
+                    appendBase16(out, num,1);
                     break;
                 default:
                     out.write(Long.toString(num, base));
@@ -1206,14 +1206,14 @@ enum BytesInternal {
     }
 
 
-    public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
+    public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException {
         Bytes b = acquireBytes();
         do {
             int digit = (int) (num & 0xF);
             num >>>= 4;
             b.writeUnsignedByte(HEXADECIMAL[digit]);
-        } while (num > 0);
+        } while (--minDigits > 0 | num > 0);
         for (int i = (int) (b.writePosition() - 1); i >= 0; i--)
             out.writeByte(b.readByte(i));
     }

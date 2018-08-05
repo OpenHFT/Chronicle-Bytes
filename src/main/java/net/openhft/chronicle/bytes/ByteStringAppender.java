@@ -121,7 +121,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
 
     @NotNull
     default B appendBase16(long value) throws BufferOverflowException {
-        BytesInternal.appendBase16(this, value);
+        BytesInternal.appendBase16(this, value, 1);
+        return (B) this;
+    }
+
+    @NotNull
+    default B appendBase16(long value, int minDigits) throws BufferOverflowException {
+        BytesInternal.appendBase16(this, value, minDigits);
         return (B) this;
     }
 

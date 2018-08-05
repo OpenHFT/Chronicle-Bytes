@@ -9,7 +9,8 @@ import static org.junit.Assert.assertTrue;
 public class CASTest {
     @Test
     public void testCAS() {
-        HexDumpBytes bytes = new HexDumpBytes();
+        HexDumpBytes bytes = new HexDumpBytes()
+                .offsetFormat((o, b) -> b.appendBase16(o, 4));
 
         bytes.comment("s32").writeUtf8("s32");
         long s32 = bytes.writePosition();
@@ -26,8 +27,9 @@ public class CASTest {
 
         System.out.println(bytes.toHexString());
 
-        assertEquals("03 73 33 32 ff ff ff 7f                         # s32\n" +
-                        "03 73 36 34 ff ff ff ff ff ff ff 7f             # s64\n",
+        assertEquals("0000 03 73 33 32 ff ff ff 7f                        # s32\n" +
+                        "0008 03 73 36 34 ff ff ff ff ff ff ff 7f            # s64\n" +
+                        "0014",
                 bytes.toHexString());
     }
 }
