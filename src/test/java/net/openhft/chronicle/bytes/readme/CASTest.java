@@ -27,8 +27,8 @@ public class CASTest {
 
         System.out.println(bytes.toHexString());
 
-        assertEquals("0000 03 73 33 32 ff ff ff 7f                        # s32\n" +
-                        "0008 03 73 36 34 ff ff ff ff ff ff ff 7f            # s64\n",
+        assertEquals("0000 03 73 33 32 ff ff ff 7f                         # s32\n" +
+                        "0008 03 73 36 34 ff ff ff ff ff ff ff 7f             # s64\n",
                 bytes.toHexString());
     }
 }
