@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
-    private static final int NUMBER_WRAP = 16;
-    private static final int COMMENT_START = NUMBER_WRAP * 3;
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
     private static final Field LONG_VALUE = Jvm.getField(Long.class, "value");
 
@@ -28,6 +26,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
     private int indent = 0;
+    private int numberWrap = 16;
 
     public HexDumpBytes() {
     }
@@ -63,6 +62,15 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     public HexDumpBytes offsetFormat(OffsetFormat offsetFormat) {
         this.offsetFormat = offsetFormat;
+        return this;
+    }
+
+    public int numberWrap() {
+        return numberWrap;
+    }
+
+    public HexDumpBytes numberWrap(int numberWrap) {
+        this.numberWrap = numberWrap;
         return this;
     }
 
@@ -118,8 +126,6 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
         indent += n;
         if (lineLength() > 0) {
             newLine();
-            long wp = this.base.writePosition();
-            appendOffset(wp);
         }
         return this;
     }
@@ -130,9 +136,9 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     private void newLine() {
         if (this.comment.readRemaining() > 0) {
-            while (lineLength() < COMMENT_START - 3)
+            while (lineLength() < numberWrap * 3 - 3)
                 this.text.append("   ");
-            while (lineLength() < COMMENT_START)
+            while (lineLength() < numberWrap * 3)
                 this.text.append(' ');
             this.text.append("# ");
             this.text.append(comment);
@@ -148,6 +154,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
         long wp = text.writePosition();
         if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
             text.append(' ');
+        startOfLine = text.writePosition();
     }
 
     @Override
@@ -502,10 +509,12 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
             doIndent();
             do {
                 int value = base.readUnsignedByte(pos);
-                if (lineLength() >= COMMENT_START - 1) {
+                long ll = lineLength();
+                if (ll >= numberWrap * 3 - 1) {
                     newLine();
                     appendOffset(pos);
                     doIndent();
+                    startOfLine = text.writePosition();
                 }
                 pos++;
                 long wp = text.writePosition();

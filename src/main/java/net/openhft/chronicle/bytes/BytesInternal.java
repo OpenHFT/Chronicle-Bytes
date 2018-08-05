@@ -1170,7 +1170,7 @@ enum BytesInternal {
                     appendLong0(out, num);
                     break;
                 case 16:
-                    appendBase16(out, num,1);
+                    appendBase16(out, num, 1);
                     break;
                 default:
                     out.write(Long.toString(num, base));
@@ -1208,14 +1208,15 @@ enum BytesInternal {
 
     public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException {
-        Bytes b = acquireBytes();
+        byte[] numberBuffer = NUMBER_BUFFER.get();
+        int len = 0;
         do {
             int digit = (int) (num & 0xF);
             num >>>= 4;
-            b.writeUnsignedByte(HEXADECIMAL[digit]);
+            numberBuffer[len++] = (byte) HEXADECIMAL[digit];
         } while (--minDigits > 0 | num > 0);
-        for (int i = (int) (b.writePosition() - 1); i >= 0; i--)
-            out.writeByte(b.readByte(i));
+        for (int i = len - 1; i >= 0; i--)
+            out.writeByte(numberBuffer[i]);
     }
 
     public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int decimalPlaces)
