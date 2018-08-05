@@ -502,7 +502,8 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
                     newLine();
                     doIndent();
                 }
-                if (text.peekUnsignedByte(text.writePosition() - 1) > ' ')
+                long wp = text.writePosition();
+                if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
                     text.append(' ');
                 text.appendBase16(value, 2);
             } while (pos < end);
