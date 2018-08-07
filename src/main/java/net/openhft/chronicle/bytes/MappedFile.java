@@ -188,7 +188,9 @@ public class MappedFile implements ReferenceCounted {
     public static MappedFile mappedFile(@NotNull File file, long capacity, long chunkSize, long overlapSize, boolean readOnly)
             throws IOException {
         RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
-        raf.setLength(capacity);
+        // Windows throws an exception when setting the length when you re-open
+        if (raf.length() < capacity)
+            raf.setLength(capacity);
         return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
     }
 
