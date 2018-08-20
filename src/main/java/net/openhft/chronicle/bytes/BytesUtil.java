@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.annotation.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -181,7 +182,7 @@ public enum BytesUtil {
     }
 
     public static boolean register(AbstractBytes bytes) {
-        bytesCreated.put(bytes, new Throwable("Created here"));
+        bytesCreated.put(bytes, new StackTrace("Created here"));
         return true;
     }
 

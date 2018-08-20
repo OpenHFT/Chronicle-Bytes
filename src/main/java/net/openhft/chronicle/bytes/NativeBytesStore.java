@@ -52,7 +52,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Nullable
-    private final Throwable createdHere = Jvm.isDebug() ? new Throwable("Created here") : null;
+    private final Throwable createdHere = Jvm.isDebug() ? new StackTrace("Created here") : null;
     /*    static {
             try {
                 last = MappedBytes.mappedBytes(new File("last"), 8);
@@ -534,7 +534,7 @@ public class NativeBytesStore<Underlying>
             LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
         }
         if (releasedHere == null) {
-            assert (releasedHere = new Throwable()) != null;
+            assert (releasedHere = new StackTrace()) != null;
         }
         if (cleaner != null) {
             cleaner.scheduleForClean();
