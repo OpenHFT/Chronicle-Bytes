@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,25 +25,28 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
+import java.util.function.Consumer;
 
 /**
  * @author Rob Austin.
  */
-public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
+public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
 
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
 
     @NotNull
-    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
-        return newInstance(bytesStore, 1);
+    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, long overlap) {
+        return newInstance(bytesStore, 1, overlap);
     }
 
     @NotNull
-    static MultiReaderBytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int numReaders) {
+    static MultiReaderBytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int
+            numReaders, long overlap) {
         try {
             @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
-            final Constructor<MultiReaderBytesRingBuffer> constructor = aClass.getDeclaredConstructor(BytesStore.class, int.class);
-            return constructor.newInstance(bytesStore, numReaders);
+            final Constructor<MultiReaderBytesRingBuffer> constructor = aClass
+                    .getDeclaredConstructor(BytesStore.class, int.class, long.class);
+            return constructor.newInstance(bytesStore, numReaders, overlap);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
@@ -59,14 +63,14 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
                 "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
     }
 
-    static long sizeFor(long capacity) {
-        return sizeFor(capacity, 1);
+    static long sizeFor(long capacity, long overlap) {
+        return sizeFor(capacity, 1, overlap);
     }
 
-    static long sizeFor(long capacity, int numReaders) {
+    static long sizeFor(long capacity, int numReaders, long overlap) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
-            return (long) sizeFor.invoke(null, capacity, numReaders);
+            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class, long.class);
+            return (long) sizeFor.invoke(null, capacity, numReaders, overlap);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
@@ -91,6 +95,20 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     boolean offer(@NotNull BytesStore bytes0);
 
     /**
+     * @param consumer a bytes consumer, when you {@code accept} this message you will write
+     *                 directly into the ring buffer, you don't have to worry about wrapping the
+     *                 ring buffer this is handled for you.
+     * @param length   in order that we ensure that we don't splat any unread messages we must know
+     *                 in advance that we have enough free space to write the message, so ideally
+     *                 the length of the message, or if this is not know in advance the maximum
+     *                 message size, in other-word the message can not be less than this.
+     * @return {@code true} if you where able to write the bytes to the ring bufer, else {@code
+     * false}  indicates nothing was written.
+     */
+    boolean offer(@NotNull Consumer<Bytes> consumer, long length);
+
+
+    /**
      * Retrieves and removes the head of this queue, or returns {@code null} if this queue is
      * empty.
      *
@@ -104,4 +122,5 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer {
     long readRemaining();
 
     boolean isEmpty();
+
 }
