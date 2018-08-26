@@ -11,6 +11,12 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
         this.in = in;
     }
 
+    @Override
+    public MethodReaderBuilder warnMissing(boolean warnMissing) {
+        // always true
+        return this;
+    }
+
     @NotNull
     static BytesParselet createDefaultParselet() {
         return (msg, in) -> {
