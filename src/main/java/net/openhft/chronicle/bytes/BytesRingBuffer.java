@@ -63,14 +63,14 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
                 "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
     }
 
-    static long sizeFor(long capacity, long overlap) {
-        return sizeFor(capacity, 1, overlap);
+    static long sizeFor(long capacity) {
+        return sizeFor(capacity, 1);
     }
 
-    static long sizeFor(long capacity, int numReaders, long overlap) {
+    static long sizeFor(long capacity, int numReaders) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class, long.class);
-            return (long) sizeFor.invoke(null, capacity, numReaders, overlap);
+            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
+            return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
@@ -98,14 +98,10 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * @param consumer a bytes consumer, when you {@code accept} this message you will write
      *                 directly into the ring buffer, you don't have to worry about wrapping the
      *                 ring buffer this is handled for you.
-     * @param length   in order that we ensure that we don't splat any unread messages we must know
-     *                 in advance that we have enough free space to write the message, so ideally
-     *                 the length of the message, or if this is not know in advance the maximum
-     *                 message size, in other-word the message can not be less than this.
      * @return {@code true} if you where able to write the bytes to the ring bufer, else {@code
      * false}  indicates nothing was written.
      */
-    boolean offer(@NotNull Consumer<Bytes> consumer, long length);
+    boolean offer(@NotNull Consumer<Bytes> consumer);
 
 
     /**
