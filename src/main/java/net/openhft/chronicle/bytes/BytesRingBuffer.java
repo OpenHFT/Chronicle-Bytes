@@ -35,18 +35,19 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
 
     @NotNull
-    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, long overlap) {
-        return newInstance(bytesStore, 1, overlap);
+    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
+        return newInstance(bytesStore, 1);
     }
 
     @NotNull
-    static MultiReaderBytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore, int
-            numReaders, long overlap) {
+    static MultiReaderBytesRingBuffer newInstance(
+            @NotNull NativeBytesStore<Void> bytesStore,
+            int numReaders) {
         try {
             @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
             final Constructor<MultiReaderBytesRingBuffer> constructor = aClass
-                    .getDeclaredConstructor(BytesStore.class, int.class, long.class);
-            return constructor.newInstance(bytesStore, numReaders, overlap);
+                    .getDeclaredConstructor(BytesStore.class, int.class);
+            return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
