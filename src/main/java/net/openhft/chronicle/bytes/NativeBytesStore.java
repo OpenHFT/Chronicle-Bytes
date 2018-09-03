@@ -299,6 +299,11 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    public boolean tryReserve() {
+        return refCount.tryReserve();
+    }
+
+    @Override
     @ForceInline
     public byte readByte(long offset) {
         if (Jvm.isDebug()) checkReleased();

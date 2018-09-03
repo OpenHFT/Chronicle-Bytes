@@ -257,6 +257,12 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     @Override
+    public boolean tryReserve() {
+        text.tryReserve();
+        return base.tryReserve();
+    }
+
+    @Override
     @NotNull
     public Bytes<ByteBuffer> writeByte(long offset, byte i8) throws BufferOverflowException {
         throw new UnsupportedOperationException();
