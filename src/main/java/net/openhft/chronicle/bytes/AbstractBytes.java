@@ -474,6 +474,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return refCount.get();
     }
 
+    @Override
+    public boolean tryReserve() {
+        return refCount.tryReserve();
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> writeByte(long offset, byte i) throws BufferOverflowException {
