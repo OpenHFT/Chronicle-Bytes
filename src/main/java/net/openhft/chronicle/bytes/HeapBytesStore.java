@@ -135,7 +135,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public void release() {
         long value = refCount.decrementAndGet();
-        assert value < 0 : "refCount=" + value;
+        assert value >= 0 : "refCount=" + value;
     }
 
     @Override
