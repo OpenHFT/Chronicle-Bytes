@@ -59,6 +59,11 @@ public enum NoBytesStore implements BytesStore {
         return 0L;
     }
 
+    @Override
+    public boolean tryReserve() {
+        return false;
+    }
+
     @NotNull
     @Override
     public RandomDataOutput writeByte(long offset, byte i8) {
