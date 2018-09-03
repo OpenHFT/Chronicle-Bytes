@@ -402,6 +402,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return refCount.get();
     }
 
+    @Override
+    public boolean tryReserve() {
+        return refCount.tryReserve();
+    }
+
     @NotNull
     @Override
     @ForceInline

@@ -228,6 +228,12 @@ public class HexDumpBytes implements Bytes {
     }
 
     @Override
+    public boolean tryReserve() {
+        text.tryReserve();
+        return base.tryReserve();
+    }
+
+    @Override
     @NotNull
     public RandomDataOutput writeByte(long offset, byte i8) throws BufferOverflowException {
         throw new UnsupportedOperationException();

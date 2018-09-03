@@ -352,6 +352,11 @@ public class MappedFile implements ReferenceCounted {
         return refCount.get();
     }
 
+    @Override
+    public boolean tryReserve() {
+        return refCount.tryReserve();
+    }
+
     private void performRelease() {
         try {
             for (int i = 0; i < stores.size(); i++) {

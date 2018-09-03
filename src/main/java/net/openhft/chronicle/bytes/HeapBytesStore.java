@@ -134,12 +134,24 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public void release() {
-        refCount.decrementAndGet();
+        long value = refCount.decrementAndGet();
+        assert value < 0 : "refCount=" + value;
     }
 
     @Override
     public long refCount() {
         return refCount.get();
+    }
+
+    @Override
+    public boolean tryReserve() {
+        for (; ; ) {
+            long value = refCount.get();
+            if (value <= 0)
+                return false;
+            if (refCount.compareAndSet(value, value + 1))
+                return true;
+        }
     }
 
     @Override
