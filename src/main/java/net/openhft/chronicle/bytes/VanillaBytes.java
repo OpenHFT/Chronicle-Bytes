@@ -400,6 +400,9 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @NotNull
     public String toString() {
+        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 2))
+            return "Not Available";
+
         return bytesStore instanceof NativeBytesStore
                 ? toString2((NativeBytesStore) bytesStore)
                 : toString0();

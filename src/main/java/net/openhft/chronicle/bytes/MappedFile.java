@@ -23,15 +23,20 @@ import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.nio.ch.Interruptible;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
+import java.lang.reflect.Proxy;
+import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
+import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
@@ -70,7 +75,43 @@ public class MappedFile implements ReferenceCounted {
         this.capacity = capacity;
         this.readOnly = readOnly;
 
+        if (Jvm.isJava9Plus())
+            doNotCloseOnInterrupt9(this.fileChannel);
+        else
+            doNotCloseOnInterrupt(this.fileChannel);
+
         assert registerMappedFile(this);
+    }
+
+    private void doNotCloseOnInterrupt(FileChannel fc) {
+        try {
+            Field field = AbstractInterruptibleChannel.class
+                    .getDeclaredField("interruptor");
+            field.setAccessible(true);
+            field.set(fc, (Interruptible) thread
+                    -> System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt"));
+        } catch (Throwable e) {
+            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
+        }
+    }
+
+    // based on a solution by https://stackoverflow.com/users/9199167/max-vollmer
+    // https://stackoverflow.com/a/52262779/57695
+    private void doNotCloseOnInterrupt9(FileChannel fc) {
+        try {
+            Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
+            Class<?> interruptibleClass = field.getType();
+            field.setAccessible(true);
+            field.set(fc, Proxy.newProxyInstance(
+                    interruptibleClass.getClassLoader(),
+                    new Class[]{interruptibleClass},
+                    (p, m, a) -> {
+                        System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt");
+                        return null;
+                    }));
+        } catch (Throwable e) {
+            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
+        }
     }
 
     private static void logNewChunk(String filename, int chunk, long delayMicros) {
@@ -438,8 +479,22 @@ public class MappedFile implements ReferenceCounted {
         try {
             return fileChannel.size();
 
+        } catch (ArrayIndexOutOfBoundsException aiooe) {
+            throw new IllegalStateException(aiooe);
+
+        } catch (ClosedByInterruptException cbie) {
+            closed.set(true);
+            Thread.currentThread().interrupt();
+            throw new IllegalStateException(cbie);
+
         } catch (IOException e) {
-            throw fileChannel.isOpen() ? new IORuntimeException(e) : new IllegalStateException(e);
+            boolean open = fileChannel.isOpen();
+            if (open) {
+                throw new IORuntimeException(e);
+            } else {
+                closed.set(true);
+                throw new IllegalStateException(e);
+            }
         }
     }
 

@@ -300,7 +300,7 @@ public class MappedBytesTest {
         mappedBytes.release();
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void interrupted() throws FileNotFoundException {
         Thread.currentThread().interrupt();
         File file = new File(OS.TARGET + "/interrupted-" + System.nanoTime());
@@ -308,6 +308,7 @@ public class MappedBytesTest {
         MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10);
         try {
             mb.realCapacity();
+            assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             mb.release();
         }
