@@ -476,15 +476,17 @@ public class MappedFile implements ReferenceCounted {
     }
 
     public long actualSize() throws IORuntimeException {
+        boolean interrupted = Thread.interrupted();
         try {
             return fileChannel.size();
 
         } catch (ArrayIndexOutOfBoundsException aiooe) {
-            throw new IllegalStateException(aiooe);
+            // try again.
+            return actualSize();
 
         } catch (ClosedByInterruptException cbie) {
             closed.set(true);
-            Thread.currentThread().interrupt();
+            interrupted = true;
             throw new IllegalStateException(cbie);
 
         } catch (IOException e) {
@@ -495,6 +497,9 @@ public class MappedFile implements ReferenceCounted {
                 closed.set(true);
                 throw new IllegalStateException(e);
             }
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
         }
     }
 
