@@ -14,4 +14,8 @@ public interface RingBufferReader extends RingBufferReaderStats {
     boolean isEmpty();
 
     boolean isClosed();
+
+    long startRead(BytesOut b);
+
+    void endRead(long next);
 }
