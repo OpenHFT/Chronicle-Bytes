@@ -9,4 +9,5 @@ public interface MultiReaderBytesRingBuffer extends BytesRingBuffer {
 
     @NotNull
     RingBufferReader createReader();
+
 }

@@ -9,5 +9,9 @@ public interface RingBufferReader extends RingBufferReaderStats {
 
     boolean read(@NotNull final BytesOut using);
 
+    boolean readDataDocument(@NotNull final BytesOut using);
+
     boolean isEmpty();
+
+    boolean isClosed();
 }
