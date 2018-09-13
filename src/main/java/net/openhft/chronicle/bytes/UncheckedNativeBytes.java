@@ -298,6 +298,12 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        writeCheckOffset(offset, 4);
+        bytesStore.testAndSetInt(offset, expected, value);
+    }
+
+    @Override
     @ForceInline
     public boolean compareAndSwapLong(long offset, long expected, long value)
             throws BufferOverflowException {

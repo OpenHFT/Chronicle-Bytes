@@ -266,6 +266,12 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        throw new UnsupportedOperationException();
+    }
+
+
+    @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         throw new UnsupportedOperationException();
     }

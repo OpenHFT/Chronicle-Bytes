@@ -220,6 +220,13 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        long off = offset & 0xFFFFFFFFL;
+        base.testAndSetInt(off, expected, value);
+        copyToText(off, offset >>> 32, 4);
+    }
+
+    @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         if (base.compareAndSwapLong(offset & 0xFFFFFFFFL, expected, value)) {
             copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);

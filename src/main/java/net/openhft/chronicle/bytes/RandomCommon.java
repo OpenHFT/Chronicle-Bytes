@@ -145,6 +145,7 @@ interface RandomCommon extends ReferenceCounted {
     boolean compareAndSwapInt(long offset, int expected, int value)
             throws BufferOverflowException;
 
+    void testAndSetInt(long offset, int expected, int value);
     /**
      * Perform a 64-bit CAS at a given offset.
      *

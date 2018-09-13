@@ -260,6 +260,11 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        memory.testAndSetInt(address + translate(offset), offset, expected, value);
+    }
+
+    @Override
     @ForceInline
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
