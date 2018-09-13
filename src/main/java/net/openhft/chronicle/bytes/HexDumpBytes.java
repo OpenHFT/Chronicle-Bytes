@@ -482,8 +482,13 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     public Bytes<ByteBuffer> writeSkip(long bytesToSkip) throws BufferOverflowException {
-        base.writeSkip(bytesToSkip);
-        return this;
+        long pos = base.writePosition();
+        try {
+            base.writeSkip(bytesToSkip);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
     }
 
     @Override

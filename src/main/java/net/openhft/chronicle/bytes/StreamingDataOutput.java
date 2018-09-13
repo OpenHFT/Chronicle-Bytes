@@ -56,6 +56,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @org.jetbrains.annotations.NotNull
     S writeSkip(long bytesToSkip) throws BufferOverflowException;
 
+    default S alignBy(int width) {
+        return writeSkip((-writePosition()) & (width - 1));
+    }
+
     /**
      * @return Bytes as an OutputStream
      */
