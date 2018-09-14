@@ -125,6 +125,7 @@ public class BytesMethodWriterBuilderTest {
 
         assertEquals(expected,
                 out.toString().replaceAll("\r", ""));
+        bytes.release();
     }
 
 }
