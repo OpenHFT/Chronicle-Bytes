@@ -53,7 +53,7 @@ public class BytesMarshaller<T> {
         for (@NotNull Field field : clazz.getDeclaredFields()) {
             if ((field.getModifiers() & (Modifier.STATIC | Modifier.TRANSIENT)) != 0)
                 continue;
-            field.setAccessible(true);
+            Jvm.setAccessible(field);
             map.put(field.getName(), field);
         }
     }

@@ -87,7 +87,7 @@ public class MappedFile implements ReferenceCounted {
         try {
             Field field = AbstractInterruptibleChannel.class
                     .getDeclaredField("interruptor");
-            field.setAccessible(true);
+            Jvm.setAccessible(field);
             field.set(fc, (Interruptible) thread
                     -> System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt"));
         } catch (Throwable e) {
@@ -101,7 +101,7 @@ public class MappedFile implements ReferenceCounted {
         try {
             Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
             Class<?> interruptibleClass = field.getType();
-            field.setAccessible(true);
+            Jvm.setAccessible(field);
             field.set(fc, Proxy.newProxyInstance(
                     interruptibleClass.getClassLoader(),
                     new Class[]{interruptibleClass},
