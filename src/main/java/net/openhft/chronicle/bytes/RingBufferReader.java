@@ -9,9 +9,18 @@ public interface RingBufferReader extends RingBufferReaderStats {
 
     boolean isClosed();
 
-    long startRead(Bytes b);
+    /**
+     * the readPosition and readLimit will be adjusted so that the client can read the data
+     *
+     * @param bytes who's byteStore must be the ring buffer,
+     * @return nextReadPosition which should be passed to {@link RingBufferReader#afterRead(long)}
+     */
+    long beforeRead(Bytes bytes);
 
-    void endRead(long next);
+    void afterRead(long next);
 
+    /**
+     * @return the byteStore which backs the ring buffer
+     */
     BytesStore byteStore();
 }
