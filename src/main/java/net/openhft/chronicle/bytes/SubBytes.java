@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-class SubBytes<Underlying> extends VanillaBytes<Underlying> {
+public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private final long start;
     private final long capacity;
 
