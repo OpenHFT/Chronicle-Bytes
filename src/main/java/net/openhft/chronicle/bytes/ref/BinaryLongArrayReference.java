@@ -15,8 +15,8 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,7 +33,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
 /**
  * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
  */
-public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
+public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     private static final long CAPACITY = 0;
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
@@ -41,7 +41,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     @Nullable
-    private long length = VALUES;
+    private long length = 16;
 
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -76,8 +76,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     public static long peakLength(@NotNull BytesStore bytes, long offset) throws BufferUnderflowException {
-        final long capacity = bytes.readLong(offset);
-        assert capacity > 0 : "capacity too small";
+        final long capacity = bytes.readLong(offset + CAPACITY);
+        assert capacity > 0 : "capacity too small " + capacity;
         return (capacity << 3) + VALUES;
     }
 
@@ -129,6 +129,35 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         assert (offset & 7) == 0 : "offset=" + offset;
         super.bytesStore(bytes, (offset + 7) & ~7, length);
         this.length = length;
+    }
+
+    @Override
+    public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        long position = bytes.readPosition();
+        long capacity = bytes.readLong();
+        long used = bytes.readLong();
+        if (capacity < 0 || capacity > bytes.readRemaining() >> 3)
+            throw new IORuntimeException("Corrupt used capacity");
+
+        if (used < 0 || used > capacity)
+            throw new IORuntimeException("Corrupt used value");
+
+        bytes.readSkip(capacity * 8);
+        long length = bytes.readPosition() - position;
+        bytesStore(((Bytes) bytes).bytesStore(), position, length);
+    }
+
+    @Override
+    public void writeMarshallable(BytesOut bytes) {
+        BytesStore bytesStore = bytesStore();
+        if (bytesStore == null) {
+            long capacity = getCapacity();
+            bytes.writeLong(capacity);
+            bytes.writeLong(0);
+            bytes.writeSkip(capacity * 8);
+        } else {
+            bytes.write(bytesStore, offset, 2 * 8 + length * 8);
+        }
     }
 
     @Override
@@ -188,6 +217,18 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @Override
     public long sizeInBytes(long capacity) {
         return (capacity << 3) + VALUES;
+    }
+
+    @Override
+    public ByteableLongArrayValues capacity(long arrayLength) {
+        BytesStore bytesStore = bytesStore();
+        long length = sizeInBytes(arrayLength);
+        if (bytesStore == null) {
+            this.length = length;
+        } else {
+            assert this.length == length;
+        }
+        return this;
     }
 
     @Override
