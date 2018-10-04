@@ -167,28 +167,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
-/*
-    public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
-            throws BufferOverflowException, BufferUnderflowException {
-        if (readOffset + length <= bytes.realCapacity() && length <= 80)
-            writeLittle(writeOffset, bytes, readOffset, length);
-        else
-            write0(writeOffset, bytes, readOffset, length);
-        return this;
-    }
-
-    private void writeLittle(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
-        writeCheckOffset(writeOffset, (length + 7) & ~7);
-        while (length > 0) {
-            long read = bytes.readLong(readOffset);
-            bytesStore.writeLong(writeOffset, read);
-            length -= 8;
-            readOffset += 8;
-            writeOffset += 8;
-        }
-    }
-*/
-
     public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
 
@@ -418,7 +396,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
         if (bytesStore instanceof NoBytesStore ||
                 bytesToSkip != (int) bytesToSkip ||
-                !((BytesStore) bytesStore).inside(readPosition, (int) bytesToSkip)) {
+                !bytesStore.inside(readPosition, (int) bytesToSkip)) {
             acquireNextByteStore0(check, false);
         }
         this.readPosition += bytesToSkip;
