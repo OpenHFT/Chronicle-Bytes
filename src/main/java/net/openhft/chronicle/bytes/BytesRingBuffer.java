@@ -60,7 +60,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     static Class<MultiReaderBytesRingBuffer> clazz() throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
         return (Class<MultiReaderBytesRingBuffer>) Class.forName(
-                "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
+                "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
 
     static long sizeFor(long capacity) {
@@ -69,7 +69,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
     static long sizeFor(long capacity, int numReaders) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
+            //noinspection AccessStaticViaInstance
+            final Method sizeFor = Class.forName(
+                    "software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);
             return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
