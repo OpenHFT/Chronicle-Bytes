@@ -147,7 +147,7 @@ public class MappedFileTest {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void interrupted() throws FileNotFoundException {
         Thread.currentThread().interrupt();
         String filename = OS.TARGET + "/interrupted-" + System.nanoTime();
@@ -155,6 +155,7 @@ public class MappedFileTest {
         MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0);
         try {
             mf.actualSize();
+            assertTrue(Thread.currentThread().isInterrupted());
         } finally {
             mf.release();
         }

@@ -171,6 +171,11 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        MEMORY.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
+    }
+
+    @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         return MEMORY.compareAndSwapLong(
                 realUnderlyingObject, dataOffset + offset, expected, value);

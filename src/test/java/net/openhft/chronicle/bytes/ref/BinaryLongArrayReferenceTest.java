@@ -16,6 +16,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesMarshallable;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -54,5 +55,29 @@ public class BinaryLongArrayReferenceTest {
         for (int i = 0; i < 128; i++)
             assertEquals(i + 1, array.getValueAt(i));
         bytes.release();
+    }
+
+    @Test
+    public void marshallable() {
+        Bytes bytes = Bytes.allocateElasticDirect(256);
+        LongArrays la = new LongArrays(4, 8);
+        la.writeMarshallable(bytes);
+        System.out.println(bytes.toHexString());
+
+        LongArrays la2 = new LongArrays(0, 0);
+        la2.readMarshallable(bytes);
+        assertEquals(4, la2.first.getCapacity());
+        assertEquals(8, la2.second.getCapacity());
+        bytes.release();
+    }
+
+    static class LongArrays implements BytesMarshallable {
+        BinaryLongArrayReference first = new BinaryLongArrayReference();
+        BinaryLongArrayReference second = new BinaryLongArrayReference();
+
+        public LongArrays(int firstLength, int secondLength) {
+            first.capacity(firstLength);
+            second.capacity(secondLength);
+        }
     }
 }

@@ -13,10 +13,12 @@ public class CASTest {
                 .offsetFormat((o, b) -> b.appendBase16(o, 4));
 
         bytes.comment("s32").writeUtf8("s32");
+        bytes.alignBy(4);
         long s32 = bytes.writePosition();
         bytes.writeInt(0);
 
         bytes.comment("s64").writeUtf8("s64");
+        bytes.alignBy(8);
         long s64 = bytes.writePosition();
         bytes.writeLong(0);
 
@@ -28,7 +30,8 @@ public class CASTest {
         System.out.println(bytes.toHexString());
 
         assertEquals("0000 03 73 33 32 ff ff ff 7f                         # s32\n" +
-                        "0008 03 73 36 34 ff ff ff ff ff ff ff 7f             # s64\n",
+                        "0008 03 73 36 34 00 00 00 00 ff ff ff ff ff ff ff 7f # s64\n",
                 bytes.toHexString());
+        bytes.release();
     }
 }

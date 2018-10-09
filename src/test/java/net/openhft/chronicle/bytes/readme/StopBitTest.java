@@ -34,5 +34,6 @@ public class StopBitTest {
         }
 
         System.out.println(bytes.toHexString());
+        bytes.release();
     }
 }

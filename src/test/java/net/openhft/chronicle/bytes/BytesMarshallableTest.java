@@ -291,6 +291,7 @@ public class BytesMarshallableTest {
                         "   00 9a 99 99 99 99 99 01 40 16 00 00 00 00 00 00\n" +
                         "   00 02 07 52 55 4e 54 49 4d 45 05 43 4c 41 53 53 # policies\n" +
                         "   03 01 00 00 00 0c 00 00 00 7b 00 00 00          # numbers\n", bytes.toHexString());
+        bytes.release();
     }
 
     @Test
@@ -320,6 +321,7 @@ public class BytesMarshallableTest {
                 "      05 68 65 6c 6c 6f                               # text\n" +
                 "                                                # bm3\n" +
                 "      d2 02 96 49 00 00 00 00                         # value\n", bm1.toString());
+        bytes.release();
     }
 
     static class MyCollections implements BytesMarshallable {

@@ -102,6 +102,17 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
+    public ByteableLongArrayValues capacity(long arrayLength) {
+        BytesStore bytesStore = bytesStore();
+        long length = sizeInBytes(arrayLength);
+        if (bytesStore == null) {
+            this.length = length;
+        } else {
+            assert this.length == length;
+        }
+        return this;
+    }
+    @Override
     public long getValueAt(long index) {
         return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
     }

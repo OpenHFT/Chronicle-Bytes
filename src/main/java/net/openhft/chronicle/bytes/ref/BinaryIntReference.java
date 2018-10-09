@@ -46,7 +46,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @Override
     public int getValue() {
-        return bytes.readInt(offset);
+        return bytes == null ? 0 : bytes.readInt(offset);
     }
 
     @Override

@@ -53,4 +53,8 @@ public abstract class AbstractReference implements Byteable, Closeable {
             this.bytes = null;
         }
     }
+
+    public long address() {
+        return bytesStore().addressForRead(offset);
+    }
 }

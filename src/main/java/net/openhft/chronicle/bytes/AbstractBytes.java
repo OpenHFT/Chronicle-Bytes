@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -165,6 +166,12 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
         writeCheckOffset(offset, 4);
         return bytesStore.compareAndSwapInt(offset, expected, value);
+    }
+
+    @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        writeCheckOffset(offset, 4);
+        bytesStore.testAndSetInt(offset, expected, value);
     }
 
     @Override
@@ -952,6 +959,8 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public String toString() {
+        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 2))
+            return "Not Available";
         try {
             return BytesInternal.toString(this);
         } catch (Exception e) {

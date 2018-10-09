@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
-import java.util.function.Consumer;
 
 /**
  * @author Rob Austin.
@@ -61,7 +60,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     static Class<MultiReaderBytesRingBuffer> clazz() throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
         return (Class<MultiReaderBytesRingBuffer>) Class.forName(
-                "software.chronicle.enterprise.queue.EnterpriseRingBuffer");
+                "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
 
     static long sizeFor(long capacity) {
@@ -70,7 +69,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
     static long sizeFor(long capacity, int numReaders) {
         try {
-            final Method sizeFor = clazz().getMethod("sizeFor", long.class, int.class);
+            //noinspection AccessStaticViaInstance
+            final Method sizeFor = Class.forName(
+                    "software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);
             return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
@@ -96,16 +97,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     boolean offer(@NotNull BytesStore bytes0);
 
     /**
-     * @param consumer a bytes consumer, when you {@code accept} this message you will write
-     *                 directly into the ring buffer, you don't have to worry about wrapping the
-     *                 ring buffer this is handled for you.
-     * @return {@code true} if you where able to write the bytes to the ring bufer, else {@code
-     * false}  indicates nothing was written.
-     */
-    boolean offer(@NotNull Consumer<Bytes> consumer);
-
-
-    /**
      * Retrieves and removes the head of this queue, or returns {@code null} if this queue is
      * empty.
      *
@@ -114,10 +105,11 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * @throws BufferOverflowException is the {@code using} buffer is not large enough
      */
     @Override
-    boolean read(@NotNull BytesOut using) throws BufferOverflowException;
+    boolean read(@NotNull BytesOut using);
 
     long readRemaining();
 
     boolean isEmpty();
 
+    BytesStore bytesStore();
 }

@@ -70,7 +70,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public long getValue() {
-        return bytes.readLong(offset);
+        return bytes == null ? 0L : bytes.readLong(offset);
     }
 
     @Override

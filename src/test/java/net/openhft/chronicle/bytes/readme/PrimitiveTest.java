@@ -56,6 +56,7 @@ public class PrimitiveTest {
         assertEquals(8, s64);
         assertEquals(9, f32, 0.0);
         assertEquals(10, f64, 0.0);
+        bytes.release();
     }
 
     @Test

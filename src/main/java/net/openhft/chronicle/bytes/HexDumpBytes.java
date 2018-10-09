@@ -1,27 +1,24 @@
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.Reader;
 import java.io.StringReader;
-import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-public class HexDumpBytes implements Bytes<ByteBuffer> {
+public class HexDumpBytes implements Bytes<Void> {
 
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
-    private static final Field LONG_VALUE = Jvm.getField(Long.class, "value");
 
-    private final Bytes<ByteBuffer> base = Bytes.elasticHeapByteBuffer(128);
-    private final Bytes<ByteBuffer> text = Bytes.elasticHeapByteBuffer(128);
+    private final NativeBytes<Void> base = Bytes.allocateElasticDirect(128);
+    private final Bytes<ByteBuffer> text = Bytes.elasticHeapByteBuffer(512);
     private final Bytes<ByteBuffer> comment = Bytes.elasticHeapByteBuffer(64);
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
@@ -108,7 +105,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     @Override
-    public Bytes<ByteBuffer> comment(CharSequence comment) {
+    public Bytes<Void> comment(CharSequence comment) {
         if (this.comment.readRemaining() > 0 || comment.length() == 0)
             newLine();
         if (comment.length() > 0 && comment.charAt(0) == '#') {
@@ -220,6 +217,13 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     }
 
     @Override
+    public void testAndSetInt(long offset, int expected, int value) {
+        long off = offset & 0xFFFFFFFFL;
+        base.testAndSetInt(off, expected, value);
+        copyToText(off, offset >>> 32, 4);
+    }
+
+    @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         if (base.compareAndSwapLong(offset & 0xFFFFFFFFL, expected, value)) {
             copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
@@ -230,8 +234,8 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @Nullable
-    public ByteBuffer underlyingObject() {
-        return base.underlyingObject();
+    public Void underlyingObject() {
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -264,31 +268,31 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeByte(long offset, byte i8) throws BufferOverflowException {
+    public Bytes<Void> writeByte(long offset, byte i8) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeShort(long offset, short i) throws BufferOverflowException {
+    public Bytes<Void> writeShort(long offset, short i) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeInt24(long offset, int i) throws BufferOverflowException {
+    public Bytes<Void> writeInt24(long offset, int i) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeInt(long offset, int i) throws BufferOverflowException {
+    public Bytes<Void> writeInt(long offset, int i) throws BufferOverflowException {
         return writeOrderedInt(offset, i);
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeOrderedInt(long offset, int i) throws BufferOverflowException {
+    public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         base.writeOrderedInt(offset & 0xFFFFFFFFL, i);
         copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
         return this;
@@ -296,55 +300,55 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeLong(long offset, long i) throws BufferOverflowException {
+    public Bytes<Void> writeLong(long offset, long i) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeOrderedLong(long offset, long i) throws BufferOverflowException {
+    public Bytes<Void> writeOrderedLong(long offset, long i) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeFloat(long offset, float d) throws BufferOverflowException {
+    public Bytes<Void> writeFloat(long offset, float d) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeDouble(long offset, double d) throws BufferOverflowException {
+    public Bytes<Void> writeDouble(long offset, double d) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
+    public Bytes<Void> writeVolatileByte(long offset, byte i8) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeVolatileShort(long offset, short i16) throws BufferOverflowException {
+    public Bytes<Void> writeVolatileShort(long offset, short i16) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeVolatileInt(long offset, int i32) throws BufferOverflowException {
+    public Bytes<Void> writeVolatileInt(long offset, int i32) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeVolatileLong(long offset, long i64) throws BufferOverflowException {
+    public Bytes<Void> writeVolatileLong(long offset, long i64) throws BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+    public Bytes<Void> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         throw new UnsupportedOperationException();
     }
 
@@ -355,7 +359,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> write(long writeOffset, RandomDataInput bytes, long readOffset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
+    public Bytes<Void> write(long writeOffset, RandomDataInput bytes, long readOffset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
@@ -366,20 +370,20 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> readPosition(long position) throws BufferUnderflowException {
+    public Bytes<Void> readPosition(long position) throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> readLimit(long limit) throws BufferUnderflowException {
+    public Bytes<Void> readLimit(long limit) throws BufferUnderflowException {
         base.readLimit(limit);
         return this;
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> readSkip(long bytesToSkip) throws BufferUnderflowException {
+    public Bytes<Void> readSkip(long bytesToSkip) throws BufferUnderflowException {
         base.readSkip(bytesToSkip);
         return this;
     }
@@ -466,7 +470,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writePosition(long position) throws BufferOverflowException {
+    public Bytes<Void> writePosition(long position) throws BufferOverflowException {
         base.writePosition(position);
         return this;
     }
@@ -474,22 +478,27 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeLimit(long limit) throws BufferOverflowException {
+    public Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
         base.writeLimit(limit);
         return this;
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> writeSkip(long bytesToSkip) throws BufferOverflowException {
-        base.writeSkip(bytesToSkip);
-        return this;
+    public Bytes<Void> writeSkip(long bytesToSkip) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeSkip(bytesToSkip);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
     }
 
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeByte(byte i8) throws BufferOverflowException {
+    public Bytes<Void> writeByte(byte i8) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeByte(i8);
@@ -554,7 +563,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeShort(short i16) throws BufferOverflowException {
+    public Bytes<Void> writeShort(short i16) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeShort(i16);
@@ -568,7 +577,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeInt(int i) throws BufferOverflowException {
+    public Bytes<Void> writeInt(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeInt(i);
@@ -582,7 +591,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeIntAdv(int i, int advance) throws BufferOverflowException {
+    public Bytes<Void> writeIntAdv(int i, int advance) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeIntAdv(i, advance);
@@ -596,7 +605,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeLong(long i64) throws BufferOverflowException {
+    public Bytes<Void> writeLong(long i64) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeLong(i64);
@@ -610,7 +619,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeLongAdv(long i64, int advance) throws BufferOverflowException {
+    public Bytes<Void> writeLongAdv(long i64, int advance) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeLongAdv(i64, advance);
@@ -624,7 +633,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeFloat(float f) throws BufferOverflowException {
+    public Bytes<Void> writeFloat(float f) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeFloat(f);
@@ -638,7 +647,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeDouble(double d) throws BufferOverflowException {
+    public Bytes<Void> writeDouble(double d) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeDouble(d);
@@ -652,7 +661,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeDoubleAndInt(double d, int i) throws BufferOverflowException {
+    public Bytes<Void> writeDoubleAndInt(double d, int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeDouble(d);
@@ -667,7 +676,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+    public Bytes<Void> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
             base.write(bytes, offset, length);
@@ -681,7 +690,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeSome(ByteBuffer buffer) throws BufferOverflowException {
+    public Bytes<Void> writeSome(ByteBuffer buffer) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeSome(buffer);
@@ -695,7 +704,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeOrderedInt(int i) throws BufferOverflowException {
+    public Bytes<Void> writeOrderedInt(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeOrderedInt(i);
@@ -709,7 +718,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     @Override
     @NotNull
     @net.openhft.chronicle.core.annotation.NotNull
-    public Bytes<ByteBuffer> writeOrderedLong(long i) throws BufferOverflowException {
+    public Bytes<Void> writeOrderedLong(long i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.writeOrderedLong(i);
@@ -733,7 +742,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> clearAndPad(long length) throws BufferOverflowException {
+    public Bytes<Void> clearAndPad(long length) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
             base.clearAndPad(length);
@@ -746,37 +755,37 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewrite(byte[] bytes) {
+    public Bytes<Void> prewrite(byte[] bytes) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewrite(BytesStore bytes) {
+    public Bytes<Void> prewrite(BytesStore bytes) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewriteByte(byte b) {
+    public Bytes<Void> prewriteByte(byte b) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewriteShort(short i) {
+    public Bytes<Void> prewriteShort(short i) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewriteInt(int i) {
+    public Bytes<Void> prewriteInt(int i) {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<ByteBuffer> prewriteLong(long l) {
+    public Bytes<Void> prewriteLong(long l) {
         throw new UnsupportedOperationException();
     }
 
@@ -854,6 +863,7 @@ public class HexDumpBytes implements Bytes<ByteBuffer> {
     public boolean lenient() {
         return base.lenient();
     }
+
 
     private static class TextBytesReader extends Reader {
         private final Reader reader;

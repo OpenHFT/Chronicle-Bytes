@@ -33,7 +33,7 @@ public class BytesMethodReader implements MethodReader {
     }
 
     private void addEncoder(Object object, Method method, MethodEncoder encoder) {
-        method.setAccessible(true);
+        Jvm.setAccessible(method);
         Class<?>[] parameterTypes = method.getParameterTypes();
         int count = parameterTypes.length;
         BytesMarshallable[][] array = new BytesMarshallable[1][count];

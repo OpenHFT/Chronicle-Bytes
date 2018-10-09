@@ -378,15 +378,13 @@ enum BytesInternal {
                 bue.initCause(new IllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
                 throw bue;
             }
-            @org.jetbrains.annotations.NotNull NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
-            long address = nbs.address + nbs.translate(bytes.readPosition());
-            @org.jetbrains.annotations.Nullable Memory memory = nbs.memory;
+            long readPosition = bytes.readPosition();
             sb.ensureCapacity(utflen);
 
             if (Jvm.isJava9Plus()) {
                 sb.setLength(utflen);
                 while (count < utflen) {
-                    byte c = memory.readByte(address + count);
+                    byte c = bytes.readByte(readPosition + count);
                     if (c < 0)
                         break;
                     sb.setCharAt(count++, (char) c); // This is not as fast as it could be.
@@ -394,7 +392,7 @@ enum BytesInternal {
             } else {
                 char[] chars = extractChars(sb);
                 while (count < utflen) {
-                    int c = memory.readByte(address + count);
+                    int c = bytes.readByte(readPosition + count);
                     if (c < 0)
                         break;
                     chars[count++] = (char) c;
