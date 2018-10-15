@@ -79,8 +79,7 @@ public enum BytesUtil {
             i += 2L;
         }
         if (i < len)
-            if (a.readByte(offset + i) != second.readByte(secondOffset + i))
-                return false;
+            return a.readByte(offset + i) == second.readByte(secondOffset + i);
         return true;
     }
 
@@ -209,4 +208,24 @@ public enum BytesUtil {
     public static boolean byteToBoolean(byte b) {
         return b != 0 && b != 'N' && b != 'n';
     }
+
+    public static long roundUpTo64ByteAlign(long x) {
+        return (x + 63L) & ~63L;
+    }
+
+    public static long roundUpTo8ByteAlign(long x) {
+        return (x + 7L) & ~7L;
+    }
+
+    public static void read8ByteAlignPadding(Bytes<?> bytes) {
+        bytes.readPosition(roundUpTo8ByteAlign(bytes.readPosition()));
+    }
+
+    public static void write8ByteAlignPadding(Bytes<?> bytes) {
+        long start = bytes.writePosition();
+        long end = roundUpTo8ByteAlign(start);
+        bytes.writePosition(end);
+        bytes.zeroOut(start, end);
+    }
+
 }
