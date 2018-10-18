@@ -207,7 +207,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     @Override
-    public MappedBytes write(@NotNull BytesStore bytes)
+    public MappedBytes write(@NotNull RandomDataInput bytes)
             throws BufferOverflowException {
         assert singleThreadedAccess();
         assert bytes != this : "you should not write to yourself !";
@@ -218,7 +218,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @NotNull
-    public MappedBytes write(long offsetInRDO, @NotNull BytesStore bytes)
+    public MappedBytes write(long offsetInRDO, @NotNull RandomDataInput bytes)
             throws BufferOverflowException {
         write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
         return this;
@@ -469,17 +469,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return backingFileIsReadOnly;
     }
 
-    @NotNull
-    @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         assert singleThreadedAccess();
         if (length == 8) {
             writeLong(bytes.readLong(offset));
-
-        } else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize())) {
-            rawCopy(bytes, offset, length);
-
+        } else if (bytes instanceof BytesStore && bytes.isDirectMemory() && length <= Math.min
+                (writeRemaining(), safeCopySize())) {
+            rawCopy((BytesStore) bytes, offset, length);
         } else if (length > 0) {
             BytesInternal.writeFully(bytes, offset, length, this);
         }

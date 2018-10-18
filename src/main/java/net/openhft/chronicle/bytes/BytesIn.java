@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public interface BytesIn<Underlying> extends
         StreamingDataInput<Bytes<Underlying>>,
+        RandomDataInput,
         ByteStringParser<Bytes<Underlying>> {
     /**
      * Reads messages from this tails as methods.  It returns a BooleanSupplier which returns
@@ -46,7 +47,7 @@ public interface BytesIn<Underlying> extends
 
     default <T> T readObject(Class<T> componentType) {
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
-            BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance((Class<T>) componentType);
+            BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);
             bm.readMarshallable(this);
             return (T) bm;
         }
