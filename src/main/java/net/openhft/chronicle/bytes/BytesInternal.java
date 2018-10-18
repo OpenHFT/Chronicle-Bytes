@@ -117,8 +117,7 @@ enum BytesInternal {
             i += 2;
         }
         if (i < length) {
-            if (a.readByte(aPos + i) != b.readByte(bPos + i))
-                return false;
+            return a.readByte(aPos + i) == b.readByte(bPos + i);
 //            i ++;
         }
         return true;
@@ -2515,7 +2514,7 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
     }
 
-    public static void writeFully(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes, long offset, long length, @org.jetbrains.annotations.NotNull StreamingDataOutput sdo)
+    public static void writeFully(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, long offset, long length, @org.jetbrains.annotations.NotNull StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException {
         long i = 0;
         for (; i < length - 7; i += 8)

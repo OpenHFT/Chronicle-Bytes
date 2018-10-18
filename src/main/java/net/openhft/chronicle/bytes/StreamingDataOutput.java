@@ -206,6 +206,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+
     @org.jetbrains.annotations.NotNull
     @NotNull
     default S write8bit(@Nullable String s)
@@ -308,6 +309,16 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @org.jetbrains.annotations.NotNull
     @NotNull
+    default S write(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes) {
+        assert bytes != this : "you should not write to yourself !";
+
+        try {
+            return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes) {
         assert bytes != this : "you should not write to yourself !";
 
@@ -317,6 +328,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throw new AssertionError(e);
         }
     }
+
 
     long realCapacity();
 
@@ -346,11 +358,24 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @org.jetbrains.annotations.NotNull
     @NotNull
-    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes, long offset, long length)
+    default S write(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
+
+    /**
+     * Write all data or fail.
+     */
+    @org.jetbrains.annotations.NotNull
+    @NotNull
+    default S write(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes, long offset, long
+            length)
+            throws BufferOverflowException, BufferUnderflowException {
+        BytesInternal.writeFully(bytes, offset, length, this);
+        return (S) this;
+    }
+
 
     @org.jetbrains.annotations.NotNull
     @NotNull
@@ -528,7 +553,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         write(bytes);
     }
 
-    default void writeWithLength(BytesStore bytes) {
+    default void writeWithLength(RandomDataInput bytes) {
         writeStopBit(bytes.readRemaining());
         write(bytes);
     }

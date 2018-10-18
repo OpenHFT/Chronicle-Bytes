@@ -205,7 +205,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
@@ -219,7 +219,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    public void rawCopy(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
@@ -941,7 +941,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes) {
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes) {
         assert bytes != this : "you should not write to yourself !";
 
         try {

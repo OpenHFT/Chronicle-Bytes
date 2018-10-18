@@ -139,12 +139,26 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.underlyingObject() == null && bytesStore.isDirectMemory() && length >= 32) {
+        } else {
+            super.write(bytes, offset, length);
+        }
+        return this;
+    }
+
+    @NotNull
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferOverflowException, IllegalArgumentException {
+        if (length == 8) {
+            writeLong(bytes.readLong(offset));
+        } else if (bytes.underlyingObject() == null
+                && bytesStore
+                .isDirectMemory() &&
+                length >= 32) {
             rawCopy(bytes, offset, length);
 
         } else {
@@ -153,12 +167,13 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
+
     @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException {
-        if (cs instanceof BytesStore) {
-            return write((BytesStore) cs);
+        if (cs instanceof RandomDataInput) {
+            return write((RandomDataInput) cs);
         }
 
         int length = cs.length();
