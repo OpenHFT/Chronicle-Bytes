@@ -30,6 +30,14 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
         readLimit(writeLimit());
     }
 
+    public SubBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
+        super(bytesStore);
+        this.start = 0;
+        this.capacity = bytesStore.capacity();
+        clear();
+        readLimit(writeLimit());
+    }
+
     @Override
     public long capacity() {
         return capacity;

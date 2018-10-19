@@ -816,5 +816,4 @@ public interface Bytes<Underlying> extends
         writeUnsignedShort(position, (int) length);
     }
 
-
 }
