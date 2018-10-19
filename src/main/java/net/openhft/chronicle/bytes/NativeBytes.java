@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
-    NativeBytes(@NotNull BytesStore store) throws IllegalStateException {
+    public NativeBytes(@NotNull BytesStore store) throws IllegalStateException {
         super(store, 0, MAX_CAPACITY);
     }
 
