@@ -351,6 +351,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 //        super.writeCheckOffset(offset, adding);
     }
 
+    @Override
+    public void ensureCapacity(long size) throws IllegalArgumentException {
+        assert singleThreadedAccess();
+        if (!bytesStore.inside(writePosition, Math.toIntExact(size))) {
+            acquireNextByteStore0(writePosition, false);
+        }
+    }
+
     @NotNull
     private BufferOverflowException writeBufferOverflowException(long offset) {
         BufferOverflowException exception = new BufferOverflowException();
