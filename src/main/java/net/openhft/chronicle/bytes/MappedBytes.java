@@ -141,8 +141,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         while (remaining > 0) {
 
+            long copySize = copySize(wp);
+
             // remaining is an int and safeCopySize is >= 0.
-            int copy = (int) Math.min(remaining, copySize(wp)); // copy 64 KB at a time.
+            int copy = (int) Math.min(remaining, copySize); // copy 64 KB at a time.
 
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
@@ -152,7 +154,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining < Math.min(mappedFile.overlapSize(), realWriteUpto(wp))) {
+            if (remaining <= mappedFile.overlapSize()) {
                 bytesStore.write(wp, bytes, offset, remaining);
                 return this;
             }
@@ -163,10 +165,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
         return this;
 
-    }
-
-    private long realWriteUpto(final long wp) {
-        return Math.min(realCapacity(), capacity()) - wp;
     }
 
     public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
@@ -196,7 +194,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining < Math.min(mappedFile.overlapSize(), realWriteUpto(wp))) {
+            if (remaining <= mappedFile.overlapSize()) {
                 bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
@@ -228,8 +226,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private long copySize(long writePosition) {
         long size = mappedFile.chunkSize();
-        return Math.min(size - writePosition % size, realWriteUpto(writePosition));
-
+        return size - writePosition % size;
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -726,6 +723,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public boolean isClosed() {
         return this.refCount() <= 0 || mappedFile.isClosed();
     }
+
 
     @NotNull
     @Override
