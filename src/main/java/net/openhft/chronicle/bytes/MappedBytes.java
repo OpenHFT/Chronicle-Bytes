@@ -152,7 +152,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining < Math.min(mappedFile.overlapSize(), realWriteRemaining(wp))) {
+            if (remaining < Math.min(mappedFile.overlapSize(), realWriteUpto(wp))) {
                 bytesStore.write(wp, bytes, offset, remaining);
                 return this;
             }
@@ -165,7 +165,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
-    private long realWriteRemaining(final long wp) {
+    private long realWriteUpto(final long wp) {
         return Math.min(realCapacity(), capacity()) - wp;
     }
 
@@ -196,7 +196,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining < Math.min(mappedFile.overlapSize(), realWriteRemaining(wp))) {
+            if (remaining < Math.min(mappedFile.overlapSize(), realWriteUpto(wp))) {
                 bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
@@ -228,8 +228,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private long copySize(long writePosition) {
         long size = mappedFile.chunkSize();
-
-        return Math.min(size - writePosition % size, realWriteRemaining(writePosition));
+        return Math.min(size - writePosition % size, realWriteUpto(writePosition));
 
     }
 
