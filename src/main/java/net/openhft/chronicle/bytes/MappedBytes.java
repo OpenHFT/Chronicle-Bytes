@@ -131,13 +131,19 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if ((length + offset) > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
 
-        if (length > writeRemaining())
+        acquireNextByteStore(wp, false);
+
+        long realWriteRemaining = Math.min(realCapacity(), capacity()) - wp;
+
+        if (length > realWriteRemaining)
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+                    String.format("write failed. Length: %d > write remaining in this block: %d " +
+                                    "we suggest you increase the Block Size via the " +
+                                    "chronicle queue builder.",
+                            length,
+                            realWriteRemaining));
 
         int remaining = length;
-
-        acquireNextByteStore(wp, false);
 
         while (remaining > 0) {
 
@@ -264,7 +270,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public long realCapacity() {
         try {
-            return mappedFile.actualSize();
+            return mappedFile == null ? 0L : mappedFile.actualSize();
 
         } catch (IORuntimeException e) {
             Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
