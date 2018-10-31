@@ -131,26 +131,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if ((length + offset) > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
 
-        acquireNextByteStore(wp, false);
-
-        long realWriteRemaining = Math.min(realCapacity(), capacity()) - wp;
-
-        if (length > realWriteRemaining)
+        if (length > writeRemaining())
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > write remaining in this block: %d " +
-                                    "we suggest you increase the Block Size via the " +
-                                    "chronicle queue builder.",
-                            length,
-                            realWriteRemaining));
+                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
 
         int remaining = length;
 
+        acquireNextByteStore(wp, false);
+
         while (remaining > 0) {
 
-            long copySize = copySize(wp);
-
             // remaining is an int and safeCopySize is >= 0.
-            int copy = (int) Math.min(remaining, copySize); // copy 64 KB at a time.
+            int copy = (int) Math.min(remaining, copySize(wp)); // copy 64 KB at a time.
 
             bytesStore.write(wp, bytes, offset, copy);
             offset += copy;
@@ -160,7 +152,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining <= mappedFile.overlapSize()) {
+            if (remaining < Math.min(mappedFile.overlapSize(), realWriteRemaining(wp))) {
                 bytesStore.write(wp, bytes, offset, remaining);
                 return this;
             }
@@ -171,6 +163,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
         return this;
 
+    }
+
+    private long realWriteRemaining(final long wp) {
+        return Math.min(realCapacity(), capacity()) - wp;
     }
 
     public MappedBytes write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
@@ -200,7 +196,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             if (remaining == 0)
                 return this;
 
-            if (remaining <= mappedFile.overlapSize()) {
+            if (remaining < Math.min(mappedFile.overlapSize(), realWriteRemaining(wp))) {
                 bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
@@ -232,7 +228,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private long copySize(long writePosition) {
         long size = mappedFile.chunkSize();
-        return size - writePosition % size;
+
+        return Math.min(size - writePosition % size, realWriteRemaining(writePosition));
+
     }
 
     public void setNewChunkListener(NewChunkListener listener) {
@@ -270,7 +268,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public long realCapacity() {
         try {
-            return mappedFile == null ? 0L : mappedFile.actualSize();
+            return mappedFile.actualSize();
 
         } catch (IORuntimeException e) {
             Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
@@ -729,7 +727,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public boolean isClosed() {
         return this.refCount() <= 0 || mappedFile.isClosed();
     }
-
 
     @NotNull
     @Override
