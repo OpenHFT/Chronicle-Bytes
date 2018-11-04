@@ -318,4 +318,44 @@ public class MappedBytesTest {
     public void clearInterrupt() {
         Thread.interrupted();
     }
+
+    @Test
+    public void multiBytes() throws FileNotFoundException {
+        String tmpfile = OS.TMP + "/data.dat";
+        MappedFile mappedFile = MappedFile.mappedFile(new File(tmpfile), 64 << 10);
+        MappedBytes original = MappedBytes.mappedBytes(mappedFile);
+        original.zeroOut(0, 1000);
+
+        original.writeInt(0, 1234);
+
+        PointerBytesStore pbs = new PointerBytesStore();
+        pbs.set(original.addressForRead(50), 100);
+
+        // Print out the int in the two BytesStores.
+        // This shows that the copy has the same contents of the original.
+        System.out.println("Original(0): " + original.readInt(0));
+        System.out.println("PBS(0): " + pbs.readInt(0));
+
+        // Now modify the copy and print out the new int in the two BytesStores again.
+        pbs.writeInt(0, 4321);
+        System.out.println("Original(50): " + original.readInt(50));
+        System.out.println("PBS(0): " + pbs.readInt(0));
+        original.writeInt(54, 12345678);
+        System.out.println("Original(54): " + original.readInt(54));
+        System.out.println("PBS(4): " + pbs.readInt(4));
+    }
+
+    @Test
+    public void testALargeFile() throws IOException {
+        File file = File.createTempFile("deleteme", "data");
+        file.deleteOnExit();
+        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 4L << 30 /* 4 GB */, 0)) {
+            long segmentSize = 64 << 20; // 64 MB.
+            long offset = segmentSize * 32; // 32nd segment.
+            assertTrue(bytes.compareAndSwapInt(offset, 0, 1));
+            // now locked, write some data
+            bytes.writeUtf8(offset + Integer.BYTES, "Hello World!");
+            assertTrue(bytes.compareAndSwapInt(offset, 1, 0));
+        }
+    }
 }
