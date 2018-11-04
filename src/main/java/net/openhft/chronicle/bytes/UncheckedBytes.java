@@ -16,22 +16,42 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
+import static net.openhft.chronicle.core.util.StringUtils.extractChars;
+
 /**
  * Fast unchecked version of AbstractBytes
  */
 public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
-    final Bytes underlyingBytes;
+    Bytes underlyingBytes;
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes) throws IllegalStateException {
         super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
+    }
+
+    public void setBytes(@NotNull Bytes bytes) throws IllegalStateException {
+        BytesStore underlyingBytes = bytes.bytesStore();
+        if (bytesStore != underlyingBytes) {
+            bytesStore.release();
+            this.bytesStore = underlyingBytes;
+            bytesStore.reserve();
+        }
+        readPosition(bytes.readPosition());
+        this.uncheckedWritePosition(bytes.writePosition());
+        this.writeLimit = bytes.writeLimit();
+
+        assert !bytesStore.isDirectMemory() || BytesUtil.register(this);
+        this.underlyingBytes = bytes;
     }
 
     @Override
@@ -139,12 +159,26 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
-        } else if (bytes.underlyingObject() == null && bytesStore.isDirectMemory() && length >= 32) {
+        } else {
+            super.write(bytes, offset, length);
+        }
+        return this;
+    }
+
+    @NotNull
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferOverflowException, IllegalArgumentException {
+        if (length == 8) {
+            writeLong(bytes.readLong(offset));
+        } else if (bytes.underlyingObject() == null
+                && bytesStore
+                .isDirectMemory() &&
+                length >= 32) {
             rawCopy(bytes, offset, length);
 
         } else {
@@ -153,12 +187,13 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
+
     @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException {
-        if (cs instanceof BytesStore) {
-            return write((BytesStore) cs);
+        if (cs instanceof RandomDataInput) {
+            return write((RandomDataInput) cs);
         }
 
         int length = cs.length();
@@ -179,5 +214,71 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             writeSkip(len);
         }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> writeByte(byte i8) throws BufferOverflowException {
+        long offset = writeOffsetPositionMoved(1, 1);
+        bytesStore.writeByte(offset, i8);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> writeUtf8(String s) throws BufferOverflowException {
+        if (s == null) {
+            writeStopBit(-1);
+            return this;
+        }
+
+        try {
+            if (Jvm.isJava9Plus()) {
+                byte[] strBytes = extractBytes(s);
+                byte coder = StringUtils.getStringCoder(s);
+                long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
+                writeStopBit(utfLength);
+                appendUtf8(strBytes, 0, s.length(), coder);
+            } else {
+                char[] chars = extractChars(s);
+                long utfLength = AppendableUtil.findUtf8Length(chars);
+                writeStopBit(utfLength);
+                if (utfLength == chars.length)
+                    append8bit(chars);
+                else
+                    appendUtf8(chars, 0, chars.length);
+            }
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
+        return this;
+    }
+
+    void append8bit(char[] chars) throws BufferOverflowException, IllegalArgumentException {
+        for (int i = 0; i < chars.length; i++) {
+            char c = chars[i];
+            bytesStore.writeByte(writePosition++, (byte) c);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+        int i;
+        ascii:
+        {
+            for (i = 0; i < length; i++) {
+                char c = chars[offset + i];
+                if (c > 0x007F)
+                    break ascii;
+                bytesStore.writeByte(writePosition++, (byte) c);
+            }
+            return this;
+        }
+        for (; i < length; i++) {
+            char c = chars[offset + i];
+            BytesInternal.appendUtf8Char(this, c);
+        }
+        return this;
     }
 }

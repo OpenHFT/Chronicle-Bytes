@@ -247,13 +247,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         optimisedWrite(bytes, offset, length);
         return this;
     }
 
-    protected void optimisedWrite(@NotNull BytesStore bytes, long offset, long length) {
+    protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length) {
         if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
             if (len > 0) {
@@ -345,8 +345,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
-        if (cs instanceof BytesStore)
-            return write((BytesStore) cs);
+        if (cs instanceof RandomDataInput)
+            return write((RandomDataInput) cs);
 
         if (isDirectMemory() && cs instanceof String)
             return append8bitNBS_S((String) cs);
