@@ -345,17 +345,4 @@ public class MappedBytesTest {
         System.out.println("PBS(4): " + pbs.readInt(4));
     }
 
-    @Test
-    public void testALargeFile() throws IOException {
-        File file = File.createTempFile("deleteme", "data");
-        file.deleteOnExit();
-        try (MappedBytes bytes = MappedBytes.mappedBytes(file, 4L << 30 /* 4 GB */, 0)) {
-            long segmentSize = 64 << 20; // 64 MB.
-            long offset = segmentSize * 32; // 32nd segment.
-            assertTrue(bytes.compareAndSwapInt(offset, 0, 1));
-            // now locked, write some data
-            bytes.writeUtf8(offset + Integer.BYTES, "Hello World!");
-            assertTrue(bytes.compareAndSwapInt(offset, 1, 0));
-        }
-    }
 }
