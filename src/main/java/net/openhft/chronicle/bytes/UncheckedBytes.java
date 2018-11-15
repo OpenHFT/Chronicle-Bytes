@@ -206,7 +206,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
@@ -214,6 +214,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             writeSkip(len);
         }
+        return len;
     }
 
     @NotNull

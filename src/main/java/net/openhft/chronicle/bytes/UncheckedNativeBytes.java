@@ -219,7 +219,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-    public void rawCopy(@NotNull RandomDataInput bytes, long offset, long length)
+    public long rawCopy(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
@@ -227,6 +227,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             writeSkip(len);
         }
+        return len;
     }
 
     @Override
