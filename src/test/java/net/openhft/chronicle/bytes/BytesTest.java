@@ -930,4 +930,26 @@ public class BytesTest {
             to.release();
         }
     }
+
+    @Test
+    public void testToStringDoesNotChange() {
+        @NotNull Bytes a = alloc1.elasticBytes(16);
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+        try {
+            String hello = "hello";
+            a.append(hello);
+            b.append(hello);
+
+            assertTrue(a.equals(b));
+            assertTrue(a.bytesStore().equals(b.bytesStore()));
+
+            assertEquals(hello, b.toString());
+
+            assertTrue(a.equals(b));
+            assertTrue(a.bytesStore().equals(b.bytesStore()));
+        } finally {
+            a.release();
+            b.release();
+        }
+    }
 }
