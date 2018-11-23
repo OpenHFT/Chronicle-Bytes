@@ -36,8 +36,16 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
+    private final long capacity;
+
+    public NativeBytes(@NotNull BytesStore store, long capacity) throws IllegalStateException {
+        super(store, 0, capacity);
+        this.capacity = capacity;
+    }
+
     public NativeBytes(@NotNull BytesStore store) throws IllegalStateException {
         super(store, 0, MAX_CAPACITY);
+        capacity = MAX_CAPACITY;
     }
 
     @NotNull
@@ -84,7 +92,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     @Override
     public long capacity() {
-        return MAX_CAPACITY;
+        return capacity;
     }
 
     @Override
