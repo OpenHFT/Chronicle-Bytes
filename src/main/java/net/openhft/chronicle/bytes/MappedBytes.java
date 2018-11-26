@@ -468,17 +468,31 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return backingFileIsReadOnly;
     }
 
+    @Override
+    @NotNull
     public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         assert singleThreadedAccess();
-        if (length == 8) {
+        if (bytes instanceof BytesStore)
+            write((BytesStore) bytes, offset, length);
+        else if (length == 8)
             writeLong(bytes.readLong(offset));
-        } else if (bytes instanceof BytesStore && bytes.isDirectMemory() && length <= Math.min
-                (writeRemaining(), safeCopySize())) {
-            rawCopy((BytesStore) bytes, offset, length);
-        } else if (length > 0) {
+        else if (length > 0)
             BytesInternal.writeFully(bytes, offset, length, this);
-        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferUnderflowException, BufferOverflowException {
+        assert singleThreadedAccess();
+        if (length == 8)
+            writeLong(bytes.readLong(offset));
+        else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize()))
+            rawCopy(bytes, offset, length);
+        else if (length > 0)
+            BytesInternal.writeFully(bytes, offset, length, this);
         return this;
     }
 
