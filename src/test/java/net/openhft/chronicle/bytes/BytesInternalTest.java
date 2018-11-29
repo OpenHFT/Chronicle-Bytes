@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -246,4 +247,28 @@ public class BytesInternalTest {
                     .parseDouble(), 0.0);
         }
     }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/110")
+    public void testWritingDecimalVsJava() {
+        Bytes bytes = Bytes.elasticHeapByteBuffer(32);
+        long l = Double.doubleToRawLongBits(1.0);
+//        Random rand = new Random(1);
+        int count = 0;
+//        for (int i = 0; i < 1000000; i++) {
+        bytes.clear();
+        double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
+        bytes.append(d);
+        String s = Double.toString(d);
+        if (s.length() != bytes.readRemaining()) {
+            assertEquals(d, Double.parseDouble(s), 0.0);
+            String s2 = bytes.toString();
+            System.out.println(s + " != " + s2);
+//                count++;
+        }
+//        }
+        assertEquals(0, count);
+    }
+
+
 }

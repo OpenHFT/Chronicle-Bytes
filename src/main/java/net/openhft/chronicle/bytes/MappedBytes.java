@@ -141,23 +141,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         while (remaining > 0) {
 
-            long copySize = copySize(wp);
+            long safeCopySize = copySize(wp);
 
-            // remaining is an int and safeCopySize is >= 0.
-            int copy = (int) Math.min(remaining, copySize); // copy 64 KB at a time.
-
-            bytesStore.write(wp, bytes, offset, copy);
-            offset += copy;
-            wp += copy;
-            remaining -= copy;
-
-            if (remaining == 0)
-                return this;
-
-            if (remaining <= mappedFile.overlapSize()) {
+            if (safeCopySize + mappedFile.overlapSize() >= remaining) {
                 bytesStore.write(wp, bytes, offset, remaining);
                 return this;
             }
+
+            bytesStore.write(wp, bytes, offset, (int) safeCopySize);
+
+            offset += safeCopySize;
+            wp += safeCopySize;
+            remaining -= safeCopySize;
 
             // move to the next chunk
             acquireNextByteStore0(wp, false);
@@ -183,21 +178,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         while (remaining > 0) {
 
             long safeCopySize = copySize(wp);
-            long copy = Math.min(remaining, safeCopySize); // copy 64 KB at a time.
 
-            bytesStore.write(wp, bytes, readOffset, copy);
-
-            readOffset += copy;
-            wp += copy;
-            remaining -= copy;
-
-            if (remaining == 0)
-                return this;
-
-            if (remaining <= mappedFile.overlapSize()) {
+            if (safeCopySize + mappedFile.overlapSize() >= remaining) {
                 bytesStore.write(wp, bytes, readOffset, remaining);
                 return this;
             }
+
+            bytesStore.write(wp, bytes, readOffset, safeCopySize);
+
+            readOffset += safeCopySize;
+            wp += safeCopySize;
+            remaining -= safeCopySize;
 
             // move to the next chunk
             acquireNextByteStore0(wp, false);
@@ -351,6 +342,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 //        super.writeCheckOffset(offset, adding);
     }
 
+    @Override
+    public void ensureCapacity(long size) throws IllegalArgumentException {
+        assert singleThreadedAccess();
+        if (!bytesStore.inside(writePosition, Math.toIntExact(size))) {
+            acquireNextByteStore0(writePosition, false);
+        }
+    }
+
     @NotNull
     private BufferOverflowException writeBufferOverflowException(long offset) {
         BufferOverflowException exception = new BufferOverflowException();
@@ -469,27 +468,39 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return backingFileIsReadOnly;
     }
 
+    @Override
+    @NotNull
     public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         assert singleThreadedAccess();
-        if (length == 8) {
+        if (bytes instanceof BytesStore)
+            write((BytesStore) bytes, offset, length);
+        else if (length == 8)
             writeLong(bytes.readLong(offset));
-        } else if (bytes instanceof BytesStore && bytes.isDirectMemory() && length <= Math.min
-                (writeRemaining(), safeCopySize())) {
-            rawCopy((BytesStore) bytes, offset, length);
-        } else if (length > 0) {
+        else if (length > 0)
             BytesInternal.writeFully(bytes, offset, length, this);
-        }
         return this;
     }
 
-    // interface
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
+            throws BufferUnderflowException, BufferOverflowException {
+        assert singleThreadedAccess();
+        if (length == 8)
+            writeLong(bytes.readLong(offset));
+        else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize()))
+            rawCopy(bytes, offset, length);
+        else if (length > 0)
+            BytesInternal.writeFully(bytes, offset, length, this);
+        return this;
+    }
+
     public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         assert length < safeCopySize();
         this.acquireNextByteStore(writePosition(), false);
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-        // xxxx what if len < length?
         if (len > 0) {
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
             uncheckedWritePosition(writePosition() + len);

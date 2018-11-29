@@ -17,27 +17,30 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.function.IntSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
  * Implementation of a reference to a 32-bit in in text wire format.
  */
 public class TextIntReference extends AbstractReference implements IntValue {
-    private static final byte[] template = "!!atomic { locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
+    private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
     private static final int UNINITIALIZED = 0;
     private static final int INT_TRUE = 1;
     private static final int INT_FALSE = 0;
-    private static final int LOCKED = 19;
-    private static final int VALUE = 33;
+    private static final int LOCKED = 20;
+    private static final int VALUE = 34;
     private static final int DIGITS = 10;
 
     public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
@@ -51,15 +54,16 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     private int withLock(@NotNull IntSupplier call) throws BufferUnderflowException {
-        long valueOffset = offset + LOCKED;
-        int value = bytes.readVolatileInt(valueOffset);
-        if (value != FALSE && value != TRUE)
+        long alignedOffset = roundUpTo8ByteAlign(offset);
+        long lockValueOffset = alignedOffset + LOCKED;
+        int lockValue = bytes.readVolatileInt(lockValueOffset);
+        if (lockValue != FALSE && lockValue != TRUE)
             throw new IllegalStateException();
         try {
             while (true) {
-                if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
+                if (bytes.compareAndSwapInt(lockValueOffset, FALSE, TRUE)) {
                     int t = call.getAsInt();
-                    bytes.writeOrderedInt(valueOffset, FALSE);
+                    bytes.writeOrderedInt(lockValueOffset, FALSE);
                     return t;
                 }
             }
@@ -121,10 +125,16 @@ public class TextIntReference extends AbstractReference implements IntValue {
         if (length != template.length)
             throw new IllegalArgumentException(length + " != " + template.length);
 
-        super.bytesStore(bytes, offset, length);
+        // align for ARM
+        long newOffset = roundUpTo8ByteAlign(offset);
+        for (long i = offset; i < newOffset; i++) {
+            bytes.writeByte(i, (byte) ' ');
+        }
 
-        if (bytes.readInt(offset) == UNINITIALIZED)
-            bytes.write(offset, template);
+        super.bytesStore(bytes, newOffset, length);
+
+        if (bytes.readInt(newOffset) == UNINITIALIZED)
+            bytes.write(newOffset, template);
     }
 
     @Override

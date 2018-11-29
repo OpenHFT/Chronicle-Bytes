@@ -25,19 +25,20 @@ import java.nio.BufferUnderflowException;
 import java.util.function.LongSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
  * reference to an array fo 32-bit in values in Text wire format.
  */
 public class TextLongReference extends AbstractReference implements LongReference {
-    static final int VALUE = 33;
-    private static final byte[] template = "!!atomic { locked: false, value: 00000000000000000000 }".getBytes(ISO_8859_1);
+    static final int VALUE = 34;
+    private static final byte[] template = "!!atomic {  locked: false, value: 00000000000000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");
     private static final long UNINITIALIZED = 0x0L;
     private static final long LONG_TRUE = 1L;
     private static final long LONG_FALSE = 0L;
-    private static final int LOCKED = 19;
+    private static final int LOCKED = 20;
     private static final int DIGITS = 20;
 
     public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
@@ -69,10 +70,16 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         if (length != template.length)
             throw new IllegalArgumentException();
 
-        super.bytesStore(bytes, offset, length);
+        // align for ARM
+        long newOffset = roundUpTo8ByteAlign(offset);
+        for (long i = offset; i < newOffset; i++) {
+            bytes.writeByte(i, (byte) ' ');
+        }
 
-        if (bytes.readLong(offset) == UNINITIALIZED)
-            bytes.write(offset, template);
+        super.bytesStore(bytes, newOffset, length);
+
+        if (bytes.readLong(newOffset) == UNINITIALIZED)
+            bytes.write(newOffset, template);
     }
 
     @Override

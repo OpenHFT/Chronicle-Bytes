@@ -358,7 +358,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Allocate an elastic buffer with initially no size.
+     * Allocate an elastic buffer with {@code initialCapacity} size.
      *
      * @return Bytes for writing.
      */

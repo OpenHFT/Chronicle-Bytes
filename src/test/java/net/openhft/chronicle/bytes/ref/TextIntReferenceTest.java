@@ -20,13 +20,11 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Assume;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/*
- * Created by Peter Lawrey on 20/12/16.
- */
 public class TextIntReferenceTest {
     @Test
     public void test() {
@@ -40,14 +38,14 @@ public class TextIntReferenceTest {
         assertEquals("value: -1", ref.toString());
         assertFalse(ref.compareAndSwapValue(0, 1));
         assertTrue(ref.compareAndSwapValue(-1, 2));
-        assertEquals(45, ref.maxSize());
+        assertEquals(46, ref.maxSize());
         assertEquals(16, ref.offset());
         assertEquals(nbs, ref.bytesStore());
         assertEquals(0L, nbs.readLong(0));
         assertEquals(0L, nbs.readLong(8));
         Bytes<Void> bytes = nbs.bytesForRead();
         bytes.readPosition(16);
-        assertEquals("!!atomic { locked: false, value: 0000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
+        assertEquals("!!atomic {  locked: false, value: 0000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
         nbs.release();
         bytes.release();
     }
