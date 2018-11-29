@@ -375,6 +375,13 @@ public class NativeBytesStore<Underlying>
         return memory.readVolatileInt(address + translate(offset));
     }
 
+    @ForceInline
+    public int fencedRead(long offset) {
+        UnsafeMemory.UNSAFE.loadFence();
+        return memory.readInt(address + translate(offset));
+    }
+
+
     @Override
     @ForceInline
     public long readVolatileLong(long offset) {
