@@ -24,6 +24,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
             file = MappedFile.mappedFile(OS.TMP + "/.time-stamp.dat", OS.pageSize(), 0);
             bytes = file.acquireBytesForWrite(0);
             bytes.append8bit("&TSF\nTime stamp file uses for sharing a unique id\n");
+            BytesUtil.unregister(bytes);
         } catch (IOException ioe) {
             throw new IORuntimeException(ioe);
         }
