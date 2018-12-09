@@ -228,4 +228,8 @@ public enum BytesUtil {
         bytes.zeroOut(start, end);
     }
 
+    public static String toDebugString(@org.jetbrains.annotations.NotNull @net.openhft.chronicle.core.annotation.NotNull RandomDataInput bytes, long start, long maxLength) {
+        BytesStore bytes2 = bytes.subBytes(start, maxLength);
+        return bytes2.toDebugString(maxLength);
+    }
 }
