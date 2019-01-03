@@ -112,6 +112,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
         return this;
     }
+
     @Override
     public long getValueAt(long index) {
         return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
