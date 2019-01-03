@@ -122,7 +122,6 @@ public class MappedBytesTest {
 
     }
 
-
     @Test
     public void testWriteBytesWithOffset() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
@@ -163,7 +162,6 @@ public class MappedBytesTest {
         }
     }
 
-
     @Test
     public void testWriteBytesWithOffsetAndTextShift() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
@@ -203,7 +201,6 @@ public class MappedBytesTest {
             Assert.assertEquals(text.substring(shift), actual);
         }
     }
-
 
     @Test
     public void testLargeWrites() throws IOException {

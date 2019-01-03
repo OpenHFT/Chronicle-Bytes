@@ -621,7 +621,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return this;
     }
 
-
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert writeCheckOffset0(offset, adding);
     }
@@ -680,11 +679,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.readDouble(offset);
     }
 
-
     void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         assert readCheckOffset0(offset, adding, given);
     }
-
 
     private boolean readCheckOffset0(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (offset < start()) {
@@ -701,11 +698,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return true;
     }
 
-
     void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
         assert prewriteCheckOffset0(offset, subtracting);
     }
-
 
     private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
         if ((offset - subtracting) < start()) {

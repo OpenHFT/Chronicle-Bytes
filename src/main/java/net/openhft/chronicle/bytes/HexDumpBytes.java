@@ -864,7 +864,6 @@ public class HexDumpBytes implements Bytes<Void> {
         return base.lenient();
     }
 
-
     private static class TextBytesReader extends Reader {
         private final Reader reader;
         private final Bytes base;

@@ -727,7 +727,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this.refCount() <= 0 || mappedFile.isClosed();
     }
 
-
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(CharSequence str) throws BufferOverflowException {

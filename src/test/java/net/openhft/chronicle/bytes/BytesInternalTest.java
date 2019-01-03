@@ -270,5 +270,4 @@ public class BytesInternalTest {
         assertEquals(0, count);
     }
 
-
 }

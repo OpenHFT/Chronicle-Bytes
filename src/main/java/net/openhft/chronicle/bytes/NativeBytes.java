@@ -215,7 +215,6 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         return this;
     }
 
-
     @NotNull
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
         long position = writePosition();

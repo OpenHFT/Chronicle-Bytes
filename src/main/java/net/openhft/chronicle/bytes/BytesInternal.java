@@ -401,7 +401,6 @@ enum BytesInternal {
             setCount(sb, count);
             if (count < utflen) {
 
-
                 long rp0 = bytes.readPosition();
                 try {
                     parseUtf82(bytes, sb, utflen, count);
@@ -412,7 +411,6 @@ enum BytesInternal {
             }
 
         } catch (IOException e) {
-
 
             throw Jvm.rethrow(e);
         }
@@ -535,7 +533,6 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-
 
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + count);
@@ -1201,7 +1198,6 @@ enum BytesInternal {
         }
         appendLong0(out, num);
     }
-
 
     public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException {

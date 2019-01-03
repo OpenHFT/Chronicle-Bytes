@@ -206,7 +206,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
-
     @org.jetbrains.annotations.NotNull
     @NotNull
     default S write8bit(@Nullable String s)
@@ -329,7 +328,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
     }
 
-
     long realCapacity();
 
     @org.jetbrains.annotations.NotNull
@@ -375,7 +373,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
-
 
     @org.jetbrains.annotations.NotNull
     @NotNull
