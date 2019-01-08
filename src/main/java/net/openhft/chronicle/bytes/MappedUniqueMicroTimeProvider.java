@@ -51,4 +51,19 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
                 return time;
         }
     }
+
+    @Override
+    public long currentTimeNanos() {
+        long time = provider.currentTimeNanos();
+        long time2 = time / 1000;
+        while (true) {
+            long time0 = bytes.readVolatileLong(LAST_TIME);
+            if (time0 >= time2) {
+                time = time2 + 1;
+                time2 = time * 1000;
+            }
+            if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
+                return time;
+        }
+    }
 }
