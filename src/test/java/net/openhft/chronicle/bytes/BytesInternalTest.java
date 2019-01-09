@@ -275,12 +275,6 @@ public class BytesInternalTest {
     public void bytesParseDouble_Issue85() {
         double d = 6.85202;
         String s = Double.toString(d);
-        assertEquals(d, Double.parseDouble(s), 0.0);
-
-        Bytes bytes = Bytes.elasticHeapByteBuffer(32);
-        bytes.append(d);
-        String bytesStr = bytes.toString();
-
-        assertEquals(s, bytesStr);
+        assertEquals(d, Bytes.from(s) .parseDouble(), 0.0);
     }
 }
