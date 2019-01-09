@@ -61,7 +61,6 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
         return BytesInternal.parseBoolean(this, StopCharTesters.NON_ALPHA_DIGIT);
     }
 
-
     /**
      * parse text with UTF-8 decoding as character terminated.
      *

@@ -50,7 +50,6 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         return applyAsLong(store, remaining);
     }
 
-
     @Override
     public long applyAsLong(BytesStore bytes, long length) {
         long start = bytes.readPosition();

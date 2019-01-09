@@ -83,37 +83,6 @@ public class MappedFile implements ReferenceCounted {
         assert registerMappedFile(this);
     }
 
-    private void doNotCloseOnInterrupt(FileChannel fc) {
-        try {
-            Field field = AbstractInterruptibleChannel.class
-                    .getDeclaredField("interruptor");
-            Jvm.setAccessible(field);
-            field.set(fc, (Interruptible) thread
-                    -> System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt"));
-        } catch (Throwable e) {
-            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
-        }
-    }
-
-    // based on a solution by https://stackoverflow.com/users/9199167/max-vollmer
-    // https://stackoverflow.com/a/52262779/57695
-    private void doNotCloseOnInterrupt9(FileChannel fc) {
-        try {
-            Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
-            Class<?> interruptibleClass = field.getType();
-            Jvm.setAccessible(field);
-            field.set(fc, Proxy.newProxyInstance(
-                    interruptibleClass.getClassLoader(),
-                    new Class[]{interruptibleClass},
-                    (p, m, a) -> {
-                        System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt");
-                        return null;
-                    }));
-        } catch (Throwable e) {
-            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
-        }
-    }
-
     private static void logNewChunk(String filename, int chunk, long delayMicros) {
         if (!Jvm.isDebugEnabled(MappedFile.class))
             return;
@@ -126,8 +95,6 @@ public class MappedFile implements ReferenceCounted {
                 .toString();
         Jvm.debug().on(MappedFile.class, message);
     }
-
-//    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
 
     private static boolean registerMappedFile(MappedFile mappedFile) {
 //        MAPPED_FILE_THROWABLE_MAP.put(mappedFile, new Throwable("Created here"));
@@ -147,21 +114,7 @@ public class MappedFile implements ReferenceCounted {
 */
     }
 
-/*
-    private void check(Throwable throwable, int[] count) {
-        for (int i = 0; i < stores.size(); i++) {
-            WeakReference<MappedBytesStore> storeRef = stores.get(i);
-            if (storeRef == null)
-                continue;
-            @Nullable MappedBytesStore mbs = storeRef.get();
-            if (mbs != null && mbs.refCount() > 0) {
-                mbs.release();
-                throwable.printStackTrace();
-                count[0]++;
-            }
-        }
-    }
-*/
+//    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
 
     @NotNull
     public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
@@ -189,6 +142,22 @@ public class MappedFile implements ReferenceCounted {
     public static MappedFile mappedFile(@NotNull File file, long chunkSize) throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
+
+/*
+    private void check(Throwable throwable, int[] count) {
+        for (int i = 0; i < stores.size(); i++) {
+            WeakReference<MappedBytesStore> storeRef = stores.get(i);
+            if (storeRef == null)
+                continue;
+            @Nullable MappedBytesStore mbs = storeRef.get();
+            if (mbs != null && mbs.refCount() > 0) {
+                mbs.release();
+                throwable.printStackTrace();
+                count[0]++;
+            }
+        }
+    }
+*/
 
     @NotNull
     public static MappedFile mappedFile(@NotNull String filename, long chunkSize) throws FileNotFoundException {
@@ -271,6 +240,37 @@ public class MappedFile implements ReferenceCounted {
             mappedFile.acquireBytesForWrite(i * mapAlignment).release();
         }
 
+    }
+
+    private void doNotCloseOnInterrupt(FileChannel fc) {
+        try {
+            Field field = AbstractInterruptibleChannel.class
+                    .getDeclaredField("interruptor");
+            Jvm.setAccessible(field);
+            field.set(fc, (Interruptible) thread
+                    -> System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt"));
+        } catch (Throwable e) {
+            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
+        }
+    }
+
+    // based on a solution by https://stackoverflow.com/users/9199167/max-vollmer
+    // https://stackoverflow.com/a/52262779/57695
+    private void doNotCloseOnInterrupt9(FileChannel fc) {
+        try {
+            Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
+            Class<?> interruptibleClass = field.getType();
+            Jvm.setAccessible(field);
+            field.set(fc, Proxy.newProxyInstance(
+                    interruptibleClass.getClassLoader(),
+                    new Class[]{interruptibleClass},
+                    (p, m, a) -> {
+                        System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt");
+                        return null;
+                    }));
+        } catch (Throwable e) {
+            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
+        }
     }
 
     @NotNull

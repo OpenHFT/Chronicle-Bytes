@@ -53,7 +53,6 @@ The API supports.
 | bytes marshallable	| streaming	| nested data structures, expected types only.	|
 |===
 
-
 === Data types explained
 
 |===

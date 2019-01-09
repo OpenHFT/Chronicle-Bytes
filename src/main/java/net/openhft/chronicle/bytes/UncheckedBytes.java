@@ -187,7 +187,6 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
-
     @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)

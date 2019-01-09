@@ -146,6 +146,7 @@ interface RandomCommon extends ReferenceCounted {
             throws BufferOverflowException;
 
     void testAndSetInt(long offset, int expected, int value);
+
     /**
      * Perform a 64-bit CAS at a given offset.
      *

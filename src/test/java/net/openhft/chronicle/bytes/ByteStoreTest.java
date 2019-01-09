@@ -186,7 +186,7 @@ public class ByteStoreTest {
     @Test
     public void testWriteReadUtf8() throws IORuntimeException {
         bytes.writeUtf8(null);
-        @NotNull String[] words = new String[] { "Hello","World!","Bye£€!","" };
+        @NotNull String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }
