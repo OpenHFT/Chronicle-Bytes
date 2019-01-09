@@ -270,4 +270,17 @@ public class BytesInternalTest {
         assertEquals(0, count);
     }
 
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/85")
+    public void bytesParseDouble_Issue85() {
+        double d = 6.85202;
+        String s = Double.toString(d);
+        assertEquals(d, Double.parseDouble(s), 0.0);
+
+        Bytes bytes = Bytes.elasticHeapByteBuffer(32);
+        bytes.append(d);
+        String bytesStr = bytes.toString();
+
+        assertEquals(s, bytesStr);
+    }
 }
