@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.math.BigDecimal;
@@ -72,8 +73,9 @@ public class Issue85Test {
             }
             count += max + 1;
         }
-        System.out.println("Different toString: " + 100.0 * different / count + "%," +
-                " parsing: " + 100.0 * different2 / count + "%");
+        if (different + different2 > 0)
+            Assert.fail("Different toString: " + 100.0 * different / count + "%," +
+                    " parsing: " + 100.0 * different2 / count + "%");
     }
 
     protected void doTest(Bytes<ByteBuffer> bytes, int i, double d) {
