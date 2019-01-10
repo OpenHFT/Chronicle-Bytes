@@ -1634,10 +1634,14 @@ enum BytesInternal {
     }
 
     private static double asDouble(long value, int exp, boolean negative, int decimalPlaces) {
+/*
+
         if (exp == 0 && decimalPlaces >= 0 && decimalPlaces < 18) {
             double d = (double) value / Maths.tens(decimalPlaces);
             return negative ? -d : d;
         }
+*/
+
         if (decimalPlaces > 0 && value < Long.MAX_VALUE / 2) {
             if (value < Long.MAX_VALUE / (1L << 32)) {
                 exp -= 32;
