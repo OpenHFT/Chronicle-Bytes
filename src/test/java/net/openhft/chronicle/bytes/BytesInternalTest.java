@@ -247,7 +247,6 @@ public class BytesInternalTest {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Wire/issues/110")
     public void testWritingDecimalVsJava() {
         Bytes bytes = Bytes.elasticHeapByteBuffer(32);
         long l = Double.doubleToRawLongBits(1.0);
