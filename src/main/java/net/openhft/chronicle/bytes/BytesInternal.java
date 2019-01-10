@@ -1641,7 +1641,7 @@ enum BytesInternal {
             value <<= scale2;
         }
         double d;
-        if (deci > 27) {
+        if (deci > 29) {
             d = value / Math.pow(5, -deci);
 
         } else if (deci > 0) {
@@ -1650,7 +1650,7 @@ enum BytesInternal {
             long rem = value % fives;
             d = whole + (double) rem / fives;
 
-        } else if (deci < -27) {
+        } else if (deci < -29) {
             d = value * Math.pow(5, -deci);
 
         } else if (deci < 0) {
