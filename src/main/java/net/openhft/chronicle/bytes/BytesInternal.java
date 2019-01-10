@@ -1634,7 +1634,7 @@ enum BytesInternal {
     }
 
     private static double asDouble(long value, int exp, boolean negative, int deci) {
-        int scale2 = exp;
+        int scale2 = 0;
         int leading = Math.min(54, Long.numberOfLeadingZeros(value));
         if (leading > 1) {
             scale2 = leading - 1;
@@ -1661,7 +1661,7 @@ enum BytesInternal {
             d = value;
         }
 
-        double scalb = Math.scalb(d, -deci - scale2);
+        double scalb = Math.scalb(d, exp - deci - scale2);
         return negative ? -scalb : scalb;
     }
 
