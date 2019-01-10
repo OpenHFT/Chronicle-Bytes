@@ -1633,91 +1633,36 @@ enum BytesInternal {
             out.writeByte((byte) '0');
     }
 
-    private static double asDouble(long value, int exp, boolean negative, int decimalPlaces) {
-/*
-
-        if (exp == 0 && decimalPlaces >= 0 && decimalPlaces < 18) {
-            double d = (double) value / Maths.tens(decimalPlaces);
-            return negative ? -d : d;
+    private static double asDouble(long value, int exp, boolean negative, int deci) {
+        int scale2 = exp;
+        int leading = Math.min(54, Long.numberOfLeadingZeros(value));
+        if (leading > 1) {
+            scale2 = leading - 1;
+            value <<= scale2;
         }
-*/
+        double d;
+        if (deci > 27) {
+            d = value / Math.pow(5, -deci);
 
-        if (decimalPlaces > 0 && value < Long.MAX_VALUE / 2) {
-            if (value < Long.MAX_VALUE / (1L << 32)) {
-                exp -= 32;
-                value <<= 32;
-            }
-            if (value < Long.MAX_VALUE / (1L << 16)) {
-                exp -= 16;
-                value <<= 16;
-            }
-            if (value < Long.MAX_VALUE / (1L << 8)) {
-                exp -= 8;
-                value <<= 8;
-            }
-            if (value < Long.MAX_VALUE / (1L << 4)) {
-                exp -= 4;
-                value <<= 4;
-            }
-            if (value < Long.MAX_VALUE / (1L << 2)) {
-                exp -= 2;
-                value <<= 2;
-            }
-            if (value < Long.MAX_VALUE / (1L << 1)) {
-                exp -= 1;
-                value <<= 1;
-            }
-        }
-        if (decimalPlaces < 0) {
-            for (; decimalPlaces < 0; decimalPlaces++) {
-                exp++;
-                int mod = 0;
-                if (value > Long.MAX_VALUE / 5 * 4) {
-                    mod = (int) (((value & 0x7) * 5 + 4) >> 3);
-                    value >>= 3;
-                    exp += 3;
-                } else if (value > Long.MAX_VALUE / 5 * 2) {
-                    mod = (int) (((value & 0x3) * 5 + 2) >> 2);
-                    value >>= 2;
-                    exp += 2;
-                } else if (value > Long.MAX_VALUE / 5) {
-                    mod = (int) (((value & 0x1) * 5 + 1) >> 1);
-                    value >>= 1;
-                    exp++;
-                }
-                value *= 5;
-                value += mod;
-            }
+        } else if (deci > 0) {
+            long fives = Maths.fives(deci);
+            long whole = value / fives;
+            long rem = value % fives;
+            d = whole + (double) rem / fives;
+
+        } else if (deci < -27) {
+            d = value * Math.pow(5, -deci);
+
+        } else if (deci < 0) {
+            double fives = Maths.fives(-deci);
+            d = value * fives;
 
         } else {
-            for (; decimalPlaces > 0; decimalPlaces--) {
-                exp--;
-                long mod = value % 5;
-                value /= 5;
-                int modDiv = 1;
-                if (value < Long.MAX_VALUE / (1L << 4)) {
-                    exp -= 4;
-                    value <<= 4;
-                    modDiv <<= 4;
-                }
-                if (value < Long.MAX_VALUE / (1L << 2)) {
-                    exp -= 2;
-                    value <<= 2;
-                    modDiv <<= 2;
-                }
-                if (value < Long.MAX_VALUE / (1L << 1)) {
-                    exp -= 1;
-                    value <<= 1;
-                    modDiv <<= 1;
-                }
-                if (decimalPlaces > 1)
-                    value += modDiv * mod / 5;
-                else
-                    value += (modDiv * mod + 4) / 5;
-            }
+            d = value;
         }
-        final double d = Math.scalb((double) value, exp);
-        return negative ? -d : d;
+
+        double scalb = Math.scalb(d, -deci - scale2);
+        return negative ? -scalb : scalb;
     }
 
     @Nullable
