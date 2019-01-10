@@ -22,12 +22,18 @@ public class Issue85Test {
                 break;
             }
         }
-        double tens = Maths.tens(Math.min(deci, 18));
-        while (deci > 18) {
-            deci --;
-            tens *= 10;
+        int scale2 = 0;
+        int leading = Long.numberOfLeadingZeros(value);
+        if (leading > 1) {
+            scale2 = leading - 1;
+            value <<= scale2;
         }
-        return value / tens;
+        long fives = Maths.fives(deci);
+        long whole = value / fives;
+        long rem = value % fives;
+        double d = whole + (double) rem / fives;
+        double scalb = Math.scalb(d, -deci - scale2);
+        return scalb;
     }
 
     @Test
@@ -38,16 +44,16 @@ public class Issue85Test {
         int max = 1000;
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         long val = Double.doubleToRawLongBits(1e-3);
-        for (int i = 1; i < max; i++) {
+        for (int i = 3; i < max; i++) {
             double d = Double.longBitsToDouble(val + i);
             String s = Double.toString(d);
-            String s2 = bytes.clear().append(d).toString();
 /*
             if (!s.equals(s2)) {
                 System.out.println("ToString " + s + " != " + s2+" should be " + new BigDecimal(d));
                 ++different;
             }
 */
+            String s2 = bytes.clear().append(s).toString();
             double d2 = parseDouble(bytes);
             if (d != d2) {
                 System.out.println(i + ": Parsing " + d + " != " + d2);
