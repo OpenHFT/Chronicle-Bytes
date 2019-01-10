@@ -1,9 +1,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import org.junit.Ignore;
 import org.junit.Test;
 
+import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -17,6 +17,7 @@ public class Issue85Test {
     {
         df.setMaximumIntegerDigits(99);
         df.setMaximumFractionDigits(99);
+        df.setMinimumFractionDigits(1);
         df.setGroupingUsed(false);
         df.setDecimalFormatSymbols(
                 DecimalFormatSymbols.getInstance(Locale.ENGLISH));
@@ -59,17 +60,17 @@ public class Issue85Test {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/85")
     public void bytesParseDouble_Issue85_Many0() {
-        int max = 1000, count = 0;
+        int max = 100, count = 0;
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+        // TODO Support d0 >> 1e9
         for (double d0 = 1e9; d0 >= 1e-8; d0 /= 10) {
             long val = Double.doubleToRawLongBits(d0);
-            for (int i = -max / 2; i < max / 2; i++) {
+            for (int i = -max / 2; i <= max / 2; i++) {
                 double d = Double.longBitsToDouble(val + i);
                 doTest(bytes, i, d);
             }
-            count += max;
+            count += max + 1;
         }
         System.out.println("Different toString: " + 100.0 * different / count + "%," +
                 " parsing: " + 100.0 * different2 / count + "%");
@@ -83,12 +84,12 @@ public class Issue85Test {
             System.out.println(i + ": Parsing " + s + " != " + d2);
             ++different2;
         }
-/*
+
         String s2 = bytes.append(d).toString();
-        if (!s.equals(s2)) {
-            System.out.println("ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
+        double d3 = Double.parseDouble(s2);
+        if (d != d3) {
+            System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
             ++different;
         }
-*/
     }
 }
