@@ -19,12 +19,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import static org.junit.Assert.*;
 
@@ -237,14 +235,14 @@ public class BytesInternalTest {
                 {"-1.1E-3 ", -1.1E-3},
                 {"-1.1E3 ", -1.1E3},
                 {"-1.16823E70 ", -1.16823E70},
-                {"1.17045E70 ", 1.17045E70}
+                {"1.17045E70 ", 1.17045E70},
+                {"6.85202", 6.85202}
         };
         for (Object[] objects : tests) {
             @NotNull String text = (String) objects[0];
             double expected = (Double) objects[1];
 
-            assertEquals(expected, Bytes.from(text)
-                    .parseDouble(), 0.0);
+            assertEquals(expected, Bytes.from(text).parseDouble(), 0.0);
         }
     }
 
@@ -270,11 +268,26 @@ public class BytesInternalTest {
         assertEquals(0, count);
     }
 
+    private int checkParse(int different, String s) {
+        double d = Double.parseDouble(s);
+        double d2 = Bytes.from(s).parseDouble();
+        if(d != d2) {
+            System.out.println(d + " != " + d2);
+            ++different;
+        }
+        return different;
+    }
+
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/85")
-    public void bytesParseDouble_Issue85() {
-        double d = 6.85202;
-        String s = Double.toString(d);
-        assertEquals(d, Bytes.from(s) .parseDouble(), 0.0);
+    public void bytesParseDouble_Issue85_SeededRandom() {
+        Random random = new Random(1);
+        int different = 0;
+        int max = 10_000;
+        for (int i = 0; i< max; i++) {
+            double num = random.nextDouble();
+            String s = String.format("%.9f", num);
+            different = checkParse(different, s);
+        }
+        Assert.assertEquals("Different "+(100.0*different)/max+"%", 0, different);
     }
 }
