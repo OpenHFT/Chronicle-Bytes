@@ -6,6 +6,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
+import java.security.SecureRandom;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
@@ -64,14 +65,19 @@ public class Issue85Test {
     public void bytesParseDouble_Issue85_Many0() {
         int max = 100, count = 0;
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
-        // TODO Support d0 >> 1e9
-        for (double d0 = 1e9; d0 >= 1e-8; d0 /= 10) {
+        for (double d0 = 1e21; d0 >= 1e-8; d0 /= 10) {
             long val = Double.doubleToRawLongBits(d0);
             for (int i = -max / 2; i <= max / 2; i++) {
                 double d = Double.longBitsToDouble(val + i);
                 doTest(bytes, i, d);
             }
             count += max + 1;
+        }
+        SecureRandom rand = new SecureRandom();
+        for (int i = 0; i < max * 100; i++) {
+            double d = Math.pow(1e12, rand.nextDouble()) / 1e3;
+            doTest(bytes, 0, d);
+            count++;
         }
         if (different + different2 > 0)
             Assert.fail("Different toString: " + 100.0 * different / count + "%," +
@@ -93,5 +99,15 @@ public class Issue85Test {
             System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
             ++different;
         }
+    }
+
+    @Test
+    public void loseTrainingZeros() {
+        double d = -541098.2421;
+        Assert.assertEquals("" + d,
+                Bytes.elasticHeapByteBuffer(64)
+                        .append(d)
+                        .toString());
+
     }
 }
