@@ -44,6 +44,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -459,10 +461,21 @@ enum BytesInternal {
         int count = 0;
 
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = extractBytes(sb);
-            while (count < utflen) {
-                byte b = memory.readByte(address + count);
-                bytes[count++] = b;
+            byte coder = getStringCoder(sb);
+
+            if (coder == JAVA9_STRING_CODER_LATIN) {
+                byte[] bytes = extractBytes(sb);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    bytes[count++] = b;
+                }
+            } else {
+                assert coder == JAVA9_STRING_CODER_UTF16;
+                sb.setLength(utflen);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    sb.setCharAt(count++, (char) b);
+                }
             }
         } else {
             char[] chars = extractChars(sb);

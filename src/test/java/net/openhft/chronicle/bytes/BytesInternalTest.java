@@ -21,6 +21,8 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.*;
 
+import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -138,6 +140,21 @@ public class BytesInternalTest {
         assertEquals(new String(bytes2, 0), sb.toString());
 
         bytes.release();
+    }
+
+    @Test
+    public void testParse8bitAndStringBuilderWithUtf16Coder() throws BufferUnderflowException, IOException {
+        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        bs.write(0, new byte[] {0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
+
+        StringBuilder sb = new StringBuilder();
+        sb.append("你好");
+
+        BytesInternal.parse8bit(0, bs, sb, 5);
+        String actual = sb.toString();
+
+        assertEquals("value", actual);
+        assertEquals(5, actual.length());
     }
 
     @Test
