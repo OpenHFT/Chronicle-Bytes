@@ -2423,14 +2423,12 @@ enum BytesInternal {
         b.writeByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long remaining)
+    public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
-        if (b1.length() < remaining || b2.length() < remaining)
-            return false;
         @org.jetbrains.annotations.Nullable BytesStore bs1 = b1.bytesStore();
         @org.jetbrains.annotations.Nullable BytesStore bs2 = b2.bytesStore();
         long i = 0;
-        for (; i < remaining - 7 &&
+        for (; i < readRemaining - 7 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
             long l1 = bs1.readLong(b1.readPosition() + i);
@@ -2438,7 +2436,7 @@ enum BytesInternal {
             if (l1 != l2)
                 return false;
         }
-        if (i < remaining - 3 &&
+        if (i < readRemaining - 3 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
             int i1 = bs1.readInt(b1.readPosition() + i);
@@ -2447,7 +2445,7 @@ enum BytesInternal {
                 return false;
             i += 4;
         }
-        for (; i < remaining &&
+        for (; i < readRemaining &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
             byte i1 = bs1.readByte(b1.readPosition() + i);
