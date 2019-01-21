@@ -304,8 +304,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param bytesStore to match against
      * @param length     to match.
-     * @return true      if the bytes up to length matched. If either this or bytesStore is shorter
-     * than length then return false
+     * @return true      if the bytes up to min(length, this.length(), bytesStore.length()) matched.
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
             throws BufferUnderflowException {
