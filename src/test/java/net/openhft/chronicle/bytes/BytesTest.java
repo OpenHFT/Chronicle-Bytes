@@ -343,6 +343,30 @@ public class BytesTest {
     }
 
     @Test
+    public void internRegressionTest() throws IORuntimeException {
+        UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
+
+        Bytes bytes1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
+        Bytes bytes2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
+        utf8StringInterner.intern(bytes1);
+        String intern = utf8StringInterner.intern(bytes2);
+        assertThat(intern, is(bytes2.toString()));
+        String intern2 = utf8StringInterner.intern(bytes1);
+        assertThat(intern2, is(bytes1.toString()));
+        bytes1.release();
+        bytes2.release();
+    }
+
+    @Test
+    public void testEqualBytesWithSecondStoreBeingLonger() throws IORuntimeException {
+        BytesStore store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
+        BytesStore store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
+        assertThat(store1.equalBytes(store2, store2.length()), is(false));
+        store1.release();
+        store2.release();
+    }
+
+    @Test
     public void testStartsWith() {
         assertTrue(Bytes.from("aaa").startsWith(Bytes.from("a")));
         assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aa")));

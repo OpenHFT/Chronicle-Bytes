@@ -283,7 +283,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @param maxLength the maxiumum len of the output
+     * @param maxLength the maximum len of the output
      * @return This BytesStore as a DebugString.
      */
     @NotNull
@@ -304,11 +304,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param bytesStore to match against
      * @param length     to match.
-     * @return true if the bytes and length matched.
+     * @return true      if the bytes up to length matched. If either this or bytesStore is shorter
+     * than length then return false
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
             throws BufferUnderflowException {
-        return length == 8
+        return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
     }

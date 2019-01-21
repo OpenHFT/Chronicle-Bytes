@@ -447,6 +447,8 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&
                 bytesStore.isDirectMemory()) {
+            if (this.length() < length || bytesStore.length() < length)
+                return false;
             @NotNull VanillaBytes b2 = (VanillaBytes) bytesStore;
             @NotNull NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             @Nullable NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();

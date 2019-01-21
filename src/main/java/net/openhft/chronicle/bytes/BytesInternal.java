@@ -2425,6 +2425,8 @@ enum BytesInternal {
 
     public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long remaining)
             throws BufferUnderflowException {
+        if (b1.length() < remaining || b2.length() < remaining)
+            return false;
         @org.jetbrains.annotations.Nullable BytesStore bs1 = b1.bytesStore();
         @org.jetbrains.annotations.Nullable BytesStore bs2 = b2.bytesStore();
         long i = 0;
