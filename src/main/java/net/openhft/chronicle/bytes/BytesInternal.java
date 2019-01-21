@@ -44,6 +44,8 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -459,10 +461,21 @@ enum BytesInternal {
         int count = 0;
 
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = extractBytes(sb);
-            while (count < utflen) {
-                byte b = memory.readByte(address + count);
-                bytes[count++] = b;
+            byte coder = getStringCoder(sb);
+
+            if (coder == JAVA9_STRING_CODER_LATIN) {
+                byte[] bytes = extractBytes(sb);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    bytes[count++] = b;
+                }
+            } else {
+                assert coder == JAVA9_STRING_CODER_UTF16;
+                sb.setLength(utflen);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    sb.setCharAt(count++, (char) b);
+                }
             }
         } else {
             char[] chars = extractChars(sb);
@@ -1633,91 +1646,42 @@ enum BytesInternal {
             out.writeByte((byte) '0');
     }
 
-    private static double asDouble(long value, int exp, boolean negative, int decimalPlaces) {
-/*
+    private static double asDouble(long value, int exp, boolean negative, int deci) {
+        // these numbers were determined empirically.
+        int leading = 11;
+        if (value >= 1L << 53)
+            leading = Long.numberOfLeadingZeros(value)-1;
+        else if (value >= 1L << 49)
+            leading = 10;
 
-        if (exp == 0 && decimalPlaces >= 0 && decimalPlaces < 18) {
-            double d = (double) value / Maths.tens(decimalPlaces);
-            return negative ? -d : d;
+        int scale2 = 0;
+        if (leading > 0) {
+            scale2 = leading;
+            value <<= scale2;
         }
-*/
+        double d;
+        if (deci > 29) {
+            d = value / Math.pow(5, -deci);
 
-        if (decimalPlaces > 0 && value < Long.MAX_VALUE / 2) {
-            if (value < Long.MAX_VALUE / (1L << 32)) {
-                exp -= 32;
-                value <<= 32;
-            }
-            if (value < Long.MAX_VALUE / (1L << 16)) {
-                exp -= 16;
-                value <<= 16;
-            }
-            if (value < Long.MAX_VALUE / (1L << 8)) {
-                exp -= 8;
-                value <<= 8;
-            }
-            if (value < Long.MAX_VALUE / (1L << 4)) {
-                exp -= 4;
-                value <<= 4;
-            }
-            if (value < Long.MAX_VALUE / (1L << 2)) {
-                exp -= 2;
-                value <<= 2;
-            }
-            if (value < Long.MAX_VALUE / (1L << 1)) {
-                exp -= 1;
-                value <<= 1;
-            }
-        }
-        if (decimalPlaces < 0) {
-            for (; decimalPlaces < 0; decimalPlaces++) {
-                exp++;
-                int mod = 0;
-                if (value > Long.MAX_VALUE / 5 * 4) {
-                    mod = (int) (((value & 0x7) * 5 + 4) >> 3);
-                    value >>= 3;
-                    exp += 3;
-                } else if (value > Long.MAX_VALUE / 5 * 2) {
-                    mod = (int) (((value & 0x3) * 5 + 2) >> 2);
-                    value >>= 2;
-                    exp += 2;
-                } else if (value > Long.MAX_VALUE / 5) {
-                    mod = (int) (((value & 0x1) * 5 + 1) >> 1);
-                    value >>= 1;
-                    exp++;
-                }
-                value *= 5;
-                value += mod;
-            }
+        } else if (deci > 0) {
+            long fives = Maths.fives(deci);
+            long whole = value / fives;
+            long rem = value % fives;
+            d = whole + (double) rem / fives;
+
+        } else if (deci < -29) {
+            d = value * Math.pow(5, -deci);
+
+        } else if (deci < 0) {
+            double fives = Maths.fives(-deci);
+            d = value * fives;
 
         } else {
-            for (; decimalPlaces > 0; decimalPlaces--) {
-                exp--;
-                long mod = value % 5;
-                value /= 5;
-                int modDiv = 1;
-                if (value < Long.MAX_VALUE / (1L << 4)) {
-                    exp -= 4;
-                    value <<= 4;
-                    modDiv <<= 4;
-                }
-                if (value < Long.MAX_VALUE / (1L << 2)) {
-                    exp -= 2;
-                    value <<= 2;
-                    modDiv <<= 2;
-                }
-                if (value < Long.MAX_VALUE / (1L << 1)) {
-                    exp -= 1;
-                    value <<= 1;
-                    modDiv <<= 1;
-                }
-                if (decimalPlaces > 1)
-                    value += modDiv * mod / 5;
-                else
-                    value += (modDiv * mod + 4) / 5;
-            }
+            d = value;
         }
-        final double d = Math.scalb((double) value, exp);
-        return negative ? -d : d;
+
+        double scalb = Math.scalb(d, exp - deci - scale2);
+        return negative ? -scalb : scalb;
     }
 
     @Nullable
@@ -2459,12 +2423,12 @@ enum BytesInternal {
         b.writeByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long remaining)
+    public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
         @org.jetbrains.annotations.Nullable BytesStore bs1 = b1.bytesStore();
         @org.jetbrains.annotations.Nullable BytesStore bs2 = b2.bytesStore();
         long i = 0;
-        for (; i < remaining - 7 &&
+        for (; i < readRemaining - 7 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
             long l1 = bs1.readLong(b1.readPosition() + i);
@@ -2472,7 +2436,7 @@ enum BytesInternal {
             if (l1 != l2)
                 return false;
         }
-        if (i < remaining - 3 &&
+        if (i < readRemaining - 3 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
             int i1 = bs1.readInt(b1.readPosition() + i);
@@ -2481,7 +2445,7 @@ enum BytesInternal {
                 return false;
             i += 4;
         }
-        for (; i < remaining &&
+        for (; i < readRemaining &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
             byte i1 = bs1.readByte(b1.readPosition() + i);

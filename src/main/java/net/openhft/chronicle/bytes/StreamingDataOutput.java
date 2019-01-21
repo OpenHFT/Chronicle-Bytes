@@ -47,7 +47,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeLimit(long limit) throws BufferOverflowException;
 
     /**
-     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     * Skip a number of bytes by moving the writePosition. Must be less than or equal to the writeLimit.
      *
      * @param bytesToSkip bytes to skip.
      * @return this

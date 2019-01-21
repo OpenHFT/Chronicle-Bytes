@@ -68,11 +68,11 @@ public abstract class AbstractInterner<T> {
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
-        if (s != null && s.bytes.equalBytes(cs, length))
+        if (s != null && s.bytes.length() == length && s.bytes.equalBytes(cs, length))
             return s.t;
         int h2 = (hash >> shift) & mask;
         InternerEntry<T> s2 = entries[h2];
-        if (s2 != null && s2.bytes.equalBytes(cs, length))
+        if (s2 != null && s2.bytes.length() == length && s2.bytes.equalBytes(cs, length))
             return s2.t;
         @NotNull T t = getValue(cs, length);
         @NotNull final byte[] bytes = new byte[length];
