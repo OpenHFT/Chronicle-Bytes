@@ -65,7 +65,7 @@ public interface BytesOut<Underlying> extends
      * @param obj           of componentType
      */
     default void writeObject(Class componentType, Object obj) {
-        if (componentType != obj.getClass())
+        if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
         if (obj instanceof BytesMarshallable) {
             ((BytesMarshallable) obj).writeMarshallable(this);
@@ -73,6 +73,12 @@ public interface BytesOut<Underlying> extends
         }
         if (obj instanceof Enum) {
             writeEnum((Enum) obj);
+            return;
+        }
+        if (obj instanceof BytesStore) {
+            BytesStore bs = (BytesStore) obj;
+            writeStopBit(bs.readRemaining());
+            write(bs);
             return;
         }
         switch (componentType.getName()) {
