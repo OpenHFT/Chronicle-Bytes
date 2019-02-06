@@ -55,7 +55,7 @@ public class StreamingOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
         try {
-            sdo.writeUnsignedByte(b);
+            sdo.writeUnsignedByte(0xff & b);
 
         } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);
