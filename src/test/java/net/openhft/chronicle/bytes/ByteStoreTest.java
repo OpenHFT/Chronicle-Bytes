@@ -42,6 +42,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ByteStoreTest {
 
     private static final int SIZE = 128;

@@ -27,6 +27,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class StringInternerBytesTest {
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testIntern() {
         @NotNull StringInternerBytes si = new StringInternerBytes(128);

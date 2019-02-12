@@ -33,6 +33,7 @@ import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
 
 public class ByteStringParserTest {
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = Bytes.elasticByteBuffer();
     private ThreadDump threadDump;
@@ -53,6 +54,7 @@ public class ByteStringParserTest {
         threadDump.assertNoNewThreads();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testParseLong() {
         long expected = 123456789012345678L;

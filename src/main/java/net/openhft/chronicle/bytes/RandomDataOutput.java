@@ -24,6 +24,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     /**
      * Write a byte at an offset.

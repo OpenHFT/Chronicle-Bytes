@@ -23,6 +23,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 

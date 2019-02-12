@@ -33,6 +33,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
         super(capacity);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     @NotNull
     protected String getValue(@NotNull BytesStore cs, int length) throws UTFDataFormatRuntimeException {

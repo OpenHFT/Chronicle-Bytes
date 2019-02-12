@@ -8,6 +8,7 @@ import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
 
+@SuppressWarnings("rawtypes")
 public class BytesMethodReader implements MethodReader {
     private final BytesIn in;
     private final BytesParselet defaultParselet;

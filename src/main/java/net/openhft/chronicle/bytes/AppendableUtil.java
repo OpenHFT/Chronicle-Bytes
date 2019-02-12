@@ -30,6 +30,7 @@ import java.nio.BufferUnderflowException;
 /*
  * Created by Peter Lawrey on 30/08/15.
  */
+@SuppressWarnings("rawtypes")
 public enum AppendableUtil {
     ;
 

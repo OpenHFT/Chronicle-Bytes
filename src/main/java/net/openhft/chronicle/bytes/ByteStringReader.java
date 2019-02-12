@@ -23,6 +23,7 @@ import java.nio.BufferUnderflowException;
 /**
  * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
  */
+@SuppressWarnings("rawtypes")
 public class ByteStringReader extends Reader {
     private final ByteStringParser in;
 

@@ -36,6 +36,7 @@ import static java.lang.Math.min;
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 

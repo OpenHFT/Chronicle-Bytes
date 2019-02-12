@@ -51,6 +51,7 @@ public class MemoryMessager {
         if (!works2) throw new AssertionError();
     }
 
+    @SuppressWarnings("restriction")
     public int length() {
         int length = UnsafeMemory.UNSAFE.getIntVolatile(null, address);
         Jvm.safepoint();

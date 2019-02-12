@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes;
 import java.io.Closeable;
 import java.io.IOException;
 
+@SuppressWarnings("rawtypes")
 class MyBytes implements BytesMarshallable, Closeable {
     Bytes bytes1;
     Bytes bytes2;

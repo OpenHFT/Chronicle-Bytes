@@ -24,6 +24,7 @@ import java.io.InputStream;
 /*
  * Created by Peter Lawrey on 17/08/15.
  */
+@SuppressWarnings("rawtypes")
 public class StreamingInputStream extends InputStream {
 
     private StreamingDataInput in;

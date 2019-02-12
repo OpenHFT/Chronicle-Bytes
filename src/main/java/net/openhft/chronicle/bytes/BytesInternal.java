@@ -52,6 +52,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * Utility methods to support common functionality in this package. This is not intended to be
  * accessed directly.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 enum BytesInternal {
     ;
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();

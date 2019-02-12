@@ -28,5 +28,6 @@ public interface ReadBytesMarshallable {
      *
      * @param bytes to read.
      */
+    @SuppressWarnings("rawtypes")
     void readMarshallable(BytesIn bytes) throws IORuntimeException;
 }

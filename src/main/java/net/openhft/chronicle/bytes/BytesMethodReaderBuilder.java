@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("rawtypes")
 public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn in;
     private BytesParselet defaultParselet = createDefaultParselet();

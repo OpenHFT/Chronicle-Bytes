@@ -119,6 +119,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param buffer         to populate
      * @param stopCharTester to check if the end has been reached.
      */
+    @SuppressWarnings("rawtypes")
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException {
@@ -144,6 +145,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */
+    @SuppressWarnings("rawtypes")
     @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException {
@@ -153,6 +155,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
             BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
     }
 
+    @SuppressWarnings("rawtypes")
     default void parse8bit(Bytes buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);

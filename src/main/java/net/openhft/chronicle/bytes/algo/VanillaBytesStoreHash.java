@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 /*
  * Created by Peter Lawrey on 28/06/15.
  */
+@SuppressWarnings("rawtypes")
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
 
