@@ -30,6 +30,7 @@ import java.util.Random;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class GzipTest {
@@ -53,6 +54,7 @@ public class GzipTest {
         assertTrue(Arrays.equals(bytes, bytes2));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCompressionRatio() throws IORuntimeException {
         @NotNull byte[] bytes = new byte[1 << 20];
@@ -69,6 +71,7 @@ public class GzipTest {
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = GZIP.uncompress(bytes4);
 
+        assertNotNull(bytes5);
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes5).replace(", ", "\n"));
 //        assertEquals(Arrays.toString(compress).replace(", ", "\n"),
