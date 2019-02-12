@@ -24,13 +24,13 @@ import java.io.*;
  * Created by Peter Lawrey on 12/07/15.
  */
 public class PrintVdsoMain {
+    @SuppressWarnings("rawtypes")
     public static void main(String[] args) throws IOException, IllegalStateException {
         long start = 0;
         long end = 0;
         @NotNull String maps = "/proc/self/maps";
         if (!new File(maps).exists()) return;
-        @NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)));
-        try {
+        try (@NotNull BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(maps)))) {
             for (String line; (line = br.readLine()) != null; ) {
                 if (line.endsWith("[vdso]")) {
                     @NotNull String[] parts = line.split("[- ]");
@@ -41,7 +41,6 @@ public class PrintVdsoMain {
 //                System.out.println(line);
             }
         } catch (IOException ioe) {
-            br.close();
             throw ioe;
         }
         System.out.printf("vdso %x to %x %n", start, end);

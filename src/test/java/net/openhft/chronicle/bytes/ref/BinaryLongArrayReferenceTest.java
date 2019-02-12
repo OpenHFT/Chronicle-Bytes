@@ -39,24 +39,27 @@ public class BinaryLongArrayReferenceTest {
         threadDump.assertNoNewThreads();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
         int length = 128 * 8 + 2 * 8;
         Bytes bytes = Bytes.allocateDirect(length);
         BinaryLongArrayReference.write(bytes, 128);
 
-        @NotNull BinaryLongArrayReference array = new BinaryLongArrayReference();
-        array.bytesStore(bytes, 0, length);
-
-        assertEquals(128, array.getCapacity());
-        for (int i = 0; i < 128; i++)
-            array.setValueAt(i, i + 1);
-
-        for (int i = 0; i < 128; i++)
-            assertEquals(i + 1, array.getValueAt(i));
-        bytes.release();
+        try (@NotNull BinaryLongArrayReference array = new BinaryLongArrayReference()) {
+            array.bytesStore(bytes, 0, length);
+    
+            assertEquals(128, array.getCapacity());
+            for (int i = 0; i < 128; i++)
+                array.setValueAt(i, i + 1);
+    
+            for (int i = 0; i < 128; i++)
+                assertEquals(i + 1, array.getValueAt(i));
+            bytes.release();
+        }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void marshallable() {
         Bytes bytes = Bytes.allocateElasticDirect(256);
