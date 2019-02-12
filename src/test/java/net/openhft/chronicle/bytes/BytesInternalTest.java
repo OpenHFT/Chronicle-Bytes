@@ -26,8 +26,10 @@ import java.nio.BufferUnderflowException;
 import java.util.Arrays;
 import java.util.Random;
 
+import static java.nio.charset.StandardCharsets.US_ASCII;
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"rawtypes"})
 public class BytesInternalTest {
 
     public static final int LENGTH;
@@ -68,7 +70,7 @@ public class BytesInternalTest {
 
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
-        assertEquals(new String(bytes2, 0), sb.toString());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
         bytes.release();
     }
 
@@ -86,7 +88,7 @@ public class BytesInternalTest {
         assertEquals(length, sb.length());
         String actual = sb.toString();
         sb = null; // free some memory.
-        assertEquals(new String(bytes2, 0), actual);
+        assertEquals(new String(bytes2, US_ASCII), actual);
 
         bytes.release();
     }
@@ -103,7 +105,7 @@ public class BytesInternalTest {
 
         BytesInternal.parseUtf81(bytes, sb, length);
         assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, 0), sb.toString());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
         bytes.release();
     }
@@ -120,7 +122,7 @@ public class BytesInternalTest {
 
         BytesInternal.parseUtf8_SB1(bytes, sb, length);
         assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, 0), sb.toString());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
         bytes.release();
     }
@@ -137,7 +139,7 @@ public class BytesInternalTest {
 
         BytesInternal.parse8bit(0, bytes, sb, length);
         assertEquals(length, sb.length());
-        assertEquals(new String(bytes2, 0), sb.toString());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
         bytes.release();
     }
@@ -266,10 +268,6 @@ public class BytesInternalTest {
     @Test
     public void testWritingDecimalVsJava() {
         Bytes bytes = Bytes.elasticHeapByteBuffer(32);
-        long l = Double.doubleToRawLongBits(1.0);
-//        Random rand = new Random(1);
-        int count = 0;
-//        for (int i = 0; i < 1000000; i++) {
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
         bytes.append(d);
@@ -278,10 +276,7 @@ public class BytesInternalTest {
             assertEquals(d, Double.parseDouble(s), 0.0);
             String s2 = bytes.toString();
             System.out.println(s + " != " + s2);
-//                count++;
         }
-//        }
-        assertEquals(0, count);
     }
 
     private int checkParse(int different, String s) {
