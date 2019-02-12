@@ -33,6 +33,7 @@ import java.nio.ByteBuffer;
 /**
  * Fast unchecked version of AbstractBytes
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     protected final long capacity;
     @NotNull
@@ -557,19 +558,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @ForceInline
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
 //        assert writeCheckOffset0(offset, adding);
-    }
-
-    private boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
-        if (offset < start())
-            throw new BufferOverflowException();
-        if (offset + adding > writeLimit()) {
-            assert offset + adding <= writeLimit() : "cant add bytes past the limit : limit=" + writeLimit() +
-                    ",offset=" +
-                    offset +
-                    ",adding=" + adding;
-            throw new BufferOverflowException();
-        }
-        return true;
     }
 
     @Override
