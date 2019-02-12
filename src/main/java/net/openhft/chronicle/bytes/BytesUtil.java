@@ -25,6 +25,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
@@ -45,6 +46,19 @@ public enum BytesUtil {
 
     static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
+    public static String findFile(@NotNull String name) throws FileNotFoundException {
+        File file = new File(name);
+        URL url = null;
+        if (!file.exists()) {
+            url = urlFor(name);
+            String file2 = url.getFile()
+                    .replace("target/test-classes", "src/test/resources");
+            file = new File(file2);
+        }
+        if (!file.exists())
+            throw new FileNotFoundException(name);
+        return file.getAbsolutePath();
+    }
     public static Bytes readFile(@org.jetbrains.annotations.NotNull String name) throws IOException {
         File file = new File(name);
         URL url = null;
