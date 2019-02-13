@@ -30,6 +30,7 @@ import java.util.Random;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /*
@@ -56,6 +57,7 @@ public class LZWTest {
         assertTrue(Arrays.equals(bytes, bytes2));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testCompressionRatio() throws IORuntimeException {
         @NotNull byte[] bytes = new byte[1 << 20];
@@ -71,6 +73,7 @@ public class LZWTest {
         LZW.compress(bytes2, bytes3);
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = LZW.uncompress(bytes4);
+        assertNotNull(bytes5);
 
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes5).replace(", ", "\n"));
