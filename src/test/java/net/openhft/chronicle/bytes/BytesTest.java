@@ -47,6 +47,7 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class BytesTest {
 
@@ -659,18 +660,19 @@ public class BytesTest {
                 "a\n" +
                 "bye\n" +
                 "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
-        @NotNull Scanner scan = new Scanner(bytes.reader());
-        scan.useLocale(Locale.ENGLISH);
-        assertEquals(1, scan.nextInt());
-        assertEquals("", scan.nextLine());
-        assertEquals("Hello", scan.nextLine());
-        assertEquals(12.34, scan.nextDouble(), 0.0);
-        assertEquals("", scan.nextLine());
-        assertEquals("a", scan.nextLine());
-        assertEquals("bye", scan.nextLine());
-        assertEquals("for now", scan.nextLine());
-        assertFalse(scan.hasNext());
-        bytes.release();
+        try (@NotNull Scanner scan = new Scanner(bytes.reader())) {
+            scan.useLocale(Locale.ENGLISH);
+            assertEquals(1, scan.nextInt());
+            assertEquals("", scan.nextLine());
+            assertEquals("Hello", scan.nextLine());
+            assertEquals(12.34, scan.nextDouble(), 0.0);
+            assertEquals("", scan.nextLine());
+            assertEquals("a", scan.nextLine());
+            assertEquals("bye", scan.nextLine());
+            assertEquals("for now", scan.nextLine());
+            assertFalse(scan.hasNext());
+            bytes.release();
+        }
     }
 
     @Test

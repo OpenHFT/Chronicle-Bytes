@@ -13,6 +13,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("rawtypes")
 public class MappedBytesTest {
 
     final private String
@@ -334,14 +335,15 @@ public class MappedBytesTest {
     @Test
     public void shouldBeReadOnly() throws Exception {
         final File tempFile = File.createTempFile("mapped", "bytes");
-        final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw");
-        raf.setLength(4096);
-        assertTrue(tempFile.setWritable(false));
-        final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
-
-        assertTrue(mappedBytes.
-                isBackingFileReadOnly());
-        mappedBytes.release();
+        try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
+            raf.setLength(4096);
+            assertTrue(tempFile.setWritable(false));
+            final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
+    
+            assertTrue(mappedBytes.
+                    isBackingFileReadOnly());
+            mappedBytes.release();
+        }
     }
 
     @Test
