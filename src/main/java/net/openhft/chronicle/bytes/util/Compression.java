@@ -40,12 +40,6 @@ public interface Compression {
                     return;
                 }
                 break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.compress(uncompressed, compressed);
-                    return;
-                }
-                break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs)) {
                     Compressions.GZIP.compress(uncompressed, compressed);
@@ -74,12 +68,6 @@ public interface Compression {
                     return;
                 }
                 break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.uncompress(from, to);
-                    return;
-                }
-                break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs)) {
                     Compressions.GZIP.uncompress(from, to);
@@ -103,10 +91,6 @@ public interface Compression {
             case 'l':
                 if (StringUtils.isEqual("lzw", cs))
                     return Compressions.LZW.uncompress(bytes.apply(t));
-                break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs))
-                    return Compressions.Snappy.uncompress(bytes.apply(t));
                 break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs))

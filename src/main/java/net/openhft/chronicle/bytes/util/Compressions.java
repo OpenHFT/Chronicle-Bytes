@@ -21,8 +21,6 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.xerial.snappy.SnappyInputStream;
-import org.xerial.snappy.SnappyOutputStream;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -104,63 +102,6 @@ public enum Compressions implements Compression {
             } catch (IOException e) {
                 throw new AssertionError(e); // in memory.
             }
-        }
-    },
-    Snappy {
-        final boolean available;
-        {
-            boolean available;
-            try {
-                Class.forName("org.xerial.snappy.Snappy");
-                available = true;
-            } catch (ClassNotFoundException cnfe) {
-                available = false;
-            }
-            this.available = available;
-        }
-
-        @Override
-        public boolean available() {
-            return available;
-        }
-
-        @NotNull
-        @Override
-        public byte[] compress(byte[] bytes) {
-            try {
-                return org.xerial.snappy.Snappy.compress(bytes);
-
-            } catch (IOException e) {
-                throw new AssertionError(e);
-            }
-        }
-
-        @NotNull
-        @Override
-        public byte[] uncompress(@NotNull byte[] bytes) throws IORuntimeException {
-            try {
-                return org.xerial.snappy.Snappy.uncompress(bytes);
-
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
-            }
-        }
-
-        @NotNull
-        @Override
-        public InputStream decompressingStream(InputStream input) throws IORuntimeException {
-            try {
-                return new SnappyInputStream(input);
-
-            } catch (IOException e) {
-                throw new IORuntimeException(e);
-            }
-        }
-
-        @NotNull
-        @Override
-        public OutputStream compressingStream(OutputStream output) {
-            return new SnappyOutputStream(output);
         }
     }
 }
