@@ -25,6 +25,7 @@ import java.nio.BufferOverflowException;
 /*
  * Created by Peter Lawrey on 17/08/15.
  */
+@SuppressWarnings("rawtypes")
 public class StreamingOutputStream extends OutputStream {
     private StreamingDataOutput sdo;
 

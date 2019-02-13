@@ -35,6 +35,7 @@ import java.util.function.Supplier;
 /*
  * Created by Peter Lawrey on 19/04/2016.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class BytesMarshaller<T> {
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
             = ClassLocal.withInitial(BytesMarshaller::new);

@@ -25,6 +25,7 @@ import static org.junit.Assert.assertEquals;
 /*
  * Created by Peter Lawrey on 17/06/2016.
  */
+@SuppressWarnings("rawtypes")
 public class VanillaBytesTest {
     @Test
     public void testBytesForRead() {

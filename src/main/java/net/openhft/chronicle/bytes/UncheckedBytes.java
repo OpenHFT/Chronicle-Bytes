@@ -30,6 +30,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 /**
  * Fast unchecked version of AbstractBytes
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     Bytes underlyingBytes;
 

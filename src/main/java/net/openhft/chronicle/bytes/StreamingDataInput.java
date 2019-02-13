@@ -34,6 +34,7 @@ import java.nio.ByteBuffer;
 /**
  * This data input has a a position() and a limit()
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     @NotNull
     S readPosition(long position) throws BufferUnderflowException;

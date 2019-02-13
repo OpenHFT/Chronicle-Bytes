@@ -35,6 +35,7 @@ public class StringInternerBytes extends StringInterner {
         super(capacity);
     }
 
+    @SuppressWarnings("rawtypes")
     public String intern(@NotNull final Bytes bytes) {
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
@@ -49,6 +50,7 @@ public class StringInternerBytes extends StringInterner {
      * @param length parse the string up to the length
      * @return the string made from bytes only ( rather than chars )
      */
+    @SuppressWarnings("rawtypes")
     public String intern(@NotNull final Bytes bytes, int length) {
         try {
             int hash32 = BytesStoreHash.hash32(bytes, length);

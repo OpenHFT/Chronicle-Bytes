@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 /**
  * Methods to append text to a Bytes. This extends the Appendable interface.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     /**

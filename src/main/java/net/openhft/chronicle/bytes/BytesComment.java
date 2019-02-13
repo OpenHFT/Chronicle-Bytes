@@ -16,6 +16,7 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @param comment to add (or ignore)
      * @return this
      */
+    @SuppressWarnings("unchecked")
     default B comment(CharSequence comment) {
         return (B) this;
     }
@@ -26,6 +27,7 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @param n +1 indent in, -1 reduce indenting
      * @return this.
      */
+    @SuppressWarnings("unchecked")
     default B indent(int n) {
         return (B) this;
     }

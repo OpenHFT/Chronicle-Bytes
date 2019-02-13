@@ -50,6 +50,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         binaryLongReferences = null;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())

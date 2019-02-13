@@ -27,7 +27,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 The format for a long array in text is
 { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
-
+@SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);

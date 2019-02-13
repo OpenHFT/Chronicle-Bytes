@@ -34,6 +34,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * <p>
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
 
     private final long capacity;

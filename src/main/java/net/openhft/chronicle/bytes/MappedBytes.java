@@ -41,6 +41,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
@@ -696,6 +697,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return bytesStore.readVolatileLong(offset);
     }
 
+    @SuppressWarnings("restriction")
     @Override
     public int peekVolatileInt() {
         if (!bytesStore.inside(readPosition, 4)) {

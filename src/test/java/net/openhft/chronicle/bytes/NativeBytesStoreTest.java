@@ -42,6 +42,7 @@ import static org.junit.Assert.*;
 /*
  * Created by peter.lawrey on 27/02/15.
  */
+@SuppressWarnings("rawtypes")
 public class NativeBytesStoreTest {
     volatile int bcs;
     private ThreadDump threadDump;

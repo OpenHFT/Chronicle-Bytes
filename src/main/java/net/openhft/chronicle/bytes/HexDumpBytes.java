@@ -12,6 +12,7 @@ import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes implements Bytes<Void> {
 
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();

@@ -33,6 +33,7 @@ import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPL
 /**
  * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
  */
+@SuppressWarnings("rawtypes")
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
     private static final long CAPACITY = 0;
     private static final long USED = CAPACITY + Long.BYTES;

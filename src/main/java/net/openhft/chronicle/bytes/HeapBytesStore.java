@@ -36,7 +36,7 @@ import java.util.function.Function;
 /**
  * Wrapper for Heap ByteBuffers and arrays.
  */
-@SuppressWarnings("sunapi")
+@SuppressWarnings("restriction")
 public class HeapBytesStore<Underlying>
         extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
     @Nullable
@@ -80,6 +80,7 @@ public class HeapBytesStore<Underlying>
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     public void init(@NotNull ByteBuffer byteBuffer) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
@@ -88,6 +89,7 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
+    @SuppressWarnings("unchecked")
     public void init(@NotNull byte[] byteArray) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteArray;
@@ -410,6 +412,7 @@ public class HeapBytesStore<Underlying>
         throw new UnsupportedOperationException("todo");
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);

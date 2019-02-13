@@ -78,6 +78,7 @@ public class MappedFileTest {
         assertThat(third.refCount(), is(1L));
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testReferenceCounts() throws IOException {
         new File(OS.TARGET).mkdir();

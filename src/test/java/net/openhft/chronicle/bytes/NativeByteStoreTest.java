@@ -33,6 +33,7 @@ public class NativeByteStoreTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
         @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());

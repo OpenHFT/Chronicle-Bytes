@@ -30,6 +30,7 @@ import java.util.zip.*;
 /*
  * Created by peter.lawrey on 09/12/2015.
  */
+@SuppressWarnings("rawtypes")
 public enum Compressions implements Compression {
     Binary {
         @NotNull

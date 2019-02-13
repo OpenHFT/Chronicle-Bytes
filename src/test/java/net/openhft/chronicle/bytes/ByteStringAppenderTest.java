@@ -38,6 +38,7 @@ public class ByteStringAppenderTest {
 
     @NotNull
     private ThreadDump threadDump;
+    @SuppressWarnings("rawtypes")
     private Bytes bytes;
 
     public ByteStringAppenderTest(String name, boolean direct) {

@@ -15,6 +15,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
     private static final byte FALSE = (byte) 0xB0;
     private static final byte TRUE = (byte) 0xB1;
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())

@@ -46,6 +46,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
+    @SuppressWarnings("unchecked")
     @NotNull
     default B prepend(long value) throws BufferOverflowException {
         BytesInternal.prepend(this, value);
@@ -67,6 +68,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param bytes to prepend to.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     B prewrite(BytesStore bytes) throws BufferOverflowException;
 

@@ -48,6 +48,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class MappedFile implements ReferenceCounted {
     private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.

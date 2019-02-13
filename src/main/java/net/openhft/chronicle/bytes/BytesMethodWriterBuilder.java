@@ -7,6 +7,7 @@ import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import java.util.List;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @Deprecated(/*is it used?*/)
 public class BytesMethodWriterBuilder<T> implements MethodWriterBuilder<T> {
 

@@ -376,6 +376,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param length of bytes
      * @return ByteStore copy.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     default BytesStore subBytes(long start, long length) throws BufferUnderflowException {
         return BytesInternal.subBytes(this, start, length);

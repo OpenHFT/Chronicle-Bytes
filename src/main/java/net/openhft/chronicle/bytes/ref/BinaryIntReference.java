@@ -27,6 +27,7 @@ import java.nio.BufferUnderflowException;
  */
 public class BinaryIntReference extends AbstractReference implements IntValue {
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         if (length != maxSize())

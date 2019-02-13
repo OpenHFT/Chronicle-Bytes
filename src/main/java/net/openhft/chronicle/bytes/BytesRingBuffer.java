@@ -29,6 +29,7 @@ import java.nio.BufferOverflowException;
 /**
  * @author Rob Austin.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
 
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
