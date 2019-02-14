@@ -17,7 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.BooleanValue;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * Implementation of a reference to a 32-bit in in text wire format.

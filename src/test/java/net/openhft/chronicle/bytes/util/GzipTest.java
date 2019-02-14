@@ -19,7 +19,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

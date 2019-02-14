@@ -19,7 +19,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.LongValue;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 

@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.*;
 
 import java.io.IOException;

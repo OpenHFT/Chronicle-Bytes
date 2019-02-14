@@ -18,8 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 import org.junit.After;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;

@@ -16,8 +16,8 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;

@@ -18,8 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.threads.ThreadDump;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 

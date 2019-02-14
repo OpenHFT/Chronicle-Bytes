@@ -18,7 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /*
  * Created by Peter Lawrey on 20/04/2016.

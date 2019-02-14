@@ -22,7 +22,7 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 

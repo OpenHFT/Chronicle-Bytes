@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import sun.misc.Unsafe;
 
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})

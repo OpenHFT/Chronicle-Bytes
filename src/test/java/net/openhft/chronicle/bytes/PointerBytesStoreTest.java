@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.After;
 import org.junit.Test;
 

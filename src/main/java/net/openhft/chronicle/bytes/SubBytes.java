@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SubBytes<Underlying> extends VanillaBytes<Underlying> {

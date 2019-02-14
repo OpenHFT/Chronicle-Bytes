@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /*
  * Created by peter.lawrey on 21/09/2015.

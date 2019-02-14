@@ -21,8 +21,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 import sun.nio.ch.Interruptible;
 
 import java.io.File;

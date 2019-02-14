@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * @author peter.lawrey

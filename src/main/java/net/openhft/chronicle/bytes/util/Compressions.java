@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.io.IOException;
 import java.io.InputStream;

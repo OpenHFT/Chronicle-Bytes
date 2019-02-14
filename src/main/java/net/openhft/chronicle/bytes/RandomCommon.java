@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;

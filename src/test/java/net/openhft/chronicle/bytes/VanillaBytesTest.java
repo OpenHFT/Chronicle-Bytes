@@ -17,7 +17,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

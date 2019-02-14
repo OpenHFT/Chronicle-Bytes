@@ -18,8 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.NotNull;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import javax.crypto.Cipher;
 import java.io.IOException;

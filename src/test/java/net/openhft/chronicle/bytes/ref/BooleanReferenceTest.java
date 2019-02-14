@@ -17,7 +17,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.NativeBytesStore;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;

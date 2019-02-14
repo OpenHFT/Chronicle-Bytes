@@ -18,7 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.ReferenceCounted;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * BytesStore to wrap memory mapped data.

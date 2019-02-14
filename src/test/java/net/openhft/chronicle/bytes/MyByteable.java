@@ -1,6 +1,6 @@
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 class MyByteable implements BytesMarshallable {
     boolean flag;

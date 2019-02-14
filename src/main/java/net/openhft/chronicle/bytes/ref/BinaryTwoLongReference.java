@@ -15,7 +15,7 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
     @Override

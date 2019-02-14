@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * A BytesStore which can point to arbitrary memory.

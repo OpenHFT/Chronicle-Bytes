@@ -1,7 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.Closeable;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;

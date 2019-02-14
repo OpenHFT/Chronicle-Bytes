@@ -20,7 +20,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -497,7 +497,6 @@ public interface RandomDataInput extends RandomCommon {
      * @return the char sequence was read
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
-    @org.jetbrains.annotations.Nullable
     @Nullable
     default String readUtf8Limited(long offset, int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,

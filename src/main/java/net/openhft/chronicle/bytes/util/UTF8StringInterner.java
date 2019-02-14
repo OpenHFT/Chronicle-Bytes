@@ -20,7 +20,7 @@ import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
-import org.jetbrains.annotations.NotNull;
+import net.openhft.chronicle.core.annotation.NotNull;
 
 /**
  * @author peter.lawrey

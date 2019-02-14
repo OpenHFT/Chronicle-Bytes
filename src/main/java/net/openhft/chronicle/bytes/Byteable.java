@@ -16,7 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.core.annotation.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
