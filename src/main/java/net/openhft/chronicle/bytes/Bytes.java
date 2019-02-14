@@ -42,6 +42,7 @@ import java.nio.charset.StandardCharsets;
  * writeLimit() &lt;= capacity() <p></p> Also readLimit() == writePosition() and readPosition()
  * &lt;= safeLimit(); <p></p>
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<Underlying> extends
         BytesStore<Bytes<Underlying>, Underlying>,
         BytesIn<Underlying>,

@@ -26,6 +26,7 @@ import static org.junit.Assert.assertNotEquals;
  * Created by Peter Lawrey on 20/12/16.
  */
 public class HeapByteStoreTest {
+    @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {
         @NotNull HeapBytesStore hbs = HeapBytesStore.wrap("Hello".getBytes());

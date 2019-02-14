@@ -35,6 +35,7 @@ import static org.junit.Assert.assertEquals;
 /*
  * Created by Peter Lawrey on 28/06/15.
  */
+@SuppressWarnings("rawtypes")
 public class OptimisedBytesStoreHashTest {
 
     private ThreadDump threadDump;

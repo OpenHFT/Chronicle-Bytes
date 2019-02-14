@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private final long start;
     private final long capacity;

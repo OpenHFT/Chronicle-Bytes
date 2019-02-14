@@ -27,37 +27,39 @@ import static org.junit.Assert.assertEquals;
 public class BooleanReferenceTest {
     @Test
     public void testBinary() {
-        @NotNull BinaryBooleanReference ref = new BinaryBooleanReference();
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
-        byte i8 = (byte) 0xB0;
-        nbs.writeByte(0, i8);
-
-        ref.bytesStore(nbs, 0, 1);
-
-        assertEquals(false, ref.getValue());
-        ref.setValue(true);
-
-        assertEquals(true, ref.getValue());
-        assertEquals(1, ref.maxSize());
-
-        nbs.release();
+        try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
+            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
+            byte i8 = (byte) 0xB0;
+            nbs.writeByte(0, i8);
+    
+            ref.bytesStore(nbs, 0, 1);
+    
+            assertEquals(false, ref.getValue());
+            ref.setValue(true);
+    
+            assertEquals(true, ref.getValue());
+            assertEquals(1, ref.maxSize());
+    
+            nbs.release();
+        }
     }
 
     @Test
     public void testText() {
-        @NotNull TextBooleanReference ref = new TextBooleanReference();
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
-
-        nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));
-
-        ref.bytesStore(nbs, 0, 5);
-
-        assertEquals(false, ref.getValue());
-        ref.setValue(true);
-
-        assertEquals(true, ref.getValue());
-        assertEquals(5, ref.maxSize());
-
-        nbs.release();
+        try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
+            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
+    
+            nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));
+    
+            ref.bytesStore(nbs, 0, 5);
+    
+            assertEquals(false, ref.getValue());
+            ref.setValue(true);
+    
+            assertEquals(true, ref.getValue());
+            assertEquals(5, ref.maxSize());
+    
+            nbs.release();
+        }
     }
 }             

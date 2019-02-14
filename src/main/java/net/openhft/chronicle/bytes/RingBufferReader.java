@@ -15,6 +15,7 @@ public interface RingBufferReader extends RingBufferReaderStats {
      * @param bytes who's byteStore must be the ring buffer,
      * @return nextReadPosition which should be passed to {@link RingBufferReader#afterRead(long)}
      */
+    @SuppressWarnings("rawtypes")
     long beforeRead(Bytes bytes);
 
     void afterRead(long next);
@@ -22,5 +23,6 @@ public interface RingBufferReader extends RingBufferReaderStats {
     /**
      * @return the byteStore which backs the ring buffer
      */
+    @SuppressWarnings("rawtypes")
     BytesStore byteStore();
 }

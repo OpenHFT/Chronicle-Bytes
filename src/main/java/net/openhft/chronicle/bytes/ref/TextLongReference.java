@@ -41,6 +41,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int LOCKED = 20;
     private static final int DIGITS = 20;
 
+    @SuppressWarnings("rawtypes")
     public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
         long position = bytes.writePosition();
         bytes.write(template);
@@ -65,6 +66,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         if (length != template.length)

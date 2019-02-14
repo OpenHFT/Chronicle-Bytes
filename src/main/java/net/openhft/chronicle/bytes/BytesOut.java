@@ -27,6 +27,7 @@ import java.util.function.Function;
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesOut<Underlying> extends
         StreamingDataOutput<Bytes<Underlying>>,
         ByteStringAppender<Bytes<Underlying>>,

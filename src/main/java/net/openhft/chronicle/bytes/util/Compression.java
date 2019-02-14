@@ -30,6 +30,7 @@ import java.io.*;
 /*
  * Created by peter.lawrey on 09/12/2015.
  */
+@SuppressWarnings("rawtypes")
 public interface Compression {
 
     static <T> void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed) {

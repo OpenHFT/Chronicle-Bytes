@@ -12,6 +12,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest {
     private final Byteable byteable;

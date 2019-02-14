@@ -87,6 +87,7 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void serializeScalars() throws IORuntimeException {
         Bytes<?> bytes = new HexDumpBytes();
@@ -233,6 +234,7 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void serializeBytes() throws IOException {
         Bytes<?> bytes = new HexDumpBytes();

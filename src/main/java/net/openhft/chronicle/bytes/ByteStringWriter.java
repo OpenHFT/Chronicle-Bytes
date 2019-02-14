@@ -25,6 +25,7 @@ import java.nio.BufferOverflowException;
 /**
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
  */
+@SuppressWarnings("rawtypes")
 class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 

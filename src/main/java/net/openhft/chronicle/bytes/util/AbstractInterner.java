@@ -29,6 +29,7 @@ import java.util.stream.Stream;
 /**
  * @author peter.lawrey
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
     @NotNull
     protected final InternerEntry<T>[] entries;

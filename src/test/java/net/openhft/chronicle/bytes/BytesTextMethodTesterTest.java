@@ -12,6 +12,7 @@ public class BytesTextMethodTesterTest {
         btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
     }
 
+    @SuppressWarnings("rawtypes")
     protected void btmttTest(String input, String output) throws IOException {
         BytesTextMethodTester tester = new BytesTextMethodTester<>(
                 input,

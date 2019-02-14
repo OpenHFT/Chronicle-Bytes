@@ -35,6 +35,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 /**
  * Simple Bytes implementation which is not Elastic.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 

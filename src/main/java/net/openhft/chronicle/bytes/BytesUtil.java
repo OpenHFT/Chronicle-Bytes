@@ -41,6 +41,7 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 /*
  * Created by Peter Lawrey on 30/08/15..
  */
+@SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ;
 

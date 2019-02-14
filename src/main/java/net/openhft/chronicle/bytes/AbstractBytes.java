@@ -29,6 +29,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
     @UsedViaReflection

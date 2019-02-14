@@ -23,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesIn<Underlying> extends
         StreamingDataInput<Bytes<Underlying>>,
         RandomDataInput,

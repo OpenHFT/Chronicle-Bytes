@@ -35,6 +35,7 @@ import java.nio.ByteBuffer;
  * Position based access.  Once data has been read, the position() moves.
  * <p>The use of this instance is single threaded, though the use of the data
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     int JAVA9_STRING_CODER_LATIN = 0;
     int JAVA9_STRING_CODER_UTF16 = 1;

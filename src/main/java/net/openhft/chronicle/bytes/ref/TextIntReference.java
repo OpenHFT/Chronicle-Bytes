@@ -41,6 +41,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int VALUE = 34;
     private static final int DIGITS = 10;
 
+    @SuppressWarnings("rawtypes")
     public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
         long position = bytes.writePosition();
         bytes.write(template);
@@ -118,6 +119,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }) == INT_TRUE;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         if (length != template.length)

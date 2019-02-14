@@ -23,10 +23,12 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  */
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
     @Override
+    @SuppressWarnings("rawtypes")
     default void readMarshallable(BytesIn bytes) throws IORuntimeException {
         BytesUtil.readMarshallable(this, bytes);
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     default void writeMarshallable(BytesOut bytes) {
         BytesUtil.writeMarshallable(this, bytes);

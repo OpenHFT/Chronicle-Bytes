@@ -16,6 +16,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
     private static final int LAST_TIME = 128;
 
     private final MappedFile file;
+    @SuppressWarnings("rawtypes")
     private final Bytes bytes;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
 

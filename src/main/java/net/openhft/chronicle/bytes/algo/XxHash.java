@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes.algo;
 import net.openhft.chronicle.bytes.BytesStore;
 
 // Migration of XxHash from Zero-Allocation-Hashing
+@SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore> {
     // Primes if treated as unsigned
     private static final long P1 = -7046029288634856825L;

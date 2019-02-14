@@ -16,6 +16,7 @@ public class ReadLenientTest {
         doTest(Bytes.from(""));
     }
 
+    @SuppressWarnings("rawtypes")
     private void doTest(Bytes bytes) {
         bytes.lenient(true);
         ByteBuffer bb = ByteBuffer.allocateDirect(32);

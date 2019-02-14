@@ -16,6 +16,7 @@ public class AppendableUtilTest {
         BytesUtil.checkRegisteredBytes();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void setLength() {
         StringBuilder sb = new StringBuilder("hello world");
@@ -36,6 +37,7 @@ public class AppendableUtilTest {
         b.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void setCharAt() {
         StringBuilder sb = new StringBuilder("hello world");

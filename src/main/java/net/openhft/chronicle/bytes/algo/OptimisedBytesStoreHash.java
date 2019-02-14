@@ -31,6 +31,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
 /*
  * Created by Peter Lawrey on 28/06/15.
  */
+@SuppressWarnings("rawtypes")
 public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
 

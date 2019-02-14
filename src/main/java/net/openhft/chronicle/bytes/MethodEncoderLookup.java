@@ -19,6 +19,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
                 return messageId;
             }
 
+            @SuppressWarnings("rawtypes")
             @Override
             public void encode(Object[] objects, BytesOut out) {
                 for (Object object : objects) {
@@ -30,6 +31,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
                 }
             }
 
+            @SuppressWarnings("rawtypes")
             @Override
             public Object[] decode(Object[] lastObjects, BytesIn in) {
                 for (Object lastObject : lastObjects)
