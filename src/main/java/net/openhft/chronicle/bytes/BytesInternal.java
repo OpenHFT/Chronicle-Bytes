@@ -1719,7 +1719,7 @@ enum BytesInternal {
     }
 
     @org.jetbrains.annotations.Nullable
-    @NotNull
+    @Nullable
     @ForceInline
     public static String parseUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester) throws BufferUnderflowException {
         StringBuilder utfReader = acquireStringBuilder();
