@@ -74,10 +74,12 @@ public class BytesTest {
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
+    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+    */
 
     @Before
     public void threadDump() {

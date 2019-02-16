@@ -53,11 +53,12 @@ public class BytesInternalTest {
     public void checkThreadDump() {
         threadDump.assertNoNewThreads();
     }
-
+    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+    */
 
     @Test
     public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
