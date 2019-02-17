@@ -58,10 +58,12 @@ public class NativeBytesTest {
         });
     }
 
+    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+    */
 
     @Before
     public void threadDump() {
