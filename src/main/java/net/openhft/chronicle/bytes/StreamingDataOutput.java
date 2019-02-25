@@ -379,9 +379,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     void nativeWrite(long address, long size)
             throws BufferOverflowException;
 
-    default <E extends Enum<E>> void writeEnum(@NotNull E e)
+    default <E extends Enum<E>> S writeEnum(@NotNull E e)
             throws BufferOverflowException {
-        write8bit(e.name());
+        return write8bit(e.name());
     }
 
     @NotNull
