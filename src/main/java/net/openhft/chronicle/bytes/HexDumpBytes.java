@@ -665,6 +665,11 @@ public class HexDumpBytes implements Bytes<Void> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return base.realWriteRemaining();
+    }
+
+    @Override
     @NotNull
     public Bytes<Void> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();

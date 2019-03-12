@@ -300,7 +300,15 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
     }
 
+    /**
+     * @return capacity without resize
+     */
     long realCapacity();
+
+    /**
+     * @return writeRemaining with resize
+     */
+    long realWriteRemaining();
 
     @NotNull
     default S writeSome(@NotNull Bytes bytes) {

@@ -1,11 +1,11 @@
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.RawText;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class RawTextBytesTest {
+public class UnsafeTextBytesTest {
     @Test
     public void appendBase10() {
         Bytes bytes = Bytes.allocateDirect(32);
@@ -18,7 +18,7 @@ public class RawTextBytesTest {
 
     static void testAppendBase10(Bytes bytes, long l) {
         long address = bytes.clear().addressForRead(0);
-        long end = RawText.appendBase10(address, l);
+        long end = UnsafeText.appendBase10(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
         assertEquals(message, l, bytes.parseLong());
