@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -1173,7 +1174,7 @@ enum BytesInternal {
         } else {
             switch (base) {
                 case 10:
-                    appendLong0(out, num);
+                    appendBase10(out, num);
                     break;
                 case 16:
                     appendBase16(out, num, 1);
@@ -1187,28 +1188,18 @@ enum BytesInternal {
 
     public static void appendBase10(@NotNull ByteStringAppender out, int num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            out.writeByte((byte) '-');
-            if (num == Integer.MIN_VALUE) {
-                appendLong0(out, -(long) num);
-                return;
-            }
-            num = -num;
-        }
-        appendInt0(out, num);
+        appendBase10(out, (long) num);
     }
 
     public static void appendBase10(@NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            if (num == Long.MIN_VALUE) {
-                out.write(MIN_VALUE_TEXT);
-                return;
-            }
-            out.writeByte((byte) '-');
-            num = -num;
+        if (out.isDirectMemory() && out.realWriteRemaining() >= 20) {
+            long address = out.addressForWrite(out.writePosition());
+            long address2 = UnsafeText.appendBase10(address, num);
+            out.writeSkip(address2 - address);
+        } else {
+            appendLong0(out, num);
         }
-        appendLong0(out, num);
     }
 
     public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
@@ -1384,6 +1375,14 @@ enum BytesInternal {
 
     private static void appendLong0(@NotNull StreamingDataOutput out, long num)
             throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.write(MIN_VALUE_TEXT);
+                return;
+            }
+            out.writeByte((byte) '-');
+            num = -num;
+        }
         if (num < 10) {
             out.writeByte((byte) ('0' + num));
 
@@ -2318,7 +2317,7 @@ enum BytesInternal {
     }
 
     /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
+     * display the hex data of Bytes from the position() to the limit()
      *
      * @param bytes the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]

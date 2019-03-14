@@ -137,6 +137,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return bytesStore.capacity() - writePosition;
+    }
+
+    @Override
     public long capacity() {
         return bytesStore.capacity();
     }
