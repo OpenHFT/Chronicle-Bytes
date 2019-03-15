@@ -13,7 +13,7 @@ public class UnsafeTextBytesTest {
         Bytes bytes = Bytes.allocateDirect(32);
         for (long l = Long.MAX_VALUE; l > 0; l /= 2) {
             testAppendBase10(bytes, l);
-            testAppendBase10(bytes, 1-l);
+            testAppendBase10(bytes, 1 - l);
         }
         bytes.release();
     }
@@ -42,6 +42,14 @@ public class UnsafeTextBytesTest {
             double d = Math.pow(1e16, rand.nextDouble()) / 1e4;
             testAppendDouble(bytes, d);
         }
+        bytes.release();
+    }
+
+    @Test
+    public void appendDouble2() {
+        Bytes bytes = Bytes.allocateDirect(32);
+        for (double d : new double[]{0.0, -0.0, 0.1, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
+            testAppendDouble(bytes, d);
         bytes.release();
     }
 }
