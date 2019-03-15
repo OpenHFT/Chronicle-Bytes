@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
@@ -200,7 +201,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency
                 long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
-                return appendDecimal(round, decimalPlaces);
+                long address = addressForWrite(writePosition());
+                long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                writeSkip(address2 - address);
+                return (B) this;
             }
         }
         return append(d);

@@ -17,15 +17,15 @@ public class BytesCoolerMain {
                 CpuCoolers.PAUSE1,
                 CpuCoolers.ALL
         )
-                .add("direct", () -> doWrite(big))
-                .add("small", () -> doWrite(small))
+                .add("direct", () -> doWrite(big, 21))
+                .add("small", () -> doWrite(small, 3))
                 .run();
     }
 
     @NotNull
-    public static Object doWrite(Bytes bytes) {
+    public static Object doWrite(Bytes bytes, int digits) {
         bytes.clear();
-        bytes.append(123.456);
+        bytes.append(123.456, digits);
         return bytes;
     }
 
@@ -39,7 +39,7 @@ public class BytesCoolerMain {
 
     @NotNull
     public static Object doTest(Bytes bytes) {
-        doWrite(bytes);
+        doWrite(bytes, 3);
         doRead(bytes);
         return bytes;
     }
