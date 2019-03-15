@@ -99,11 +99,15 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException {
-        if (offset < bytesStore.start())
-            throw new BufferOverflowException();
-        long writeEnd = offset + adding;
-        if (writeEnd > bytesStore.safeLimit())
+        if (offset >= bytesStore.start()) {
+            long writeEnd = offset + adding;
+            if (writeEnd <= bytesStore.safeLimit()) {
+                return; // do nothing.
+            }
             checkResize(writeEnd);
+        } else {
+            throw new BufferOverflowException();
+        }
     }
 
     @Override
