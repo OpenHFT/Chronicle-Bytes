@@ -198,12 +198,16 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             throw new IllegalArgumentException();
         if (decimalPlaces < 20) {
             double d2 = d * Maths.tens(decimalPlaces);
-            if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
+            if (d2 < Long.MAX_VALUE && d2 > Long.MIN_VALUE) {
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency
                 long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
-                long address = addressForWrite(writePosition());
-                long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
-                writeSkip(address2 - address);
+                if (canWriteDirect(20 + decimalPlaces)) {
+                    long address = addressForWrite(writePosition());
+                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                    writeSkip(address2 - address);
+                } else {
+                    appendDecimal(round, decimalPlaces);
+                }
                 return (B) this;
             }
         }

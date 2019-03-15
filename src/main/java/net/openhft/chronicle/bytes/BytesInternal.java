@@ -1646,8 +1646,10 @@ enum BytesInternal {
 
     private static double asDouble(long value, int exp, boolean negative, int deci) {
         // these numbers were determined empirically.
-        int leading = Math.min(39,
-                Long.numberOfLeadingZeros(value) - 1);
+        int leading =
+                Long.numberOfLeadingZeros(value) - 1;
+        if (leading > 9)
+            leading = (9 + leading) >>> 1;
 
         int scale2 = 0;
         if (leading > 0) {
