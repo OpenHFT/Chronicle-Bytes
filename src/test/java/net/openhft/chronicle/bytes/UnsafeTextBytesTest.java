@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class UnsafeTextBytesTest {
 
     static void testAppendBase10(Bytes bytes, long l) {
         long address = bytes.clear().addressForRead(0);
-        long end = UnsafeText.appendBase10(address, l);
+        long end = UnsafeText.appendFixed(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
         assertEquals(message, l, bytes.parseLong());
@@ -34,13 +35,25 @@ public class UnsafeTextBytesTest {
         assertEquals(message, l, bytes.parseDouble(), 0.0);
     }
 
+    static void testAppendFixed(Bytes bytes, double l, int digits) {
+        long address = bytes.clear().addressForRead(0);
+        long end = UnsafeText.appendFixed(address, l, digits);
+        bytes.readLimit(end - address);
+        String message = bytes.toString();
+        double expected = Maths.round4(l);
+        double actual = bytes.parseDouble();
+        assertEquals(message, expected, actual, 0.0);
+    }
+
     @Test
     public void appendDouble() {
         Random rand = new Random();
         Bytes bytes = Bytes.allocateDirect(32);
+        testAppendFixed(bytes, 0.0003, 4);
         for (int i = 0; i < 1000000; i++) {
             double d = Math.pow(1e16, rand.nextDouble()) / 1e4;
             testAppendDouble(bytes, d);
+            testAppendFixed(bytes, d, 4);
         }
         bytes.release();
     }
@@ -48,7 +61,8 @@ public class UnsafeTextBytesTest {
     @Test
     public void appendDouble2() {
         Bytes bytes = Bytes.allocateDirect(32);
-        for (double d : new double[]{0.0, -0.0, 0.1, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
+        for (double d : new double[]{
+                0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
             testAppendDouble(bytes, d);
         bytes.release();
     }

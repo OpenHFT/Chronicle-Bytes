@@ -19,7 +19,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
@@ -27,19 +30,25 @@ import java.util.Arrays;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
+import static net.openhft.chronicle.bytes.BytesInternalTest.Nested.LENGTH;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"rawtypes"})
 public class BytesInternalTest {
 
-    public static final int LENGTH;
+    @Test
+    public void testParse8bitAndStringBuilderWithUtf16Coder() throws BufferUnderflowException, IOException {
+        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
-    static {
-        long totalMemory = Runtime.getRuntime().totalMemory();
-        int maxLength = 1 << 29;
-        LENGTH = (int) Math.min(totalMemory / 9, maxLength);
-        if (LENGTH < maxLength)
-            System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
+        StringBuilder sb = new StringBuilder();
+        sb.append("你好");
+
+        BytesInternal.parse8bit(0, bs, sb, 5);
+        String actual = sb.toString();
+
+        assertEquals("value", actual);
+        assertEquals(5, actual.length());
     }
 
     private ThreadDump threadDump;
@@ -146,18 +155,19 @@ public class BytesInternalTest {
     }
 
     @Test
-    public void testParse8bitAndStringBuilderWithUtf16Coder() throws BufferUnderflowException, IOException {
-        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
-        bs.write(0, new byte[] {0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("你好");
-
-        BytesInternal.parse8bit(0, bs, sb, 5);
-        String actual = sb.toString();
-
-        assertEquals("value", actual);
-        assertEquals(5, actual.length());
+    public void testAllParseDouble() {
+        for (String s : "0.,1.,9.".split(",")) {
+            for (int d = 0; d < 16; d++) {
+                s += '0';
+                for (int i = 1; i < 10; i += 2) {
+                    String si = s + i;
+                    assertEquals(si,
+                            Double.parseDouble(si),
+                            Bytes.from(si)
+                                    .parseDouble(), 0.0);
+                }
+            }
+        }
     }
 
     @Test
@@ -266,6 +276,16 @@ public class BytesInternalTest {
         }
     }
 
+    private int checkParse(int different, String s) {
+        double d = Double.parseDouble(s);
+        double d2 = Bytes.from(s).parseDouble();
+        if (d != d2) {
+            System.out.println(d + " != " + d2);
+            ++different;
+        }
+        return different;
+    }
+
     @Test
     public void testWritingDecimalVsJava() {
         Bytes bytes = Bytes.elasticHeapByteBuffer(32);
@@ -280,26 +300,28 @@ public class BytesInternalTest {
         }
     }
 
-    private int checkParse(int different, String s) {
-        double d = Double.parseDouble(s);
-        double d2 = Bytes.from(s).parseDouble();
-        if(d != d2) {
-            System.out.println(d + " != " + d2);
-            ++different;
-        }
-        return different;
-    }
-
     @Test
     public void bytesParseDouble_Issue85_SeededRandom() {
         Random random = new Random(1);
         int different = 0;
         int max = 10_000;
-        for (int i = 0; i< max; i++) {
+        for (int i = 0; i < max; i++) {
             double num = random.nextDouble();
             String s = String.format("%.9f", num);
             different = checkParse(different, s);
         }
-        Assert.assertEquals("Different "+(100.0*different)/max+"%", 0, different);
+        Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
+    }
+
+    static class Nested {
+        public static final int LENGTH;
+
+        static {
+            long totalMemory = Runtime.getRuntime().totalMemory();
+            int maxLength = 1 << 29;
+            LENGTH = (int) Math.min(totalMemory / 9, maxLength);
+            if (LENGTH < maxLength)
+                System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
+        }
     }
 }

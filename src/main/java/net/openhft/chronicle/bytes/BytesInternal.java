@@ -1195,7 +1195,7 @@ enum BytesInternal {
             throws IllegalArgumentException, BufferOverflowException {
         if (out.canWriteDirect(20)) {
             long address = out.addressForWrite(out.writePosition());
-            long address2 = UnsafeText.appendBase10(address, num);
+            long address2 = UnsafeText.appendFixed(address, num);
             out.writeSkip(address2 - address);
         } else {
             appendLong0(out, num);
@@ -1646,11 +1646,8 @@ enum BytesInternal {
 
     private static double asDouble(long value, int exp, boolean negative, int deci) {
         // these numbers were determined empirically.
-        int leading = 11;
-        if (value >= 1L << 53)
-            leading = Long.numberOfLeadingZeros(value)-1;
-        else if (value >= 1L << 49)
-            leading = 10;
+        int leading = Math.min(39,
+                Long.numberOfLeadingZeros(value) - 1);
 
         int scale2 = 0;
         if (leading > 0) {
@@ -1658,15 +1655,15 @@ enum BytesInternal {
             value <<= scale2;
         }
         double d;
-        if (deci > 29) {
-            d = value / Math.pow(5, -deci);
-
-        } else if (deci > 0) {
-            long fives = Maths.fives(deci);
-            long whole = value / fives;
-            long rem = value % fives;
-            d = whole + (double) rem / fives;
-
+        if (deci > 0) {
+            if (deci <= 29) {
+                long fives = Maths.fives(deci);
+                long whole = value / fives;
+                long rem = value % fives;
+                d = whole + (double) rem / fives;
+            } else {
+                d = value / Math.pow(5, -deci);
+            }
         } else if (deci < -29) {
             d = value * Math.pow(5, -deci);
 
