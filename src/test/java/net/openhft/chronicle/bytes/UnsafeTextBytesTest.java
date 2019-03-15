@@ -62,6 +62,7 @@ public class UnsafeTextBytesTest {
     public void appendDouble2() {
         Bytes bytes = Bytes.allocateDirect(32);
         for (double d : new double[]{
+                741138311171.555,
                 0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
             testAppendDouble(bytes, d);
         bytes.release();

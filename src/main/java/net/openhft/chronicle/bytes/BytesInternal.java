@@ -1649,7 +1649,7 @@ enum BytesInternal {
         int leading =
                 Long.numberOfLeadingZeros(value) - 1;
         if (leading > 9)
-            leading = (9 + leading) >>> 1;
+            leading = (27 + leading) >>> 2;
 
         int scale2 = 0;
         if (leading > 0) {
