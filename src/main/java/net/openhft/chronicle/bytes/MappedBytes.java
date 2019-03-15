@@ -319,7 +319,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         long check = adding >= 0 ? offset : offset + adding;
         //noinspection StatementWithEmptyBody
-        if (bytesStore.inside(check, adding < 1 << 10 ? (int) adding : 0)) {
+        if (bytesStore.inside(check, adding)) {
             // nothing.
         } else {
             acquireNextByteStore0(offset, false);

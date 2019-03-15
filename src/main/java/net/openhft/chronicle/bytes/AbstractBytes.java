@@ -489,7 +489,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     protected long readOffsetPositionMoved(long adding) throws BufferUnderflowException {
         long offset = readPosition;
-        readCheckOffset(readPosition, adding, false);
+        readCheckOffset(readPosition, Math.toIntExact(adding), false);
         readPosition += adding;
         assert readPosition <= readLimit();
         return offset;

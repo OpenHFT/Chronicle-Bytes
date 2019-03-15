@@ -241,7 +241,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean inside(long offset, int buffer) {
+    public boolean inside(long offset, long buffer) {
         return false;
     }
 
