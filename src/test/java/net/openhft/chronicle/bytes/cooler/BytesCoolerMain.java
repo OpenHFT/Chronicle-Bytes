@@ -11,9 +11,7 @@ public class BytesCoolerMain {
         Bytes small = Bytes.allocateDirect(23);
         Bytes big = Bytes.allocateDirect(400);
 
-        System.out.println("BEST CASE");
-
-        System.out.println("\nWITH COOLERS ACROSS MEMORY");
+        System.out.println("WITH COOLERS ACROSS MEMORY");
         new CoolerTester(
                 CpuCoolers.BUSY100,
                 CpuCoolers.PAUSE1,
