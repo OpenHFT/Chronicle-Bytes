@@ -22,16 +22,16 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.io.UnsafeText;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ByteBuffers;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1193,7 +1193,7 @@ enum BytesInternal {
 
     public static void appendBase10(@NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (out.isDirectMemory() && out.realWriteRemaining() >= 20) {
+        if (out.canWriteDirect(20)) {
             long address = out.addressForWrite(out.writePosition());
             long address2 = UnsafeText.appendBase10(address, num);
             out.writeSkip(address2 - address);
@@ -1781,7 +1781,7 @@ enum BytesInternal {
                     return;
                 }
                 chars[i] = (char) c;
-//            appendable.append((char) c);
+//            appendable.appendDouble((char) c);
             }
         }
         StringUtils.setCount(appendable, i);

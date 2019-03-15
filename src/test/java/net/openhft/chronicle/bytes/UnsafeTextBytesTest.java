@@ -3,6 +3,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.junit.Test;
 
+import java.util.Random;
+
 import static org.junit.Assert.assertEquals;
 
 public class UnsafeTextBytesTest {
@@ -22,5 +24,24 @@ public class UnsafeTextBytesTest {
         bytes.readLimit(end - address);
         String message = bytes.toString();
         assertEquals(message, l, bytes.parseLong());
+    }
+
+    static void testAppendDouble(Bytes bytes, double l) {
+        long address = bytes.clear().addressForRead(0);
+        long end = UnsafeText.appendDouble(address, l);
+        bytes.readLimit(end - address);
+        String message = bytes.toString();
+        assertEquals(message, l, bytes.parseDouble(), 0.0);
+    }
+
+    @Test
+    public void appendDouble() {
+        Random rand = new Random();
+        Bytes bytes = Bytes.allocateDirect(32);
+        for (int i = 0; i < 1000000; i++) {
+            double d = Math.pow(1e16, rand.nextDouble()) / 1e4;
+            testAppendDouble(bytes, d);
+        }
+        bytes.release();
     }
 }

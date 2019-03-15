@@ -144,7 +144,7 @@ public class ByteStringAppenderTest {
 
 /* assumes self terminating.
         bytes.clear();
-        bytes.append(d);
+        bytes.appendDouble(d);
         bytes.flip();
         double d3 = bytes.parseDouble();
         Assert.assertEquals(d, d3, 0);
