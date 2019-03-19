@@ -22,15 +22,16 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ByteBuffers;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -1173,7 +1174,7 @@ enum BytesInternal {
         } else {
             switch (base) {
                 case 10:
-                    appendLong0(out, num);
+                    appendBase10(out, num);
                     break;
                 case 16:
                     appendBase16(out, num, 1);
@@ -1187,28 +1188,18 @@ enum BytesInternal {
 
     public static void appendBase10(@NotNull ByteStringAppender out, int num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            out.writeByte((byte) '-');
-            if (num == Integer.MIN_VALUE) {
-                appendLong0(out, -(long) num);
-                return;
-            }
-            num = -num;
-        }
-        appendInt0(out, num);
+        appendBase10(out, (long) num);
     }
 
     public static void appendBase10(@NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            if (num == Long.MIN_VALUE) {
-                out.write(MIN_VALUE_TEXT);
-                return;
-            }
-            out.writeByte((byte) '-');
-            num = -num;
+        if (out.canWriteDirect(20)) {
+            long address = out.addressForWrite(out.writePosition());
+            long address2 = UnsafeText.appendFixed(address, num);
+            out.writeSkip(address2 - address);
+        } else {
+            appendLong0(out, num);
         }
-        appendLong0(out, num);
     }
 
     public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
@@ -1384,6 +1375,14 @@ enum BytesInternal {
 
     private static void appendLong0(@NotNull StreamingDataOutput out, long num)
             throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.write(MIN_VALUE_TEXT);
+                return;
+            }
+            out.writeByte((byte) '-');
+            num = -num;
+        }
         if (num < 10) {
             out.writeByte((byte) ('0' + num));
 
@@ -1647,11 +1646,10 @@ enum BytesInternal {
 
     private static double asDouble(long value, int exp, boolean negative, int deci) {
         // these numbers were determined empirically.
-        int leading = 11;
-        if (value >= 1L << 53)
-            leading = Long.numberOfLeadingZeros(value)-1;
-        else if (value >= 1L << 49)
-            leading = 10;
+        int leading =
+                Long.numberOfLeadingZeros(value) - 1;
+        if (leading > 9)
+            leading = (27 + leading) >>> 2;
 
         int scale2 = 0;
         if (leading > 0) {
@@ -1659,15 +1657,15 @@ enum BytesInternal {
             value <<= scale2;
         }
         double d;
-        if (deci > 29) {
-            d = value / Math.pow(5, -deci);
-
-        } else if (deci > 0) {
-            long fives = Maths.fives(deci);
-            long whole = value / fives;
-            long rem = value % fives;
-            d = whole + (double) rem / fives;
-
+        if (deci > 0) {
+            if (deci <= 29) {
+                long fives = Maths.fives(deci);
+                long whole = value / fives;
+                long rem = value % fives;
+                d = whole + (double) rem / fives;
+            } else {
+                d = value / Math.pow(5, -deci);
+            }
         } else if (deci < -29) {
             d = value * Math.pow(5, -deci);
 
@@ -1782,7 +1780,7 @@ enum BytesInternal {
                     return;
                 }
                 chars[i] = (char) c;
-//            appendable.append((char) c);
+//            appendable.appendDouble((char) c);
             }
         }
         StringUtils.setCount(appendable, i);
@@ -2318,7 +2316,7 @@ enum BytesInternal {
     }
 
     /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
+     * display the hex data of Bytes from the position() to the limit()
      *
      * @param bytes the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]

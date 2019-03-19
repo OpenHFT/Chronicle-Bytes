@@ -607,8 +607,8 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default String toHexString(long offset, long maxLength) {
-        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 2))
-            return "Not Available";
+//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
+//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         @NotNull String ret = BytesInternal.toHexString(this, offset, maxLength2);

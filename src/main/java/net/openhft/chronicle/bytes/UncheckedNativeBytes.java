@@ -268,6 +268,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return writeRemaining();
+    }
+
+    @Override
     @ForceInline
     public long capacity() {
         return capacity;

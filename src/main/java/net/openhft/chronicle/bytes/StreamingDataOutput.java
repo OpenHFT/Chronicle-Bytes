@@ -18,8 +18,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
-import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.core.util.Histogram;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -300,7 +300,19 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
     }
 
+    /**
+     * @return capacity without resize
+     */
     long realCapacity();
+
+    /**
+     * @return writeRemaining with resize
+     */
+    long realWriteRemaining();
+
+    default boolean canWriteDirect(long count) {
+        return false;
+    }
 
     @NotNull
     default S writeSome(@NotNull Bytes bytes) {

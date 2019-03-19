@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -137,6 +138,18 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return bytesStore.capacity() - writePosition;
+    }
+
+    @Override
+    public boolean canWriteDirect(long count) {
+        return isDirectMemory() &&
+                Math.min(writeLimit, bytesStore.capacity())
+                        >= count + writePosition;
+    }
+
+    @Override
     public long capacity() {
         return bytesStore.capacity();
     }
@@ -178,6 +191,22 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         return bytesStore.compareAndSwapLong(offset, expected, value);
+    }
+
+    public AbstractBytes append(double d) throws BufferOverflowException {
+        boolean fits = canWriteDirect(380);
+        if (!fits) {
+            double ad = Math.abs(d);
+            fits = 1e-6 <= ad && ad < 1e20 && canWriteDirect(24);
+        }
+        if (fits) {
+            long address = addressForWrite(writePosition);
+            long address2 = UnsafeText.appendDouble(address, d);
+            writeSkip(address2 - address);
+            return this;
+        }
+        BytesInternal.append(this, d);
+        return this;
     }
 
     @NotNull
@@ -460,7 +489,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     protected long readOffsetPositionMoved(long adding) throws BufferUnderflowException {
         long offset = readPosition;
-        readCheckOffset(readPosition, adding, false);
+        readCheckOffset(readPosition, Math.toIntExact(adding), false);
         readPosition += adding;
         assert readPosition <= readLimit();
         return offset;
