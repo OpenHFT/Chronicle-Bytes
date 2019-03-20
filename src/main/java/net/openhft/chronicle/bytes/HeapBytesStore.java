@@ -403,6 +403,11 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void nativeRead(long position, long address, long size) {
         throw new UnsupportedOperationException("todo");
     }

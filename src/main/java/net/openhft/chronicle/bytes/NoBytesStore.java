@@ -300,6 +300,12 @@ public enum NoBytesStore implements BytesStore {
         return NO_PAGE;
     }
 
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return NO_PAGE;
+    }
+
+
     @NotNull
     @Override
     public Bytes bytesForWrite() {

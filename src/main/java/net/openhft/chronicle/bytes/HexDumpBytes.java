@@ -209,6 +209,10 @@ public class HexDumpBytes implements Bytes<Void> {
     }
 
     @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
         if (base.compareAndSwapInt(offset & 0xFFFFFFFFL, expected, value)) {
             copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);

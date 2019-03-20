@@ -202,7 +202,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency
                 long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
                 if (canWriteDirect(20 + decimalPlaces)) {
-                    long address = addressForWrite(writePosition());
+                    long address = addressForWritePosition();
                     long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
                     writeSkip(address2 - address);
                 } else {
@@ -245,6 +245,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return append8bit(cs, 0, cs.length());
     }
 
+    default B append8bit(@NotNull BytesStore bs)
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+        return write(bs, 0L, bs.readRemaining());
+    }
+
     default B append8bit(@NotNull String cs)
             throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
         return append8bit(cs, 0, cs.length());
@@ -272,6 +277,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             writeByte((byte) c);
         }
         return (B) this;
+    }
+
+    default B append8bit(@NotNull BytesStore bs, long start, long end)
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+        return write(bs, start, end);
     }
 
     @NotNull

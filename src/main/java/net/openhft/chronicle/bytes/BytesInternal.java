@@ -47,6 +47,7 @@ import java.util.TimeZone;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
+import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -2489,6 +2490,18 @@ enum BytesInternal {
         }
         for (; i < length; i++)
             sdo.writeByte(bytes.readByte(offset + i));
+    }
+
+    public static void copyMemory(long from, long to, int length)
+            throws BufferUnderflowException, BufferOverflowException {
+        long i = 0;
+        for (; i < length - 7; i += 8) {
+            UNSAFE.putLong(to, UNSAFE.getLong(from));
+            from += 8;
+            to += 8;
+        }
+        for (; i < length; i++)
+            UNSAFE.putByte(to++, UNSAFE.getByte(from++));
     }
 
     @NotNull

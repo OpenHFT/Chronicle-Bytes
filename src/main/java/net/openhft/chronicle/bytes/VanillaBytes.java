@@ -261,7 +261,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             if (len > 0) {
                 writeCheckOffset(writePosition(), len);
                 long address = bytes.addressForRead(offset);
-                long address2 = addressForWrite(writePosition());
+                long address2 = addressForWritePosition();
                 assert address != 0;
                 assert address2 != 0;
                 OS.memory().copyMemory(address, address2, len);
@@ -353,6 +353,29 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         if (isDirectMemory() && cs instanceof String)
             return append8bitNBS_S((String) cs);
         return append8bit0(cs);
+    }
+
+    @Override
+    @NotNull
+    public Bytes<Underlying> append8bit(@NotNull BytesStore bs)
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+        long remaining = bs.readLimit() - bs.readPosition();
+        return write(bs, 0L, remaining);
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
+        if (bytes.canReadDirect(length) && canWriteDirect(length) && length == (int) length) {
+            long wAddr = addressForWritePosition();
+            writeSkip(length);
+            long rAddr = bytes.addressForRead(offset);
+            BytesInternal.copyMemory(rAddr, wAddr, (int) length);
+
+        } else {
+            BytesInternal.writeFully(bytes, offset, length, this);
+        }
+        return this;
     }
 
     @Override

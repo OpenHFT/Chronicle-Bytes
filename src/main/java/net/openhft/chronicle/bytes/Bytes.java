@@ -324,10 +324,12 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
-    static Bytes<byte[]> from(@NotNull CharSequence text) {
-        if (text instanceof BytesStore)
-            return ((BytesStore) text).copy().bytesForRead();
-        return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
+    static Bytes<?> from(@NotNull CharSequence text) {
+        return from(text.toString());
+    }
+
+    static Bytes<?> from(@NotNull String text) {
+        return NativeBytesStore.from(text).bytesForRead();
     }
 
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
@@ -343,7 +345,7 @@ public interface Bytes<Underlying> extends
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
-            return bs.bytesForWrite();
+            return new VanillaBytes<>(bs);
         } finally {
             bs.release();
         }
@@ -458,8 +460,8 @@ public interface Bytes<Underlying> extends
      * @return a direct byte buffer contain the {@code bytes}
      */
     @NotNull
-    static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
-        Bytes<Void> result = allocateDirect(bytes.length);
+    static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
+        VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
         } catch (BufferOverflowException e) {

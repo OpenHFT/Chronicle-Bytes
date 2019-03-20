@@ -18,9 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import org.jetbrains.annotations.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -567,5 +567,9 @@ public interface RandomDataInput extends RandomCommon {
             hash += readByte(offset + i);
         hash *= 0x855dd4db;
         return (int) (hash ^ (hash >> 32));
+    }
+
+    default boolean canReadDirect(long length) {
+        return isDirectMemory() && readRemaining() >= length;
     }
 }

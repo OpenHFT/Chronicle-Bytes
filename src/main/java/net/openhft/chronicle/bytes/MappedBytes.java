@@ -504,7 +504,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         this.acquireNextByteStore(writePosition(), false);
         long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
         if (len > 0) {
-            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
+            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), len);
             uncheckedWritePosition(writePosition() + len);
         }
         return len;
@@ -550,7 +550,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         assert singleThreadedAccess();
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
-            long address = addressForWrite(writePosition());
+            long address = addressForWritePosition();
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
@@ -568,7 +568,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             writeSkip(length);
         } else {
             char[] chars = extractChars(s);
-            long address = addressForWrite(writePosition());
+            long address = addressForWritePosition();
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
