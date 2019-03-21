@@ -279,7 +279,9 @@ public class BytesInternalTest {
 
     private int checkParse(int different, String s) {
         double d = Double.parseDouble(s);
-        double d2 = Bytes.from(s).parseDouble();
+        Bytes<?> from = Bytes.from(s);
+        double d2 = from.parseDouble();
+        from.release();
         if (d != d2) {
             System.out.println(d + " != " + d2);
             ++different;
