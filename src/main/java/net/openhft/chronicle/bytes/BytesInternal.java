@@ -2583,8 +2583,8 @@ enum BytesInternal {
 
     @NotNull
     public static Bytes fromHexString(@NotNull String s) {
+        Bytes in = Bytes.from(s);
         try {
-            Bytes in = Bytes.from(s);
             Bytes out = Bytes.elasticByteBuffer();
             OUTER:
             while (in.readRemaining() > 0) {
@@ -2605,6 +2605,8 @@ enum BytesInternal {
             return out;
         } catch (BufferUnderflowException | BufferOverflowException e) {
             throw new AssertionError(e);
+        } finally {
+            in.release();
         }
     }
 

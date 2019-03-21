@@ -74,12 +74,10 @@ public class BytesTest {
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
     }
 
-    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
-    */
 
     @Before
     public void threadDump() {
@@ -371,11 +369,21 @@ public class BytesTest {
 
     @Test
     public void testStartsWith() {
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("a")));
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aa")));
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aaa")));
-        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("aaaa")));
-        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("b")));
+        Bytes<?> aaa = Bytes.from("aaa");
+        Bytes<?> a = Bytes.from("a");
+        assertTrue(aaa.startsWith(a));
+        Bytes<?> aa = Bytes.from("aa");
+        assertTrue(aaa.startsWith(aa));
+        assertTrue(aaa.startsWith(aaa));
+        Bytes<?> aaaa = Bytes.from("aaaa");
+        assertFalse(aaa.startsWith(aaaa));
+        Bytes<?> b = Bytes.from("b");
+        assertFalse(aaa.startsWith(b));
+        a.release();
+        aa.release();
+        aaa.release();
+        aaaa.release();
+        b.release();
     }
 
     @Test
@@ -753,6 +761,8 @@ public class BytesTest {
 
         b.release();
         b2.release();
+        hello.release();
+        world.release();
     }
 
     @Test

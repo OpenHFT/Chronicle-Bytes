@@ -92,7 +92,8 @@ public class MappedBytesTest {
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
 
             // write
-            bytesW.write(Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(from);
             long wp = bytesW.writePosition;
             Assert.assertEquals(text.length(), bytesW.writePosition);
 
@@ -100,6 +101,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
 
     }
@@ -111,7 +113,8 @@ public class MappedBytesTest {
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
 
             // write
-            bytesW.write(Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(from);
             long wp = bytesW.writePosition;
             Assert.assertEquals(text.length(), bytesW.writePosition);
 
@@ -119,6 +122,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
 
     }
@@ -132,7 +136,8 @@ public class MappedBytesTest {
             int offset = 10;
 
             // write
-            bytesW.write(offset, Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from);
             long wp = text.length() + offset;
             Assert.assertEquals(0, bytesW.writePosition);
 
@@ -140,6 +145,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
     }
 
@@ -152,7 +158,8 @@ public class MappedBytesTest {
             int offset = 10;
 
             // write
-            bytesW.write(offset, Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from);
             long wp = text.length() + offset;
             Assert.assertEquals(0, bytesW.writePosition);
 
@@ -160,6 +167,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
     }
 
@@ -172,7 +180,8 @@ public class MappedBytesTest {
             int shift = 128;
 
             //write
-            bytesW.write(offset, Bytes.from(text), shift, text.length() - shift);
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from, shift, text.length() - shift);
             Assert.assertEquals(0, bytesW.writePosition);
 
             // read
@@ -180,6 +189,7 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
+            from.release();
         }
     }
 
@@ -192,7 +202,8 @@ public class MappedBytesTest {
             int shift = 128;
 
             //write
-            bytesW.write(offset, Bytes.from(text), shift, text.length() - shift);
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from, shift, text.length() - shift);
             Assert.assertEquals(0, bytesW.writePosition);
 
             // read
@@ -200,6 +211,7 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
+            from.release();
         }
     }
 
