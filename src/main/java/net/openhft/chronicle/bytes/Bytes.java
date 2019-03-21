@@ -321,6 +321,8 @@ public interface Bytes<Underlying> extends
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      *
+     * Note: this returns a direct Bytes now
+     *
      * @param text to convert
      * @return Bytes ready for reading.
      */
@@ -328,10 +330,26 @@ public interface Bytes<Underlying> extends
         return from(text.toString());
     }
 
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * <p>
+     * Note: this returns a direct Bytes now
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
     static Bytes<?> from(@NotNull String text) {
         return NativeBytesStore.from(text).bytesForRead();
     }
 
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     *
+     * Note: this returns a heap Bytes
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
