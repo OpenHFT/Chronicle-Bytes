@@ -64,6 +64,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean checkRefCount() {
+        return refCount.checkRefCount();
+    }
+
+    @Override
     public boolean isDirectMemory() {
         return bytesStore.isDirectMemory();
     }

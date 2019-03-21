@@ -66,6 +66,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean checkRefCount() {
+        return refCount.checkRefCount();
+    }
+
+    @Override
     public boolean unchecked() {
         return true;
     }

@@ -90,6 +90,18 @@ public class BytesTest {
     }
 
     @Test
+    public void checkRefCount() {
+        Bytes bytes = alloc1.elasticBytes(16);
+        bytes.checkRefCount();
+        bytes.release();
+        try {
+            bytes.checkRefCount();
+            fail();
+        } catch (IllegalStateException ise) {
+            // expected.
+        }
+    }
+    @Test
     public void testIndexOfAtEnd() {
         String sourceStr = "A string of some data";
         String subStr = "ta";

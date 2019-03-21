@@ -652,4 +652,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return true;
     }
 
+    default boolean checkRefCount() {
+        return true;
+    }
 }
