@@ -215,10 +215,13 @@ public enum BytesUtil {
             throw new IllegalStateException("Bytes not released properly " + count);
     }
 
-    public static boolean unregister(BytesStore... bytesArr) {
-        for (BytesStore bytes : bytesArr) {
-            bytesCreated.remove(bytes);
-        }
+    public static boolean unregister(BytesStore bytes) {
+        bytesCreated.remove(bytes);
+        return true;
+    }
+
+    public static boolean unregister(Bytes bytes) {
+        bytesCreated.remove(bytes);
         return true;
     }
 
