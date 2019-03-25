@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,6 +27,13 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
+ * This cache only gaurentees it will provide a String which matches the decoded bytes.
+ * <p/>
+ * It doesn't guantee it will always return the same object,
+ * nor that different threads will return the same object,
+ * though the contents should always be the same.
+ * <p/>
+ * While not technically thread safe, it should still behave correctly.
  * @author peter.lawrey
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -67,7 +73,8 @@ public abstract class AbstractInterner<T> {
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         if (length > entries.length)
             return getValue(cs, length);
-        UnsafeMemory.UNSAFE.loadFence();
+        // TODO This needs to be reviewd.
+//        UnsafeMemory.UNSAFE.loadFence();
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
@@ -82,7 +89,7 @@ public abstract class AbstractInterner<T> {
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
-        UnsafeMemory.UNSAFE.storeFence();
+//        UnsafeMemory.UNSAFE.storeFence();
         return t;
     }
 
