@@ -43,26 +43,26 @@ public class HeapBytesStore<Underlying>
     private static final Memory MEMORY = OS.memory();
     private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
-    private Object realUnderlyingObject;
-    private int dataOffset;
-    private long capacity;
+    private final Object realUnderlyingObject;
+    private final int dataOffset;
+    private final long capacity;
     @NotNull
-    private Underlying underlyingObject;
-
-    public HeapBytesStore() {
-    }
+    private final Underlying underlyingObject;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
-        init(byteBuffer);
+        //noinspection unchecked
+        this.underlyingObject = (Underlying) byteBuffer;
+        this.realUnderlyingObject = byteBuffer.array();
+        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET + byteBuffer.arrayOffset();
+        this.capacity = byteBuffer.capacity();
     }
 
     private HeapBytesStore(@NotNull byte[] byteArray) {
-        init(byteArray);
-    }
-
-    @NotNull
-    public static <T> HeapBytesStore<T> uninitialized() {
-        return new HeapBytesStore<>();
+        //noinspection unchecked
+        this.underlyingObject = (Underlying) byteArray;
+        this.realUnderlyingObject = byteArray;
+        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+        this.capacity = byteArray.length;
     }
 
     @NotNull
@@ -78,31 +78,6 @@ public class HeapBytesStore<Underlying>
     @Override
     public boolean isDirectMemory() {
         return false;
-    }
-
-    @SuppressWarnings("unchecked")
-    public void init(@NotNull ByteBuffer byteBuffer) {
-        //noinspection unchecked
-        this.underlyingObject = (Underlying) byteBuffer;
-        this.realUnderlyingObject = byteBuffer.array();
-        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET + byteBuffer.arrayOffset();
-        this.capacity = byteBuffer.capacity();
-    }
-
-    @SuppressWarnings("unchecked")
-    public void init(@NotNull byte[] byteArray) {
-        //noinspection unchecked
-        this.underlyingObject = (Underlying) byteArray;
-        this.realUnderlyingObject = byteArray;
-        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
-        this.capacity = byteArray.length;
-    }
-
-    public void uninit() {
-        underlyingObject = null;
-        realUnderlyingObject = null;
-        dataOffset = 0;
-        capacity = 0;
     }
 
     @Override
