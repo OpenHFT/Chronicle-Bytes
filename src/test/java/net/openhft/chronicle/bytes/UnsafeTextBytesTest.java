@@ -47,7 +47,7 @@ public class UnsafeTextBytesTest {
 
     @Test
     public void appendDouble() {
-        Random rand = new Random();
+        Random rand = new Random(1);
         Bytes bytes = Bytes.allocateDirect(32);
         testAppendFixed(bytes, 0.0003, 4);
         for (int i = 0; i < 1000000; i++) {
