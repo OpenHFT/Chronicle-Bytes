@@ -32,7 +32,7 @@ public class UnsafeTextBytesTest {
         long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
-        assertEquals(message, l, bytes.parseDouble(), 0.0);
+        assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
     }
 
     static void testAppendFixed(Bytes bytes, double l, int digits) {
