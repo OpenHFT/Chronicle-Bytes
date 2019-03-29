@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -26,40 +25,38 @@ import static org.junit.Assert.assertEquals;
 
 public class CopyBytesTest {
 
-    @Test
-    public void testCanCopyBytesFromBytes() {
+    static void doTest(Bytes toTest, int from) {
         Bytes toCopy = Bytes.allocateDirect(32);
         Bytes toValidate = Bytes.allocateDirect(32);
 
         toCopy.writeLong(0, (long) 'W' << 56L | 100L);
         toCopy.writeLong(8, (long) 'W' << 56L | 200L);
 
-        Bytes buffer = Bytes.allocateElasticDirect();
-        buffer.write(toCopy, 0, (long) 2 * 8);
+        toTest.writePosition(from);
+        toTest.write(toCopy, 0, 2 * 8L);
+        toTest.write(toCopy, 0, 8L);
 
-        buffer.read(toValidate, 2 * 8);
+        toTest.read(toValidate, 3 * 8);
 
         assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(0));
         assertEquals((long) 'W' << 56L | 200L, toValidate.readLong(8));
+        assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(16));
 
+        toTest.release();
+        toCopy.release();
+        toValidate.release();
     }
 
-    @Ignore
+    @Test
+    public void testCanCopyBytesFromBytes() {
+        doTest(Bytes.allocateElasticDirect(), 0);
+    }
+
     @Test
     public void testCanCopyBytesFromMappedBytes() throws Exception {
-        Bytes toCopy = Bytes.allocateDirect(32);
-        Bytes toValidate = Bytes.allocateDirect(32);
-
-        toCopy.writeLong(0, (long) 'W' << 56L | 100L);
-        toCopy.writeLong(8, (long) 'W' << 56L | 200L);
-
-        Bytes buffer = MappedBytes.mappedBytes(File.createTempFile("mapped-test", "bytes"), 64 << 10);
-        buffer.write(toCopy, 0, (long) 2 * 8);
-
-        buffer.read(toValidate, 2 * 8);
-
-        assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(0));
-        assertEquals((long) 'W' << 56L | 200L, toValidate.readLong(8));
-
+        File bytes = File.createTempFile("mapped-test", "bytes");
+        bytes.deleteOnExit();
+        doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), 0);
+        doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), (64 << 10) - 8);
     }
 }
