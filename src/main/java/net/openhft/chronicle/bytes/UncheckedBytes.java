@@ -206,7 +206,7 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
         return this;
     }
 
-    public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    long rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {

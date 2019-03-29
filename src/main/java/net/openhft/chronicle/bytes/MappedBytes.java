@@ -489,25 +489,30 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         assert singleThreadedAccess();
-        if (length == 8)
+        if (length == 8) {
             writeLong(bytes.readLong(offset));
-        else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize()))
-            rawCopy(bytes, offset, length);
-        else if (length > 0)
+        } else if (length > 0) {
+            if (bytes.isDirectMemory() && length <=
+                    Math.min(bytes.bytesStore().realCapacity() - offset, safeCopySize())) {
+                this.acquireNextByteStore(writePosition(), false);
+                // can we do a direct copy of raw memory?
+                if (bytesStore.realCapacity() - writePosition >= length) {
+                    rawCopy(bytes, offset, length);
+                    return this;
+                }
+            }
             BytesInternal.writeFully(bytes, offset, length, this);
+
+        }
+
         return this;
     }
 
-    public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    void rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         assert length < safeCopySize();
-        this.acquireNextByteStore(writePosition(), false);
-        long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-        if (len > 0) {
-            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), len);
-            uncheckedWritePosition(writePosition() + len);
-        }
-        return len;
+        OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), length);
+        uncheckedWritePosition(writePosition() + length);
     }
 
     @NotNull
