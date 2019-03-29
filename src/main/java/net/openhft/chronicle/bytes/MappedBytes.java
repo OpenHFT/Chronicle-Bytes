@@ -492,14 +492,16 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (length > 0) {
-            // trigger this offset to be available in the source.
-            bytes.readByte(offset);
-            if (bytes.isDirectMemory() && length <= bytes.bytesStore().realCapacity() - offset) {
-                this.acquireNextByteStore(writePosition(), false);
-                // can we do a direct copy of raw memory?
-                if (bytesStore.realCapacity() - writePosition >= length) {
-                    rawCopy(bytes, offset, length);
-                    return this;
+            if (bytes.isDirectMemory()) {
+                // need to check this to pull in the right bytesStore()
+                long fromAddress = bytes.addressForRead(offset);
+                if (length <= bytes.bytesStore().realCapacity() - offset) {
+                    this.acquireNextByteStore(writePosition(), false);
+                    // can we do a direct copy of raw memory?
+                    if (bytesStore.realCapacity() - writePosition >= length) {
+                        rawCopy(length, fromAddress);
+                        return this;
+                    }
                 }
             }
             BytesInternal.writeFully(bytes, offset, length, this);
@@ -508,9 +510,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    void rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    void rawCopy(long length, long fromAddress)
             throws BufferOverflowException, BufferUnderflowException {
-        OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), length);
+        OS.memory().copyMemory(fromAddress, addressForWritePosition(), length);
         uncheckedWritePosition(writePosition() + length);
     }
 
