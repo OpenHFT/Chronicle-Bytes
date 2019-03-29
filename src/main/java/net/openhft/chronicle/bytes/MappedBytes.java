@@ -492,8 +492,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (length > 0) {
-            if (bytes.isDirectMemory() && length <=
-                    Math.min(bytes.bytesStore().realCapacity() - offset, safeCopySize())) {
+            if (bytes.isDirectMemory() && length <= bytes.bytesStore().realCapacity() - offset) {
                 this.acquireNextByteStore(writePosition(), false);
                 // can we do a direct copy of raw memory?
                 if (bytesStore.realCapacity() - writePosition >= length) {
@@ -502,7 +501,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 }
             }
             BytesInternal.writeFully(bytes, offset, length, this);
-
         }
 
         return this;
