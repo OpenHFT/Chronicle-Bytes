@@ -492,6 +492,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (length > 0) {
+            // trigger this offset to be available in the source.
+            bytes.readInt(offset);
             if (bytes.isDirectMemory() && length <= bytes.bytesStore().realCapacity() - offset) {
                 this.acquireNextByteStore(writePosition(), false);
                 // can we do a direct copy of raw memory?
