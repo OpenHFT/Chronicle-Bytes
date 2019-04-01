@@ -844,7 +844,7 @@ public interface Bytes<Underlying> extends
             read = inputStream.read();
             if (read == -1)
                 break;
-            append((char) read);
+            writeByte((byte) read);
         }
         return this;
     }
