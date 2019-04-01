@@ -69,9 +69,11 @@ public class ByteStringAppenderTest {
 
     @Test
     public void testConvertTo() {
-        assertEquals(Bytes.from("hello"), ObjectUtils.convertTo(Bytes.class, "hello"));
+        Bytes<?> hello = Bytes.from("hello");
+        assertEquals(hello, ObjectUtils.convertTo(Bytes.class, "hello"));
         VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
         assertEquals(bytes.append(1), ObjectUtils.convertTo(Bytes.class, 1));
+        hello.release();
         bytes.release();
     }
 

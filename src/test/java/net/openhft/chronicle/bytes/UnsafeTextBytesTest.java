@@ -32,7 +32,7 @@ public class UnsafeTextBytesTest {
         long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
-        assertEquals(message, l, bytes.parseDouble(), 0.0);
+        assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
     }
 
     static void testAppendFixed(Bytes bytes, double l, int digits) {
@@ -47,7 +47,7 @@ public class UnsafeTextBytesTest {
 
     @Test
     public void appendDouble() {
-        Random rand = new Random();
+        Random rand = new Random(1);
         Bytes bytes = Bytes.allocateDirect(32);
         testAppendFixed(bytes, 0.0003, 4);
         for (int i = 0; i < 1000000; i++) {

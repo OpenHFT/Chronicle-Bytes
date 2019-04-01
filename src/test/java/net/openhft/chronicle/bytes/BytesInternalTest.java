@@ -162,10 +162,11 @@ public class BytesInternalTest {
                 s += '0';
                 for (int i = 1; i < 10; i += 2) {
                     String si = s + i;
+                    Bytes<?> from = Bytes.from(si);
                     assertEquals(si,
                             Double.parseDouble(si),
-                            Bytes.from(si)
-                                    .parseDouble(), 0.0);
+                            from.parseDouble(), 0.0);
+                    from.release();
                 }
             }
         }
@@ -273,13 +274,17 @@ public class BytesInternalTest {
             @NotNull String text = (String) objects[0];
             double expected = (Double) objects[1];
 
-            assertEquals(expected, Bytes.from(text).parseDouble(), 0.0);
+            Bytes<?> from = Bytes.from(text);
+            assertEquals(expected, from.parseDouble(), 0.0);
+            from.release();
         }
     }
 
     private int checkParse(int different, String s) {
         double d = Double.parseDouble(s);
-        double d2 = Bytes.from(s).parseDouble();
+        Bytes<?> from = Bytes.from(s);
+        double d2 = from.parseDouble();
+        from.release();
         if (d != d2) {
             System.out.println(d + " != " + d2);
             ++different;

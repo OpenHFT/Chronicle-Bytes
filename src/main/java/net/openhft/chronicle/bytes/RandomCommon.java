@@ -118,6 +118,9 @@ interface RandomCommon extends ReferenceCounted {
     long addressForWrite(long offset)
             throws UnsupportedOperationException, BufferOverflowException;
 
+    long addressForWritePosition()
+            throws UnsupportedOperationException, BufferOverflowException;
+
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
     }

@@ -322,15 +322,35 @@ public interface Bytes<Underlying> extends
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      *
+     * Note: this returns a direct Bytes now
+     *
      * @param text to convert
      * @return Bytes ready for reading.
      */
-    static Bytes<byte[]> from(@NotNull CharSequence text) {
-        if (text instanceof BytesStore)
-            return ((BytesStore) text).copy().bytesForRead();
-        return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
+    static Bytes<?> from(@NotNull CharSequence text) {
+        return from(text.toString());
     }
 
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * <p>
+     * Note: this returns a direct Bytes now
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
+    static Bytes<?> from(@NotNull String text) {
+        return NativeBytesStore.from(text).bytesForRead();
+    }
+
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     *
+     * Note: this returns a heap Bytes
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -344,7 +364,7 @@ public interface Bytes<Underlying> extends
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
-            return bs.bytesForWrite();
+            return new VanillaBytes<>(bs);
         } finally {
             bs.release();
         }
@@ -459,8 +479,8 @@ public interface Bytes<Underlying> extends
      * @return a direct byte buffer contain the {@code bytes}
      */
     @NotNull
-    static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
-        Bytes<Void> result = allocateDirect(bytes.length);
+    static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
+        VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
         } catch (BufferOverflowException e) {

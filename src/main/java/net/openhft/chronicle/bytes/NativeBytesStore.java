@@ -117,6 +117,8 @@ public class NativeBytesStore<Underlying>
     @NotNull
     private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic)
             throws IllegalArgumentException {
+        if (capacity <= 0)
+            return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
@@ -151,7 +153,7 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     public static NativeBytesStore from(@NotNull String text) {
-        return from(text.getBytes(StandardCharsets.UTF_8));
+        return from(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     @NotNull
@@ -169,6 +171,12 @@ public class NativeBytesStore<Underlying>
     public boolean isDirectMemory() {
         return true;
     }
+
+    @Override
+    public boolean canReadDirect(long length) {
+        return maximumLimit >= length;
+    }
+
 
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
@@ -542,6 +550,11 @@ public class NativeBytesStore<Underlying>
         if (offset < start() || offset > realCapacity())
             throw new BufferOverflowException();
         return address + translate(offset);
+    }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return addressForWrite(start());
     }
 
     // this is synchronized to ensure that setting memory = null gets flushed

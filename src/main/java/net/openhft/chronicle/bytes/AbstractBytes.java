@@ -64,8 +64,19 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean checkRefCount() {
+        return refCount.checkRefCount();
+    }
+
+    @Override
     public boolean isDirectMemory() {
         return bytesStore.isDirectMemory();
+    }
+
+    @Override
+    public boolean canReadDirect(long length) {
+        long remaining = writePosition - readPosition;
+        return bytesStore.isDirectMemory() && remaining >= length;
     }
 
     @Override
@@ -613,6 +624,18 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @NotNull
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes) {
+        assert bytes != this : "you should not write to yourself !";
+
+        try {
+            return write(bytes, bytes.readPosition(), Math.min(writeLimit() - writePosition(), bytes.readRemaining()));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    @NotNull
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
         long remaining = length;
         while (remaining > 0) {
@@ -948,6 +971,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public long addressForWrite(long offset) throws UnsupportedOperationException, BufferOverflowException {
         return bytesStore.addressForWrite(offset);
+    }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return bytesStore.addressForWrite(writePosition);
     }
 
     @Override

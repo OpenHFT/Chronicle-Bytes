@@ -66,6 +66,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean checkRefCount() {
+        return refCount.checkRefCount();
+    }
+
+    @Override
     public boolean unchecked() {
         return true;
     }
@@ -225,7 +230,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
-            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
+            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), len);
             writeSkip(len);
         }
         return len;
@@ -797,6 +802,11 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public long addressForWrite(long offset) throws BufferOverflowException {
         return bytesStore.addressForWrite(offset);
+    }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return bytesStore.addressForWrite(0);
     }
 
     @Override

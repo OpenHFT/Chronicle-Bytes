@@ -31,7 +31,8 @@ public class PrewriteTest {
         bytes.clearAndPad(64);
         bytes.prepend(1234);
         bytes.prewrite(",hi,".getBytes());
-        bytes.prewrite(Bytes.from("words"));
+        Bytes<?> words = Bytes.from("words");
+        bytes.prewrite(words);
         bytes.prewriteByte((byte) ',');
         bytes.prewriteInt(0x34333231);
         bytes.prewriteLong(0x3837363534333231L);
@@ -39,5 +40,6 @@ public class PrewriteTest {
         assertEquals("01123456781234,words,hi,1234", bytes.toString());
 
         bytes.release();
+        words.release();
     }
 }

@@ -47,6 +47,7 @@ import java.util.TimeZone;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
+import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -2491,6 +2492,18 @@ enum BytesInternal {
             sdo.writeByte(bytes.readByte(offset + i));
     }
 
+    public static void copyMemory(long from, long to, int length)
+            throws BufferUnderflowException, BufferOverflowException {
+        long i = 0;
+        for (; i < length - 7; i += 8) {
+            UNSAFE.putLong(to, UNSAFE.getLong(from));
+            from += 8;
+            to += 8;
+        }
+        for (; i < length; i++)
+            UNSAFE.putByte(to++, UNSAFE.getByte(from++));
+    }
+
     @NotNull
     public static byte[] toByteArray(@NotNull RandomDataInput in) {
         int len = (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
@@ -2570,8 +2583,8 @@ enum BytesInternal {
 
     @NotNull
     public static Bytes fromHexString(@NotNull String s) {
+        Bytes in = Bytes.from(s);
         try {
-            Bytes in = Bytes.from(s);
             Bytes out = Bytes.elasticByteBuffer();
             OUTER:
             while (in.readRemaining() > 0) {
@@ -2592,6 +2605,8 @@ enum BytesInternal {
             return out;
         } catch (BufferUnderflowException | BufferOverflowException e) {
             throw new AssertionError(e);
+        } finally {
+            in.release();
         }
     }
 

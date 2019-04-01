@@ -18,9 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.StackTrace;
-import org.jetbrains.annotations.NotNull;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
@@ -45,7 +45,7 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 public enum BytesUtil {
     ;
 
-    static final Map<AbstractBytes, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
+    static final Map<BytesStore, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
     public static String findFile(@NotNull String name) throws FileNotFoundException {
         File file = new File(name);
@@ -202,8 +202,8 @@ public enum BytesUtil {
 
     public static void checkRegisteredBytes() {
         int count = 0;
-        for (Map.Entry<AbstractBytes, Throwable> entry : bytesCreated.entrySet()) {
-            AbstractBytes key = entry.getKey();
+        for (Map.Entry<BytesStore, Throwable> entry : bytesCreated.entrySet()) {
+            BytesStore key = entry.getKey();
             if (key.refCount() != 0) {
                 System.err.println("Bytes " + key.getClass() + " refCount=" + key.refCount());
                 entry.getValue().printStackTrace();
@@ -213,6 +213,11 @@ public enum BytesUtil {
         bytesCreated.clear();
         if (count != 0)
             throw new IllegalStateException("Bytes not released properly " + count);
+    }
+
+    public static boolean unregister(BytesStore bytes) {
+        bytesCreated.remove(bytes);
+        return true;
     }
 
     public static boolean unregister(Bytes bytes) {
