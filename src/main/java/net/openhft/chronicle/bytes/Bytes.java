@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -815,6 +816,17 @@ public interface Bytes<Underlying> extends
         if (length >= 1 << 16)
             throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
         writeUnsignedShort(position, (int) length);
+    }
+
+    default Bytes write(final InputStream inputStream) throws IOException {
+        for (; ; ) {
+            int read;
+            read = inputStream.read();
+            if (read == -1)
+                break;
+            append((char) read);
+        }
+        return this;
     }
 
 }
