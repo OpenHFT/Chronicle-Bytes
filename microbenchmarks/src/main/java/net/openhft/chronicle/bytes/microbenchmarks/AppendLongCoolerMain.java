@@ -1,31 +1,30 @@
-package net.openhft.chronicle.bytes.cooler;
+package net.openhft.chronicle.bytes.microbenchmarks;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
 import org.jetbrains.annotations.NotNull;
 
-public class BytesCoolerMain {
+public class AppendLongCoolerMain {
+
+    static int i = 0;
+    static long[] longs = {Integer.MIN_VALUE, -128, 0, 1, 11, 111, Integer.MAX_VALUE, Long.MAX_VALUE};
 
     public static void main(String[] args) {
-        Bytes small = Bytes.allocateDirect(23);
-        Bytes big = Bytes.allocateDirect(400);
+        Bytes bytes = Bytes.allocateElasticDirect(32);
 
-        System.out.println("WITH COOLERS ACROSS MEMORY");
         new CoolerTester(
-                CpuCoolers.BUSY100,
                 CpuCoolers.PAUSE1,
+                CpuCoolers.BUSY100,
                 CpuCoolers.ALL
-        )
-                .add("direct", () -> doWrite(big, 21))
-                .add("small", () -> doWrite(small, 3))
+        ).add("write", () -> doWrite(bytes))
                 .run();
     }
 
     @NotNull
-    public static Object doWrite(Bytes bytes, int digits) {
+    public static Object doWrite(Bytes bytes) {
         bytes.clear();
-        bytes.append(123.456, digits);
+        bytes.append(longs[i++ % longs.length]);
         return bytes;
     }
 
@@ -39,7 +38,7 @@ public class BytesCoolerMain {
 
     @NotNull
     public static Object doTest(Bytes bytes) {
-        doWrite(bytes, 3);
+        doWrite(bytes);
         doRead(bytes);
         return bytes;
     }
