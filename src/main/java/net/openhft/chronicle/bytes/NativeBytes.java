@@ -19,8 +19,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.UnsafeMemory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.misc.Unsafe;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -298,5 +300,32 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @Override
     public long readRemaining() {
         return writePosition - readPosition;
+    }
+
+    public static class NativeSubBytes extends SubBytes {
+        private NativeBytesStore nativeBytesStore;
+
+        public NativeSubBytes(@NotNull final BytesStore bytesStore, final long start, final long capacity) throws IllegalStateException {
+            super(bytesStore, start, capacity);
+            nativeBytesStore = (NativeBytesStore) this.bytesStore;
+        }
+
+        @Override
+        public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+
+            int len = (int) Math.min(length, readLimit() - offsetInRDI);
+            int i;
+            final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
+            final long address = nativeBytesStore.address + nativeBytesStore.translate(offsetInRDI);
+            for (i = 0; i < len - 7; i += 8)
+                UnsafeMemory.UNSAFE.putLong(bytes, offset2 + i, nativeBytesStore.memory.readLong(address + i));
+            if (i < len - 3) {
+                UnsafeMemory.UNSAFE.putInt(bytes, offset2 + i, nativeBytesStore.memory.readInt(address + i));
+                i += 4;
+            }
+            for (; i < len; i++)
+                UnsafeMemory.UNSAFE.putByte(bytes, offset2 + i, nativeBytesStore.memory.readByte(address + i));
+            return len;
+        }
     }
 }
