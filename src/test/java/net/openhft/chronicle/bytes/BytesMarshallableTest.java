@@ -21,7 +21,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -39,7 +43,32 @@ import static org.junit.Assume.assumeFalse;
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
+@RunWith(Parameterized.class)
 public class BytesMarshallableTest {
+
+    private final boolean guarded;
+
+    public BytesMarshallableTest(String name, boolean guarded) {
+        this.guarded = guarded;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"Unguarded", false},
+                {"Guarded", true}
+        });
+    }
+
+    @AfterClass
+    public static void resetGuarded() {
+        NativeBytes.resetNewGuarded();
+    }
+
+    @Before
+    public void setGuarded() {
+        NativeBytes.setNewGuarded(guarded);
+    }
 
     @After
     public void checkRegisteredBytes() {
