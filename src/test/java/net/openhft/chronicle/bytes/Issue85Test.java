@@ -11,6 +11,8 @@ import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.util.Locale;
 
+import static org.junit.Assume.assumeFalse;
+
 public class Issue85Test {
     int different = 0;
     int different2 = 0;
@@ -64,6 +66,7 @@ public class Issue85Test {
 
     @Test
     public void bytesParseDouble_Issue85_Many0() {
+        assumeFalse(NativeBytes.areNewGuarded());
         int max = 100, count = 0;
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         for (double d0 = 1e21; d0 >= 1e-8; d0 /= 10) {

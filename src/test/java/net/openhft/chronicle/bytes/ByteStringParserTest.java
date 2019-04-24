@@ -31,6 +31,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class ByteStringParserTest {
     @SuppressWarnings("rawtypes")
@@ -81,6 +82,7 @@ public class ByteStringParserTest {
 
     @Test
     public void testParseDouble() {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         double expected = 123.1234;
         bytes.append(expected);
 
@@ -89,6 +91,7 @@ public class ByteStringParserTest {
 
     @Test
     public void testParseFloat() {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         float expected = 123;
         bytes.append(expected);
 
@@ -105,6 +108,7 @@ public class ByteStringParserTest {
 
     @Test
     public void testAppendParse() throws IOException, IORuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
         bytes.append("word£€)").append(' ');
         bytes.append(1234).append(' ');
@@ -122,6 +126,7 @@ public class ByteStringParserTest {
 
     @Test
     public void testLastDecimalPlaces() throws IOException, IORuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.append("1").append(' ');
         bytes.append("1.").append(' ');
         bytes.append("0.0").append(' ');
@@ -186,6 +191,7 @@ public class ByteStringParserTest {
 
     @Test
     public void testAppendParseUTF() throws IOException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (@NotNull String word : words) {
             bytes.append(word).append('\t');

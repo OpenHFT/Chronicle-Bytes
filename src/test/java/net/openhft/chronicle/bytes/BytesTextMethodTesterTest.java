@@ -5,10 +5,12 @@ import org.junit.Test;
 import java.io.IOException;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class BytesTextMethodTesterTest {
     @Test
     public void run() throws IOException {
+        assumeFalse(NativeBytes.areNewGuarded());
         btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
     }
 

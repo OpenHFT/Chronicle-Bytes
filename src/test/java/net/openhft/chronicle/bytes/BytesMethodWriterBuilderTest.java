@@ -14,11 +14,13 @@ import java.util.UUID;
 import static junit.framework.TestCase.assertEquals;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
 
 public class BytesMethodWriterBuilderTest {
 
     @Test
     public void testPrimitives() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = new HexDumpBytes();
         IBytesMethod m = bytes.bytesMethodWriter(IBytesMethod.class);
 

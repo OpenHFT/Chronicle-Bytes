@@ -224,7 +224,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public VanillaBytes<Underlying> bytesForWrite() throws IllegalStateException {
-        return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
+        return elastic ? NativeBytes.wrapWithNativeBytes(this) : new VanillaBytes<>(this);
     }
 
     @Override

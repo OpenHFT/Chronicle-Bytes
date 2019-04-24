@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +30,8 @@ import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class GzipTest {
 
@@ -57,6 +57,7 @@ public class GzipTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void testCompressionRatio() throws IORuntimeException {
+        assumeFalse(NativeBytes.areNewGuarded());
         @NotNull byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');
         @NotNull Random rand = new Random();

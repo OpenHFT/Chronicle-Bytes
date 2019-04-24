@@ -745,7 +745,7 @@ enum BytesInternal {
             char c = str.charAt(offset + i);
             if (c > 0x007F)
                 break;
-            bytes.writeByte((byte) c);
+            bytes.rawWriteByte((byte) c);
         }
         appendUtf82(bytes, str, offset, length, i);
     }
@@ -806,22 +806,22 @@ enum BytesInternal {
     public static void appendUtf8Char(@NotNull StreamingDataOutput bytes, int c)
             throws BufferOverflowException {
         if (c <= 0x007F) {
-            bytes.writeByte((byte) c);
+            bytes.rawWriteByte((byte) c);
 
         } else if (c <= 0x07FF) {
-            bytes.writeByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
-            bytes.writeByte((byte) (0x80 | c & 0x3F));
+            bytes.rawWriteByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
+            bytes.rawWriteByte((byte) (0x80 | c & 0x3F));
 
         } else if (c <= 0xFFFF) {
-            bytes.writeByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
-            bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+            bytes.rawWriteByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 6) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | (c & 0x3F)));
 
         } else {
-            bytes.writeByte((byte) (0xF0 | ((c >> 18) & 0x07)));
-            bytes.writeByte((byte) (0x80 | ((c >> 12) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+            bytes.rawWriteByte((byte) (0xF0 | ((c >> 18) & 0x07)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 12) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 6) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | (c & 0x3F)));
         }
     }
 
@@ -851,12 +851,12 @@ enum BytesInternal {
     public static void writeStopBit(@NotNull StreamingDataOutput out, char n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
-            out.writeByte((byte) (n & 0x7f));
+            out.rawWriteByte((byte) (n & 0x7f));
             return;
         }
         if ((n & ~0x3FFF) == 0) {
-            out.writeByte((byte) ((n & 0x7f) | 0x80));
-            out.writeByte((byte) (n >> 7));
+            out.rawWriteByte((byte) ((n & 0x7f) | 0x80));
+            out.rawWriteByte((byte) (n >> 7));
             return;
         }
         writeStopBit0(out, n);
@@ -865,12 +865,12 @@ enum BytesInternal {
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
-            out.writeByte((byte) (n & 0x7f));
+            out.rawWriteByte((byte) (n & 0x7f));
             return;
         }
         if ((n & ~0x3FFF) == 0) {
-            out.writeByte((byte) ((n & 0x7f) | 0x80));
-            out.writeByte((byte) (n >> 7));
+            out.rawWriteByte((byte) ((n & 0x7f) | 0x80));
+            out.rawWriteByte((byte) (n >> 7));
             return;
         }
         writeStopBit0(out, n);
@@ -895,10 +895,10 @@ enum BytesInternal {
             throws BufferOverflowException {
         long n = Double.doubleToRawLongBits(d);
         while ((n & (~0L >>> 7)) != 0) {
-            out.writeByte((byte) (((n >>> -7) & 0x7F) | 0x80));
+            out.rawWriteByte((byte) (((n >>> -7) & 0x7F) | 0x80));
             n <<= 7;
         }
-        out.writeByte((byte) ((n >>> -7) & 0x7F));
+        out.rawWriteByte((byte) ((n >>> -7) & 0x7F));
     }
 
     public static double readStopBitDouble(@NotNull StreamingDataInput in) {
@@ -923,16 +923,16 @@ enum BytesInternal {
 
         long n2;
         while ((n2 = n >>> 7) != 0) {
-            out.writeByte((byte) (0x80L | n));
+            out.rawWriteByte((byte) (0x80L | n));
             n = n2;
         }
         // final byte
         if (!neg) {
-            out.writeByte((byte) n);
+            out.rawWriteByte((byte) n);
 
         } else {
-            out.writeByte((byte) (0x80L | n));
-            out.writeByte((byte) 0);
+            out.rawWriteByte((byte) (0x80L | n));
+            out.rawWriteByte((byte) 0);
         }
     }
 
@@ -1119,7 +1119,7 @@ enum BytesInternal {
     public static char readStopBitChar(@NotNull StreamingDataInput in)
             throws IORuntimeException {
         int l;
-        if ((l = in.readByte()) >= 0)
+        if ((l = in.rawReadByte()) >= 0)
             return (char) l;
         return (char) readStopBit0(in, l);
     }
@@ -1128,7 +1128,7 @@ enum BytesInternal {
     public static long readStopBit(@NotNull StreamingDataInput in)
             throws IORuntimeException {
         long l;
-        if ((l = in.readByte()) >= 0)
+        if ((l = in.rawReadByte()) >= 0)
             return l;
         return readStopBit0(in, l);
     }
@@ -1138,7 +1138,7 @@ enum BytesInternal {
         l &= 0x7FL;
         long b;
         int count = 7;
-        while ((b = in.readByte()) < 0) {
+        while ((b = in.rawReadByte()) < 0) {
             l |= (b & 0x7FL) << count;
             count += 7;
         }
@@ -1166,11 +1166,11 @@ enum BytesInternal {
                     out.write(Long.toString(Long.MIN_VALUE, base));
                 return;
             }
-            out.writeByte((byte) '-');
+            out.rawWriteByte((byte) '-');
             num = -num;
         }
         if (num == 0) {
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
 
         } else {
             switch (base) {
@@ -1213,7 +1213,7 @@ enum BytesInternal {
             numberBuffer[len++] = (byte) HEXADECIMAL[digit];
         } while (--minDigits > 0 | num > 0);
         for (int i = len - 1; i >= 0; i--)
-            out.writeByte(numberBuffer[i]);
+            out.rawWriteByte(numberBuffer[i]);
     }
 
     public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces)
@@ -1230,7 +1230,7 @@ enum BytesInternal {
                 numberBuffer = MIN_VALUE_TEXT;
                 endIndex = MIN_VALUE_TEXT.length;
             } else {
-                out.writeByte((byte) '-');
+                out.rawWriteByte((byte) '-');
                 num = -num;
                 endIndex = appendLong1(numberBuffer, num);
             }
@@ -1359,7 +1359,7 @@ enum BytesInternal {
     private static void appendInt0(@NotNull StreamingDataOutput out, int num)
             throws IllegalArgumentException, BufferOverflowException {
         if (num < 10) {
-            out.writeByte((byte) ('0' + num));
+            out.rawWriteByte((byte) ('0' + num));
 
         } else if (num < 100) {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
@@ -1381,11 +1381,11 @@ enum BytesInternal {
                 out.write(MIN_VALUE_TEXT);
                 return;
             }
-            out.writeByte((byte) '-');
+            out.rawWriteByte((byte) '-');
             num = -num;
         }
         if (num < 10) {
-            out.writeByte((byte) ('0' + num));
+            out.rawWriteByte((byte) ('0' + num));
 
         } else if (num < 100) {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
@@ -1525,12 +1525,12 @@ enum BytesInternal {
         int exp = (int) ((val >>> 52) & 2047);
         long mantissa = val & ((1L << 52) - 1);
         if (sign != 0) {
-            out.writeByte((byte) '-');
+            out.rawWriteByte((byte) '-');
         }
         if (exp == 0 && mantissa == 0) {
-            out.writeByte((byte) '0');
-            out.writeByte((byte) '.');
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
+            out.rawWriteByte((byte) '.');
+            out.rawWriteByte((byte) '0');
             return;
 
         } else if (exp == 2047) {
@@ -1553,7 +1553,7 @@ enum BytesInternal {
                 appendLong0(out, intValue);
                 mantissa -= intValue << shift;
                 if (mantissa > 0) {
-                    out.writeByte((byte) '.');
+                    out.rawWriteByte((byte) '.');
                     mantissa <<= 1;
                     mantissa++;
                     int precision = shift + 1;
@@ -1568,7 +1568,7 @@ enum BytesInternal {
                         precision--;
                         long num = (mantissa >> precision);
                         value = value * 10 + num;
-                        out.writeByte((byte) ('0' + num));
+                        out.rawWriteByte((byte) ('0' + num));
                         mantissa -= num << precision;
 
                         final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
@@ -1576,15 +1576,15 @@ enum BytesInternal {
                             break;
                     }
                 } else {
-                    out.writeByte((byte) '.');
-                    out.writeByte((byte) '0');
+                    out.rawWriteByte((byte) '.');
+                    out.rawWriteByte((byte) '0');
                 }
                 return;
 
             } else {
                 // faction.
-                out.writeByte((byte) '0');
-                out.writeByte((byte) '.');
+                out.rawWriteByte((byte) '0');
+                out.rawWriteByte((byte) '.');
                 mantissa <<= 6;
                 mantissa += (1 << 5);
                 int precision = shift + 6;
@@ -1605,14 +1605,14 @@ enum BytesInternal {
                     precision--;
                     if (precision >= 64) {
                         decimalPlaces++;
-                        out.writeByte((byte) '0');
+                        out.rawWriteByte((byte) '0');
                         continue;
                     }
                     long num = (mantissa >>> precision);
                     value = value * 10 + num;
                     final char c = (char) ('0' + num);
                     assert !(c < '0' || c > '9');
-                    out.writeByte((byte) c);
+                    out.rawWriteByte((byte) c);
                     mantissa -= num << precision;
                     final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
                     if (parsedValue == d)
@@ -1642,7 +1642,7 @@ enum BytesInternal {
 
         appendLong0(out, val2);
         for (int i = 0; i < digits; i++)
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
     }
 
     private static double asDouble(long value, int exp, boolean negative, int deci) {
@@ -1854,7 +1854,7 @@ enum BytesInternal {
             throws IOException, BufferUnderflowException {
         int len = Maths.toInt32(bytes.readRemaining());
         while (len-- > 0) {
-            int c = bytes.readUnsignedByte();
+            int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
                 bytes.readSkip(-1);
                 break;
@@ -2026,7 +2026,7 @@ enum BytesInternal {
         int decimalPlaces = Integer.MIN_VALUE;
         int ch;
         do {
-            ch = in.readUnsignedByte();
+            ch = in.rawReadByte() & 0xFF;
         } while (ch == ' ');
 
         try {
@@ -2047,7 +2047,7 @@ enum BytesInternal {
                     if (compareRest(in, "Infinity"))
                         return Double.NEGATIVE_INFINITY;
                     negative = true;
-                    ch = in.readUnsignedByte();
+                    ch = in.rawReadByte();
                     break;
             }
             int tens = 0;
@@ -2072,7 +2072,7 @@ enum BytesInternal {
                 }
                 if (in.readRemaining() == 0)
                     break;
-                ch = in.readUnsignedByte();
+                ch = in.rawReadByte();
             }
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
@@ -2119,7 +2119,7 @@ enum BytesInternal {
             }
         }
         while (in.readRemaining() > 0) {
-            b = in.readUnsignedByte();
+            b = in.rawReadByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
@@ -2402,55 +2402,62 @@ enum BytesInternal {
         if (hours > 99) {
             b.append(hours); // can have over 24 hours.
         } else {
-            b.writeByte((byte) (hours / 10 + '0'));
-            b.writeByte((byte) (hours % 10 + '0'));
+            b.rawWriteByte((byte) (hours / 10 + '0'));
+            b.rawWriteByte((byte) (hours % 10 + '0'));
         }
-        b.writeByte((byte) ':');
+        b.rawWriteByte((byte) ':');
         int minutes = (int) ((timeInMS / (60 * 1000)) % 60);
-        b.writeByte((byte) (minutes / 10 + '0'));
-        b.writeByte((byte) (minutes % 10 + '0'));
-        b.writeByte((byte) ':');
+        b.rawWriteByte((byte) (minutes / 10 + '0'));
+        b.rawWriteByte((byte) (minutes % 10 + '0'));
+        b.rawWriteByte((byte) ':');
         int seconds = (int) ((timeInMS / 1000) % 60);
-        b.writeByte((byte) (seconds / 10 + '0'));
-        b.writeByte((byte) (seconds % 10 + '0'));
-        b.writeByte((byte) '.');
+        b.rawWriteByte((byte) (seconds / 10 + '0'));
+        b.rawWriteByte((byte) (seconds % 10 + '0'));
+        b.rawWriteByte((byte) '.');
         int millis = (int) (timeInMS % 1000);
-        b.writeByte((byte) (millis / 100 + '0'));
-        b.writeByte((byte) (millis / 10 % 10 + '0'));
-        b.writeByte((byte) (millis % 10 + '0'));
+        b.rawWriteByte((byte) (millis / 100 + '0'));
+        b.rawWriteByte((byte) (millis / 10 % 10 + '0'));
+        b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
     public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
         @Nullable BytesStore bs1 = b1.bytesStore();
         @Nullable BytesStore bs2 = b2.bytesStore();
-        long i = 0;
-        for (; i < readRemaining - 7 &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
-            long l1 = bs1.readLong(b1.readPosition() + i);
-            long l2 = bs2.readLong(b2.readPosition() + i);
-            if (l1 != l2)
-                return false;
+        bs1.checkRefCount();
+        bs2.checkRefCount();
+        try {
+            long i = 0;
+            for (; i < readRemaining - 7 &&
+                    canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
+                    canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
+                long l1 = bs1.readLong(b1.readPosition() + i);
+                long l2 = bs2.readLong(b2.readPosition() + i);
+                if (l1 != l2)
+                    return false;
+            }
+            if (i < readRemaining - 3 &&
+                    canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
+                    canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
+                int i1 = bs1.readInt(b1.readPosition() + i);
+                int i2 = bs2.readInt(b2.readPosition() + i);
+                if (i1 != i2)
+                    return false;
+                i += 4;
+            }
+            for (; i < readRemaining &&
+                    canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
+                    canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
+                byte i1 = bs1.readByte(b1.readPosition() + i);
+                byte i2 = bs2.readByte(b2.readPosition() + i);
+                if (i1 != i2)
+                    return false;
+            }
+            return true;
+        } finally {
+            bs1.checkRefCount();
+            bs2.checkRefCount();
         }
-        if (i < readRemaining - 3 &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
-            int i1 = bs1.readInt(b1.readPosition() + i);
-            int i2 = bs2.readInt(b2.readPosition() + i);
-            if (i1 != i2)
-                return false;
-            i += 4;
-        }
-        for (; i < readRemaining &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
-            byte i1 = bs1.readByte(b1.readPosition() + i);
-            byte i2 = bs2.readByte(b2.readPosition() + i);
-            if (i1 != i2)
-                return false;
-        }
-        return true;
     }
 
     public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS)
@@ -2482,14 +2489,10 @@ enum BytesInternal {
     public static void writeFully(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException {
         long i = 0;
-        for (; i < length - 7; i += 8)
-            sdo.writeLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            sdo.writeInt(bytes.readInt(offset + i));
-            i += 4;
-        }
+        for (; i < length - 3; i += 4)
+            sdo.rawWriteInt(bytes.readInt(offset + i));
         for (; i < length; i++)
-            sdo.writeByte(bytes.readByte(offset + i));
+            sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
     public static void copyMemory(long from, long to, int length)
@@ -2596,7 +2599,7 @@ enum BytesInternal {
                             break OUTER;
                     }
                     long value = in.parseHexLong();
-                    out.writeByte((byte) value);
+                    out.rawWriteByte((byte) value);
                 }
                 if (in.readByte(in.readPosition() - 1) <= ' ')
                     in.readSkip(-1);

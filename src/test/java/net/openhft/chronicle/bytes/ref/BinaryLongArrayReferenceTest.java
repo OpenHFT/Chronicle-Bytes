@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -24,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class BinaryLongArrayReferenceTest {
 
@@ -62,6 +64,7 @@ public class BinaryLongArrayReferenceTest {
     @SuppressWarnings("rawtypes")
     @Test
     public void marshallable() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = Bytes.allocateElasticDirect(256);
         LongArrays la = new LongArrays(4, 8);
         la.writeMarshallable(bytes);

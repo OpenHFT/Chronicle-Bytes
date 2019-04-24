@@ -4,11 +4,15 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 public class ReadWriteMarshallableTest {
     @Test
     public void test() {
+        // TODO Make guarded safe
+        assumeFalse(NativeBytes.areNewGuarded());
+
         Bytes<?> bytes = Bytes.elasticHeapByteBuffer(128);
         Bytes<?> hello_world = Bytes.from("Hello World");
         Bytes<?> bye = Bytes.from("Bye");

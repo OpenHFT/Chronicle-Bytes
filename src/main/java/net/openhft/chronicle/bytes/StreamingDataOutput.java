@@ -171,7 +171,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writeStopBit(length);
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
-            writeUnsignedByte(c);
+            rawWriteByte((byte) Maths.toUInt8((int) c));
         }
         return (S) this;
     }
@@ -222,6 +222,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     S writeByte(byte i8) throws BufferOverflowException;
 
+    default S rawWriteByte(byte i8) throws BufferOverflowException {
+        return writeByte(i8);
+    }
+
     @NotNull
     default S writeUnsignedByte(int i)
             throws BufferOverflowException, IllegalArgumentException {
@@ -251,6 +255,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @NotNull
     S writeInt(int i) throws BufferOverflowException;
+
+    default S rawWriteInt(int i) throws BufferOverflowException {
+        return writeInt(i);
+    }
 
     @NotNull
     S writeIntAdv(int i, int advance) throws BufferOverflowException;

@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class ByteStringAppenderTest {
@@ -126,6 +127,7 @@ public class ByteStringAppenderTest {
 
     @Test
     public void testAppendDouble() throws IORuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         testAppendDouble0(-1.42278619425894E11);
 /*
         @NotNull Random random = new Random(1);
@@ -155,6 +157,7 @@ public class ByteStringAppenderTest {
 
     @Test
     public void testAppendLongDecimal() {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.appendDecimal(128, 0).append('\n');
         bytes.appendDecimal(128, 1).append('\n');
         bytes.appendDecimal(128, 2).append('\n');
@@ -187,6 +190,8 @@ public class ByteStringAppenderTest {
 
     @Test
     public void testAppendDoublePrecision() {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
+
         bytes.append(1.28, 0).append('\n');
         bytes.append(-1.28, 1).append('\n');
         bytes.append(1.28, 2).append('\n');

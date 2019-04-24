@@ -1,14 +1,18 @@
 package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeFalse;
 
 public class CASTest {
     @Test
     public void testCAS() {
+        assumeFalse(NativeBytes.areNewGuarded());
+
         HexDumpBytes bytes = new HexDumpBytes()
                 .offsetFormat((o, b) -> b.appendBase16(o, 4));
 

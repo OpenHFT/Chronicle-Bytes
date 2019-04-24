@@ -2,12 +2,14 @@ package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class PrimitiveTest {
     @Test
@@ -101,6 +103,7 @@ public class PrimitiveTest {
 
     @Test
     public void testTextPrimitive() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         bytes.append(true).append('\n');
         bytes.append(1).append('\n');

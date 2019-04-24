@@ -85,7 +85,7 @@ public interface Bytes<Underlying> extends
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
         @NotNull HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
-            return new NativeBytes<>(bs);
+            return NativeBytes.wrapWithNativeBytes(bs);
         } finally {
             bs.release();
         }

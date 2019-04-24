@@ -9,10 +9,13 @@ import java.nio.ByteBuffer;
 import java.util.Random;
 
 import static junit.framework.TestCase.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class StopBitDecimalTest {
     @Test
     public void testDecimals() {
+        assumeFalse(NativeBytes.areNewGuarded());
+
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(16);
         Random rand = new Random();
         for (int i = 0; i < 10_000; i++) {

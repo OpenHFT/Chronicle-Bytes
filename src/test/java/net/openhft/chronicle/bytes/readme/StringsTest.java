@@ -1,15 +1,18 @@
 package net.openhft.chronicle.bytes.readme;
 
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
+import static org.junit.Assume.assumeFalse;
 
 public class StringsTest {
     @Test
     public void testString() {
+        assumeFalse(NativeBytes.areNewGuarded());
         HexDumpBytes bytes = new HexDumpBytes();
         bytes.comment("write8bit").write8bit("£ 1");
         bytes.comment("writeUtf8").writeUtf8("£ 1");
