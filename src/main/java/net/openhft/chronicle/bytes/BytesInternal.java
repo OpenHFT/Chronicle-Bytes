@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.UnsafeText;
@@ -144,7 +145,8 @@ enum BytesInternal {
     public static void parseUtf8(
             @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
-        if (appendable instanceof StringBuilder) {
+
+        if (!OS.isWindows() && appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
                 parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
@@ -452,6 +454,7 @@ enum BytesInternal {
             setCount(sb, count);
             if (count < utflen)
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
+            assert bytes.memory != null;
         } catch (IOException e) {
             throw Jvm.rethrow(e);
         }
@@ -2422,42 +2425,26 @@ enum BytesInternal {
 
     public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
-        @Nullable BytesStore bs1 = b1.bytesStore();
-        @Nullable BytesStore bs2 = b2.bytesStore();
-        bs1.checkRefCount();
-        bs2.checkRefCount();
-        try {
-            long i = 0;
-            for (; i < readRemaining - 7 &&
-                    canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
-                    canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
-                long l1 = bs1.readLong(b1.readPosition() + i);
-                long l2 = bs2.readLong(b2.readPosition() + i);
-                if (l1 != l2)
-                    return false;
-            }
-            if (i < readRemaining - 3 &&
-                    canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
-                    canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
-                int i1 = bs1.readInt(b1.readPosition() + i);
-                int i2 = bs2.readInt(b2.readPosition() + i);
-                if (i1 != i2)
-                    return false;
-                i += 4;
-            }
-            for (; i < readRemaining &&
-                    canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
-                    canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
-                byte i1 = bs1.readByte(b1.readPosition() + i);
-                byte i2 = bs2.readByte(b2.readPosition() + i);
-                if (i1 != i2)
-                    return false;
-            }
-            return true;
-        } finally {
-            bs1.checkRefCount();
-            bs2.checkRefCount();
+        @Nullable BytesStore bs1 = OS.isWindows() ? b1 : b1.bytesStore();
+        @Nullable BytesStore bs2 = OS.isWindows() ? b2 : b2.bytesStore();
+        long i = 0;
+        for (; i < readRemaining - 7 &&
+                canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
+                canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
+            long l1 = bs1.readLong(b1.readPosition() + i);
+            long l2 = bs2.readLong(b2.readPosition() + i);
+            if (l1 != l2)
+                return false;
         }
+        for (; i < readRemaining &&
+                canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
+                canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
+            byte i1 = bs1.readByte(b1.readPosition() + i);
+            byte i2 = bs2.readByte(b2.readPosition() + i);
+            if (i1 != i2)
+                return false;
+        }
+        return true;
     }
 
     public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS)
