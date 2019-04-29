@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.UnsafeText;
@@ -146,7 +145,7 @@ enum BytesInternal {
             @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
 
-        if (!OS.isWindows() && appendable instanceof StringBuilder) {
+  /*      if (!OS.isWindows() && appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
                 parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
@@ -156,7 +155,7 @@ enum BytesInternal {
                 parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
                 return;
             }
-        }
+        }*/
         parseUtf81(input, offset, appendable, utflen);
     }
 
