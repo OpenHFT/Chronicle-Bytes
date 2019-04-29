@@ -286,7 +286,7 @@ public class BytesInternalTest {
         final BytesStore longerBuffer = Bytes.elasticHeapByteBuffer(512).bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
-        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 512));
+        assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
     }
 
     @Test

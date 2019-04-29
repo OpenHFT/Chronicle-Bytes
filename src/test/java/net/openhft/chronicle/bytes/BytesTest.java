@@ -374,11 +374,17 @@ public class BytesTest {
 
     @Test
     public void testEqualBytesWithSecondStoreBeingLonger() throws IORuntimeException {
-        BytesStore store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
-        BytesStore store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
-        assertThat(store1.equalBytes(store2, store2.length()), is(false));
-        store1.release();
-        store2.release();
+
+        BytesStore store1 = null, store2 = null;
+        try {
+            store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
+            store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
+            assertThat(store1.equalBytes(store2, store2.length()), is(false));
+        } finally {
+            store1.release();
+            store2.release();
+        }
+
     }
 
     @Test

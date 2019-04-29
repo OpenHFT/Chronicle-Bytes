@@ -2425,8 +2425,12 @@ enum BytesInternal {
 
     public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
-        @Nullable BytesStore bs1 = b1;
-        @Nullable BytesStore bs2 = b2;
+        @Nullable BytesStore bs1 = b1;// OS.isWindows() ? b1 : b1.bytesStore();
+        @Nullable BytesStore bs2 = b2; //OS.isWindows() ? b2 : b2.bytesStore();
+
+        if (bs1.readRemaining() < readRemaining)
+            return false;
+
         long i = 0;
         for (; i < readRemaining - 7 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
