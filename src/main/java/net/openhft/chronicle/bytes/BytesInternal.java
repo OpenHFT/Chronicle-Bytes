@@ -145,7 +145,7 @@ enum BytesInternal {
             @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
 
-  /*      if (!OS.isWindows() && appendable instanceof StringBuilder) {
+        if (appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
                 parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
@@ -155,7 +155,7 @@ enum BytesInternal {
                 parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
                 return;
             }
-        }*/
+        }
         parseUtf81(input, offset, appendable, utflen);
     }
 
