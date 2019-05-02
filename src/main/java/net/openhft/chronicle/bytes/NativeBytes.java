@@ -355,13 +355,13 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
             final long address = nativeBytesStore.address + nativeBytesStore.translate(offsetInRDI);
             for (i = 0; i < len - 7; i += 8)
-                UnsafeMemory.UNSAFE.putLong(bytes, offset2 + i, nativeBytesStore.memory.readLong(address + i));
+                UnsafeMemory.UNSAFE.putLong(bytes, (long) offset2 + i, nativeBytesStore.memory.readLong(address + i));
             if (i < len - 3) {
-                UnsafeMemory.UNSAFE.putInt(bytes, offset2 + i, nativeBytesStore.memory.readInt(address + i));
+                UnsafeMemory.UNSAFE.putInt(bytes, (long) offset2 + i, nativeBytesStore.memory.readInt(address + i));
                 i += 4;
             }
             for (; i < len; i++)
-                UnsafeMemory.UNSAFE.putByte(bytes, offset2 + i, nativeBytesStore.memory.readByte(address + i));
+                UnsafeMemory.UNSAFE.putByte(bytes, (long) offset2 + i, nativeBytesStore.memory.readByte(address + i));
             return len;
         }
     }
