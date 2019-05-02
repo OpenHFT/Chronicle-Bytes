@@ -151,7 +151,7 @@ enum BytesInternal {
                 return;
             }
 
-            // todo: this was causing a JVM crash for a client, we have remove this optimization for the moment.
+            // todo: see https://github.com/OpenHFT/Chronicle-Bytes/issues/100 this was causing a JVM crash for a client, we have remove this optimization for the moment.
             /*else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
