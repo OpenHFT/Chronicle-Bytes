@@ -149,12 +149,15 @@ enum BytesInternal {
             if (input instanceof NativeBytesStore) {
                 parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
-            } else if (input instanceof Bytes
+            }
+
+            // todo: see https://github.com/OpenHFT/Chronicle-Bytes/issues/100 this was causing a JVM crash for a client, we have remove this optimization for the moment.
+            /*else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
                 parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
                 return;
-            }
+            }*/
         }
         parseUtf81(input, offset, appendable, utflen);
     }
