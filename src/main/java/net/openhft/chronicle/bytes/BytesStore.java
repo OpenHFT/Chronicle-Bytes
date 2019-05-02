@@ -176,11 +176,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return start() <= offset && offset < safeLimit();
     }
 
-    // to be removed in x.18
-    @Deprecated
-    default boolean inside(long offset, int buffer) {
-        return start() <= offset && offset + buffer < safeLimit();
-    }
     default boolean inside(long offset, long buffer) {
         return start() <= offset && offset + buffer < safeLimit();
     }

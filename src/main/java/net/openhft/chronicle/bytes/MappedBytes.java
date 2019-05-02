@@ -704,6 +704,22 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return bytesStore.readVolatileLong(offset);
     }
 
+    @Override
+    public int peekUnsignedByte() {
+        if (!bytesStore.inside(readPosition, 1)) {
+            acquireNextByteStore0(readPosition, false);
+        }
+        return super.peekUnsignedByte();
+    }
+
+    @Override
+    public int peekUnsignedByte(final long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset, 1)) {
+            acquireNextByteStore0(offset, false);
+        }
+        return super.peekUnsignedByte(offset);
+    }
+
     @SuppressWarnings("restriction")
     @Override
     public int peekVolatileInt() {
