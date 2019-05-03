@@ -383,7 +383,8 @@ public class HexDumpBytes implements Bytes<Void> {
     @Override
     @NotNull
     public Bytes<Void> readPosition(long position) throws BufferUnderflowException {
-        throw new UnsupportedOperationException();
+        base.readPosition(position);
+        return this;
     }
 
     @Override
@@ -1101,7 +1102,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes write(InputStream inputStream) throws IOException {
         long pos = base.writePosition();
         try {
-            return base.write(inputStream);
+            base.write(inputStream);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1112,7 +1115,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeStopBit(long x) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeStopBit(x);
+            base.writeStopBit(x);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1123,7 +1128,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeStopBit(char x) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeStopBit(x);
+            base.writeStopBit(x);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1134,7 +1141,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeStopBit(double d) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeStopBit(d);
+            base.writeStopBit(d);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1145,7 +1154,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeStopBitDecimal(double d) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeStopBitDecimal(d);
+            base.writeStopBitDecimal(d);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1156,7 +1167,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUtf8(CharSequence cs) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeUtf8(cs);
+            base.writeUtf8(cs);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1167,7 +1180,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeUtf8(s);
+            base.writeUtf8(s);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1178,7 +1193,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeUTFΔ(cs);
+            base.writeUTFΔ(cs);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1189,7 +1206,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write8bit(@Nullable CharSequence cs) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.write8bit(cs);
+            base.write8bit(cs);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1200,7 +1219,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write8bit(@NotNull CharSequence s, int start, int length) throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         long pos = base.writePosition();
         try {
-            return base.write8bit(s, start, length);
+            base.write8bit(s, start, length);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1211,7 +1232,8 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(CharSequence cs) throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
-            return base.write(cs);
+            base.write(cs);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1222,7 +1244,8 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull CharSequence s, int start, int length) throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
         long pos = base.writePosition();
         try {
-            return base.write(s, start, length);
+            base.write(s, start, length);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1233,7 +1256,8 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write8bit(@Nullable String s) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.write8bit(s);
+            base.write8bit(s);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1244,7 +1268,8 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write8bit(@Nullable BytesStore bs) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.write8bit(bs);
+            base.write8bit(bs);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1255,7 +1280,8 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUnsignedByte(int i) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
-            return base.writeUnsignedByte(i);
+            base.writeUnsignedByte(i);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1266,7 +1292,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUnsignedShort(int u16) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
-            return base.writeUnsignedShort(u16);
+            base.writeUnsignedShort(u16);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1277,7 +1305,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeInt24(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeInt24(i);
+            base.writeInt24(i);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1288,7 +1318,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUnsignedInt24(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeUnsignedInt24(i);
+            base.writeUnsignedInt24(i);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1299,7 +1331,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeUnsignedInt(long i) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
-            return base.writeUnsignedInt(i);
+            base.writeUnsignedInt(i);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1310,7 +1344,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull RandomDataInput bytes) {
         long pos = base.writePosition();
         try {
-            return base.write(bytes);
+
+            base.write(bytes);
+            return this;
         } finally {
             copyToText(pos);
         }
@@ -1320,7 +1356,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull BytesStore bytes) {
         long pos = base.writePosition();
         try {
-            return base.write(bytes);
+            base.write(bytes);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1331,7 +1369,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeSome(@NotNull Bytes bytes) {
         long pos = base.writePosition();
         try {
-            return base.writeSome(bytes);
+            base.writeSome(bytes);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1342,7 +1382,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
-            return base.write(bytes, offset, length);
+            base.write(bytes, offset, length);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1353,7 +1395,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
-            return base.write(bytes, offset, length);
+            base.write(bytes, offset, length);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1364,7 +1408,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> write(@NotNull byte[] bytes) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.write(bytes);
+            base.write(bytes);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1375,7 +1421,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public Bytes<Void> writeBoolean(boolean flag) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeBoolean(flag);
+            base.writeBoolean(flag);
+            return this;
+
         } finally {
             copyToText(pos);
         }
@@ -1385,7 +1433,9 @@ public class HexDumpBytes implements Bytes<Void> {
     public <E extends Enum<E>> Bytes<Void> writeEnum(@NotNull E e) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
-            return base.writeEnum(e);
+            base.writeEnum(e);
+            return this;
+
         } finally {
             copyToText(pos);
         }
