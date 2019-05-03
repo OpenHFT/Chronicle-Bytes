@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -351,7 +352,7 @@ public class MappedBytesTest {
             raf.setLength(4096);
             assertTrue(tempFile.setWritable(false));
             final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
-    
+
             assertTrue(mappedBytes.
                     isBackingFileReadOnly());
             mappedBytes.release();
@@ -401,6 +402,34 @@ public class MappedBytesTest {
         original.writeInt(54, 12345678);
         System.out.println("Original(54): " + original.readInt(54));
         System.out.println("PBS(4): " + pbs.readInt(4));
+    }
+
+    @Test
+    public void memoryOverlapRegions() throws FileNotFoundException {
+        String tmpfile = OS.TARGET + "/memoryOverlapRegions-" + System.nanoTime();
+        int chunkSize = 256 << 16;
+        int overlapSize = 64 << 16;
+        String longString = new String(new char[overlapSize * 2]);
+        try (MappedBytes mb = MappedBytes.mappedBytes(new File(tmpfile), chunkSize, overlapSize)) {
+            Bytes csb = Bytes.from(longString);
+            StringBuilder sb = new StringBuilder();
+            for (int offset : new int[]{chunkSize - OS.pageSize(), chunkSize + overlapSize - OS.pageSize()}) {
+                mb.writePosition(offset);
+                mb.appendUtf8(longString);
+                mb.readPosition(offset);
+                assertEquals(offset < chunkSize ? 0 : chunkSize, mb.bytesStore().start());
+
+                mb.equalBytes(csb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+
+                mb.equalBytes(csb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+
+                mb.parseUtf8(sb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+            }
+        }
+        IOTools.deleteDirWithFiles(tmpfile, 2);
     }
 
 }
