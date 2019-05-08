@@ -410,8 +410,8 @@ public class MappedBytesTest {
         int chunkSize = 256 << 16;
         int overlapSize = 64 << 16;
         String longString = new String(new char[overlapSize * 2]);
+        Bytes csb = Bytes.from(longString);
         try (MappedBytes mb = MappedBytes.mappedBytes(new File(tmpfile), chunkSize, overlapSize)) {
-            Bytes csb = Bytes.from(longString);
             StringBuilder sb = new StringBuilder();
             for (int offset : new int[]{chunkSize - OS.pageSize(), chunkSize + overlapSize - OS.pageSize()}) {
                 mb.writePosition(offset);
@@ -428,8 +428,9 @@ public class MappedBytesTest {
                 mb.parseUtf8(sb, csb.length());
                 assertEquals(chunkSize, mb.bytesStore().start());
             }
+        } finally {
+            csb.release();
         }
         IOTools.deleteDirWithFiles(tmpfile, 2);
     }
-
 }
