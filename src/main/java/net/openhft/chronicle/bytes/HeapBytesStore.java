@@ -65,13 +65,15 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteArray.length;
     }
 
+    // Used by Chronicle-Map.
     @NotNull
-    static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
+    public static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
         return new HeapBytesStore<>(byteArray);
     }
 
+    // Used by Chronicle-Map.
     @NotNull
-    static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
+    public static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new HeapBytesStore<>(bb);
     }
 
