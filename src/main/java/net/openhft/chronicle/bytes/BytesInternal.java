@@ -22,15 +22,16 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.annotation.NotNull;
-import net.openhft.chronicle.core.annotation.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import net.openhft.chronicle.core.util.ByteBuffers;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -44,12 +45,16 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
+import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
+import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
  * Utility methods to support common functionality in this package. This is not intended to be
  * accessed directly.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 enum BytesInternal {
     ;
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
@@ -75,7 +80,7 @@ enum BytesInternal {
         }
     }
 
-    public static boolean contentEqual(@org.jetbrains.annotations.Nullable @Nullable BytesStore a, @org.jetbrains.annotations.Nullable @Nullable BytesStore b) {
+    public static boolean contentEqual(@Nullable BytesStore a, @Nullable BytesStore b) {
         if (a == null) return b == null;
         if (b == null) return false;
         if (a.readRemaining() != b.readRemaining())
@@ -95,7 +100,7 @@ enum BytesInternal {
         return true;
     }
 
-    static boolean startsWith(@org.jetbrains.annotations.NotNull @NotNull BytesStore a, @org.jetbrains.annotations.NotNull @NotNull BytesStore b) {
+    static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b) {
         if (a.readRemaining() < b.readRemaining())
             return false;
         long aPos = a.readPosition();
@@ -124,7 +129,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
+            @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (appendable instanceof StringBuilder
                 && bytes.isDirectMemory()
@@ -139,13 +144,14 @@ enum BytesInternal {
     public static void parseUtf8(
             @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
+
         if (appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
                 parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
                 return;
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
-                @org.jetbrains.annotations.Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
+                @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
                 parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
                 return;
             }
@@ -153,7 +159,7 @@ enum BytesInternal {
         parseUtf81(input, offset, appendable, utflen);
     }
 
-    public static boolean compareUtf8(@org.jetbrains.annotations.NotNull RandomDataInput input, long offset, @org.jetbrains.annotations.Nullable CharSequence other)
+    public static boolean compareUtf8(@NotNull RandomDataInput input, long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, IndexOutOfBoundsException {
         long utfLen;
         if ((utfLen = input.readByte(offset++)) < 0) {
@@ -182,7 +188,7 @@ enum BytesInternal {
     }
 
     private static boolean compareUtf8(
-            @org.jetbrains.annotations.NotNull RandomDataInput input, long offset, long utfLen, @org.jetbrains.annotations.NotNull CharSequence other)
+            @NotNull RandomDataInput input, long offset, long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException {
         if (offset + utfLen > input.realCapacity())
             throw new BufferUnderflowException();
@@ -201,7 +207,7 @@ enum BytesInternal {
     }
 
     private static boolean compareUtf82(
-            @org.jetbrains.annotations.NotNull RandomDataInput input, long offset, int charI, long utfLen, @org.jetbrains.annotations.NotNull CharSequence other)
+            @NotNull RandomDataInput input, long offset, int charI, long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         long limit = offset + utfLen;
         while (offset < limit && charI < other.length()) {
@@ -279,7 +285,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf81(
-            @org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen)
+            @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             int count = 0;
@@ -304,8 +310,8 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf81(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput input, long offset,
-                                  @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen)
+    public static void parseUtf81(@NotNull RandomDataInput input, long offset,
+                                  @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             assert input.realCapacity() >= offset + utflen;
@@ -329,7 +335,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen) {
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen) {
         assert bytes.readRemaining() >= utflen;
         sb.ensureCapacity(utflen);
 
@@ -349,7 +355,7 @@ enum BytesInternal {
         StringUtils.setLength(sb, utflen);
     }
 
-    public static void parse8bit1(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen) throws IOException {
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen) throws IOException {
 
         assert bytes.readRemaining() >= utflen;
         for (int count = 0; count < utflen; count++) {
@@ -358,7 +364,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(long offset, @org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen)
+    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen)
             throws BufferUnderflowException, IOException {
 
         assert bytes.realCapacity() >= utflen + offset;
@@ -368,12 +374,12 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@org.jetbrains.annotations.NotNull @NotNull Bytes bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             int count = 0;
             if (utflen > bytes.readRemaining()) {
-                @org.jetbrains.annotations.NotNull final BufferUnderflowException bue = new BufferUnderflowException();
+                @NotNull final BufferUnderflowException bue = new BufferUnderflowException();
                 bue.initCause(new IllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
                 throw bue;
             }
@@ -401,7 +407,6 @@ enum BytesInternal {
             setCount(sb, count);
             if (count < utflen) {
 
-
                 long rp0 = bytes.readPosition();
                 try {
                     parseUtf82(bytes, sb, utflen, count);
@@ -413,19 +418,18 @@ enum BytesInternal {
 
         } catch (IOException e) {
 
-
             throw Jvm.rethrow(e);
         }
     }
 
-    public static void parseUtf8_SB1(@org.jetbrains.annotations.NotNull @NotNull NativeBytesStore bytes, long offset,
-                                     @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, long offset,
+                                     @NotNull StringBuilder sb, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             if (offset + utflen > bytes.realCapacity())
                 throw new BufferUnderflowException();
             long address = bytes.address + bytes.translate(offset);
-            @org.jetbrains.annotations.Nullable Memory memory = bytes.memory;
+            @Nullable Memory memory = bytes.memory;
             sb.ensureCapacity(utflen);
             int count = 0;
 
@@ -449,22 +453,34 @@ enum BytesInternal {
             setCount(sb, count);
             if (count < utflen)
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
+            assert bytes.memory != null;
         } catch (IOException e) {
             throw Jvm.rethrow(e);
         }
     }
 
-    public static int parse8bit_SB1(long offset, @org.jetbrains.annotations.NotNull NativeBytesStore nbs, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb, int utflen) {
+    public static int parse8bit_SB1(long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, int utflen) {
         long address = nbs.address + nbs.translate(offset);
-        @org.jetbrains.annotations.Nullable Memory memory = nbs.memory;
+        @Nullable Memory memory = nbs.memory;
         sb.ensureCapacity(utflen);
         int count = 0;
 
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = extractBytes(sb);
-            while (count < utflen) {
-                byte b = memory.readByte(address + count);
-                bytes[count++] = b;
+            byte coder = getStringCoder(sb);
+
+            if (coder == JAVA9_STRING_CODER_LATIN) {
+                byte[] bytes = extractBytes(sb);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    bytes[count++] = b;
+                }
+            } else {
+                assert coder == JAVA9_STRING_CODER_UTF16;
+                sb.setLength(utflen);
+                while (count < utflen) {
+                    byte b = memory.readByte(address + count);
+                    sb.setCharAt(count++, (char) b);
+                }
             }
         } else {
             char[] chars = extractChars(sb);
@@ -477,7 +493,7 @@ enum BytesInternal {
         return count;
     }
 
-    static void parseUtf82(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen, int count)
+    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count)
             throws IOException, UTFDataFormatRuntimeException {
         while (count < utflen) {
             int c = bytes.readUnsignedByte();
@@ -536,15 +552,14 @@ enum BytesInternal {
                 default:
                     /* 10xx xxxx, 1111 xxxx */
 
-
                     throw new UTFDataFormatRuntimeException(
                             "malformed input around byte " + count);
             }
         }
     }
 
-    static void parseUtf82(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput input, long offset, long limit,
-                           @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, int utflen)
+    static void parseUtf82(@NotNull RandomDataInput input, long offset, long limit,
+                           @NotNull Appendable appendable, int utflen)
             throws IOException, UTFDataFormatRuntimeException, BufferUnderflowException {
         while (offset < limit) {
             int c = input.readUnsignedByte(offset++);
@@ -605,7 +620,7 @@ enum BytesInternal {
         }
     }
 
-    public static void writeUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes, @org.jetbrains.annotations.Nullable @Nullable String str)
+    public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable String str)
             throws BufferOverflowException {
         if (str == null) {
             bytes.writeStopBit(-1);
@@ -631,7 +646,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void writeUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes, @Nullable CharSequence str)
+    public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable CharSequence str)
             throws BufferOverflowException {
         if (str instanceof String) {
             writeUtf8(bytes, (String) str);
@@ -652,8 +667,8 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static long writeUtf8(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset,
-                                 @org.jetbrains.annotations.Nullable @Nullable CharSequence str)
+    public static long writeUtf8(@NotNull RandomDataOutput out, long offset,
+                                 @Nullable CharSequence str)
             throws BufferOverflowException {
         if (str == null) {
             offset = writeStopBit(out, offset, -1);
@@ -685,8 +700,8 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static long writeUtf8(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset,
-                                 @org.jetbrains.annotations.Nullable @Nullable CharSequence str, int maxUtf8Len)
+    public static long writeUtf8(@NotNull RandomDataOutput out, long offset,
+                                 @Nullable CharSequence str, int maxUtf8Len)
             throws BufferOverflowException {
         if (str == null) {
             offset = writeStopBit(out, offset, -1);
@@ -714,9 +729,8 @@ enum BytesInternal {
         return offset;
     }
 
-    @org.jetbrains.annotations.NotNull
     @NotNull
-    public static Bytes asBytes(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput bytes, long position, long limit)
+    public static Bytes asBytes(@NotNull RandomDataOutput bytes, long position, long limit)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         Bytes sbytes = bytes.bytesForWrite();
         sbytes.writeLimit(limit);
@@ -725,21 +739,21 @@ enum BytesInternal {
         return sbytes;
     }
 
-    public static void appendUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes,
-                                  @org.jetbrains.annotations.NotNull @NotNull CharSequence str, int offset, int length)
+    public static void appendUtf8(@NotNull StreamingDataOutput bytes,
+                                  @NotNull CharSequence str, int offset, int length)
             throws IndexOutOfBoundsException, BufferOverflowException {
         int i;
         for (i = 0; i < length; i++) {
             char c = str.charAt(offset + i);
             if (c > 0x007F)
                 break;
-            bytes.writeByte((byte) c);
+            bytes.rawWriteByte((byte) c);
         }
         appendUtf82(bytes, str, offset, length, i);
     }
 
-    private static void appendUtf82(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes,
-                                    @org.jetbrains.annotations.NotNull @NotNull CharSequence str, int offset, int length, int i)
+    private static void appendUtf82(@NotNull StreamingDataOutput bytes,
+                                    @NotNull CharSequence str, int offset, int length, int i)
             throws IndexOutOfBoundsException, BufferOverflowException {
         for (; i < length; i++) {
             char c = str.charAt(offset + i);
@@ -747,8 +761,8 @@ enum BytesInternal {
         }
     }
 
-    public static long appendUtf8(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long outOffset,
-                                  @org.jetbrains.annotations.NotNull @NotNull CharSequence str, int strOffset, int length)
+    public static long appendUtf8(@NotNull RandomDataOutput out, long outOffset,
+                                  @NotNull CharSequence str, int strOffset, int length)
             throws IndexOutOfBoundsException, BufferOverflowException {
         int i;
         for (i = 0; i < length; i++) {
@@ -760,8 +774,8 @@ enum BytesInternal {
         return appendUtf82(out, outOffset, str, strOffset, length, i);
     }
 
-    private static long appendUtf82(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long outOffset,
-                                    @org.jetbrains.annotations.NotNull @NotNull CharSequence str, int strOffset, int length, int i)
+    private static long appendUtf82(@NotNull RandomDataOutput out, long outOffset,
+                                    @NotNull CharSequence str, int strOffset, int length, int i)
             throws IndexOutOfBoundsException, BufferOverflowException {
         for (; i < length; i++) {
             char c = str.charAt(strOffset + i);
@@ -774,7 +788,7 @@ enum BytesInternal {
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
             IndexOutOfBoundsException {
         if (bytes instanceof VanillaBytes) {
-            @org.jetbrains.annotations.NotNull VanillaBytes vb = (VanillaBytes) bytes;
+            @NotNull VanillaBytes vb = (VanillaBytes) bytes;
             if (str instanceof RandomDataInput) {
                 vb.write(offsetInRDO, (RandomDataInput) str, offset, length);
                 return;
@@ -791,29 +805,29 @@ enum BytesInternal {
         }
     }
 
-    public static void appendUtf8Char(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput bytes, int c)
+    public static void appendUtf8Char(@NotNull StreamingDataOutput bytes, int c)
             throws BufferOverflowException {
         if (c <= 0x007F) {
-            bytes.writeByte((byte) c);
+            bytes.rawWriteByte((byte) c);
 
         } else if (c <= 0x07FF) {
-            bytes.writeByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
-            bytes.writeByte((byte) (0x80 | c & 0x3F));
+            bytes.rawWriteByte((byte) (0xC0 | ((c >> 6) & 0x1F)));
+            bytes.rawWriteByte((byte) (0x80 | c & 0x3F));
 
         } else if (c <= 0xFFFF) {
-            bytes.writeByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
-            bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+            bytes.rawWriteByte((byte) (0xE0 | ((c >> 12) & 0x0F)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 6) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | (c & 0x3F)));
 
         } else {
-            bytes.writeByte((byte) (0xF0 | ((c >> 18) & 0x07)));
-            bytes.writeByte((byte) (0x80 | ((c >> 12) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | ((c >> 6) & 0x3F)));
-            bytes.writeByte((byte) (0x80 | (c & 0x3F)));
+            bytes.rawWriteByte((byte) (0xF0 | ((c >> 18) & 0x07)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 12) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | ((c >> 6) & 0x3F)));
+            bytes.rawWriteByte((byte) (0x80 | (c & 0x3F)));
         }
     }
 
-    public static long appendUtf8Char(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset, int c)
+    public static long appendUtf8Char(@NotNull RandomDataOutput out, long offset, int c)
             throws BufferOverflowException {
         if (c <= 0x007F) {
             out.writeByte(offset++, (byte) c);
@@ -836,35 +850,35 @@ enum BytesInternal {
         return offset;
     }
 
-    public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, char n)
+    public static void writeStopBit(@NotNull StreamingDataOutput out, char n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
-            out.writeByte((byte) (n & 0x7f));
+            out.rawWriteByte((byte) (n & 0x7f));
             return;
         }
         if ((n & ~0x3FFF) == 0) {
-            out.writeByte((byte) ((n & 0x7f) | 0x80));
-            out.writeByte((byte) (n >> 7));
+            out.rawWriteByte((byte) ((n & 0x7f) | 0x80));
+            out.rawWriteByte((byte) (n >> 7));
             return;
         }
         writeStopBit0(out, n);
     }
 
-    public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long n)
+    public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
-            out.writeByte((byte) (n & 0x7f));
+            out.rawWriteByte((byte) (n & 0x7f));
             return;
         }
         if ((n & ~0x3FFF) == 0) {
-            out.writeByte((byte) ((n & 0x7f) | 0x80));
-            out.writeByte((byte) (n >> 7));
+            out.rawWriteByte((byte) ((n & 0x7f) | 0x80));
+            out.rawWriteByte((byte) (n >> 7));
             return;
         }
         writeStopBit0(out, n);
     }
 
-    public static long writeStopBit(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset, long n)
+    public static long writeStopBit(@NotNull RandomDataOutput out, long offset, long n)
             throws BufferOverflowException {
         if ((n & ~0x7F) == 0) {
             out.writeByte(offset++, (byte) (n & 0x7f));
@@ -879,17 +893,17 @@ enum BytesInternal {
     }
 
     @SuppressWarnings("ShiftOutOfRange")
-    public static void writeStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, double d)
+    public static void writeStopBit(@NotNull StreamingDataOutput out, double d)
             throws BufferOverflowException {
         long n = Double.doubleToRawLongBits(d);
         while ((n & (~0L >>> 7)) != 0) {
-            out.writeByte((byte) (((n >>> -7) & 0x7F) | 0x80));
+            out.rawWriteByte((byte) (((n >>> -7) & 0x7F) | 0x80));
             n <<= 7;
         }
-        out.writeByte((byte) ((n >>> -7) & 0x7F));
+        out.rawWriteByte((byte) ((n >>> -7) & 0x7F));
     }
 
-    public static double readStopBitDouble(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in) {
+    public static double readStopBitDouble(@NotNull StreamingDataInput in) {
         long n = 0;
         int shift = 64 - 7;
         int b;
@@ -901,7 +915,7 @@ enum BytesInternal {
         return Double.longBitsToDouble(n);
     }
 
-    static void writeStopBit0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long n)
+    static void writeStopBit0(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException {
         boolean neg = false;
         if (n < 0) {
@@ -911,20 +925,20 @@ enum BytesInternal {
 
         long n2;
         while ((n2 = n >>> 7) != 0) {
-            out.writeByte((byte) (0x80L | n));
+            out.rawWriteByte((byte) (0x80L | n));
             n = n2;
         }
         // final byte
         if (!neg) {
-            out.writeByte((byte) n);
+            out.rawWriteByte((byte) n);
 
         } else {
-            out.writeByte((byte) (0x80L | n));
-            out.writeByte((byte) 0);
+            out.rawWriteByte((byte) (0x80L | n));
+            out.rawWriteByte((byte) 0);
         }
     }
 
-    static long writeStopBit0(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset, long n)
+    static long writeStopBit0(@NotNull RandomDataOutput out, long offset, long n)
             throws BufferOverflowException {
         boolean neg = false;
         if (n < 0) {
@@ -959,14 +973,14 @@ enum BytesInternal {
         return len + 1;
     }
 
-    public static String toDebugString(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, long maxLength) {
+    public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength) {
         if (bytes.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
         bytes.reserve();
         try {
             int len = Maths.toUInt31(maxLength + 40);
-            @org.jetbrains.annotations.NotNull StringBuilder sb = new StringBuilder(len);
+            @NotNull StringBuilder sb = new StringBuilder(len);
             long readPosition = bytes.readPosition();
             long readLimit = bytes.readLimit();
             sb.append("[")
@@ -985,7 +999,7 @@ enum BytesInternal {
                         if (bytes.readLong(end - 8) != 0)
                             break;
                     }
-                } catch (@org.jetbrains.annotations.NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
+                } catch (@NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
                     // ignore
                 }
                 toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
@@ -1001,17 +1015,16 @@ enum BytesInternal {
         }
     }
 
-    @org.jetbrains.annotations.NotNull
     @NotNull
     public static Object asSize(long size) {
         return size == Bytes.MAX_CAPACITY ? "8EiB" : size;
     }
 
-    public static String to8bitString(@org.jetbrains.annotations.NotNull @NotNull BytesStore bytes)
+    public static String to8bitString(@NotNull BytesStore bytes)
             throws IllegalArgumentException {
         long pos = bytes.readPosition();
         int len = Maths.toInt32(bytes.readRemaining());
-        @org.jetbrains.annotations.NotNull char[] chars = new char[len];
+        @NotNull char[] chars = new char[len];
         if (bytes instanceof VanillaBytes) {
             ((VanillaBytes) bytes).read8Bit(chars, len);
         } else {
@@ -1025,13 +1038,13 @@ enum BytesInternal {
         return StringUtils.newString(chars);
     }
 
-    @org.jetbrains.annotations.NotNull
-    public static String toString(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes)
+    @NotNull
+    public static String toString(@NotNull RandomDataInput bytes)
             throws IllegalStateException {
 
         // the output will be no larger than this
         final int size = MAX_STRING_LEN;
-        @org.jetbrains.annotations.NotNull final StringBuilder sb = new StringBuilder(size);
+        @NotNull final StringBuilder sb = new StringBuilder(size);
 
         if (bytes.readRemaining() > size) {
             final Bytes bytes1 = bytes.bytesForRead();
@@ -1048,8 +1061,8 @@ enum BytesInternal {
         }
     }
 
-    private static void toString(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes,
-                                 @org.jetbrains.annotations.NotNull @NotNull Appendable sb,
+    private static void toString(@NotNull RandomDataInput bytes,
+                                 @NotNull Appendable sb,
                                  long start,
                                  long readPosition,
                                  long writePosition,
@@ -1079,14 +1092,14 @@ enum BytesInternal {
         }
     }
 
-    private static void toString(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable sb, long start, long last)
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long last)
             throws IOException {
         for (long i = start; i < last; i++) {
             sb.append(bytes.printable(i));
         }
     }
 
-    private static void toString(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder sb)
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull StringBuilder sb)
             throws IllegalStateException {
         bytes.reserve();
         assert bytes.start() <= bytes.readPosition();
@@ -1105,29 +1118,29 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static char readStopBitChar(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static char readStopBitChar(@NotNull StreamingDataInput in)
             throws IORuntimeException {
         int l;
-        if ((l = in.readByte()) >= 0)
+        if ((l = in.rawReadByte()) >= 0)
             return (char) l;
         return (char) readStopBit0(in, l);
     }
 
     @ForceInline
-    public static long readStopBit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static long readStopBit(@NotNull StreamingDataInput in)
             throws IORuntimeException {
         long l;
-        if ((l = in.readByte()) >= 0)
+        if ((l = in.rawReadByte()) >= 0)
             return l;
         return readStopBit0(in, l);
     }
 
-    static long readStopBit0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, long l)
+    static long readStopBit0(@NotNull StreamingDataInput in, long l)
             throws IORuntimeException {
         l &= 0x7FL;
         long b;
         int count = 7;
-        while ((b = in.readByte()) < 0) {
+        while ((b = in.rawReadByte()) < 0) {
             l |= (b & 0x7FL) << count;
             count += 7;
         }
@@ -1145,7 +1158,7 @@ enum BytesInternal {
         }
     }
 
-    public static void append(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int base)
+    public static void append(@NotNull ByteStringAppender out, long num, int base)
             throws IllegalArgumentException, BufferOverflowException {
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
@@ -1155,16 +1168,16 @@ enum BytesInternal {
                     out.write(Long.toString(Long.MIN_VALUE, base));
                 return;
             }
-            out.writeByte((byte) '-');
+            out.rawWriteByte((byte) '-');
             num = -num;
         }
         if (num == 0) {
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
 
         } else {
             switch (base) {
                 case 10:
-                    appendLong0(out, num);
+                    appendBase10(out, num);
                     break;
                 case 16:
                     appendBase16(out, num, 1);
@@ -1176,34 +1189,23 @@ enum BytesInternal {
         }
     }
 
-    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, int num)
+    public static void appendBase10(@NotNull ByteStringAppender out, int num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            out.writeByte((byte) '-');
-            if (num == Integer.MIN_VALUE) {
-                appendLong0(out, -(long) num);
-                return;
-            }
-            num = -num;
-        }
-        appendInt0(out, num);
+        appendBase10(out, (long) num);
     }
 
-    public static void appendBase10(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num)
+    public static void appendBase10(@NotNull ByteStringAppender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
-        if (num < 0) {
-            if (num == Long.MIN_VALUE) {
-                out.write(MIN_VALUE_TEXT);
-                return;
-            }
-            out.writeByte((byte) '-');
-            num = -num;
+        if (out.canWriteDirect(20)) {
+            long address = out.addressForWrite(out.writePosition());
+            long address2 = UnsafeText.appendFixed(address, num);
+            out.writeSkip(address2 - address);
+        } else {
+            appendLong0(out, num);
         }
-        appendLong0(out, num);
     }
 
-
-    public static void appendBase16(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int minDigits)
+    public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException {
         byte[] numberBuffer = NUMBER_BUFFER.get();
         int len = 0;
@@ -1213,10 +1215,10 @@ enum BytesInternal {
             numberBuffer[len++] = (byte) HEXADECIMAL[digit];
         } while (--minDigits > 0 | num > 0);
         for (int i = len - 1; i >= 0; i--)
-            out.writeByte(numberBuffer[i]);
+            out.rawWriteByte(numberBuffer[i]);
     }
 
-    public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender out, long num, int decimalPlaces)
+    public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces)
             throws IllegalArgumentException, BufferOverflowException {
         if (decimalPlaces == 0) {
             appendBase10(out, num);
@@ -1230,7 +1232,7 @@ enum BytesInternal {
                 numberBuffer = MIN_VALUE_TEXT;
                 endIndex = MIN_VALUE_TEXT.length;
             } else {
-                out.writeByte((byte) '-');
+                out.rawWriteByte((byte) '-');
                 num = -num;
                 endIndex = appendLong1(numberBuffer, num);
             }
@@ -1253,7 +1255,7 @@ enum BytesInternal {
         out.write(numberBuffer, endIndex + decimalLength, digits - decimalLength);
     }
 
-    public static void prepend(@org.jetbrains.annotations.NotNull @NotNull BytesPrepender out, long num)
+    public static void prepend(@NotNull BytesPrepender out, long num)
             throws IllegalArgumentException, BufferOverflowException {
         boolean neg = false;
         if (num < 0) {
@@ -1276,7 +1278,7 @@ enum BytesInternal {
      * The length of the number must be fixed otherwise short numbers will not overwrite longer
      * numbers
      */
-    public static void append(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long offset, long num, int digits)
+    public static void append(@NotNull RandomDataOutput out, long offset, long num, int digits)
             throws BufferOverflowException, IllegalArgumentException {
         boolean negative = num < 0;
         num = Math.abs(num);
@@ -1302,7 +1304,7 @@ enum BytesInternal {
      *
      * @param width Maximum width. I will be padded with zeros to the left if necessary
      */
-    public static void appendDecimal(@org.jetbrains.annotations.NotNull @NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
+    public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
             throws IORuntimeException, IllegalArgumentException, BufferOverflowException {
         if (decimalPlaces == 0) {
             append(out, offset, num, width);
@@ -1356,10 +1358,10 @@ enum BytesInternal {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
     }
 
-    private static void appendInt0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, int num)
+    private static void appendInt0(@NotNull StreamingDataOutput out, int num)
             throws IllegalArgumentException, BufferOverflowException {
         if (num < 10) {
-            out.writeByte((byte) ('0' + num));
+            out.rawWriteByte((byte) ('0' + num));
 
         } else if (num < 100) {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
@@ -1374,10 +1376,18 @@ enum BytesInternal {
         }
     }
 
-    private static void appendLong0(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, long num)
+    private static void appendLong0(@NotNull StreamingDataOutput out, long num)
             throws IllegalArgumentException, BufferOverflowException {
+        if (num < 0) {
+            if (num == Long.MIN_VALUE) {
+                out.write(MIN_VALUE_TEXT);
+                return;
+            }
+            out.rawWriteByte((byte) '-');
+            num = -num;
+        }
         if (num < 10) {
-            out.writeByte((byte) ('0' + num));
+            out.rawWriteByte((byte) ('0' + num));
 
         } else if (num < 100) {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
@@ -1510,19 +1520,19 @@ enum BytesInternal {
         return 1;
     }
 
-    public static void append(@org.jetbrains.annotations.NotNull @NotNull StreamingDataOutput out, double d)
+    public static void append(@NotNull StreamingDataOutput out, double d)
             throws BufferOverflowException, IllegalArgumentException {
         long val = Double.doubleToRawLongBits(d);
         int sign = (int) (val >>> 63);
         int exp = (int) ((val >>> 52) & 2047);
         long mantissa = val & ((1L << 52) - 1);
         if (sign != 0) {
-            out.writeByte((byte) '-');
+            out.rawWriteByte((byte) '-');
         }
         if (exp == 0 && mantissa == 0) {
-            out.writeByte((byte) '0');
-            out.writeByte((byte) '.');
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
+            out.rawWriteByte((byte) '.');
+            out.rawWriteByte((byte) '0');
             return;
 
         } else if (exp == 2047) {
@@ -1545,7 +1555,7 @@ enum BytesInternal {
                 appendLong0(out, intValue);
                 mantissa -= intValue << shift;
                 if (mantissa > 0) {
-                    out.writeByte((byte) '.');
+                    out.rawWriteByte((byte) '.');
                     mantissa <<= 1;
                     mantissa++;
                     int precision = shift + 1;
@@ -1560,7 +1570,7 @@ enum BytesInternal {
                         precision--;
                         long num = (mantissa >> precision);
                         value = value * 10 + num;
-                        out.writeByte((byte) ('0' + num));
+                        out.rawWriteByte((byte) ('0' + num));
                         mantissa -= num << precision;
 
                         final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
@@ -1568,15 +1578,15 @@ enum BytesInternal {
                             break;
                     }
                 } else {
-                    out.writeByte((byte) '.');
-                    out.writeByte((byte) '0');
+                    out.rawWriteByte((byte) '.');
+                    out.rawWriteByte((byte) '0');
                 }
                 return;
 
             } else {
                 // faction.
-                out.writeByte((byte) '0');
-                out.writeByte((byte) '.');
+                out.rawWriteByte((byte) '0');
+                out.rawWriteByte((byte) '.');
                 mantissa <<= 6;
                 mantissa += (1 << 5);
                 int precision = shift + 6;
@@ -1597,14 +1607,14 @@ enum BytesInternal {
                     precision--;
                     if (precision >= 64) {
                         decimalPlaces++;
-                        out.writeByte((byte) '0');
+                        out.rawWriteByte((byte) '0');
                         continue;
                     }
                     long num = (mantissa >>> precision);
                     value = value * 10 + num;
                     final char c = (char) ('0' + num);
                     assert !(c < '0' || c > '9');
-                    out.writeByte((byte) c);
+                    out.rawWriteByte((byte) c);
                     mantissa -= num << precision;
                     final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
                     if (parsedValue == d)
@@ -1634,91 +1644,49 @@ enum BytesInternal {
 
         appendLong0(out, val2);
         for (int i = 0; i < digits; i++)
-            out.writeByte((byte) '0');
+            out.rawWriteByte((byte) '0');
     }
 
-    private static double asDouble(long value, int exp, boolean negative, int decimalPlaces) {
-        if (decimalPlaces > 0 && value < Long.MAX_VALUE / 2) {
-            if (value < Long.MAX_VALUE / (1L << 32)) {
-                exp -= 32;
-                value <<= 32;
-            }
-            if (value < Long.MAX_VALUE / (1L << 16)) {
-                exp -= 16;
-                value <<= 16;
-            }
-            if (value < Long.MAX_VALUE / (1L << 8)) {
-                exp -= 8;
-                value <<= 8;
-            }
-            if (value < Long.MAX_VALUE / (1L << 4)) {
-                exp -= 4;
-                value <<= 4;
-            }
-            if (value < Long.MAX_VALUE / (1L << 2)) {
-                exp -= 2;
-                value <<= 2;
-            }
-            if (value < Long.MAX_VALUE / (1L << 1)) {
-                exp -= 1;
-                value <<= 1;
-            }
+    private static double asDouble(long value, int exp, boolean negative, int deci) {
+        // these numbers were determined empirically.
+        int leading =
+                Long.numberOfLeadingZeros(value) - 1;
+        if (leading > 9)
+            leading = (27 + leading) >>> 2;
+
+        int scale2 = 0;
+        if (leading > 0) {
+            scale2 = leading;
+            value <<= scale2;
         }
-        if (decimalPlaces < 0) {
-            for (; decimalPlaces < 0; decimalPlaces++) {
-                exp++;
-                int mod = 0;
-                if (value > Long.MAX_VALUE / 5 * 4) {
-                    mod = (int) (((value & 0x7) * 5 + 4) >> 3);
-                    value >>= 3;
-                    exp += 3;
-                } else if (value > Long.MAX_VALUE / 5 * 2) {
-                    mod = (int) (((value & 0x3) * 5 + 2) >> 2);
-                    value >>= 2;
-                    exp += 2;
-                } else if (value > Long.MAX_VALUE / 5) {
-                    mod = (int) (((value & 0x1) * 5 + 1) >> 1);
-                    value >>= 1;
-                    exp++;
-                }
-                value *= 5;
-                value += mod;
+        double d;
+        if (deci > 0) {
+            if (deci <= 29) {
+                long fives = Maths.fives(deci);
+                long whole = value / fives;
+                long rem = value % fives;
+                d = whole + (double) rem / fives;
+            } else {
+                d = value / Math.pow(5, -deci);
             }
+        } else if (deci < -29) {
+            d = value * Math.pow(5, -deci);
+
+        } else if (deci < 0) {
+            double fives = Maths.fives(-deci);
+            d = value * fives;
 
         } else {
-            for (; decimalPlaces > 0; decimalPlaces--) {
-                exp--;
-                long mod = value % 5;
-                value /= 5;
-                int modDiv = 1;
-                if (value < Long.MAX_VALUE / (1L << 4)) {
-                    exp -= 4;
-                    value <<= 4;
-                    modDiv <<= 4;
-                }
-                if (value < Long.MAX_VALUE / (1L << 2)) {
-                    exp -= 2;
-                    value <<= 2;
-                    modDiv <<= 2;
-                }
-                if (value < Long.MAX_VALUE / (1L << 1)) {
-                    exp -= 1;
-                    value <<= 1;
-                    modDiv <<= 1;
-                }
-                if (decimalPlaces > 1)
-                    value += modDiv * mod / 5;
-                else
-                    value += (modDiv * mod + 4) / 5;
-            }
+            d = value;
         }
-        final double d = Math.scalb((double) value, exp);
-        return negative ? -d : d;
+
+        double scalb = Math.scalb(d, exp - deci - scale2);
+        return negative ? -scalb : scalb;
     }
 
     @Nullable
     @ForceInline
-    public static String readUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static String readUtf8(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IllegalArgumentException, IORuntimeException {
         StringBuilder sb = acquireStringBuilder();
         return in.readUtf8(sb) ? SI.intern(sb) : null;
@@ -1726,7 +1694,7 @@ enum BytesInternal {
 
     @Nullable
     @ForceInline
-    public static String readUtf8(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, int maxUtf8Len)
+    public static String readUtf8(@NotNull RandomDataInput in, long offset, int maxUtf8Len)
             throws BufferUnderflowException, IllegalArgumentException,
             IllegalStateException, IORuntimeException {
         StringBuilder sb = acquireStringBuilder();
@@ -1743,30 +1711,29 @@ enum BytesInternal {
 
     @Nullable
     @ForceInline
-    public static String read8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static String read8bit(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IORuntimeException {
         Bytes bytes = acquireBytes();
         return in.read8bit(bytes) ? SI.intern(bytes) : null;
     }
 
-    @org.jetbrains.annotations.Nullable
-    @NotNull
+    @Nullable
     @ForceInline
-    public static String parseUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester) throws BufferUnderflowException {
+    public static String parseUtf8(@NotNull StreamingDataInput bytes, @NotNull StopCharTester tester) throws BufferUnderflowException {
         StringBuilder utfReader = acquireStringBuilder();
         parseUtf8(bytes, utfReader, tester);
         return SI.intern(utfReader);
     }
 
     @ForceInline
-    public static void parseUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @NotNull Appendable builder,
-                                 @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder,
+                                 @NotNull StopCharTester tester)
             throws BufferUnderflowException {
         try {
             if (builder instanceof StringBuilder
                     && bytes.isDirectMemory()) {
-                @org.jetbrains.annotations.NotNull Bytes vb = (Bytes) bytes;
-                @org.jetbrains.annotations.NotNull StringBuilder sb = (StringBuilder) builder;
+                @NotNull Bytes vb = (Bytes) bytes;
+                @NotNull StringBuilder sb = (StringBuilder) builder;
                 sb.setLength(0);
                 readUtf8_SB1(vb, sb, tester);
             } else {
@@ -1774,7 +1741,7 @@ enum BytesInternal {
                 readUtf81(bytes, builder, tester);
             }
         } catch (UTFDataFormatException e) {
-            @org.jetbrains.annotations.NotNull UTFDataFormatRuntimeException e2 = new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code");
+            @NotNull UTFDataFormatRuntimeException e2 = new UTFDataFormatRuntimeException("Unable to parse invalid UTF-8 code");
             e2.initCause(e);
             throw e2;
 
@@ -1784,12 +1751,12 @@ enum BytesInternal {
     }
 
     private static void readUtf8_SB1(
-            @org.jetbrains.annotations.NotNull @NotNull Bytes bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder appendable, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+            @NotNull Bytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, BufferUnderflowException {
-        @org.jetbrains.annotations.Nullable NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
+        @Nullable NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0, len = Maths.toInt32(bytes.readRemaining());
         long address = nb.address + nb.translate(bytes.readPosition());
-        @org.jetbrains.annotations.Nullable Memory memory = nb.memory;
+        @Nullable Memory memory = nb.memory;
 
         if (Jvm.isJava9Plus()) {
             int appendableLength = appendable.capacity();
@@ -1816,7 +1783,7 @@ enum BytesInternal {
                     return;
                 }
                 chars[i] = (char) c;
-//            appendable.append((char) c);
+//            appendable.appendDouble((char) c);
             }
         }
         StringUtils.setCount(appendable, i);
@@ -1826,7 +1793,7 @@ enum BytesInternal {
         }
     }
 
-    private static void readUtf8_SB2(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder appendable, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    private static void readUtf8_SB2(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws UTFDataFormatException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -1885,11 +1852,11 @@ enum BytesInternal {
         }
     }
 
-    private static void readUtf81(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    private static void readUtf81(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
             throws IOException, BufferUnderflowException {
         int len = Maths.toInt32(bytes.readRemaining());
         while (len-- > 0) {
-            int c = bytes.readUnsignedByte();
+            int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
                 bytes.readSkip(-1);
                 break;
@@ -1904,7 +1871,7 @@ enum BytesInternal {
         readUtf82(bytes, appendable, tester);
     }
 
-    private static void readUtf82(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable appendable, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
             throws IOException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -1964,7 +1931,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parseUtf8(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Appendable builder, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
+    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester)
             throws IllegalArgumentException, BufferUnderflowException, IORuntimeException {
         AppendableUtil.setLength(builder, 0);
         try {
@@ -1975,13 +1942,13 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parse8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder builder, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester) {
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharsTester tester) {
         builder.setLength(0);
         AppendableUtil.read8bitAndAppend(bytes, builder, tester);
     }
 
     @ForceInline
-    public static void parse8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Bytes builder, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester)
             throws BufferUnderflowException, BufferOverflowException {
         builder.readPosition(0);
 
@@ -1989,20 +1956,20 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static void parse8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder builder, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester) {
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull StringBuilder builder, @NotNull StopCharTester tester) {
         builder.setLength(0);
         read8bitAndAppend(bytes, builder, tester);
     }
 
     @ForceInline
-    public static void parse8bit(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Bytes builder, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharTester tester)
             throws BufferUnderflowException, BufferOverflowException {
         builder.clear();
 
         read8bitAndAppend(bytes, builder, tester);
     }
 
-    private static void read8bitAndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull StringBuilder appendable, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester) {
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester) {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c))
@@ -2013,7 +1980,7 @@ enum BytesInternal {
         }
     }
 
-    private static void read8bitAndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Bytes bytes2, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester)
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharTester tester)
             throws BufferUnderflowException, BufferOverflowException {
         try {
             while (true) {
@@ -2029,7 +1996,7 @@ enum BytesInternal {
         }
     }
 
-    private static void read8bitAndAppend(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput bytes, @org.jetbrains.annotations.NotNull @NotNull Bytes bytes2, @org.jetbrains.annotations.NotNull @NotNull StopCharsTester tester)
+    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes bytes2, @NotNull StopCharsTester tester)
             throws BufferUnderflowException, BufferOverflowException {
         try {
             int ch = bytes.readUnsignedByte();
@@ -2053,7 +2020,7 @@ enum BytesInternal {
         }
     }
 
-    public static double parseDouble(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static double parseDouble(@NotNull StreamingDataInput in)
             throws BufferUnderflowException {
         long value = 0;
         int exp = 0;
@@ -2061,7 +2028,7 @@ enum BytesInternal {
         int decimalPlaces = Integer.MIN_VALUE;
         int ch;
         do {
-            ch = in.readUnsignedByte();
+            ch = in.rawReadByte() & 0xFF;
         } while (ch == ' ');
 
         try {
@@ -2082,7 +2049,7 @@ enum BytesInternal {
                     if (compareRest(in, "Infinity"))
                         return Double.NEGATIVE_INFINITY;
                     negative = true;
-                    ch = in.readUnsignedByte();
+                    ch = in.rawReadByte();
                     break;
             }
             int tens = 0;
@@ -2107,7 +2074,7 @@ enum BytesInternal {
                 }
                 if (in.readRemaining() == 0)
                     break;
-                ch = in.readUnsignedByte();
+                ch = in.rawReadByte();
             }
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
@@ -2118,7 +2085,7 @@ enum BytesInternal {
         }
     }
 
-    static boolean compareRest(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in, @org.jetbrains.annotations.NotNull @NotNull String s)
+    static boolean compareRest(@NotNull StreamingDataInput in, @NotNull String s)
             throws BufferUnderflowException {
         if (s.length() > in.readRemaining())
             return false;
@@ -2140,7 +2107,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static long parseLong(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static long parseLong(@NotNull StreamingDataInput in)
             throws BufferUnderflowException {
         long num = 0;
         boolean negative = false;
@@ -2154,7 +2121,7 @@ enum BytesInternal {
             }
         }
         while (in.readRemaining() > 0) {
-            b = in.readUnsignedByte();
+            b = in.rawReadByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
@@ -2175,7 +2142,7 @@ enum BytesInternal {
         return negative ? -num : num;
     }
 
-    private static long parseLongHexaDecimal(@org.jetbrains.annotations.NotNull StreamingDataInput in) {
+    private static long parseLongHexaDecimal(@NotNull StreamingDataInput in) {
         long num = 0;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
@@ -2203,7 +2170,7 @@ enum BytesInternal {
         return num;
     }
 
-    static void consumeDecimals(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in) {
+    static void consumeDecimals(@NotNull StreamingDataInput in) {
         int b;
         while (in.readRemaining() > 0) {
             b = in.readUnsignedByte();
@@ -2214,7 +2181,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static long parseLongDecimal(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static long parseLongDecimal(@NotNull StreamingDataInput in)
             throws BufferUnderflowException {
         long num = 0;
         boolean negative = false;
@@ -2243,7 +2210,7 @@ enum BytesInternal {
     }
 
     @ForceInline
-    public static long parseHexLong(@org.jetbrains.annotations.NotNull @NotNull StreamingDataInput in)
+    public static long parseHexLong(@NotNull StreamingDataInput in)
             throws BufferUnderflowException {
         long num = 0;
         while (in.readRemaining() > 0) {
@@ -2267,7 +2234,7 @@ enum BytesInternal {
         return num;
     }
 
-    public static long parseLong(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset)
+    public static long parseLong(@NotNull RandomDataInput in, long offset)
             throws BufferUnderflowException {
         long num = 0;
         boolean negative = false;
@@ -2284,7 +2251,7 @@ enum BytesInternal {
         return negative ? -num : num;
     }
 
-    public static boolean skipTo(@org.jetbrains.annotations.NotNull @NotNull ByteStringParser parser, @org.jetbrains.annotations.NotNull @NotNull StopCharTester tester) {
+    public static boolean skipTo(@NotNull ByteStringParser parser, @NotNull StopCharTester tester) {
         while (parser.readRemaining() > 0) {
             int ch = parser.readUnsignedByte();
             if (tester.isStopChar(ch))
@@ -2293,7 +2260,7 @@ enum BytesInternal {
         return false;
     }
 
-    public static float addAndGetFloat(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, float adding)
+    public static float addAndGetFloat(@NotNull RandomDataInput in, long offset, float adding)
             throws BufferUnderflowException {
         try {
             for (; ; ) {
@@ -2308,7 +2275,7 @@ enum BytesInternal {
         }
     }
 
-    public static double addAndGetDouble(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, double adding)
+    public static double addAndGetDouble(@NotNull RandomDataInput in, long offset, double adding)
             throws BufferUnderflowException {
         try {
             for (; ; ) {
@@ -2323,7 +2290,7 @@ enum BytesInternal {
         }
     }
 
-    public static int addAndGetInt(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, int adding)
+    public static int addAndGetInt(@NotNull RandomDataInput in, long offset, int adding)
             throws BufferUnderflowException {
         try {
             for (; ; ) {
@@ -2337,7 +2304,7 @@ enum BytesInternal {
         }
     }
 
-    public static long addAndGetLong(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput in, long offset, long adding)
+    public static long addAndGetLong(@NotNull RandomDataInput in, long offset, long adding)
             throws BufferUnderflowException {
         try {
             for (; ; ) {
@@ -2352,26 +2319,26 @@ enum BytesInternal {
     }
 
     /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
+     * display the hex data of Bytes from the position() to the limit()
      *
      * @param bytes the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
-    public static String toHexString(@org.jetbrains.annotations.NotNull @NotNull final Bytes bytes, long offset, long len)
+    public static String toHexString(@NotNull final Bytes bytes, long offset, long len)
             throws BufferUnderflowException {
         if (len == 0)
             return "";
 
         int width = 16;
-        @org.jetbrains.annotations.NotNull int[] lastLine = new int[width];
-        @org.jetbrains.annotations.NotNull String sep = "";
+        @NotNull int[] lastLine = new int[width];
+        @NotNull String sep = "";
         long position = bytes.readPosition();
         long limit = bytes.readLimit();
 
         try {
             bytes.readPositionRemaining(offset, len);
 
-            @org.jetbrains.annotations.NotNull final StringBuilder builder = new StringBuilder();
+            @NotNull final StringBuilder builder = new StringBuilder();
             long start = offset / width * width;
             long end = (offset + len + width - 1) / width * width;
             for (long i = start; i < end; i += width) {
@@ -2431,36 +2398,40 @@ enum BytesInternal {
         }
     }
 
-    public static void appendTimeMillis(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender b, long timeInMS)
+    public static void appendTimeMillis(@NotNull ByteStringAppender b, long timeInMS)
             throws BufferOverflowException {
         int hours = (int) (timeInMS / (60 * 60 * 1000));
         if (hours > 99) {
             b.append(hours); // can have over 24 hours.
         } else {
-            b.writeByte((byte) (hours / 10 + '0'));
-            b.writeByte((byte) (hours % 10 + '0'));
+            b.rawWriteByte((byte) (hours / 10 + '0'));
+            b.rawWriteByte((byte) (hours % 10 + '0'));
         }
-        b.writeByte((byte) ':');
+        b.rawWriteByte((byte) ':');
         int minutes = (int) ((timeInMS / (60 * 1000)) % 60);
-        b.writeByte((byte) (minutes / 10 + '0'));
-        b.writeByte((byte) (minutes % 10 + '0'));
-        b.writeByte((byte) ':');
+        b.rawWriteByte((byte) (minutes / 10 + '0'));
+        b.rawWriteByte((byte) (minutes % 10 + '0'));
+        b.rawWriteByte((byte) ':');
         int seconds = (int) ((timeInMS / 1000) % 60);
-        b.writeByte((byte) (seconds / 10 + '0'));
-        b.writeByte((byte) (seconds % 10 + '0'));
-        b.writeByte((byte) '.');
+        b.rawWriteByte((byte) (seconds / 10 + '0'));
+        b.rawWriteByte((byte) (seconds % 10 + '0'));
+        b.rawWriteByte((byte) '.');
         int millis = (int) (timeInMS % 1000);
-        b.writeByte((byte) (millis / 100 + '0'));
-        b.writeByte((byte) (millis / 10 % 10 + '0'));
-        b.writeByte((byte) (millis % 10 + '0'));
+        b.rawWriteByte((byte) (millis / 100 + '0'));
+        b.rawWriteByte((byte) (millis / 10 % 10 + '0'));
+        b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@org.jetbrains.annotations.NotNull @NotNull BytesStore b1, @org.jetbrains.annotations.NotNull @NotNull BytesStore b2, long remaining)
+    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException {
-        @org.jetbrains.annotations.Nullable BytesStore bs1 = b1.bytesStore();
-        @org.jetbrains.annotations.Nullable BytesStore bs2 = b2.bytesStore();
+        @Nullable BytesStore bs1 = b1;// OS.isWindows() ? b1 : b1.bytesStore();
+        @Nullable BytesStore bs2 = b2; //OS.isWindows() ? b2 : b2.bytesStore();
+
+        if (bs1.readRemaining() < readRemaining)
+            return false;
+
         long i = 0;
-        for (; i < remaining - 7 &&
+        for (; i < readRemaining - 7 &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
             long l1 = bs1.readLong(b1.readPosition() + i);
@@ -2468,16 +2439,7 @@ enum BytesInternal {
             if (l1 != l2)
                 return false;
         }
-        if (i < remaining - 3 &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 4) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 4)) {
-            int i1 = bs1.readInt(b1.readPosition() + i);
-            int i2 = bs2.readInt(b2.readPosition() + i);
-            if (i1 != i2)
-                return false;
-            i += 4;
-        }
-        for (; i < remaining &&
+        for (; i < readRemaining &&
                 canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
                 canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
             byte i1 = bs1.readByte(b1.readPosition() + i);
@@ -2488,7 +2450,7 @@ enum BytesInternal {
         return true;
     }
 
-    public static void appendDateMillis(@org.jetbrains.annotations.NotNull @NotNull ByteStringAppender b, long timeInMS)
+    public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS)
             throws BufferOverflowException {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
@@ -2505,8 +2467,8 @@ enum BytesInternal {
         b.write(dateCache.lastDateStr);
     }
 
-    @org.jetbrains.annotations.NotNull
-    public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@org.jetbrains.annotations.NotNull StreamingDataInput input, @org.jetbrains.annotations.NotNull Class<E> eClass)
+    @NotNull
+    public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@NotNull StreamingDataInput input, @NotNull Class<E> eClass)
             throws BufferUnderflowException, IORuntimeException {
         Bytes bytes = acquireBytes();
         input.read8bit(bytes);
@@ -2514,45 +2476,53 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
     }
 
-    public static void writeFully(@org.jetbrains.annotations.NotNull @NotNull RandomDataInput bytes, long offset, long length, @org.jetbrains.annotations.NotNull StreamingDataOutput sdo)
+    public static void writeFully(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException {
         long i = 0;
-        for (; i < length - 7; i += 8)
-            sdo.writeLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            sdo.writeInt(bytes.readInt(offset + i));
-            i += 4;
-        }
+        for (; i < length - 3; i += 4)
+            sdo.rawWriteInt(bytes.readInt(offset + i));
         for (; i < length; i++)
-            sdo.writeByte(bytes.readByte(offset + i));
+            sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    @org.jetbrains.annotations.NotNull
-    public static byte[] toByteArray(@org.jetbrains.annotations.NotNull RandomDataInput in) {
+    public static void copyMemory(long from, long to, int length)
+            throws BufferUnderflowException, BufferOverflowException {
+        long i = 0;
+        for (; i < length - 7; i += 8) {
+            UNSAFE.putLong(to, UNSAFE.getLong(from));
+            from += 8;
+            to += 8;
+        }
+        for (; i < length; i++)
+            UNSAFE.putByte(to++, UNSAFE.getByte(from++));
+    }
+
+    @NotNull
+    public static byte[] toByteArray(@NotNull RandomDataInput in) {
         int len = (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
-        @org.jetbrains.annotations.NotNull byte[] bytes = new byte[len];
+        @NotNull byte[] bytes = new byte[len];
         in.read(in.readPosition(), bytes, 0, bytes.length);
         return bytes;
     }
 
-    public static void copy(@org.jetbrains.annotations.NotNull RandomDataInput input, @org.jetbrains.annotations.NotNull OutputStream output)
+    public static void copy(@NotNull RandomDataInput input, @NotNull OutputStream output)
             throws IOException {
-        @org.jetbrains.annotations.NotNull byte[] bytes = new byte[512];
+        @NotNull byte[] bytes = new byte[512];
         long start = input.readPosition();
         for (int i = 0, len; (len = (int) input.read(start + i, bytes, 0, bytes.length)) > 0; i += len) {
             output.write(bytes, 0, len);
         }
     }
 
-    public static void copy(@org.jetbrains.annotations.NotNull InputStream input, @org.jetbrains.annotations.NotNull StreamingDataOutput output)
+    public static void copy(@NotNull InputStream input, @NotNull StreamingDataOutput output)
             throws IOException, BufferOverflowException, IllegalArgumentException {
-        @org.jetbrains.annotations.NotNull byte[] bytes = new byte[512];
+        @NotNull byte[] bytes = new byte[512];
         for (int len; (len = input.read(bytes)) > 0; ) {
             output.write(bytes, 0, len);
         }
     }
 
-    public static Boolean parseBoolean(@org.jetbrains.annotations.NotNull ByteStringParser parser, @org.jetbrains.annotations.NotNull StopCharTester tester) throws BufferUnderflowException {
+    public static Boolean parseBoolean(@NotNull ByteStringParser parser, @NotNull StopCharTester tester) throws BufferUnderflowException {
         Bytes sb = acquireBytes();
         parseUtf8(parser, sb, tester);
         if (sb.length() == 0)
@@ -2579,10 +2549,10 @@ enum BytesInternal {
         }
     }
 
-    @org.jetbrains.annotations.NotNull
+    @NotNull
     public static BytesStore subBytes(RandomDataInput from, long start, long length) throws BufferUnderflowException {
         try {
-            @org.jetbrains.annotations.NotNull BytesStore ret = NativeBytesStore.nativeStore(Math.max(0, length));
+            @NotNull BytesStore ret = NativeBytesStore.nativeStore(Math.max(0, length));
             ret.write(0L, from, start, length);
             return ret;
         } catch (IllegalArgumentException | BufferOverflowException e) {
@@ -2590,7 +2560,7 @@ enum BytesInternal {
         }
     }
 
-    public static long findByte(@org.jetbrains.annotations.NotNull RandomDataInput bytes, byte stopByte) {
+    public static long findByte(@NotNull RandomDataInput bytes, byte stopByte) {
         try {
             long start = bytes.readPosition();
             long remaining = bytes.readRemaining();
@@ -2604,10 +2574,10 @@ enum BytesInternal {
         }
     }
 
-    @org.jetbrains.annotations.NotNull
-    public static Bytes fromHexString(@org.jetbrains.annotations.NotNull String s) {
+    @NotNull
+    public static Bytes fromHexString(@NotNull String s) {
+        Bytes in = Bytes.from(s);
         try {
-            Bytes in = Bytes.from(s);
             Bytes out = Bytes.elasticByteBuffer();
             OUTER:
             while (in.readRemaining() > 0) {
@@ -2619,7 +2589,7 @@ enum BytesInternal {
                             break OUTER;
                     }
                     long value = in.parseHexLong();
-                    out.writeByte((byte) value);
+                    out.rawWriteByte((byte) value);
                 }
                 if (in.readByte(in.readPosition() - 1) <= ' ')
                     in.readSkip(-1);
@@ -2628,10 +2598,12 @@ enum BytesInternal {
             return out;
         } catch (BufferUnderflowException | BufferOverflowException e) {
             throw new AssertionError(e);
+        } finally {
+            in.release();
         }
     }
 
-    public static void readHistogram(@org.jetbrains.annotations.NotNull StreamingDataInput in, @org.jetbrains.annotations.NotNull Histogram histogram) {
+    public static void readHistogram(@NotNull StreamingDataInput in, @NotNull Histogram histogram) {
         try {
             int powersOf2 = Maths.toUInt31(in.readStopBit());
             int fractionBits = Maths.toUInt31(in.readStopBit());
@@ -2648,7 +2620,7 @@ enum BytesInternal {
         }
     }
 
-    public static void writeHistogram(@org.jetbrains.annotations.NotNull StreamingDataOutput out, @org.jetbrains.annotations.NotNull Histogram histogram) throws BufferOverflowException {
+    public static void writeHistogram(@NotNull StreamingDataOutput out, @NotNull Histogram histogram) throws BufferOverflowException {
         out.writeStopBit(histogram.powersOf2());
         out.writeStopBit(histogram.fractionBits());
         out.writeStopBit(histogram.overRange());
@@ -2660,21 +2632,21 @@ enum BytesInternal {
             out.writeStopBit(i);
     }
 
-    public static ByteBuffer asByteBuffer(@org.jetbrains.annotations.NotNull BytesStore bytesStore) throws BufferUnderflowException {
+    public static ByteBuffer asByteBuffer(@NotNull BytesStore bytesStore) throws BufferUnderflowException {
         return asByteBuffer(BYTE_BUFFER_TL, bytesStore);
     }
 
-    public static ByteBuffer asByteBuffer2(@org.jetbrains.annotations.NotNull BytesStore bytesStore) throws BufferUnderflowException {
+    public static ByteBuffer asByteBuffer2(@NotNull BytesStore bytesStore) throws BufferUnderflowException {
         return asByteBuffer(BYTE_BUFFER2_TL, bytesStore);
     }
 
-    private static ByteBuffer asByteBuffer(@org.jetbrains.annotations.NotNull ThreadLocal<ByteBuffer> byteBufferTL, @org.jetbrains.annotations.NotNull BytesStore bytesStore) throws BufferUnderflowException {
+    private static ByteBuffer asByteBuffer(@NotNull ThreadLocal<ByteBuffer> byteBufferTL, @NotNull BytesStore bytesStore) throws BufferUnderflowException {
         ByteBuffer byteBuffer = byteBufferTL.get();
         assignBytesStoreToByteBuffer(bytesStore, byteBuffer);
         return byteBuffer;
     }
 
-    public static void assignBytesStoreToByteBuffer(@org.jetbrains.annotations.NotNull BytesStore bytesStore, @org.jetbrains.annotations.NotNull ByteBuffer byteBuffer) throws BufferUnderflowException {
+    public static void assignBytesStoreToByteBuffer(@NotNull BytesStore bytesStore, @NotNull ByteBuffer byteBuffer) throws BufferUnderflowException {
         long address = bytesStore.addressForRead(bytesStore.readPosition());
         long capacity = bytesStore.readRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);
@@ -2695,7 +2667,6 @@ enum BytesInternal {
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
-        @org.jetbrains.annotations.Nullable
         @Nullable
         private byte[] lastDateStr = null;
 

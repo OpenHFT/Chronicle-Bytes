@@ -41,6 +41,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
@@ -317,9 +318,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         long check = adding >= 0 ? offset : offset + adding;
-        if (adding < 1 << 10
-                ? !bytesStore.inside(check, (int) adding)
-                : !bytesStore.inside(check)) {
+        //noinspection StatementWithEmptyBody
+        if (bytesStore.inside(check, adding)) {
+            // nothing.
+        } else {
             acquireNextByteStore0(offset, false);
         }
         super.readCheckOffset(offset, adding, given);
@@ -487,25 +489,31 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException {
         assert singleThreadedAccess();
-        if (length == 8)
+        if (length == 8) {
             writeLong(bytes.readLong(offset));
-        else if (bytes.isDirectMemory() && length <= Math.min(writeRemaining(), safeCopySize()))
-            rawCopy(bytes, offset, length);
-        else if (length > 0)
+        } else if (length > 0) {
+            if (bytes.isDirectMemory()) {
+                // need to check this to pull in the right bytesStore()
+                long fromAddress = bytes.addressForRead(offset);
+                if (length <= bytes.bytesStore().realCapacity() - offset) {
+                    this.acquireNextByteStore(writePosition(), false);
+                    // can we do a direct copy of raw memory?
+                    if (bytesStore.realCapacity() - writePosition >= length) {
+                        rawCopy(length, fromAddress);
+                        return this;
+                    }
+                }
+            }
             BytesInternal.writeFully(bytes, offset, length, this);
+        }
+
         return this;
     }
 
-    public long rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    void rawCopy(long length, long fromAddress)
             throws BufferOverflowException, BufferUnderflowException {
-        assert length < safeCopySize();
-        this.acquireNextByteStore(writePosition(), false);
-        long len = Math.min(writeRemaining(), Math.min(bytes.readRemaining(), length));
-        if (len > 0) {
-            OS.memory().copyMemory(bytes.addressForRead(offset), addressForWrite(writePosition()), len);
-            uncheckedWritePosition(writePosition() + len);
-        }
-        return len;
+        OS.memory().copyMemory(fromAddress, addressForWritePosition(), length);
+        uncheckedWritePosition(writePosition() + length);
     }
 
     @NotNull
@@ -548,7 +556,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         assert singleThreadedAccess();
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
-            long address = addressForWrite(writePosition());
+            long address = addressForWritePosition();
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
@@ -566,7 +574,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             writeSkip(length);
         } else {
             char[] chars = extractChars(s);
-            long address = addressForWrite(writePosition());
+            long address = addressForWritePosition();
             Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
@@ -697,6 +705,23 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
+    public int peekUnsignedByte() {
+        if (!bytesStore.inside(readPosition, 1)) {
+            acquireNextByteStore0(readPosition, false);
+        }
+        return super.peekUnsignedByte();
+    }
+
+    @Override
+    public int peekUnsignedByte(final long offset) throws BufferUnderflowException {
+        if (!bytesStore.inside(offset, 1)) {
+            acquireNextByteStore0(offset, false);
+        }
+        return super.peekUnsignedByte(offset);
+    }
+
+    @SuppressWarnings("restriction")
+    @Override
     public int peekVolatileInt() {
         if (!bytesStore.inside(readPosition, 4)) {
             acquireNextByteStore0(readPosition, true);
@@ -726,7 +751,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public boolean isClosed() {
         return this.refCount() <= 0 || mappedFile.isClosed();
     }
-
 
     @NotNull
     @Override

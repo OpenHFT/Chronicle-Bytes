@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 /**
  * Write data directly as Bytes.
  */
+@SuppressWarnings("rawtypes")
 @FunctionalInterface
 public interface WriteBytesMarshallable {
     /**

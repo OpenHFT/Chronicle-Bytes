@@ -4,20 +4,29 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings("rawtypes")
 public class ReadWriteMarshallableTest {
     @Test
     public void test() {
+        // TODO Make guarded safe
+        assumeFalse(NativeBytes.areNewGuarded());
+
         Bytes<?> bytes = Bytes.elasticHeapByteBuffer(128);
+        Bytes<?> hello_world = Bytes.from("Hello World");
+        Bytes<?> bye = Bytes.from("Bye");
         RWOuter o = new RWOuter(
-                new RWInner(Bytes.from("Hello World")),
-                new RWInner(Bytes.from("Bye")));
+                new RWInner(hello_world),
+                new RWInner(bye));
 
         bytes.writeMarshallableLength16(o);
 
         RWOuter o2 = bytes.readMarshallableLength16(RWOuter.class, null);
         assertEquals("Hello World", o2.i1.data.toString());
         assertEquals("Bye", o2.i2.data.toString());
+        hello_world.release();
+        bye.release();
     }
 
     static class RWOuter implements BytesMarshallable {

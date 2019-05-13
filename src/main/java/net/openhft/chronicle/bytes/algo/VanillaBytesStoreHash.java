@@ -25,6 +25,7 @@ import java.nio.ByteOrder;
 /*
  * Created by Peter Lawrey on 28/06/15.
  */
+@SuppressWarnings("rawtypes")
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
 
@@ -49,7 +50,6 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         int remaining = Maths.toInt32(store.readRemaining());
         return applyAsLong(store, remaining);
     }
-
 
     @Override
     public long applyAsLong(BytesStore bytes, long length) {

@@ -23,6 +23,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
 
@@ -240,7 +241,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean inside(long offset, int buffer) {
+    public boolean inside(long offset, long buffer) {
         return false;
     }
 
@@ -270,7 +271,6 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
-
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
         throw new UnsupportedOperationException();
@@ -299,6 +299,12 @@ public enum NoBytesStore implements BytesStore {
             throw new BufferOverflowException();
         return NO_PAGE;
     }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return NO_PAGE;
+    }
+
 
     @NotNull
     @Override

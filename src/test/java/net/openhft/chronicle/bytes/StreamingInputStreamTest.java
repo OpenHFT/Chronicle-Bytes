@@ -32,6 +32,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertThat;
 
+@SuppressWarnings("rawtypes")
 public class StreamingInputStreamTest {
     private ThreadDump threadDump;
 

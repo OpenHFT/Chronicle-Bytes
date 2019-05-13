@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -29,6 +30,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     // used for debugging
     @UsedViaReflection
@@ -62,8 +64,19 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public boolean checkRefCount() {
+        return refCount.checkRefCount();
+    }
+
+    @Override
     public boolean isDirectMemory() {
         return bytesStore.isDirectMemory();
+    }
+
+    @Override
+    public boolean canReadDirect(long length) {
+        long remaining = writePosition - readPosition;
+        return bytesStore.isDirectMemory() && remaining >= length;
     }
 
     @Override
@@ -136,6 +149,18 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return bytesStore.capacity() - writePosition;
+    }
+
+    @Override
+    public boolean canWriteDirect(long count) {
+        return isDirectMemory() &&
+                Math.min(writeLimit, bytesStore.capacity())
+                        >= count + writePosition;
+    }
+
+    @Override
     public long capacity() {
         return bytesStore.capacity();
     }
@@ -177,6 +202,22 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
         writeCheckOffset(offset, 8);
         return bytesStore.compareAndSwapLong(offset, expected, value);
+    }
+
+    public AbstractBytes append(double d) throws BufferOverflowException {
+        boolean fits = canWriteDirect(380);
+        if (!fits) {
+            double ad = Math.abs(d);
+            fits = 1e-6 <= ad && ad < 1e20 && canWriteDirect(24);
+        }
+        if (fits) {
+            long address = addressForWrite(writePosition);
+            long address2 = UnsafeText.appendDouble(address, d);
+            writeSkip(address2 - address);
+            return this;
+        }
+        BytesInternal.append(this, d);
+        return this;
     }
 
     @NotNull
@@ -459,7 +500,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     protected long readOffsetPositionMoved(long adding) throws BufferUnderflowException {
         long offset = readPosition;
-        readCheckOffset(readPosition, adding, false);
+        readCheckOffset(readPosition, Math.toIntExact(adding), false);
         readPosition += adding;
         assert readPosition <= readLimit();
         return offset;
@@ -583,6 +624,18 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     @NotNull
+    public Bytes<Underlying> write(@NotNull RandomDataInput bytes) {
+        assert bytes != this : "you should not write to yourself !";
+
+        try {
+            return write(bytes, bytes.readPosition(), Math.min(writeLimit() - writePosition(), bytes.readRemaining()));
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    @NotNull
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
         long remaining = length;
         while (remaining > 0) {
@@ -620,7 +673,6 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         }
         return this;
     }
-
 
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
         assert writeCheckOffset0(offset, adding);
@@ -680,11 +732,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.readDouble(offset);
     }
 
-
     void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
         assert readCheckOffset0(offset, adding, given);
     }
-
 
     private boolean readCheckOffset0(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (offset < start()) {
@@ -701,11 +751,9 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         return true;
     }
 
-
     void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
         assert prewriteCheckOffset0(offset, subtracting);
     }
-
 
     private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
         if ((offset - subtracting) < start()) {
@@ -923,6 +971,11 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public long addressForWrite(long offset) throws UnsupportedOperationException, BufferOverflowException {
         return bytesStore.addressForWrite(offset);
+    }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return bytesStore.addressForWrite(writePosition);
     }
 
     @Override

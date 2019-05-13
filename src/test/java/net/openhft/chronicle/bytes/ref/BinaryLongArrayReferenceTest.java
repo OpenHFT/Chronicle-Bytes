@@ -17,6 +17,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -24,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class BinaryLongArrayReferenceTest {
 
@@ -39,26 +41,30 @@ public class BinaryLongArrayReferenceTest {
         threadDump.assertNoNewThreads();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
         int length = 128 * 8 + 2 * 8;
         Bytes bytes = Bytes.allocateDirect(length);
         BinaryLongArrayReference.write(bytes, 128);
 
-        @NotNull BinaryLongArrayReference array = new BinaryLongArrayReference();
-        array.bytesStore(bytes, 0, length);
-
-        assertEquals(128, array.getCapacity());
-        for (int i = 0; i < 128; i++)
-            array.setValueAt(i, i + 1);
-
-        for (int i = 0; i < 128; i++)
-            assertEquals(i + 1, array.getValueAt(i));
-        bytes.release();
+        try (@NotNull BinaryLongArrayReference array = new BinaryLongArrayReference()) {
+            array.bytesStore(bytes, 0, length);
+    
+            assertEquals(128, array.getCapacity());
+            for (int i = 0; i < 128; i++)
+                array.setValueAt(i, i + 1);
+    
+            for (int i = 0; i < 128; i++)
+                assertEquals(i + 1, array.getValueAt(i));
+            bytes.release();
+        }
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void marshallable() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = Bytes.allocateElasticDirect(256);
         LongArrays la = new LongArrays(4, 8);
         la.writeMarshallable(bytes);

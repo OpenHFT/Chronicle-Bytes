@@ -18,6 +18,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
@@ -28,6 +29,7 @@ import java.nio.BufferUnderflowException;
 /**
  * Methods to append text to a Bytes. This extends the Appendable interface.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     /**
@@ -196,10 +198,17 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             throw new IllegalArgumentException();
         if (decimalPlaces < 20) {
             double d2 = d * Maths.tens(decimalPlaces);
-            if (d2 <= Long.MAX_VALUE && d2 >= Long.MIN_VALUE) {
+            if (d2 < Long.MAX_VALUE && d2 > Long.MIN_VALUE) {
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency
                 long round = d2 > 0.0 ? (long) (d2 + 0.5) : (long) (d2 - 0.5);
-                return appendDecimal(round, decimalPlaces);
+                if (canWriteDirect(20 + decimalPlaces)) {
+                    long address = addressForWritePosition();
+                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                    writeSkip(address2 - address);
+                } else {
+                    appendDecimal(round, decimalPlaces);
+                }
+                return (B) this;
             }
         }
         return append(d);
@@ -236,6 +245,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return append8bit(cs, 0, cs.length());
     }
 
+    default B append8bit(@NotNull BytesStore bs)
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+        return write(bs, 0L, bs.readRemaining());
+    }
+
     default B append8bit(@NotNull String cs)
             throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
         return append8bit(cs, 0, cs.length());
@@ -263,6 +277,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             writeByte((byte) c);
         }
         return (B) this;
+    }
+
+    default B append8bit(@NotNull BytesStore bs, long start, long end)
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+        return write(bs, start, end);
     }
 
     @NotNull

@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 /*
  * Created by Peter Lawrey on 20/12/16.
  */
+@SuppressWarnings("rawtypes")
 public class BytesPool {
     final ThreadLocal<Bytes> bytesTL = new ThreadLocal<>();
 

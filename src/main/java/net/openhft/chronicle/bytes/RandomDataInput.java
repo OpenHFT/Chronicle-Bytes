@@ -18,9 +18,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.ForceInline;
-import net.openhft.chronicle.core.annotation.Nullable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -376,6 +376,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param length of bytes
      * @return ByteStore copy.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     default BytesStore subBytes(long start, long length) throws BufferUnderflowException {
         return BytesInternal.subBytes(this, start, length);
@@ -496,7 +497,6 @@ public interface RandomDataInput extends RandomCommon {
      * @return the char sequence was read
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
-    @org.jetbrains.annotations.Nullable
     @Nullable
     default String readUtf8Limited(long offset, int maxUtf8Len)
             throws BufferUnderflowException, IORuntimeException, IllegalArgumentException,
@@ -567,5 +567,9 @@ public interface RandomDataInput extends RandomCommon {
             hash += readByte(offset + i);
         hash *= 0x855dd4db;
         return (int) (hash ^ (hash >> 32));
+    }
+
+    default boolean canReadDirect(long length) {
+        return isDirectMemory() && readRemaining() >= length;
     }
 }

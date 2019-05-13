@@ -25,6 +25,7 @@ import java.nio.BufferOverflowException;
 /*
  * Created by Peter Lawrey on 17/08/15.
  */
+@SuppressWarnings("rawtypes")
 public class StreamingOutputStream extends OutputStream {
     private StreamingDataOutput sdo;
 
@@ -55,7 +56,7 @@ public class StreamingOutputStream extends OutputStream {
     @Override
     public void write(int b) throws IOException {
         try {
-            sdo.writeUnsignedByte(b);
+            sdo.writeUnsignedByte(0xff & b);
 
         } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
             throw new IOException(e);

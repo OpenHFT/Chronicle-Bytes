@@ -58,10 +58,12 @@ public class NativeBytesTest {
         });
     }
 
+    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
+    */
 
     @Before
     public void threadDump() {
@@ -73,6 +75,7 @@ public class NativeBytesTest {
         threadDump.assertNoNewThreads();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = alloc.elasticBytes(1);
@@ -87,6 +90,7 @@ public class NativeBytesTest {
         b.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testWriteBytesWhereResizeNeeded() throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = alloc.elasticBytes(1);
@@ -101,6 +105,7 @@ public class NativeBytesTest {
         b.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void testAppendCharArrayNonAscii() {
         Bytes b = alloc.elasticBytes(1);

@@ -28,29 +28,30 @@ import static org.junit.Assert.*;
 public class BinaryIntReferenceTest {
     @Test
     public void test() {
-        @NotNull BinaryIntReference ref = new BinaryIntReference();
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
-        ref.bytesStore(nbs, 16, 4);
-        assertEquals(0, ref.getValue());
-        ref.addAtomicValue(1);
-        assertEquals(1, ref.getVolatileValue());
-        ref.addValue(-2);
-        assertEquals("value: -1", ref.toString());
-        assertFalse(ref.compareAndSwapValue(0, 1));
-        assertTrue(ref.compareAndSwapValue(-1, 2));
-        assertEquals(4, ref.maxSize());
-        assertEquals(16, ref.offset());
-        assertEquals(nbs, ref.bytesStore());
-        assertEquals(0L, nbs.readLong(0));
-        assertEquals(0L, nbs.readLong(8));
-        assertEquals(2, nbs.readInt(16));
-        assertEquals(0L, nbs.readLong(20));
-
-        ref.setValue(10);
-        assertEquals(10L, nbs.readInt(16));
-        ref.setOrderedValue(20);
-        Thread.yield();
-        assertEquals(20L, nbs.readVolatileInt(16));
-        nbs.release();
+        try (@NotNull BinaryIntReference ref = new BinaryIntReference()) {
+            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
+            ref.bytesStore(nbs, 16, 4);
+            assertEquals(0, ref.getValue());
+            ref.addAtomicValue(1);
+            assertEquals(1, ref.getVolatileValue());
+            ref.addValue(-2);
+            assertEquals("value: -1", ref.toString());
+            assertFalse(ref.compareAndSwapValue(0, 1));
+            assertTrue(ref.compareAndSwapValue(-1, 2));
+            assertEquals(4, ref.maxSize());
+            assertEquals(16, ref.offset());
+            assertEquals(nbs, ref.bytesStore());
+            assertEquals(0L, nbs.readLong(0));
+            assertEquals(0L, nbs.readLong(8));
+            assertEquals(2, nbs.readInt(16));
+            assertEquals(0L, nbs.readLong(20));
+    
+            ref.setValue(10);
+            assertEquals(10L, nbs.readInt(16));
+            ref.setOrderedValue(20);
+            Thread.yield();
+            assertEquals(20L, nbs.readVolatileInt(16));
+            nbs.release();
+        }
     }
 }

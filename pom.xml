@@ -20,13 +20,13 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.17</version>
+        <version>1.1.21</version>
         <relativePath />
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.17.6-SNAPSHOT</version>
+    <version>2.17.28-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -42,7 +42,7 @@
                 <artifactId>third-party-bom
                 </artifactId> <!-- PLEASE DON'T LEAVE THIS ON A SNAPSHOT because they get missed in a release  -->
                 <type>pom</type>
-                <version>3.6.5</version>
+                <version>3.6.9</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -73,12 +73,6 @@
             <artifactId>annotations</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>org.xerial.snappy</groupId>
-            <artifactId>snappy-java</artifactId>
-            <optional>true</optional>
-        </dependency>
-
         <!-- test dependencies -->
         <dependency>
             <groupId>junit</groupId>
@@ -97,7 +91,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
-                <version>3.0.0-M1</version>
             </plugin>
 
             <plugin>
@@ -109,7 +102,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-release-plugin</artifactId>
-                <version>2.5.3</version>
 
                 <configuration>
                     <autoVersionSubmodules>true</autoVersionSubmodules>
@@ -138,7 +130,6 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.6.2</version>
                 <configuration>
                     <compilerArgument>-Xlint:deprecation</compilerArgument>
                     <source>1.8</source>
@@ -169,7 +160,6 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
-                <version>3.3.0</version>
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
@@ -201,38 +191,6 @@
 
         </plugins>
     </build>
-
-    <profiles>
-        <profile>
-            <id>java9</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-compiler-plugin</artifactId>
-                        <version>3.6.2</version>
-                        <configuration>
-                            <source>1.9</source>
-                            <target>1.9</target>
-                            <compilerArgs>
-                                <arg>--add-exports=java.base/jdk.internal.ref=ALL-UNNAMED</arg>
-                                <arg>--add-exports=java.base/sun.nio.ch=ALL-UNNAMED</arg>
-                            </compilerArgs>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <configuration>
-                            <argLine>--add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports
-                                java.base/jdk.internal.misc=ALL-UNNAMED --add-exports java.base/sun.nio.ch=ALL-UNNAMED
-                            </argLine>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 
     <scm>
         <url>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</url>

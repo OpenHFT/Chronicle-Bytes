@@ -25,7 +25,10 @@ import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -43,7 +46,9 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class BytesTest {
 
@@ -85,6 +90,18 @@ public class BytesTest {
         threadDump.assertNoNewThreads();
     }
 
+    @Test
+    public void checkRefCount() {
+        Bytes bytes = alloc1.elasticBytes(16);
+        bytes.checkRefCount();
+        bytes.release();
+        try {
+            bytes.checkRefCount();
+            fail();
+        } catch (IllegalStateException ise) {
+            // expected.
+        }
+    }
     @Test
     public void testIndexOfAtEnd() {
         String sourceStr = "A string of some data";
@@ -278,6 +295,7 @@ public class BytesTest {
 
     @Test
     public void fromHexString() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(260);
         try {
             for (int i = 0; i < 259; i++)
@@ -340,12 +358,52 @@ public class BytesTest {
     }
 
     @Test
+    public void internRegressionTest() throws IORuntimeException {
+        UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
+
+        Bytes bytes1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
+        Bytes bytes2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
+        utf8StringInterner.intern(bytes1);
+        String intern = utf8StringInterner.intern(bytes2);
+        assertThat(intern, is(bytes2.toString()));
+        String intern2 = utf8StringInterner.intern(bytes1);
+        assertThat(intern2, is(bytes1.toString()));
+        bytes1.release();
+        bytes2.release();
+    }
+
+    @Test
+    public void testEqualBytesWithSecondStoreBeingLonger() throws IORuntimeException {
+
+        BytesStore store1 = null, store2 = null;
+        try {
+            store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
+            store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
+            assertThat(store1.equalBytes(store2, store2.length()), is(false));
+        } finally {
+            store1.release();
+            store2.release();
+        }
+
+    }
+
+    @Test
     public void testStartsWith() {
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("a")));
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aa")));
-        assertTrue(Bytes.from("aaa").startsWith(Bytes.from("aaa")));
-        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("aaaa")));
-        assertFalse(Bytes.from("aaa").startsWith(Bytes.from("b")));
+        Bytes<?> aaa = Bytes.from("aaa");
+        Bytes<?> a = Bytes.from("a");
+        assertTrue(aaa.startsWith(a));
+        Bytes<?> aa = Bytes.from("aa");
+        assertTrue(aaa.startsWith(aa));
+        assertTrue(aaa.startsWith(aaa));
+        Bytes<?> aaaa = Bytes.from("aaaa");
+        assertFalse(aaa.startsWith(aaaa));
+        Bytes<?> b = Bytes.from("b");
+        assertFalse(aaa.startsWith(b));
+        a.release();
+        aa.release();
+        aaa.release();
+        aaaa.release();
+        b.release();
     }
 
     @Test
@@ -438,6 +496,7 @@ public class BytesTest {
 
     @Test
     public void testCompact() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes from = alloc1.elasticBytes(1);
         try {
             from.write("Hello World");
@@ -555,6 +614,7 @@ public class BytesTest {
 
     @Test
     public void testUnwrite() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(1);
         try {
             for (int i = 0; i < 26; i++) {
@@ -617,7 +677,7 @@ public class BytesTest {
 
     @Test
     public void testWriter() {
-
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(1);
         @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
         writer.println(1);
@@ -632,18 +692,19 @@ public class BytesTest {
                 "a\n" +
                 "bye\n" +
                 "for now\n", bytes.toString().replaceAll("\r\n", "\n"));
-        @NotNull Scanner scan = new Scanner(bytes.reader());
-        scan.useLocale(Locale.ENGLISH);
-        assertEquals(1, scan.nextInt());
-        assertEquals("", scan.nextLine());
-        assertEquals("Hello", scan.nextLine());
-        assertEquals(12.34, scan.nextDouble(), 0.0);
-        assertEquals("", scan.nextLine());
-        assertEquals("a", scan.nextLine());
-        assertEquals("bye", scan.nextLine());
-        assertEquals("for now", scan.nextLine());
-        assertFalse(scan.hasNext());
-        bytes.release();
+        try (@NotNull Scanner scan = new Scanner(bytes.reader())) {
+            scan.useLocale(Locale.ENGLISH);
+            assertEquals(1, scan.nextInt());
+            assertEquals("", scan.nextLine());
+            assertEquals("Hello", scan.nextLine());
+            assertEquals(12.34, scan.nextDouble(), 0.0);
+            assertEquals("", scan.nextLine());
+            assertEquals("a", scan.nextLine());
+            assertEquals("bye", scan.nextLine());
+            assertEquals("for now", scan.nextLine());
+            assertFalse(scan.hasNext());
+            bytes.release();
+        }
     }
 
     @Test
@@ -668,6 +729,7 @@ public class BytesTest {
 
     @Test
     public void testParseUtf8High() {
+        assumeFalse(NativeBytes.areNewGuarded());
         @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
         for (int i = ' '; i < Character.MAX_VALUE; i++)
             if (Character.isValidCodePoint(i))
@@ -707,6 +769,7 @@ public class BytesTest {
 
     @Test
     public void testWithLength() {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes hello = Bytes.from("hello");
         Bytes world = Bytes.from("world");
         @NotNull Bytes b = alloc1.elasticBytes(16);
@@ -722,6 +785,8 @@ public class BytesTest {
 
         b.release();
         b2.release();
+        hello.release();
+        world.release();
     }
 
     @Test
@@ -816,6 +881,8 @@ public class BytesTest {
 
     @Test
     public void uncheckedSkip() {
+        assumeFalse(NativeBytes.areNewGuarded());
+
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.uncheckedReadSkipOne();
@@ -851,6 +918,7 @@ public class BytesTest {
 
     @Test
     public void testHashCode() {
+        assumeFalse(NativeBytes.areNewGuarded());
 
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
@@ -919,8 +987,11 @@ public class BytesTest {
         Bytes from = NativeBytes.nativeBytes(length).unchecked(true);
         Bytes to = alloc1.elasticBytes(length);
 
-        for (int i = 0; i < length; i++)
-            from.write(i, Bytes.from("a"), 0L, 1);
+        Bytes<?> a = Bytes.from("a");
+        for (int i = 0; i < length; i++) {
+            from.write(i, a, 0L, 1);
+        }
+        a.release();
 
         try {
             to.write(from, 0L, length);

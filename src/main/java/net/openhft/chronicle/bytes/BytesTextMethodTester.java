@@ -3,19 +3,17 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /*
  * Created by Peter Lawrey on 17/05/2017.
  */
+@SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
     private final String input;
     private final Class<T> outputClass;
     private final String output;
     private final Function<T, Object> componentFunction;
-    private BiConsumer<BytesMethodReader, T> exceptionHandlerSetup;
-    private String genericEvent;
 
     private String setup;
     private Function<String, String> afterRun;

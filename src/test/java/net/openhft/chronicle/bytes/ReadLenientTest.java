@@ -7,15 +7,18 @@ import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class ReadLenientTest {
     @Test
     public void testLenient() {
+        assumeFalse(NativeBytes.areNewGuarded());
         doTest(Bytes.allocateDirect(64));
         doTest(Bytes.elasticHeapByteBuffer(64));
         doTest(Bytes.from(""));
     }
 
+    @SuppressWarnings("rawtypes")
     private void doTest(Bytes bytes) {
         bytes.lenient(true);
         ByteBuffer bb = ByteBuffer.allocateDirect(32);

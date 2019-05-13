@@ -1,0 +1,117 @@
+package net.openhft.chronicle.bytes;
+
+import net.openhft.chronicle.core.Maths;
+import org.junit.Assert;
+import org.junit.Test;
+
+import java.math.BigDecimal;
+import java.nio.ByteBuffer;
+import java.security.SecureRandom;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.util.Locale;
+
+import static org.junit.Assume.assumeFalse;
+
+public class Issue85Test {
+    int different = 0;
+    int different2 = 0;
+    DecimalFormat df = new DecimalFormat();
+
+    {
+        df.setMaximumIntegerDigits(99);
+        df.setMaximumFractionDigits(99);
+        df.setMinimumFractionDigits(1);
+        df.setGroupingUsed(false);
+        df.setDecimalFormatSymbols(
+                DecimalFormatSymbols.getInstance(Locale.ENGLISH));
+    }
+
+    @SuppressWarnings("rawtypes")
+    static double parseDouble(Bytes bytes) {
+        long value = 0;
+        int deci = Integer.MIN_VALUE;
+        while (bytes.readRemaining() > 0) {
+            byte ch = bytes.readByte();
+            if (ch == '.') {
+                deci = 0;
+            } else if (ch >= '0' && ch <= '9') {
+                value *= 10;
+                value += ch - '0';
+                deci++;
+            } else {
+                break;
+            }
+        }
+        if (deci <= 0) {
+            return value;
+        }
+        return asDouble(value, deci);
+    }
+
+    private static double asDouble(long value, int deci) {
+        int scale2 = 0;
+        int leading = Long.numberOfLeadingZeros(value);
+        if (leading > 1) {
+            scale2 = leading - 1;
+            value <<= scale2;
+        }
+        long fives = Maths.fives(deci);
+        long whole = value / fives;
+        long rem = value % fives;
+        double d = whole + (double) rem / fives;
+        double scalb = Math.scalb(d, -deci - scale2);
+        return scalb;
+    }
+
+    @Test
+    public void bytesParseDouble_Issue85_Many0() {
+        assumeFalse(NativeBytes.areNewGuarded());
+        int max = 100, count = 0;
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+        for (double d0 = 1e21; d0 >= 1e-8; d0 /= 10) {
+            long val = Double.doubleToRawLongBits(d0);
+            for (int i = -max / 2; i <= max / 2; i++) {
+                double d = Double.longBitsToDouble(val + i);
+                doTest(bytes, i, d);
+            }
+            count += max + 1;
+        }
+        SecureRandom rand = new SecureRandom();
+        for (int i = 0; i < max * 100; i++) {
+            double d = Math.pow(1e12, rand.nextDouble()) / 1e3;
+            doTest(bytes, 0, d);
+            count++;
+        }
+        if (different + different2 > 0)
+            Assert.fail("Different toString: " + 100.0 * different / count + "%," +
+                    " parsing: " + 100.0 * different2 / count + "%");
+    }
+
+    protected void doTest(Bytes<ByteBuffer> bytes, int i, double d) {
+        String s = df.format(d);
+        bytes.clear().append(s);
+        double d2 = bytes.parseDouble();
+        if (d != d2) {
+            System.out.println(i + ": Parsing " + s + " != " + d2);
+            ++different2;
+        }
+
+        String s2 = bytes.append(d).toString();
+        double d3 = Double.parseDouble(s2);
+        if (d != d3) {
+            System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
+            ++different;
+        }
+    }
+
+    @Test
+    public void loseTrainingZeros() {
+        double d = -541098.2421;
+        Assert.assertEquals("" + d,
+                Bytes.elasticHeapByteBuffer(64)
+                        .append(d)
+                        .toString());
+
+    }
+}

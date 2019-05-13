@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,6 +14,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings("rawtypes")
 public class MappedBytesTest {
 
     final private String
@@ -91,7 +93,8 @@ public class MappedBytesTest {
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
 
             // write
-            bytesW.write(Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(from);
             long wp = bytesW.writePosition;
             Assert.assertEquals(text.length(), bytesW.writePosition);
 
@@ -99,6 +102,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
 
     }
@@ -110,7 +114,8 @@ public class MappedBytesTest {
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
 
             // write
-            bytesW.write(Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(from);
             long wp = bytesW.writePosition;
             Assert.assertEquals(text.length(), bytesW.writePosition);
 
@@ -118,10 +123,10 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
 
     }
-
 
     @Test
     public void testWriteBytesWithOffset() throws IOException {
@@ -132,7 +137,8 @@ public class MappedBytesTest {
             int offset = 10;
 
             // write
-            bytesW.write(offset, Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from);
             long wp = text.length() + offset;
             Assert.assertEquals(0, bytesW.writePosition);
 
@@ -140,6 +146,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
     }
 
@@ -152,7 +159,8 @@ public class MappedBytesTest {
             int offset = 10;
 
             // write
-            bytesW.write(offset, Bytes.from(text));
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from);
             long wp = text.length() + offset;
             Assert.assertEquals(0, bytesW.writePosition);
 
@@ -160,9 +168,9 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
+            from.release();
         }
     }
-
 
     @Test
     public void testWriteBytesWithOffsetAndTextShift() throws IOException {
@@ -173,7 +181,8 @@ public class MappedBytesTest {
             int shift = 128;
 
             //write
-            bytesW.write(offset, Bytes.from(text), shift, text.length() - shift);
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from, shift, text.length() - shift);
             Assert.assertEquals(0, bytesW.writePosition);
 
             // read
@@ -181,6 +190,7 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
+            from.release();
         }
     }
 
@@ -193,7 +203,8 @@ public class MappedBytesTest {
             int shift = 128;
 
             //write
-            bytesW.write(offset, Bytes.from(text), shift, text.length() - shift);
+            Bytes<?> from = Bytes.from(text);
+            bytesW.write(offset, from, shift, text.length() - shift);
             Assert.assertEquals(0, bytesW.writePosition);
 
             // read
@@ -201,9 +212,9 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
+            from.release();
         }
     }
-
 
     @Test
     public void testLargeWrites() throws IOException {
@@ -337,14 +348,15 @@ public class MappedBytesTest {
     @Test
     public void shouldBeReadOnly() throws Exception {
         final File tempFile = File.createTempFile("mapped", "bytes");
-        final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw");
-        raf.setLength(4096);
-        assertTrue(tempFile.setWritable(false));
-        final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
+        try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
+            raf.setLength(4096);
+            assertTrue(tempFile.setWritable(false));
+            final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
 
-        assertTrue(mappedBytes.
-                isBackingFileReadOnly());
-        mappedBytes.release();
+            assertTrue(mappedBytes.
+                    isBackingFileReadOnly());
+            mappedBytes.release();
+        }
     }
 
     @Test
@@ -392,4 +404,33 @@ public class MappedBytesTest {
         System.out.println("PBS(4): " + pbs.readInt(4));
     }
 
+    @Test
+    public void memoryOverlapRegions() throws FileNotFoundException {
+        String tmpfile = OS.TARGET + "/memoryOverlapRegions-" + System.nanoTime();
+        int chunkSize = 256 << 16;
+        int overlapSize = 64 << 16;
+        String longString = new String(new char[overlapSize * 2]);
+        Bytes csb = Bytes.from(longString);
+        try (MappedBytes mb = MappedBytes.mappedBytes(new File(tmpfile), chunkSize, overlapSize)) {
+            StringBuilder sb = new StringBuilder();
+            for (int offset : new int[]{chunkSize - OS.pageSize(), chunkSize + overlapSize - OS.pageSize()}) {
+                mb.writePosition(offset);
+                mb.appendUtf8(longString);
+                mb.readPosition(offset);
+                assertEquals(offset < chunkSize ? 0 : chunkSize, mb.bytesStore().start());
+
+                mb.equalBytes(csb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+
+                mb.equalBytes(csb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+
+                mb.parseUtf8(sb, csb.length());
+                assertEquals(chunkSize, mb.bytesStore().start());
+            }
+        } finally {
+            csb.release();
+        }
+        IOTools.deleteDirWithFiles(tmpfile, 2);
+    }
 }

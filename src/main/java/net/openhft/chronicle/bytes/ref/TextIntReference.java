@@ -17,10 +17,8 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -43,6 +41,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int VALUE = 34;
     private static final int DIGITS = 10;
 
+    @SuppressWarnings("rawtypes")
     public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
         long position = bytes.writePosition();
         bytes.write(template);
@@ -120,6 +119,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }) == INT_TRUE;
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         if (length != template.length)

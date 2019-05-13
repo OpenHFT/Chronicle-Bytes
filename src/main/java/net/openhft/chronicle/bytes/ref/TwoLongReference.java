@@ -22,5 +22,6 @@ import net.openhft.chronicle.core.values.TwoLongValue;
 /*
  * Created by Peter Lawrey on 20/01/16.
  */
+@SuppressWarnings("rawtypes")
 public interface TwoLongReference extends TwoLongValue, Byteable {
 }

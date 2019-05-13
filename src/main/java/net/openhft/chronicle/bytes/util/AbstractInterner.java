@@ -27,8 +27,16 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
+ * This cache only gaurentees it will provide a String which matches the decoded bytes.
+ * <p/>
+ * It doesn't guantee it will always return the same object,
+ * nor that different threads will return the same object,
+ * though the contents should always be the same.
+ * <p/>
+ * While not technically thread safe, it should still behave correctly.
  * @author peter.lawrey
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
     @NotNull
     protected final InternerEntry<T>[] entries;
@@ -65,20 +73,23 @@ public abstract class AbstractInterner<T> {
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
         if (length > entries.length)
             return getValue(cs, length);
+        // TODO This needs to be reviewd.
+//        UnsafeMemory.UNSAFE.loadFence();
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
-        if (s != null && s.bytes.equalBytes(cs, length))
+        if (s != null && s.bytes.length() == length && s.bytes.equalBytes(cs, length))
             return s.t;
         int h2 = (hash >> shift) & mask;
         InternerEntry<T> s2 = entries[h2];
-        if (s2 != null && s2.bytes.equalBytes(cs, length))
+        if (s2 != null && s2.bytes.length() == length && s2.bytes.equalBytes(cs, length))
             return s2.t;
         @NotNull T t = getValue(cs, length);
         @NotNull final byte[] bytes = new byte[length];
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
+//        UnsafeMemory.UNSAFE.storeFence();
         return t;
     }
 

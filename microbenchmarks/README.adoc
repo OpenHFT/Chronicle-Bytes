@@ -1,0 +1,8 @@
+= Chronicle Bytes micro-benchmarks
+Peter Lawrey
+
+Micro-benchmark involving Chronicle Bytes
+
+== Cooler micro-benchmarks
+
+Code runs slower in a CPU after it has cooled. These tests look at how they perform so they can be optimised.

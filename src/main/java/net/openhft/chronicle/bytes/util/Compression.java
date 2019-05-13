@@ -30,6 +30,7 @@ import java.io.*;
 /*
  * Created by peter.lawrey on 09/12/2015.
  */
+@SuppressWarnings("rawtypes")
 public interface Compression {
 
     static <T> void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed) {
@@ -37,12 +38,6 @@ public interface Compression {
             case 'l':
                 if (StringUtils.isEqual("lzw", cs)) {
                     Compressions.LZW.compress(uncompressed, compressed);
-                    return;
-                }
-                break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.compress(uncompressed, compressed);
                     return;
                 }
                 break;
@@ -74,12 +69,6 @@ public interface Compression {
                     return;
                 }
                 break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs)) {
-                    Compressions.Snappy.uncompress(from, to);
-                    return;
-                }
-                break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs)) {
                     Compressions.GZIP.uncompress(from, to);
@@ -103,10 +92,6 @@ public interface Compression {
             case 'l':
                 if (StringUtils.isEqual("lzw", cs))
                     return Compressions.LZW.uncompress(bytes.apply(t));
-                break;
-            case 's':
-                if (StringUtils.isEqual("snappy", cs))
-                    return Compressions.Snappy.uncompress(bytes.apply(t));
                 break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs))

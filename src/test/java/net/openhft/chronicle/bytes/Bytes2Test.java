@@ -32,6 +32,7 @@ import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class Bytes2Test {
 

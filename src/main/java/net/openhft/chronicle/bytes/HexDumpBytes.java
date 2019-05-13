@@ -1,17 +1,25 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.core.util.ThrowingConsumer;
+import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.io.StringReader;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes implements Bytes<Void> {
 
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
@@ -43,7 +51,7 @@ public class HexDumpBytes implements Bytes<Void> {
         try (Scanner sc = new Scanner(reader2)) {
             while (sc.hasNext()) {
                 if (sc.hasNext(HEX_PATTERN))
-                    tb.base.writeUnsignedByte(Integer.parseInt(sc.next(), 16));
+                    tb.base.rawWriteByte((byte) Integer.parseInt(sc.next(), 16));
                 else
                     sc.nextLine(); // assume it's a comment
             }
@@ -208,6 +216,10 @@ public class HexDumpBytes implements Bytes<Void> {
     }
 
     @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        throw new UnsupportedOperationException();
+    }
+    @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
         if (base.compareAndSwapInt(offset & 0xFFFFFFFFL, expected, value)) {
             copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
@@ -371,7 +383,8 @@ public class HexDumpBytes implements Bytes<Void> {
     @Override
     @NotNull
     public Bytes<Void> readPosition(long position) throws BufferUnderflowException {
-        throw new UnsupportedOperationException();
+        base.readPosition(position);
+        return this;
     }
 
     @Override
@@ -396,6 +409,26 @@ public class HexDumpBytes implements Bytes<Void> {
     @Override
     public void uncheckedReadSkipBackOne() {
         base.uncheckedReadSkipBackOne();
+    }
+
+    @Override
+    public long readStopBit() throws IORuntimeException {
+        return base.readStopBit();
+    }
+
+    @Override
+    public char readStopBitChar() throws IORuntimeException {
+        return base.readStopBitChar();
+    }
+
+    @Override
+    public double readStopBitDouble() {
+        return base.readStopBitDouble();
+    }
+
+    @Override
+    public double readStopBitDecimal() throws BufferOverflowException {
+        return base.readStopBitDecimal();
     }
 
     @Override
@@ -468,6 +501,184 @@ public class HexDumpBytes implements Bytes<Void> {
         base.lastDecimalPlaces(lastDecimalPlaces);
     }
 
+    @NotNull
+    @Override
+    public BigDecimal readBigDecimal() {
+        return base.readBigDecimal();
+    }
+
+    @NotNull
+    @Override
+    public BigInteger readBigInteger() {
+        return base.readBigInteger();
+    }
+
+    @Override
+    public void readWithLength(long length, @NotNull BytesOut<Void> bytesOut) throws BufferUnderflowException, IORuntimeException {
+        base.readWithLength(length, bytesOut);
+    }
+
+    @Override
+    public <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object) {
+        return base.readMarshallableLength16(tClass, object);
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> readPositionUnlimited(long position) throws BufferUnderflowException {
+        return base.readPositionUnlimited(position);
+
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
+        return base.readPositionRemaining(position, remaining);
+
+    }
+
+    @Override
+    public void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes) throws BufferUnderflowException, IORuntimeException {
+        base.readWithLength0(length, bytesConsumer, sb, toBytes);
+
+    }
+
+    @Override
+    public void readWithLength(long length, @NotNull ThrowingConsumer<Bytes<Void>, IORuntimeException> bytesConsumer) throws BufferUnderflowException, IORuntimeException {
+        base.readWithLength(length, bytesConsumer);
+
+    }
+
+    @Override
+    public boolean readBoolean() {
+        return base.readBoolean();
+
+    }
+
+    @Override
+    public int readUnsignedShort() throws BufferUnderflowException {
+        return base.readUnsignedShort();
+
+    }
+
+    @Override
+    public int readInt24() throws BufferUnderflowException {
+        return base.readInt24();
+
+    }
+
+    @Override
+    public int readUnsignedInt24() throws BufferUnderflowException {
+        return base.readUnsignedInt24();
+
+    }
+
+    @Override
+    public long readUnsignedInt() throws BufferUnderflowException {
+        return base.readUnsignedInt();
+
+    }
+
+    @Nullable
+    @Override
+    public String readUtf8() throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
+        return base.readUtf8();
+
+    }
+
+    @Nullable
+    @Override
+    public String readUTFΔ() throws IORuntimeException, BufferUnderflowException, IllegalArgumentException {
+        return base.readUTFΔ();
+
+    }
+
+    @Nullable
+    @Override
+    public String read8bit() throws IORuntimeException, BufferUnderflowException {
+        return base.read8bit();
+
+    }
+
+    @Override
+    public <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb) throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+        return base.readUtf8(sb);
+
+    }
+
+    @Override
+    public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb) throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+        return base.readUTFΔ(sb);
+
+    }
+
+    @Override
+    public boolean read8bit(@NotNull Bytes b) throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
+        return base.read8bit(b);
+
+    }
+
+    @Override
+    public <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb) throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+        return base.read8bit(sb);
+
+    }
+
+    @Override
+    public boolean read8bit(@NotNull StringBuilder sb) throws IORuntimeException, BufferUnderflowException {
+        return base.read8bit(sb);
+
+    }
+
+    @Override
+    public int read(@NotNull byte[] bytes) {
+        return base.read(bytes);
+
+    }
+
+    @Override
+    public int read(@NotNull byte[] bytes, int off, int len) {
+        return base.read(bytes, off, len);
+
+    }
+
+    @Override
+    public int read(@NotNull char[] bytes, int off, int len) {
+        return base.read(bytes, off, len);
+
+    }
+
+    @Override
+    public void read(@NotNull ByteBuffer buffer) {
+        base.read(buffer);
+
+    }
+
+    @Override
+    public void read(@NotNull Bytes bytes, int length) {
+        base.read(bytes, length);
+
+    }
+
+    @NotNull
+    @Override
+    public <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass) throws IORuntimeException, BufferUnderflowException {
+        return base.readEnum(eClass);
+
+    }
+
+    @Override
+    public void readHistogram(@NotNull Histogram histogram) {
+        base.readHistogram(histogram);
+
+    }
+
+    @Override
+    public void readWithLength(Bytes bytes) {
+        base.readWithLength(bytes);
+
+    }
+
     @Override
     @NotNull
     public Bytes<Void> writePosition(long position) throws BufferOverflowException {
@@ -477,7 +688,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeLimit(long limit) throws BufferOverflowException {
         base.writeLimit(limit);
         return this;
@@ -497,7 +707,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeByte(byte i8) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -562,7 +771,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeShort(short i16) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -576,7 +784,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeInt(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -590,7 +797,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeIntAdv(int i, int advance) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -604,7 +810,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeLong(long i64) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -618,7 +823,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeLongAdv(long i64, int advance) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -632,7 +836,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeFloat(float f) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -646,7 +849,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeDouble(double d) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -660,7 +862,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeDoubleAndInt(double d, int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -674,8 +875,12 @@ public class HexDumpBytes implements Bytes<Void> {
     }
 
     @Override
+    public long realWriteRemaining() {
+        return base.realWriteRemaining();
+    }
+
+    @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
@@ -689,7 +894,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeSome(ByteBuffer buffer) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -703,7 +907,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeOrderedInt(int i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -717,7 +920,6 @@ public class HexDumpBytes implements Bytes<Void> {
 
     @Override
     @NotNull
-    @net.openhft.chronicle.core.annotation.NotNull
     public Bytes<Void> writeOrderedLong(long i) throws BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -864,7 +1066,6 @@ public class HexDumpBytes implements Bytes<Void> {
         return base.lenient();
     }
 
-
     private static class TextBytesReader extends Reader {
         private final Reader reader;
         private final Bytes base;
@@ -884,6 +1085,409 @@ public class HexDumpBytes implements Bytes<Void> {
         @Override
         public void close() throws IOException {
             reader.close();
+        }
+    }
+
+    @Override
+    public void writeMarshallableLength16(WriteBytesMarshallable marshallable) {
+        long pos = base.writePosition();
+        try {
+            base.writeMarshallableLength16(marshallable);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public Bytes write(InputStream inputStream) throws IOException {
+        long pos = base.writePosition();
+        try {
+            base.write(inputStream);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBit(long x) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeStopBit(x);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBit(char x) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeStopBit(x);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBit(double d) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeStopBit(d);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeStopBitDecimal(double d) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeStopBitDecimal(d);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUtf8(CharSequence cs) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeUtf8(cs);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUtf8(String s) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeUtf8(s);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUTFΔ(CharSequence cs) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeUTFΔ(cs);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write8bit(@Nullable CharSequence cs) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.write8bit(cs);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write8bit(@NotNull CharSequence s, int start, int length) throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
+        long pos = base.writePosition();
+        try {
+            base.write8bit(s, start, length);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(CharSequence cs) throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.write(cs);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull CharSequence s, int start, int length) throws BufferOverflowException, IllegalArgumentException, IndexOutOfBoundsException {
+        long pos = base.writePosition();
+        try {
+            base.write(s, start, length);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write8bit(@Nullable String s) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.write8bit(s);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write8bit(@Nullable BytesStore bs) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.write8bit(bs);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUnsignedByte(int i) throws BufferOverflowException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.writeUnsignedByte(i);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUnsignedShort(int u16) throws BufferOverflowException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.writeUnsignedShort(u16);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeInt24(int i) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeInt24(i);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUnsignedInt24(int i) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeUnsignedInt24(i);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeUnsignedInt(long i) throws BufferOverflowException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.writeUnsignedInt(i);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull RandomDataInput bytes) {
+        long pos = base.writePosition();
+        try {
+
+            base.write(bytes);
+            return this;
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes) {
+        long pos = base.writePosition();
+        try {
+            base.write(bytes);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeSome(@NotNull Bytes bytes) {
+        long pos = base.writePosition();
+        try {
+            base.writeSome(bytes);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
+        long pos = base.writePosition();
+        try {
+            base.write(bytes, offset, length);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
+        long pos = base.writePosition();
+        try {
+            base.write(bytes, offset, length);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write(@NotNull byte[] bytes) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.write(bytes);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> writeBoolean(boolean flag) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeBoolean(flag);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public <E extends Enum<E>> Bytes<Void> writeEnum(@NotNull E e) throws BufferOverflowException {
+        long pos = base.writePosition();
+        try {
+            base.writeEnum(e);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public void writePositionRemaining(long position, long length) {
+        long pos = base.writePosition();
+        try {
+            base.writePositionRemaining(position, length);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public void writeHistogram(@NotNull Histogram histogram) {
+        long pos = base.writePosition();
+        try {
+            base.writeHistogram(histogram);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public void writeBigDecimal(@NotNull BigDecimal bd) {
+        long pos = base.writePosition();
+        try {
+            base.writeBigDecimal(bd);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public void writeBigInteger(@NotNull BigInteger bi) {
+        long pos = base.writePosition();
+        try {
+            base.writeBigInteger(bi);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public void writeWithLength(RandomDataInput bytes) {
+        long pos = base.writePosition();
+        try {
+            base.writeWithLength(bytes);
+        } finally {
+            copyToText(pos);
         }
     }
 }

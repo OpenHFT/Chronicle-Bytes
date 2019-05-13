@@ -83,6 +83,7 @@ public class AllocationRatesTest {
         return System.nanoTime() - start;
     }
 
+    @SuppressWarnings("rawtypes")
     private long timeDirectStoreAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {

@@ -17,13 +17,14 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     /**
      * Write a byte at an offset.
@@ -253,7 +254,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     R write(long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException;
 
-    @Deprecated(/*Is this used?*/)
     void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException;
 

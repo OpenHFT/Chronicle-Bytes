@@ -38,10 +38,12 @@ import java.security.SecureRandom;
 import java.util.Random;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 /*
  * Created by peter.lawrey on 27/02/15.
  */
+@SuppressWarnings("rawtypes")
 public class NativeBytesStoreTest {
     volatile int bcs;
     private ThreadDump threadDump;
@@ -106,6 +108,7 @@ public class NativeBytesStoreTest {
 
     @Test
     public void testCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+        assumeFalse(NativeBytes.areNewGuarded());
         byte[] keyBytes = new SecureRandom().generateSeed(16);
         SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         Cipher encCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");

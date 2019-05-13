@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
+@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class UncheckedLongReference implements LongReference {
     private long address;
     private Unsafe unsafe;

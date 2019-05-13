@@ -21,7 +21,11 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
+import org.junit.AfterClass;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.lang.annotation.RetentionPolicy;
@@ -34,11 +38,37 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 /*
  * Created by Peter Lawrey on 20/04/2016.
  */
+@RunWith(Parameterized.class)
 public class BytesMarshallableTest {
+
+    private final boolean guarded;
+
+    public BytesMarshallableTest(String name, boolean guarded) {
+        this.guarded = guarded;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"Unguarded", false},
+                {"Guarded", true}
+        });
+    }
+
+    @AfterClass
+    public static void resetGuarded() {
+        NativeBytes.resetNewGuarded();
+    }
+
+    @Before
+    public void setGuarded() {
+        NativeBytes.setNewGuarded(guarded);
+    }
 
     @After
     public void checkRegisteredBytes() {
@@ -47,6 +77,7 @@ public class BytesMarshallableTest {
 
     @Test
     public void serializePrimitives() throws IORuntimeException {
+        assumeFalse(NativeBytes.areNewGuarded());
         Bytes<?> bytes = new HexDumpBytes();
         @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
         @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
@@ -87,6 +118,7 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void serializeScalars() throws IORuntimeException {
         Bytes<?> bytes = new HexDumpBytes();
@@ -163,7 +195,7 @@ public class BytesMarshallableTest {
         bytes.comment("mn2").writeUnsignedByte(2);
         mn2.writeMarshallable(bytes);
 
-        final String expected = "01                                              # mn1\n" +
+        String expected = "01                                              # mn1\n" +
                 "                                                # byteable\n" +
                 "      4e                                              # flag\n" +
                 "      01                                              # b\n" +
@@ -216,6 +248,63 @@ public class BytesMarshallableTest {
                 "      31 31 31 2d 31 31 31 31 2d 32 32 32 32 2d 32 32\n" +
                 "      32 32 32 32 32 32 32 32 32 32\n";
 
+        if (GuardedNativeBytes.areNewGuarded()) {
+            expected = "" +
+                    "a4 01                                           # mn1\n" +
+                    "                                                # byteable\n" +
+                    "      a4 4e                                           # flag\n" +
+                    "      a4 01                                           # b\n" +
+                    "      a5 02 00                                        # s\n" +
+                    "      ae 33                                           # c\n" +
+                    "      a6 04 00 00 00                                  # i\n" +
+                    "      90 00 00 b0 40                                  # f\n" +
+                    "      a7 06 00 00 00 00 00 00 00                      # l\n" +
+                    "      91 cd cc cc cc cc cc 1e 40                      # d\n" +
+                    "                                                # scalars\n" +
+                    "      ae 05 48 65 6c 6c 6f                            # s\n" +
+                    "      ae 01 31                                        # bi\n" +
+                    "      ae 02 31 30                                     # bd\n" +
+                    "      ae 0a 32 30 31 37 2d 31 31 2d 30 36             # date\n" +
+                    "      ae 0c 31 32 3a 33 35 3a 35 36 2e 37 37 35       # time\n" +
+                    "      ae 17 32 30 31 37 2d 31 31 2d 30 36 54 31 32 3a # dateTime\n" +
+                    "      33 35 3a 35 36 2e 37 37 35 ae 27 32 30 31 37 2d # zonedDateTime\n" +
+                    "      31 31 2d 30 36 54 31 32 3a 33 35 3a 35 36 2e 37\n" +
+                    "      37 35 5a 5b 45 75 72 6f 70 65 2f 4c 6f 6e 64 6f\n" +
+                    "      6e 5d ae 24 30 30 30 30 30 30 30 31 2d 32 33 34 # uuid\n" +
+                    "      35 2d 36 37 38 39 2d 30 30 30 30 2d 30 30 30 30\n" +
+                    "      30 30 61 62 63 64 65 66\n" +
+                    "a4 02                                           # mn2\n" +
+                    "                                                # byteable\n" +
+                    "      a4 59                                           # flag\n" +
+                    "      a4 0b                                           # b\n" +
+                    "      a5 16 00                                        # s\n" +
+                    "      ae 54                                           # c\n" +
+                    "      a6 2c 00 00 00                                  # i\n" +
+                    "      90 8f c2 b1 40                                  # f\n" +
+                    "      a7 42 00 00 00 00 00 00 00                      # l\n" +
+                    "      91 e1 7a 14 ae 47 71 53 40                      # d\n" +
+                    "                                                # scalars\n" +
+                    "      ae 05 57 6f 72 6c 64                            # s\n" +
+                    "      ae 01 30                                        # bi\n" +
+                    "      ae 01 30                                        # bd\n" +
+                    "      ae 0a 32 30 31 36 2d 31 30 2d 30 35             # date\n" +
+                    (Jvm.isJava9Plus() ? "" +
+                            "      ae 0c 30 32 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
+                            "      ae 17 32 30 31 36 2d 31 30 2d 30 35 54 30 32 3a # dateTime\n" +
+                            "      33 34 3a 35 36 2e 37 37 35 ae 2c 32 30 31 36 2d # zonedDateTime\n" +
+                            "      31 30 2d 30 35 54 30 32 3a 33 34 3a 35 36 2e 37\n" +
+                            "      37 35 2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f\n"
+                            : "" +
+                            "      ae 0c 30 31 3a 33 34 3a 35 36 2e 37 37 35       # time\n" +
+                            "      ae 17 32 30 31 36 2d 31 30 2d 30 35 54 30 31 3a # dateTime\n" +
+                            "      33 34 3a 35 36 2e 37 37 35 ae 2c 32 30 31 36 2d # zonedDateTime\n" +
+                            "      31 30 2d 30 35 54 30 31 3a 33 34 3a 35 36 2e 37\n" +
+                            "      37 35 2b 30 31 3a 30 30 5b 45 75 72 6f 70 65 2f\n") +
+                    "      4c 6f 6e 64 6f 6e 5d ae 24 31 31 31 31 31 31 31 # uuid\n" +
+                    "      31 2d 31 31 31 31 2d 31 31 31 31 2d 32 32 32 32\n" +
+                    "      2d 32 32 32 32 32 32 32 32 32 32 32 32\n";
+        }
+
         System.out.println(bytes.toHexString());
 
         assertEquals(
@@ -233,12 +322,16 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @SuppressWarnings("rawtypes")
     @Test
     public void serializeBytes() throws IOException {
         Bytes<?> bytes = new HexDumpBytes();
-        try (@NotNull MyBytes mb1 = new MyBytes(Bytes.from("hello"), Bytes.allocateElasticDirect().append("2"));
-             @NotNull MyBytes mb2 = new MyBytes(Bytes.from("byeee"), null)) {
-            bytes.comment("mb1").writeUnsignedByte(1);
+        Bytes<?> hello = Bytes.from("hello");
+        Bytes<?> byeee = Bytes.from("byeee");
+        try (@NotNull MyBytes mb1 = new MyBytes(hello, Bytes.allocateElasticDirect().append("2"));
+             @NotNull MyBytes mb2 = new MyBytes(byeee, null)) {
+            bytes.comment("mb1")
+                    .writeUnsignedByte(1);
             mb1.writeMarshallable(bytes);
             bytes.comment("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
@@ -285,12 +378,20 @@ public class BytesMarshallableTest {
         assertEquals(mc.policies, mc2.policies);
         assertEquals(mc.numbers, mc2.numbers);
 
-        assertEquals(
+        String expected = "" +
                 "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
-                        "   02 cd cc cc cc cc cc f4 3f 0b 00 00 00 00 00 00 # scoreCountMap\n" +
-                        "   00 9a 99 99 99 99 99 01 40 16 00 00 00 00 00 00\n" +
-                        "   00 02 07 52 55 4e 54 49 4d 45 05 43 4c 41 53 53 # policies\n" +
-                        "   03 01 00 00 00 0c 00 00 00 7b 00 00 00          # numbers\n", bytes.toHexString());
+                "   02 cd cc cc cc cc cc f4 3f 0b 00 00 00 00 00 00 # scoreCountMap\n" +
+                "   00 9a 99 99 99 99 99 01 40 16 00 00 00 00 00 00\n" +
+                "   00 02 07 52 55 4e 54 49 4d 45 05 43 4c 41 53 53 # policies\n" +
+                "   03 01 00 00 00 0c 00 00 00 7b 00 00 00          # numbers\n";
+        String expectedG = "" +
+                "   ae 02 ae 05 48 65 6c 6c 6f ae 05 57 6f 72 6c 64 # words\n" +
+                "   ae 02 91 cd cc cc cc cc cc f4 3f a7 0b 00 00 00 # scoreCountMap\n" +
+                "   00 00 00 00 91 9a 99 99 99 99 99 01 40 a7 16 00\n" +
+                "   00 00 00 00 00 00 ae 02 ae 07 52 55 4e 54 49 4d # policies\n" +
+                "   45 ae 05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 # numbers\n" +
+                "   0c 00 00 00 a6 7b 00 00 00\n";
+        assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
         bytes.release();
     }
 
@@ -309,18 +410,34 @@ public class BytesMarshallableTest {
         assertEquals(bm1b.bm2.text, bm1.bm2.text);
         assertEquals(bm1b.bm3.value, bm1.bm3.value);
 
-        assertEquals(
-                "   05 00 00 00                                     # num\n" +
-                        "                                                # bm2\n" +
-                        "      05 68 65 6c 6c 6f                               # text\n" +
-                        "                                                # bm3\n" +
-                        "      d2 02 96 49 00 00 00 00                         # value\n", bytes.toHexString());
-        assertEquals("# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+        String expected = "" +
                 "   05 00 00 00                                     # num\n" +
                 "                                                # bm2\n" +
                 "      05 68 65 6c 6c 6f                               # text\n" +
                 "                                                # bm3\n" +
-                "      d2 02 96 49 00 00 00 00                         # value\n", bm1.toString());
+                "      d2 02 96 49 00 00 00 00                         # value\n";
+        String expected2 = "" +
+                "   a6 05 00 00 00                                  # num\n" +
+                "                                                # bm2\n" +
+                "      ae 05 68 65 6c 6c 6f                            # text\n" +
+                "                                                # bm3\n" +
+                "      a7 d2 02 96 49 00 00 00 00                      # value\n";
+        assertEquals(NativeBytes.areNewGuarded() ? expected2 : expected, bytes.toHexString());
+        String expectedB = "" +
+                "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+                "   05 00 00 00                                     # num\n" +
+                "                                                # bm2\n" +
+                "      05 68 65 6c 6c 6f                               # text\n" +
+                "                                                # bm3\n" +
+                "      d2 02 96 49 00 00 00 00                         # value\n";
+        String expectedBG = "" +
+                "# net.openhft.chronicle.bytes.BytesMarshallableTest$BM1\n" +
+                "   a6 05 00 00 00                                  # num\n" +
+                "                                                # bm2\n" +
+                "      ae 05 68 65 6c 6c 6f                            # text\n" +
+                "                                                # bm3\n" +
+                "      a7 d2 02 96 49 00 00 00 00                      # value\n";
+        assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString());
         bytes.release();
     }
 

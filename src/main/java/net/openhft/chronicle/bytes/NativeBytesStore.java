@@ -35,7 +35,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
-@SuppressWarnings("sunapi")
+@SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<Underlying>
         extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
@@ -117,6 +117,8 @@ public class NativeBytesStore<Underlying>
     @NotNull
     private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic)
             throws IllegalArgumentException {
+        if (capacity <= 0)
+            return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
@@ -151,7 +153,7 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     public static NativeBytesStore from(@NotNull String text) {
-        return from(text.getBytes(StandardCharsets.UTF_8));
+        return from(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     @NotNull
@@ -169,6 +171,12 @@ public class NativeBytesStore<Underlying>
     public boolean isDirectMemory() {
         return true;
     }
+
+    @Override
+    public boolean canReadDirect(long length) {
+        return maximumLimit >= length;
+    }
+
 
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
@@ -216,7 +224,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public VanillaBytes<Underlying> bytesForWrite() throws IllegalStateException {
-        return elastic ? new NativeBytes<>(this) : new VanillaBytes<>(this);
+        return elastic ? NativeBytes.wrapWithNativeBytes(this) : new VanillaBytes<>(this);
     }
 
     @Override
@@ -374,6 +382,13 @@ public class NativeBytesStore<Underlying>
     public int readVolatileInt(long offset) {
         return memory.readVolatileInt(address + translate(offset));
     }
+
+    @ForceInline
+    public int fencedRead(long offset) {
+        UnsafeMemory.UNSAFE.loadFence();
+        return memory.readInt(address + translate(offset));
+    }
+
 
     @Override
     @ForceInline
@@ -535,6 +550,11 @@ public class NativeBytesStore<Underlying>
         if (offset < start() || offset > realCapacity())
             throw new BufferOverflowException();
         return address + translate(offset);
+    }
+
+    @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        return addressForWrite(start());
     }
 
     // this is synchronized to ensure that setting memory = null gets flushed
@@ -749,13 +769,13 @@ public class NativeBytesStore<Underlying>
         final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
         final long address = this.address + translate(offsetInRDI);
         for (i = 0; i < len - 7; i += 8)
-            UnsafeMemory.UNSAFE.putLong(bytes, offset2 + i, memory.readLong(address + i));
+            UnsafeMemory.UNSAFE.putLong(bytes, (long) offset2 + i, memory.readLong(address + i));
         if (i < len - 3) {
-            UnsafeMemory.UNSAFE.putInt(bytes, offset2 + i, memory.readInt(address + i));
+            UnsafeMemory.UNSAFE.putInt(bytes, (long) offset2 + i, memory.readInt(address + i));
             i += 4;
         }
         for (; i < len; i++)
-            UnsafeMemory.UNSAFE.putByte(bytes, offset2 + i, memory.readByte(address + i));
+            UnsafeMemory.UNSAFE.putByte(bytes, (long) offset2 + i, memory.readByte(address + i));
         return len;
     }
 

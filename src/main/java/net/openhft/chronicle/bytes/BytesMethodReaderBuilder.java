@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+@SuppressWarnings("rawtypes")
 public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn in;
     private BytesParselet defaultParselet = createDefaultParselet();
@@ -11,18 +12,18 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
         this.in = in;
     }
 
-    @Override
-    public MethodReaderBuilder warnMissing(boolean warnMissing) {
-        // always true
-        return this;
-    }
-
     @NotNull
     static BytesParselet createDefaultParselet() {
         return (msg, in) -> {
             Bytes bytes = (Bytes) in;
             throw new IllegalArgumentException("Unknown message type " + msg + " " + bytes.toHexString());
         };
+    }
+
+    @Override
+    public MethodReaderBuilder warnMissing(boolean warnMissing) {
+        // always true
+        return this;
     }
 
     public MethodEncoderLookup methodEncoderLookup() {

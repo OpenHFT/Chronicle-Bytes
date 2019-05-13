@@ -36,51 +36,20 @@ import java.util.function.Function;
 /**
  * Wrapper for Heap ByteBuffers and arrays.
  */
-@SuppressWarnings("sunapi")
+@SuppressWarnings("restriction")
 public class HeapBytesStore<Underlying>
         extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
     @Nullable
     private static final Memory MEMORY = OS.memory();
     private final AtomicLong refCount = new AtomicLong(1);
     @NotNull
-    private Object realUnderlyingObject;
-    private int dataOffset;
-    private long capacity;
+    private final Object realUnderlyingObject;
+    private final int dataOffset;
+    private final long capacity;
     @NotNull
-    private Underlying underlyingObject;
-
-    public HeapBytesStore() {
-    }
+    private final Underlying underlyingObject;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
-        init(byteBuffer);
-    }
-
-    private HeapBytesStore(@NotNull byte[] byteArray) {
-        init(byteArray);
-    }
-
-    @NotNull
-    public static <T> HeapBytesStore<T> uninitialized() {
-        return new HeapBytesStore<>();
-    }
-
-    @NotNull
-    static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
-        return new HeapBytesStore<>(byteArray);
-    }
-
-    @NotNull
-    static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
-        return new HeapBytesStore<>(bb);
-    }
-
-    @Override
-    public boolean isDirectMemory() {
-        return false;
-    }
-
-    public void init(@NotNull ByteBuffer byteBuffer) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
@@ -88,7 +57,7 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
-    public void init(@NotNull byte[] byteArray) {
+    private HeapBytesStore(@NotNull byte[] byteArray) {
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteArray;
         this.realUnderlyingObject = byteArray;
@@ -96,11 +65,21 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteArray.length;
     }
 
-    public void uninit() {
-        underlyingObject = null;
-        realUnderlyingObject = null;
-        dataOffset = 0;
-        capacity = 0;
+    // Used by Chronicle-Map.
+    @NotNull
+    public static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
+        return new HeapBytesStore<>(byteArray);
+    }
+
+    // Used by Chronicle-Map.
+    @NotNull
+    public static HeapBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
+        return new HeapBytesStore<>(bb);
+    }
+
+    @Override
+    public boolean isDirectMemory() {
+        return false;
     }
 
     @Override
@@ -401,6 +380,11 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
+    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void nativeRead(long position, long address, long size) {
         throw new UnsupportedOperationException("todo");
     }
@@ -410,6 +394,7 @@ public class HeapBytesStore<Underlying>
         throw new UnsupportedOperationException("todo");
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);

@@ -17,12 +17,14 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.misc.Unsafe;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -34,6 +36,7 @@ import java.nio.ByteBuffer;
 /**
  * This data input has a a position() and a limit()
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     @NotNull
     S readPosition(long position) throws BufferUnderflowException;
@@ -139,6 +142,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     byte readByte();
 
+    default byte rawReadByte() {
+        return readByte();
+    }
+
     /**
      * @return the next unsigned 8 bit value or -1;
      */
@@ -164,6 +171,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     int readInt() throws BufferUnderflowException;
+
+    default int rawReadInt() {
+        return readInt();
+    }
 
     default long readUnsignedInt()
             throws BufferUnderflowException {
@@ -212,7 +223,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (readRemaining() <= 0)
             // TODO throw BufferUnderflowException here? please review
             return false;
-        long len0 = BytesInternal.readStopBit(this);
+        long len0 = readStopBit();
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
@@ -232,7 +243,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         b.clear();
         if (readRemaining() <= 0)
             return false;
-        long len0 = BytesInternal.readStopBit(this);
+        long len0 = this.readStopBit();
         if (len0 == -1)
             return false;
         int len = Maths.toUInt31(len0);
@@ -274,14 +285,21 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default int read(@NotNull byte[] bytes) {
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
-            bytes[i] = readByte();
+            bytes[i] = rawReadByte();
         return len;
     }
 
     default int read(@NotNull byte[] bytes, int off, int len) {
         int len2 = (int) Math.min(len, readRemaining());
-        for (int i = 0; i < len2; i++)
-            bytes[off + i] = readByte();
+        int i = 0;
+        while (i < len2 - 3) {
+            UnsafeMemory.UNSAFE.putInt(bytes,
+                    (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i,
+                    rawReadInt());
+            i += 4;
+        }
+        for (; i < len2; i++)
+            bytes[off + i] = rawReadByte();
         return len2;
     }
 
@@ -302,8 +320,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default void read(@NotNull Bytes bytes, int length) {
         int len2 = (int) Math.min(length, readRemaining());
-        for (int i = 0; i < len2; i++)
-            bytes.writeByte(readByte());
+        int i = 0;
+        for (; i < len2 - 3; i += 4)
+            bytes.rawWriteInt(rawReadInt());
+        for (; i < len2; i++)
+            bytes.rawWriteByte(rawReadByte());
     }
 
     int readVolatileInt() throws BufferUnderflowException;
@@ -370,4 +391,5 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     void lenient(boolean lenient);
 
     boolean lenient();
+
 }

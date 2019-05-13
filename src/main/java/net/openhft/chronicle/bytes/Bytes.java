@@ -26,6 +26,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.BigInteger;
@@ -42,6 +43,7 @@ import java.nio.charset.StandardCharsets;
  * writeLimit() &lt;= capacity() <p></p> Also readLimit() == writePosition() and readPosition()
  * &lt;= safeLimit(); <p></p>
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<Underlying> extends
         BytesStore<Bytes<Underlying>, Underlying>,
         BytesIn<Underlying>,
@@ -83,7 +85,7 @@ public interface Bytes<Underlying> extends
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
         @NotNull HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
-            return new NativeBytes<>(bs);
+            return NativeBytes.wrapWithNativeBytes(bs);
         } finally {
             bs.release();
         }
@@ -320,15 +322,35 @@ public interface Bytes<Underlying> extends
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      *
+     * Note: this returns a direct Bytes now
+     *
      * @param text to convert
      * @return Bytes ready for reading.
      */
-    static Bytes<byte[]> from(@NotNull CharSequence text) {
-        if (text instanceof BytesStore)
-            return ((BytesStore) text).copy().bytesForRead();
-        return wrapForRead(text.toString().getBytes(StandardCharsets.ISO_8859_1));
+    static Bytes<?> from(@NotNull CharSequence text) {
+        return from(text.toString());
     }
 
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * <p>
+     * Note: this returns a direct Bytes now
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
+    static Bytes<?> from(@NotNull String text) {
+        return NativeBytesStore.from(text).bytesForRead();
+    }
+
+    /**
+     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     *
+     * Note: this returns a heap Bytes
+     *
+     * @param text to convert
+     * @return Bytes ready for reading.
+     */
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -342,7 +364,7 @@ public interface Bytes<Underlying> extends
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
-            return bs.bytesForWrite();
+            return new VanillaBytes<>(bs);
         } finally {
             bs.release();
         }
@@ -457,8 +479,8 @@ public interface Bytes<Underlying> extends
      * @return a direct byte buffer contain the {@code bytes}
      */
     @NotNull
-    static Bytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
-        Bytes<Void> result = allocateDirect(bytes.length);
+    static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
+        VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
         } catch (BufferOverflowException e) {
@@ -606,8 +628,8 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default String toHexString(long offset, long maxLength) {
-        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 2))
-            return "Not Available";
+//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
+//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         @NotNull String ret = BytesInternal.toHexString(this, offset, maxLength2);
@@ -814,6 +836,17 @@ public interface Bytes<Underlying> extends
         if (length >= 1 << 16)
             throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
         writeUnsignedShort(position, (int) length);
+    }
+
+    default Bytes write(final InputStream inputStream) throws IOException {
+        for (; ; ) {
+            int read;
+            read = inputStream.read();
+            if (read == -1)
+                break;
+            writeByte((byte) read);
+        }
+        return this;
     }
 
 }

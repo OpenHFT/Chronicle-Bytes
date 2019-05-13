@@ -41,7 +41,9 @@ import java.util.zip.GZIPOutputStream;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assume.assumeFalse;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ByteStoreTest {
 
     private static final int SIZE = 128;
@@ -186,7 +188,7 @@ public class ByteStoreTest {
     @Test
     public void testWriteReadUtf8() throws IORuntimeException {
         bytes.writeUtf8(null);
-        @NotNull String[] words = new String[] { "Hello","World!","Bye£€!","" };
+        @NotNull String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
         for (String word : words) {
             bytes.writeUtf8(word);
         }
@@ -546,7 +548,7 @@ public class ByteStoreTest {
 
     @Test
     public void testToString() {
-
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @Nullable Bytes bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
         try {
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString());

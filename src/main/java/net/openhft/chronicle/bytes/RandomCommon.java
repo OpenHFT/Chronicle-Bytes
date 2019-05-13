@@ -118,6 +118,9 @@ interface RandomCommon extends ReferenceCounted {
     long addressForWrite(long offset)
             throws UnsupportedOperationException, BufferOverflowException;
 
+    long addressForWritePosition()
+            throws UnsupportedOperationException, BufferOverflowException;
+
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
     }
@@ -125,12 +128,14 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return the streaming bytes for reading.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytesForRead() throws IllegalStateException;
 
     /**
      * @return the streaming bytes for writing.
      */
+    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytesForWrite() throws IllegalStateException;
 
@@ -146,6 +151,7 @@ interface RandomCommon extends ReferenceCounted {
             throws BufferOverflowException;
 
     void testAndSetInt(long offset, int expected, int value);
+
     /**
      * Perform a 64-bit CAS at a given offset.
      *

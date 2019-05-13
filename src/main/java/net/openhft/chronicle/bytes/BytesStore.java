@@ -27,7 +27,6 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.charset.StandardCharsets;
 
 import static java.lang.Math.min;
 
@@ -36,6 +35,7 @@ import static java.lang.Math.min;
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
@@ -49,7 +49,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     static BytesStore from(@NotNull CharSequence cs) {
         if (cs instanceof BytesStore)
             return ((BytesStore) cs).copy();
-        return wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
+        return NativeBytesStore.from(cs.toString());
     }
 
     /**
@@ -176,13 +176,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return start() <= offset && offset < safeLimit();
     }
 
-    default boolean inside(long offset, int buffer) {
+    default boolean inside(long offset, long buffer) {
         return start() <= offset && offset + buffer < safeLimit();
     }
 
     /**
-     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying
-     * data.
+     * @return how many bytes can be safely read, i.e. what is the real capacity of the underlying data.
      */
     default long safeLimit() {
         return capacity();
@@ -283,7 +282,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @param maxLength the maxiumum len of the output
+     * @param maxLength the maximum len of the output
      * @return This BytesStore as a DebugString.
      */
     @NotNull
@@ -304,11 +303,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @param bytesStore to match against
      * @param length     to match.
-     * @return true if the bytes and length matched.
+     * @return true      if the bytes up to min(length, this.length(), bytesStore.length()) matched.
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
             throws BufferUnderflowException {
-        return length == 8
+        return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
     }
@@ -648,4 +647,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return true;
     }
 
+    default boolean checkRefCount() {
+        return true;
+    }
 }
