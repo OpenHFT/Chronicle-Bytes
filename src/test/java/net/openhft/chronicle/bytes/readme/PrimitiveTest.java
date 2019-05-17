@@ -9,6 +9,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class PrimitiveTest {
+
+    @Test
+    public void testBinaryNestedDTO() {
+        Outer outer = new Outer("name", new Inner("key1", 1.1), new Inner("key2", 2.2));
+
+        HexDumpBytes bytes = new HexDumpBytes();
+        bytes.comment("outer");
+        outer.writeMarshallable(bytes);
+        System.out.println(bytes.toHexString());
+
+        Outer outer2 = new Outer();
+        outer2.readMarshallable(bytes);
+
+        bytes.release();
+    }
+
     @Test
     public void testBinaryPrimitiveDTO() {
         PrimitiveDTO dto = new PrimitiveDTO(true,
@@ -28,6 +44,35 @@ public class PrimitiveTest {
         PrimitiveDTO dto2 = new PrimitiveDTO();
         dto2.readMarshallable(bytes);
         bytes.release();
+    }
+
+    static class Outer implements BytesMarshallable {
+        String name;
+        Inner innerA, innerB;
+
+        public Outer(String name, Inner innerA, Inner innerB) {
+            this.name = name;
+            this.innerA = innerA;
+            this.innerB = innerB;
+        }
+
+        public Outer() {
+            innerA = new Inner();
+            innerB = new Inner();
+        }
+    }
+
+    static class Inner implements BytesMarshallable {
+        String key;
+        double value;
+
+        public Inner(String key, double value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public Inner() {
+        }
     }
 
     @Test
