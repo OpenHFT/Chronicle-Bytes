@@ -22,7 +22,9 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
 
     MappedUniqueMicroTimeProvider() {
         try {
-            file = MappedFile.mappedFile(OS.TMP + "/.time-stamp.dat", OS.pageSize(), 0);
+            String user = System.getProperty("user.name");
+            if (user == null) user = "unknown";
+            file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
             bytes = file.acquireBytesForWrite(0);
             bytes.append8bit("&TSF\nTime stamp file uses for sharing a unique id\n");
             BytesUtil.unregister(bytes);
