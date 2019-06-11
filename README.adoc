@@ -78,14 +78,14 @@ The API supports.
 [source, Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
-ByteBuffer bb = bytes.underlying();
+ByteBuffer bb = bytes.underlyingObject();
 ----
 
 .Bytes which wraps a direct ByteBuffer
 [source, Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
-ByteBuffer bb = bytes.underlying();
+ByteBuffer bb = bytes.underlyingObject();
 ----
 
 .Bytes which wraps some native memory
