@@ -627,24 +627,26 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @return the size which can be safely read.  If this isElastic() it can be lower than the
-     * point it can safely write.
+     * @inheritDoc
+     * <P>
+     * If this Bytes {@link #isElastic()} the {@link #safeLimit()} can be
+     * lower than the point it can safely write.
      */
     @Override
     default long safeLimit() {
         return bytesStore().safeLimit();
     }
 
-    /**
-     * @return is the readPosition at the start and the writeLimit at the end.
-     */
     @Override
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
 
     /**
-     * @return if isElastic, this can be much lower than the virtual capacity().
+     * @inheritDoc
+     * <P>
+     * If this Bytes {@link #isElastic()} the {@link #realCapacity()} can be
+     * lower than the virtual {@link #capacity()}.
      */
     @Override
     default long realCapacity() {
@@ -657,11 +659,6 @@ public interface Bytes<Underlying> extends
     @Override
     BytesStore<Bytes<Underlying>, Underlying> copy();
 
-    /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
-     *
-     * @return hex representation of the buffer, from example [0D ,OA, FF]
-     */
     @NotNull
     default String toHexString() {
         return toHexString(1024);
@@ -695,7 +692,10 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @return can the Bytes resize when more data is written than it's realCapacity()
+     * Returns if this Bytes is elastic. I.e. it can resize when more data is written
+     * than it's {@link #realCapacity()}.
+     *
+     * @return if this Bytes is elastic
      */
     boolean isElastic();
 
