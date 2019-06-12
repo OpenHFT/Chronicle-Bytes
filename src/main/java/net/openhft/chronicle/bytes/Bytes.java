@@ -54,14 +54,44 @@ public interface Bytes<Underlying> extends
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
-     * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
+     * which will be resized as required.
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
+     * which will be resized as required
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
 
-    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
-        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
+
+    /**
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required
+     */
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
+        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
+    }
+
+    /**
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required up
+     * to the given {@code maxSize}.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     * @param maxCapacity the max capacity given in bytes equal or greater than initialCapacity
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required up
+     * to the given {@code maxSize}
+     */
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
+        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -70,16 +100,13 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Returns an elastic wrapper for a direct ByteBuffer which will be resized as required, with
-     * the given initial capacity.
-     */
-    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
-        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
-    }
-
-    /**
-     * Returns an elastic wrapper for a heap ByteBuffer which will be resized as required, with
-     * the given initial capacity.
+     * Creates and returns a new elastic wrapper for a heap ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for a heap ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
