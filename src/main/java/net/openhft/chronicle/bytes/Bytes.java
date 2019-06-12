@@ -508,10 +508,16 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * copies the contents of bytes into a direct byte buffer
+     * Creates and returns a new fix sized wrapper for native (64-bit address)
+     * memory with the contents copied from the given {@code bytes} array.
+     * <p>
+     * Changes in the given {@code bytes} will not be affected by writes in
+     * the returned wrapper or vice versa.
      *
-     * @param bytes the bytes to wrap
-     * @return a direct byte buffer contain the {@code bytes}
+     * @param bytes array to copy
+     *
+     * @return a new fix sized wrapper for native (64-bit address)
+     *         memory with the contents copied from the given {@code bytes} array
      */
     @NotNull
     static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
