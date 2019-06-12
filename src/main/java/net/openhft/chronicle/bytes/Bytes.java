@@ -60,6 +60,7 @@ public interface Bytes<Underlying> extends
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
      *         which will be resized as required
      */
+    @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
@@ -73,6 +74,7 @@ public interface Bytes<Underlying> extends
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
      *         the given {@code initialCapacity} which will be resized as required
      */
+    @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
         return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
     }
@@ -89,6 +91,7 @@ public interface Bytes<Underlying> extends
      *         the given {@code initialCapacity} which will be resized as required up
      *         to the given {@code maxSize}
      */
+    @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
         @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
         try {
@@ -165,6 +168,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to wrap
      * @return a Bytes which wraps the provided ByteBuffer and is ready for reading.
      */
+    @NotNull
     static Bytes<ByteBuffer> wrapForRead(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
@@ -225,6 +229,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to wrap
      * @return a Bytes which wraps the provided ByteBuffer and is ready for writing.
      */
+    @NotNull
     static Bytes<ByteBuffer> wrapForWrite(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
@@ -282,6 +287,7 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for reading.
      */
+    @NotNull
     static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
         @NotNull HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
         try {
@@ -336,6 +342,7 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for writing.
      */
+    @NotNull
     static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
         @NotNull BytesStore bs = BytesStore.wrap(byteArray);
         try {
@@ -353,6 +360,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<?> from(@NotNull CharSequence text) {
         return from(text.toString());
     }
@@ -365,6 +373,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<?> from(@NotNull String text) {
         return NativeBytesStore.from(text).bytesForRead();
     }
@@ -377,6 +386,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -390,6 +400,7 @@ public interface Bytes<Underlying> extends
      * @return a new fix sized wrapper for native (64-bit address)
      *         memory with the given {@code capacity}
      */
+    @NotNull
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
@@ -406,6 +417,7 @@ public interface Bytes<Underlying> extends
      * @return a new elastic wrapper for native (64-bit address)
      *         memory with zero initial capacity which will be resized as required
      */
+    @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
         return NativeBytes.nativeBytes();
     }
@@ -420,6 +432,7 @@ public interface Bytes<Underlying> extends
      * @return a new elastic wrapper for native (64-bit address)
      *         memory with the given {@code initialCapacity} which will be resized as required
      */
+    @NotNull
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) throws IllegalArgumentException {
         return NativeBytes.nativeBytes(initialCapacity);
     }
@@ -431,6 +444,7 @@ public interface Bytes<Underlying> extends
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
+    @NotNull
     static String toString(@NotNull final Bytes<?> buffer) throws BufferUnderflowException {
         return toString(buffer, Integer.MAX_VALUE - 4);
     }
@@ -443,6 +457,7 @@ public interface Bytes<Underlying> extends
      * @param maxLen of the result returned
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
+    @NotNull
     static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
             BufferUnderflowException {
 
@@ -486,6 +501,7 @@ public interface Bytes<Underlying> extends
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
+    @NotNull
     static String toString(@NotNull final Bytes buffer, long position, long len)
             throws BufferUnderflowException {
         final long pos = buffer.readPosition();
@@ -530,6 +546,7 @@ public interface Bytes<Underlying> extends
         return result;
     }
 
+    @NotNull
     static Bytes fromHexString(@NotNull String s) {
         return BytesInternal.fromHexString(s);
     }
