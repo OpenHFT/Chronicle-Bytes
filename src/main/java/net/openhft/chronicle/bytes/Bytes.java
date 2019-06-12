@@ -58,12 +58,11 @@ public interface Bytes<Underlying> extends
      * which will be resized as required.
      *
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
-     * which will be resized as required
+     *         which will be resized as required
      */
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
-
 
     /**
      * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
@@ -72,7 +71,7 @@ public interface Bytes<Underlying> extends
      * @param initialCapacity the initial non-negative capacity given in bytes
      *
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required
+     *         the given {@code initialCapacity} which will be resized as required
      */
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
         return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
@@ -87,8 +86,8 @@ public interface Bytes<Underlying> extends
      * @param maxCapacity the max capacity given in bytes equal or greater than initialCapacity
      *
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required up
-     * to the given {@code maxSize}
+     *         the given {@code initialCapacity} which will be resized as required up
+     *         to the given {@code maxSize}
      */
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
         @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
@@ -106,7 +105,7 @@ public interface Bytes<Underlying> extends
      * @param initialCapacity the initial non-negative capacity given in bytes
      *
      * @return a new elastic wrapper for a heap ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required
+     *         the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
@@ -383,10 +382,13 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Allocate a fixed size buffer read for writing.
+     * Creates and returns a new fix sized wrapper for native (64-bit address)
+     * memory with the given {@code capacity}.
      *
-     * @param capacity minimum to allocate
-     * @return a new Bytes ready for writing.
+     * @param capacity the non-negative capacity given in bytes
+     *
+     * @return a new fix sized wrapper for native (64-bit address)
+     *         memory with the given {@code capacity}
      */
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
@@ -398,18 +400,25 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Allocate an elastic buffer with initially no size.
+     * Creates and returns a new elastic wrapper for native (64-bit address)
+     * memory with zero initial capacity which will be resized as required.
      *
-     * @return Bytes for writing.
+     * @return a new elastic wrapper for native (64-bit address)
+     *         memory with zero initial capacity which will be resized as required
      */
     static NativeBytes<Void> allocateElasticDirect() {
         return NativeBytes.nativeBytes();
     }
 
+
     /**
-     * Allocate an elastic buffer with {@code initialCapacity} size.
+     * Creates and returns a new elastic wrapper for native (64-bit address)
+     * memory with the given {@code initialCapacity} which will be resized as required.
      *
-     * @return Bytes for writing.
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for native (64-bit address)
+     *         memory with the given {@code initialCapacity} which will be resized as required
      */
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) throws IllegalArgumentException {
         return NativeBytes.nativeBytes(initialCapacity);
@@ -477,7 +486,6 @@ public interface Bytes<Underlying> extends
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
-
     static String toString(@NotNull final Bytes buffer, long position, long len)
             throws BufferUnderflowException {
         final long pos = buffer.readPosition();
