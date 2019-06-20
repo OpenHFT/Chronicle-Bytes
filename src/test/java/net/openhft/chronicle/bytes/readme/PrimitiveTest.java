@@ -1,9 +1,6 @@
 package net.openhft.chronicle.bytes.readme;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.HexDumpBytes;
-import net.openhft.chronicle.bytes.NativeBytes;
-import net.openhft.chronicle.bytes.StopCharTesters;
+import net.openhft.chronicle.bytes.*;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -12,15 +9,81 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class PrimitiveTest {
+
+    @Test
+    public void testBinaryNestedDTO() {
+        Outer outer = new Outer("name", new Inner("key1", 1.1), new Inner("key2", 2.2));
+
+        HexDumpBytes bytes = new HexDumpBytes();
+        bytes.comment("outer");
+        outer.writeMarshallable(bytes);
+        System.out.println(bytes.toHexString());
+
+        Outer outer2 = new Outer();
+        outer2.readMarshallable(bytes);
+
+        bytes.release();
+    }
+
+    @Test
+    public void testBinaryPrimitiveDTO() {
+        PrimitiveDTO dto = new PrimitiveDTO(true,
+                (byte) 0x11,
+                (short) 0x2222,
+                '5',
+                0x12345678,
+                0x123456789ABCDEFL,
+                1.2345f,
+                Math.PI);
+
+        HexDumpBytes bytes = new HexDumpBytes();
+        bytes.comment("dto");
+        dto.writeMarshallable(bytes);
+        System.out.println(bytes.toHexString());
+
+        PrimitiveDTO dto2 = new PrimitiveDTO();
+        dto2.readMarshallable(bytes);
+        bytes.release();
+    }
+
+    static class Outer implements BytesMarshallable {
+        String name;
+        Inner innerA, innerB;
+
+        public Outer(String name, Inner innerA, Inner innerB) {
+            this.name = name;
+            this.innerA = innerA;
+            this.innerB = innerB;
+        }
+
+        public Outer() {
+            innerA = new Inner();
+            innerB = new Inner();
+        }
+    }
+
+    static class Inner implements BytesMarshallable {
+        String key;
+        double value;
+
+        public Inner(String key, double value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public Inner() {
+        }
+    }
+
     @Test
     public void testBinaryPrimitive() {
         HexDumpBytes bytes = new HexDumpBytes();
-        bytes.comment("true").writeBoolean(true);
+        bytes.comment("flag").writeBoolean(true);
         bytes.comment("s8").writeByte((byte) 1);
         bytes.comment("u8").writeUnsignedByte(2);
         bytes.comment("s16").writeShort((short) 3);
         bytes.comment("u16").writeUnsignedShort(4);
-        bytes.comment("char").writeStopBit('5'); // char
+        bytes.comment("ch").writeStopBit('5');
         bytes.comment("s24").writeInt24(-6_666_666);
         bytes.comment("u24").writeUnsignedInt24(16_666_666);
         bytes.comment("s32").writeInt(6);
@@ -59,6 +122,31 @@ public class PrimitiveTest {
         assertEquals(9, f32, 0.0);
         assertEquals(10, f64, 0.0);
         bytes.release();
+    }
+
+    static class PrimitiveDTO implements BytesMarshallable {
+        boolean flag;
+        byte s8;
+        short s16;
+        char ch;
+        int s32;
+        long s64;
+        float f32;
+        double f64;
+
+        public PrimitiveDTO(boolean flag, byte s8, short s16, char ch, int s32, long s64, float f32, double f64) {
+            this.flag = flag;
+            this.s8 = s8;
+            this.s16 = s16;
+            this.ch = ch;
+            this.s32 = s32;
+            this.s64 = s64;
+            this.f32 = f32;
+            this.f64 = f64;
+        }
+
+        public PrimitiveDTO() {
+        }
     }
 
     @Test

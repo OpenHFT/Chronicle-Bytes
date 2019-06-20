@@ -54,14 +54,46 @@ public interface Bytes<Underlying> extends
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
-     * @return an elastic wrapper for a direct ByteBuffer which will be resized as required.
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
+     * which will be resized as required.
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
+     *         which will be resized as required
      */
+    @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer() {
         return elasticByteBuffer(DEFAULT_BYTE_BUFFER_CAPACITY);
     }
 
-    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxSize) {
-        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxSize);
+    /**
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     *         the given {@code initialCapacity} which will be resized as required
+     */
+    @NotNull
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
+        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
+    }
+
+    /**
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required up
+     * to the given {@code maxSize}.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     * @param maxCapacity the max capacity given in bytes equal or greater than initialCapacity
+     *
+     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
+     *         the given {@code initialCapacity} which will be resized as required up
+     *         to the given {@code maxSize}
+     */
+    @NotNull
+    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
+        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -70,16 +102,13 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Returns an elastic wrapper for a direct ByteBuffer which will be resized as required, with
-     * the given initial capacity.
-     */
-    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
-        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
-    }
-
-    /**
-     * Returns an elastic wrapper for a heap ByteBuffer which will be resized as required, with
-     * the given initial capacity.
+     * Creates and returns a new elastic wrapper for a heap ByteBuffer with
+     * the given {@code initialCapacity} which will be resized as required.
+     *
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for a heap ByteBuffer with
+     *         the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
@@ -139,6 +168,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to wrap
      * @return a Bytes which wraps the provided ByteBuffer and is ready for reading.
      */
+    @NotNull
     static Bytes<ByteBuffer> wrapForRead(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
@@ -199,6 +229,7 @@ public interface Bytes<Underlying> extends
      * @param byteBuffer to wrap
      * @return a Bytes which wraps the provided ByteBuffer and is ready for writing.
      */
+    @NotNull
     static Bytes<ByteBuffer> wrapForWrite(@NotNull ByteBuffer byteBuffer) {
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
@@ -256,6 +287,7 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for reading.
      */
+    @NotNull
     static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
         @NotNull HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
         try {
@@ -310,6 +342,7 @@ public interface Bytes<Underlying> extends
      * @param byteArray to wrap
      * @return the Bytes ready for writing.
      */
+    @NotNull
     static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
         @NotNull BytesStore bs = BytesStore.wrap(byteArray);
         try {
@@ -327,6 +360,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<?> from(@NotNull CharSequence text) {
         return from(text.toString());
     }
@@ -339,6 +373,7 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<?> from(@NotNull String text) {
         return NativeBytesStore.from(text).bytesForRead();
     }
@@ -351,16 +386,21 @@ public interface Bytes<Underlying> extends
      * @param text to convert
      * @return Bytes ready for reading.
      */
+    @NotNull
     static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     /**
-     * Allocate a fixed size buffer read for writing.
+     * Creates and returns a new fix sized wrapper for native (64-bit address)
+     * memory with the given {@code capacity}.
      *
-     * @param capacity minimum to allocate
-     * @return a new Bytes ready for writing.
+     * @param capacity the non-negative capacity given in bytes
+     *
+     * @return a new fix sized wrapper for native (64-bit address)
+     *         memory with the given {@code capacity}
      */
+    @NotNull
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
@@ -371,19 +411,28 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Allocate an elastic buffer with initially no size.
+     * Creates and returns a new elastic wrapper for native (64-bit address)
+     * memory with zero initial capacity which will be resized as required.
      *
-     * @return Bytes for writing.
+     * @return a new elastic wrapper for native (64-bit address)
+     *         memory with zero initial capacity which will be resized as required
      */
+    @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
         return NativeBytes.nativeBytes();
     }
 
+
     /**
-     * Allocate an elastic buffer with {@code initialCapacity} size.
+     * Creates and returns a new elastic wrapper for native (64-bit address)
+     * memory with the given {@code initialCapacity} which will be resized as required.
      *
-     * @return Bytes for writing.
+     * @param initialCapacity the initial non-negative capacity given in bytes
+     *
+     * @return a new elastic wrapper for native (64-bit address)
+     *         memory with the given {@code initialCapacity} which will be resized as required
      */
+    @NotNull
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) throws IllegalArgumentException {
         return NativeBytes.nativeBytes(initialCapacity);
     }
@@ -395,6 +444,7 @@ public interface Bytes<Underlying> extends
      * @param buffer the buffer to use
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
+    @NotNull
     static String toString(@NotNull final Bytes<?> buffer) throws BufferUnderflowException {
         return toString(buffer, Integer.MAX_VALUE - 4);
     }
@@ -407,6 +457,7 @@ public interface Bytes<Underlying> extends
      * @param maxLen of the result returned
      * @return a string contain the text from the {@code position}  to the  {@code limit}
      */
+    @NotNull
     static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
             BufferUnderflowException {
 
@@ -450,7 +501,7 @@ public interface Bytes<Underlying> extends
      * @param len      the number of characters to show in the string
      * @return a string contain the text from offset {@code position}
      */
-
+    @NotNull
     static String toString(@NotNull final Bytes buffer, long position, long len)
             throws BufferUnderflowException {
         final long pos = buffer.readPosition();
@@ -473,10 +524,16 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * copies the contents of bytes into a direct byte buffer
+     * Creates and returns a new fix sized wrapper for native (64-bit address)
+     * memory with the contents copied from the given {@code bytes} array.
+     * <p>
+     * Changes in the given {@code bytes} will not be affected by writes in
+     * the returned wrapper or vice versa.
      *
-     * @param bytes the bytes to wrap
-     * @return a direct byte buffer contain the {@code bytes}
+     * @param bytes array to copy
+     *
+     * @return a new fix sized wrapper for native (64-bit address)
+     *         memory with the contents copied from the given {@code bytes} array
      */
     @NotNull
     static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
@@ -489,6 +546,7 @@ public interface Bytes<Underlying> extends
         return result;
     }
 
+    @NotNull
     static Bytes fromHexString(@NotNull String s) {
         return BytesInternal.fromHexString(s);
     }
@@ -569,24 +627,26 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @return the size which can be safely read.  If this isElastic() it can be lower than the
-     * point it can safely write.
+     * @inheritDoc
+     * <P>
+     * If this Bytes {@link #isElastic()} the {@link #safeLimit()} can be
+     * lower than the point it can safely write.
      */
     @Override
     default long safeLimit() {
         return bytesStore().safeLimit();
     }
 
-    /**
-     * @return is the readPosition at the start and the writeLimit at the end.
-     */
     @Override
     default boolean isClear() {
         return start() == readPosition() && writeLimit() == capacity();
     }
 
     /**
-     * @return if isElastic, this can be much lower than the virtual capacity().
+     * @inheritDoc
+     * <P>
+     * If this Bytes {@link #isElastic()} the {@link #realCapacity()} can be
+     * lower than the virtual {@link #capacity()}.
      */
     @Override
     default long realCapacity() {
@@ -599,11 +659,6 @@ public interface Bytes<Underlying> extends
     @Override
     BytesStore<Bytes<Underlying>, Underlying> copy();
 
-    /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
-     *
-     * @return hex representation of the buffer, from example [0D ,OA, FF]
-     */
     @NotNull
     default String toHexString() {
         return toHexString(1024);
@@ -637,7 +692,10 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @return can the Bytes resize when more data is written than it's realCapacity()
+     * Returns if this Bytes is elastic. I.e. it can resize when more data is written
+     * than it's {@link #realCapacity()}.
+     *
+     * @return if this Bytes is elastic
      */
     boolean isElastic();
 

@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
@@ -11,6 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
 
@@ -430,6 +432,25 @@ public class MappedBytesTest {
             }
         } finally {
             csb.release();
+        }
+        IOTools.deleteDirWithFiles(tmpfile, 2);
+    }
+
+    @Test
+    public void threadSafeMappedBytes() throws FileNotFoundException {
+        String tmpfile = OS.TARGET + "/threadSafeMappedBytes-" + System.nanoTime();
+        int count = 4000;
+        IntStream.range(0, count)
+                .parallel()
+                .forEach(i -> {
+                    try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
+                        mb.addAndGetLong(0, 1);
+                    } catch (FileNotFoundException e) {
+                        Jvm.rethrow(e);
+                    }
+                });
+        try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
+            assertEquals(count, mb.readVolatileLong(0));
         }
         IOTools.deleteDirWithFiles(tmpfile, 2);
     }

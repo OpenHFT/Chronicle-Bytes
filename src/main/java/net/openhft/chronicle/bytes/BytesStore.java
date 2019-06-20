@@ -141,9 +141,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * The Bytes are clear if start() == readPosition() &amp;&amp; writeLimit() == capacity()
+     * Returns if the {@code readPosition} is at the {@code start} and
+     * the {@code writeLimit} is at the {@code end}.
+     * <p>
+     * I.e {@code start() == readPosition() &amp;&amp; writeLimit() == capacity()}
      *
-     * @return is the Bytes clear?
+     * @return if the {@code readPosition} is at the {@code start} and
+     *         the {@code writeLimit} is at the {@code end}
      */
     default boolean isClear() {
         return true;

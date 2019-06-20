@@ -313,7 +313,9 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     /**
-     * @return the actual capacity you can potentially read.
+     * Returns the actual capacity that can be potentially read.
+     *
+     * @return the actual capacity that can be potentially read.
      */
     long realCapacity();
 
