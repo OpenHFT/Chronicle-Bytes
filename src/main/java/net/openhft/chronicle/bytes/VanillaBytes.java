@@ -288,10 +288,13 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     @NotNull
     public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
+        assert end > start : "end=" + end + ",start=" + start;
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
+
                     write((BytesStore) str, (long) start, end - start);
+                    writePosition(writePosition() + (end - start));
                     return this;
                 }
                 if (str instanceof String) {
