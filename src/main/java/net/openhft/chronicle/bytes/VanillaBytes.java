@@ -294,7 +294,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
                 if (str instanceof BytesStore) {
 
                     write((BytesStore) str, (long) start, end - start);
-                    writePosition(writePosition() + (end - start));
                     return this;
                 }
                 if (str instanceof String) {
