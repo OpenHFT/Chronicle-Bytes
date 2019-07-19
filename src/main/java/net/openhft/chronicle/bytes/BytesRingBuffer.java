@@ -17,11 +17,11 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.Closeable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
