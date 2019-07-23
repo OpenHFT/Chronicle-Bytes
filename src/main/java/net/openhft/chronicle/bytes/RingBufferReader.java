@@ -8,6 +8,9 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     boolean isClosed();
 
+    @Override
+    void close();
+
     /**
      * the readPosition and readLimit will be adjusted so that the client can read the data
      *
