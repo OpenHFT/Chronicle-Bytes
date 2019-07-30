@@ -23,6 +23,14 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     void afterRead(long next);
 
     /**
+     * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}
+     * @param bytes
+     * @return whether read succeeded
+     */
+    @SuppressWarnings("rawtypes")
+    boolean read(BytesOut bytes);
+
+    /**
      * @return the byteStore which backs the ring buffer
      */
     @SuppressWarnings("rawtypes")
