@@ -35,4 +35,6 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      */
     @SuppressWarnings("rawtypes")
     BytesStore byteStore();
+
+    void toEnd();
 }
