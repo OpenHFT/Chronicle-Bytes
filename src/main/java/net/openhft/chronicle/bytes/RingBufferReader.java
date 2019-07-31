@@ -8,6 +8,9 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     boolean isClosed();
 
+    /**
+     * Close the reader. After being closed, the reader will not block writers
+     */
     @Override
     void close();
 
@@ -36,5 +39,8 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     @SuppressWarnings("rawtypes")
     BytesStore byteStore();
 
+    /**
+     * Take reader to just past the end of the RB
+     */
     void toEnd();
 }
