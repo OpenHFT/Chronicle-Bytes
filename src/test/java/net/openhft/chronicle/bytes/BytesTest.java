@@ -102,6 +102,7 @@ public class BytesTest {
             // expected.
         }
     }
+
     @Test
     public void testIndexOfAtEnd() {
         String sourceStr = "A string of some data";
@@ -506,6 +507,27 @@ public class BytesTest {
             assertEquals(0, from.readPosition());
         } finally {
             from.release();
+        }
+    }
+
+    @Test
+    public void testReadIncompleteLong() {
+        assumeFalse(NativeBytes.areNewGuarded());
+        Bytes bytes = alloc1.elasticBytes(16);
+        bytes.writeLong(0x0706050403020100L);
+        bytes.writeLong(0x0F0E0D0C0B0A0908L);
+        try {
+            assertEquals(0x0706050403020100L, bytes.readIncompleteLong());
+            assertEquals(0x0F0E0D0C0B0A0908L, bytes.readIncompleteLong());
+            for (int i = 0; i <= 7; i++) {
+                assertEquals("i: " + i, Long.toHexString(0x0B0A090807060504L >>> (i * 8)),
+                        Long.toHexString(bytes.readPositionRemaining(4 + i, 8 - i)
+                                .readIncompleteLong()));
+            }
+            assertEquals(0, bytes.readPositionRemaining(4, 0).readIncompleteLong());
+
+        } finally {
+            bytes.release();
         }
     }
 

@@ -183,6 +183,27 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     long readLong() throws BufferUnderflowException;
 
+    /**
+     * @return a long using the bytes remaining
+     */
+    default long readIncompleteLong() {
+        long left = readRemaining();
+        try {
+            if (left >= 8)
+                return readLong();
+            if (left == 4)
+                return readInt();
+            long l = 0;
+            for (int i = 0, remaining = (int) left; i < remaining; i++) {
+                l |= (long) readUnsignedByte() << (i * 8);
+            }
+            return l;
+
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     float readFloat() throws BufferUnderflowException;
 
     double readDouble() throws BufferUnderflowException;
