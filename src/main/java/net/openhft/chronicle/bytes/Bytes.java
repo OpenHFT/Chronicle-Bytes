@@ -422,7 +422,6 @@ public interface Bytes<Underlying> extends
         return NativeBytes.nativeBytes();
     }
 
-
     /**
      * Creates and returns a new elastic wrapper for native (64-bit address)
      * memory with the given {@code initialCapacity} which will be resized as required.

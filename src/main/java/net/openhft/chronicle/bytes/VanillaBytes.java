@@ -254,7 +254,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         return this;
     }
 
-
     protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length) {
         if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
             long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
