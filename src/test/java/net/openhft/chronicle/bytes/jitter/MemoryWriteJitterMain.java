@@ -100,7 +100,6 @@ public class MemoryWriteJitterMain {
                 histoRead.sampleNanos(now - startTimeNs);
                 histoReadWrite.sampleNanos(now - mm.firstLong());
             }
-
         } while (System.currentTimeMillis() < start0 + runTime * 1_000);
         running = false;
         mf.release();

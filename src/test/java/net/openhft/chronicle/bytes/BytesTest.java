@@ -231,7 +231,6 @@ public class BytesTest {
         } finally {
             bytes.release();
         }
-
     }
 
     @Test
@@ -269,7 +268,6 @@ public class BytesTest {
         } finally {
             bbb.release();
         }
-
     }
 
     @Test
@@ -385,7 +383,6 @@ public class BytesTest {
             store1.release();
             store2.release();
         }
-
     }
 
     @Test

@@ -32,6 +32,5 @@ public class StopBitDecimalTest {
             double d2 = bytes.readStopBitDecimal();
             assertEquals("i: " + i + ", d: " + d + ", v: " + v, d, d2, 0.0);
         }
-
     }
 }

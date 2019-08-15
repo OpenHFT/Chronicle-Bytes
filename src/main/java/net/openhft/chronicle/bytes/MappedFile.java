@@ -227,7 +227,6 @@ public class MappedFile implements ReferenceCounted {
                     Jvm.debug().on(MappedFile.class, "Error during warmup", e);
                 }
             }
-
         } catch (IOException e) {
             Jvm.warn().on(MappedFile.class, "Error during warmup", e);
         }
@@ -240,7 +239,6 @@ public class MappedFile implements ReferenceCounted {
             mappedFile.acquireBytesForRead(i * mapAlignment).release();
             mappedFile.acquireBytesForWrite(i * mapAlignment).release();
         }
-
     }
 
     private void doNotCloseOnInterrupt(FileChannel fc) {
@@ -335,7 +333,6 @@ public class MappedFile implements ReferenceCounted {
                             }
                         }
                     }
-
                 } catch (IOException ioe) {
                     throw new IOException("Failed to resize to " + minSize, ioe);
                 }

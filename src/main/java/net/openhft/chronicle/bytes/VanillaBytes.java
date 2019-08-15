@@ -240,7 +240,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             } catch (IllegalArgumentException e) {
                 throw new AssertionError(e);
             }
-
         } else {
             return (BytesStore) NativeBytes.copyOf(this);
         }

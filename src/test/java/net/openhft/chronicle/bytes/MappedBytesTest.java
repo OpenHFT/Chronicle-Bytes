@@ -61,7 +61,6 @@ public class MappedBytesTest {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
-
         }
     }
 
@@ -84,7 +83,6 @@ public class MappedBytesTest {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
-
         }
     }
 
@@ -106,7 +104,6 @@ public class MappedBytesTest {
             Assert.assertEquals(text, bytesR.toString());
             from.release();
         }
-
     }
 
     @Test
@@ -127,7 +124,6 @@ public class MappedBytesTest {
             Assert.assertEquals(text, bytesR.toString());
             from.release();
         }
-
     }
 
     @Test
