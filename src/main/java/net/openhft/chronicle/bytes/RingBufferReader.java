@@ -25,6 +25,8 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     void afterRead(long next);
 
+    void afterRead(long next, long underlyingIndex);
+
     /**
      * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}
      * @param bytes
