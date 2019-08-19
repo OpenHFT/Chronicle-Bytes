@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes;
 import java.io.Closeable;
 
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
+    long UNKNOWN_INDEX = -1;
 
     boolean isEmpty();
 
@@ -25,7 +26,9 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     void afterRead(long next);
 
-    void afterRead(long next, long underlyingIndex);
+    void afterRead(long next, long payloadStart, long underlyingIndex);
+
+    long underlyingIndex();
 
     /**
      * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}

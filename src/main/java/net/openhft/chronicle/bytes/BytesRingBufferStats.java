@@ -37,8 +37,6 @@ public interface BytesRingBufferStats {
 
     long getAndClearWriteCount();
 
-    long maxCopyTimeNs();
-
     long getAndClearMissedWriteCount();
 
     long getAndClearContentionCount();
