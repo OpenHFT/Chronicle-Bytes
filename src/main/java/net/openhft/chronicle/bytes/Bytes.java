@@ -558,6 +558,7 @@ public interface Bytes<Underlying> extends
      * @param source    the read bytes being searched.
      * @param target    the read bytes being searched for.
      * @param fromIndex the index to begin searching from,
+     * @return the index of where the text was found.
      */
     static int indexOf(@NotNull BytesStore source, @NotNull BytesStore target, int fromIndex) {
 

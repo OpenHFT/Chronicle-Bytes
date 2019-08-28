@@ -504,4 +504,9 @@ public class MappedFile implements ReferenceCounted {
     public boolean isClosed() {
         return closed.get();
     }
+
+    @NotNull
+    public RandomAccessFile raf() {
+        return raf;
+    }
 }
