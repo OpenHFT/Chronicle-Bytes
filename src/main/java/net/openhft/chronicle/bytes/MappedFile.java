@@ -52,7 +52,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public class MappedFile implements ReferenceCounted {
     private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
-    private static final Object GLOBAL_FILE_LOCK = new Object();
+    private static final Object GLOBAL_FILE_LOCK = FileChannel.class;
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
