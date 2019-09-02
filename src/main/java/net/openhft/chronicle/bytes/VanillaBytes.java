@@ -240,7 +240,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
             } catch (IllegalArgumentException e) {
                 throw new AssertionError(e);
             }
-
         } else {
             return (BytesStore) NativeBytes.copyOf(this);
         }
@@ -253,7 +252,6 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         optimisedWrite(bytes, offset, length);
         return this;
     }
-
 
     protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length) {
         if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
@@ -288,9 +286,11 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @Override
     @NotNull
     public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
+        assert end > start : "end=" + end + ",start=" + start;
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
+
                     write((BytesStore) str, (long) start, end - start);
                     return this;
                 }

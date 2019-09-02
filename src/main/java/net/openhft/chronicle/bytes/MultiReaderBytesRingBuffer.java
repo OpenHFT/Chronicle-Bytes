@@ -2,12 +2,18 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
-/**
- * Created by Jerry Shea on 23/04/18.
- */
 public interface MultiReaderBytesRingBuffer extends BytesRingBuffer {
 
     @NotNull
-    RingBufferReader createReader();
+    default RingBufferReader createReader() {
+        return createReader(0);
+    }
 
+    /**
+     * Create a reader
+     * @param id of reader as each reader has separate read position etc.
+     * @return reader
+     */
+    @NotNull
+    RingBufferReader createReader(int id);
 }

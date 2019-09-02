@@ -305,7 +305,6 @@ public interface RandomDataInput extends RandomCommon {
             for (int i = 0, remaining = (int) left; i < remaining; i++) {
                 l |= (long) readUnsignedByte(offset + i) << (i * 8);
             }
-
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }

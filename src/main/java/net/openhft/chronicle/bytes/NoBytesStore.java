@@ -305,7 +305,6 @@ public enum NoBytesStore implements BytesStore {
         return NO_PAGE;
     }
 
-
     @NotNull
     @Override
     public Bytes bytesForWrite() {

@@ -28,11 +28,11 @@ import java.util.stream.Stream;
 
 /**
  * This cache only gaurentees it will provide a String which matches the decoded bytes.
- * <p/>
+ * <p>
  * It doesn't guantee it will always return the same object,
  * nor that different threads will return the same object,
  * though the contents should always be the same.
- * <p/>
+ * <p>
  * While not technically thread safe, it should still behave correctly.
  * @author peter.lawrey
  */

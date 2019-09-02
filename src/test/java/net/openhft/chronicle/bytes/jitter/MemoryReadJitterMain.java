@@ -113,7 +113,6 @@ public class MemoryReadJitterMain {
             while (System.nanoTime() < start1 + intervalNS) {
                 Thread.yield();
             }
-
         } while (System.currentTimeMillis() < start0 + runTime * 1_000);
         running = false;
         mf.release();

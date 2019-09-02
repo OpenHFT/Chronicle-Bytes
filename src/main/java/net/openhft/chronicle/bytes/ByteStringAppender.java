@@ -64,6 +64,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @Override
     @NotNull
     default B append(@NotNull CharSequence cs) throws BufferOverflowException {
+        if (cs.length() == 0)
+            return (B) this;
         try {
             return append(cs, 0, cs.length());
         } catch (IndexOutOfBoundsException e) {

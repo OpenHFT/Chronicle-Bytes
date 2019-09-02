@@ -113,4 +113,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     boolean isEmpty();
 
     BytesStore bytesStore();
+
+    @Override
+    void close();
 }

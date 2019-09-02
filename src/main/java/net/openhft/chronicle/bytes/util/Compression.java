@@ -78,7 +78,6 @@ public interface Compression {
             default:
                 throw new IllegalArgumentException("Unsupported compression " + cs);
         }
-
     }
 
     @Nullable

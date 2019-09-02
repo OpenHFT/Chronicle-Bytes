@@ -1,13 +1,19 @@
 package net.openhft.chronicle.bytes;
 
-/**
- * Created by Jerry Shea on 23/04/18.
- */
-public interface RingBufferReader extends RingBufferReaderStats {
+import java.io.Closeable;
+
+public interface RingBufferReader extends RingBufferReaderStats, Closeable {
+    long UNKNOWN_INDEX = -1;
 
     boolean isEmpty();
 
     boolean isClosed();
+
+    /**
+     * Close the reader. After being closed, the reader will not block writers
+     */
+    @Override
+    void close();
 
     /**
      * the readPosition and readLimit will be adjusted so that the client can read the data
@@ -20,9 +26,26 @@ public interface RingBufferReader extends RingBufferReaderStats {
 
     void afterRead(long next);
 
+    void afterRead(long next, long payloadStart, long underlyingIndex);
+
+    long underlyingIndex();
+
+    /**
+     * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}
+     * @param bytes
+     * @return whether read succeeded
+     */
+    @SuppressWarnings("rawtypes")
+    boolean read(BytesOut bytes);
+
     /**
      * @return the byteStore which backs the ring buffer
      */
     @SuppressWarnings("rawtypes")
     BytesStore byteStore();
+
+    /**
+     * Take reader to just past the end of the RB
+     */
+    void toEnd();
 }

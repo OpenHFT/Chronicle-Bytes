@@ -23,10 +23,7 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -35,6 +32,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
 
@@ -60,6 +58,7 @@ public enum BytesUtil {
             throw new FileNotFoundException(name);
         return file.getAbsolutePath();
     }
+
     public static Bytes readFile(@NotNull String name) throws IOException {
         File file = new File(name);
         URL url = null;
@@ -200,19 +199,24 @@ public enum BytesUtil {
         return true;
     }
 
+    static String asString(String s, Throwable t) {
+        StringWriter sw = new StringWriter();
+        sw.append(s).append("\n");
+        t.printStackTrace(new PrintWriter(sw));
+        return sw.toString();
+    }
+
     public static void checkRegisteredBytes() {
-        int count = 0;
-        for (Map.Entry<BytesStore, Throwable> entry : bytesCreated.entrySet()) {
-            BytesStore key = entry.getKey();
-            if (key.refCount() != 0) {
-                System.err.println("Bytes " + key.getClass() + " refCount=" + key.refCount());
-                entry.getValue().printStackTrace();
-                count++;
-            }
-        }
+        Map<String, Long> throwCount = bytesCreated.entrySet()
+                .stream()
+                .filter(e -> e.getKey().refCount() > 0)
+                .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
+                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+
         bytesCreated.clear();
-        if (count != 0)
-            throw new IllegalStateException("Bytes not released properly " + count);
+        throwCount.forEach((k, v) -> System.err.println("checkRegisteredBytes: " + v + " times " + k));
+        if (throwCount.size() != 0)
+            throw new IllegalStateException("Bytes not released properly " + throwCount.values().stream().mapToLong(l -> l).sum());
     }
 
     public static boolean unregister(BytesStore bytes) {

@@ -415,7 +415,6 @@ enum BytesInternal {
                     throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200));
                 }
             }
-
         } catch (IOException e) {
 
             throw Jvm.rethrow(e);

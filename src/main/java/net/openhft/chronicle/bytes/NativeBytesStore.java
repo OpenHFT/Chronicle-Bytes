@@ -177,7 +177,6 @@ public class NativeBytesStore<Underlying>
         return maximumLimit >= length;
     }
 
-
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
@@ -388,7 +387,6 @@ public class NativeBytesStore<Underlying>
         UnsafeMemory.UNSAFE.loadFence();
         return memory.readInt(address + translate(offset));
     }
-
 
     @Override
     @ForceInline

@@ -52,7 +52,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public class MappedFile implements ReferenceCounted {
     private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
-    private static final Object GLOBAL_FILE_LOCK = new Object();
+    private static final Object GLOBAL_FILE_LOCK = FileChannel.class;
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -227,7 +227,6 @@ public class MappedFile implements ReferenceCounted {
                     Jvm.debug().on(MappedFile.class, "Error during warmup", e);
                 }
             }
-
         } catch (IOException e) {
             Jvm.warn().on(MappedFile.class, "Error during warmup", e);
         }
@@ -240,7 +239,6 @@ public class MappedFile implements ReferenceCounted {
             mappedFile.acquireBytesForRead(i * mapAlignment).release();
             mappedFile.acquireBytesForWrite(i * mapAlignment).release();
         }
-
     }
 
     private void doNotCloseOnInterrupt(FileChannel fc) {
@@ -335,7 +333,6 @@ public class MappedFile implements ReferenceCounted {
                             }
                         }
                     }
-
                 } catch (IOException ioe) {
                     throw new IOException("Failed to resize to " + minSize, ioe);
                 }
@@ -506,5 +503,10 @@ public class MappedFile implements ReferenceCounted {
 
     public boolean isClosed() {
         return closed.get();
+    }
+
+    @NotNull
+    public RandomAccessFile raf() {
+        return raf;
     }
 }
