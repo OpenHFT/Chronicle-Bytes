@@ -27,28 +27,6 @@ import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
-    @Nullable
-    private static Set<WeakReference<BinaryLongReference>> binaryLongReferences;
-
-    /**
-     * only used for testing
-     */
-    public static void startCollecting() {
-        binaryLongReferences = new CopyOnWriteArraySet<>();
-    }
-
-    /**
-     * only used for testing
-     */
-    public static void forceAllToNotCompleteState() {
-        binaryLongReferences.forEach(x -> {
-            @Nullable BinaryLongReference binaryLongReference = x.get();
-            if (binaryLongReference != null) {
-                binaryLongReference.setValue(LONG_NOT_COMPLETE);
-            }
-        });
-        binaryLongReferences = null;
-    }
 
     @SuppressWarnings("rawtypes")
     @Override
@@ -101,8 +79,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
-        if (value == LONG_NOT_COMPLETE && binaryLongReferences != null)
-            binaryLongReferences.add(new WeakReference<>(this));
-        return bytes.compareAndSwapLong(offset, expected, value);
+        BytesStore bytes = this.bytes;
+        return bytes != null && bytes.compareAndSwapLong(offset, expected, value);
     }
 }
