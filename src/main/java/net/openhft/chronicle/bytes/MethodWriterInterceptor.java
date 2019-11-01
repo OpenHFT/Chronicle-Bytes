@@ -21,19 +21,17 @@ public interface MethodWriterInterceptor {
         if (methodWriterListener == null)
             return (method, args, invoker) -> {
                 interceptor.intercept(method, args, invoker);
-                invoker.accept(method, args);
             };
 
         if (interceptor == null)
             return (method, args, invoker) -> {
                 methodWriterListener.onWrite(method.getName(), args);
-                invoker.accept(method, args);
+
             };
 
         return (method, args, invoker) -> {
             interceptor.intercept(method, args, invoker);
             methodWriterListener.onWrite(method.getName(), args);
-            invoker.accept(method, args);
         };
     }
 
