@@ -30,7 +30,8 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
     void onClose(Closeable closeable);
 
     default void methodWriterInterceptor(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptor interceptor) {
-        methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener, interceptor));
+        if (methodWriterListener != null || interceptor != null)
+            methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener, interceptor));
     }
 
     void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor);
