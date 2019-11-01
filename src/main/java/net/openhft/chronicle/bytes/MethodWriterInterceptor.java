@@ -26,7 +26,7 @@ public interface MethodWriterInterceptor {
         if (interceptor == null)
             return (method, args, invoker) -> {
                 methodWriterListener.onWrite(method.getName(), args);
-
+                invoker.accept(method, args);
             };
 
         return (method, args, invoker) -> {
