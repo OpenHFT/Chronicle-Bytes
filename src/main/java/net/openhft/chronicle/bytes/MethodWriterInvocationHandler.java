@@ -17,6 +17,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.Closeable;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 
@@ -28,9 +29,8 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
 
     void onClose(Closeable closeable);
 
-    // MethodWriterInterceptor is more flexible
-    default void methodWriterListener(MethodWriterListener methodWriterListener) {
-        methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener));
+    default void methodWriterInterceptor(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptor interceptor) {
+        methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener, interceptor));
     }
 
     void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor);
