@@ -19,9 +19,7 @@ public interface MethodWriterInterceptor {
             throw new IllegalArgumentException("both methodWriterListener and interceptor are NULL");
 
         if (methodWriterListener == null)
-            return (method, args, invoker) -> {
-                interceptor.intercept(method, args, invoker);
-            };
+            return interceptor::intercept;
 
         if (interceptor == null)
             return (method, args, invoker) -> {
