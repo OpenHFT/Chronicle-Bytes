@@ -101,6 +101,17 @@ public class BytesMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
+                    if (type == byte[].class)
+                        return new ByteArrayFieldAccess(field);
+                    if (type == int[].class)
+                        return new IntArrayFieldAccess(field);
+                    if (type == float[].class)
+                        return new FloatArrayFieldAccess(field);
+                    if (type == long[].class)
+                        return new LongArrayFieldAccess(field);
+                    if (type == double[].class)
+                        return new DoubleArrayFieldAccess(field);
+
                     if (type.isArray())
                         throw new UnsupportedOperationException("TODO");
                     if (Collection.class.isAssignableFrom(type))
@@ -436,6 +447,40 @@ public class BytesMarshaller<T> {
         }
     }
 
+    static class ByteArrayFieldAccess extends FieldAccess {
+        public ByteArrayFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            byte[] array = (byte[]) field.get(o);
+            if (array == null) {
+                write.writeInt(~0);
+            } else {
+                write.writeInt(array.length);
+                for (int i = 0; i < array.length; i++)
+                    write.writeByte(array[i]);
+            }
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            int len = read.readInt();
+            if (len == ~0) {
+                field.set(o, null);
+            } else if (len >= 0) {
+                byte[] array = (byte[]) field.get(o);
+                if (array == null || array.length != len) {
+                    array = new byte[len];
+                    field.set(o, array);
+                }
+                for (int i = 0; i < len; i++)
+                    array[i] = read.readByte();
+            }
+        }
+    }
+
     static class CharFieldAccess extends FieldAccess {
         public CharFieldAccess(Field field) {
             super(field);
@@ -484,6 +529,40 @@ public class BytesMarshaller<T> {
         }
     }
 
+    static class IntArrayFieldAccess extends FieldAccess {
+        public IntArrayFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            int[] array = (int[]) field.get(o);
+            if (array == null) {
+                write.writeInt(~0);
+            } else {
+                write.writeInt(array.length);
+                for (int i = 0; i < array.length; i++)
+                    write.writeInt(array[i]);
+            }
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            int len = read.readInt();
+            if (len == ~0) {
+                field.set(o, null);
+            } else if (len >= 0) {
+                int[] array = (int[]) field.get(o);
+                if (array == null || array.length != len) {
+                    array = new int[len];
+                    field.set(o, array);
+                }
+                for (int i = 0; i < len; i++)
+                    array[i] = read.readInt();
+            }
+        }
+    }
+
     static class FloatFieldAccess extends FieldAccess {
         public FloatFieldAccess(Field field) {
             super(field);
@@ -500,6 +579,41 @@ public class BytesMarshaller<T> {
         }
     }
 
+    static class FloatArrayFieldAccess extends FieldAccess {
+        public FloatArrayFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            float[] array = (float[]) field.get(o);
+            if (array == null) {
+                write.writeInt(~0);
+            } else {
+                write.writeInt(array.length);
+                for (int i = 0; i < array.length; i++)
+                    write.writeFloat(array[i]);
+            }
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            int len = read.readInt();
+            if (len == ~0) {
+                field.set(o, null);
+            } else if (len >= 0) {
+                float[] array = (float[]) field.get(o);
+                if (array == null || array.length != len) {
+                    array = new float[len];
+                    field.set(o, array);
+                }
+                for (int i = 0; i < len; i++)
+                    array[i] = read.readFloat();
+            }
+        }
+    }
+
+
     static class LongFieldAccess extends FieldAccess {
         public LongFieldAccess(Field field) {
             super(field);
@@ -513,6 +627,40 @@ public class BytesMarshaller<T> {
         @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setLong(o, read.readLong());
+        }
+    }
+
+    static class LongArrayFieldAccess extends FieldAccess {
+        public LongArrayFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            long[] array = (long[]) field.get(o);
+            if (array == null) {
+                write.writeInt(~0);
+            } else {
+                write.writeInt(array.length);
+                for (int i = 0; i < array.length; i++)
+                    write.writeLong(array[i]);
+            }
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            int len = read.readInt();
+            if (len == ~0) {
+                field.set(o, null);
+            } else if (len >= 0) {
+                long[] array = (long[]) field.get(o);
+                if (array == null || array.length != len) {
+                    array = new long[len];
+                    field.set(o, array);
+                }
+                for (int i = 0; i < len; i++)
+                    array[i] = read.readLong();
+            }
         }
     }
 
@@ -531,4 +679,39 @@ public class BytesMarshaller<T> {
             field.setDouble(o, read.readDouble());
         }
     }
+
+    static class DoubleArrayFieldAccess extends FieldAccess {
+        public DoubleArrayFieldAccess(Field field) {
+            super(field);
+        }
+
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            double[] array = (double[]) field.get(o);
+            if (array == null) {
+                write.writeInt(~0);
+            } else {
+                write.writeInt(array.length);
+                for (int i = 0; i < array.length; i++)
+                    write.writeDouble(array[i]);
+            }
+        }
+
+        @Override
+        protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
+            int len = read.readInt();
+            if (len == ~0) {
+                field.set(o, null);
+            } else if (len >= 0) {
+                double[] array = (double[]) field.get(o);
+                if (array == null || array.length != len) {
+                    array = new double[len];
+                    field.set(o, array);
+                }
+                for (int i = 0; i < len; i++)
+                    array[i] = read.readDouble();
+            }
+        }
+    }
+
 }
