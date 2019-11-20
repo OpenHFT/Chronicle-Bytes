@@ -315,7 +315,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         int i = 0;
         while (i < len2 - 3) {
             UnsafeMemory.UNSAFE.putInt(bytes,
-                    (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i,
+                    (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i + off,
                     rawReadInt());
             i += 4;
         }

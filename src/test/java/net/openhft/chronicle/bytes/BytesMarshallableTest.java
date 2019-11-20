@@ -38,6 +38,7 @@ import java.time.ZonedDateTime;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
 /*
@@ -441,6 +442,71 @@ public class BytesMarshallableTest {
         bytes.release();
     }
 
+    @Test
+    public void nullArrays() {
+        Bytes<?> bytes = new HexDumpBytes();
+        BMA bma = new BMA();
+        bma.writeMarshallable(bytes);
+        String expected = NativeBytes.areNewGuarded() ?
+                "   a6 ff ff ff ff                                  # bytes\n" +
+                        "   a6 ff ff ff ff                                  # ints\n" +
+                        "   a6 ff ff ff ff                                  # floats\n" +
+                        "   a6 ff ff ff ff                                  # longs\n" +
+                        "   a6 ff ff ff ff                                  # doubles\n" :
+                "   ff ff ff ff                                     # bytes\n" +
+                        "   ff ff ff ff                                     # ints\n" +
+                        "   ff ff ff ff                                     # floats\n" +
+                        "   ff ff ff ff                                     # longs\n" +
+                        "   ff ff ff ff                                     # doubles\n";
+        assertEquals(expected, bytes.toHexString());
+        BMA bma2 = new BMA();
+        bma2.bytes = new byte[0];
+        bma2.ints = new int[0];
+        bma2.floats = new float[0];
+        bma2.longs = new long[0];
+        bma2.doubles = new double[0];
+        bma2.readMarshallable(bytes);
+        assertNull(bma2.longs);
+        assertNull(bma2.doubles);
+        bytes.release();
+    }
+
+    @Test
+    public void arrays() {
+        Bytes<?> bytes = new HexDumpBytes();
+        BMA bma = new BMA();
+        bma.bytes = "Hello".getBytes();
+        bma.ints = new int[]{0x12345678};
+        bma.floats = new float[]{0x1.234567p0f};
+        bma.longs = new long[]{0x123456789ABCDEFL};
+        bma.doubles = new double[]{0x1.23456789ABCDEp0};
+        bma.writeMarshallable(bytes);
+        String expected = NativeBytes.areNewGuarded() ?
+                "   a6 05 00 00 00 a4 48 a4 65 a4 6c a4 6c a4 6f    # bytes\n" +
+                        "   a6 01 00 00 00 a6 78 56 34 12                   # ints\n" +
+                        "   a6 01 00 00 00 90 b4 a2 91 3f                   # floats\n" +
+                        "   a6 01 00 00 00 a7 ef cd ab 89 67 45 23 01       # longs\n" +
+                        "   a6 01 00 00 00 91 de bc 9a 78 56 34 f2 3f       # doubles\n" :
+                "   05 00 00 00 48 65 6c 6c 6f                      # bytes\n" +
+                        "   01 00 00 00 78 56 34 12                         # ints\n" +
+                        "   01 00 00 00 b4 a2 91 3f                         # floats\n" +
+                        "   01 00 00 00 ef cd ab 89 67 45 23 01             # longs\n" +
+                        "   01 00 00 00 de bc 9a 78 56 34 f2 3f             # doubles\n";
+        assertEquals(expected, bytes.toHexString());
+        BMA bma2 = new BMA();
+        bma2.longs = new long[0];
+        bma2.doubles = new double[0];
+        bma2.readMarshallable(bytes);
+        assertEquals("[72, 101, 108, 108, 111]", Arrays.toString(bma2.bytes));
+        assertEquals("[305419896]", Arrays.toString(bma2.ints));
+        assertEquals("[1.1377778]", Arrays.toString(bma2.floats));
+        assertEquals("[81985529216486895]", Arrays.toString(bma2.longs));
+        assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles));
+        assertEquals(0x123456789ABCDEFL, bma2.longs[0]);
+        assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0);
+        bytes.release();
+    }
+
     static class MyCollections implements BytesMarshallable {
         List<String> words = new ArrayList<>();
         Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
@@ -465,6 +531,14 @@ public class BytesMarshallableTest {
 
     static class BM3 implements BytesMarshallable {
         long value;
+    }
+
+    static class BMA implements BytesMarshallable {
+        byte[] bytes;
+        int[] ints;
+        float[] floats;
+        long[] longs;
+        double[] doubles;
     }
 }
 

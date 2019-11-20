@@ -25,7 +25,6 @@ import org.jetbrains.annotations.NotNull;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesIn<Underlying> extends
-        StreamingDataInput<Bytes<Underlying>>,
         RandomDataInput,
         ByteStringParser<Bytes<Underlying>> {
     /**

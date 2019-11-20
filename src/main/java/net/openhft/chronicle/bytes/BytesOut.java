@@ -29,7 +29,6 @@ import java.util.function.Function;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesOut<Underlying> extends
-        StreamingDataOutput<Bytes<Underlying>>,
         ByteStringAppender<Bytes<Underlying>>,
         BytesPrepender<Bytes<Underlying>>,
         BytesComment<BytesOut<Underlying>> {
