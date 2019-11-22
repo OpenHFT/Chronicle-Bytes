@@ -28,7 +28,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.nio.ByteBuffer;
 import java.util.*;
 import java.util.function.Supplier;
 
@@ -252,18 +251,13 @@ public class BytesMarshaller<T> {
             @NotNull Bytes bs;
             if (bytes == null) {
                 bs = Bytes.elasticHeapByteBuffer(length);
+                field.set(o, bs);
             } else {
                 bs = bytes;
             }
-            Object uo = bs.underlyingObject();
-            if (uo instanceof ByteBuffer && !(bs.bytesStore() instanceof NativeBytesStore)) {
-                read.read(((ByteBuffer) uo).array(), 0, length);
-            } else {
-                bs.clear();
-                read.read(bs, length);
-            }
+            bs.clear();
+            read.read(bs, length);
             bs.readLimit(length);
-            field.set(o, bs);
         }
     }
 
