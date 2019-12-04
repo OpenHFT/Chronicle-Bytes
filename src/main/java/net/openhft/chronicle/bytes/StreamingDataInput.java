@@ -146,6 +146,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return readByte();
     }
 
+    default char readChar() {
+        return readStopBitChar();
+    }
+
     /**
      * @return the next unsigned 8 bit value or -1;
      */
