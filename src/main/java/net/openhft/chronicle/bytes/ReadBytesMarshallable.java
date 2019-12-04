@@ -22,7 +22,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * Read data directly as Bytes.
  */
 @FunctionalInterface
-public interface ReadBytesMarshallable {
+public interface ReadBytesMarshallable extends CommonMarshallable {
     /**
      * Bytes to read.  This can be used as a method to implement or as a lambda.
      *
