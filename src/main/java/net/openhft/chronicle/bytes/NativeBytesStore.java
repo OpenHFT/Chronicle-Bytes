@@ -596,6 +596,14 @@ public class NativeBytesStore<Underlying>
         memory.copyMemory(address, addressForWrite(position), size);
     }
 
+    void write8bit(long position, CharSequence charSequence, int offset, int length) {
+        long addr = address + translate(position);
+        @Nullable Memory memory = this.memory;
+        for (int i = 0; i < length; i++) {
+            memory.writeByte(addr + i, (byte) charSequence.charAt(offset + i));
+        }
+    }
+
     void write8bit(long position, char[] chars, int offset, int length) {
         long addr = address + translate(position);
         @Nullable Memory memory = this.memory;
