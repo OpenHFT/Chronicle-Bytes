@@ -21,7 +21,7 @@ package net.openhft.chronicle.bytes;
  */
 @SuppressWarnings("rawtypes")
 @FunctionalInterface
-public interface WriteBytesMarshallable {
+public interface WriteBytesMarshallable extends CommonMarshallable {
     /**
      * Write to Bytes.  This can be used as an interface to extend or a lambda
      *

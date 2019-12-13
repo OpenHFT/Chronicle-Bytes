@@ -281,19 +281,25 @@ public class HexDumpBytes implements Bytes<Void> {
     @Override
     @NotNull
     public Bytes<Void> writeByte(long offset, byte i8) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeByte(offset & 0xFFFFFFFFL, i8);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 1);
+        return this;
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeShort(long offset, short i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeShort(offset & 0xFFFFFFFFL, i);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 2);
+        return this;
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeInt24(long offset, int i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeInt24(offset & 0xFFFFFFFFL, i);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 3);
+        return this;
     }
 
     @Override
@@ -313,25 +319,31 @@ public class HexDumpBytes implements Bytes<Void> {
     @Override
     @NotNull
     public Bytes<Void> writeLong(long offset, long i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        return writeOrderedLong(offset, i);
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeOrderedLong(long offset, long i) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeOrderedLong(offset & 0xFFFFFFFFL, i);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
+        return this;
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeFloat(long offset, float d) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeFloat(offset & 0xFFFFFFFFL, d);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+        return this;
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeDouble(long offset, double d) throws BufferOverflowException {
-        throw new UnsupportedOperationException();
+        base.writeDouble(offset & 0xFFFFFFFFL, d);
+        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
+        return this;
     }
 
     @Override

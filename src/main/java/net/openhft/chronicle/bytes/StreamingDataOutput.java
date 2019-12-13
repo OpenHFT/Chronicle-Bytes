@@ -233,6 +233,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
+    default S writeChar(char ch) {
+        return writeStopBit(ch);
+    }
+
+    @NotNull
     S writeShort(short i16) throws BufferOverflowException;
 
     @NotNull
