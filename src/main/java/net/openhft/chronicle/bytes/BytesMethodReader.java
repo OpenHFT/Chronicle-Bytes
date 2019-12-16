@@ -60,7 +60,7 @@ public class BytesMethodReader implements MethodReader {
     }
 
     @Override
-    public MethodReaderInterceptor methodReaderInterceptor() {
+    public MethodReaderInterceptorReturns methodReaderInterceptorReturns() {
         throw new UnsupportedOperationException();
     }
 

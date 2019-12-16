@@ -45,7 +45,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     @Override
-    public MethodReaderBuilder methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
+    public MethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         throw new UnsupportedOperationException();
     }
 

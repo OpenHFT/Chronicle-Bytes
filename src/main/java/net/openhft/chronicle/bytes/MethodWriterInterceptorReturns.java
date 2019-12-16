@@ -3,38 +3,42 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Method;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
-/**
- * Created by Jerry Shea 25/10/2017
+/*
+ * Peter Lawrey so interceptors can return an object to use for chaining.
  * <p>
  * Invoked around method writing allowing you to take action before or after method invocation,
  * or even not to call the method
- *
- * @deprecated Use MethodWriterInterceptorReturns
  */
 @FunctionalInterface
-@Deprecated
-public interface MethodWriterInterceptor {
+public interface MethodWriterInterceptorReturns {
+    static MethodWriterInterceptorReturns of(MethodWriterInterceptor interceptor) {
+        return (m, a, i) -> {
+            interceptor.intercept(m, a, i::apply);
+            return null;
+        };
+    }
 
-    static MethodWriterInterceptor of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptor interceptor) {
+    static MethodWriterInterceptorReturns of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptorReturns interceptor) {
         if (methodWriterListener == null && interceptor == null)
             throw new IllegalArgumentException("both methodWriterListener and interceptor are NULL");
 
         if (methodWriterListener == null)
-            return interceptor::intercept;
+            return interceptor;
 
         if (interceptor == null)
             return (method, args, invoker) -> {
                 methodWriterListener.onWrite(method.getName(), args);
-                invoker.accept(method, args);
+                return invoker.apply(method, args);
             };
 
         return (method, args, invoker) -> {
-            interceptor.intercept(method, args, invoker);
             methodWriterListener.onWrite(method.getName(), args);
+            return interceptor.intercept(method, args, invoker);
         };
     }
 
-    void intercept(Method method, Object[] args, BiConsumer<Method, Object[]> invoker);
+
+    Object intercept(Method method, Object[] args, BiFunction<Method, Object[], Object> invoker);
 }
