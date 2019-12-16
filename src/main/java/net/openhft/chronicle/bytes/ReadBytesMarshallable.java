@@ -16,12 +16,14 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
  * Read data directly as Bytes.
  */
 @FunctionalInterface
+@DontChain
 public interface ReadBytesMarshallable extends CommonMarshallable {
     /**
      * Bytes to read.  This can be used as a method to implement or as a lambda.
