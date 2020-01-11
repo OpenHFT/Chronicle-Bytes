@@ -325,11 +325,16 @@ public class MappedFile implements ReferenceCounted {
                     synchronized (GLOBAL_FILE_LOCK) {
                         size = fileChannel.size();
                         if (size < minSize) {
+                            long time0 = System.nanoTime();
                             try (FileLock ignore = fileChannel.lock()) {
                                 size = fileChannel.size();
                                 if (size < minSize) {
                                     raf.setLength(minSize);
                                 }
+                            }
+                            long time1 = System.nanoTime() - time0;
+                            if (time1 >= 5_000_000) {
+                                Jvm.warn().on(getClass(), "Took " + time1 / 1000_000 + " ms to grow file " + file());
                             }
                         }
                     }
