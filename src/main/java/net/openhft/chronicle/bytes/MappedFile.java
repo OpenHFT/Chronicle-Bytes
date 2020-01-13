@@ -333,8 +333,8 @@ public class MappedFile implements ReferenceCounted {
                                 }
                             }
                             long time1 = System.nanoTime() - time0;
-                            if (time1 >= 5_000_000) {
-                                Jvm.warn().on(getClass(), "Took " + time1 / 1000_000 + " ms to grow file " + file());
+                            if (time1 >= 1_000_000) {
+                                Jvm.warn().on(getClass(), "Took " + time1 / 1000 + " us to grow file " + file());
                             }
                         }
                     }
@@ -350,8 +350,13 @@ public class MappedFile implements ReferenceCounted {
             T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
 
-            if (newChunkListener != null)
-                newChunkListener.onNewChunk(file.getPath(), chunk, (System.nanoTime() - start) / 1000);
+            long time2 = System.nanoTime() - start;
+            if (newChunkListener != null) {
+                newChunkListener.onNewChunk(file.getPath(), chunk, time2 / 1000);
+            }
+            if (time2 > 5_000_000)
+                Jvm.warn().on(getClass(), "Took " + time2 / 1000 + " to add mapping for " + file());
+
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
         }
