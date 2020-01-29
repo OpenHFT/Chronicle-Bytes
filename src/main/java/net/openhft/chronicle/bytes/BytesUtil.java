@@ -72,6 +72,13 @@ public enum BytesUtil {
 
     }
 
+    public static void writeFile(String file, Bytes<byte[]> bytes) throws IOException {
+        try (OutputStream os = new FileOutputStream(file)) {
+            os.write(bytes.underlyingObject());
+        }
+    }
+
+
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
@@ -256,4 +263,5 @@ public enum BytesUtil {
         BytesStore bytes2 = bytes.subBytes(start, maxLength);
         return bytes2.toDebugString(maxLength);
     }
+
 }
