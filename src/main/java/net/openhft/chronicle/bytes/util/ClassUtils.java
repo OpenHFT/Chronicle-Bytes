@@ -12,9 +12,9 @@ import static net.openhft.chronicle.core.ClassMetrics.updateJar;
 
 public class ClassUtils {
 
-    private void updateClass(Class aClass, long find, long replace, String domain, @Nullable UpdateConsumer consumer) throws IOException {
+    public static void updateClass(Class aClass, long find, long replace, String domain, @Nullable UpdateConsumer consumer) throws IOException {
         boolean wasUpdated = false;
-        String file = getClass().getProtectionDomain().getCodeSource().getLocation().getFile();
+        String file = ClassUtils.class.getProtectionDomain().getCodeSource().getLocation().getFile();
         String dir = file.replaceAll("target/.*", "target");
         for (File jar : new File(dir).listFiles()) {
             if (jar.getName().endsWith(".jar") && !jar.getName().contains("guarded")) {
@@ -27,7 +27,7 @@ public class ClassUtils {
             throw new IllegalStateException("failed to update any class");
     }
 
-    private void updateClass(Class aClass, long find, long replace, File jar, String domain, @Nullable UpdateConsumer consumer) throws IOException {
+    private static void updateClass(Class aClass, long find, long replace, File jar, String domain, @Nullable UpdateConsumer consumer) throws IOException {
         String classPath = aClass.getName().replace('.', '/').concat(".class");
         String file = aClass.getClassLoader().getResource(classPath).getFile();
         Bytes<byte[]> bytes = readFile(file);
@@ -48,7 +48,7 @@ public class ClassUtils {
         throw new AssertionError("Unable to find magic in " + file);
     }
 
-    interface UpdateConsumer {
+    public interface UpdateConsumer {
         void accept(File jar, long replace, String domain, String file);
     }
 }
