@@ -380,7 +380,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int peekUnsignedByte() {
-        return readPosition >= writePosition ? -1 : bytesStore.peekUnsignedByte(readPosition);
+        return readPosition >= writePosition ? -1 : bytesStore.readUnsignedByte(readPosition);
     }
 
     @Override
@@ -699,7 +699,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
 
     @Override
     public int peekUnsignedByte(long offset) throws BufferUnderflowException {
-        return offset >= readLimit() ? -1 : bytesStore.readUnsignedByte(offset);
+        return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
     }
 
     @Override
