@@ -14,7 +14,7 @@ public class ClassUtils {
 
     public static void updateClass(Class aClass, long find, long replace, String domain, @Nullable UpdateConsumer consumer) throws IOException {
         boolean wasUpdated = false;
-        String file = ClassUtils.class.getProtectionDomain().getCodeSource().getLocation().getFile();
+        String file = aClass.getProtectionDomain().getCodeSource().getLocation().getFile();
         String dir = file.replaceAll("target/.*", "target");
         for (File jar : new File(dir).listFiles()) {
             if (jar.getName().endsWith(".jar") && !jar.getName().contains("guarded")) {
