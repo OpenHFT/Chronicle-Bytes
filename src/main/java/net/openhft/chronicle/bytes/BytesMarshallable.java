@@ -16,11 +16,13 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
 /**
  * An object which can be read or written directly to Bytes in a streaming manner.
  */
+@DontChain
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
     @Override
     @SuppressWarnings("rawtypes")

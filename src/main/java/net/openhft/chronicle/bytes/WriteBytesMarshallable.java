@@ -16,11 +16,14 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.DontChain;
+
 /**
  * Write data directly as Bytes.
  */
 @SuppressWarnings("rawtypes")
 @FunctionalInterface
+@DontChain
 public interface WriteBytesMarshallable extends CommonMarshallable {
     /**
      * Write to Bytes.  This can be used as an interface to extend or a lambda

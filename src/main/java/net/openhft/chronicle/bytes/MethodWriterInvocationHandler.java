@@ -29,12 +29,12 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
 
     void onClose(Closeable closeable);
 
-    default void methodWriterInterceptor(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptor interceptor) {
+    default void methodWriterInterceptorReturns(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptorReturns interceptor) {
         if (methodWriterListener != null || interceptor != null)
-            methodWriterInterceptor(MethodWriterInterceptor.of(methodWriterListener, interceptor));
+            methodWriterInterceptorReturns(MethodWriterInterceptorReturns.of(methodWriterListener, interceptor));
     }
 
-    void methodWriterInterceptor(MethodWriterInterceptor methodWriterInterceptor);
+    void methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor);
 
     void genericEvent(String genericEvent);
 

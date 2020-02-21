@@ -5,7 +5,7 @@ import net.openhft.chronicle.core.io.Closeable;
 public interface MethodReader extends Closeable {
     String HISTORY = "history";
 
-    MethodReaderInterceptor methodReaderInterceptor();
+    MethodReaderInterceptorReturns methodReaderInterceptorReturns();
 
     /**
      * Moves the queue to read a message if there is one, but is more expensive

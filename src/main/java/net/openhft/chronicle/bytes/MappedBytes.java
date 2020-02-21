@@ -926,4 +926,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
         return this;
     }
+
+    // used by the Pretoucher, don't change this without considering the impact.
+    @Override
+    public boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException {
+        assert singleThreadedAccess();
+        if (offset < 0 || offset > mappedFile.capacity() - (long) 8)
+            throw writeBufferOverflowException(offset);
+        if (bytesStore.start() > offset || offset + 8 >= bytesStore.safeLimit()) {
+            acquireNextByteStore0(offset, false);
+        }
+//        super.writeCheckOffset(offset, adding);
+        return bytesStore.compareAndSwapLong(offset, expected, value);
+    }
 }
