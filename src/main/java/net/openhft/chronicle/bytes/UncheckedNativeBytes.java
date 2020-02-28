@@ -926,7 +926,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        ensureCapacity(writePosition() + length);
+        ensureCapacity(length);
         @NotNull NativeBytesStore nbs = this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);

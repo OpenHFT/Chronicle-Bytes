@@ -153,7 +153,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
             assert size >= 0;
-            writeCheckOffset(size, 0L);
+            writeCheckOffset(writePosition(), size);
         } catch (BufferOverflowException e) {
             throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
         }
@@ -253,8 +253,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         if (length > writeRemaining())
             throw new BufferOverflowException();
-        long position = writePosition();
-        ensureCapacity(position + length);
+        ensureCapacity(length);
         super.write(bytes, offset, length);
         return this;
     }
@@ -262,7 +261,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     @NotNull
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
         long position = writePosition();
-        ensureCapacity(position + length);
+        ensureCapacity(length);
         super.write(bytes, offset, length);
         return this;
     }
@@ -275,8 +274,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             if (length + writePosition() >= 1 << 20)
                 length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
             long offset = bytes.readPosition();
-            long position = writePosition();
-            ensureCapacity(position + length);
+            ensureCapacity(length);
             optimisedWrite(bytes, offset, length);
             if (length == bytes.readRemaining()) {
                 bytes.clear();

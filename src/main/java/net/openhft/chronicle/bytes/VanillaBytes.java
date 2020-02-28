@@ -275,7 +275,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         // todo optimise
         if (str instanceof String) {
             @NotNull char[] chars = ((String) str).toCharArray();
-            ensureCapacity(position + length);
+            ensureCapacity(length);
             @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore;
             nbs.write8bit(position, chars, offset, length);
         } else {
@@ -527,7 +527,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        ensureCapacity(writePosition() + length);
+        ensureCapacity(length);
         if (bytesStore instanceof NativeBytesStore) {
             @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
             long position = nbs.appendUtf8(writePosition(), chars, offset, length);
