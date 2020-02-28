@@ -941,6 +941,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
     @Override
     public Bytes<Underlying> writeSome(@NotNull ByteBuffer buffer) throws BufferOverflowException {
         int length = (int) Math.min(buffer.remaining(), writeRemaining());
+        ensureCapacity(length);
         bytesStore.write(writePosition, buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition + length);
         buffer.position(buffer.position() + length);
