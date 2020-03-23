@@ -67,7 +67,12 @@ public class MappedFile implements ReferenceCounted {
     private final boolean readOnly;
     private NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
-    protected MappedFile(@NotNull File file, @NotNull RandomAccessFile raf, long chunkSize, long overlapSize, long capacity, boolean readOnly) {
+    protected MappedFile(@NotNull final File file,
+                         @NotNull final RandomAccessFile raf,
+                         final long chunkSize,
+                         final long overlapSize,
+                         final long capacity,
+                         final boolean readOnly) {
         this.file = file;
         this.raf = raf;
         this.fileChannel = raf.getChannel();
@@ -84,12 +89,14 @@ public class MappedFile implements ReferenceCounted {
         assert registerMappedFile(this);
     }
 
-    private static void logNewChunk(String filename, int chunk, long delayMicros) {
+    private static void logNewChunk(final String filename,
+                                    final int chunk,
+                                    final long delayMicros) {
         if (!Jvm.isDebugEnabled(MappedFile.class))
             return;
 
         // avoid a GC while trying to memory map.
-        String message = BytesInternal.acquireStringBuilder()
+        final String message = BytesInternal.acquireStringBuilder()
                 .append("Allocation of ").append(chunk)
                 .append(" chunk in ").append(filename)
                 .append(" took ").append(delayMicros / 1e3).append(" ms.")
@@ -97,7 +104,7 @@ public class MappedFile implements ReferenceCounted {
         Jvm.debug().on(MappedFile.class, message);
     }
 
-    private static boolean registerMappedFile(MappedFile mappedFile) {
+    private static boolean registerMappedFile(final MappedFile mappedFile) {
 //        MAPPED_FILE_THROWABLE_MAP.put(mappedFile, new Throwable("Created here"));
         return true;
     }
@@ -118,8 +125,10 @@ public class MappedFile implements ReferenceCounted {
 //    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
 
     @NotNull
-    public static MappedFile of(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
-            throws FileNotFoundException {
+    public static MappedFile of(@NotNull final File file,
+                                final long chunkSize,
+                                final long overlapSize,
+                                final boolean readOnly) throws FileNotFoundException {
 //        if (readOnly && OS.isWindows()) {
 //            Jvm.warn().on(MappedFile.class, "Read only mode not supported on Windows, defaulting to read/write");
 //            readOnly = false;
@@ -127,7 +136,7 @@ public class MappedFile implements ReferenceCounted {
 
         @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
 //        try {
-        long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
+        final long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
         return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
 /*
         } catch (IOException e) {
@@ -140,7 +149,7 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final File file, final long chunkSize) throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
 
@@ -161,30 +170,34 @@ public class MappedFile implements ReferenceCounted {
 */
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull String filename, long chunkSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final String filename, final long chunkSize) throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull String filename, long chunkSize, long overlapSize)
-            throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final String filename,
+                                        final long chunkSize,
+                                        final long overlapSize) throws FileNotFoundException {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize)
-            throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final File file,
+                                        final long chunkSize,
+                                        final long overlapSize) throws FileNotFoundException {
         return mappedFile(file, chunkSize, overlapSize, false);
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long chunkSize, long overlapSize, boolean readOnly)
-            throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final File file,
+                                        final long chunkSize,
+                                        final long overlapSize,
+                                        final boolean readOnly) throws FileNotFoundException {
         return MappedFile.of(file, chunkSize, overlapSize, readOnly);
     }
 
     @NotNull
-    public static MappedFile readOnly(@NotNull File file) throws FileNotFoundException {
+    public static MappedFile readOnly(@NotNull final File file) throws FileNotFoundException {
         long chunkSize = file.length();
         long overlapSize = 0;
         // Chunks of 4 GB+ not supported on Windows.
@@ -196,9 +209,12 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull File file, long capacity, long chunkSize, long overlapSize, boolean readOnly)
-            throws IOException {
-        RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+    public static MappedFile mappedFile(@NotNull final File file,
+                                        final long capacity,
+                                        final long chunkSize,
+                                        final long overlapSize,
+                                        final boolean readOnly) throws IOException {
+        final RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
         // Windows throws an exception when setting the length when you re-open
         if (raf.length() < capacity)
             raf.setLength(capacity);
@@ -209,15 +225,15 @@ public class MappedFile implements ReferenceCounted {
         try {
             Jvm.disableDebugHandler();
 
-            @NotNull File file = File.createTempFile("delete", "me");
+            @NotNull final File file = File.createTempFile("delete", "me");
             file.deleteOnExit();
-            long mapAlignment = OS.mapAlignment();
-            int chunks = 64;
-            int compileThreshold = Jvm.compileThreshold();
+            final long mapAlignment = OS.mapAlignment();
+            final int chunks = 64;
+            final int compileThreshold = Jvm.compileThreshold();
             for (int j = 0; j <= compileThreshold; j += chunks) {
                 try {
                     try (@NotNull RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
-                        @NotNull MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
+                        @NotNull final MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
                         warmup0(mapAlignment, chunks, mappedFile);
                         mappedFile.release();
                     }
@@ -234,16 +250,18 @@ public class MappedFile implements ReferenceCounted {
         Jvm.resetExceptionHandlers();
     }
 
-    private static void warmup0(long mapAlignment, int chunks, @NotNull MappedFile mappedFile) throws IOException {
+    private static void warmup0(final long mapAlignment,
+                                final int chunks,
+                                @NotNull final MappedFile mappedFile) throws IOException {
         for (int i = 0; i < chunks; i++) {
             mappedFile.acquireBytesForRead(i * mapAlignment).release();
             mappedFile.acquireBytesForWrite(i * mapAlignment).release();
         }
     }
 
-    private void doNotCloseOnInterrupt(FileChannel fc) {
+    private void doNotCloseOnInterrupt(final FileChannel fc) {
         try {
-            Field field = AbstractInterruptibleChannel.class
+            final Field field = AbstractInterruptibleChannel.class
                     .getDeclaredField("interruptor");
             Jvm.setAccessible(field);
             field.set(fc, (Interruptible) thread
@@ -255,10 +273,10 @@ public class MappedFile implements ReferenceCounted {
 
     // based on a solution by https://stackoverflow.com/users/9199167/max-vollmer
     // https://stackoverflow.com/a/52262779/57695
-    private void doNotCloseOnInterrupt9(FileChannel fc) {
+    private void doNotCloseOnInterrupt9(final FileChannel fc) {
         try {
-            Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
-            Class<?> interruptibleClass = field.getType();
+            final Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
+            final Class<?> interruptibleClass = field.getType();
             Jvm.setAccessible(field);
             field.set(fc, Proxy.newProxyInstance(
                     interruptibleClass.getClassLoader(),
@@ -291,13 +309,14 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public MappedBytesStore acquireByteStore(long position)
+    public MappedBytesStore acquireByteStore(final long position)
             throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(position, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
     }
 
     @NotNull
-    public <T extends MappedBytesStore> T acquireByteStore(long position, @NotNull MappedBytesStoreFactory<T> mappedBytesStoreFactory)
+    public <T extends MappedBytesStore> T acquireByteStore(final long position,
+                                                           @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
             throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
@@ -309,15 +328,15 @@ public class MappedFile implements ReferenceCounted {
             while (stores.size() <= chunk) {
                 stores.add(null);
             }
-            WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
+            final WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
             if (mbsRef != null) {
-                @NotNull T mbs = (T) mbsRef.get();
+                @NotNull final T mbs = (T) mbsRef.get();
                 if (mbs != null && mbs.tryReserve()) {
                     return mbs;
                 }
             }
-            long start = System.nanoTime();
-            long minSize = (chunk + 1L) * chunkSize + overlapSize;
+            final long start = System.nanoTime();
+            final long minSize = (chunk + 1L) * chunkSize + overlapSize;
             long size = fileChannel.size();
             if (size < minSize && !readOnly) {
                 // handle a possible race condition between processes.
@@ -325,14 +344,14 @@ public class MappedFile implements ReferenceCounted {
                     synchronized (GLOBAL_FILE_LOCK) {
                         size = fileChannel.size();
                         if (size < minSize) {
-                            long time0 = System.nanoTime();
+                            final long time0 = System.nanoTime();
                             try (FileLock ignore = fileChannel.lock()) {
                                 size = fileChannel.size();
                                 if (size < minSize) {
                                     raf.setLength(minSize);
                                 }
                             }
-                            long time1 = System.nanoTime() - time0;
+                            final long time1 = System.nanoTime() - time0;
                             if (time1 >= 1_000_000) {
                                 Jvm.warn().on(getClass(), "Took " + time1 / 1000 + " us to grow file " + file());
                             }
@@ -342,20 +361,20 @@ public class MappedFile implements ReferenceCounted {
                     throw new IOException("Failed to resize to " + minSize, ioe);
                 }
             }
-            long mappedSize = chunkSize + overlapSize;
-            MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
-            long startOfMap = chunk * chunkSize;
-            long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
+            final long mappedSize = chunkSize + overlapSize;
+            final MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
+            final long startOfMap = chunk * chunkSize;
+            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
-            T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+            final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
 
-            long time2 = System.nanoTime() - start;
+            final long time2 = System.nanoTime() - start;
             if (newChunkListener != null) {
                 newChunkListener.onNewChunk(file.getPath(), chunk, time2 / 1000);
             }
             if (time2 > 5_000_000)
-                Jvm.warn().on(getClass(), "Took " + time2 / 1000 + " to add mapping for " + file());
+                Jvm.warn().on(getClass(), "Took " + time2 / 1000 + " us to add mapping for " + file());
 
 //            new Throwable("chunk "+chunk).printStackTrace();
             return mbs2;
@@ -366,23 +385,23 @@ public class MappedFile implements ReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
     @NotNull
-    public Bytes acquireBytesForRead(long position)
+    public Bytes acquireBytesForRead(final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable MappedBytesStore mbs = acquireByteStore(position);
-        Bytes bytes = mbs.bytesForRead();
+        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
+        final Bytes bytes = mbs.bytesForRead();
         bytes.readPositionUnlimited(position);
         mbs.release();
         return bytes;
     }
 
-    public void acquireBytesForRead(long position, @NotNull VanillaBytes bytes)
+    public void acquireBytesForRead(final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
 
     @NotNull
-    public Bytes acquireBytesForWrite(long position)
+    public Bytes acquireBytesForWrite(final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
         @Nullable MappedBytesStore mbs = acquireByteStore(position);
         @NotNull Bytes bytes = mbs.bytesForWrite();
@@ -391,9 +410,9 @@ public class MappedFile implements ReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForWrite(long position, @NotNull VanillaBytes bytes)
+    public void acquireBytesForWrite(final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
         bytes.writePosition(position);
     }
@@ -421,10 +440,10 @@ public class MappedFile implements ReferenceCounted {
     private void performRelease() {
         try {
             for (int i = 0; i < stores.size(); i++) {
-                WeakReference<MappedBytesStore> storeRef = stores.get(i);
+                final WeakReference<MappedBytesStore> storeRef = stores.get(i);
                 if (storeRef == null)
                     continue;
-                @Nullable MappedBytesStore mbs = storeRef.get();
+                @Nullable final MappedBytesStore mbs = storeRef.get();
                 if (mbs != null) {
                     // this MappedFile is the only referrer to the MappedBytesStore at this point,
                     // so ensure that it is released
@@ -449,12 +468,12 @@ public class MappedFile implements ReferenceCounted {
 
     @NotNull
     public String referenceCounts() {
-        @NotNull StringBuilder sb = new StringBuilder();
+        @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
-        for (@Nullable WeakReference<MappedBytesStore> store : stores) {
+        for (@Nullable final WeakReference<MappedBytesStore> store : stores) {
             long count = 0;
             if (store != null) {
-                @Nullable MappedBytesStore mbs = store.get();
+                @Nullable final MappedBytesStore mbs = store.get();
                 if (mbs != null)
                     count = mbs.refCount();
             }
@@ -479,7 +498,7 @@ public class MappedFile implements ReferenceCounted {
         return newChunkListener;
     }
 
-    public void setNewChunkListener(NewChunkListener listener) {
+    public void setNewChunkListener(final NewChunkListener listener) {
         this.newChunkListener = listener;
     }
 
@@ -498,7 +517,7 @@ public class MappedFile implements ReferenceCounted {
             throw new IllegalStateException(cbie);
 
         } catch (IOException e) {
-            boolean open = fileChannel.isOpen();
+            final boolean open = fileChannel.isOpen();
             if (open) {
                 throw new IORuntimeException(e);
             } else {
