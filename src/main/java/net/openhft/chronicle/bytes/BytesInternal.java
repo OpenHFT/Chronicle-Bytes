@@ -2078,7 +2078,9 @@ enum BytesInternal {
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
 
-            return asDouble(value, exp, negative, decimalPlaces - tens);
+            decimalPlaces = decimalPlaces - tens;
+
+            return asDouble(value, exp, negative, decimalPlaces);
         } finally {
             ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
         }
