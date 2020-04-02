@@ -1,10 +1,11 @@
 package net.openhft.chronicle.bytes;
 
-/*
- * Created by peter.lawrey@chronicle.software on 30/07/2017
- * <p>
- * Invoked before writing out this method and args. See also MethodWriterInterceptor
+/**
+ * Invoked before writing out this method and args.
+ *
+ * @deprecated Use MethodWriterInterceptorReturns
  */
+@Deprecated
 @FunctionalInterface
 public interface MethodWriterListener {
     void onWrite(String name, Object[] args);
