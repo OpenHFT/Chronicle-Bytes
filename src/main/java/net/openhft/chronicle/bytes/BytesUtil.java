@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -217,16 +218,28 @@ public enum BytesUtil {
     }
 
     public static void checkRegisteredBytes() {
-        Map<String, Long> throwCount = bytesCreated.entrySet()
-                .stream()
-                .filter(e -> e.getKey().refCount() > 0)
-                .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
-                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        Jvm.pause(100);
+        Map<String, Long> throwCount = null;
+        try {
+            throwCount = checkRegisteredBytes0();
+        } catch (Exception e) {
+            // try again if this is still being touched
+            Jvm.pause(1000);
+            throwCount = checkRegisteredBytes0();
+        }
 
         bytesCreated.clear();
         throwCount.forEach((k, v) -> System.err.println("checkRegisteredBytes: " + v + " times " + k));
         if (throwCount.size() != 0)
             throw new IllegalStateException("Bytes not released properly " + throwCount.values().stream().mapToLong(l -> l).sum());
+    }
+
+    public static Map<String, Long> checkRegisteredBytes0() {
+        return bytesCreated.entrySet()
+                .stream()
+                .filter(e -> e.getKey().refCount() > 0)
+                .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
+                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
     }
 
     public static boolean unregister(BytesStore bytes) {
