@@ -131,6 +131,39 @@ public class BytesInternalTest {
     }
 
     @Test
+    public void parseDoubleScientificNegative() {
+        String strDouble = "6.1E-4";
+        double expected = 6.1E-4;
+        int expectedDp = 5; //0.00061 needs dp 5
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());
+        from.release();
+    }
+
+    @Test
+    public void parseDoubleScientificNegative1() {
+        String strDouble = "6.123E-4";
+        double expected = 6.123E-4;
+        int expectedDp = 7; //0.0006123 needs dp 7
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());  //Last dp should be 7.
+        from.release();
+    }
+
+    @Test
+    public void parseDoubleScientificPositive1() {
+        String strDouble = "6.12345E4";
+        double expected = 6.12345E4;
+        int expectedDp = 1; //6.12345 x 10^4 = 61234.5 needs 1
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());
+        from.release();
+    }
+
+    @Test
     public void testParseUTF81_LongString() throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
