@@ -121,6 +121,15 @@ public enum AppendableUtil {
                 bytes.readSkip(-1);
                 break;
             }
+            // this is used for array class such as !type byte[]
+            if (c == '[' && bytes.peekUnsignedByte() == ']') {
+                appendable.append((char) c);
+                appendable.append((char) bytes.readUnsignedByte());
+                if (bytes.readRemaining() == 0)
+                    return;
+                continue;
+            }
+
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
                 return;
             appendable.append((char) c);
