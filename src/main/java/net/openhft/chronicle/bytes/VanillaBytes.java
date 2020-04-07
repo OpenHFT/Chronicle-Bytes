@@ -1,4 +1,4 @@
-/*
+    /*
  * Copyright 2016 higherfrequencytrading.com
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -272,15 +272,15 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     public void write(long position, @NotNull CharSequence str, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
-        // todo optimise
-        if (str instanceof String) {
-            @NotNull char[] chars = ((String) str).toCharArray();
-            ensureCapacity(length);
-            @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore;
-            nbs.write8bit(position, chars, offset, length);
-        } else {
-            throw new UnsupportedOperationException();
+
+        ensureCapacity(length);
+        if (offset + length > str.length())
+            throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
+
+        for (int i = 0; i < length; i++) {
+            bytesStore.writeByte(position + i, str.charAt(offset + i));
         }
+
     }
 
     @Override
