@@ -4,8 +4,8 @@ import net.openhft.chronicle.core.io.Closeable;
 
 import java.util.function.Supplier;
 
-@Deprecated(/*is it used?*/)
 public interface MethodWriterBuilder<T> extends Supplier<T> {
+    @Deprecated(/* use methodWriterInterceptorReturns */)
     MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener);
 
     MethodWriterBuilder<T> genericEvent(String genericEvent);
@@ -15,6 +15,8 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     MethodWriterBuilder<T> onClose(Closeable closeable);
 
     MethodWriterBuilder<T> recordHistory(boolean recordHistory);
+
+    MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
 
     default T build() {
         return get();

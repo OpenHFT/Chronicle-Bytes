@@ -46,6 +46,11 @@ public class BytesMethodWriterBuilder<T> implements MethodWriterBuilder<T> {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor) {
+        throw new UnsupportedOperationException();
+    }
+
     // Supplier terminology
     @NotNull
     @Override
