@@ -79,11 +79,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         this.mappedFile = reserve(mappedFile);
         this.backingFileIsReadOnly = !mappedFile.file().canWrite();
         assert !mappedFile.isClosed();
+        clear();
         if (TRACE) {
             createdHere = Thread.currentThread().getStackTrace();
             MAPPED_BYTES.add(new WeakReference<>(this));
         }
-        clear();
+
     }
 
     /**
