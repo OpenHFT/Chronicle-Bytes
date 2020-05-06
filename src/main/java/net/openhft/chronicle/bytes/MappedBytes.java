@@ -51,17 +51,20 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
+
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
-    private static Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
-    private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
-            Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
+    private static final Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
+    private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
+    private static final boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
+
     @NotNull
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
+    @Nullable
+    private final StackTraceElement[] createdHere;
+
     private volatile Thread lastAccessedThread;
     private volatile RuntimeException writeStack;
-    private static boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
-    private StackTraceElement[] createdHere;
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
@@ -79,6 +82,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         if (TRACE) {
             createdHere = Thread.currentThread().getStackTrace();
             MAPPED_BYTES.add(new WeakReference<>(this));
+        } else {
+            createdHere = null;
         }
 
     }
