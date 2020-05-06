@@ -31,12 +31,14 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.ref.Reference;
+import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
+import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.Set;
-import java.util.WeakHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.newSetFromMap;
@@ -50,7 +52,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
-    static Set<MappedBytes> mappedBytes = newSetFromMap(new WeakHashMap<>());
+    static Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
             Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     @NotNull
@@ -66,7 +68,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         this(mappedFile, "");
         if (TRACE) {
             createdHere = Thread.currentThread().getStackTrace();
-            mappedBytes.add(this);
+            MAPPED_BYTES.add(new WeakReference<>(this));
         }
     }
 
@@ -79,7 +81,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         assert !mappedFile.isClosed();
         if (TRACE) {
             createdHere = Thread.currentThread().getStackTrace();
-            mappedBytes.add(this);
+            MAPPED_BYTES.add(new WeakReference<>(this));
         }
         clear();
     }
@@ -88,7 +90,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
      * dump the creation of the mapped bytes, so that we can trace where dangling, references that are not closed.
      */
     public static void dump() {
-        mappedBytes.forEach(System.out::println);
+        MAPPED_BYTES.stream().map(Reference::get).filter(Objects::nonNull).forEach(System.out::println);
     }
 
     @NotNull
