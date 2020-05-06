@@ -66,10 +66,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
         this(mappedFile, "");
-        if (TRACE) {
-            createdHere = Thread.currentThread().getStackTrace();
-            MAPPED_BYTES.add(new WeakReference<>(this));
-        }
     }
 
     protected MappedBytes(@NotNull MappedFile mappedFile, String name) throws IllegalStateException {
