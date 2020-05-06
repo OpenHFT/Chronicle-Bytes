@@ -52,7 +52,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
-    static Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
+    private static Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
             Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     @NotNull
