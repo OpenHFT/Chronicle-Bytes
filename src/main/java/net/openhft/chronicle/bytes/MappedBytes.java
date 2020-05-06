@@ -33,7 +33,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.WeakHashMap;
+import java.util.stream.Collectors;
 
+import static java.util.Collections.newSetFromMap;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -44,6 +50,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
+    static Set<MappedBytes> mappedBytes = newSetFromMap(new WeakHashMap<>());
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS =
             Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     @NotNull
@@ -51,10 +58,16 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private final boolean backingFileIsReadOnly;
     private volatile Thread lastAccessedThread;
     private volatile RuntimeException writeStack;
+    private static boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
+    private StackTraceElement[] createdHere;
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull MappedFile mappedFile) throws IllegalStateException {
         this(mappedFile, "");
+        if (TRACE) {
+            createdHere = Thread.currentThread().getStackTrace();
+            mappedBytes.add(this);
+        }
     }
 
     protected MappedBytes(@NotNull MappedFile mappedFile, String name) throws IllegalStateException {
@@ -64,7 +77,35 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         this.mappedFile = reserve(mappedFile);
         this.backingFileIsReadOnly = !mappedFile.file().canWrite();
         assert !mappedFile.isClosed();
+        if (TRACE) {
+            createdHere = Thread.currentThread().getStackTrace();
+            mappedBytes.add(this);
+        }
         clear();
+    }
+
+    /**
+     * dump the creation of the mapped bytes, so that we can trace where dangling, references that are not closed.
+     */
+    public static void dump() {
+        mappedBytes.forEach(System.out::println);
+    }
+
+    @NotNull
+    @Override
+    public String toString() {
+        if (!TRACE)
+            return super.toString();
+        return "MappedBytes{" + "\n" +
+                "refCount=" + refCount() + ",\n" +
+                "mappedFile=" + mappedFile.file().getAbsolutePath() + ",\n" +
+                "mappedFileRefCount=" + mappedFile.refCount() + ",\n" +
+                "mappedFileIsClosed=" + mappedFile.isClosed() + ",\n" +
+                "mappedFileRafIsClosed=" + Jvm.getValue(mappedFile.raf(), "closed") + ",\n" +
+                "mappedFileRafChannelIsClosed=" + !mappedFile.raf().getChannel().isOpen() + ",\n" +
+                "isClosed=" + isClosed() + ",\n" +
+                "createdHere=" + Arrays.stream(createdHere).map(Objects::toString).collect(Collectors.joining("\n")) +
+                '}';
     }
 
     @NotNull
