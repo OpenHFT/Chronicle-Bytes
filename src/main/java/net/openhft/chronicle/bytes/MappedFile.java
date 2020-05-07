@@ -16,10 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.ReferenceCounted;
-import net.openhft.chronicle.core.ReferenceCounter;
+import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -134,7 +131,7 @@ public class MappedFile implements ReferenceCounted {
 //            readOnly = false;
 //        }
 
-        @NotNull RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+        @NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
 //        try {
         final long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
         return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
@@ -214,7 +211,7 @@ public class MappedFile implements ReferenceCounted {
                                         final long chunkSize,
                                         final long overlapSize,
                                         final boolean readOnly) throws IOException {
-        final RandomAccessFile raf = new RandomAccessFile(file, readOnly ? "r" : "rw");
+        final RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
         // Windows throws an exception when setting the length when you re-open
         if (raf.length() < capacity)
             raf.setLength(capacity);
@@ -232,7 +229,7 @@ public class MappedFile implements ReferenceCounted {
             final int compileThreshold = Jvm.compileThreshold();
             for (int j = 0; j <= compileThreshold; j += chunks) {
                 try {
-                    try (@NotNull RandomAccessFile raf = new RandomAccessFile(file, "rw")) {
+                    try (@NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, "rw")) {
                         @NotNull final MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
                         warmup0(mapAlignment, chunks, mappedFile);
                         mappedFile.release();
