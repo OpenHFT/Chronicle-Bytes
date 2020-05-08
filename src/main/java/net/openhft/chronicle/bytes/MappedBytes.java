@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.newSetFromMap;
@@ -53,7 +54,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
-    private static final Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new IdentityHashMap<>());
+    private static final Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new ConcurrentHashMap<>());
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     private static final boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
 
