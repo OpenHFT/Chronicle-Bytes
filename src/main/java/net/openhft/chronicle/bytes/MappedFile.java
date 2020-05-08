@@ -452,7 +452,8 @@ public class MappedFile implements ReferenceCounted {
                         }
                     }
                 }
-
+                // Dereference released entities
+                storeRef.clear();
                 stores.set(i, null);
             }
         } finally {
