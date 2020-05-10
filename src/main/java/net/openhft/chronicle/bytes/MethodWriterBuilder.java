@@ -10,6 +10,10 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
 
     MethodWriterBuilder<T> genericEvent(String genericEvent);
 
+    default MethodWriterBuilder<T> metaData(boolean metaData) {
+        return this;
+    }
+
     MethodWriterBuilder<T> useMethodIds(boolean useMethodIds);
 
     MethodWriterBuilder<T> onClose(Closeable closeable);
