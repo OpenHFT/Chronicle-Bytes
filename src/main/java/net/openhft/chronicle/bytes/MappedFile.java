@@ -312,71 +312,69 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public <T extends MappedBytesStore> T acquireByteStore(final long position,
-                                                           @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
+    public synchronized <T extends MappedBytesStore> T acquireByteStore(final long position,
+                                                                        @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
             throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
-        int chunk = (int) (position / chunkSize);
+        final int chunk = (int) (position / chunkSize);
 
-        synchronized (stores) {
-            while (stores.size() <= chunk) {
-                stores.add(null);
+        while (stores.size() <= chunk)
+            stores.add(null);
+
+        final WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
+        if (mbsRef != null) {
+            @NotNull final T mbs = (T) mbsRef.get();
+            if (mbs != null && mbs.tryReserve()) {
+                return mbs;
             }
-            final WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
-            if (mbsRef != null) {
-                @NotNull final T mbs = (T) mbsRef.get();
-                if (mbs != null && mbs.tryReserve()) {
-                    return mbs;
-                }
-            }
-            final long start = System.nanoTime();
-            final long minSize = (chunk + 1L) * chunkSize + overlapSize;
-            long size = fileChannel.size();
-            if (size < minSize && !readOnly) {
-                // handle a possible race condition between processes.
-                try {
-                    synchronized (GLOBAL_FILE_LOCK) {
-                        size = fileChannel.size();
-                        if (size < minSize) {
-                            final long time0 = System.nanoTime();
-                            try (FileLock ignore = fileChannel.lock()) {
-                                size = fileChannel.size();
-                                if (size < minSize) {
-                                    raf.setLength(minSize);
-                                }
-                            }
-                            final long time1 = System.nanoTime() - time0;
-                            if (time1 >= 1_000_000) {
-                                Jvm.warn().on(getClass(), "Took " + time1 / 1000 + " us to grow file " + file());
+        }
+        final long start = System.nanoTime();
+        final long minSize = (chunk + 1L) * chunkSize + overlapSize;
+        long size = fileChannel.size();
+        if (size < minSize && !readOnly) {
+            // handle a possible race condition between processes.
+            try {
+                synchronized (GLOBAL_FILE_LOCK) {
+                    size = fileChannel.size();
+                    if (size < minSize) {
+                        final long time0 = System.nanoTime();
+                        try (FileLock ignore = fileChannel.lock()) {
+                            size = fileChannel.size();
+                            if (size < minSize) {
+                                raf.setLength(minSize);
                             }
                         }
+                        final long time1 = System.nanoTime() - time0;
+                        if (time1 >= 1_000_000L) {
+                            Jvm.warn().on(getClass(), "Took " + time1 / 1000L + " us to grow file " + file());
+                        }
                     }
-                } catch (IOException ioe) {
-                    throw new IOException("Failed to resize to " + minSize, ioe);
                 }
+            } catch (IOException ioe) {
+                throw new IOException("Failed to resize to " + minSize, ioe);
             }
-            final long mappedSize = chunkSize + overlapSize;
-            final MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
-            final long startOfMap = chunk * chunkSize;
-            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
+        }
+        final long mappedSize = chunkSize + overlapSize;
+        final MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
+        final long startOfMap = chunk * chunkSize;
+        final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
-            final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
-            stores.set(chunk, new WeakReference<>(mbs2));
+        final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
 
-            final long time2 = System.nanoTime() - start;
-            if (newChunkListener != null) {
-                newChunkListener.onNewChunk(file.getPath(), chunk, time2 / 1000);
-            }
-            if (time2 > 5_000_000)
-                Jvm.warn().on(getClass(), "Took " + time2 / 1000 + " us to add mapping for " + file());
+        final long time2 = System.nanoTime() - start;
+        if (newChunkListener != null) {
+            newChunkListener.onNewChunk(file.getPath(), chunk, time2 / 1000);
+        }
+        if (time2 > 5_000_000L)
+            Jvm.warn().on(getClass(), "Took " + time2 / 1000L + " us to add mapping for " + file());
 
 //            new Throwable("chunk "+chunk).printStackTrace();
-            return mbs2;
-        }
+        return mbs2;
     }
+
 
     /**
      * Convenience method so you don't need to release the BytesStore
