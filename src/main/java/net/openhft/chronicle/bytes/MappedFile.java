@@ -222,7 +222,7 @@ public class MappedFile implements ReferenceCounted {
         try {
             Jvm.disableDebugHandler();
 
-            @NotNull final File file = File.createTempFile("delete_warming_up", "me");
+            @NotNull final File file = File.createTempFile("delete", "me");
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;
@@ -312,8 +312,8 @@ public class MappedFile implements ReferenceCounted {
     }
 
     @NotNull
-    public synchronized <T extends MappedBytesStore> T acquireByteStore(final long position,
-                                                                        @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
+    public synchronized  <T extends MappedBytesStore> T acquireByteStore(final long position,
+                                                           @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
             throws IOException, IllegalArgumentException, IllegalStateException {
         if (closed.get())
             throw new IOException("Closed");
@@ -321,9 +321,10 @@ public class MappedFile implements ReferenceCounted {
             throw new IOException("Attempt to access a negative position: " + position);
         final int chunk = (int) (position / chunkSize);
 
-        while (stores.size() <= chunk)
-            stores.add(null);
 
+        while (stores.size() <= chunk) {
+            stores.add(null);
+        }
         final WeakReference<MappedBytesStore> mbsRef = stores.get(chunk);
         if (mbsRef != null) {
             @NotNull final T mbs = (T) mbsRef.get();
@@ -363,6 +364,7 @@ public class MappedFile implements ReferenceCounted {
         final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
         final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+        stores.set(chunk, new WeakReference<>(mbs2));
 
         final long time2 = System.nanoTime() - start;
         if (newChunkListener != null) {
@@ -373,8 +375,8 @@ public class MappedFile implements ReferenceCounted {
 
 //            new Throwable("chunk "+chunk).printStackTrace();
         return mbs2;
-    }
 
+    }
 
     /**
      * Convenience method so you don't need to release the BytesStore
@@ -432,7 +434,7 @@ public class MappedFile implements ReferenceCounted {
         return refCount.tryReserve();
     }
 
-    private void performRelease() {
+    private synchronized void performRelease() {
         try {
             for (int i = 0; i < stores.size(); i++) {
                 final WeakReference<MappedBytesStore> storeRef = stores.get(i);
