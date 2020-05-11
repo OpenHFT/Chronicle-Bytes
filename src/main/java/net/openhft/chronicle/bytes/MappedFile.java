@@ -222,7 +222,7 @@ public class MappedFile implements ReferenceCounted {
         try {
             Jvm.disableDebugHandler();
 
-            @NotNull final File file = File.createTempFile("delete", "me");
+            @NotNull final File file = File.createTempFile("delete_warming_up", "me");
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;
