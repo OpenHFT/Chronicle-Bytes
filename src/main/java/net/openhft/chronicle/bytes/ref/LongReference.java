@@ -19,9 +19,6 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.core.values.LongValue;
 
-/*
- * Created by Peter Lawrey on 20/01/16.
- */
 @SuppressWarnings("rawtypes")
 public interface LongReference extends LongValue, Byteable {
 }

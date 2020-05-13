@@ -9,9 +9,6 @@ import java.io.Closeable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-/**
- * Created by Jerry Shea on 26/02/18.
- */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractReference implements Byteable, Closeable {
 

@@ -17,13 +17,9 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
@@ -60,6 +56,11 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long getVolatileValue() {
         return bytes.readVolatileLong(offset);
+    }
+
+    @Override
+    public void setVolatileValue(long value) {
+        bytes.writeVolatileLong(offset, value);
     }
 
     @Override

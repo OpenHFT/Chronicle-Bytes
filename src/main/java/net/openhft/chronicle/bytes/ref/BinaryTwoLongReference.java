@@ -44,6 +44,11 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     @Override
+    public void setVolatileValue2(long value) {
+        bytes.writeVolatileLong(offset+8, value);
+    }
+
+    @Override
     public void setOrderedValue2(long value) {
         bytes.writeOrderedLong(offset + 8, value);
     }

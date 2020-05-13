@@ -112,6 +112,11 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         setValue(value);
     }
 
+    @Override
+    public void setVolatileValue(long value) {
+        setValue(value);
+    }
+
     @NotNull
     public String toString() {
         return "value: " + getValue();

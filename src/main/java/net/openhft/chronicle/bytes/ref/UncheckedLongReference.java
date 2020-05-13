@@ -21,7 +21,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
-@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedLongReference implements LongReference {
     private long address;
     private Unsafe unsafe;
@@ -74,7 +74,12 @@ public class UncheckedLongReference implements LongReference {
 
     @Override
     public long getVolatileValue() {
-        return unsafe.getLong(address);
+        return unsafe.getLongVolatile(null, address);
+    }
+
+    @Override
+    public void setVolatileValue(long value) {
+        unsafe.putLongVolatile(null, address, value);
     }
 
     @Override
