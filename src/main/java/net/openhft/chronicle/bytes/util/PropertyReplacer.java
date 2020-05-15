@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,6 +33,28 @@ public enum PropertyReplacer {
         result.append(expression.substring(i));
         return result.toString();
     }
+
+    public static String replaceTokensWithProperties(String expression, Properties properties) {
+
+        StringBuilder result = new StringBuilder(expression.length());
+        int i = 0;
+        Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
+        while (matcher.find()) {
+            // Strip leading "${" and trailing "}" off.
+            result.append(expression.substring(i, matcher.start()));
+            String property = matcher.group();
+            property = property.substring(2, property.length() - 1);
+
+            //look up property and replace
+            String p = properties.getProperty(property);
+            result.append((p != null) ? p : matcher.group());
+
+            i = matcher.end();
+        }
+        result.append(expression.substring(i));
+        return result.toString();
+    }
+
 
     @NotNull
     public static String fileAsString(String fileName) throws IOException {
