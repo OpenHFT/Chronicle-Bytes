@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -9,7 +10,7 @@ import java.util.*;
 import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
-public class BytesMethodReader implements MethodReader {
+public class BytesMethodReader extends AbstractCloseable implements MethodReader {
     private final BytesIn in;
     private final BytesParselet defaultParselet;
     private final List<Consumer<BytesIn>> methodEncoders = new ArrayList<>();
@@ -88,7 +89,7 @@ public class BytesMethodReader implements MethodReader {
     }
 
     @Override
-    public void close() {
+    protected void performClose() {
 
     }
 }
