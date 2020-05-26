@@ -17,7 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.Closeable;
+import java.io.Closeable;
 
 public interface BytesContext extends Closeable {
 
