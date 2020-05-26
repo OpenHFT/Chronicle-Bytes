@@ -5,9 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.function.Function;
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
 @SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
     private final String input;

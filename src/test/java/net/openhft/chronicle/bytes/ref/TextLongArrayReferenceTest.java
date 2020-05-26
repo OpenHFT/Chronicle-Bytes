@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,14 +33,14 @@ public class TextLongArrayReferenceTest {
 
         try (@NotNull TextLongArrayReference array = new TextLongArrayReference()) {
             array.bytesStore(bytes, 0, length);
-    
+
             assertEquals(5, array.getCapacity());
             for (int i = 0; i < 5; i++)
                 array.setValueAt(i, i + 1);
-    
+
             for (int i = 0; i < 5; i++)
                 assertEquals(i + 1, array.getValueAt(i));
-    
+
             @NotNull final String expected = "{ locked: false, capacity: 5                   , used: 00000000000000000000, " +
                     "values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n";
             System.out.println(expected.length());

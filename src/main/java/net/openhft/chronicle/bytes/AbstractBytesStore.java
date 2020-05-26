@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -21,9 +23,6 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 
 import java.nio.BufferUnderflowException;
 
-/*
- * Created by Peter Lawrey on 07/05/16.
- */
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         implements BytesStore<B, Underlying> {
     @Override

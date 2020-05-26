@@ -8,9 +8,6 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertTrue;
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
 @SuppressWarnings("rawtypes")
 public class BytesUtilTest {
     @Test

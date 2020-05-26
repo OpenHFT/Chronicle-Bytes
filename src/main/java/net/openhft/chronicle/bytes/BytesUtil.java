@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,9 +39,6 @@ import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
 
-/*
- * Created by Peter Lawrey on 30/08/15..
- */
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ;

@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -40,9 +42,6 @@ import java.util.Random;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-/*
- * Created by peter.lawrey on 27/02/15.
- */
 @SuppressWarnings("rawtypes")
 public class NativeBytesStoreTest {
     volatile int bcs;
