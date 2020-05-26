@@ -19,15 +19,16 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Closeable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 @SuppressWarnings("rawtypes")
-public abstract class AbstractReference implements Byteable, Closeable {
+public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
     @Nullable
     protected BytesStore bytes;
@@ -62,7 +63,7 @@ public abstract class AbstractReference implements Byteable, Closeable {
     }
 
     @Override
-    public void close() {
+    protected void performClose() {
         if (this.bytes != null) {
             this.bytes.release();
             this.bytes = null;
@@ -71,5 +72,11 @@ public abstract class AbstractReference implements Byteable, Closeable {
 
     public long address() {
         return bytesStore().addressForRead(offset);
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        warnIfNotClosed();
+        super.finalize();
     }
 }
