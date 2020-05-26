@@ -17,7 +17,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import java.io.Closeable;
+
+import net.openhft.chronicle.core.io.Closeable;
 
 public interface BytesContext extends Closeable {
 
@@ -31,5 +32,10 @@ public interface BytesContext extends Closeable {
      * @return the key to be written to
      */
     int key();
+
+    @Override
+    default boolean isClosed() {
+        throw new UnsupportedOperationException("todo");
+    }
 
 }
