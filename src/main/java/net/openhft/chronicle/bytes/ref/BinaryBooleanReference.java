@@ -7,9 +7,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-/**
- * Created by Rob Austin
- */
 public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
     private static final byte FALSE = (byte) 0xB0;

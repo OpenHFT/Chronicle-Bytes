@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -50,11 +52,11 @@ public class BinaryLongArrayReferenceTest {
 
         try (@NotNull BinaryLongArrayReference array = new BinaryLongArrayReference()) {
             array.bytesStore(bytes, 0, length);
-    
+
             assertEquals(128, array.getCapacity());
             for (int i = 0; i < 128; i++)
                 array.setValueAt(i, i + 1);
-    
+
             for (int i = 0; i < 128; i++)
                 assertEquals(i + 1, array.getValueAt(i));
             bytes.release();

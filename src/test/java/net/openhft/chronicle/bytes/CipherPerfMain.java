@@ -4,9 +4,6 @@ import java.security.Provider;
 import java.security.Security;
 import java.util.Map;
 
-/*
- * Created by Peter Lawrey on 07/02/2017.
- */
 public class CipherPerfMain {
     public static void main(String[] args) {
         for (Provider providers : Security.getProviders()) {

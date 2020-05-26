@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,17 +36,17 @@ public class TextLongReferenceTest {
             value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
             value.setValue(expected);
-    
+
             long l = bytesStore.parseLong(TextLongReference.VALUE);
-    
+
             Assert.assertEquals(expected, value.getValue());
             Assert.assertEquals(expected, l);
-    
+
             assertFalse(value.compareAndSwapValue(0, 1));
             assertTrue(value.compareAndSwapValue(10, 2));
             assertEquals(56, value.maxSize());
             assertEquals(0, value.offset());
-    
+
             Bytes<Void> bytes = bytesStore.bytesForRead();
             bytes.readPosition(0);
             assertEquals("!!atomic {  locked: false, value: 00000000000000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
