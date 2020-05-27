@@ -321,55 +321,63 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             IllegalArgumentException,
             IllegalStateException {
 
-        final int chunk0;
-        synchronized (this) {
-            Jvm.safepoint();
-            throwExceptionIfClosed();
-            if (position < 0)
-                throw new IOException("Attempt to access a negative position: " + position);
-            chunk0 = (int) (position / chunkSize);
-            Jvm.safepoint();
-            while (stores.size() <= chunk0) {
+        throwExceptionIfClosed();
+        if (position < 0)
+            throw new IOException("Attempt to access a negative position: " + position);
+        final int chunk = (int) (position / chunkSize);
+        Jvm.safepoint();
+
+        final WeakReference<MappedBytesStore> mbsRef;
+        synchronized (stores) {
+            while (stores.size() <= chunk)
                 stores.add(null);
+            mbsRef = stores.get(chunk);
+        }
+        if (mbsRef != null) {
+            final T mbs = (T) mbsRef.get();
+            if (mbs != null && mbs.tryReserve()) {
+                return mbs;
             }
-            Jvm.safepoint();
-            final WeakReference<MappedBytesStore> mbsRef = stores.get(chunk0);
-            if (mbsRef != null) {
-                @NotNull final T mbs = (T) mbsRef.get();
+        }
+
+        // its important we perform this outside the synchronized below, as this operation can take a while and if synchronized can block slow tailer
+        // from acquiring the next block
+        resizeRafIfTooSmall(chunk);
+
+        synchronized (stores) {
+
+            // We are back, protected by synchronized, and need to
+            // update our view on previous existence (we might have been stalled
+            // for a long time since we last checked dues to resizing and another
+            // thread might have added a MappedByteStore (very unlikely but still possible))
+            final WeakReference<MappedBytesStore> mbsRef2 = stores.get(chunk);
+            if (mbsRef2 != null) {
+                final T mbs = (T) mbsRef2.get();
                 if (mbs != null && mbs.tryReserve()) {
                     return mbs;
                 }
             }
-        }
-        final long start = System.nanoTime();
-
-        // its important we perform this outside the synchronized below, as this operation can take a while and if synchronized can block slow tailer
-        // from acquiring the next block
-        resizeRafIfTooSmall(chunk0);
-
-        synchronized (this) {
-            int chunk = (int) (position / chunkSize);
-
             // *** THIS CAN TAKE A LONG TIME IF A RESIZE HAS TO OCCUR ***
             // let double check it to make sure no other thread change it in the meantime.
-            resizeRafIfTooSmall(chunk);
+            //resizeRafIfTooSmall(chunk);
 
             final long mappedSize = chunkSize + overlapSize;
             final MapMode mode = readOnly ? MapMode.READ_ONLY : MapMode.READ_WRITE;
             final long startOfMap = chunk * chunkSize;
-            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
 
+            final long beginNs = System.nanoTime();
+
+            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
 
-            final long time2 = System.nanoTime() - start;
-            if (newChunkListener != null) {
-                newChunkListener.onNewChunk(file.getPath(), chunk, time2 / 1000);
-            }
-            if (time2 > 5_000_000L)
-                Jvm.warn().on(getClass(), "Took " + time2 / 1000L + " us to add mapping for " + file());
+            final long elapsedNs = System.nanoTime() - beginNs;
+            if (newChunkListener != null)
+                newChunkListener.onNewChunk(file.getPath(), chunk, elapsedNs / 1000);
 
-//            new Throwable("chunk "+chunk).printStackTrace();
+            if (elapsedNs > 5_000_000L)
+                Jvm.warn().on(getClass(), "Took " + elapsedNs / 1000L + " us to add mapping for " + file());
+
             return mbs2;
         }
 
@@ -386,10 +394,11 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
 
         // handle a possible race condition between processes.
         try {
+            // Todo: We should be able to synchronize on an object obtained by some Function.apply(file.getCanonicalPath())
             synchronized (GLOBAL_FILE_LOCK) {
                 size = fileChannel.size();
                 if (size < minSize) {
-                    final long time0 = System.nanoTime();
+                    final long beginNs = System.nanoTime();
                     try (FileLock ignore = fileChannel.lock()) {
                         size = fileChannel.size();
                         if (size < minSize) {
@@ -398,9 +407,9 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
                             Jvm.safepoint();
                         }
                     }
-                    final long time1 = System.nanoTime() - time0;
-                    if (time1 >= 1_000_000L) {
-                        Jvm.warn().on(getClass(), "Took " + time1 / 1000L + " us to grow file " + file());
+                    final long elapsedNs = System.nanoTime() - beginNs;
+                    if (elapsedNs >= 1_000_000L) {
+                        Jvm.warn().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
                     }
                 }
             }
@@ -470,33 +479,37 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         // nothing to do until released.
     }
 
-    private synchronized void performRelease() {
-        try {
-            for (int i = 0; i < stores.size(); i++) {
-                final WeakReference<MappedBytesStore> storeRef = stores.get(i);
-                if (storeRef == null)
-                    continue;
-                @Nullable final MappedBytesStore mbs = storeRef.get();
-                if (mbs != null) {
-                    // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                    // so ensure that it is released
-                    while (mbs.refCount() != 0) {
-                        try {
-                            mbs.release();
-                        } catch (IllegalStateException e) {
-                            Jvm.debug().on(getClass(), e);
+    private void performRelease() {
+
+            try {
+                synchronized (stores) {
+                    for (int i = 0; i < stores.size(); i++) {
+                        final WeakReference<MappedBytesStore> storeRef = stores.get(i);
+                        if (storeRef == null)
+                            continue;
+                        @Nullable final MappedBytesStore mbs = storeRef.get();
+                        if (mbs != null) {
+                            // this MappedFile is the only referrer to the MappedBytesStore at this point,
+                            // so ensure that it is released
+                            while (mbs.refCount() != 0) {
+                                try {
+                                    mbs.release();
+                                } catch (IllegalStateException e) {
+                                    Jvm.debug().on(getClass(), e);
+                                }
+                            }
                         }
+                        // Dereference released entities
+                        storeRef.clear();
+                        stores.set(i, null);
                     }
                 }
-                // Dereference released entities
-                storeRef.clear();
-                stores.set(i, null);
+            } finally {
+                closeQuietly(raf);
+                // if not already closed.
+                close();
             }
-        } finally {
-            closeQuietly(raf);
-            // if not already closed.
-            close();
-        }
+
     }
 
     @NotNull
