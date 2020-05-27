@@ -1,10 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IOTools;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
@@ -19,6 +16,17 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.fail;
 
+/*
+    Averages from TeamCity logs:
+
+    Type.        Linux [us]   Windows [us]   ARM [us]
+    ===========================================================
+    Sequential   15           49             120
+    Parallel      3.5         15              51
+*/
+
+
+@Ignore("This is a performance test and should not be run as a part of the normal build")
 public class ConcurrentRafAccessTest {
 
     private static final String MODE = "rw";
