@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -113,6 +114,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             for (Map.Entry<MappedFile, StackTrace> entry : MAPPED_FILE_STACK_TRACE_MAP.entrySet()) {
                 if (!entry.getKey().isClosed())
                     openFiles.addSuppressed(entry.getValue());
+                Closeable.closeQuietly(entry.getKey());
             }
         }
         if (openFiles.getSuppressed().length > 0)
