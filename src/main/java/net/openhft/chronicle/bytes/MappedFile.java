@@ -108,8 +108,6 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     }
 
     public static void checkMappedFiles() {
-        System.gc();
-        Jvm.pause(250);
         AssertionError openFiles = new AssertionError("Files still open");
         synchronized (MAPPED_FILE_STACK_TRACE_MAP) {
             for (Map.Entry<MappedFile, StackTrace> entry : MAPPED_FILE_STACK_TRACE_MAP.entrySet()) {
