@@ -15,6 +15,8 @@ import java.util.concurrent.*;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static org.junit.Assert.fail;
+
 public class ConcurrentRafAccessTest {
 
     private static final String MODE = "rw";
@@ -27,6 +29,9 @@ public class ConcurrentRafAccessTest {
 
     @Before
     public void setup() {
+        if (!new File(BASE_DIR).mkdirs()) {
+            fail("Unable to create directory " + BASE_DIR);
+        }
         workers = IntStream.range(0, NO_FILES)
                 .mapToObj(i -> {
                     final File file = fileFromInt(i);
@@ -53,7 +58,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testParallel2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testSequential" + i, ForkJoinPool.commonPool()))
+                .mapToLong(i -> test("testParallel2" + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -75,7 +80,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testParallel() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testSequential" + i, ForkJoinPool.commonPool()))
+                .mapToLong(i -> test("testParallel" + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -85,15 +90,13 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testSequential2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testSequential" + i, Executors.newSingleThreadExecutor()))
+                .mapToLong(i -> test("testSequential2" + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
                 .summaryStatistics();
 
         System.out.println("testSequential2: " + summaryStatistics);
 
     }
-
-
 
 
     private long test(final String name, final ExecutorService executor) {
