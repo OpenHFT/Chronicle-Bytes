@@ -38,8 +38,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
@@ -49,6 +48,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class MappedFile extends AbstractCloseable implements ReferenceCounted {
+    static final Map<MappedFile, StackTrace> MAPPED_FILE_STACK_TRACE_MAP = Collections.synchronizedMap(new WeakHashMap<>());
     private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = FileChannel.class;
@@ -84,7 +84,8 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         else
             doNotCloseOnInterrupt(this.fileChannel);
 
-        assert registerMappedFile(this);
+        if (Jvm.isResourceTracing())
+            registerMappedFile(this);
     }
 
     private static void logNewChunk(final String filename,
@@ -102,25 +103,23 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         Jvm.debug().on(MappedFile.class, message);
     }
 
-    private static boolean registerMappedFile(final MappedFile mappedFile) {
-//        MAPPED_FILE_THROWABLE_MAP.put(mappedFile, new Throwable("Created here"));
-        return true;
+    private static void registerMappedFile(final MappedFile mappedFile) {
+        MAPPED_FILE_STACK_TRACE_MAP.put(mappedFile, new StackTrace("Created here, file=" + mappedFile.file()));
     }
 
     public static void checkMappedFiles() {
-
-/*
-        int[] count = {0};
-        for (Map.Entry<MappedFile, Throwable> entry : MAPPED_FILE_THROWABLE_MAP.entrySet()) {
-            entry.getKey().check(entry.getValue(), count);
+        System.gc();
+        Jvm.pause(250);
+        AssertionError openFiles = new AssertionError("Files still open");
+        synchronized (MAPPED_FILE_STACK_TRACE_MAP) {
+            for (Map.Entry<MappedFile, StackTrace> entry : MAPPED_FILE_STACK_TRACE_MAP.entrySet()) {
+                if (!entry.getKey().isClosed())
+                    openFiles.addSuppressed(entry.getValue());
+            }
         }
-        MAPPED_FILE_THROWABLE_MAP.clear();
-        if (count[0] > 0)
-            throw new AssertionError("Count: " + count[0]);
-*/
+        if (openFiles.getSuppressed().length > 0)
+            throw openFiles;
     }
-
-//    static final Map<MappedFile, Throwable> MAPPED_FILE_THROWABLE_MAP = Collections.synchronizedMap(new IdentityHashMap<>());
 
     @NotNull
     public static MappedFile of(@NotNull final File file,
@@ -458,7 +457,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
 
     @Override
     public long refCount() {
-        return refCount.get();
+        return refCount.refCount();
     }
 
     @Override
