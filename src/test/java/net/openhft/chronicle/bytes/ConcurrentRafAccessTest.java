@@ -3,7 +3,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,6 +29,9 @@ public class ConcurrentRafAccessTest {
 
     private List<Worker> workers;
 
+    @Rule
+    public TemporaryFolder tmpDir = new TemporaryFolder();
+
     @Before
     public void setup() {
         if (!new File(BASE_DIR).mkdirs()) {
@@ -34,15 +39,15 @@ public class ConcurrentRafAccessTest {
         }
         workers = IntStream.range(0, NO_FILES)
                 .mapToObj(i -> {
-                    final File file = fileFromInt(i);
                     try {
+                        final File file = fileFromInt(i);
                         final RandomAccessFile raf = new RandomAccessFile(file, MODE);
                         raf.setLength(INITIAL_LENGTH);
                         final FileChannel fc = raf.getChannel();
                         return new Worker(file, raf, fc);
                     } catch (IOException e) {
                         e.printStackTrace();
-                        System.exit(1);
+                        fail("unable to create file for " + i);
                         return null;
                     }
 
@@ -58,7 +63,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testParallel2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testParallel2" + i, ForkJoinPool.commonPool()))
+                .mapToLong(i -> test("testParallel2 " + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -69,7 +74,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testSequential() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testSequential" + i, Executors.newSingleThreadExecutor()))
+                .mapToLong(i -> test("testSequential " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -80,7 +85,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testParallel() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testParallel" + i, ForkJoinPool.commonPool()))
+                .mapToLong(i -> test("testParallel " + i, ForkJoinPool.commonPool()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -90,7 +95,7 @@ public class ConcurrentRafAccessTest {
     @Test
     public void testSequential2() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
-                .mapToLong(i -> test("testSequential2" + i, Executors.newSingleThreadExecutor()))
+                .mapToLong(i -> test("testSequential2 " + i, Executors.newSingleThreadExecutor()))
                 .skip(4)
                 .summaryStatistics();
 
@@ -150,8 +155,8 @@ public class ConcurrentRafAccessTest {
         raf.setLength(currentSize * 2);
     }
 
-    private File fileFromInt(int i) {
-        return new File(BASE_DIR + "/" + Integer.toString(i));
+    private File fileFromInt(int i) throws IOException {
+        return tmpDir.newFile(Integer.toString(i));
     }
 
 }
