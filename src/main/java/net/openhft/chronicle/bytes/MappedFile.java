@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,7 +40,6 @@ import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
@@ -48,7 +48,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * avoid wasting bytes at the end of chunks.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
-public class MappedFile implements ReferenceCounted {
+public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     private static final long DEFAULT_CAPACITY = 128L << 40;
     // A single JVM cannot lock a file more than once.
     private static final Object GLOBAL_FILE_LOCK = FileChannel.class;
@@ -58,7 +58,6 @@ public class MappedFile implements ReferenceCounted {
     private final long chunkSize;
     private final long overlapSize;
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
-    private final AtomicBoolean closed = new AtomicBoolean();
     private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
     @NotNull
@@ -307,6 +306,9 @@ public class MappedFile implements ReferenceCounted {
         return file;
     }
 
+    /**
+     * @throws IllegalStateException if closed.
+     */
     @NotNull
     public MappedBytesStore acquireByteStore(final long position)
             throws IOException, IllegalArgumentException, IllegalStateException {
@@ -323,8 +325,7 @@ public class MappedFile implements ReferenceCounted {
         final int chunk0;
         synchronized (this) {
             Jvm.safepoint();
-            if (closed.get())
-                throw new IOException("Closed");
+            throwExceptionIfClosed();
             if (position < 0)
                 throw new IOException("Attempt to access a negative position: " + position);
             chunk0 = (int) (position / chunkSize);
@@ -465,6 +466,11 @@ public class MappedFile implements ReferenceCounted {
         return refCount.tryReserve();
     }
 
+    @Override
+    protected void performClose() {
+        // nothing to do until released.
+    }
+
     private synchronized void performRelease() {
         try {
             for (int i = 0; i < stores.size(); i++) {
@@ -489,7 +495,8 @@ public class MappedFile implements ReferenceCounted {
             }
         } finally {
             closeQuietly(raf);
-            closed.set(true);
+            // if not already closed.
+            close();
         }
     }
 
@@ -539,7 +546,7 @@ public class MappedFile implements ReferenceCounted {
             return actualSize();
 
         } catch (ClosedByInterruptException cbie) {
-            closed.set(true);
+            close();
             interrupted = true;
             throw new IllegalStateException(cbie);
 
@@ -548,7 +555,7 @@ public class MappedFile implements ReferenceCounted {
             if (open) {
                 throw new IORuntimeException(e);
             } else {
-                closed.set(true);
+                close();
                 throw new IllegalStateException(e);
             }
         } finally {
@@ -557,12 +564,15 @@ public class MappedFile implements ReferenceCounted {
         }
     }
 
-    public boolean isClosed() {
-        return closed.get();
-    }
-
     @NotNull
     public RandomAccessFile raf() {
         return raf;
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        warnIfNotClosed();
+        close();
+        super.finalize();
     }
 }
