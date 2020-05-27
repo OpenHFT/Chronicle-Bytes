@@ -33,7 +33,6 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -235,11 +234,13 @@ public enum BytesUtil {
     }
 
     public static Map<String, Long> checkRegisteredBytes0() {
-        return new HashMap<>(bytesCreated).entrySet()
-                .stream()
-                .filter(e -> e.getKey().refCount() > 0)
-                .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
-                .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        synchronized (bytesCreated) {
+            return bytesCreated.entrySet()
+                    .stream()
+                    .filter(e -> e.getKey().refCount() > 0)
+                    .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
+                    .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
+        }
     }
 
     public static boolean unregister(BytesStore bytes) {
