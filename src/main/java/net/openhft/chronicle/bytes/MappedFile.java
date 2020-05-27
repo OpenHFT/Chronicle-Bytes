@@ -40,6 +40,7 @@ import java.nio.channels.FileLock;
 import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
@@ -51,8 +52,12 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     static final Map<MappedFile, StackTrace> MAPPED_FILE_STACK_TRACE_MAP = Collections.synchronizedMap(new WeakHashMap<>());
     private static final long DEFAULT_CAPACITY = 128L << 40;
-    // A single JVM cannot lock a file more than once.
-    private static final Object GLOBAL_FILE_LOCK = FileChannel.class;
+
+    // A single JVM cannot lock a distinct canonical file more than once
+    private static final Map<String, WeakReference<NamedObject>> FILE_LOCKS = new HashMap<>();
+    private static final int EXPUNGE_MODULO = 64;
+    private static int EXPUNGE_COUNTER = 0;
+
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -63,6 +68,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     private final long capacity;
     @NotNull
     private final File file;
+    private final String canonicalPath;
     private final boolean readOnly;
     private NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
@@ -73,6 +79,11 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
                          final long capacity,
                          final boolean readOnly) {
         this.file = file;
+        try {
+            this.canonicalPath = file.getCanonicalPath();
+        } catch (IOException ioe) {
+            throw new IllegalStateException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
+        }
         this.raf = raf;
         this.fileChannel = raf.getChannel();
         this.chunkSize = OS.mapAlign(chunkSize);
@@ -394,8 +405,33 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
 
         // handle a possible race condition between processes.
         try {
-            // Todo: We should be able to synchronize on an object obtained by some Function.apply(file.getCanonicalPath())
-            synchronized (GLOBAL_FILE_LOCK) {
+
+            // We might have several MappedFile objects that maps to
+            // the same underlying file (possibly via hard or soft links)
+            // so we use the canonical path as a lock key
+
+            NamedObject namedObject;
+            synchronized (FILE_LOCKS) {
+                if (++EXPUNGE_COUNTER % EXPUNGE_MODULO == 0) {
+                    // Occasionally expunge all stale entries.
+                    final Set<String> expiredKeys = FILE_LOCKS.entrySet()
+                            .stream()
+                            .filter(e -> e.getValue().get() == null)
+                            .map(Map.Entry::getKey)
+                            .collect(Collectors.toSet());
+                    expiredKeys.forEach(FILE_LOCKS::remove);
+                }
+                do {
+                    final WeakReference<NamedObject> namedObjectRef = FILE_LOCKS.computeIfAbsent(canonicalPath, k -> new WeakReference<>(new NamedObject(k)));
+                    namedObject = namedObjectRef.get();
+                    if (namedObject == null)
+                        FILE_LOCKS.remove(canonicalPath); // Expunge a stale entry
+                } while (namedObject == null);
+            }
+
+            // Ensure exclusivity for any and all MappedFile objects handling
+            // the same canonical file.
+            synchronized (namedObject) {
                 size = fileChannel.size();
                 if (size < minSize) {
                     final long beginNs = System.nanoTime();
@@ -481,34 +517,34 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
 
     private void performRelease() {
 
-            try {
-                synchronized (stores) {
-                    for (int i = 0; i < stores.size(); i++) {
-                        final WeakReference<MappedBytesStore> storeRef = stores.get(i);
-                        if (storeRef == null)
-                            continue;
-                        @Nullable final MappedBytesStore mbs = storeRef.get();
-                        if (mbs != null) {
-                            // this MappedFile is the only referrer to the MappedBytesStore at this point,
-                            // so ensure that it is released
-                            while (mbs.refCount() != 0) {
-                                try {
-                                    mbs.release();
-                                } catch (IllegalStateException e) {
-                                    Jvm.debug().on(getClass(), e);
-                                }
+        try {
+            synchronized (stores) {
+                for (int i = 0; i < stores.size(); i++) {
+                    final WeakReference<MappedBytesStore> storeRef = stores.get(i);
+                    if (storeRef == null)
+                        continue;
+                    @Nullable final MappedBytesStore mbs = storeRef.get();
+                    if (mbs != null) {
+                        // this MappedFile is the only referrer to the MappedBytesStore at this point,
+                        // so ensure that it is released
+                        while (mbs.refCount() != 0) {
+                            try {
+                                mbs.release();
+                            } catch (IllegalStateException e) {
+                                Jvm.debug().on(getClass(), e);
                             }
                         }
-                        // Dereference released entities
-                        storeRef.clear();
-                        stores.set(i, null);
                     }
+                    // Dereference released entities
+                    storeRef.clear();
+                    stores.set(i, null);
                 }
-            } finally {
-                closeQuietly(raf);
-                // if not already closed.
-                close();
             }
+        } finally {
+            closeQuietly(raf);
+            // if not already closed.
+            close();
+        }
 
     }
 
@@ -587,4 +623,20 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         close();
         super.finalize();
     }
+
+    private static final class NamedObject {
+        private final String name;
+
+        public NamedObject(@NotNull final String name) {
+            this.name = name;
+        }
+
+        @Override
+        public String toString() {
+            return "NamedObject{" +
+                    "name='" + name + '\'' +
+                    '}';
+        }
+    }
+
 }
