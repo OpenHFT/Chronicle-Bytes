@@ -180,8 +180,8 @@ public class BytesTest {
         subBytes.readSkip(1);
 
         Assert.assertEquals(0, source.indexOf(subBytes));
-        Assert.assertTrue(subBytes.readPosition() == 1);
-        Assert.assertTrue(source.readPosition() == 0);
+        assertEquals(1, subBytes.readPosition());
+        assertEquals(0, source.readPosition());
     }
 
     @Test
@@ -1032,13 +1032,13 @@ public class BytesTest {
             a.append(hello);
             b.append(hello);
 
-            assertTrue(a.equals(b));
-            assertTrue(a.bytesStore().equals(b.bytesStore()));
+            assertEquals(a, b);
+            assertEquals(a.bytesStore(), b.bytesStore());
 
             assertEquals(hello, b.toString());
 
-            assertTrue(a.equals(b));
-            assertTrue(a.bytesStore().equals(b.bytesStore()));
+            assertEquals(a, b);
+            assertEquals(a.bytesStore(), b.bytesStore());
         } finally {
             a.release();
             b.release();

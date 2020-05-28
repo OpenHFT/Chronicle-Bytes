@@ -5,8 +5,7 @@ import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class StringsTest {
@@ -50,8 +49,8 @@ public class StringsTest {
 
         String a = bytes.read8bit();
         String b = bytes.readUtf8();
-        assertEquals(null, a);
-        assertEquals(null, b);
+        assertNull(a);
+        assertNull(b);
         bytes.release();
     }
 }

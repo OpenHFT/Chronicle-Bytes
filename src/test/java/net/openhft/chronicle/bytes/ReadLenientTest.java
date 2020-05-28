@@ -6,7 +6,7 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class ReadLenientTest {
@@ -27,9 +27,9 @@ public class ReadLenientTest {
 
         assertEquals(BigDecimal.ZERO, bytes.readBigDecimal());
         assertEquals(BigInteger.ZERO, bytes.readBigInteger());
-        assertEquals(false, bytes.readBoolean());
-        assertEquals(null, bytes.read8bit());
-        assertEquals(null, bytes.readUtf8());
+        assertFalse(bytes.readBoolean());
+        assertNull(bytes.read8bit());
+        assertNull(bytes.readUtf8());
         assertEquals(0, bytes.readByte());
         assertEquals(-1, bytes.readUnsignedByte()); // note this behaviour is need to find the end of a stream.
         assertEquals(0, bytes.readShort());

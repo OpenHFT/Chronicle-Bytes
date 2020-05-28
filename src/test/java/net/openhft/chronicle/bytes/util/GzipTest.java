@@ -53,7 +53,7 @@ public class GzipTest {
     public void testCompress() throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = GZIP.uncompress(GZIP.compress(bytes));
-        assertTrue(Arrays.equals(bytes, bytes2));
+        assertArrayEquals(bytes, bytes2);
     }
 
     @SuppressWarnings("rawtypes")
@@ -80,11 +80,11 @@ public class GzipTest {
 //        assertEquals(Arrays.toString(compress).replace(", ", "\n"),
 //                Arrays.toString(bytes4).replace(", ", "\n"));
         assertEquals(compress.length, bytes4.length);
-        assertTrue(Arrays.equals(compress, bytes4));
+        assertArrayEquals(compress, bytes4);
 
         @NotNull Bytes bytes6 = Bytes.allocateElasticDirect();
         GZIP.uncompress(bytes3, bytes6);
-        assertTrue(Arrays.equals(bytes, bytes6.toByteArray()));
+        assertArrayEquals(bytes, bytes6.toByteArray());
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes6.toByteArray()).replace(", ", "\n"));
     }

@@ -6,6 +6,7 @@ import org.junit.Test;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 public class PrimitiveTest {
@@ -108,7 +109,7 @@ public class PrimitiveTest {
         float f32 = bytes.readFloat();
         double f64 = bytes.readDouble();
 
-        assertEquals(true, flag);
+        assertTrue(flag);
         assertEquals(1, s8);
         assertEquals(2, u8);
         assertEquals(3, s16);
@@ -177,7 +178,7 @@ public class PrimitiveTest {
         float f32 = bytes.readFloat(23);
         double f64 = bytes.readDouble(27);
 
-        assertEquals(true, flag);
+        assertTrue(flag);
         assertEquals(1, s8);
         assertEquals(2, u8);
         assertEquals(3, s16);
@@ -211,7 +212,7 @@ public class PrimitiveTest {
         double f64 = bytes.parseDouble();
         double f64b = bytes.parseDouble();
 
-        assertEquals(true, flag);
+        assertTrue(flag);
         assertEquals(1, s32);
         assertEquals(2, s64);
         assertEquals("3", ch);

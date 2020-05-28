@@ -41,8 +41,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -195,11 +194,11 @@ public class ByteStoreTest {
             bytes.writeUtf8(word);
         }
 
-        assertEquals(null, bytes.readUtf8());
+        assertNull(bytes.readUtf8());
         for (String word : words) {
             assertEquals(word, bytes.readUtf8());
         }
-        assertEquals(null, bytes.readUtf8());
+        assertNull(bytes.readUtf8());
         assertEquals(26, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
@@ -227,7 +226,7 @@ public class ByteStoreTest {
             assertEquals(word, bytes.readUtf8());
         }
         assertEquals("", bytes.readUtf8());
-        assertEquals(null, bytes.readUtf8());
+        assertNull(bytes.readUtf8());
     }
 
     @Test
@@ -241,7 +240,7 @@ public class ByteStoreTest {
 
         Assert.assertEquals(bytes.length, bb2.position());
         @NotNull byte[] bytes2b = Arrays.copyOf(bytes2, bytes.length);
-        Assert.assertTrue(Arrays.equals(bytes, bytes2b));
+        Assert.assertArrayEquals(bytes, bytes2b);
     }
 
     @Test

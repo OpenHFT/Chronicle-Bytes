@@ -24,7 +24,7 @@ import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 public class BooleanReferenceTest {
     @Test
@@ -36,10 +36,10 @@ public class BooleanReferenceTest {
 
             ref.bytesStore(nbs, 0, 1);
 
-            assertEquals(false, ref.getValue());
+            assertFalse(ref.getValue());
             ref.setValue(true);
 
-            assertEquals(true, ref.getValue());
+            assertTrue(ref.getValue());
             assertEquals(1, ref.maxSize());
 
             nbs.release();
@@ -55,10 +55,10 @@ public class BooleanReferenceTest {
 
             ref.bytesStore(nbs, 0, 5);
 
-            assertEquals(false, ref.getValue());
+            assertFalse(ref.getValue());
             ref.setValue(true);
 
-            assertEquals(true, ref.getValue());
+            assertTrue(ref.getValue());
             assertEquals(5, ref.maxSize());
 
             nbs.release();
