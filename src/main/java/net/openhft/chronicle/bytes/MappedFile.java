@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.AbstractCloseable;
-import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +49,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class MappedFile extends AbstractCloseable implements ReferenceCounted {
-    static final Map<MappedFile, StackTrace> MAPPED_FILE_STACK_TRACE_MAP = Collections.synchronizedMap(new WeakHashMap<>());
     private static final long DEFAULT_CAPACITY = 128L << 40;
 
     // A single JVM cannot lock a distinct canonical file more than once
@@ -95,9 +93,6 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             doNotCloseOnInterrupt9(this.fileChannel);
         else
             doNotCloseOnInterrupt(this.fileChannel);
-
-        if (Jvm.isResourceTracing())
-            registerMappedFile(this);
     }
 
     private static void logNewChunk(final String filename,
@@ -115,21 +110,8 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         Jvm.debug().on(MappedFile.class, message);
     }
 
-    private static void registerMappedFile(final MappedFile mappedFile) {
-        MAPPED_FILE_STACK_TRACE_MAP.put(mappedFile, new StackTrace("Created here, file=" + mappedFile.file()));
-    }
-
     public static void checkMappedFiles() {
-        AssertionError openFiles = new AssertionError("Files still open");
-        synchronized (MAPPED_FILE_STACK_TRACE_MAP) {
-            for (Map.Entry<MappedFile, StackTrace> entry : MAPPED_FILE_STACK_TRACE_MAP.entrySet()) {
-                if (!entry.getKey().isClosed())
-                    openFiles.addSuppressed(entry.getValue());
-                Closeable.closeQuietly(entry.getKey());
-            }
-        }
-        if (openFiles.getSuppressed().length > 0)
-            throw openFiles;
+        AbstractCloseable.assertCloseablesClosed();
     }
 
     @NotNull
