@@ -9,8 +9,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
@@ -52,11 +51,11 @@ public class ByteableReferenceTest {
         final long startCount = firstStore.refCount();
         byteable.bytesStore(firstStore, 0, byteable.maxSize());
 
-        assertThat(firstStore.refCount(), is(startCount + 1));
+        assertEquals(startCount + 1, firstStore.refCount());
 
         byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
-        assertThat(firstStore.refCount(), is(startCount));
+        assertEquals(startCount, firstStore.refCount());
     }
 
 }

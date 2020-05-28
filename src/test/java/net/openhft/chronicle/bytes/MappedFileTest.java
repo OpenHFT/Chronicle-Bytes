@@ -30,7 +30,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
 public class MappedFileTest {
@@ -66,18 +65,18 @@ public class MappedFileTest {
         final MappedFile mappedFile = MappedFile.mappedFile(file, 64);
         final MappedBytesStore first = mappedFile.acquireByteStore(1);
 
-        assertThat(first.refCount(), is(1L));
+        assertEquals(1L, first.refCount());
 
         final MappedBytesStore second = mappedFile.acquireByteStore(1 + chunkSize);
 
-        assertThat(first.refCount(), is(1L));
-        assertThat(second.refCount(), is(1L));
+        assertEquals(1L, first.refCount());
+        assertEquals(1L, second.refCount());
 
         final MappedBytesStore third = mappedFile.acquireByteStore(1 + chunkSize + chunkSize);
 
-        assertThat(first.refCount(), is(1L));
-        assertThat(second.refCount(), is(1L));
-        assertThat(third.refCount(), is(1L));
+        assertEquals(1L, first.refCount());
+        assertEquals(1L, second.refCount());
+        assertEquals(1L, third.refCount());
     }
 
     @SuppressWarnings("rawtypes")

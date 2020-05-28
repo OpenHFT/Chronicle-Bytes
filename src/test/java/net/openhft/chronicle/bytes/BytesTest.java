@@ -46,7 +46,6 @@ import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
@@ -316,7 +315,7 @@ public class BytesTest {
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {
             b.readWithLength(2, bytesOut);
-            assertThat(bytesOut.toString(), is("He"));
+            assertEquals("He", bytesOut.toString());
         } finally {
             b.release();
             bytesOut.release();
@@ -366,9 +365,9 @@ public class BytesTest {
         Bytes bytes2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
         utf8StringInterner.intern(bytes1);
         String intern = utf8StringInterner.intern(bytes2);
-        assertThat(intern, is(bytes2.toString()));
+        assertEquals(bytes2.toString(), intern);
         String intern2 = utf8StringInterner.intern(bytes1);
-        assertThat(intern2, is(bytes1.toString()));
+        assertEquals(bytes1.toString(), intern2);
         bytes1.release();
         bytes2.release();
     }
@@ -380,7 +379,7 @@ public class BytesTest {
         try {
             store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
-            assertThat(store1.equalBytes(store2, store2.length()), is(false));
+            assertFalse(store1.equalBytes(store2, store2.length()));
         } finally {
             store1.release();
             store2.release();

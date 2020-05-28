@@ -30,9 +30,8 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 public class StreamingInputStreamTest {
@@ -55,7 +54,7 @@ public class StreamingInputStreamTest {
         prepareBytes(b);
 
         @NotNull InputStream is = b.inputStream();
-        assertThat(is.read(new byte[5], 0, 0), is(0));
+        assertEquals(0, is.read(new byte[5], 0, 0));
         b.release();
     }
 
