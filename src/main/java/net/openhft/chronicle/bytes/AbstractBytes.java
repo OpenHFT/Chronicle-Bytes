@@ -339,7 +339,7 @@ public abstract class AbstractBytes<Underlying> implements Bytes<Underlying> {
         try {
             this.bytesStore.release();
         } finally {
-            this.bytesStore = NoBytesStore.noBytesStore();
+            this.bytesStore = ReleasedBytesStore.releasedBytesStore();
         }
     }
 

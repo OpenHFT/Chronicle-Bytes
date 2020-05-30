@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -26,40 +25,28 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 /**
- * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStire with space)
+ * applied after a Bytes has been released and cannot be used.
  *
- * @see ReleasedBytesStore
+ * @see NoBytesStore
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public enum NoBytesStore implements BytesStore {
-    NO_BYTES_STORE;
+public enum ReleasedBytesStore implements BytesStore {
+    RELEASED_BYTES_STORE;
 
-    public static final long NO_PAGE;
-
-    @NotNull
-    public static final Bytes NO_BYTES;
-
-    static {
-        try {
-            NO_PAGE = OS.memory().allocate(OS.pageSize());
-            NO_BYTES = new VanillaBytes(noBytesStore());
-
-        } catch (@NotNull IllegalArgumentException | IllegalStateException e) {
-            throw new AssertionError(e);
-        }
-    }
 
     @NotNull
-    public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
-        return NO_BYTES_STORE;
+    public static <T, B extends BytesStore<B, T>> BytesStore<B, T> releasedBytesStore() {
+        return RELEASED_BYTES_STORE;
     }
 
     @Override
     public void reserve() throws IllegalStateException {
+        throw newIllegalStateException();
     }
 
     @Override
     public void release() throws IllegalStateException {
+        throw newIllegalStateException();
     }
 
     @Override
@@ -75,100 +62,102 @@ public enum NoBytesStore implements BytesStore {
     @NotNull
     @Override
     public RandomDataOutput writeByte(long offset, byte i8) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
+    }
+
+    @NotNull
+    private IllegalStateException newIllegalStateException() {
+        return new IllegalStateException("closed");
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeShort(long offset, short i) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeInt(long offset, int i) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeOrderedInt(long offset, int i) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeLong(long offset, long i) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeOrderedLong(long offset, long i) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeFloat(long offset, float d) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeDouble(long offset, double d) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeVolatileByte(long offset, byte i8) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeVolatileShort(long offset, short i16) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeVolatileInt(long offset, int i32) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput writeVolatileLong(long offset, long i64) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {
         if (length != 0)
-            throw new UnsupportedOperationException();
+            throw newIllegalStateException();
         return this;
     }
 
     @Override
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
-        if (length != 0)
-            throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
-        if (length != 0)
-            throw new UnsupportedOperationException();
-        return this;
+        throw newIllegalStateException();
     }
 
     @Override
     public byte readByte(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
@@ -178,47 +167,47 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public short readShort(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public int readInt(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public long readLong(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public float readFloat(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public double readDouble(long offset) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public byte readVolatileByte(long offset) throws BufferUnderflowException {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public short readVolatileShort(long offset) throws BufferUnderflowException {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public int readVolatileInt(long offset) throws BufferUnderflowException {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public long readVolatileLong(long offset) throws BufferUnderflowException {
-        throw new BufferUnderflowException();
+        throw newIllegalStateException();
     }
 
     @Override
@@ -254,74 +243,67 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public long copyTo(BytesStore store) {
-        // nothing to copy.
-        return 0L;
+        throw newIllegalStateException();
     }
 
     @Override
     public void nativeWrite(long address, long position, long size) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public void nativeRead(long position, long address, long size) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public void testAndSetInt(long offset, int expected, int value) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public boolean equalBytes(BytesStore bytesStore, long length) {
-        return length == 0;
+        throw newIllegalStateException();
     }
 
     @Override
     public void move(long from, long to, long length) {
-        throw new UnsupportedOperationException();
+        throw newIllegalStateException();
     }
 
     @Override
     public long addressForRead(long offset) throws BufferUnderflowException {
-        if (offset != 0)
-            throw new BufferUnderflowException();
-        return NO_PAGE;
+        throw newIllegalStateException();
     }
 
     @Override
     public long addressForWrite(long offset) throws BufferOverflowException {
-        if (offset != 0)
-            throw new BufferOverflowException();
-        return NO_PAGE;
+        throw newIllegalStateException();
     }
 
     @Override
     public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
-        return NO_PAGE;
+        throw newIllegalStateException();
     }
 
     @NotNull
     @Override
     public Bytes bytesForWrite() {
-        throw new UnsupportedOperationException("todo");
+        throw newIllegalStateException();
     }
 
     @Override
     public boolean sharedMemory() {
         return false;
     }
-
-
 }

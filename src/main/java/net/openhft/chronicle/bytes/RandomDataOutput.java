@@ -19,8 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -179,7 +179,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeLong(long offset, long i) throws BufferOverflowException;
+    R writeLong(long offset, long i) throws BufferOverflowException, IllegalStateException;
 
     /**
      * Perform a non stalling write with a store barrier.
