@@ -107,7 +107,7 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <runOrder>random</runOrder>
+                    <runOrder>hourly</runOrder>
                 </configuration>
             </plugin>
 
