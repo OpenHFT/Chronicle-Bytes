@@ -53,7 +53,7 @@ public class MappedFileTest {
     }
 
     @Test
-    public void testWarmup() throws InterruptedException {
+    public void testWarmup() {
         MappedFile.warmup();
     }
 
@@ -62,21 +62,26 @@ public class MappedFileTest {
         final File file = tmpDir.newFile();
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
-        final MappedFile mappedFile = MappedFile.mappedFile(file, 64);
-        final MappedBytesStore first = mappedFile.acquireByteStore(1);
+        try (final MappedFile mappedFile = MappedFile.mappedFile(file, 64)) {
+            final MappedBytesStore first = mappedFile.acquireByteStore(1);
 
-        assertEquals(1L, first.refCount());
+            assertEquals(1L, first.refCount());
 
-        final MappedBytesStore second = mappedFile.acquireByteStore(1 + chunkSize);
+            final MappedBytesStore second = mappedFile.acquireByteStore(1 + chunkSize);
 
-        assertEquals(1L, first.refCount());
-        assertEquals(1L, second.refCount());
+            assertEquals(1L, first.refCount());
+            assertEquals(1L, second.refCount());
 
-        final MappedBytesStore third = mappedFile.acquireByteStore(1 + chunkSize + chunkSize);
+            final MappedBytesStore third = mappedFile.acquireByteStore(1 + chunkSize + chunkSize);
 
-        assertEquals(1L, first.refCount());
-        assertEquals(1L, second.refCount());
-        assertEquals(1L, third.refCount());
+            assertEquals(1L, first.refCount());
+            assertEquals(1L, second.refCount());
+            assertEquals(1L, third.refCount());
+
+            third.release();
+            second.release();
+            first.release();
+        }
     }
 
     @SuppressWarnings("rawtypes")
