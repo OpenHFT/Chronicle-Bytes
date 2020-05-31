@@ -40,7 +40,7 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
-    private static final boolean BYTES_GUARDED = Boolean.getBoolean("bytes.guarded");
+    private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean s_newGuarded = BYTES_GUARDED;
     private final long capacity;
 

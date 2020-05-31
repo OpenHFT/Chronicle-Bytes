@@ -38,7 +38,6 @@ import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
-import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -57,7 +56,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
     private static final Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new ConcurrentHashMap<>());
-    private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Boolean.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
+    private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Jvm.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     private static final boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
 
     @NotNull
