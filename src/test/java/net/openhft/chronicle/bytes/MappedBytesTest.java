@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("rawtypes")
-public class MappedBytesTest {
+public class MappedBytesTest extends BytesTestCommon {
 
     final private String
             smallText = "It's ten years since the iPhone was first unveiled and Apple has marked " +
@@ -354,6 +354,7 @@ public class MappedBytesTest {
             assertTrue(mappedBytes.
                     isBackingFileReadOnly());
             mappedBytes.release();
+            assertEquals(0, mappedBytes.refCount());
         }
     }
 

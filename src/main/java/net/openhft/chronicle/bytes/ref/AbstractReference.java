@@ -74,9 +74,10 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return bytesStore().addressForRead(offset);
     }
 
-    @Override
+/* TODO FIX
+        @Override
     protected void finalize() throws Throwable {
         warnIfNotClosed();
         super.finalize();
-    }
+    }*/
 }

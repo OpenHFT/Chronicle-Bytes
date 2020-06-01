@@ -45,7 +45,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class ByteStoreTest {
+public class ByteStoreTest extends BytesTestCommon {
 
     private static final int SIZE = 128;
     private Bytes bytes;

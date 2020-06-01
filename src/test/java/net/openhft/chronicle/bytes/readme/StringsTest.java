@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes.readme;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
@@ -8,7 +9,7 @@ import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class StringsTest {
+public class StringsTest extends BytesTestCommon {
     @Test
     public void testString() {
         assumeFalse(NativeBytes.areNewGuarded());

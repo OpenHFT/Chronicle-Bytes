@@ -44,7 +44,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
-public class BytesMarshallableTest {
+public class BytesMarshallableTest extends BytesTestCommon {
 
     private final boolean guarded;
 

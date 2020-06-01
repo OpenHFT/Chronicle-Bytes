@@ -51,7 +51,7 @@ import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
-public class BytesTest {
+public class BytesTest extends BytesTestCommon {
 
     private Allocator alloc1;
     private ThreadDump threadDump;

@@ -18,13 +18,14 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class UncheckedLongReferenceTest {
+public class UncheckedLongReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
         @NotNull UncheckedLongReference ref = new UncheckedLongReference();

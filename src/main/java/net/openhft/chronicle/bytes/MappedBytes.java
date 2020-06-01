@@ -168,7 +168,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     public static MappedBytes readOnly(@NotNull final File file) throws FileNotFoundException {
-        return new MappedBytes(MappedFile.readOnly(file));
+        MappedFile mappedFile = MappedFile.readOnly(file);
+        try {
+            return new MappedBytes(mappedFile);
+        } finally {
+            mappedFile.release();
+        }
     }
 
     public MappedBytes write(final byte[] bytes,

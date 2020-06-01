@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 
-public class CommonMarshallableTest {
+public class CommonMarshallableTest extends BytesTestCommon {
 
     @Test
     public void usesSelfDescribingMessage() {

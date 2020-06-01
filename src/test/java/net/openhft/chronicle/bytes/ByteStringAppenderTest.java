@@ -35,7 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
-public class ByteStringAppenderTest {
+public class ByteStringAppenderTest extends BytesTestCommon {
 
     @NotNull
     private ThreadDump threadDump;

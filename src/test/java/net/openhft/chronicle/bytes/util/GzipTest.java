@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -35,7 +36,7 @@ import static net.openhft.chronicle.bytes.util.Compressions.GZIP;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class GzipTest {
+public class GzipTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 

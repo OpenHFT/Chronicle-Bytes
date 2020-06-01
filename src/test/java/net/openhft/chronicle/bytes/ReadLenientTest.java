@@ -9,7 +9,7 @@ import java.nio.ByteBuffer;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class ReadLenientTest {
+public class ReadLenientTest extends BytesTestCommon {
     @Test
     public void testLenient() {
         assumeFalse(NativeBytes.areNewGuarded());

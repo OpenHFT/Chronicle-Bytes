@@ -18,12 +18,13 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class TextLongArrayReferenceTest {
+public class TextLongArrayReferenceTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {

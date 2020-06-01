@@ -35,7 +35,7 @@ import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class ByteStringParserTest {
+public class ByteStringParserTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = Bytes.elasticByteBuffer();

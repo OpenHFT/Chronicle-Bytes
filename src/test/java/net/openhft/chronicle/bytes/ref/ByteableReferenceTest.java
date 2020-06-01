@@ -2,6 +2,9 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import org.junit.AfterClass;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -14,9 +17,9 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest {
-    private final Byteable byteable;
+    private final AbstractReference byteable;
 
-    public ByteableReferenceTest(final String className, final Byteable byteable) {
+    public ByteableReferenceTest(final String className, final AbstractReference byteable) {
         this.byteable = byteable;
     }
 
@@ -38,6 +41,18 @@ public class ByteableReferenceTest {
         );
     }
 
+
+    @BeforeClass
+    public static void enableCloseableTracing() {
+        AbstractCloseable.enableCloseableTracing();
+    }
+
+    @AfterClass
+    public static void assertCloseablesClosed() {
+        AbstractCloseable.assertCloseablesClosed();
+    }
+
+
     private static Object[] datum(final Byteable reference) {
         return new Object[]{reference.getClass().getSimpleName(), reference};
     }
@@ -56,6 +71,7 @@ public class ByteableReferenceTest {
         byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
         assertEquals(startCount, firstStore.refCount());
+        byteable.close();
     }
 
 }

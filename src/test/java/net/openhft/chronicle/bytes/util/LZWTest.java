@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +34,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.*;
 
-public class LZWTest {
+public class LZWTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 

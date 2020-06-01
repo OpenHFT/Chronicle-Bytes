@@ -19,12 +19,13 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class StringInternerBytesTest {
+public class StringInternerBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test

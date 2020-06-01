@@ -25,7 +25,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class VanillaBytesTest {
+public class VanillaBytesTest extends BytesTestCommon {
     @Test
     public void testBytesForRead() {
         @NotNull byte[] byteArr = new byte[128];

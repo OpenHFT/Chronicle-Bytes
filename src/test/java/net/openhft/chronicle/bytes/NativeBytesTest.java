@@ -41,7 +41,7 @@ import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
-public class NativeBytesTest {
+public class NativeBytesTest extends BytesTestCommon {
 
     private Allocator alloc;
     private ThreadDump threadDump;

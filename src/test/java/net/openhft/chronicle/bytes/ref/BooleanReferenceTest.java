@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
@@ -26,7 +27,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.*;
 
-public class BooleanReferenceTest {
+public class BooleanReferenceTest extends BytesTestCommon {
     @Test
     public void testBinary() {
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {

@@ -11,7 +11,7 @@ import java.util.Random;
 import static junit.framework.TestCase.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class StopBitDecimalTest {
+public class StopBitDecimalTest extends BytesTestCommon {
     @Test
     public void testDecimals() {
         assumeFalse(NativeBytes.areNewGuarded());

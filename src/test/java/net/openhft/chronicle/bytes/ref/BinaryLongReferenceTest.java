@@ -18,13 +18,14 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-public class BinaryLongReferenceTest {
+public class BinaryLongReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
         try (@NotNull BinaryLongReference ref = new BinaryLongReference()) {

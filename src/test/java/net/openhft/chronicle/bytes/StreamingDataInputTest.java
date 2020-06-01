@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class StreamingDataInputTest {
+public class StreamingDataInputTest extends BytesTestCommon {
     @Test
     public void read() {
         Bytes b = Bytes.allocateDirect(128);

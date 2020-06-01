@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class ByteCheckSumTest {
+public class ByteCheckSumTest extends BytesTestCommon {
     @Test
     public void test() {
         Bytes bytes = Bytes.allocateDirect(32);

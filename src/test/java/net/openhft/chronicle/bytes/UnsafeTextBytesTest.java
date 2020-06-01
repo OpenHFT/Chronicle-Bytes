@@ -8,7 +8,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class UnsafeTextBytesTest {
+public class UnsafeTextBytesTest extends BytesTestCommon {
     @Test
     public void appendBase10() {
         Bytes bytes = Bytes.allocateDirect(32);

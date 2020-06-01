@@ -36,7 +36,7 @@ import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
-public class BytesInternalTest {
+public class BytesInternalTest extends BytesTestCommon {
 
     private final boolean guarded;
 

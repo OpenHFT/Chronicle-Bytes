@@ -13,7 +13,7 @@ import java.util.Locale;
 
 import static org.junit.Assume.assumeFalse;
 
-public class Issue85Test {
+public class Issue85Test extends BytesTestCommon {
     int different = 0;
     int different2 = 0;
     DecimalFormat df = new DecimalFormat();

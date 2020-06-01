@@ -35,7 +35,7 @@ import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class MappedMemoryTest {
+public class MappedMemoryTest extends BytesTestCommon {
     private static final org.slf4j.Logger LOG = LoggerFactory.getLogger(MappedMemoryTest.class);
     private static final long SHIFT = 27L;
     private static long BLOCK_SIZE = 1L << SHIFT;

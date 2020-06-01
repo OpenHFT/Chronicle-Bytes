@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("rawtypes")
-public class ReadWriteMarshallableTest {
+public class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
     public void test() {
         // TODO Make guarded safe

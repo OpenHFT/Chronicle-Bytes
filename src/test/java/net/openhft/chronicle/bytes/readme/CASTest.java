@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes.readme;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
@@ -8,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-public class CASTest {
+public class CASTest extends BytesTestCommon {
     @Test
     public void testCAS() {
         assumeFalse(NativeBytes.areNewGuarded());

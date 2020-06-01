@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -35,7 +36,7 @@ import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class OptimisedBytesStoreHashTest {
+public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 

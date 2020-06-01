@@ -23,7 +23,7 @@ import java.io.File;
 
 import static org.junit.Assert.assertEquals;
 
-public class CopyBytesTest {
+public class CopyBytesTest extends BytesTestCommon {
 
     static void doTest(Bytes toTest, int from) {
         Bytes toCopy = Bytes.allocateDirect(32);

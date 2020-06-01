@@ -32,7 +32,7 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
 
-public class MappedFileTest {
+public class MappedFileTest extends BytesTestCommon {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
     private ThreadDump threadDump;

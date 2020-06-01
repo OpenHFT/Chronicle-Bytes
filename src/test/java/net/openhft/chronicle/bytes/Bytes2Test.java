@@ -36,7 +36,7 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
-public class Bytes2Test {
+public class Bytes2Test extends BytesTestCommon {
 
     private Allocator alloc1;
     private Allocator alloc2;

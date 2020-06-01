@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -29,7 +30,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class BinaryLongArrayReferenceTest {
+public class BinaryLongArrayReferenceTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 

@@ -24,7 +24,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 
-public class HeapByteStoreTest {
+public class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testEquals() {

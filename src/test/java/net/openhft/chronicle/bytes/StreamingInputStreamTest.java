@@ -34,7 +34,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class StreamingInputStreamTest {
+public class StreamingInputStreamTest extends BytesTestCommon {
     private ThreadDump threadDump;
 
     @Before

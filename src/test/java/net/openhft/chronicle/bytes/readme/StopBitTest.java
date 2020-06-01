@@ -1,9 +1,10 @@
 package net.openhft.chronicle.bytes.readme;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import org.junit.Test;
 
-public class StopBitTest {
+public class StopBitTest extends BytesTestCommon {
     @Test
     public void testString() {
         HexDumpBytes bytes = new HexDumpBytes();

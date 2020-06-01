@@ -10,7 +10,10 @@ import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.util.List;
 import java.util.LongSummaryStatistics;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -27,7 +30,7 @@ import static org.junit.Assert.fail;
 
 
 @Ignore("This is a performance test and should not be run as a part of the normal build")
-public class ConcurrentRafAccessTest {
+public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     private static final String MODE = "rw";
     private static final String BASE_DIR = "rafs";
