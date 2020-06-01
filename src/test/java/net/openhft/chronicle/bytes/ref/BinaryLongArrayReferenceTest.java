@@ -77,6 +77,8 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         la2.readMarshallable(bytes);
         assertEquals(4, la2.first.getCapacity());
         assertEquals(8, la2.second.getCapacity());
+        la.closeAll();
+        la2.closeAll();
         bytes.release();
     }
 
@@ -87,6 +89,11 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         public LongArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);
             second.capacity(secondLength);
+        }
+
+        public void closeAll() {
+            first.close();
+            second.close();
         }
     }
 }

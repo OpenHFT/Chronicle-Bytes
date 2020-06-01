@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
@@ -42,6 +43,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
             String user = System.getProperty("user.name");
             if (user == null) user = "unknown";
             file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
+            AbstractCloseable.unmonitor(file);
             bytes = file.acquireBytesForWrite(0);
             bytes.append8bit("&TSF\nTime stamp file uses for sharing a unique id\n");
             BytesUtil.unregister(bytes);
