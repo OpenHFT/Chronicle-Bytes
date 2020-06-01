@@ -212,8 +212,9 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     }
 
     public static void warmup() {
+        final List<IOException> errorsDuringWarmup = new ArrayList<>();
         try {
-            Jvm.disableDebugHandler();
+            Jvm.setExceptionHandlers(null, null, null);
 
             @NotNull final File file = File.createTempFile("delete_warming_up", "me");
             file.deleteOnExit();
@@ -228,16 +229,20 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
                         mappedFile.release();
                     }
                     Thread.yield();
-                    Files.delete(file.toPath());
                 } catch (IOException e) {
-                    Jvm.debug().on(MappedFile.class, "Error during warmup", e);
+                    errorsDuringWarmup.add(e);
                 }
             }
+            Thread.yield();
+            Files.delete(file.toPath());
         } catch (IOException e) {
+            Jvm.resetExceptionHandlers();
             Jvm.warn().on(MappedFile.class, "Error during warmup", e);
+        } finally {
+            Jvm.resetExceptionHandlers();
+            if (errorsDuringWarmup.size() > 0)
+                Jvm.warn().on(MappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
         }
-
-        Jvm.resetExceptionHandlers();
     }
 
     private static void warmup0(final long mapAlignment,
