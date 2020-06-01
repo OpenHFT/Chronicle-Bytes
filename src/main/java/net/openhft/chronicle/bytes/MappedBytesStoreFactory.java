@@ -22,7 +22,7 @@ import net.openhft.chronicle.core.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
-public interface MappedBytesStoreFactory<T extends MappedBytesStore> {
+public interface MappedBytesStoreFactory {
     @NotNull
-    T create(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity);
+    MappedBytesStore create(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity);
 }

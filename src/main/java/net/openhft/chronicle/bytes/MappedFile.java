@@ -308,8 +308,8 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     }
 
     @NotNull
-    public <T extends MappedBytesStore> T acquireByteStore(final long position,
-                                                           @NotNull final MappedBytesStoreFactory<T> mappedBytesStoreFactory)
+    public MappedBytesStore acquireByteStore(final long position,
+                                             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
             IllegalArgumentException,
             IllegalStateException {
@@ -327,7 +327,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             mbsRef = stores.get(chunk);
         }
         if (mbsRef != null) {
-            final T mbs = (T) mbsRef.get();
+            final MappedBytesStore mbs = mbsRef.get();
             if (mbs != null && mbs.tryReserve()) {
                 return mbs;
             }
@@ -345,7 +345,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             // thread might have added a MappedByteStore (very unlikely but still possible))
             final WeakReference<MappedBytesStore> mbsRef2 = stores.get(chunk);
             if (mbsRef2 != null) {
-                final T mbs = (T) mbsRef2.get();
+                final MappedBytesStore mbs = mbsRef2.get();
                 if (mbs != null && mbs.tryReserve()) {
                     return mbs;
                 }
@@ -361,7 +361,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             final long beginNs = System.nanoTime();
 
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
-            final T mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+            final MappedBytesStore mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
             stores.set(chunk, new WeakReference<>(mbs2));
 
             final long elapsedNs = System.nanoTime() - beginNs;
