@@ -132,9 +132,8 @@ public class MappedMemoryTest {
     public void mappedMemoryTest() throws IOException, IORuntimeException {
 
         @NotNull File tempFile = File.createTempFile("chronicle", "q");
+        @NotNull Bytes bytes = mappedBytes(tempFile, OS.pageSize());
         try {
-
-            @NotNull Bytes bytes = mappedBytes(tempFile, OS.pageSize());
             assertEquals(1, bytes.refCount());
             bytes.reserve();
             @NotNull char[] chars = new char[OS.pageSize() * 11];
@@ -148,6 +147,8 @@ public class MappedMemoryTest {
             bytes.release();
             assertEquals(1, bytes.refCount());
         } finally {
+            bytes.release();
+            assertEquals(0, bytes.refCount());
             tempFile.delete();
         }
     }
