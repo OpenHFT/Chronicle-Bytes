@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -57,7 +58,12 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public long getVolatileValue() {
-        return bytes.readVolatileLong(offset);
+        try {
+            return bytes.readVolatileLong(offset);
+        } catch (Exception e) {
+            throwExceptionIfClosed();
+            throw Jvm.rethrow(e);
+        }
     }
 
     @Override
