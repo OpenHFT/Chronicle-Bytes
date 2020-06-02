@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import sun.nio.ch.Interruptible;
@@ -214,7 +215,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     public static void warmup() {
         final List<IOException> errorsDuringWarmup = new ArrayList<>();
         try {
-            Jvm.setExceptionHandlers(null, null, null);
+            Jvm.setExceptionHandlers(Slf4jExceptionHandler.FATAL, null, null);
 
             @NotNull final File file = File.createTempFile("delete_warming_up", "me");
             file.deleteOnExit();
