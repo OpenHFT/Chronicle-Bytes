@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.Closeable;
 import org.junit.Test;
 
 import java.io.File;
@@ -45,6 +46,8 @@ public class CopyBytesTest extends BytesTestCommon {
         toTest.release();
         toCopy.release();
         toValidate.release();
+        // close if closeable.
+        Closeable.closeQuietly(toTest);
     }
 
     @Test

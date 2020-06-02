@@ -88,8 +88,4 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         return this;
     }
 
-    @Override
-    protected void performClose() {
-
-    }
 }
