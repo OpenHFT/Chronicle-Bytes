@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.StackTrace;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -217,7 +218,8 @@ public enum BytesUtil {
     }
 
     public static void checkRegisteredBytes() {
-        Jvm.pause(100);
+        BackgroundResourceReleaser.releasePendingResources();
+
         Map<String, Long> throwCount = null;
         try {
             throwCount = checkRegisteredBytes0();

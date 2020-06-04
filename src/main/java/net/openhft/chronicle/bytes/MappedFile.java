@@ -503,6 +503,11 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         // nothing to do until released.
     }
 
+    @Override
+    protected boolean performCloseInBackground() {
+        return true;
+    }
+
     private void performRelease() {
 
         try {
