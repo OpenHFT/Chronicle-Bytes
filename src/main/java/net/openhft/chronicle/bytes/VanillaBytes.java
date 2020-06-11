@@ -38,7 +38,8 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Simple Bytes implementation which is not Elastic.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
+public class VanillaBytes<Underlying>
+        extends AbstractBytes<Underlying>
         implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
@@ -159,10 +160,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
             throws IllegalStateException {
-        @Nullable BytesStore oldBS = this.bytesStore;
-        this.bytesStore = bytesStore;
-        bytesStore.reserve();
-        oldBS.release();
+        if (this.bytesStore != bytesStore) {
+            @Nullable BytesStore oldBS = this.bytesStore;
+            this.bytesStore = bytesStore;
+            bytesStore.reserve(this);
+            oldBS.release(this);
+        }
         clear();
     }
 
@@ -398,7 +401,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         @Nullable final Memory memory = bytesStore.memory;
 
         if (memory == null)
-            throw new AssertionError(bytesStore.releasedHere);
+            bytesStore.throwExceptionIfReleased();
 
         if (Jvm.isJava9Plus()) {
             final byte[] chars = StringUtils.extractBytes(s);

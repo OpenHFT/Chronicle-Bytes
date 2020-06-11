@@ -1,19 +1,19 @@
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.After;
 import org.junit.Before;
 
 public class BytesTestCommon {
 
     @Before
-    public void enableCloseableTracing() {
-        AbstractCloseable.enableCloseableTracing();
+    public void enableReferenceTracing() {
+        AbstractReferenceCounted.enableReferenceTracing();
     }
 
     @After
-    public void assertCloseablesClosed() {
-        AbstractCloseable.assertCloseablesClosed();
+    public void assertReferencesReleased() {
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
 }

@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
@@ -75,6 +76,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         assertEquals("value", actual);
         assertEquals(5, actual.length());
+        bs.releaseLast();
     }
 
     private ThreadDump threadDump;
@@ -107,7 +109,7 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -127,7 +129,7 @@ public class BytesInternalTest extends BytesTestCommon {
         sb = null; // free some memory.
         assertEquals(new String(bytes2, US_ASCII), actual);
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -138,7 +140,7 @@ public class BytesInternalTest extends BytesTestCommon {
         Bytes<?> from = Bytes.from(strDouble);
         assertEquals(expected, from.parseDouble(), 0.0);
         assertEquals(expectedDp, from.lastDecimalPlaces());
-        from.release();
+        from.releaseLast();
     }
 
     @Test
@@ -149,7 +151,7 @@ public class BytesInternalTest extends BytesTestCommon {
         Bytes<?> from = Bytes.from(strDouble);
         assertEquals(expected, from.parseDouble(), 0.0);
         assertEquals(expectedDp, from.lastDecimalPlaces());  //Last dp should be 7.
-        from.release();
+        from.releaseLast();
     }
 
     @Test
@@ -160,7 +162,7 @@ public class BytesInternalTest extends BytesTestCommon {
         Bytes<?> from = Bytes.from(strDouble);
         assertEquals(expected, from.parseDouble(), 0.0);
         assertEquals(expectedDp, from.lastDecimalPlaces());
-        from.release();
+        from.releaseLast();
     }
 
     @Test
@@ -178,7 +180,7 @@ public class BytesInternalTest extends BytesTestCommon {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -195,7 +197,7 @@ public class BytesInternalTest extends BytesTestCommon {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -212,7 +214,7 @@ public class BytesInternalTest extends BytesTestCommon {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -228,7 +230,7 @@ public class BytesInternalTest extends BytesTestCommon {
                     assertEquals(si,
                             Double.parseDouble(si),
                             from.parseDouble(), 0.0);
-                    from.release();
+                    from.releaseLast();
                 }
             }
         }
@@ -250,7 +252,7 @@ public class BytesInternalTest extends BytesTestCommon {
         sb.setLength(0);
         assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -269,7 +271,7 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.parse8bit(0, bytes, sb, length);
 
         assertEquals(test, sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -288,7 +290,7 @@ public class BytesInternalTest extends BytesTestCommon {
         BytesInternal.parse8bit(0, bytes, sb, length);
 
         assertEquals(test, sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -309,17 +311,22 @@ public class BytesInternalTest extends BytesTestCommon {
         assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
+        bs.releaseLast();
     }
 
     @Test
-    public void shouldHandleDifferentSizedStores() throws Exception {
-        final BytesStore storeOfThirtyTwoBytes = Bytes.elasticHeapByteBuffer(32).bytesStore();
+    public void shouldHandleDifferentSizedStores() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
+        final BytesStore storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
-        final BytesStore longerBuffer = Bytes.elasticHeapByteBuffer(512).bytesStore();
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticHeapByteBuffer(512);
+        final BytesStore longerBuffer = bytes2.bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
         assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
+        bytes2.releaseLast();
+        bytes.releaseLast();
     }
 
     @Test
@@ -340,7 +347,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
             Bytes<?> from = Bytes.from(text);
             assertEquals(expected, from.parseDouble(), 0.0);
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -348,7 +355,7 @@ public class BytesInternalTest extends BytesTestCommon {
         double d = Double.parseDouble(s);
         Bytes<?> from = Bytes.from(s);
         double d2 = from.parseDouble();
-        from.release();
+        from.releaseLast();
         if (d != d2) {
             System.out.println(d + " != " + d2);
             ++different;
@@ -368,6 +375,7 @@ public class BytesInternalTest extends BytesTestCommon {
             String s2 = bytes.toString();
             System.out.println(s + " != " + s2);
         }
+        bytes.releaseLast();
     }
 
     @Test

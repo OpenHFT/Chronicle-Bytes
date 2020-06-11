@@ -13,6 +13,6 @@ public class StreamingDataInputTest extends BytesTestCommon {
         b.read(byteArr, 2, 6);
         assertEquals("AB012345IJKLMNOP", new String(byteArr, 0));
         assertEquals('6', b.readByte());
-        b.release();
+        b.releaseLast();
     }
 }

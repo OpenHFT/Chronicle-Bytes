@@ -37,6 +37,6 @@ public class CASTest extends BytesTestCommon {
         assertEquals("0000 03 73 33 32 ff ff ff 7f                         # s32\n" +
                         "0008 03 73 36 34 00 00 00 00 ff ff ff ff ff ff ff 7f # s64\n",
                 bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 }

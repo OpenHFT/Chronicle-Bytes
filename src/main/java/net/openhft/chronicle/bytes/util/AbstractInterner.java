@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -89,6 +90,7 @@ public abstract class AbstractInterner<T> {
         @NotNull T t = getValue(cs, length);
         @NotNull final byte[] bytes = new byte[length];
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
+        AbstractReferenceCounted.unmonitor(bs);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
 //        UnsafeMemory.UNSAFE.storeFence();

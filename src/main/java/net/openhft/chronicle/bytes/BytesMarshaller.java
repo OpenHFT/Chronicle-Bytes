@@ -242,7 +242,7 @@ public class BytesMarshaller<T> {
             long stopBit = read.readStopBit();
             if (stopBit == -1) {
                 if (bytes != null)
-                    bytes.release();
+                    bytes.releaseLast();
                 field.set(o, null);
                 return;
             }

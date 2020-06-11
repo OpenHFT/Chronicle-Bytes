@@ -34,7 +34,7 @@ public class StringInternerBytesTest extends BytesTestCommon {
         for (int i = 0; i < 100; i++) {
             Bytes b = Bytes.from("key" + i);
             si.intern(b, (int) b.readRemaining());
-            b.release();
+            b.releaseLast();
         }
         assertEquals(89, si.valueCount());
     }

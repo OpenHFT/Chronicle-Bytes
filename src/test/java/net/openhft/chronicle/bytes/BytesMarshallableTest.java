@@ -20,6 +20,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
@@ -72,7 +73,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Test
@@ -115,7 +116,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
         assertEquals(mb1.toString(), mb3.toString());
         assertEquals(mb2.toString(), mb4.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -159,21 +160,22 @@ public class BytesMarshallableTest extends BytesTestCommon {
                         "   65 32 38 61 34\n", bytes.toHexString());
 */
         Bytes bytes2 = HexDumpBytes.fromText(bytes.toHexString());
-        for (int i = 0; i < 2; i++) {
-            @NotNull MyScalars mb3 = new MyScalars();
-            @NotNull MyScalars mb4 = new MyScalars();
-            assertEquals(1, bytes.readUnsignedByte());
-            mb3.readMarshallable(bytes);
-            assertEquals(2, bytes.readUnsignedByte());
-            mb4.readMarshallable(bytes);
+        doSerializeScalars(bytes, mb1, mb2);
+        doSerializeScalars(bytes2, mb1, mb2);
+        bytes.releaseLast();
+        bytes2.releaseLast();
+    }
 
-            assertEquals(mb1.toString(), mb3.toString());
-            assertEquals(mb2.toString(), mb4.toString());
+    public void doSerializeScalars(Bytes<?> bytes, @NotNull MyScalars mb1, @NotNull MyScalars mb2) {
+        @NotNull MyScalars mb3 = new MyScalars();
+        @NotNull MyScalars mb4 = new MyScalars();
+        assertEquals(1, bytes.readUnsignedByte());
+        mb3.readMarshallable(bytes);
+        assertEquals(2, bytes.readUnsignedByte());
+        mb4.readMarshallable(bytes);
 
-            bytes.release();
-
-            bytes = bytes2;
-        }
+        assertEquals(mb1.toString(), mb3.toString());
+        assertEquals(mb2.toString(), mb4.toString());
     }
 
     @Test
@@ -319,7 +321,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
         assertEquals(mn1.toString(), mn3.toString());
         assertEquals(mn2.toString(), mn4.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -348,7 +350,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     assertEquals(mb1.toString(), mb3.toString());
                     assertEquals(mb2.toString(), mb4.toString());
 
-                    bytes.release();
+                    bytes.releaseLast();
 
                     bytes = bytes2;
                 }
@@ -392,7 +394,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                 "   45 ae 05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 # numbers\n" +
                 "   0c 00 00 00 a6 7b 00 00 00\n";
         assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -438,7 +440,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
                 "                                                # bm3\n" +
                 "      a7 d2 02 96 49 00 00 00 00                      # value\n";
         assertEquals(NativeBytes.areNewGuarded() ? expectedBG : expectedB, bm1.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -467,7 +469,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         bma2.readMarshallable(bytes);
         assertNull(bma2.longs);
         assertNull(bma2.doubles);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -503,7 +505,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         assertEquals("[1.1377777777777776]", Arrays.toString(bma2.doubles));
         assertEquals(0x123456789ABCDEFL, bma2.longs[0]);
         assertEquals(0x1.23456789ABCDEp0, bma2.doubles[0], 0);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     static class MyCollections implements BytesMarshallable {

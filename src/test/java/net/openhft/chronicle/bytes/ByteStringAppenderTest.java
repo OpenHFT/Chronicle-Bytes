@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -56,8 +57,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        bytes.release();
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -73,11 +74,15 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     @Test
     public void testConvertTo() {
         Bytes<?> hello = Bytes.from("hello");
-        assertEquals(hello, ObjectUtils.convertTo(Bytes.class, "hello"));
+        Bytes hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
+        assertEquals(hello, hello1);
         VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
-        assertEquals(bytes.append(1), ObjectUtils.convertTo(Bytes.class, 1));
-        hello.release();
-        bytes.release();
+        Bytes one = ObjectUtils.convertTo(Bytes.class, 1);
+        assertEquals(bytes.append(1), one);
+        one.releaseLast();
+        hello1.releaseLast();
+        hello.releaseLast();
+        bytes.releaseLast();
     }
 
     @Test

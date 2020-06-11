@@ -30,8 +30,8 @@ import static org.junit.Assert.*;
 public class BooleanReferenceTest extends BytesTestCommon {
     @Test
     public void testBinary() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
             byte i8 = (byte) 0xB0;
             nbs.writeByte(0, i8);
 
@@ -43,14 +43,14 @@ public class BooleanReferenceTest extends BytesTestCommon {
             assertTrue(ref.getValue());
             assertEquals(1, ref.maxSize());
 
-            nbs.release();
         }
+        nbs.releaseLast();
     }
 
     @Test
     public void testText() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
 
             nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));
 
@@ -62,7 +62,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
             assertTrue(ref.getValue());
             assertEquals(5, ref.maxSize());
 
-            nbs.release();
         }
+        nbs.releaseLast();
     }
 }

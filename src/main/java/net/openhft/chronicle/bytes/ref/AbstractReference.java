@@ -56,16 +56,16 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
 
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes) {
         if (this.bytes != null) {
-            this.bytes.release();
+            this.bytes.release(this);
         }
         this.bytes = bytes.bytesStore();
-        this.bytes.reserve();
+        this.bytes.reserve(this);
     }
 
     @Override
     protected void performClose() {
         if (this.bytes != null) {
-            this.bytes.release();
+            this.bytes.release(this);
             this.bytes = null;
         }
     }

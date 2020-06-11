@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
@@ -56,7 +57,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -100,9 +101,9 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
         }
 
-        bytes.release();
-        enc.release();
-        dec.release();
+        bytes.releaseLast();
+        enc.releaseLast();
+        dec.releaseLast();
     }
 
     @Test
@@ -161,7 +162,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
 
-        bbb.release();
+        bbb.releaseLast();
     }
 
     @Test
@@ -223,7 +224,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         dst.writePosition(src.copyTo(dst));
         assertEquals(src, dst);
 
-        src.release();
-        dst.release();
+        src.releaseLast();
+        dst.releaseLast();
     }
 }

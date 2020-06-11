@@ -18,8 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.ReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -650,10 +650,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return whether this BytesStore is writable.
      */
     default boolean readWrite() {
-        return true;
-    }
-
-    default boolean checkRefCount() {
         return true;
     }
 }

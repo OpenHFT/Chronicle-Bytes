@@ -20,11 +20,21 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
 import java.nio.BufferUnderflowException;
 
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
+        extends AbstractReferenceCounted
         implements BytesStore<B, Underlying> {
+
+    protected AbstractBytesStore() {
+    }
+
+    protected AbstractBytesStore(boolean monitored) {
+        super(monitored);
+    }
+
     @Override
     public int peekUnsignedByte(long offset) throws BufferUnderflowException {
         return offset >= readLimit() ? -1 : readUnsignedByte(offset);

@@ -19,7 +19,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.junit.After;
@@ -42,31 +44,33 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     // on i7-3970X ~ 3.3 ns
     @Test
     public void testRawMemoryMapped() throws IOException {
+        ReferenceOwner test = ReferenceOwner.temporary("test");
         for (int t = 0; t < 5; t++) {
             @NotNull File tempFile = File.createTempFile("chronicle", "q");
             try {
 
                 long startTime = System.nanoTime();
-                @NotNull MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
-                @Nullable MappedBytesStore bytesStore = mappedFile.acquireByteStore(1);
-                long address = bytesStore.address;
+                MappedFile file0;
+                try (@NotNull MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize())) {
+                    file0 = mappedFile;
+                    @Nullable MappedBytesStore bytesStore = mappedFile.acquireByteStore(test, 1);
+                    long address = bytesStore.address;
 
-                for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    OS.memory().writeLong(address + i, i);
+                    for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
+                        OS.memory().writeLong(address + i, i);
+                    }
+                    for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
+                        OS.memory().writeLong(address + i, i);
+                    }
+                    bytesStore.release(test);
                 }
-                for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    OS.memory().writeLong(address + i, i);
-                }
-
-                bytesStore.release();
-                mappedFile.release();
-                assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
+                assertEquals(file0.referenceCounts(), 0, file0.refCount());
                 LOG.info("With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 tempFile.delete();
@@ -88,7 +92,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 for (long i = 0; i < BLOCK_SIZE; i += 8) {
                     bytes.writeLong(i);
                 }
-                bytes.release();
+                bytes.releaseLast();
                 assertEquals(0, bytes.refCount());
                 LOG.info("With MappedNativeBytes,\t avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
@@ -100,27 +104,27 @@ public class MappedMemoryTest extends BytesTestCommon {
     // on i7-3970X ~ 6.0 ns
     @Test
     public void withRawNativeBytesTess() throws IOException {
+        ReferenceOwner test = ReferenceOwner.temporary("test");
 
         for (int t = 0; t < 3; t++) {
             @NotNull File tempFile = File.createTempFile("chronicle", "q");
             try {
 
-                @NotNull MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize());
                 long startTime = System.nanoTime();
-                @NotNull Bytes bytes = mappedFile.acquireBytesForWrite(1);
-                for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    bytes.writeLong(i);
-                }
-                bytes.release();
+                try (MappedFile mappedFile = mappedFile(tempFile, BLOCK_SIZE / 2, OS.pageSize())) {
+                    @NotNull Bytes bytes = mappedFile.acquireBytesForWrite(test, 1);
+                    for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
+                        bytes.writeLong(i);
+                    }
+                    bytes.releaseLast(test);
 
-                bytes = mappedFile.acquireBytesForWrite(BLOCK_SIZE / 2 + 1);
-                for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
-                    bytes.writeLong(i);
-                }
-                bytes.release();
+                    bytes = mappedFile.acquireBytesForWrite(test, BLOCK_SIZE / 2 + 1);
+                    for (long i = 0; i < BLOCK_SIZE / 2; i += 8L) {
+                        bytes.writeLong(i);
+                    }
+                    bytes.releaseLast(test);
 
-                mappedFile.release();
-                assertEquals(mappedFile.referenceCounts(), 0, mappedFile.refCount());
+                }
                 LOG.info("With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 tempFile.delete();
@@ -132,25 +136,33 @@ public class MappedMemoryTest extends BytesTestCommon {
     public void mappedMemoryTest() throws IOException, IORuntimeException {
 
         @NotNull File tempFile = File.createTempFile("chronicle", "q");
-        @NotNull Bytes bytes = mappedBytes(tempFile, OS.pageSize());
+        Bytes bytes0 = null;
         try {
-            assertEquals(1, bytes.refCount());
-            bytes.reserve();
-            @NotNull char[] chars = new char[OS.pageSize() * 11];
-            Arrays.fill(chars, '.');
-            chars[chars.length - 1] = '*';
-            bytes.writeUtf8(new String(chars));
-            @NotNull String text = "hello this is some very long text";
-            bytes.writeUtf8(text);
-            final String textValue = bytes.toString();
-            assertEquals(text, textValue.substring(chars.length + 4));
-            bytes.release();
-            assertEquals(1, bytes.refCount());
+            try (@NotNull MappedBytes bytes = mappedBytes(tempFile, OS.pageSize())) {
+                bytes0 = bytes;
+                ReferenceOwner test = ReferenceOwner.temporary("test");
+                try {
+                    assertEquals(1, bytes.refCount());
+                    bytes.reserve(test);
+                    assertEquals(2, bytes.refCount());
+                    @NotNull char[] chars = new char[OS.pageSize() * 11];
+                    Arrays.fill(chars, '.');
+                    chars[chars.length - 1] = '*';
+                    bytes.writeUtf8(new String(chars));
+                    @NotNull String text = "hello this is some very long text";
+                    bytes.writeUtf8(text);
+                    final String textValue = bytes.toString();
+                    assertEquals(text, textValue.substring(chars.length + 4));
+                    assertEquals(2, bytes.refCount());
+                } finally {
+                    bytes.release(test);
+                    assertEquals(1, bytes.refCount());
+                }
+            }
         } finally {
-            bytes.release();
-            assertEquals(0, bytes.refCount());
             tempFile.delete();
         }
+        assertEquals(0, bytes0.refCount());
     }
 }
 

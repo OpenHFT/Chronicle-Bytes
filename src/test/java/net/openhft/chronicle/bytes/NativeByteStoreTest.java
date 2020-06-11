@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
@@ -29,7 +30,7 @@ public class NativeByteStoreTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @SuppressWarnings("rawtypes")

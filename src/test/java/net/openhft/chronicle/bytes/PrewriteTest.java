@@ -38,7 +38,7 @@ public class PrewriteTest extends BytesTestCommon {
         bytes.prewriteShort((short) 0x3130);
         assertEquals("01123456781234,words,hi,1234", bytes.toString());
 
-        bytes.release();
-        words.release();
+        bytes.releaseLast();
+        words.releaseLast();
     }
 }

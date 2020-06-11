@@ -37,7 +37,7 @@ public class StringsTest extends BytesTestCommon {
         // assertSame(a, c); // uses a string pool
         assertSame(b, c); // uses a string pool
         assertSame(b, d); // uses a string pool
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -52,6 +52,6 @@ public class StringsTest extends BytesTestCommon {
         String b = bytes.readUtf8();
         assertNull(a);
         assertNull(b);
-        bytes.release();
+        bytes.releaseLast();
     }
 }

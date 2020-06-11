@@ -31,9 +31,8 @@ public class TextLongReferenceTest extends BytesTestCommon {
 
     @Test
     public void testSetValue() {
+        @NotNull NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(64);
         try (@NotNull final TextLongReference value = new TextLongReference()) {
-            @NotNull NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(value
-                    .maxSize());
             value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
             value.setValue(expected);
@@ -51,8 +50,8 @@ public class TextLongReferenceTest extends BytesTestCommon {
             Bytes<Void> bytes = bytesStore.bytesForRead();
             bytes.readPosition(0);
             assertEquals("!!atomic {  locked: false, value: 00000000000000000002 }", bytes.parseUtf8(StopCharTesters.CONTROL_STOP));
-            bytesStore.release();
-            bytes.release();
+            bytes.releaseLast();
         }
+        bytesStore.releaseLast();
     }
 }

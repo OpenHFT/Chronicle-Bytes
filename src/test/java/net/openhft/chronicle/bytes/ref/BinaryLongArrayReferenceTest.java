@@ -60,7 +60,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
 
             for (int i = 0; i < 128; i++)
                 assertEquals(i + 1, array.getValueAt(i));
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -79,7 +79,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         assertEquals(8, la2.second.getCapacity());
         la.closeAll();
         la2.closeAll();
-        bytes.release();
+        bytes.releaseLast();
     }
 
     static class LongArrays implements BytesMarshallable {

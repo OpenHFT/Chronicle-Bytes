@@ -29,25 +29,28 @@ public class CopyBytesTest extends BytesTestCommon {
     static void doTest(Bytes toTest, int from) {
         Bytes toCopy = Bytes.allocateDirect(32);
         Bytes toValidate = Bytes.allocateDirect(32);
+        try {
+            toCopy.writeLong(0, (long) 'W' << 56L | 100L);
+            toCopy.writeLong(8, (long) 'W' << 56L | 200L);
 
-        toCopy.writeLong(0, (long) 'W' << 56L | 100L);
-        toCopy.writeLong(8, (long) 'W' << 56L | 200L);
+            toTest.writePosition(from);
+            toTest.write(toCopy, 0, 2 * 8L);
+            toTest.write(toCopy, 0, 8L);
 
-        toTest.writePosition(from);
-        toTest.write(toCopy, 0, 2 * 8L);
-        toTest.write(toCopy, 0, 8L);
+            toTest.readPosition(from);
+            toTest.read(toValidate, 3 * 8);
 
-        toTest.read(toValidate, 3 * 8);
+            assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(0));
+            assertEquals((long) 'W' << 56L | 200L, toValidate.readLong(8));
+            assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(16));
 
-        assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(0));
-        assertEquals((long) 'W' << 56L | 200L, toValidate.readLong(8));
-        assertEquals((long) 'W' << 56L | 100L, toValidate.readLong(16));
-
-        toTest.release();
-        toCopy.release();
-        toValidate.release();
-        // close if closeable.
-        Closeable.closeQuietly(toTest);
+        } finally {
+            toTest.releaseLast();
+            toCopy.releaseLast();
+            toValidate.releaseLast();
+            // close if closeable.
+            Closeable.closeQuietly(toTest);
+        }
     }
 
     @Test
@@ -56,10 +59,23 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes() throws Exception {
+    public void testCanCopyBytesFromMappedBytes1() throws Exception {
         File bytes = File.createTempFile("mapped-test", "bytes");
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), 0);
+    }
+
+    @Test
+    public void testCanCopyBytesFromMappedBytes2() throws Exception {
+        File bytes = File.createTempFile("mapped-test", "bytes");
+        bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), (64 << 10) - 8);
+    }
+
+    @Test
+    public void testCanCopyBytesFromMappedBytes3() throws Exception {
+        File bytes = File.createTempFile("mapped-test", "bytes");
+        bytes.deleteOnExit();
+        doTest(MappedBytes.mappedBytes(bytes, 16 << 10, 16 << 10), (64 << 10) - 8);
     }
 }

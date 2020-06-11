@@ -127,7 +127,7 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
         assertEquals(expected,
                 out.toString().replaceAll("\r", ""));
-        bytes.release();
+        bytes.releaseLast();
     }
 
 }

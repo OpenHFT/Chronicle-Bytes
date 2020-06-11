@@ -18,10 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.StackTrace;
-import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -33,18 +31,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ;
-
-    static final Map<BytesStore, Throwable> bytesCreated = Collections.synchronizedMap(new IdentityHashMap<>());
 
     public static String findFile(@NotNull String name) throws FileNotFoundException {
         File file = new File(name);
@@ -205,11 +197,6 @@ public enum BytesUtil {
         return AppendableUtil.findUtf8Length(toWrite);
     }
 
-    public static boolean register(AbstractBytes bytes) {
-        bytesCreated.put(bytes, new StackTrace("Created here"));
-        return true;
-    }
-
     static String asString(String s, Throwable t) {
         StringWriter sw = new StringWriter();
         sw.append(s).append("\n");
@@ -217,42 +204,9 @@ public enum BytesUtil {
         return sw.toString();
     }
 
+    // calls the BackgroundResourceReleaser and AbstractCloseable.assertCloseableClose first.
     public static void checkRegisteredBytes() {
-        BackgroundResourceReleaser.releasePendingResources();
-
-        Map<String, Long> throwCount = null;
-        try {
-            throwCount = checkRegisteredBytes0();
-        } catch (Exception e) {
-            // try again if this is still being touched
-            Jvm.pause(1000);
-            throwCount = checkRegisteredBytes0();
-        }
-
-        bytesCreated.clear();
-        throwCount.forEach((k, v) -> System.err.println("checkRegisteredBytes: " + v + " times " + k));
-        if (throwCount.size() != 0)
-            throw new IllegalStateException("Bytes not released properly " + throwCount.values().stream().mapToLong(l -> l).sum());
-    }
-
-    public static Map<String, Long> checkRegisteredBytes0() {
-        synchronized (bytesCreated) {
-            return bytesCreated.entrySet()
-                    .stream()
-                    .filter(e -> e.getKey().refCount() > 0)
-                    .map(e -> asString("bytes " + e.getKey().getClass() + " refCount=" + e.getKey().refCount(), e.getValue()))
-                    .collect(Collectors.groupingBy(t -> t, Collectors.counting()));
-        }
-    }
-
-    public static boolean unregister(BytesStore bytes) {
-        bytesCreated.remove(bytes);
-        return true;
-    }
-
-    public static boolean unregister(Bytes bytes) {
-        bytesCreated.remove(bytes);
-        return true;
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     public static boolean byteToBoolean(byte b) {
@@ -283,4 +237,9 @@ public enum BytesUtil {
         return bytes2.toDebugString(maxLength);
     }
 
+    @Deprecated
+    public static boolean unregister(BytesStore bs) {
+        AbstractReferenceCounted.unmonitor(bs);
+        return true;
+    }
 }

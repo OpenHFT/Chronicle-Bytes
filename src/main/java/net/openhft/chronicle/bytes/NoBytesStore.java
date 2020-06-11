@@ -19,6 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -43,6 +45,7 @@ public enum NoBytesStore implements BytesStore {
         try {
             NO_PAGE = OS.memory().allocate(OS.pageSize());
             NO_BYTES = new VanillaBytes(noBytesStore());
+            AbstractReferenceCounted.unmonitor(NO_BYTES);
 
         } catch (@NotNull IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
@@ -55,22 +58,32 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void reserve() throws IllegalStateException {
+    public void reserve(ReferenceOwner owner) throws IllegalStateException {
     }
 
     @Override
-    public void release() throws IllegalStateException {
+    public void release(ReferenceOwner owner) throws IllegalStateException {
     }
 
     @Override
-    public long refCount() {
-        return 0L;
+    public void releaseLast(ReferenceOwner id) throws IllegalStateException {
     }
 
     @Override
-    public boolean tryReserve() {
+    public int refCount() {
+        return 1;
+    }
+
+    @Override
+    public boolean tryReserve(ReferenceOwner owner) {
         return false;
     }
+
+    @Override
+    public boolean reservedBy(ReferenceOwner owner) {
+        return true;
+    }
+
 
     @NotNull
     @Override

@@ -10,14 +10,14 @@ public class ByteCheckSumTest extends BytesTestCommon {
     public void test() {
         Bytes bytes = Bytes.allocateDirect(32);
         doTest(bytes);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
     public void testHeap() {
         Bytes bytes = Bytes.elasticHeapByteBuffer(32);
         doTest(bytes);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     private void doTest(Bytes bytes) {

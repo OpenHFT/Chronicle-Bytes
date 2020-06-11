@@ -20,13 +20,16 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class UncheckedLongReference implements LongReference {
+public class UncheckedLongReference extends AbstractCloseable implements LongReference, ReferenceOwner {
     private long address;
     private Unsafe unsafe;
+    private BytesStore bytes;
 
     @NotNull
     public static LongReference create(BytesStore bytesStore, long offset, int size) {
@@ -39,7 +42,12 @@ public class UncheckedLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
         address = bytes.addressForRead(offset);
-        bytes.reserve();
+        if (this.bytes != bytes) {
+            if (this.bytes != null)
+                this.bytes.release(this);
+            this.bytes = bytes;
+            bytes.reserve(this);
+        }
         unsafe = UnsafeMemory.UNSAFE;
     }
 
@@ -102,5 +110,10 @@ public class UncheckedLongReference implements LongReference {
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
         return unsafe.compareAndSwapLong(null, address, expected, value);
+    }
+
+    @Override
+    protected void performClose() {
+        this.bytes.release(this);
     }
 }

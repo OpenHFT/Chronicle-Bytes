@@ -3,8 +3,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.io.AbstractCloseable;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -25,7 +24,7 @@ public class ByteableReferenceTest {
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
-        return Arrays.asList(
+        List<Object[]> objects = Arrays.asList(
                 datum(new BinaryLongReference()),
                 datum(new BinaryTwoLongReference()),
                 datum(new BinaryBooleanReference()),
@@ -39,19 +38,10 @@ public class ByteableReferenceTest {
                 datum(new BinaryLongArrayReference()),
                 datum(new UncheckedLongReference())*/
         );
+        AbstractCloseable.disableCloseableTracing();
+        AbstractReferenceCounted.disableReferenceTracing();
+        return objects;
     }
-
-
-    @BeforeClass
-    public static void enableCloseableTracing() {
-        AbstractCloseable.enableCloseableTracing();
-    }
-
-    @AfterClass
-    public static void assertCloseablesClosed() {
-        AbstractCloseable.assertCloseablesClosed();
-    }
-
 
     private static Object[] datum(final Byteable reference) {
         return new Object[]{reference.getClass().getSimpleName(), reference};

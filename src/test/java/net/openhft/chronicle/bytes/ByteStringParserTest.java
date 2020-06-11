@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -43,8 +44,8 @@ public class ByteStringParserTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        bytes.release();
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -70,7 +71,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes2.append(expected);
         Assert.assertEquals(expected, bytes2.parseLong(0));
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
-        bytes2.release();
+        bytes2.releaseLast();
 
     }
 

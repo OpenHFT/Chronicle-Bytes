@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
-import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -34,17 +33,9 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.lang.ref.Reference;
-import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
-import static java.util.Collections.newSetFromMap;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -56,21 +47,12 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
-    private static final Set<WeakReference<MappedBytes>> MAPPED_BYTES = newSetFromMap(new ConcurrentHashMap<>());
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Jvm.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
     private static final boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
 
-    private final AbstractCloseable closeable = new AbstractCloseable() {
-        @Override
-        protected void performClose() {
-            superRelease();
-        }
-    };
     @NotNull
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
-    @Nullable
-    private final StackTraceElement[] createdHere;
 
     private volatile Thread lastAccessedThread;
     private volatile RuntimeException writeStack;
@@ -86,32 +68,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 NoBytesStore.noBytesStore().writeLimit(),
                 name);
 
-        this.mappedFile = reserve(mappedFile);
+        this.mappedFile = mappedFile;
+        mappedFile.reserve(this);
         this.backingFileIsReadOnly = !mappedFile.file().canWrite();
         assert !mappedFile.isClosed();
         clear();
-        if (TRACE) {
-            createdHere = Thread.currentThread().getStackTrace();
-            MAPPED_BYTES.add(new WeakReference<>(this));
-        } else {
-            createdHere = null;
-        }
-    }
-
-    /**
-     * dump the creation of the mapped bytes, so that we can trace where dangling, references that are not closed.
-     */
-    public static void dump() {
-        MAPPED_BYTES.stream()
-                .map(Reference::get)
-                .filter(Objects::nonNull)
-                .forEach(System.out::println);
-    }
-
-    @NotNull
-    private static MappedFile reserve(@NotNull final MappedFile mappedFile) {
-        mappedFile.reserve();
-        return mappedFile;
     }
 
     @NotNull
@@ -133,7 +94,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         try {
             return mappedBytes(rw);
         } finally {
-            rw.release();
+            rw.release(INIT);
         }
     }
 
@@ -147,7 +108,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         try {
             return mappedBytes(rw);
         } finally {
-            rw.release();
+            rw.release(INIT);
         }
     }
 
@@ -162,7 +123,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         try {
             return new MappedBytes(mappedFile);
         } finally {
-            mappedFile.release();
+            mappedFile.release(INIT);
         }
     }
 
@@ -178,8 +139,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 "mappedFileIsClosed=" + mappedFile.isClosed() + ",\n" +
                 "mappedFileRafIsClosed=" + Jvm.getValue(mappedFile.raf(), "closed") + ",\n" +
                 "mappedFileRafChannelIsClosed=" + !mappedFile.raf().getChannel().isOpen() + ",\n" +
-                "isClosed=" + isClosed() + ",\n" +
-                "createdHere=" + Arrays.stream(createdHere).map(Objects::toString).collect(Collectors.joining("\n")) +
+                "isClosed=" + isClosed() +
                 '}';
     }
 
@@ -425,7 +385,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             return;
 
         // not allowed if closed.
-        closeable.throwExceptionIfClosed();
+        throwExceptionIfReleased();
 
         acquireNextByteStore0(offset, set);
     }
@@ -435,11 +395,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private synchronized void acquireNextByteStore0(final long offset, final boolean set) {
         @Nullable final BytesStore oldBS = this.bytesStore;
         try {
-            @Nullable final BytesStore newBS = mappedFile.acquireByteStore(offset);
-            this.bytesStore = newBS;
-            oldBS.release();
+            @Nullable final BytesStore newBS = mappedFile.acquireByteStore(this, offset, oldBS);
+            if (newBS != oldBS) {
+                this.bytesStore = newBS;
+                oldBS.release(this);
+            }
+            assert this.bytesStore.reservedBy(this);
 
-        } catch (@NotNull IOException | IllegalStateException | IllegalArgumentException e) {
+        } catch (@NotNull IOException | IllegalArgumentException e) {
             @NotNull final BufferOverflowException boe = new BufferOverflowException();
             boe.initCause(e);
             throw boe;
@@ -497,7 +460,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public Bytes<Void> clear() {
         // typically only used at the start of an operation so reject if closed.
-        closeable.throwExceptionIfClosed();
+        throwExceptionIfReleased();
 
         long start = 0L;
         readPosition = start;
@@ -525,7 +488,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     protected void performRelease() throws IllegalStateException {
         super.performRelease();
-        mappedFile.release();
+        mappedFile.release(this);
     }
 
     @Override
@@ -812,26 +775,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
     }
 
-    void superRelease() {
-        super.release();
-    }
-
-    @Override
-    public void release() throws IllegalStateException {
-        if (refCount() == 1)
-            closeable.close();
-        else
-            super.release();
-    }
-
     @Override
     public void close() {
-        closeable.close();
+        release(INIT);
     }
 
     @Override
     public boolean isClosed() {
-        return closeable.isClosed();
+        return refCount() <= 0;
     }
 
     @NotNull

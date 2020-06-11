@@ -33,7 +33,8 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * Fast unchecked version of AbstractBytes
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
+public class UncheckedBytes<Underlying>
+        extends AbstractBytes<Underlying> {
     Bytes underlyingBytes;
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes) throws IllegalStateException {
@@ -45,15 +46,14 @@ public class UncheckedBytes<Underlying> extends AbstractBytes<Underlying> {
     public void setBytes(@NotNull Bytes bytes) throws IllegalStateException {
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
-            bytesStore.release();
+            bytesStore.release(this);
             this.bytesStore = underlyingBytes;
-            bytesStore.reserve();
+            bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
         this.uncheckedWritePosition(bytes.writePosition());
         this.writeLimit = bytes.writeLimit();
 
-        assert !bytesStore.isDirectMemory() || BytesUtil.register(this);
         this.underlyingBytes = bytes;
     }
 

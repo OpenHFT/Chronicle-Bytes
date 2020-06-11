@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -41,6 +42,7 @@ import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
@@ -54,7 +56,8 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -71,6 +74,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void beforeTest() {
         bytesStore = BytesStore.wrap(ByteBuffer.allocate(SIZE).order(ByteOrder.nativeOrder()));
         bytes = bytesStore.bytesForWrite();
+        bytesStore.release(INIT);
         bytes.clear();
     }
 
@@ -94,6 +98,7 @@ public class ByteStoreTest extends BytesTestCommon {
         @NotNull BytesStore bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
         assertEquals(1L, bytes.readLong(0));
+        bytes.releaseLast();
     }
 
     @Test
@@ -152,7 +157,7 @@ public class ByteStoreTest extends BytesTestCommon {
         assertEquals(SIZE, bytes.capacity());
         VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
         assertEquals(10, bytes.capacity());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -434,18 +439,21 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testStream() throws IOException {
-        bytes = BytesStore.wrap(ByteBuffer.allocate(1000)).bytesForWrite();
-        @NotNull GZIPOutputStream out = new GZIPOutputStream(bytes.outputStream());
+        BytesStore<?, ByteBuffer> bytes0 = BytesStore.wrap(ByteBuffer.allocate(1000));
+        Bytes bytes2 = bytes0.bytesForWrite();
+        bytes0.release(INIT);
+        @NotNull GZIPOutputStream out = new GZIPOutputStream(bytes2.outputStream());
         out.write("Hello world\n".getBytes(ISO_8859_1));
         out.close();
 
-        @NotNull GZIPInputStream in = new GZIPInputStream(bytes.inputStream());
+        @NotNull GZIPInputStream in = new GZIPInputStream(bytes2.inputStream());
         @NotNull byte[] bytes = new byte[12];
         for (int i = 0; i < 12; i++)
             bytes[i] = (byte) in.read();
         Assert.assertEquals(-1, in.read());
         Assert.assertEquals("Hello world\n", new String(bytes));
         in.close();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -487,6 +495,7 @@ public class ByteStoreTest extends BytesTestCommon {
             bytesStore.addAndGetInt(4L, 11);
         assertEquals(100, bytesStore.readInt(0L));
         assertEquals(11 * 11, bytesStore.readInt(4L));
+        bytesStore.releaseLast();
     }
 
     @Test
@@ -494,6 +503,7 @@ public class ByteStoreTest extends BytesTestCommon {
         bytesStore = NativeBytesStore.nativeStore(128);
 
         checkAddAndGetLong();
+        bytesStore.releaseLast();
     }
 
     @Test
@@ -503,6 +513,7 @@ public class ByteStoreTest extends BytesTestCommon {
         bytesStore = BytesStore.wrap(new byte[128]);
 
         checkAddAndGetLong();
+        bytesStore.releaseLast();
     }
 
     private void checkAddAndGetLong() {
@@ -530,6 +541,7 @@ public class ByteStoreTest extends BytesTestCommon {
             bytesStore.addAndGetFloat(4L, 11);
         assertEquals(100, bytesStore.readVolatileFloat(0L), 0f);
         assertEquals(11 * 11, bytesStore.readFloat(4L), 0f);
+        bytesStore.releaseLast();
     }
 
     @Test
@@ -545,12 +557,15 @@ public class ByteStoreTest extends BytesTestCommon {
             bytesStore.addAndGetDouble(8L, 11);
         assertEquals(100, bytesStore.readVolatileDouble(0L), 0.0);
         assertEquals(11 * 11, bytesStore.readDouble(8L), 0.0);
+        bytesStore.releaseLast();
     }
 
     @Test
     public void testToString() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @Nullable Bytes bytes = NativeBytesStore.nativeStore(32).bytesForWrite();
+        NativeBytesStore<Void> bytes0 = NativeBytesStore.nativeStore(32);
+        @Nullable Bytes bytes = bytes0.bytesForWrite();
+        bytes0.release(INIT);
         try {
             assertEquals("[pos: 0, rlim: 0, wlim: 8EiB, cap: 8EiB ] ǁ‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
             bytes.writeUnsignedByte(1);
@@ -577,7 +592,7 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeUnsignedByte(8);
             assertEquals("[pos: 3, rlim: 8, wlim: 8EiB, cap: 8EiB ] ⒈⒉⒊ǁ⒋⒌⒍⒎⒏‡٠٠٠٠٠٠٠٠", bytes.toDebugString());
         } finally {
-            bytes.release();
+            bytes.releaseLast();
             assertEquals(0, bytes.refCount());
         }
     }
@@ -591,6 +606,8 @@ public class ByteStoreTest extends BytesTestCommon {
             throw new AssertionError("should throw BufferUnderflowException");
         } catch (BufferUnderflowException e) {
             // expected
+        } finally {
+            bs.releaseLast();
         }
     }
 
@@ -605,6 +622,8 @@ public class ByteStoreTest extends BytesTestCommon {
         bytesStoreOriginal.copyTo(bytesStoreCopy);
         for (int i = 0; i < SIZE; i++)
             assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i));
+        bytesStoreCopy.releaseLast();
+        bytesStoreOriginal.releaseLast();
     }
 
     @Test
@@ -615,6 +634,10 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test(expected = DecoratedBufferOverflowException.class)
     public void testClearAndPadTooMuch() {
         Bytes b = bytesStore.bytesForWrite();
-        b.clearAndPad(SIZE + 1);
+        try {
+            b.clearAndPad(SIZE + 1);
+        } finally {
+            b.releaseLast();
+        }
     }
 }

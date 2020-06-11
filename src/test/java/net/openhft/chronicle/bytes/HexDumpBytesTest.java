@@ -20,6 +20,6 @@ public class HexDumpBytesTest extends BytesTestCommon {
                 "0012    00 00 00 00 00 00 00 00 # nest\n" +
                 "001a    00 00 00 00 00 00 00 00\n" +
                 "0022    00 00\n", bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 }

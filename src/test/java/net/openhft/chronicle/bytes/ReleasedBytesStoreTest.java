@@ -13,7 +13,7 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
         assertEquals(NoBytesStore.class, bytes.bytesStore().getClass());
         bytes.writeLong(0, 0);
         assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
-        bytes.release();
+        bytes.releaseLast();
         assertEquals(ReleasedBytesStore.class, bytes.bytesStore().getClass());
         try {
             bytes.writeLong(0, 0);

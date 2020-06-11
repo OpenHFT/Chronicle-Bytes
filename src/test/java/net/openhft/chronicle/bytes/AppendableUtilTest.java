@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.After;
 import org.junit.Test;
 
@@ -10,7 +11,7 @@ public class AppendableUtilTest extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @SuppressWarnings("rawtypes")
@@ -31,7 +32,7 @@ public class AppendableUtilTest extends BytesTestCommon {
         } catch (IllegalArgumentException iae) {
             // expected.
         }
-        b.release();
+        b.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -43,6 +44,7 @@ public class AppendableUtilTest extends BytesTestCommon {
         AppendableUtil.setCharAt(b, 5, 'X');
         assertEquals("helloXworld", sb.toString());
         assertEquals("HelloXWorld", b.toString());
+        b.releaseLast();
     }
 
 }

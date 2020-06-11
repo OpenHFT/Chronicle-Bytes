@@ -88,5 +88,8 @@ public class GzipTest extends BytesTestCommon {
         assertArrayEquals(bytes, bytes6.toByteArray());
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes6.toByteArray()).replace(", ", "\n"));
+        bytes2.releaseLast();
+        bytes3.releaseLast();
+        bytes6.releaseLast();
     }
 }

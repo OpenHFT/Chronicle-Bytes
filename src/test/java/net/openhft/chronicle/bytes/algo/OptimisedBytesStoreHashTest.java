@@ -65,7 +65,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
                 OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -84,7 +84,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
             assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
         for (int i = 17; i <= 32; i++)
             assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
-        nb.release();
+        nb.releaseLast();
     }
 
     //@Test
@@ -215,7 +215,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                     Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)));
             bs2.writeUnsignedByte(i + 1);
         }
-        bs.release();
-        bs2.release();
+        bs.releaseLast();
+        bs2.releaseLast();
     }
 }

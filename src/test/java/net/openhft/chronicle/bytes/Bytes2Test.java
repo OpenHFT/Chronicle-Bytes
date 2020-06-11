@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
@@ -56,7 +57,7 @@ public class Bytes2Test extends BytesTestCommon {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -80,8 +81,8 @@ public class Bytes2Test extends BytesTestCommon {
             to.writeSome(from);
             assertEquals("World", from.toString());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -96,8 +97,8 @@ public class Bytes2Test extends BytesTestCommon {
             to.writeSome(from);
             assertTrue("from: " + from, from.toString().startsWith("World "));
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -112,8 +113,8 @@ public class Bytes2Test extends BytesTestCommon {
             to.write(from);
             assertEquals(from.toString(), to.toString());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -130,8 +131,8 @@ public class Bytes2Test extends BytesTestCommon {
             }
             assertEquals(0, from.readRemaining());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 }

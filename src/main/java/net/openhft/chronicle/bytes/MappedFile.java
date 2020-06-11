@@ -18,9 +18,13 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.CleaningRandomAccessFile;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.AbstractCloseableReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +53,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * avoid wasting bytes at the end of chunks.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
-public class MappedFile extends AbstractCloseable implements ReferenceCounted {
+public class MappedFile extends AbstractCloseableReferenceCounted {
     private static final long DEFAULT_CAPACITY = 128L << 40;
 
     // A single JVM cannot lock a distinct canonical file more than once
@@ -63,7 +67,6 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     private final long chunkSize;
     private final long overlapSize;
     private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     private final long capacity;
     @NotNull
     private final File file;
@@ -225,9 +228,9 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             for (int j = 0; j <= compileThreshold; j += chunks) {
                 try {
                     try (@NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, "rw")) {
-                        @NotNull final MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false);
-                        warmup0(mapAlignment, chunks, mappedFile);
-                        mappedFile.release();
+                        try (final MappedFile mappedFile = new MappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false)) {
+                            warmup0(mapAlignment, chunks, mappedFile);
+                        }
                     }
                     Thread.yield();
                 } catch (IOException e) {
@@ -249,9 +252,10 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     private static void warmup0(final long mapAlignment,
                                 final int chunks,
                                 @NotNull final MappedFile mappedFile) throws IOException {
+        ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
         for (int i = 0; i < chunks; i++) {
-            mappedFile.acquireBytesForRead(i * mapAlignment).release();
-            mappedFile.acquireBytesForWrite(i * mapAlignment).release();
+            mappedFile.acquireBytesForRead(warmup, i * mapAlignment).release(warmup);
+            mappedFile.acquireBytesForWrite(warmup, i * mapAlignment).release(warmup);
         }
     }
 
@@ -287,19 +291,6 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
     }
 
     @NotNull
-    public MappedFile withSizes(long chunkSize, long overlapSize) {
-        chunkSize = OS.mapAlign(chunkSize);
-        overlapSize = OS.mapAlign(overlapSize);
-        if (chunkSize == this.chunkSize && overlapSize == this.overlapSize)
-            return this;
-        try {
-            return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
-        } finally {
-            release();
-        }
-    }
-
-    @NotNull
     public File file() {
         return file;
     }
@@ -308,14 +299,28 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
      * @throws IllegalStateException if closed.
      */
     @NotNull
-    public MappedBytesStore acquireByteStore(final long position)
+    public MappedBytesStore acquireByteStore(
+            ReferenceOwner owner,
+            final long position)
             throws IOException, IllegalArgumentException, IllegalStateException {
-        return acquireByteStore(position, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
+        return acquireByteStore(owner, position, null, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
     }
 
     @NotNull
-    public MappedBytesStore acquireByteStore(final long position,
-                                             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
+    public MappedBytesStore acquireByteStore(
+            ReferenceOwner owner,
+            final long position,
+            BytesStore oldByteStore)
+            throws IOException, IllegalArgumentException, IllegalStateException {
+        return acquireByteStore(owner, position, oldByteStore, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
+    }
+
+    @NotNull
+    public MappedBytesStore acquireByteStore(
+            ReferenceOwner owner,
+            final long position,
+            BytesStore oldByteStore,
+            @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
             IllegalArgumentException,
             IllegalStateException {
@@ -334,8 +339,14 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
         }
         if (mbsRef != null) {
             final MappedBytesStore mbs = mbsRef.get();
-            if (mbs != null && mbs.tryReserve()) {
-                return mbs;
+            if (mbs != null) {
+                // don't reserve it again if we are already holding it.
+                if (mbs == oldByteStore) {
+                    return mbs;
+                }
+                if (mbs.tryReserve(owner)) {
+                    return mbs;
+                }
             }
         }
 
@@ -352,7 +363,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             final WeakReference<MappedBytesStore> mbsRef2 = stores.get(chunk);
             if (mbsRef2 != null) {
                 final MappedBytesStore mbs = mbsRef2.get();
-                if (mbs != null && mbs.tryReserve()) {
+                if (mbs != null && mbs.tryReserve(owner)) {
                     return mbs;
                 }
             }
@@ -367,7 +378,8 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             final long beginNs = System.nanoTime();
 
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
-            final MappedBytesStore mbs2 = mappedBytesStoreFactory.create(this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+            final MappedBytesStore mbs2 = mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+            mbs2.reserve(this);
             stores.set(chunk, new WeakReference<>(mbs2));
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -446,69 +458,41 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
     @NotNull
-    public Bytes acquireBytesForRead(final long position)
+    public Bytes acquireBytesForRead(ReferenceOwner owner, final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         final Bytes bytes = mbs.bytesForRead();
         bytes.readPositionUnlimited(position);
-        mbs.release();
+        bytes.reserveTransfer(INIT, owner);
+        mbs.release(owner);
         return bytes;
     }
 
-    public void acquireBytesForRead(final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForRead(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
 
     @NotNull
-    public Bytes acquireBytesForWrite(final long position)
+    public Bytes acquireBytesForWrite(ReferenceOwner owner, final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable MappedBytesStore mbs = acquireByteStore(owner, position, null);
         @NotNull Bytes bytes = mbs.bytesForWrite();
         bytes.writePosition(position);
-        mbs.release();
+        bytes.reserveTransfer(INIT, owner);
+        mbs.release(owner);
         return bytes;
     }
 
-    public void acquireBytesForWrite(final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForWrite(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
-        @Nullable final MappedBytesStore mbs = acquireByteStore(position);
+        @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
         bytes.writePosition(position);
     }
 
-    @Override
-    public void reserve() throws IllegalStateException {
-        refCount.reserve();
-    }
-
-    @Override
-    public void release() throws IllegalStateException {
-        refCount.release();
-    }
-
-    @Override
-    public long refCount() {
-        return refCount.refCount();
-    }
-
-    @Override
-    public boolean tryReserve() {
-        return refCount.tryReserve();
-    }
-
-    @Override
-    protected void performClose() {
-        // nothing to do until released.
-    }
-
-    @Override
-    protected boolean performCloseInBackground() {
-        return true;
-    }
-
-    private void performRelease() {
+    protected void performRelease() {
 
         try {
             synchronized (stores) {
@@ -520,13 +504,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
                     if (mbs != null) {
                         // this MappedFile is the only referrer to the MappedBytesStore at this point,
                         // so ensure that it is released
-                        while (mbs.refCount() != 0) {
-                            try {
-                                mbs.release();
-                            } catch (IllegalStateException e) {
-                                Jvm.debug().on(getClass(), e);
-                            }
-                        }
+                        mbs.release(this);
                     }
                     // Dereference released entities
                     storeRef.clear();
@@ -535,8 +513,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
             }
         } finally {
             closeQuietly(raf);
-            // if not already closed.
-            close();
+            setClosed();
         }
 
     }
@@ -612,8 +589,7 @@ public class MappedFile extends AbstractCloseable implements ReferenceCounted {
 
     @Override
     protected void finalize() throws Throwable {
-        warnIfNotClosed();
-        close();
+        warnAndReleaseIfNotReleased();
         super.finalize();
     }
 

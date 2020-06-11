@@ -28,34 +28,35 @@ import static org.junit.Assert.*;
 public class UncheckedLongReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
-        @NotNull UncheckedLongReference ref = new UncheckedLongReference();
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
-        ref.bytesStore(nbs, 16, 8);
-        assertEquals(0, ref.getValue());
-        ref.addAtomicValue(1);
-        assertEquals(1, ref.getVolatileValue());
-        ref.addValue(-2);
-        assertEquals("value: -1", ref.toString());
-        assertFalse(ref.compareAndSwapValue(0, 1));
-        assertTrue(ref.compareAndSwapValue(-1, 2));
-        assertEquals(8, ref.maxSize());
-        assertEquals(nbs.addressForRead(16), ref.offset());
-        try {
-            assertEquals(nbs, ref.bytesStore());
-            fail();
-        } catch (UnsupportedOperationException e) {
-            // expected
-        }
-        assertEquals(0L, nbs.readLong(0));
-        assertEquals(0L, nbs.readLong(8));
-        assertEquals(2L, nbs.readLong(16));
-        assertEquals(0L, nbs.readLong(24));
+        try (@NotNull UncheckedLongReference ref = new UncheckedLongReference()) {
+            ref.bytesStore(nbs, 16, 8);
+            assertEquals(0, ref.getValue());
+            ref.addAtomicValue(1);
+            assertEquals(1, ref.getVolatileValue());
+            ref.addValue(-2);
+            assertEquals("value: -1", ref.toString());
+            assertFalse(ref.compareAndSwapValue(0, 1));
+            assertTrue(ref.compareAndSwapValue(-1, 2));
+            assertEquals(8, ref.maxSize());
+            assertEquals(nbs.addressForRead(16), ref.offset());
+            try {
+                assertEquals(nbs, ref.bytesStore());
+                fail();
+            } catch (UnsupportedOperationException e) {
+                // expected
+            }
+            assertEquals(0L, nbs.readLong(0));
+            assertEquals(0L, nbs.readLong(8));
+            assertEquals(2L, nbs.readLong(16));
+            assertEquals(0L, nbs.readLong(24));
 
-        ref.setValue(10);
-        assertEquals(10L, nbs.readLong(16));
-        ref.setOrderedValue(20);
-        Thread.yield();
-        assertEquals(20L, nbs.readLong(16));
-        nbs.release();
+            ref.setValue(10);
+            assertEquals(10L, nbs.readLong(16));
+            ref.setOrderedValue(20);
+            Thread.yield();
+            assertEquals(20L, nbs.readLong(16));
+        }
+        nbs.releaseLast();
     }
 }

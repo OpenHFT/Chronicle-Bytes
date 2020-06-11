@@ -39,7 +39,8 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
+public class NativeBytes<Underlying>
+        extends VanillaBytes<Underlying> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean s_newGuarded = BYTES_GUARDED;
     private final long capacity;
@@ -100,7 +101,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
                 return NativeBytes.wrapWithNativeBytes(store);
 
             } finally {
-                store.release();
+                store.release(INIT);
             }
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
@@ -218,6 +219,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             } else {
                 store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
             }
+            store.reserveTransfer(INIT, this);
         } catch (IllegalArgumentException e) {
             BufferOverflowException boe = new BufferOverflowException();
             boe.initCause(e);
@@ -228,7 +230,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         this.bytesStore.copyTo(store);
         this.bytesStore = store;
         try {
-            tempStore.release();
+            tempStore.release(this);
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }

@@ -42,7 +42,7 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
         HexDumpBytes bytes = new HexDumpBytes();
         writeMarshallable(bytes);
         String s = "# " + getClass().getName() + "\n" + bytes.toHexString();
-        bytes.release();
+        bytes.releaseLast();
         return s;
     }
 }

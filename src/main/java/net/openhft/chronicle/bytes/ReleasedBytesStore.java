@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -33,30 +34,39 @@ import java.nio.ByteBuffer;
 public enum ReleasedBytesStore implements BytesStore {
     RELEASED_BYTES_STORE;
 
-
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> releasedBytesStore() {
         return RELEASED_BYTES_STORE;
     }
 
     @Override
-    public void reserve() throws IllegalStateException {
+    public void reserve(ReferenceOwner id) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void release() throws IllegalStateException {
+    public void release(ReferenceOwner id) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long refCount() {
-        return 0L;
+    public int refCount() {
+        return 0;
     }
 
     @Override
-    public boolean tryReserve() {
+    public boolean tryReserve(ReferenceOwner id) throws IllegalStateException {
         return false;
+    }
+
+    @Override
+    public boolean reservedBy(ReferenceOwner owner) {
+        return false;
+    }
+
+    @Override
+    public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+        throw newIllegalStateException();
     }
 
     @NotNull
@@ -67,7 +77,7 @@ public enum ReleasedBytesStore implements BytesStore {
 
     @NotNull
     private IllegalStateException newIllegalStateException() {
-        return new IllegalStateException("closed");
+        return new IllegalStateException("released");
     }
 
     @NotNull

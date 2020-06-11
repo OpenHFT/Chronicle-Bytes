@@ -47,7 +47,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
             System.out.println(expected.length());
             assertEquals(expected,
                     bytes.toString());
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 }

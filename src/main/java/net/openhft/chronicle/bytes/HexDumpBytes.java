@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
@@ -37,7 +38,8 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class HexDumpBytes implements Bytes<Void> {
+public class HexDumpBytes
+        implements Bytes<Void> {
 
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
@@ -273,26 +275,41 @@ public class HexDumpBytes implements Bytes<Void> {
     }
 
     @Override
-    public void reserve() throws IllegalStateException {
-        base.reserve();
-        text.reserve();
+    public void reserve(ReferenceOwner owner) throws IllegalStateException {
+        base.reserve(owner);
     }
 
     @Override
-    public void release() throws IllegalStateException {
-        base.release();
-        text.release();
+    public void release(ReferenceOwner owner) throws IllegalStateException {
+        base.release(owner);
+        if (base.refCount() == 0) {
+            text.releaseLast();
+            comment.releaseLast();
+        }
     }
 
     @Override
-    public long refCount() {
+    public void releaseLast(ReferenceOwner owner) throws IllegalStateException {
+        base.releaseLast(owner);
+        if (base.refCount() == 0) {
+            text.releaseLast();
+            comment.releaseLast();
+        }
+    }
+
+    @Override
+    public int refCount() {
         return base.refCount();
     }
 
     @Override
-    public boolean tryReserve() {
-        text.tryReserve();
-        return base.tryReserve();
+    public boolean tryReserve(ReferenceOwner owner) {
+        return base.tryReserve(owner);
+    }
+
+    @Override
+    public boolean reservedBy(ReferenceOwner owner) {
+        return base.reservedBy(owner);
     }
 
     @Override

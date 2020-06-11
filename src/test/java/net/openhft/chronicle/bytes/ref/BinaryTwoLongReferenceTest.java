@@ -28,8 +28,8 @@ import static org.junit.Assert.*;
 public class BinaryTwoLongReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryTwoLongReference ref = new BinaryTwoLongReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
             ref.bytesStore(nbs, 16, 16);
             assertEquals(0, ref.getValue());
             assertEquals(0, ref.getValue2());
@@ -57,7 +57,7 @@ public class BinaryTwoLongReferenceTest extends BytesTestCommon {
             ref.setOrderedValue(20);
             Thread.yield();
             assertEquals(20L, nbs.readVolatileLong(16));
-            nbs.release();
         }
+        nbs.releaseLast();
     }
 }

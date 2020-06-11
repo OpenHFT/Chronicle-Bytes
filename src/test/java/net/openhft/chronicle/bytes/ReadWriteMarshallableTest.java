@@ -25,8 +25,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         RWOuter o2 = bytes.readMarshallableLength16(RWOuter.class, null);
         assertEquals("Hello World", o2.i1.data.toString());
         assertEquals("Bye", o2.i2.data.toString());
-        hello_world.release();
-        bye.release();
+        hello_world.releaseLast();
+        bye.releaseLast();
     }
 
     static class RWOuter implements BytesMarshallable {

@@ -16,7 +16,7 @@ public class BytesUtilTest extends BytesTestCommon {
         Bytes<?> apache_license = Bytes.from("Apache License");
         long n = bytes.indexOf(apache_license);
         assertTrue(n > 0);
-        apache_license.release();
+        apache_license.releaseLast();
     }
 
     @Test

@@ -19,9 +19,10 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.ByteBuffer;
 
 @SuppressWarnings("rawtypes")
 public class BytesPool {
@@ -39,8 +40,9 @@ public class BytesPool {
 
     @NotNull
     protected Bytes createBytes() {
-        NativeBytes<Void> bytes = Bytes.allocateElasticDirect(256);
-        assert BytesUtil.unregister(bytes);
-        return bytes;
+        // use heap buffer as we never know when a thread will die and not release this resource.
+        Bytes<ByteBuffer> bbb = Bytes.elasticHeapByteBuffer(256);
+        AbstractReferenceCounted.unmonitor(bbb);
+        return bbb;
     }
 }

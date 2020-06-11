@@ -41,6 +41,6 @@ public class ReadLenientTest extends BytesTestCommon {
         bytes.readSkip(8);
         assertEquals(0, bytes.readPosition());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 }

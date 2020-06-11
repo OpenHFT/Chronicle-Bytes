@@ -35,6 +35,6 @@ public class StopBitTest extends BytesTestCommon {
         }
 
         System.out.println(bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 }

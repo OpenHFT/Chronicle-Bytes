@@ -27,7 +27,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     private boolean isPresent = false;
 
     public PointerBytesStore() {
-        super(NoBytesStore.NO_PAGE, 0, null, false);
+        super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
     public void set(long address, long capacity) {
