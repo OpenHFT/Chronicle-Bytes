@@ -661,8 +661,6 @@ public abstract class AbstractBytes<Underlying>
             throw new DecoratedBufferOverflowException(String.format("writeCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
         }
         if ((offset + adding) > writeLimit()) {
-            assert (offset + adding) <= writeLimit() : "cant add bytes past the limit : limit=" + writeLimit() + ",offset=" + offset
-                    + ",adding=" + adding;
             throw new DecoratedBufferOverflowException(
                     String.format("writeCheckOffset0 failed. Offset: %d + adding %d> writeLimit: %d", offset, adding, writeLimit()));
         }
