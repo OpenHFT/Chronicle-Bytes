@@ -609,4 +609,9 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         }
     }
 
+    @Override
+    protected boolean threadSafetyCheck() {
+        // component is thread safe
+        return true;
+    }
 }
