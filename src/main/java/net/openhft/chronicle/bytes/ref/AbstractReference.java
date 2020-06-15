@@ -82,4 +82,10 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         warnIfNotClosed();
         super.finalize();
     }*/
+
+    @Override
+    protected boolean threadSafetyCheck() {
+        // References are thread safe
+        return true;
+    }
 }
