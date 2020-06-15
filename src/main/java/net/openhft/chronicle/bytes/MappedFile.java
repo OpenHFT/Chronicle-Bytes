@@ -21,7 +21,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractCloseableReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -112,10 +111,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                 .append(" took ").append(delayMicros / 1e3).append(" ms.")
                 .toString();
         Jvm.debug().on(MappedFile.class, message);
-    }
-
-    public static void checkMappedFiles() {
-        AbstractCloseable.assertCloseablesClosed();
     }
 
     @NotNull
