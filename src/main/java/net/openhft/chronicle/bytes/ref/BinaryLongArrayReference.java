@@ -86,46 +86,55 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public long getCapacity() {
+        throwExceptionIfClosed();
         return (length - VALUES) >>> 3;
     }
 
     @Override
     public long getUsed() {
+        throwExceptionIfClosed();
         return bytes.readVolatileLong(offset + USED);
     }
 
     @Override
     public void setMaxUsed(long usedAtLeast) {
+        throwExceptionIfClosed();
         bytes.writeMaxLong(offset + USED, usedAtLeast);
     }
 
     @Override
     public long getValueAt(long index) throws BufferUnderflowException {
+        throwExceptionIfClosed();
         return bytes.readLong(VALUES + offset + (index << 3));
     }
 
     @Override
     public void setValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+        throwExceptionIfClosed();
         bytes.writeLong(VALUES + offset + (index << 3), value);
     }
 
     @Override
     public long getVolatileValueAt(long index) throws BufferUnderflowException {
+        throwExceptionIfClosed();
         return bytes.readVolatileLong(VALUES + offset + (index << 3));
     }
 
     @Override
     public void bindValueAt(int index, @NotNull LongValue value) {
+        throwExceptionIfClosed();
         ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << 3), 8);
     }
 
     @Override
     public void setOrderedValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+        throwExceptionIfClosed();
         bytes.writeOrderedLong(VALUES + offset + (index << 3), value);
     }
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) throws BufferUnderflowException, IllegalArgumentException {
+        throwExceptionIfClosed();
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
 
@@ -136,6 +145,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        throwExceptionIfClosed();
         long position = bytes.readPosition();
         long capacity = bytes.readLong();
         long used = bytes.readLong();
@@ -152,6 +162,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void writeMarshallable(BytesOut bytes) {
+        ;
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
@@ -165,11 +176,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public boolean isNull() {
+        throwExceptionIfClosed();
         return bytes == null;
     }
 
     @Override
     public void reset() {
+        throwExceptionIfClosed();
         bytes = null;
         offset = 0;
         length = 0;
@@ -219,11 +232,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public long sizeInBytes(long capacity) {
+        throwExceptionIfClosed();
         return (capacity << 3) + VALUES;
     }
 
     @Override
     public ByteableLongArrayValues capacity(long arrayLength) {
+        throwExceptionIfClosed();
         BytesStore bytesStore = bytesStore();
         long length = sizeInBytes(arrayLength);
         if (bytesStore == null) {
@@ -236,6 +251,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public boolean compareAndSet(long index, long expected, long value) throws IllegalArgumentException, BufferOverflowException {
+        throwExceptionIfClosed();
         if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
             binaryLongArrayReferences.add(new WeakReference<>(this));
         return bytes.compareAndSwapLong(VALUES + offset + (index << 3), expected, value);

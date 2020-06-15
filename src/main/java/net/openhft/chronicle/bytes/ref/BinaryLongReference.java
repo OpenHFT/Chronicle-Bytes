@@ -30,6 +30,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+        throwExceptionIfClosed();
         if (length != maxSize())
             throw new IllegalArgumentException();
 
@@ -48,46 +49,54 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public long getValue() {
+        throwExceptionIfClosed();
         return bytes == null ? 0L : bytes.readLong(offset);
     }
 
     @Override
     public void setValue(long value) {
+        throwExceptionIfClosed();
         bytes.writeLong(offset, value);
     }
 
     @Override
     public long getVolatileValue() {
+        throwExceptionIfClosed();
         try {
             return bytes.readVolatileLong(offset);
         } catch (Exception e) {
-            throwExceptionIfClosed();
+
             throw Jvm.rethrow(e);
         }
     }
 
     @Override
     public void setVolatileValue(long value) {
+        throwExceptionIfClosed();
         bytes.writeVolatileLong(offset, value);
     }
 
     @Override
     public void setOrderedValue(long value) {
+        throwExceptionIfClosed();
         bytes.writeOrderedLong(offset, value);
     }
 
     @Override
     public long addValue(long delta) {
+        throwExceptionIfClosed();
         return bytes.addAndGetLong(offset, delta);
     }
 
     @Override
     public long addAtomicValue(long delta) {
+        throwExceptionIfClosed();
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
+        throwExceptionIfClosed();
         BytesStore bytes = this.bytes;
         return bytes != null && bytes.compareAndSwapLong(offset, expected, value);
     }
