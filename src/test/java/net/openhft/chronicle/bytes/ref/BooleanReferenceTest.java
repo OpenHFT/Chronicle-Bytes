@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,50 +18,51 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
-public class BooleanReferenceTest {
+public class BooleanReferenceTest extends BytesTestCommon {
     @Test
     public void testBinary() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
             byte i8 = (byte) 0xB0;
             nbs.writeByte(0, i8);
-    
+
             ref.bytesStore(nbs, 0, 1);
-    
-            assertEquals(false, ref.getValue());
+
+            assertFalse(ref.getValue());
             ref.setValue(true);
-    
-            assertEquals(true, ref.getValue());
+
+            assertTrue(ref.getValue());
             assertEquals(1, ref.maxSize());
-    
-            nbs.release();
+
         }
+        nbs.releaseLast();
     }
 
     @Test
     public void testText() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
-    
+
             nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));
-    
+
             ref.bytesStore(nbs, 0, 5);
-    
-            assertEquals(false, ref.getValue());
+
+            assertFalse(ref.getValue());
             ref.setValue(true);
-    
-            assertEquals(true, ref.getValue());
+
+            assertTrue(ref.getValue());
             assertEquals(5, ref.maxSize());
-    
-            nbs.release();
+
         }
+        nbs.releaseLast();
     }
-}             
+}

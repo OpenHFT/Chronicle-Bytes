@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -75,12 +77,12 @@ class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void flush() throws IOException {
+    public void flush() {
 
     }
 
     @Override
-    public void close() throws IOException {
+    public void close() {
 
     }
 

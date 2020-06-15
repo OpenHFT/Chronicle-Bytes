@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -28,17 +32,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 
-public class MappedFileTest {
+public class MappedFileTest extends BytesTestCommon {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
     private ThreadDump threadDump;
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -52,7 +55,7 @@ public class MappedFileTest {
     }
 
     @Test
-    public void testWarmup() throws InterruptedException {
+    public void testWarmup() {
         MappedFile.warmup();
     }
 
@@ -61,21 +64,27 @@ public class MappedFileTest {
         final File file = tmpDir.newFile();
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
-        final MappedFile mappedFile = MappedFile.mappedFile(file, 64);
-        final MappedBytesStore first = mappedFile.acquireByteStore(1);
+        ReferenceOwner test = ReferenceOwner.temporary("test");
+        try (final MappedFile mappedFile = MappedFile.mappedFile(file, 64)) {
+            final MappedBytesStore first = mappedFile.acquireByteStore(test, 1);
 
-        assertThat(first.refCount(), is(1L));
+            assertEquals(2, first.refCount());
 
-        final MappedBytesStore second = mappedFile.acquireByteStore(1 + chunkSize);
+            final MappedBytesStore second = mappedFile.acquireByteStore(test, 1 + chunkSize);
 
-        assertThat(first.refCount(), is(1L));
-        assertThat(second.refCount(), is(1L));
+            assertEquals(2, first.refCount());
+            assertEquals(2, second.refCount());
 
-        final MappedBytesStore third = mappedFile.acquireByteStore(1 + chunkSize + chunkSize);
+            final MappedBytesStore third = mappedFile.acquireByteStore(test, 1 + chunkSize + chunkSize);
 
-        assertThat(first.refCount(), is(1L));
-        assertThat(second.refCount(), is(1L));
-        assertThat(third.refCount(), is(1L));
+            assertEquals(2, first.refCount());
+            assertEquals(2, second.refCount());
+            assertEquals(2, third.refCount());
+
+            third.release(test);
+            second.release(test);
+            first.release(test);
+        }
     }
 
     @SuppressWarnings("rawtypes")
@@ -85,51 +94,49 @@ public class MappedFileTest {
         @NotNull File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
         tmp.deleteOnExit();
         int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
-        @NotNull MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0);
-        assertEquals("refCount: 1", mf.referenceCounts());
+        try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
+            assertEquals("refCount: 1", mf.referenceCounts());
 
-        @Nullable MappedBytesStore bs = mf.acquireByteStore(chunkSize + (1 << 10));
-        assertEquals(chunkSize, bs.start());
-        assertEquals(chunkSize * 2, bs.capacity());
-        Bytes bytes = bs.bytesForRead();
+            ReferenceOwner test = ReferenceOwner.temporary("test");
+            @Nullable MappedBytesStore bs = mf.acquireByteStore(test, chunkSize + (1 << 10));
+            assertEquals(chunkSize, bs.start());
+            assertEquals(chunkSize * 2, bs.capacity());
+            Bytes bytes = bs.bytesForRead();
 
-        assertNotNull(bytes.toString()); // show it doesn't blow up.
-        assertNotNull(bs.toString()); // show it doesn't blow up.
-        assertEquals(chunkSize, bytes.start());
-        assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
-        assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
-        Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
-        Assert.assertFalse(bs.inside(chunkSize - 1));
-        Assert.assertTrue(bs.inside(chunkSize));
-        Assert.assertTrue(bs.inside(chunkSize * 2 - 1));
-        Assert.assertFalse(bs.inside(chunkSize * 2));
-        try {
-            bytes.readLong(chunkSize - (1 << 10));
-            Assert.fail();
-        } catch (BufferUnderflowException e) {
-            // expected
+            assertNotNull(bytes.toString()); // show it doesn't blow up.
+            assertNotNull(bs.toString()); // show it doesn't blow up.
+            assertEquals(chunkSize, bytes.start());
+            assertEquals(0L, bs.readLong(chunkSize + (1 << 10)));
+            assertEquals(0L, bytes.readLong(chunkSize + (1 << 10)));
+            Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
+            Assert.assertFalse(bs.inside(chunkSize - 1));
+            Assert.assertTrue(bs.inside(chunkSize));
+            Assert.assertTrue(bs.inside(chunkSize * 2 - 1));
+            Assert.assertFalse(bs.inside(chunkSize * 2));
+            try {
+                bytes.readLong(chunkSize - (1 << 10));
+                Assert.fail();
+            } catch (BufferUnderflowException e) {
+                // expected
+            }
+            try {
+                bytes.readLong(chunkSize * 2 + (1 << 10));
+                Assert.fail();
+            } catch (BufferUnderflowException e) {
+                // expected
+            }
+            assertEquals(1, mf.refCount());
+            assertEquals(3, bs.refCount());
+            assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+
+            @Nullable BytesStore bs2 = mf.acquireByteStore(test, chunkSize + (1 << 10), bs);
+            assertSame(bs, bs2);
+            assertEquals(3, bs2.refCount());
+            assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+            bytes.releaseLast();
+            assertEquals(2, bs2.refCount());
+            assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
         }
-        try {
-            bytes.readLong(chunkSize * 2 + (1 << 10));
-            Assert.fail();
-        } catch (BufferUnderflowException e) {
-            // expected
-        }
-        assertEquals(1, mf.refCount());
-        assertEquals(2, bs.refCount());
-        assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
-
-        @Nullable BytesStore bs2 = mf.acquireByteStore(chunkSize + (1 << 10));
-        assertEquals(3, bs2.refCount());
-        assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
-        bytes.release();
-        assertEquals(2, bs2.refCount());
-        assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
-
-        mf.release();
-        assertEquals(0, bs.refCount());
-        assertEquals(0, mf.refCount());
-        assertEquals("refCount: 0, 0, 0", mf.referenceCounts());
     }
 
     @Test
@@ -153,12 +160,9 @@ public class MappedFileTest {
         Thread.currentThread().interrupt();
         String filename = OS.TARGET + "/interrupted-" + System.nanoTime();
         new File(filename).deleteOnExit();
-        MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0);
-        try {
+        try (MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0)) {
             mf.actualSize();
             assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            mf.release();
         }
     }
 
@@ -170,8 +174,8 @@ public class MappedFileTest {
         MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
         MappedFile mappedFile2 = MappedFile.mappedFile(file, 1024, 256, 256, false);
 
-        mappedFile.release();
-        mappedFile2.release();
+        mappedFile.releaseLast();
+        mappedFile2.releaseLast();
     }
 
     @After

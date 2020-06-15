@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,6 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -97,7 +100,7 @@ public interface Bytes<Underlying> extends
         try {
             return bs.bytesForWrite();
         } finally {
-            bs.release();
+            bs.release(ReferenceOwner.INIT);
         }
     }
 
@@ -116,8 +119,13 @@ public interface Bytes<Underlying> extends
         try {
             return NativeBytes.wrapWithNativeBytes(bs);
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
+    }
+
+    @NotNull
+    static Bytes<ByteBuffer> elasticHeapByteBuffer() {
+        return elasticHeapByteBuffer(128);
     }
 
     /**
@@ -177,7 +185,7 @@ public interface Bytes<Underlying> extends
             bbb.readPosition(byteBuffer.position());
             return bbb;
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
     }
 
@@ -238,7 +246,7 @@ public interface Bytes<Underlying> extends
             bbb.writeLimit(byteBuffer.limit());
             return bbb;
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
     }
 
@@ -293,7 +301,7 @@ public interface Bytes<Underlying> extends
         try {
             return bs.bytesForRead();
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
     }
 
@@ -348,7 +356,7 @@ public interface Bytes<Underlying> extends
         try {
             return bs.bytesForWrite();
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
     }
 
@@ -375,7 +383,12 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<?> from(@NotNull String text) {
-        return NativeBytesStore.from(text).bytesForRead();
+        NativeBytesStore from = NativeBytesStore.from(text);
+        try {
+            return from.bytesForRead();
+        } finally {
+            from.release(INIT);
+        }
     }
 
     /**
@@ -406,7 +419,7 @@ public interface Bytes<Underlying> extends
         try {
             return new VanillaBytes<>(bs);
         } finally {
-            bs.release();
+            bs.release(INIT);
         }
     }
 
@@ -464,7 +477,8 @@ public interface Bytes<Underlying> extends
             // added because something is crashing the JVM
             return "<unknown>";
 
-        buffer.reserve();
+        ReferenceOwner toString = ReferenceOwner.temporary("toString");
+        buffer.reserve(toString);
         try {
 
             if (buffer.readRemaining() == 0)
@@ -488,7 +502,7 @@ public interface Bytes<Underlying> extends
             }
             return builder.toString();
         } finally {
-            buffer.release();
+            buffer.release(toString);
         }
     }
 
@@ -615,9 +629,11 @@ public interface Bytes<Underlying> extends
         if (unchecked) {
             if (isElastic())
                 Jvm.debug().on(getClass(), "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
-            return start() == 0 && bytesStore().isDirectMemory() ?
+            Bytes<Underlying> underlyingBytes = start() == 0 && bytesStore().isDirectMemory() ?
                     new UncheckedNativeBytes<>(this) :
                     new UncheckedBytes<>(this);
+            release(INIT);
+            return underlyingBytes;
         }
         return this;
     }

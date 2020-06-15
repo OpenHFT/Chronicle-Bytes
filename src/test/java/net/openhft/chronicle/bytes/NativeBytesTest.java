@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -38,11 +40,8 @@ import static net.openhft.chronicle.bytes.Allocator.HEAP;
 import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.*;
 
-/*
- * Created by daniel on 17/04/15.
- */
 @RunWith(Parameterized.class)
-public class NativeBytesTest {
+public class NativeBytesTest extends BytesTestCommon {
 
     private Allocator alloc;
     private ThreadDump threadDump;
@@ -87,7 +86,7 @@ public class NativeBytesTest {
         Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap0);
         assertEquals("Hello World, Have a great day!", b.toString());
-        b.release();
+        b.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -102,7 +101,7 @@ public class NativeBytesTest {
         Bytes<byte[]> wrap1 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
         b.writeSome(wrap1);
         assertEquals("Hello World, Have a great day!", b.toString());
-        b.release();
+        b.releaseLast();
     }
 
     @SuppressWarnings("rawtypes")
@@ -110,7 +109,7 @@ public class NativeBytesTest {
     public void testAppendCharArrayNonAscii() {
         Bytes b = alloc.elasticBytes(1);
         b.appendUtf8(new char[]{'Δ'}, 0, 1);
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -122,7 +121,7 @@ public class NativeBytesTest {
         nativeBytes.writeInt(0);
         assertEquals(3 * pageSize, nativeBytes.realCapacity());
 
-        nativeBytes.release();
+        nativeBytes.releaseLast();
     }
 
     //@Test

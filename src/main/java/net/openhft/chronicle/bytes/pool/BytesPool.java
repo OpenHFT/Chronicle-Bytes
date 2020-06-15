@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,13 +19,11 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
-import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Created by Peter Lawrey on 20/12/16.
- */
+import java.nio.ByteBuffer;
+
 @SuppressWarnings("rawtypes")
 public class BytesPool {
     final ThreadLocal<Bytes> bytesTL = new ThreadLocal<>();
@@ -40,8 +40,9 @@ public class BytesPool {
 
     @NotNull
     protected Bytes createBytes() {
-        NativeBytes<Void> bytes = Bytes.allocateElasticDirect(256);
-        assert BytesUtil.unregister(bytes);
-        return bytes;
+        // use heap buffer as we never know when a thread will die and not release this resource.
+        Bytes<ByteBuffer> bbb = Bytes.elasticHeapByteBuffer(256);
+        AbstractReferenceCounted.unmonitor(bbb);
+        return bbb;
     }
 }

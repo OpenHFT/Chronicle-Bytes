@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
@@ -34,7 +37,7 @@ import static org.junit.Assert.assertTrue;
 
 @SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
-public class Bytes2Test {
+public class Bytes2Test extends BytesTestCommon {
 
     private Allocator alloc1;
     private Allocator alloc2;
@@ -54,7 +57,7 @@ public class Bytes2Test {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -78,8 +81,8 @@ public class Bytes2Test {
             to.writeSome(from);
             assertEquals("World", from.toString());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -94,8 +97,8 @@ public class Bytes2Test {
             to.writeSome(from);
             assertTrue("from: " + from, from.toString().startsWith("World "));
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -110,8 +113,8 @@ public class Bytes2Test {
             to.write(from);
             assertEquals(from.toString(), to.toString());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -128,8 +131,8 @@ public class Bytes2Test {
             }
             assertEquals(0, from.readRemaining());
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 }

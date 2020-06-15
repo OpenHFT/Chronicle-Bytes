@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +18,11 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.ReferenceCounted;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
-/*
- * Created by peter.lawrey on 21/09/2015.
- */
 @FunctionalInterface
-public interface MappedBytesStoreFactory<T extends MappedBytesStore> {
+public interface MappedBytesStoreFactory {
     @NotNull
-    T create(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity);
+    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity);
 }

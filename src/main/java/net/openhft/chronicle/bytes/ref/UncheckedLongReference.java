@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,13 +20,16 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import sun.misc.Unsafe;
 
-@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
-public class UncheckedLongReference implements LongReference {
+@SuppressWarnings({"rawtypes", "unchecked"})
+public class UncheckedLongReference extends AbstractCloseable implements LongReference, ReferenceOwner {
     private long address;
     private Unsafe unsafe;
+    private BytesStore bytes;
 
     @NotNull
     public static LongReference create(BytesStore bytesStore, long offset, int size) {
@@ -37,7 +42,12 @@ public class UncheckedLongReference implements LongReference {
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         if (length != maxSize()) throw new IllegalArgumentException();
         address = bytes.addressForRead(offset);
-        bytes.reserve();
+        if (this.bytes != bytes) {
+            if (this.bytes != null)
+                this.bytes.release(this);
+            this.bytes = bytes;
+            bytes.reserve(this);
+        }
         unsafe = UnsafeMemory.UNSAFE;
     }
 
@@ -74,7 +84,12 @@ public class UncheckedLongReference implements LongReference {
 
     @Override
     public long getVolatileValue() {
-        return unsafe.getLong(address);
+        return unsafe.getLongVolatile(null, address);
+    }
+
+    @Override
+    public void setVolatileValue(long value) {
+        unsafe.putLongVolatile(null, address, value);
     }
 
     @Override
@@ -95,5 +110,10 @@ public class UncheckedLongReference implements LongReference {
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
         return unsafe.compareAndSwapLong(null, address, expected, value);
+    }
+
+    @Override
+    protected void performClose() {
+        this.bytes.release(this);
     }
 }

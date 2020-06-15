@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -44,13 +47,12 @@ import java.util.Scanner;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
-public class BytesTest {
+public class BytesTest extends BytesTestCommon {
 
     private Allocator alloc1;
     private ThreadDump threadDump;
@@ -77,7 +79,7 @@ public class BytesTest {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -91,12 +93,12 @@ public class BytesTest {
     }
 
     @Test
-    public void checkRefCount() {
+    public void throwExceptionIfReleased() {
         Bytes bytes = alloc1.elasticBytes(16);
-        bytes.checkRefCount();
-        bytes.release();
+        ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
+        bytes.releaseLast();
         try {
-            bytes.checkRefCount();
+            ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
             fail();
         } catch (IllegalStateException ise) {
             // expected.
@@ -178,8 +180,8 @@ public class BytesTest {
         subBytes.readSkip(1);
 
         Assert.assertEquals(0, source.indexOf(subBytes));
-        Assert.assertTrue(subBytes.readPosition() == 1);
-        Assert.assertTrue(source.readPosition() == 0);
+        assertEquals(1, subBytes.readPosition());
+        assertEquals(0, source.readPosition());
     }
 
     @Test
@@ -188,7 +190,7 @@ public class BytesTest {
         for (int i = 0; i < 4; i++)
             bytes.writeIntAdv('1', 1);
         assertEquals("1111", bytes.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -197,7 +199,7 @@ public class BytesTest {
         for (int i = 0; i < 4; i++)
             bytes.writeLongAdv('1', 1);
         assertEquals("1111", bytes.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -211,7 +213,7 @@ public class BytesTest {
             bytes.writePosition(offset + 8);
             assertEquals(expected, bytes.readLong(offset));
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -229,7 +231,7 @@ public class BytesTest {
             assertEquals(0x11, bytes.readUnsignedByte(1));
 
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -252,7 +254,7 @@ public class BytesTest {
 
         assertEquals(hist, histB);
         assertEquals(hist2, histC);
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -265,8 +267,9 @@ public class BytesTest {
             BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
             bbb.writeUnsignedByte(10, '0');
             assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
+            copy.releaseLast();
         } finally {
-            bbb.release();
+            bbb.releaseLast();
         }
     }
 
@@ -288,7 +291,7 @@ public class BytesTest {
                     "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "... truncated", bytes.toHexString(256));
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -302,9 +305,9 @@ public class BytesTest {
             @NotNull String s = bytes.toHexString();
             Bytes bytes2 = Bytes.fromHexString(s);
             assertEquals(s, bytes2.toHexString());
-            bytes2.release();
+            bytes2.releaseLast();
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -314,10 +317,10 @@ public class BytesTest {
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {
             b.readWithLength(2, bytesOut);
-            assertThat(bytesOut.toString(), is("He"));
+            assertEquals("He", bytesOut.toString());
         } finally {
-            b.release();
-            bytesOut.release();
+            b.releaseLast();
+            bytesOut.releaseLast();
         }
     }
 
@@ -328,7 +331,7 @@ public class BytesTest {
             b.readSkip(6);
             assertTrue(StringUtils.isEqual("World", b));
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -352,7 +355,7 @@ public class BytesTest {
                 assertSame(s, s2);
             }
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -364,11 +367,11 @@ public class BytesTest {
         Bytes bytes2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
         utf8StringInterner.intern(bytes1);
         String intern = utf8StringInterner.intern(bytes2);
-        assertThat(intern, is(bytes2.toString()));
+        assertEquals(bytes2.toString(), intern);
         String intern2 = utf8StringInterner.intern(bytes1);
-        assertThat(intern2, is(bytes1.toString()));
-        bytes1.release();
-        bytes2.release();
+        assertEquals(bytes1.toString(), intern2);
+        bytes1.releaseLast();
+        bytes2.releaseLast();
     }
 
     @Test
@@ -378,10 +381,10 @@ public class BytesTest {
         try {
             store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
-            assertThat(store1.equalBytes(store2, store2.length()), is(false));
+            assertFalse(store1.equalBytes(store2, store2.length()));
         } finally {
-            store1.release();
-            store2.release();
+            store1.releaseLast();
+            store2.releaseLast();
         }
     }
 
@@ -397,11 +400,11 @@ public class BytesTest {
         assertFalse(aaa.startsWith(aaaa));
         Bytes<?> b = Bytes.from("b");
         assertFalse(aaa.startsWith(b));
-        a.release();
-        aa.release();
-        aaa.release();
-        aaaa.release();
-        b.release();
+        a.releaseLast();
+        aa.releaseLast();
+        aaa.releaseLast();
+        aaaa.releaseLast();
+        b.releaseLast();
     }
 
     @Test
@@ -419,7 +422,7 @@ public class BytesTest {
             testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
             testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -447,7 +450,7 @@ public class BytesTest {
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
             } finally {
-                b.release();
+                b.releaseLast();
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 0, b.refCount());
                 assertEquals(count++ + ": " + b.getClass().getSimpleName(), 0, b.bytesStore().refCount());
             }
@@ -466,7 +469,7 @@ public class BytesTest {
             assertEquals("Hello World", s);
             assertEquals(1, bytes.refCount());
         } finally {
-            bytes.release();
+            bytes.releaseLast();
             assertEquals(0, bytes.refCount());
         }
     }
@@ -478,7 +481,7 @@ public class BytesTest {
         try {
             to.write(array);
         } finally {
-            to.release();
+            to.releaseLast();
         }
     }
 
@@ -489,7 +492,7 @@ public class BytesTest {
 
         to.writeSome(bb);
         assertEquals("World", Bytes.wrapForRead(bb).toString());
-        to.release();
+        to.releaseLast();
     }
 
     @Test
@@ -503,7 +506,7 @@ public class BytesTest {
             assertEquals("rld", from.toString());
             assertEquals(0, from.readPosition());
         } finally {
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -524,7 +527,7 @@ public class BytesTest {
             assertEquals(0, bytes.readPositionRemaining(4, 0).readIncompleteLong());
 
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -537,7 +540,7 @@ public class BytesTest {
             to.append(0, 1, 5);
             assertEquals("00001", Bytes.wrapForRead(bb).toString());
         } finally {
-            to.release();
+            to.releaseLast();
         }
     }
 
@@ -548,9 +551,11 @@ public class BytesTest {
         Bytes to = Bytes.wrapForWrite(bb);
         try {
             to.append(5, 10, 5);
-            assertEquals("WWWWW00010", Bytes.wrapForRead(bb).toString());
+            Bytes<ByteBuffer> bbb = Bytes.wrapForRead(bb);
+            assertEquals("WWWWW00010", bbb.toString());
+            bbb.releaseLast();
         } finally {
-            to.release();
+            to.releaseLast();
         }
     }
 
@@ -563,7 +568,7 @@ public class BytesTest {
                 to.append(0, 1000, 5);
                 fail("Should throw Exception");
             } finally {
-                to.release();
+                to.releaseLast();
             }
         } catch (Exception e) {
             e.printStackTrace();
@@ -578,7 +583,7 @@ public class BytesTest {
             try {
                 to.append(0, 1000, 3);
             } finally {
-                to.release();
+                to.releaseLast();
             }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
@@ -594,7 +599,7 @@ public class BytesTest {
         try {
             to.append(0, 3.14, 2, 6);
         } finally {
-            to.release();
+            to.releaseLast();
         }
         assertEquals("003.14", Bytes.wrapForRead(bytes).toString());
     }
@@ -606,7 +611,7 @@ public class BytesTest {
             try {
                 to.append(0, 3.14, 2, 8);
             } finally {
-                to.release();
+                to.releaseLast();
             }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
@@ -622,7 +627,7 @@ public class BytesTest {
             try {
                 to.append(0, 33333.14, 2, 6);
             } finally {
-                to.release();
+                to.releaseLast();
             }
             fail("Should throw Exception");
         } catch (BufferOverflowException e) {
@@ -645,7 +650,7 @@ public class BytesTest {
             assertEquals(25, bytes.writePosition());
             assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -657,7 +662,7 @@ public class BytesTest {
                 throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -670,7 +675,7 @@ public class BytesTest {
                 throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -680,7 +685,7 @@ public class BytesTest {
         try {
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -690,7 +695,7 @@ public class BytesTest {
         try {
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -722,7 +727,7 @@ public class BytesTest {
             assertEquals("bye", scan.nextLine());
             assertEquals("for now", scan.nextLine());
             assertFalse(scan.hasNext());
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -759,7 +764,7 @@ public class BytesTest {
         sb.setLength(0);
         b.readPosition(0);
         b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -770,7 +775,7 @@ public class BytesTest {
 
             @NotNull BigDecimal bd = b.readBigDecimal();
             assertEquals(new BigDecimal(d), bd);
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -782,7 +787,7 @@ public class BytesTest {
 
             @NotNull BigDecimal bd = b.parseBigDecimal();
             assertEquals(new BigDecimal(d), bd);
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -802,10 +807,10 @@ public class BytesTest {
         b.readWithLength(b2);
         assertEquals("world", b2.toString());
 
-        b.release();
-        b2.release();
-        hello.release();
-        world.release();
+        b.releaseLast();
+        b2.releaseLast();
+        hello.releaseLast();
+        world.releaseLast();
     }
 
     @Test
@@ -818,7 +823,7 @@ public class BytesTest {
                 assertEquals(s, b.toString());
             }
         }
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -829,7 +834,7 @@ public class BytesTest {
             b.clear().appendBase16(value);
             assertEquals(s, b.toString());
         }
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -842,7 +847,7 @@ public class BytesTest {
             b.move(3, 5, 3);
             assertEquals("Hlo o o rld", b.toString());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -855,7 +860,7 @@ public class BytesTest {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -868,7 +873,7 @@ public class BytesTest {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -881,7 +886,7 @@ public class BytesTest {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -894,7 +899,7 @@ public class BytesTest {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -913,7 +918,7 @@ public class BytesTest {
             assertEquals('H', b.uncheckedReadUnsignedByte());
             assertEquals(0xFF, b.uncheckedReadUnsignedByte());
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -931,7 +936,7 @@ public class BytesTest {
             assertEquals(4, b.readVolatileLong(7));
 
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -957,7 +962,7 @@ public class BytesTest {
             assertEquals(0x54ab5df8, b.hashCode());
 
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -972,7 +977,7 @@ public class BytesTest {
             assertEquals(NATIVE, b.readEnum(Allocator.class));
 
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -984,7 +989,7 @@ public class BytesTest {
             assertEquals("03:25:45.678", b.toString());
 
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -996,7 +1001,7 @@ public class BytesTest {
             assertEquals("20031020", b.toString());
 
         } finally {
-            b.release();
+            b.releaseLast();
         }
     }
 
@@ -1010,14 +1015,14 @@ public class BytesTest {
         for (int i = 0; i < length; i++) {
             from.write(i, a, 0L, 1);
         }
-        a.release();
+        a.releaseLast();
 
         try {
             to.write(from, 0L, length);
             assertEquals(from.readLong(0), to.readLong(0));
         } finally {
-            from.release();
-            to.release();
+            from.releaseLast();
+            to.releaseLast();
         }
     }
 
@@ -1030,16 +1035,16 @@ public class BytesTest {
             a.append(hello);
             b.append(hello);
 
-            assertTrue(a.equals(b));
-            assertTrue(a.bytesStore().equals(b.bytesStore()));
+            assertEquals(a, b);
+            assertEquals(a.bytesStore(), b.bytesStore());
 
             assertEquals(hello, b.toString());
 
-            assertTrue(a.equals(b));
-            assertTrue(a.bytesStore().equals(b.bytesStore()));
+            assertEquals(a, b);
+            assertEquals(a.bytesStore(), b.bytesStore());
         } finally {
-            a.release();
-            b.release();
+            a.releaseLast();
+            b.releaseLast();
         }
     }
 }

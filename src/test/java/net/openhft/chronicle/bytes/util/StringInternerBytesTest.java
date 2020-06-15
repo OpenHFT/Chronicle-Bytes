@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,15 +19,13 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 17/09/15.
- */
-public class StringInternerBytesTest {
+public class StringInternerBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
@@ -34,7 +34,7 @@ public class StringInternerBytesTest {
         for (int i = 0; i < 100; i++) {
             Bytes b = Bytes.from("key" + i);
             si.intern(b, (int) b.readRemaining());
-            b.release();
+            b.releaseLast();
         }
         assertEquals(89, si.valueCount());
     }

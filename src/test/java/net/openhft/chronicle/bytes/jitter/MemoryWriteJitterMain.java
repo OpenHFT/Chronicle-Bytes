@@ -58,7 +58,7 @@ public class MemoryWriteJitterMain {
                     //noinspection StatementWithEmptyBody
                     while (System.nanoTime() < start + intervalNS) ;
                 }
-                mf.release();
+                mf.releaseLast();
             } catch (Throwable t) {
                 t.printStackTrace();
                 System.exit(-1);
@@ -102,7 +102,7 @@ public class MemoryWriteJitterMain {
             }
         } while (System.currentTimeMillis() < start0 + runTime * 1_000);
         running = false;
-        mf.release();
+        mf.releaseLast();
         System.gc();// give it time to release the file so the delete on exit will work on windows.
 
         System.out.println("size=" + size + " padTo=" + padTo);

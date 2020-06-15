@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -22,11 +24,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 17/06/2016.
- */
 @SuppressWarnings("rawtypes")
-public class VanillaBytesTest {
+public class VanillaBytesTest extends BytesTestCommon {
     @Test
     public void testBytesForRead() {
         @NotNull byte[] byteArr = new byte[128];
@@ -43,6 +42,6 @@ public class VanillaBytesTest {
         bytes2.writeByte(bytes2.start() + 1, 99);
         assertEquals(99, bytes.readByte(99));
 
-        bytes.release();
+        bytes.releaseLast();
     }
 }

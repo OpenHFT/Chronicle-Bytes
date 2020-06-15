@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -18,14 +20,21 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
 import java.nio.BufferUnderflowException;
 
-/*
- * Created by Peter Lawrey on 07/05/16.
- */
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
+        extends AbstractReferenceCounted
         implements BytesStore<B, Underlying> {
+
+    protected AbstractBytesStore() {
+    }
+
+    protected AbstractBytesStore(boolean monitored) {
+        super(monitored);
+    }
+
     @Override
     public int peekUnsignedByte(long offset) throws BufferUnderflowException {
         return offset >= readLimit() ? -1 : readUnsignedByte(offset);

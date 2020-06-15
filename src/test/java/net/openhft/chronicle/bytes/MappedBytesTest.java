@@ -17,7 +17,7 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.*;
 
 @SuppressWarnings("rawtypes")
-public class MappedBytesTest {
+public class MappedBytesTest extends BytesTestCommon {
 
     final private String
             smallText = "It's ten years since the iPhone was first unveiled and Apple has marked " +
@@ -102,7 +102,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -122,7 +122,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -144,7 +144,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -166,7 +166,7 @@ public class MappedBytesTest {
             bytesR.readLimit(wp);
             bytesR.readPosition(offset);
             Assert.assertEquals(text, bytesR.toString());
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -188,7 +188,7 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -210,7 +210,7 @@ public class MappedBytesTest {
             bytesR.readPosition(offset);
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -249,8 +249,8 @@ public class MappedBytesTest {
         bytes.writePosition(0);
         bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
 
-        bytes2.release();
-        bytes.release();
+        bytes2.releaseLast();
+        bytes.releaseLast();
 
     }
 
@@ -289,8 +289,8 @@ public class MappedBytesTest {
         bytes.writePosition(0);
         bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
 
-        bytes2.release();
-        bytes.release();
+        bytes2.releaseLast();
+        bytes.releaseLast();
 
     }
 
@@ -329,8 +329,8 @@ public class MappedBytesTest {
         bytes.writePosition(0);
         bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
 
-        bytes2.release();
-        bytes.release();
+        bytes2.releaseLast();
+        bytes.releaseLast();
 
     }
 
@@ -340,7 +340,7 @@ public class MappedBytesTest {
         assertFalse(bytes.isBackingFileReadOnly());
         bytes.writeUtf8(null); // used to blow up.
         assertNull(bytes.readUtf8());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -353,7 +353,8 @@ public class MappedBytesTest {
 
             assertTrue(mappedBytes.
                     isBackingFileReadOnly());
-            mappedBytes.release();
+            mappedBytes.releaseLast();
+            assertEquals(0, mappedBytes.refCount());
         }
     }
 
@@ -367,7 +368,7 @@ public class MappedBytesTest {
             mb.realCapacity();
             assertTrue(Thread.currentThread().isInterrupted());
         } finally {
-            mb.release();
+            mb.releaseLast();
         }
     }
 
@@ -379,27 +380,28 @@ public class MappedBytesTest {
     @Test
     public void multiBytes() throws FileNotFoundException {
         String tmpfile = OS.TMP + "/data.dat";
-        MappedFile mappedFile = MappedFile.mappedFile(new File(tmpfile), 64 << 10);
-        MappedBytes original = MappedBytes.mappedBytes(mappedFile);
-        original.zeroOut(0, 1000);
+        try (MappedFile mappedFile = MappedFile.mappedFile(new File(tmpfile), 64 << 10);
+             MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
+            original.zeroOut(0, 1000);
 
-        original.writeInt(0, 1234);
+            original.writeInt(0, 1234);
 
-        PointerBytesStore pbs = new PointerBytesStore();
-        pbs.set(original.addressForRead(50), 100);
+            PointerBytesStore pbs = new PointerBytesStore();
+            pbs.set(original.addressForRead(50), 100);
 
-        // Print out the int in the two BytesStores.
-        // This shows that the copy has the same contents of the original.
-        System.out.println("Original(0): " + original.readInt(0));
-        System.out.println("PBS(0): " + pbs.readInt(0));
+            // Print out the int in the two BytesStores.
+            // This shows that the copy has the same contents of the original.
+            System.out.println("Original(0): " + original.readInt(0));
+            System.out.println("PBS(0): " + pbs.readInt(0));
 
-        // Now modify the copy and print out the new int in the two BytesStores again.
-        pbs.writeInt(0, 4321);
-        System.out.println("Original(50): " + original.readInt(50));
-        System.out.println("PBS(0): " + pbs.readInt(0));
-        original.writeInt(54, 12345678);
-        System.out.println("Original(54): " + original.readInt(54));
-        System.out.println("PBS(4): " + pbs.readInt(4));
+            // Now modify the copy and print out the new int in the two BytesStores again.
+            pbs.writeInt(0, 4321);
+            System.out.println("Original(50): " + original.readInt(50));
+            System.out.println("PBS(0): " + pbs.readInt(0));
+            original.writeInt(54, 12345678);
+            System.out.println("Original(54): " + original.readInt(54));
+            System.out.println("PBS(4): " + pbs.readInt(4));
+        }
     }
 
     @Test
@@ -427,7 +429,7 @@ public class MappedBytesTest {
                 assertEquals(chunkSize, mb.bytesStore().start());
             }
         } finally {
-            csb.release();
+            csb.releaseLast();
         }
         IOTools.deleteDirWithFiles(tmpfile, 2);
     }

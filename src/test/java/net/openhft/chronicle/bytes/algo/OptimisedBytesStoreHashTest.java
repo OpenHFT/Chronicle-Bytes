@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +19,7 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -32,11 +35,8 @@ import java.util.Random;
 import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.*;
 import static org.junit.Assert.assertEquals;
 
-/*
- * Created by Peter Lawrey on 28/06/15.
- */
 @SuppressWarnings("rawtypes")
-public class OptimisedBytesStoreHashTest {
+public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 
@@ -65,7 +65,7 @@ public class OptimisedBytesStoreHashTest {
         }
         assertEquals(VanillaBytesStoreHash.INSTANCE.applyAsLong(b),
                 OptimisedBytesStoreHash.INSTANCE.applyAsLong(b));
-        b.release();
+        b.releaseLast();
     }
 
     @Test
@@ -84,7 +84,7 @@ public class OptimisedBytesStoreHashTest {
             assertEquals("i: " + i, applyAsLong9to16(nb, i), applyAsLongAny(nb, i));
         for (int i = 17; i <= 32; i++)
             assertEquals("i: " + i, applyAsLong17to32(nb, i), applyAsLongAny(nb, i));
-        nb.release();
+        nb.releaseLast();
     }
 
     //@Test
@@ -215,7 +215,7 @@ public class OptimisedBytesStoreHashTest {
                     Long.toHexString(OptimisedBytesStoreHash.readIncompleteLong(bs.addressForRead(0), i)));
             bs2.writeUnsignedByte(i + 1);
         }
-        bs.release();
-        bs2.release();
+        bs.releaseLast();
+        bs2.releaseLast();
     }
 }

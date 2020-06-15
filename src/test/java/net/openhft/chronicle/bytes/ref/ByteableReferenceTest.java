@@ -2,6 +2,8 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.NativeBytesStore;
+import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -9,21 +11,20 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest {
-    private final Byteable byteable;
+    private final AbstractReference byteable;
 
-    public ByteableReferenceTest(final String className, final Byteable byteable) {
+    public ByteableReferenceTest(final String className, final AbstractReference byteable) {
         this.byteable = byteable;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
-        return Arrays.asList(
+        List<Object[]> objects = Arrays.asList(
                 datum(new BinaryLongReference()),
                 datum(new BinaryTwoLongReference()),
                 datum(new BinaryBooleanReference()),
@@ -37,6 +38,9 @@ public class ByteableReferenceTest {
                 datum(new BinaryLongArrayReference()),
                 datum(new UncheckedLongReference())*/
         );
+        AbstractCloseable.disableCloseableTracing();
+        AbstractReferenceCounted.disableReferenceTracing();
+        return objects;
     }
 
     private static Object[] datum(final Byteable reference) {
@@ -52,11 +56,12 @@ public class ByteableReferenceTest {
         final long startCount = firstStore.refCount();
         byteable.bytesStore(firstStore, 0, byteable.maxSize());
 
-        assertThat(firstStore.refCount(), is(startCount + 1));
+        assertEquals(startCount + 1, firstStore.refCount());
 
         byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
-        assertThat(firstStore.refCount(), is(startCount));
+        assertEquals(startCount, firstStore.refCount());
+        byteable.close();
     }
 
 }

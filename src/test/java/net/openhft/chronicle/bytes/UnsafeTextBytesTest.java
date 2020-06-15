@@ -8,7 +8,7 @@ import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 
-public class UnsafeTextBytesTest {
+public class UnsafeTextBytesTest extends BytesTestCommon {
     @Test
     public void appendBase10() {
         Bytes bytes = Bytes.allocateDirect(32);
@@ -16,7 +16,7 @@ public class UnsafeTextBytesTest {
             testAppendBase10(bytes, l);
             testAppendBase10(bytes, 1 - l);
         }
-        bytes.release();
+        bytes.releaseLast();
     }
 
     static void testAppendBase10(Bytes bytes, long l) {
@@ -55,7 +55,7 @@ public class UnsafeTextBytesTest {
             testAppendDouble(bytes, d);
             testAppendFixed(bytes, d, 4);
         }
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -65,6 +65,6 @@ public class UnsafeTextBytesTest {
                 741138311171.555,
                 0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
             testAppendDouble(bytes, d);
-        bytes.release();
+        bytes.releaseLast();
     }
 }

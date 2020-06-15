@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesMarshallable;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -27,7 +30,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class BinaryLongArrayReferenceTest {
+public class BinaryLongArrayReferenceTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 
@@ -50,14 +53,14 @@ public class BinaryLongArrayReferenceTest {
 
         try (@NotNull BinaryLongArrayReference array = new BinaryLongArrayReference()) {
             array.bytesStore(bytes, 0, length);
-    
+
             assertEquals(128, array.getCapacity());
             for (int i = 0; i < 128; i++)
                 array.setValueAt(i, i + 1);
-    
+
             for (int i = 0; i < 128; i++)
                 assertEquals(i + 1, array.getValueAt(i));
-            bytes.release();
+            bytes.releaseLast();
         }
     }
 
@@ -74,7 +77,9 @@ public class BinaryLongArrayReferenceTest {
         la2.readMarshallable(bytes);
         assertEquals(4, la2.first.getCapacity());
         assertEquals(8, la2.second.getCapacity());
-        bytes.release();
+        la.closeAll();
+        la2.closeAll();
+        bytes.releaseLast();
     }
 
     static class LongArrays implements BytesMarshallable {
@@ -84,6 +89,11 @@ public class BinaryLongArrayReferenceTest {
         public LongArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);
             second.capacity(secondLength);
+        }
+
+        public void closeAll() {
+            first.close();
+            second.close();
         }
     }
 }

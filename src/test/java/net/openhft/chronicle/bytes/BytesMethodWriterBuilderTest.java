@@ -16,7 +16,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assume.assumeFalse;
 
-public class BytesMethodWriterBuilderTest {
+public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
     @Test
     public void testPrimitives() {
@@ -127,7 +127,7 @@ public class BytesMethodWriterBuilderTest {
 
         assertEquals(expected,
                 out.toString().replaceAll("\r", ""));
-        bytes.release();
+        bytes.releaseLast();
     }
 
 }

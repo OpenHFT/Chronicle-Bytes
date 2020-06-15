@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -20,8 +22,8 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.ReferenceCounter;
 import net.openhft.chronicle.core.annotation.ForceInline;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,11 +36,12 @@ import java.nio.ByteBuffer;
  * Fast unchecked version of AbstractBytes
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
+public class UncheckedNativeBytes<Underlying>
+        extends AbstractReferenceCounted
+        implements Bytes<Underlying> {
     protected final long capacity;
     @NotNull
     private final Bytes<Underlying> underlyingBytes;
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
     @NotNull
     protected NativeBytesStore<Underlying> bytesStore;
     protected long readPosition;
@@ -49,6 +52,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
+        underlyingBytes.reserve(this);
         this.bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
@@ -63,11 +67,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
             underlyingBytes.ensureCapacity(size);
             bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
         }
-    }
-
-    @Override
-    public boolean checkRefCount() {
-        return refCount.checkRefCount();
     }
 
     @Override
@@ -323,8 +322,9 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
-    void performRelease() {
-        this.underlyingBytes.release();
+    @Override
+    protected void performRelease() {
+        this.underlyingBytes.release(this);
     }
 
     @Override
@@ -403,26 +403,6 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     public long readVolatileLong() {
         long offset = readOffsetPositionMoved(8);
         return bytesStore.readVolatileLong(offset);
-    }
-
-    @Override
-    public void reserve() throws IllegalStateException {
-        refCount.reserve();
-    }
-
-    @Override
-    public void release() throws IllegalStateException {
-        refCount.release();
-    }
-
-    @Override
-    public long refCount() {
-        return refCount.get();
-    }
-
-    @Override
-    public boolean tryReserve() {
-        return refCount.tryReserve();
     }
 
     @NotNull
@@ -926,7 +906,7 @@ public class UncheckedNativeBytes<Underlying> implements Bytes<Underlying> {
     @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        ensureCapacity(writePosition() + length);
+        ensureCapacity(length);
         @NotNull NativeBytesStore nbs = this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);

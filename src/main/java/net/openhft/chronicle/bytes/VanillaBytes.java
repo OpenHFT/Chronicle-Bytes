@@ -1,5 +1,7 @@
-/*
- * Copyright 2016 higherfrequencytrading.com
+    /*
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -36,7 +38,8 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Simple Bytes implementation which is not Elastic.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
+public class VanillaBytes<Underlying>
+        extends AbstractBytes<Underlying>
         implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
     public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
@@ -157,10 +160,12 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
             throws IllegalStateException {
-        @Nullable BytesStore oldBS = this.bytesStore;
-        this.bytesStore = bytesStore;
-        bytesStore.reserve();
-        oldBS.release();
+        if (this.bytesStore != bytesStore) {
+            @Nullable BytesStore oldBS = this.bytesStore;
+            this.bytesStore = bytesStore;
+            bytesStore.reserve(this);
+            oldBS.release(this);
+        }
         clear();
     }
 
@@ -272,15 +277,15 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
 
     public void write(long position, @NotNull CharSequence str, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException {
-        // todo optimise
-        if (str instanceof String) {
-            @NotNull char[] chars = ((String) str).toCharArray();
-            ensureCapacity(position + length);
-            @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore;
-            nbs.write8bit(position, chars, offset, length);
-        } else {
-            throw new UnsupportedOperationException();
+
+        ensureCapacity(length);
+        if (offset + length > str.length())
+            throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
+
+        for (int i = 0; i < length; i++) {
+            bytesStore.writeByte(position + i, str.charAt(offset + i));
         }
+
     }
 
     @Override
@@ -396,7 +401,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
         @Nullable final Memory memory = bytesStore.memory;
 
         if (memory == null)
-            throw new AssertionError(bytesStore.releasedHere);
+            bytesStore.throwExceptionIfReleased();
 
         if (Jvm.isJava9Plus()) {
             final byte[] chars = StringUtils.extractBytes(s);
@@ -527,7 +532,7 @@ public class VanillaBytes<Underlying> extends AbstractBytes<Underlying>
     @NotNull
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
-        ensureCapacity(writePosition() + length);
+        ensureCapacity(length);
         if (bytesStore instanceof NativeBytesStore) {
             @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
             long position = nbs.appendUtf8(writePosition(), chars, offset, length);

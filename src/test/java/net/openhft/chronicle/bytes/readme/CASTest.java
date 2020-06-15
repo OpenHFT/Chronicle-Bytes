@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes.readme;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import org.junit.Test;
@@ -8,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
-public class CASTest {
+public class CASTest extends BytesTestCommon {
     @Test
     public void testCAS() {
         assumeFalse(NativeBytes.areNewGuarded());
@@ -36,6 +37,6 @@ public class CASTest {
         assertEquals("0000 03 73 33 32 ff ff ff 7f                         # s32\n" +
                         "0008 03 73 36 34 00 00 00 00 ff ff ff ff ff ff ff 7f # s64\n",
                 bytes.toHexString());
-        bytes.release();
+        bytes.releaseLast();
     }
 }

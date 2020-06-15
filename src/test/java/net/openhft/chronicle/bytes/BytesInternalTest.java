@@ -25,6 +25,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Random;
@@ -36,7 +37,7 @@ import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
-public class BytesInternalTest {
+public class BytesInternalTest extends BytesTestCommon {
 
     private final boolean guarded;
 
@@ -75,6 +76,7 @@ public class BytesInternalTest {
 
         assertEquals("value", actual);
         assertEquals(5, actual.length());
+        bs.releaseLast();
     }
 
     private ThreadDump threadDump;
@@ -107,7 +109,7 @@ public class BytesInternalTest {
         BytesInternal.parseUtf8(bytes, sb, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -127,7 +129,40 @@ public class BytesInternalTest {
         sb = null; // free some memory.
         assertEquals(new String(bytes2, US_ASCII), actual);
 
-        bytes.release();
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void parseDoubleScientificNegative() {
+        String strDouble = "6.1E-4";
+        double expected = 6.1E-4;
+        int expectedDp = 5; //0.00061 needs dp 5
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());
+        from.releaseLast();
+    }
+
+    @Test
+    public void parseDoubleScientificNegative1() {
+        String strDouble = "6.123E-4";
+        double expected = 6.123E-4;
+        int expectedDp = 7; //0.0006123 needs dp 7
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());  //Last dp should be 7.
+        from.releaseLast();
+    }
+
+    @Test
+    public void parseDoubleScientificPositive1() {
+        String strDouble = "6.12345E4";
+        double expected = 6.12345E4;
+        int expectedDp = 1; //6.12345 x 10^4 = 61234.5 needs 1
+        Bytes<?> from = Bytes.from(strDouble);
+        assertEquals(expected, from.parseDouble(), 0.0);
+        assertEquals(expectedDp, from.lastDecimalPlaces());
+        from.releaseLast();
     }
 
     @Test
@@ -145,7 +180,7 @@ public class BytesInternalTest {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -162,7 +197,7 @@ public class BytesInternalTest {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -179,7 +214,7 @@ public class BytesInternalTest {
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -195,7 +230,7 @@ public class BytesInternalTest {
                     assertEquals(si,
                             Double.parseDouble(si),
                             from.parseDouble(), 0.0);
-                    from.release();
+                    from.releaseLast();
                 }
             }
         }
@@ -217,7 +252,7 @@ public class BytesInternalTest {
         sb.setLength(0);
         assertTrue(BytesInternal.compareUtf8(bytes, 0, test));
 
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -236,7 +271,7 @@ public class BytesInternalTest {
         BytesInternal.parse8bit(0, bytes, sb, length);
 
         assertEquals(test, sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -255,7 +290,7 @@ public class BytesInternalTest {
         BytesInternal.parse8bit(0, bytes, sb, length);
 
         assertEquals(test, sb.toString());
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -276,17 +311,22 @@ public class BytesInternalTest {
         assertTrue(BytesInternal.compareUtf8(bs, 1, "£€"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£"));
         assertFalse(BytesInternal.compareUtf8(bs, 1, "£€$"));
+        bs.releaseLast();
     }
 
     @Test
-    public void shouldHandleDifferentSizedStores() throws Exception {
-        final BytesStore storeOfThirtyTwoBytes = Bytes.elasticHeapByteBuffer(32).bytesStore();
+    public void shouldHandleDifferentSizedStores() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
+        final BytesStore storeOfThirtyTwoBytes = bytes.bytesStore();
         storeOfThirtyTwoBytes.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
-        final BytesStore longerBuffer = Bytes.elasticHeapByteBuffer(512).bytesStore();
+        Bytes<ByteBuffer> bytes2 = Bytes.elasticHeapByteBuffer(512);
+        final BytesStore longerBuffer = bytes2.bytesStore();
         longerBuffer.writeUtf8(0, "thirty_two_bytes_of_utf8_chars_");
 
         assertTrue(BytesInternal.equalBytesAny(storeOfThirtyTwoBytes, longerBuffer, 32));
+        bytes2.releaseLast();
+        bytes.releaseLast();
     }
 
     @Test
@@ -307,7 +347,7 @@ public class BytesInternalTest {
 
             Bytes<?> from = Bytes.from(text);
             assertEquals(expected, from.parseDouble(), 0.0);
-            from.release();
+            from.releaseLast();
         }
     }
 
@@ -315,7 +355,7 @@ public class BytesInternalTest {
         double d = Double.parseDouble(s);
         Bytes<?> from = Bytes.from(s);
         double d2 = from.parseDouble();
-        from.release();
+        from.releaseLast();
         if (d != d2) {
             System.out.println(d + " != " + d2);
             ++different;
@@ -335,6 +375,7 @@ public class BytesInternalTest {
             String s2 = bytes.toString();
             System.out.println(s + " != " + s2);
         }
+        bytes.releaseLast();
     }
 
     @Test

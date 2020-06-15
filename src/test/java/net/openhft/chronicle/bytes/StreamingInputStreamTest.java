@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -28,12 +30,11 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
-public class StreamingInputStreamTest {
+public class StreamingInputStreamTest extends BytesTestCommon {
     private ThreadDump threadDump;
 
     @Before
@@ -53,8 +54,8 @@ public class StreamingInputStreamTest {
         prepareBytes(b);
 
         @NotNull InputStream is = b.inputStream();
-        assertThat(is.read(new byte[5], 0, 0), is(0));
-        b.release();
+        assertEquals(0, is.read(new byte[5], 0, 0));
+        b.releaseLast();
     }
 
     @Test(timeout = 1000)
@@ -72,7 +73,7 @@ public class StreamingInputStreamTest {
             assertArrayEquals(test, os.toByteArray());
         }
 
-        b.release();
+        b.releaseLast();
     }
 
     private byte[] prepareBytes(final Bytes b) {

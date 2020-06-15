@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,14 +18,11 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.lang.ref.WeakReference;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
 
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
@@ -59,7 +58,17 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public long getVolatileValue() {
-        return bytes.readVolatileLong(offset);
+        try {
+            return bytes.readVolatileLong(offset);
+        } catch (Exception e) {
+            throwExceptionIfClosed();
+            throw Jvm.rethrow(e);
+        }
+    }
+
+    @Override
+    public void setVolatileValue(long value) {
+        bytes.writeVolatileLong(offset, value);
     }
 
     @Override

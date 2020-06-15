@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.nio.ByteBuffer;
@@ -36,21 +35,10 @@ buffers 128 KB took an average of 12,809 ns for heap ByteBuffer, 21,602 ns for d
 buffers 128 KB took an average of 10,768 ns for heap ByteBuffer, 21,444 ns for direct ByteBuffer and 894 for DirectStore
 buffers 128 KB took an average of 8,739 ns for heap ByteBuffer, 22,684 ns for direct ByteBuffer and 890 for DirectStore
  */
-public class AllocationRatesTest {
+public class AllocationRatesTest extends BytesTestCommon {
     public static final int BATCH = 10;
     static final int BUFFER_SIZE = 128 * 1024;
     static final int ALLOCATIONS = 10000;
-    private ThreadDump threadDump;
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
-    }
 
     @Test
     public void compareAllocationRates() {
@@ -91,7 +79,7 @@ public class AllocationRatesTest {
             for (int j = 0; j < BATCH; j++)
                 ds[j] = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
-                ds[j].release();
+                ds[j].releaseLast();
                 assertEquals(0, ds[j].refCount());
             }
         }

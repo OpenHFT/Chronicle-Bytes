@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,20 +19,23 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.ReferenceCounted;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * BytesStore to wrap memory mapped data.
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
+    private final MappedFile mappedFile;
     private final long start;
     private final long safeLimit;
 
-    protected MappedBytesStore(ReferenceCounted owner, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
-        super(address, start + capacity, new OS.Unmapper(address, capacity, owner), false);
+    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
+        super(address, start + capacity, new OS.Unmapper(address, capacity), false);
+        this.mappedFile = mappedFile;
         this.start = start;
         this.safeLimit = start + safeCapacity;
+        reserveTransfer(INIT, owner);
     }
 
     @NotNull

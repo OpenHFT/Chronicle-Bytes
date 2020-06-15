@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,6 +25,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeText;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
@@ -48,6 +51,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
+import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -976,7 +980,8 @@ enum BytesInternal {
         if (bytes.refCount() < 1)
             // added because something is crashing the JVM
             return "<unknown>";
-        bytes.reserve();
+        ReferenceOwner toDebugString = temporary("toDebugString");
+        bytes.reserve(toDebugString);
         try {
             int len = Maths.toUInt31(maxLength + 40);
             @NotNull StringBuilder sb = new StringBuilder(len);
@@ -1010,7 +1015,7 @@ enum BytesInternal {
             return sb.toString();
 
         } finally {
-            bytes.release();
+            bytes.release(toDebugString);
         }
     }
 
@@ -1042,7 +1047,7 @@ enum BytesInternal {
             throws IllegalStateException {
 
         // the output will be no larger than this
-        final int size = MAX_STRING_LEN;
+        final int size = (int) Math.min(bytes.readRemaining() + 3, MAX_STRING_LEN);
         @NotNull final StringBuilder sb = new StringBuilder(size);
 
         if (bytes.readRemaining() > size) {
@@ -1050,9 +1055,10 @@ enum BytesInternal {
             try {
                 bytes1.readLimit(bytes1.readPosition() + size);
                 toString(bytes1, sb);
-                return sb.toString() + "...";
+                sb.append("...");
+                return sb.toString();
             } finally {
-                bytes1.release();
+                bytes1.releaseLast();
             }
         } else {
             toString(bytes, sb);
@@ -1100,7 +1106,8 @@ enum BytesInternal {
 
     private static void toString(@NotNull RandomDataInput bytes, @NotNull StringBuilder sb)
             throws IllegalStateException {
-        bytes.reserve();
+        ReferenceOwner toString = temporary("toString");
+        bytes.reserve(toString);
         assert bytes.start() <= bytes.readPosition();
         assert bytes.readPosition() <= bytes.readLimit();
         assert bytes.readLimit() <= bytes.realCapacity();
@@ -1109,11 +1116,13 @@ enum BytesInternal {
             for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
                 sb.append((char) bytes.readUnsignedByte(i));
             }
+
         } catch (BufferUnderflowException e) {
             sb.append(' ').append(e);
-        }
 
-        bytes.release();
+        } finally {
+            bytes.release(toString);
+        }
     }
 
     @ForceInline
@@ -2078,7 +2087,9 @@ enum BytesInternal {
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
 
-            return asDouble(value, exp, negative, decimalPlaces - tens);
+            decimalPlaces = decimalPlaces - tens;
+
+            return asDouble(value, exp, negative, decimalPlaces);
         } finally {
             ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
         }
@@ -2598,7 +2609,7 @@ enum BytesInternal {
         } catch (BufferUnderflowException | BufferOverflowException e) {
             throw new AssertionError(e);
         } finally {
-            in.release();
+            in.releaseLast();
         }
     }
 

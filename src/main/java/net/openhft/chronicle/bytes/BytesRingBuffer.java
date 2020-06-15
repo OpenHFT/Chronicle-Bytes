@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -26,9 +28,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 
-/**
- * @author Rob Austin.
- */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
 
@@ -113,7 +112,4 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     boolean isEmpty();
 
     BytesStore bytesStore();
-
-    @Override
-    void close();
 }

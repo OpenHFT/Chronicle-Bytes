@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -51,26 +53,15 @@ public class NativeBytesStore<Underlying>
         BB_ATT = Jvm.getField(directBB, "att");
     }
 
-    @Nullable
-    private final Throwable createdHere = Jvm.isDebug() ? new StackTrace("Created here") : null;
-    /*    static {
-            try {
-                last = MappedBytes.mappedBytes(new File("last"), 8);
-            } catch (FileNotFoundException e) {
-                throw new AssertionError(e);
-            }
-        }*/
     protected long address;
     // on release, set this to null.
     protected Memory memory = OS.memory();
-    protected volatile Throwable releasedHere;
     protected long maximumLimit;
     @Nullable
     private WeakReferenceCleaner cleaner;
     private boolean elastic;
     @Nullable
     private Underlying underlyingObject;
-    private final ReferenceCounter refCount = ReferenceCounter.onReleased(this::performRelease);
 
     private NativeBytesStore() {
     }
@@ -86,6 +77,12 @@ public class NativeBytesStore<Underlying>
 
     public NativeBytesStore(
             long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic) {
+        this(address, maximumLimit, deallocator, elastic, false);
+    }
+
+    protected NativeBytesStore(
+            long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
+        super(monitored);
         setAddress(address);
         this.maximumLimit = maximumLimit;
         this.cleaner = deallocator == null ? null : WeakReferenceCleaner.newCleaner(this, deallocator);
@@ -160,7 +157,9 @@ public class NativeBytesStore<Underlying>
     public static NativeBytesStore from(@NotNull byte[] bytes) {
         try {
             @NotNull NativeBytesStore nbs = nativeStore(bytes.length);
-            Bytes.wrapForRead(bytes).copyTo(nbs);
+            Bytes<byte[]> bytes2 = Bytes.wrapForRead(bytes);
+            bytes2.copyTo(nbs);
+            bytes2.releaseLast();
             return nbs;
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
@@ -294,42 +293,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public void reserve() throws IllegalStateException {
-        refCount.reserve();
-    }
-
-    @Override
-    public void release() throws IllegalStateException {
-        refCount.release();
-        if (Jvm.isDebug() && refCount.get() == 0)
-            releasedHere = new Error("Released here");
-    }
-
-    @Override
-    public long refCount() {
-        return refCount.get();
-    }
-
-    @Override
-    public boolean tryReserve() {
-        return refCount.tryReserve();
-    }
-
-    @Override
     @ForceInline
     public byte readByte(long offset) {
-        if (Jvm.isDebug()) checkReleased();
-
         return memory.readByte(address + translate(offset));
     }
 
     public int readUnsignedByte(long offset) throws BufferUnderflowException {
         return readByte(offset) & 0xFF;
-    }
-
-    public void checkReleased() {
-        if (releasedHere != null)
-            throw new InternalError("Accessing a released resource", releasedHere);
     }
 
     @Override
@@ -414,8 +384,13 @@ public class NativeBytesStore<Underlying>
     @Override
     @ForceInline
     public NativeBytesStore<Underlying> writeInt(long offset, int i32) {
-        memory.writeInt(address + translate(offset), i32);
-        return this;
+        try {
+            memory.writeInt(address + translate(offset), i32);
+            return this;
+        } catch (NullPointerException e) {
+            throwExceptionIfReleased();
+            throw e;
+        }
     }
 
     @NotNull
@@ -555,15 +530,9 @@ public class NativeBytesStore<Underlying>
         return addressForWrite(start());
     }
 
-    // this is synchronized to ensure that setting memory = null gets flushed
-    private synchronized void performRelease() {
+    @Override
+    protected void performRelease() {
         memory = null;
-        if (refCount.get() > 0) {
-            LOGGER.info("NativeBytesStore discarded without releasing ", createdHere);
-        }
-        if (releasedHere == null) {
-            assert (releasedHere = new StackTrace()) != null;
-        }
         if (cleaner != null) {
             cleaner.scheduleForClean();
         } else if (underlyingObject instanceof ByteBuffer) {

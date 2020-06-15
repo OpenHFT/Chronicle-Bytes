@@ -1,15 +1,15 @@
 package net.openhft.chronicle.bytes.readme;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.bytes.StopCharTesters;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class StringsTest {
+public class StringsTest extends BytesTestCommon {
     @Test
     public void testString() {
         assumeFalse(NativeBytes.areNewGuarded());
@@ -37,7 +37,7 @@ public class StringsTest {
         // assertSame(a, c); // uses a string pool
         assertSame(b, c); // uses a string pool
         assertSame(b, d); // uses a string pool
-        bytes.release();
+        bytes.releaseLast();
     }
 
     @Test
@@ -50,8 +50,8 @@ public class StringsTest {
 
         String a = bytes.read8bit();
         String b = bytes.readUtf8();
-        assertEquals(null, a);
-        assertEquals(null, b);
-        bytes.release();
+        assertNull(a);
+        assertNull(b);
+        bytes.releaseLast();
     }
 }

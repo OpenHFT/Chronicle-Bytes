@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class StreamingDataInputTest {
+public class StreamingDataInputTest extends BytesTestCommon {
     @Test
     public void read() {
         Bytes b = Bytes.allocateDirect(128);
@@ -13,6 +13,6 @@ public class StreamingDataInputTest {
         b.read(byteArr, 2, 6);
         assertEquals("AB012345IJKLMNOP", new String(byteArr, 0));
         assertEquals('6', b.readByte());
-        b.release();
+        b.releaseLast();
     }
 }

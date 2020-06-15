@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
@@ -40,11 +43,8 @@ import java.util.Random;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-/*
- * Created by peter.lawrey on 27/02/15.
- */
 @SuppressWarnings("rawtypes")
-public class NativeBytesStoreTest {
+public class NativeBytesStoreTest extends BytesTestCommon {
     volatile int bcs;
     private ThreadDump threadDump;
 
@@ -57,7 +57,7 @@ public class NativeBytesStoreTest {
 
     @After
     public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -101,9 +101,9 @@ public class NativeBytesStoreTest {
             System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
         }
 
-        bytes.release();
-        enc.release();
-        dec.release();
+        bytes.releaseLast();
+        enc.releaseLast();
+        dec.releaseLast();
     }
 
     @Test
@@ -162,7 +162,7 @@ public class NativeBytesStoreTest {
         assertNotNull(bb2);
         assertNotSame(bb, bb2);
 
-        bbb.release();
+        bbb.releaseLast();
     }
 
     @Test
@@ -224,7 +224,7 @@ public class NativeBytesStoreTest {
         dst.writePosition(src.copyTo(dst));
         assertEquals(src, dst);
 
-        src.release();
-        dst.release();
+        src.releaseLast();
+        dst.releaseLast();
     }
 }

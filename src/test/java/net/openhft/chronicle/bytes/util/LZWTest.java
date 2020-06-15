@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,6 +19,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -29,14 +32,9 @@ import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.util.Compressions.LZW;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-/*
- * Created by peter.lawrey on 09/12/2015.
- */
-public class LZWTest {
+public class LZWTest extends BytesTestCommon {
 
     private ThreadDump threadDump;
 
@@ -54,7 +52,7 @@ public class LZWTest {
     public void testCompress() throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
-        assertTrue(Arrays.equals(bytes, bytes2));
+        assertArrayEquals(bytes, bytes2);
     }
 
     @SuppressWarnings("rawtypes")
@@ -80,12 +78,15 @@ public class LZWTest {
 //        assertEquals(Arrays.toString(compress).replace(", ", "\n"),
 //                Arrays.toString(bytes4).replace(", ", "\n"));
         assertEquals(compress.length, bytes4.length);
-        assertTrue(Arrays.equals(compress, bytes4));
+        assertArrayEquals(compress, bytes4);
 
         @NotNull Bytes bytes6 = Bytes.allocateElasticDirect();
         LZW.uncompress(bytes3, bytes6);
-        assertTrue(Arrays.equals(bytes, bytes6.toByteArray()));
+        assertArrayEquals(bytes, bytes6.toByteArray());
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),
 //                Arrays.toString(bytes6.toByteArray()).replace(", ", "\n"));
+        bytes2.releaseLast();
+        bytes3.releaseLast();
+        bytes6.releaseLast();
     }
 }

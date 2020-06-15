@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +36,7 @@ import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class ByteStringParserTest {
+public class ByteStringParserTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = Bytes.elasticByteBuffer();
@@ -41,8 +44,8 @@ public class ByteStringParserTest {
 
     @After
     public void checkRegisteredBytes() {
-        bytes.release();
-        BytesUtil.checkRegisteredBytes();
+        bytes.releaseLast();
+        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Before
@@ -68,7 +71,7 @@ public class ByteStringParserTest {
         bytes2.append(expected);
         Assert.assertEquals(expected, bytes2.parseLong(0));
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes2));
-        bytes2.release();
+        bytes2.releaseLast();
 
     }
 

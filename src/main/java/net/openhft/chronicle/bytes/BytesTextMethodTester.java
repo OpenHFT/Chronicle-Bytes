@@ -5,9 +5,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.util.function.Function;
 
-/*
- * Created by Peter Lawrey on 17/05/2017.
- */
 @SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
     private final String input;
@@ -88,7 +85,7 @@ public class BytesTextMethodTester<T> {
                 if (bytes.readRemaining() > 1)
                     bytes2.comment("## End Of Message");
             }
-            bytes.release();
+            bytes.releaseLast();
             bytes2.comment("## End Of Block");
         }
         bytes2.comment("## End Of Test");
@@ -98,7 +95,7 @@ public class BytesTextMethodTester<T> {
             expected = afterRun.apply(expected);
             actual = afterRun.apply(actual);
         }
-        bytes2.release();
+        bytes2.releaseLast();
         return this;
     }
 

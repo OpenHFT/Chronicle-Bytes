@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -37,8 +39,9 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
-    private static final boolean BYTES_GUARDED = Boolean.getBoolean("bytes.guarded");
+public class NativeBytes<Underlying>
+        extends VanillaBytes<Underlying> {
+    private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean s_newGuarded = BYTES_GUARDED;
     private final long capacity;
 
@@ -98,7 +101,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
                 return NativeBytes.wrapWithNativeBytes(store);
 
             } finally {
-                store.release();
+                store.release(INIT);
             }
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
@@ -153,7 +156,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public void ensureCapacity(long size) throws IllegalArgumentException {
         try {
             assert size >= 0;
-            writeCheckOffset(size, 0L);
+            writeCheckOffset(writePosition(), size);
         } catch (BufferOverflowException e) {
             throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
         }
@@ -216,6 +219,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             } else {
                 store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
             }
+            store.reserveTransfer(INIT, this);
         } catch (IllegalArgumentException e) {
             BufferOverflowException boe = new BufferOverflowException();
             boe.initCause(e);
@@ -226,7 +230,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
         this.bytesStore.copyTo(store);
         this.bytesStore = store;
         try {
-            tempStore.release();
+            tempStore.release(this);
         } catch (IllegalStateException e) {
             Jvm.debug().on(getClass(), e);
         }
@@ -253,16 +257,14 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
     public Bytes<Underlying> write(byte[] bytes, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
         if (length > writeRemaining())
             throw new BufferOverflowException();
-        long position = writePosition();
-        ensureCapacity(position + length);
+        ensureCapacity(length);
         super.write(bytes, offset, length);
         return this;
     }
 
     @NotNull
     public Bytes<Underlying> write(BytesStore bytes, long offset, long length) throws BufferOverflowException, IllegalArgumentException, BufferUnderflowException {
-        long position = writePosition();
-        ensureCapacity(position + length);
+        ensureCapacity(length);
         super.write(bytes, offset, length);
         return this;
     }
@@ -275,8 +277,7 @@ public class NativeBytes<Underlying> extends VanillaBytes<Underlying> {
             if (length + writePosition() >= 1 << 20)
                 length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
             long offset = bytes.readPosition();
-            long position = writePosition();
-            ensureCapacity(position + length);
+            ensureCapacity(length);
             optimisedWrite(bytes, offset, length);
             if (length == bytes.readRemaining()) {
                 bytes.clear();

@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,9 +33,6 @@ import java.lang.reflect.Type;
 import java.util.*;
 import java.util.function.Supplier;
 
-/*
- * Created by Peter Lawrey on 19/04/2016.
- */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BytesMarshaller<T> {
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
@@ -243,7 +242,7 @@ public class BytesMarshaller<T> {
             long stopBit = read.readStopBit();
             if (stopBit == -1) {
                 if (bytes != null)
-                    bytes.release();
+                    bytes.releaseLast();
                 field.set(o, null);
                 return;
             }

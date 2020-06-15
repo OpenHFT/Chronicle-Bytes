@@ -1,5 +1,7 @@
 /*
- * Copyright 2016 higherfrequencytrading.com
+ * Copyright 2016-2020 Chronicle Software
+ *
+ * https://chronicle.software
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +18,18 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
 
-/*
- * Created by Peter Lawrey on 20/12/16.
- */
-public class BinaryIntReferenceTest {
+public class BinaryIntReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
+        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
         try (@NotNull BinaryIntReference ref = new BinaryIntReference()) {
-            @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(32);
             ref.bytesStore(nbs, 16, 4);
             assertEquals(0, ref.getValue());
             ref.addAtomicValue(1);
@@ -45,13 +45,13 @@ public class BinaryIntReferenceTest {
             assertEquals(0L, nbs.readLong(8));
             assertEquals(2, nbs.readInt(16));
             assertEquals(0L, nbs.readLong(20));
-    
+
             ref.setValue(10);
             assertEquals(10L, nbs.readInt(16));
             ref.setOrderedValue(20);
             Thread.yield();
             assertEquals(20L, nbs.readVolatileInt(16));
-            nbs.release();
         }
+        nbs.releaseLast();
     }
 }
