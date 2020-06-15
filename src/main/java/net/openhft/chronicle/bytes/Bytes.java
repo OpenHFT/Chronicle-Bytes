@@ -123,6 +123,11 @@ public interface Bytes<Underlying> extends
         }
     }
 
+    @NotNull
+    static Bytes<ByteBuffer> elasticHeapByteBuffer() {
+        return elasticHeapByteBuffer(128);
+    }
+
     /**
      * Wrap the ByteBuffer ready for reading
      * Method for convenience only - might not be ideal for performance (creates garbage).
