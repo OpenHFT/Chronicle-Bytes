@@ -264,7 +264,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     public MappedFile mappedFile() {
-        throwExceptionIfClosed();
         return mappedFile;
     }
 
@@ -275,7 +274,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public long capacity() {
-        throwExceptionIfClosed();
         return mappedFile == null ? 0L : mappedFile.capacity();
     }
 
