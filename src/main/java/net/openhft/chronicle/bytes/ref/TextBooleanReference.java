@@ -47,11 +47,13 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
 
     @Override
     public boolean getValue() {
+        throwExceptionIfClosed();
         return bytes.readVolatileInt(offset) == TRUE;
     }
 
     @Override
     public void setValue(final boolean value) {
+        throwExceptionIfClosed();
         write(value, bytes, offset);
     }
 }

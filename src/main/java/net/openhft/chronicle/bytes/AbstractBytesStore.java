@@ -59,4 +59,9 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Un
     public long start() {
         return 0L;
     }
+
+    @Override
+    protected boolean performReleaseInBackground() {
+        return isDirectMemory();
+    }
 }

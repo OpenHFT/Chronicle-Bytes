@@ -66,6 +66,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     }
 
     public boolean readOne() {
+        throwExceptionIfClosed();
         if (in.readRemaining() < 1)
             return false;
         long messageId = in.readStopBit();

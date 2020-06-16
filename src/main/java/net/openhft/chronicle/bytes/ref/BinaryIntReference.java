@@ -32,6 +32,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+        throwExceptionIfClosed();
         if (length != maxSize())
             throw new IllegalArgumentException();
         super.bytesStore(bytes, offset, length);
@@ -49,36 +50,43 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @Override
     public int getValue() {
+        throwExceptionIfClosed();
         return bytes == null ? 0 : bytes.readInt(offset);
     }
 
     @Override
     public void setValue(int value) {
+        throwExceptionIfClosed();
         bytes.writeInt(offset, value);
     }
 
     @Override
     public int getVolatileValue() {
+        throwExceptionIfClosed();
         return bytes.readVolatileInt(offset);
     }
 
     @Override
     public void setOrderedValue(int value) {
+        throwExceptionIfClosed();
         bytes.writeOrderedInt(offset, value);
     }
 
     @Override
     public int addValue(int delta) {
+        throwExceptionIfClosed();
         return bytes.addAndGetInt(offset, delta);
     }
 
     @Override
     public int addAtomicValue(int delta) {
+        throwExceptionIfClosed();
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(int expected, int value) {
+        throwExceptionIfClosed();
         return bytes.compareAndSwapInt(offset, expected, value);
     }
 }

@@ -75,6 +75,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getUsed() {
+        throwExceptionIfClosed();
         return bytes.parseLong(USED + offset);
     }
 
@@ -84,6 +85,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public void setMaxUsed(long usedAtLeast) {
+        throwExceptionIfClosed();
         while (true) {
             if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                 continue;
@@ -100,11 +102,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getCapacity() {
+        throwExceptionIfClosed();
         return (length - VALUES) / VALUE_SIZE;
     }
 
     @Override
     public ByteableLongArrayValues capacity(long arrayLength) {
+        throwExceptionIfClosed();
         BytesStore bytesStore = bytesStore();
         long length = sizeInBytes(arrayLength);
         if (bytesStore == null) {
@@ -117,11 +121,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getValueAt(long index) {
+        throwExceptionIfClosed();
         return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
     }
 
     @Override
     public void setValueAt(long index, long value) {
+        throwExceptionIfClosed();
         bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
     }
 
@@ -132,18 +138,21 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getVolatileValueAt(long index) {
+        throwExceptionIfClosed();
         OS.memory().loadFence();
         return getValueAt(index);
     }
 
     @Override
     public void setOrderedValueAt(long index, long value) {
+        throwExceptionIfClosed();
         setValueAt(index, value);
         OS.memory().storeFence();
     }
 
     @Override
     public boolean compareAndSet(long index, long expected, long value) {
+        throwExceptionIfClosed();
         if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
             return false;
         boolean ret = false;
@@ -160,6 +169,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
+        throwExceptionIfClosed();
         if (length != peakLength(bytes, offset))
             throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
         super.bytesStore(bytes, offset, length);
@@ -168,11 +178,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public boolean isNull() {
+        throwExceptionIfClosed();
         return bytes == null;
     }
 
     @Override
     public void reset() {
+        throwExceptionIfClosed();
         bytes = null;
         offset = 0;
         length = 0;
@@ -198,6 +210,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long sizeInBytes(long capacity) {
+        throwExceptionIfClosed();
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 }
