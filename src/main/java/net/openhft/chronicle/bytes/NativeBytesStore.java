@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.WeakReferenceCleaner;
+import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -58,15 +58,18 @@ public class NativeBytesStore<Underlying>
     protected Memory memory = OS.memory();
     protected long maximumLimit;
     @Nullable
-    private WeakReferenceCleaner cleaner;
+    private SimpleCleaner cleaner;
     private boolean elastic;
     @Nullable
     private Underlying underlyingObject;
+    private final Finalizer finalizer;
 
     private NativeBytesStore() {
+        finalizer = null;
     }
 
     private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
+        this();
         init(bb, elastic);
     }
 
@@ -85,9 +88,13 @@ public class NativeBytesStore<Underlying>
         super(monitored);
         setAddress(address);
         this.maximumLimit = maximumLimit;
-        this.cleaner = deallocator == null ? null : WeakReferenceCleaner.newCleaner(this, deallocator);
+        this.cleaner = deallocator == null ? null : new SimpleCleaner(deallocator);
         underlyingObject = null;
         this.elastic = elastic;
+        if (cleaner == null)
+            finalizer = null;
+        else
+            finalizer = new Finalizer();
     }
 
     @NotNull
@@ -534,9 +541,12 @@ public class NativeBytesStore<Underlying>
     protected void performRelease() {
         memory = null;
         if (cleaner != null) {
-            cleaner.scheduleForClean();
+            cleaner.clean();
+
         } else if (underlyingObject instanceof ByteBuffer) {
-            CLEANER_SERVICE.clean((ByteBuffer) underlyingObject);
+            ByteBuffer underlyingObject = (ByteBuffer) this.underlyingObject;
+            if (underlyingObject.isDirect())
+                CLEANER_SERVICE.clean(underlyingObject);
         }
     }
 
@@ -819,4 +829,11 @@ public class NativeBytesStore<Underlying>
         }
     }
 
+    private class Finalizer {
+        @Override
+        protected void finalize() throws Throwable {
+            super.finalize();
+            warnAndReleaseIfNotReleased();
+        }
+    }
 }
