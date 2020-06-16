@@ -409,7 +409,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private synchronized void acquireNextByteStore0(final long offset, final boolean set) {
         @Nullable final BytesStore oldBS = this.bytesStore;
         try {
-            @Nullable final BytesStore newBS = mappedFile.acquireByteStore(this, offset, oldBS);
+            @NotNull final BytesStore newBS = mappedFile.acquireByteStore(this, offset, oldBS);
             if (newBS != oldBS) {
                 this.bytesStore = newBS;
                 oldBS.release(this);

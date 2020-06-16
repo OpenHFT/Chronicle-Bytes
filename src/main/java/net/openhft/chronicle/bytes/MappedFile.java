@@ -65,7 +65,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     private final FileChannel fileChannel;
     private final long chunkSize;
     private final long overlapSize;
-    private final List<WeakReference<MappedBytesStore>> stores = new ArrayList<>();
+    private final List<MappedBytesStore> stores = new ArrayList<>();
     private final long capacity;
     @NotNull
     private final File file;
@@ -249,8 +249,10 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                                 @NotNull final MappedFile mappedFile) throws IOException {
         ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
         for (int i = 0; i < chunks; i++) {
-            mappedFile.acquireBytesForRead(warmup, i * mapAlignment).release(warmup);
-            mappedFile.acquireBytesForWrite(warmup, i * mapAlignment).release(warmup);
+            mappedFile.acquireBytesForRead(warmup, i * mapAlignment)
+                    .release(warmup);
+            mappedFile.acquireBytesForWrite(warmup, i * mapAlignment)
+                    .release(warmup);
         }
     }
 
@@ -326,22 +328,19 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         final int chunk = (int) (position / chunkSize);
         Jvm.safepoint();
 
-        final WeakReference<MappedBytesStore> mbsRef;
+        final MappedBytesStore mbs;
         synchronized (stores) {
             while (stores.size() <= chunk)
                 stores.add(null);
-            mbsRef = stores.get(chunk);
+            mbs = stores.get(chunk);
         }
-        if (mbsRef != null) {
-            final MappedBytesStore mbs = mbsRef.get();
-            if (mbs != null) {
-                // don't reserve it again if we are already holding it.
-                if (mbs == oldByteStore) {
-                    return mbs;
-                }
-                if (mbs.tryReserve(owner)) {
-                    return mbs;
-                }
+        if (mbs != null) {
+            // don't reserve it again if we are already holding it.
+            if (mbs == oldByteStore) {
+                return mbs;
+            }
+            if (mbs.tryReserve(owner)) {
+                return mbs;
             }
         }
 
@@ -355,12 +354,9 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             // update our view on previous existence (we might have been stalled
             // for a long time since we last checked dues to resizing and another
             // thread might have added a MappedByteStore (very unlikely but still possible))
-            final WeakReference<MappedBytesStore> mbsRef2 = stores.get(chunk);
-            if (mbsRef2 != null) {
-                final MappedBytesStore mbs = mbsRef2.get();
-                if (mbs != null && mbs.tryReserve(owner)) {
-                    return mbs;
-                }
+            final MappedBytesStore mbs1 = stores.get(chunk);
+            if (mbs1 != null && mbs1.tryReserve(owner)) {
+                return mbs1;
             }
             // *** THIS CAN TAKE A LONG TIME IF A RESIZE HAS TO OCCUR ***
             // let double check it to make sure no other thread change it in the meantime.
@@ -375,7 +371,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final MappedBytesStore mbs2 = mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
             mbs2.reserve(this);
-            stores.set(chunk, new WeakReference<>(mbs2));
+            stores.set(chunk, mbs2);
 
             final long elapsedNs = System.nanoTime() - beginNs;
             if (newChunkListener != null)
@@ -492,21 +488,16 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     protected void performRelease() {
-
         try {
             synchronized (stores) {
                 for (int i = 0; i < stores.size(); i++) {
-                    final WeakReference<MappedBytesStore> storeRef = stores.get(i);
-                    if (storeRef == null)
-                        continue;
-                    @Nullable final MappedBytesStore mbs = storeRef.get();
+                    final MappedBytesStore mbs = stores.get(i);
                     if (mbs != null) {
                         // this MappedFile is the only referrer to the MappedBytesStore at this point,
                         // so ensure that it is released
                         mbs.release(this);
                     }
                     // Dereference released entities
-                    storeRef.clear();
                     stores.set(i, null);
                 }
             }
@@ -521,13 +512,10 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public String referenceCounts() {
         @NotNull final StringBuilder sb = new StringBuilder();
         sb.append("refCount: ").append(refCount());
-        for (@Nullable final WeakReference<MappedBytesStore> store : stores) {
+        for (@Nullable final MappedBytesStore mbs : stores) {
             long count = 0;
-            if (store != null) {
-                @Nullable final MappedBytesStore mbs = store.get();
-                if (mbs != null)
-                    count = mbs.refCount();
-            }
+            if (mbs != null)
+                count = mbs.refCount();
             sb.append(", ").append(count);
         }
         return sb.toString();
@@ -594,6 +582,12 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         super.finalize();
     }
 
+    @Override
+    protected boolean threadSafetyCheck() {
+        // component is thread safe
+        return true;
+    }
+
     private static final class NamedObject {
         private final String name;
 
@@ -607,11 +601,5 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                     "name='" + name + '\'' +
                     '}';
         }
-    }
-
-    @Override
-    protected boolean threadSafetyCheck() {
-        // component is thread safe
-        return true;
     }
 }
