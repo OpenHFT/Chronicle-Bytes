@@ -125,4 +125,9 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
     protected void performClose() {
         this.bytes.release(this);
     }
+
+    @Override
+    protected boolean threadSafetyCheck() {
+        return true;
+    }
 }
