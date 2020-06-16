@@ -136,6 +136,7 @@ public class MappedFileTest extends BytesTestCommon {
             bytes.releaseLast();
             assertEquals(2, bs2.refCount());
             assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
+            bs.release(test);
         }
     }
 
