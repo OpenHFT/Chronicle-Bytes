@@ -54,7 +54,7 @@ public enum BytesUtil {
 
     public static Bytes readFile(@NotNull String name) throws IOException {
         if (name.startsWith("=")) {
-            return Bytes.fromString(name.substring(1));
+            return Bytes.from(name.substring(1));
         }
         File file = new File(name);
         URL url = null;
