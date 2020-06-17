@@ -48,7 +48,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MappedBytes.class);
     private static final boolean ENFORCE_SINGLE_THREADED_ACCESS = Jvm.getBoolean("chronicle.bytes.enforceSingleThreadedAccess");
-    private static final boolean TRACE = Boolean.getBoolean("trace.mapped.bytes");
+    private static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
 
     @NotNull
     private final MappedFile mappedFile;
