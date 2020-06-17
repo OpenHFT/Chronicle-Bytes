@@ -109,6 +109,17 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     }
 
     @Override
+    public long getVolatileValue(long closedValue) {
+        if (isClosed())
+            return closedValue;
+        try {
+            return getVolatileValue();
+        } catch (Exception e) {
+            return closedValue;
+        }
+    }
+
+    @Override
     public void setVolatileValue(long value) {
         throwExceptionIfClosed();
         setValue(value);

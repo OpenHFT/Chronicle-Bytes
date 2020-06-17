@@ -92,6 +92,17 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
     }
 
     @Override
+    public long getVolatileValue(long closedValue) {
+        if (isClosed())
+            return closedValue;
+        try {
+            return getVolatileValue();
+        } catch (Exception e) {
+            return closedValue;
+        }
+    }
+
+    @Override
     public void setVolatileValue(long value) {
         throwExceptionIfClosed();
         unsafe.putLongVolatile(null, address, value);
@@ -123,6 +134,7 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
 
     @Override
     protected void performClose() {
+        unsafe = null;
         this.bytes.release(this);
     }
 
