@@ -249,7 +249,7 @@ public class BytesMarshaller<T> {
             int length = Maths.toUInt31(stopBit);
             @NotNull Bytes bs;
             if (bytes == null) {
-                bs = Bytes.elasticHeapByteBuffer(length);
+                bs = Bytes.allocateElasticOnHeap(length);
                 field.set(o, bs);
             } else {
                 bs = bytes;

@@ -15,7 +15,7 @@ public class ByteCheckSumTest extends BytesTestCommon {
 
     @Test
     public void testHeap() {
-        Bytes bytes = Bytes.elasticHeapByteBuffer(32);
+        Bytes bytes = Bytes.allocateElasticOnHeap(32);
         doTest(bytes);
         bytes.releaseLast();
     }

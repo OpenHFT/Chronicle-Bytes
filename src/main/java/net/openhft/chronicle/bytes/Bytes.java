@@ -450,6 +450,21 @@ public interface Bytes<Underlying> extends
         return NativeBytes.nativeBytes(initialCapacity);
     }
 
+    @NotNull
+    static OnHeapBytes allocateElasticOnHeap() {
+        return allocateElasticOnHeap(32);
+    }
+
+    @NotNull
+    static OnHeapBytes allocateElasticOnHeap(int initialCapacity) {
+        HeapBytesStore<byte[]> wrap = HeapBytesStore.wrap(new byte[initialCapacity]);
+        try {
+            return new OnHeapBytes(wrap, true);
+        } finally {
+            wrap.release(INIT);
+        }
+    }
+
     /**
      * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
      * by this call
@@ -791,7 +806,7 @@ public interface Bytes<Underlying> extends
         if (wp < fromOffset)
             return;
 
-        write(fromOffset, this, fromOffset + count, wp - fromOffset);
+        write(fromOffset, this, fromOffset + count, wp - fromOffset - count);
         writeSkip(-count);
     }
 

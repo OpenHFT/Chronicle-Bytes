@@ -365,7 +365,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testWritingDecimalVsJava() {
-        Bytes bytes = Bytes.elasticHeapByteBuffer(32);
+        Bytes bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
         bytes.append(d);
