@@ -487,6 +487,12 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         bytes.writePosition(position);
     }
 
+    @Override
+    protected boolean performReleaseInBackground() {
+        // don't perform the close in the background as that just sets a flag. This does the real work.
+        return true;
+    }
+
     protected void performRelease() {
         try {
             synchronized (stores) {
@@ -602,4 +608,5 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                     '}';
         }
     }
+
 }
