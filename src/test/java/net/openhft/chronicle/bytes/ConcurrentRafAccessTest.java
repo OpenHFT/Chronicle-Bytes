@@ -60,7 +60,6 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                         fail("unable to create file for " + i);
                         return null;
                     }
-
                 })
                 .collect(Collectors.toList());
     }
@@ -154,7 +153,6 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
             final long elapsedNs = System.nanoTime() - beginNs;
             System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
         }
-
     }
 
     private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc) throws IOException {

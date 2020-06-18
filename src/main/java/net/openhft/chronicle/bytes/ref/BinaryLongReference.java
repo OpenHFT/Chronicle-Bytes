@@ -61,8 +61,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
             throw e;
         }
-
-    }
+ }
 
     @Override
     public long getVolatileValue() {
@@ -84,7 +83,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
             throw e;
         }
-
     }
 
     @Override
@@ -107,7 +105,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
             throw e;
         }
-
     }
 
     @Override

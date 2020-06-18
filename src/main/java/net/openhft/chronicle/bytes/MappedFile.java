@@ -383,8 +383,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
             return mbs2;
         }
-
-    }
+ }
 
     private void resizeRafIfTooSmall(final int chunk) throws IOException {
         Jvm.safepoint();
@@ -516,7 +515,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             closeQuietly(raf);
             setClosed();
         }
-
     }
 
     @NotNull
