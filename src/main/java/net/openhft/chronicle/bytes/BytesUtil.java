@@ -74,18 +74,17 @@ public enum BytesUtil {
         }
     }
 
-
-    public static boolean bytesEqual(
-            @NotNull RandomDataInput a, long offset,
-            @NotNull RandomDataInput second, long secondOffset, long len)
-            throws BufferUnderflowException {
-        long i = 0;
-        while (len - i >= 8L) {
-            if (a.readLong(offset + i) != second.readLong(secondOffset + i))
-                return false;
-            i += 8L;
-        }
-        if (len - i >= 4L) {
+public static boolean bytesEqual(
+        @NotNull RandomDataInput a, long offset,
+        @NotNull RandomDataInput second, long secondOffset, long len)
+        throws BufferUnderflowException {
+    long i = 0;
+    while (len - i >= 8L) {
+        if (a.readLong(offset + i) != second.readLong(secondOffset + i))
+            return false;
+        i += 8L;
+    }
+    if (len - i >= 4L) {
             if (a.readInt(offset + i) != second.readInt(secondOffset + i))
                 return false;
             i += 4L;

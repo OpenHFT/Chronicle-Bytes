@@ -41,6 +41,7 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
         throwExceptionIfClosed();
+
         if (length != maxSize()) throw new IllegalArgumentException();
         address = bytes.addressForRead(offset);
         if (this.bytes != bytes) {
@@ -76,18 +77,21 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
     @Override
     public long getValue() {
         throwExceptionIfClosed();
+
         return unsafe.getLong(address);
     }
 
     @Override
     public void setValue(long value) {
         throwExceptionIfClosed();
+
         unsafe.putLong(address, value);
     }
 
     @Override
     public long getVolatileValue() {
         throwExceptionIfClosed();
+
         return unsafe.getLongVolatile(null, address);
     }
 
@@ -105,30 +109,35 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
     @Override
     public void setVolatileValue(long value) {
         throwExceptionIfClosed();
+
         unsafe.putLongVolatile(null, address, value);
     }
 
     @Override
     public void setOrderedValue(long value) {
         throwExceptionIfClosed();
+
         unsafe.putOrderedLong(null, address, value);
     }
 
     @Override
     public long addValue(long delta) {
         throwExceptionIfClosed();
+
         return unsafe.getAndAddLong(null, address, delta) + delta;
     }
 
     @Override
     public long addAtomicValue(long delta) {
         throwExceptionIfClosed();
+
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
         throwExceptionIfClosed();
+
         return unsafe.compareAndSwapLong(null, address, expected, value);
     }
 

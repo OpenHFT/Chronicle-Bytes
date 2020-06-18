@@ -28,7 +28,6 @@ import static org.junit.Assert.fail;
     Parallel      3.5         15              51
 */
 
-
 @Ignore("This is a performance test and should not be run as a part of the normal build")
 public class ConcurrentRafAccessTest extends BytesTestCommon {
 
@@ -81,8 +80,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         System.out.println("testParallel2: " + summaryStatistics);
     }
 
-
-    @Test
+@Test
     public void testSequential() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential " + i, Executors.newSingleThreadExecutor()))
@@ -114,7 +112,6 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 
     }
 
-
     private long test(final String name, final ExecutorService executor) {
         final long beginNs = System.nanoTime();
 
@@ -130,7 +127,6 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
         return elapsedNs;
     }
-
 
     private static final class Worker implements Runnable {
 

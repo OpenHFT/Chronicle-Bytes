@@ -95,8 +95,7 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-
-    @Test
+@Test
     public void writeAdv() {
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
@@ -223,7 +222,6 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void internRegressionTest() throws IORuntimeException {
         UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
@@ -253,7 +251,6 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void testStopBitDouble() throws IORuntimeException {
         Bytes b = alloc1.elasticBytes(1);
@@ -278,7 +275,6 @@ public class BytesTest extends BytesTestCommon {
         b.writeStopBit(v);
         assertEquals(s, b.toHexString().toUpperCase());
     }
-
 
     @Test
     public void testParseUtf8() {
@@ -448,7 +444,6 @@ public class BytesTest extends BytesTestCommon {
             bytes.releaseLast();
         }
     }
-
 
     @Test
     public void testParseUtf8High() {

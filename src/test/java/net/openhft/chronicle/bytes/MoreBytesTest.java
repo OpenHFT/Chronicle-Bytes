@@ -294,8 +294,7 @@ public class MoreBytesTest {
         }
     }
 
-
-    @Test
+@Test
     public void testReadWithLength() {
         Bytes b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();

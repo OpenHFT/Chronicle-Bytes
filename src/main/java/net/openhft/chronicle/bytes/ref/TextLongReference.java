@@ -72,6 +72,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         throwExceptionIfClosed();
+
         if (length != template.length)
             throw new IllegalArgumentException();
 
@@ -90,12 +91,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public long getValue() {
         throwExceptionIfClosed();
+
         return withLock(() -> bytes.parseLong(offset + VALUE));
     }
 
     @Override
     public void setValue(long value) {
         throwExceptionIfClosed();
+
         withLock(() -> {
             bytes.append(offset + VALUE, value, DIGITS);
             return LONG_TRUE;
@@ -105,6 +108,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public long getVolatileValue() {
         throwExceptionIfClosed();
+
         return getValue();
     }
 
@@ -122,18 +126,21 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public void setVolatileValue(long value) {
         throwExceptionIfClosed();
+
         setValue(value);
     }
 
     @Override
     public long maxSize() {
         throwExceptionIfClosed();
+
         return template.length;
     }
 
     @Override
     public void setOrderedValue(long value) {
         throwExceptionIfClosed();
+
         setValue(value);
     }
 
@@ -145,6 +152,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public long addValue(long delta) {
         throwExceptionIfClosed();
+
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
             bytes.append(offset + VALUE, value, DIGITS);
@@ -155,12 +163,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     @Override
     public long addAtomicValue(long delta) {
         throwExceptionIfClosed();
+
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
         throwExceptionIfClosed();
+
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
                 bytes.append(offset + VALUE, value, DIGITS);

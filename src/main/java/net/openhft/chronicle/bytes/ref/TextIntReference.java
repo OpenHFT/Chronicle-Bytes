@@ -76,12 +76,14 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @Override
     public int getValue() {
         throwExceptionIfClosed();
+
         return withLock(() -> (int) bytes.parseLong(offset + VALUE));
     }
 
     @Override
     public void setValue(int value) {
         throwExceptionIfClosed();
+
         withLock(() -> {
             bytes.append(offset + VALUE, value, DIGITS);
             return INT_TRUE;
@@ -91,18 +93,21 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @Override
     public int getVolatileValue() {
         throwExceptionIfClosed();
+
         return getValue();
     }
 
     @Override
     public void setOrderedValue(int value) {
         throwExceptionIfClosed();
+
         setValue(value);
     }
 
     @Override
     public int addValue(int delta) {
         throwExceptionIfClosed();
+
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
             bytes.append(offset + VALUE, value, DIGITS);
@@ -113,12 +118,14 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @Override
     public int addAtomicValue(int delta) {
         throwExceptionIfClosed();
+
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(int expected, int value) {
         throwExceptionIfClosed();
+
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
                 bytes.append(offset + VALUE, value, DIGITS);
@@ -132,6 +139,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
         throwExceptionIfClosed();
+
         if (length != template.length)
             throw new IllegalArgumentException(length + " != " + template.length);
 
@@ -150,6 +158,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @Override
     public long maxSize() {
         throwExceptionIfClosed();
+
         return template.length;
     }
 

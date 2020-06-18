@@ -606,18 +606,17 @@ public class BytesMarshaller<T> {
         }
     }
 
+static class LongFieldAccess extends FieldAccess {
+    public LongFieldAccess(Field field) {
+        super(field);
+    }
 
-    static class LongFieldAccess extends FieldAccess {
-        public LongFieldAccess(Field field) {
-            super(field);
-        }
+    @Override
+    protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+        write.writeLong(field.getLong(o));
+    }
 
-        @Override
-        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
-            write.writeLong(field.getLong(o));
-        }
-
-        @Override
+    @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setLong(o, read.readLong());
         }
