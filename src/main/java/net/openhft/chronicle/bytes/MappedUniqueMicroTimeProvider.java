@@ -43,8 +43,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
 
     MappedUniqueMicroTimeProvider() {
         try {
-            String user = System.getProperty("user.name");
-            if (user == null) user = "unknown";
+            String user = System.getProperty("user.name", "unknown");
             file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
             AbstractCloseable.unmonitor(file);
             AbstractReferenceCounted.unmonitor(file);
