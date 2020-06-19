@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
@@ -75,6 +76,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
                 time = time0 + 1;
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
                 return time;
+            Jvm.nanoPause();
         }
     }
 
@@ -90,6 +92,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
             }
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
                 return time;
+            Jvm.nanoPause();
         }
     }
 }
