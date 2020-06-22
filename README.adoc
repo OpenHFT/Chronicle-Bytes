@@ -82,26 +82,26 @@ ByteBuffer bb = bytes.underlyingObject();
 ----
 
 .Bytes which wraps a direct ByteBuffer
-[source, Java]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
 ByteBuffer bb = bytes.underlyingObject();
 ----
 
 .Bytes which wraps some native memory
-[source, Java]
+[source,Java]
 ----
 Bytes bytes = Bytes.allocateElasticDirect(64);
 long address = bytes.address
-bytes.release(); // when it can be freed.
+bytes.releaseLast(); // when it can be freed.
 ----
 
 .Bytes which will wrap some native memory when used
-[source, Java]
+[source,Java]
 ----
 Bytes bytes = Bytes.allocateElasticDirect();
 // use the bytes
-bytes.release(); // when it can be freed.
+bytes.releaseLast(); // when it can be freed.
 ----
 
 === Flipping Bytes

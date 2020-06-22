@@ -150,7 +150,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                 continue;
             @Nullable MappedBytesStore mbs = storeRef.get();
             if (mbs != null && mbs.refCount() > 0) {
-                mbs.release();
+                mbs.releaseLast();
                 throwable.printStackTrace();
                 count[0]++;
             }
