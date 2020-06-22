@@ -178,6 +178,7 @@ public class NativeBytes<Underlying>
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
             throws BufferOverflowException {
+        throwExceptionIfReleased();
         if (endOfBuffer < 0)
             throw new BufferOverflowException();
         if (endOfBuffer > capacity())
@@ -226,6 +227,7 @@ public class NativeBytes<Underlying>
             throw boe;
         }
 
+        throwExceptionIfReleased();
         @Nullable BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         this.bytesStore = store;
