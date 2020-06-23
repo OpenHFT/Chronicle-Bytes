@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -90,9 +91,7 @@ public class MappedFileTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void testReferenceCounts() throws IOException {
-        new File(OS.TARGET).mkdir();
-        @NotNull File tmp = new File(OS.TARGET, "testReferenceCounts-" + System.nanoTime() + ".bin");
-        tmp.deleteOnExit();
+        @NotNull File tmp = IOTools.createTempFile("testReferenceCounts");
         int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
@@ -159,8 +158,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void interrupted() throws FileNotFoundException {
         Thread.currentThread().interrupt();
-        String filename = OS.TARGET + "/interrupted-" + System.nanoTime();
-        new File(filename).deleteOnExit();
+        String filename = IOTools.createTempFile("interrupted").getAbsolutePath();
         try (MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0)) {
             mf.actualSize();
             assertTrue(Thread.currentThread().isInterrupted());
@@ -169,8 +167,7 @@ public class MappedFileTest extends BytesTestCommon {
 
     @Test
     public void testCreateMappedFile() throws IOException {
-        File file = File.createTempFile("mappedFile", "");
-        file.deleteOnExit();
+        File file = IOTools.createTempFile("mappedFile");
 
         MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
         MappedFile mappedFile2 = MappedFile.mappedFile(file, 1024, 256, 256, false);

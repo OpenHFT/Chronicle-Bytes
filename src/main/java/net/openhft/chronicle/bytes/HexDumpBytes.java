@@ -45,8 +45,8 @@ public class HexDumpBytes
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
 
     private final NativeBytes<Void> base = Bytes.allocateElasticDirect(128);
-    private final Bytes<ByteBuffer> text = Bytes.elasticHeapByteBuffer(512);
-    private final Bytes<ByteBuffer> comment = Bytes.elasticHeapByteBuffer(64);
+    private final Bytes<byte[]> text = Bytes.allocateElasticOnHeap(512);
+    private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
     private int indent = 0;

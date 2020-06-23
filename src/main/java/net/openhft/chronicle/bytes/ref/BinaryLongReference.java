@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -31,6 +30,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
         throwExceptionIfClosed();
+
         if (length != maxSize())
             throw new IllegalArgumentException();
 
@@ -49,55 +49,88 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @Override
     public long getValue() {
-        throwExceptionIfClosed();
         return bytes == null ? 0L : bytes.readLong(offset);
     }
 
     @Override
     public void setValue(long value) {
-        throwExceptionIfClosed();
-        bytes.writeLong(offset, value);
-    }
+        try {
+            bytes.writeLong(offset, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+
+            throw e;
+        }
+ }
 
     @Override
     public long getVolatileValue() {
-        throwExceptionIfClosed();
         try {
             return bytes.readVolatileLong(offset);
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
 
-            throw Jvm.rethrow(e);
+            throw e;
         }
     }
 
     @Override
     public void setVolatileValue(long value) {
-        throwExceptionIfClosed();
-        bytes.writeVolatileLong(offset, value);
+        try {
+            bytes.writeVolatileLong(offset, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+
+            throw e;
+        }
+    }
+
+    @Override
+    public long getVolatileValue(long closedValue) {
+        if (isClosed())
+            return closedValue;
+        try {
+            return getVolatileValue();
+        } catch (Exception e) {
+            return closedValue;
+        }
     }
 
     @Override
     public void setOrderedValue(long value) {
-        throwExceptionIfClosed();
-        bytes.writeOrderedLong(offset, value);
+        try {
+            bytes.writeOrderedLong(offset, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+
+            throw e;
+        }
     }
 
     @Override
     public long addValue(long delta) {
-        throwExceptionIfClosed();
-        return bytes.addAndGetLong(offset, delta);
+        try {
+            return bytes.addAndGetLong(offset, delta);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+
+            throw e;
+        }
     }
 
     @Override
     public long addAtomicValue(long delta) {
-        throwExceptionIfClosed();
         return addValue(delta);
     }
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
-        throwExceptionIfClosed();
-        BytesStore bytes = this.bytes;
-        return bytes != null && bytes.compareAndSwapLong(offset, expected, value);
+        try {
+            return bytes.compareAndSwapLong(offset, expected, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+
+            throw e;
+        }
     }
 }

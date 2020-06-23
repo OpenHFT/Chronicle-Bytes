@@ -109,7 +109,7 @@ public class Issue85Test extends BytesTestCommon {
     public void loseTrainingZeros() {
         double d = -541098.2421;
         Assert.assertEquals("" + d,
-                Bytes.elasticHeapByteBuffer(64)
+                ((Bytes<byte[]>) Bytes.allocateElasticOnHeap(64))
                         .append(d)
                         .toString());
 

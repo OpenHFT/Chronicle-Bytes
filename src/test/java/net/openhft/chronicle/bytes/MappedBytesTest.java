@@ -361,7 +361,7 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void interrupted() throws FileNotFoundException {
         Thread.currentThread().interrupt();
-        File file = new File(OS.TARGET + "/interrupted-" + System.nanoTime());
+        File file = IOTools.createTempFile("interrupted");
         file.deleteOnExit();
         MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10);
         try {
@@ -379,8 +379,8 @@ public class MappedBytesTest extends BytesTestCommon {
 
     @Test
     public void multiBytes() throws FileNotFoundException {
-        String tmpfile = OS.TMP + "/data.dat";
-        try (MappedFile mappedFile = MappedFile.mappedFile(new File(tmpfile), 64 << 10);
+        File tmpfile = IOTools.createTempFile("data.dat");
+        try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 10);
              MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
             original.zeroOut(0, 1000);
 
@@ -406,7 +406,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     @Test
     public void memoryOverlapRegions() throws FileNotFoundException {
-        String tmpfile = OS.TARGET + "/memoryOverlapRegions-" + System.nanoTime();
+        String tmpfile = IOTools.createTempFile("memoryOverlapRegions").getAbsolutePath();
         int chunkSize = 256 << 16;
         int overlapSize = 64 << 16;
         String longString = new String(new char[overlapSize * 2]);
@@ -436,7 +436,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     @Test
     public void threadSafeMappedBytes() throws FileNotFoundException {
-        String tmpfile = OS.TARGET + "/threadSafeMappedBytes-" + System.nanoTime();
+        String tmpfile = IOTools.createTempFile("threadSafeMappedBytes").getAbsolutePath();
         int count = 4000;
         IntStream.range(0, count)
                 .parallel()

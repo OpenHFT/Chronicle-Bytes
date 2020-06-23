@@ -14,7 +14,7 @@ public class ReadLenientTest extends BytesTestCommon {
     public void testLenient() {
         assumeFalse(NativeBytes.areNewGuarded());
         doTest(Bytes.allocateDirect(64));
-        doTest(Bytes.elasticHeapByteBuffer(64));
+        doTest(Bytes.allocateElasticOnHeap(64));
         doTest(Bytes.from(""));
     }
 

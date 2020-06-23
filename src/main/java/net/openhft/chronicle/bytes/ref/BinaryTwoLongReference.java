@@ -23,6 +23,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public long maxSize() {
         throwExceptionIfClosed();
+
         return 2 * 8;
     }
 
@@ -34,48 +35,56 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     @Override
     public long getValue2() {
         throwExceptionIfClosed();
+
         return bytes.readLong(offset + 8);
     }
 
     @Override
     public void setValue2(long value) {
         throwExceptionIfClosed();
+
         bytes.writeLong(offset + 8, value);
     }
 
     @Override
     public long getVolatileValue2() {
         throwExceptionIfClosed();
+
         return bytes.readVolatileLong(offset + 8);
     }
 
     @Override
     public void setVolatileValue2(long value) {
         throwExceptionIfClosed();
+
         bytes.writeVolatileLong(offset + 8, value);
     }
 
     @Override
     public void setOrderedValue2(long value) {
         throwExceptionIfClosed();
+
         bytes.writeOrderedLong(offset + 8, value);
     }
 
     @Override
     public long addValue2(long delta) {
         throwExceptionIfClosed();
+
         return bytes.addAndGetLong(offset + 8, delta);
     }
 
     @Override
     public long addAtomicValue2(long delta) {
         throwExceptionIfClosed();
+
         return addValue2(delta);
     }
 
     @Override
     public boolean compareAndSwapValue2(long expected, long value) {
         throwExceptionIfClosed();
+
         return bytes.compareAndSwapLong(offset + 8, expected, value);
     }
 }

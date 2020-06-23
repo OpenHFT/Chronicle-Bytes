@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
@@ -42,8 +43,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
 
     MappedUniqueMicroTimeProvider() {
         try {
-            String user = System.getProperty("user.name");
-            if (user == null) user = "unknown";
+            String user = System.getProperty("user.name", "unknown");
             file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
             AbstractCloseable.unmonitor(file);
             AbstractReferenceCounted.unmonitor(file);
@@ -75,6 +75,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
                 time = time0 + 1;
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
                 return time;
+            Jvm.nanoPause();
         }
     }
 
@@ -90,6 +91,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
             }
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
                 return time;
+            Jvm.nanoPause();
         }
     }
 }

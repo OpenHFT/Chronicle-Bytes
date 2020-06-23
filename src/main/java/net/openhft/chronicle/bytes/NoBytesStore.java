@@ -84,9 +84,8 @@ public enum NoBytesStore implements BytesStore {
         return true;
     }
 
-
-    @NotNull
-    @Override
+@NotNull
+@Override
     public RandomDataOutput writeByte(long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
@@ -335,6 +334,5 @@ public enum NoBytesStore implements BytesStore {
     public boolean sharedMemory() {
         return false;
     }
-
 
 }

@@ -1116,7 +1116,6 @@ enum BytesInternal {
             for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
                 sb.append((char) bytes.readUnsignedByte(i));
             }
-
         } catch (BufferUnderflowException e) {
             sb.append(' ').append(e);
 

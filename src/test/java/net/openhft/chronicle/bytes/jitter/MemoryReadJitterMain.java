@@ -3,7 +3,6 @@ package net.openhft.chronicle.bytes.jitter;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.Histogram;
 
 import java.io.File;
@@ -28,7 +27,7 @@ public class MemoryReadJitterMain {
     public static void main(String[] args) throws IOException {
         MappedFile.warmup();
 
-        String path = OS.TMP + "/test-mem-" + System.nanoTime();
+        String path = "test-mem-" + System.nanoTime();
         System.out.println("Writing to " + path);
         AtomicLong lastRead = new AtomicLong();
         File file = new File(path);

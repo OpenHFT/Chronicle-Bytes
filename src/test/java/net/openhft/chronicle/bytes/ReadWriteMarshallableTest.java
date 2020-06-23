@@ -13,7 +13,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         // TODO Make guarded safe
         assumeFalse(NativeBytes.areNewGuarded());
 
-        Bytes<?> bytes = Bytes.elasticHeapByteBuffer(128);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(128);
         Bytes<?> hello_world = Bytes.from("Hello World");
         Bytes<?> bye = Bytes.from("Bye");
         RWOuter o = new RWOuter(
@@ -60,7 +60,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
 
         @Override
         public void readMarshallable(BytesIn bytes) throws IORuntimeException {
-            if (data == null) data = Bytes.elasticHeapByteBuffer(64);
+            if (data == null) data = Bytes.allocateElasticOnHeap(64);
             data.clear().write((BytesStore) bytes);
         }
 

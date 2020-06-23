@@ -285,8 +285,7 @@ public class VanillaBytes<Underlying>
         for (int i = 0; i < length; i++) {
             bytesStore.writeByte(position + i, str.charAt(offset + i));
         }
-
-    }
+ }
 
     @Override
     @NotNull

@@ -40,6 +40,19 @@ public enum Allocator {
     HEAP {
         @NotNull
         @Override
+        Bytes<byte[]> elasticBytes(int capacity) {
+            return Bytes.allocateElasticOnHeap(capacity);
+        }
+
+        @NotNull
+        @Override
+        ByteBuffer byteBuffer(int capacity) {
+            return ByteBuffer.allocate(capacity);
+        }
+    },
+    BYTE_BUFFER {
+        @NotNull
+        @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
             return Bytes.elasticHeapByteBuffer(capacity);
         }
@@ -78,7 +91,7 @@ public enum Allocator {
     };
 
     @NotNull
-    abstract Bytes<ByteBuffer> elasticBytes(int capacity);
+    abstract Bytes<?> elasticBytes(int capacity);
 
     @NotNull
     abstract ByteBuffer byteBuffer(int capacity);

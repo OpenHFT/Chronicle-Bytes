@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -61,7 +62,7 @@ public interface Bytes<Underlying> extends
      * which will be resized as required.
      *
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
-     *         which will be resized as required
+     * which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer() {
@@ -73,9 +74,8 @@ public interface Bytes<Underlying> extends
      * the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     *
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     *         the given {@code initialCapacity} which will be resized as required
+     * the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
@@ -88,11 +88,10 @@ public interface Bytes<Underlying> extends
      * to the given {@code maxSize}.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @param maxCapacity the max capacity given in bytes equal or greater than initialCapacity
-     *
+     * @param maxCapacity     the max capacity given in bytes equal or greater than initialCapacity
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     *         the given {@code initialCapacity} which will be resized as required up
-     *         to the given {@code maxSize}
+     * the given {@code initialCapacity} which will be resized as required up
+     * to the given {@code maxSize}
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
@@ -109,9 +108,8 @@ public interface Bytes<Underlying> extends
      * the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     *
      * @return a new elastic wrapper for a heap ByteBuffer with
-     *         the given {@code initialCapacity} which will be resized as required
+     * the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
@@ -362,7 +360,7 @@ public interface Bytes<Underlying> extends
 
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
-     *
+     * <p>
      * Note: this returns a direct Bytes now
      *
      * @param text to convert
@@ -382,7 +380,7 @@ public interface Bytes<Underlying> extends
      * @return Bytes ready for reading.
      */
     @NotNull
-    static Bytes<?> from(@NotNull String text) {
+    static Bytes<?> directFrom(@NotNull String text) {
         NativeBytesStore from = NativeBytesStore.from(text);
         try {
             return from.bytesForRead();
@@ -393,15 +391,20 @@ public interface Bytes<Underlying> extends
 
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
-     *
+     * <p>
      * Note: this returns a heap Bytes
      *
      * @param text to convert
      * @return Bytes ready for reading.
      */
     @NotNull
-    static Bytes<byte[]> fromString(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
+    static Bytes<byte[]> from(@NotNull String text) throws IllegalArgumentException, IllegalStateException {
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
+    }
+
+    @UsedViaReflection
+    static Bytes<byte[]> valueOf(String text) {
+        return from(text);
     }
 
     /**
@@ -409,9 +412,8 @@ public interface Bytes<Underlying> extends
      * memory with the given {@code capacity}.
      *
      * @param capacity the non-negative capacity given in bytes
-     *
      * @return a new fix sized wrapper for native (64-bit address)
-     *         memory with the given {@code capacity}
+     * memory with the given {@code capacity}
      */
     @NotNull
     static VanillaBytes<Void> allocateDirect(long capacity) throws IllegalArgumentException {
@@ -428,7 +430,7 @@ public interface Bytes<Underlying> extends
      * memory with zero initial capacity which will be resized as required.
      *
      * @return a new elastic wrapper for native (64-bit address)
-     *         memory with zero initial capacity which will be resized as required
+     * memory with zero initial capacity which will be resized as required
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
@@ -440,13 +442,27 @@ public interface Bytes<Underlying> extends
      * memory with the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     *
      * @return a new elastic wrapper for native (64-bit address)
-     *         memory with the given {@code initialCapacity} which will be resized as required
+     * memory with the given {@code initialCapacity} which will be resized as required
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect(long initialCapacity) throws IllegalArgumentException {
         return NativeBytes.nativeBytes(initialCapacity);
+    }
+
+    @NotNull
+    static OnHeapBytes allocateElasticOnHeap() {
+        return allocateElasticOnHeap(32);
+    }
+
+    @NotNull
+    static OnHeapBytes allocateElasticOnHeap(int initialCapacity) {
+        HeapBytesStore<byte[]> wrap = HeapBytesStore.wrap(new byte[initialCapacity]);
+        try {
+            return new OnHeapBytes(wrap, true);
+        } finally {
+            wrap.release(INIT);
+        }
     }
 
     /**
@@ -544,9 +560,8 @@ public interface Bytes<Underlying> extends
      * the returned wrapper or vice versa.
      *
      * @param bytes array to copy
-     *
      * @return a new fix sized wrapper for native (64-bit address)
-     *         memory with the contents copied from the given {@code bytes} array
+     * memory with the contents copied from the given {@code bytes} array
      */
     @NotNull
     static VanillaBytes allocateDirect(@NotNull byte[] bytes) throws IllegalArgumentException {
@@ -643,8 +658,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @inheritDoc
-     * <P>
+     * @inheritDoc <P>
      * If this Bytes {@link #isElastic()} the {@link #safeLimit()} can be
      * lower than the point it can safely write.
      */
@@ -659,8 +673,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * @inheritDoc
-     * <P>
+     * @inheritDoc <P>
      * If this Bytes {@link #isElastic()} the {@link #realCapacity()} can be
      * lower than the virtual {@link #capacity()}.
      */
@@ -793,7 +806,7 @@ public interface Bytes<Underlying> extends
         if (wp < fromOffset)
             return;
 
-        write(fromOffset, this, fromOffset + count, wp - fromOffset);
+        write(fromOffset, this, fromOffset + count, wp - fromOffset - count);
         writeSkip(-count);
     }
 

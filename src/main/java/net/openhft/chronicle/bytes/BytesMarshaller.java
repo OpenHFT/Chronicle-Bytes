@@ -249,7 +249,7 @@ public class BytesMarshaller<T> {
             int length = Maths.toUInt31(stopBit);
             @NotNull Bytes bs;
             if (bytes == null) {
-                bs = Bytes.elasticHeapByteBuffer(length);
+                bs = Bytes.allocateElasticOnHeap(length);
                 field.set(o, bs);
             } else {
                 bs = bytes;
@@ -606,18 +606,17 @@ public class BytesMarshaller<T> {
         }
     }
 
+static class LongFieldAccess extends FieldAccess {
+    public LongFieldAccess(Field field) {
+        super(field);
+    }
 
-    static class LongFieldAccess extends FieldAccess {
-        public LongFieldAccess(Field field) {
-            super(field);
-        }
+    @Override
+    protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+        write.writeLong(field.getLong(o));
+    }
 
-        @Override
-        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
-            write.writeLong(field.getLong(o));
-        }
-
-        @Override
+    @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setLong(o, read.readLong());
         }

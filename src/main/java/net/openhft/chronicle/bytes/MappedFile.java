@@ -101,7 +101,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     private static void logNewChunk(final String filename,
                                     final int chunk,
                                     final long delayMicros) {
-        if (!Jvm.isDebugEnabled(MappedFile.class))
+        if (delayMicros < 100 || !Jvm.isDebugEnabled(MappedFile.class))
             return;
 
         // avoid a GC while trying to memory map.
@@ -150,7 +150,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                 continue;
             @Nullable MappedBytesStore mbs = storeRef.get();
             if (mbs != null && mbs.refCount() > 0) {
-                mbs.release();
+                mbs.releaseLast();
                 throwable.printStackTrace();
                 count[0]++;
             }
@@ -323,6 +323,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             IllegalStateException {
 
         throwExceptionIfClosed();
+
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
         final int chunk = (int) (position / chunkSize);
@@ -382,8 +383,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
             return mbs2;
         }
-
-    }
+ }
 
     private void resizeRafIfTooSmall(final int chunk) throws IOException {
         Jvm.safepoint();
@@ -452,6 +452,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public Bytes acquireBytesForRead(ReferenceOwner owner, final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
         throwExceptionIfClosed();
+
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         final Bytes bytes = mbs.bytesForRead();
         bytes.readPositionUnlimited(position);
@@ -463,6 +464,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public void acquireBytesForRead(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
         throwExceptionIfClosed();
+
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
@@ -471,6 +473,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public Bytes acquireBytesForWrite(ReferenceOwner owner, final long position)
             throws IOException, IllegalStateException, IllegalArgumentException {
         throwExceptionIfClosed();
+
         @Nullable MappedBytesStore mbs = acquireByteStore(owner, position, null);
         @NotNull Bytes bytes = mbs.bytesForWrite();
         bytes.writePosition(position);
@@ -482,9 +485,16 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public void acquireBytesForWrite(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException {
         throwExceptionIfClosed();
+
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
         bytes.writePosition(position);
+    }
+
+    @Override
+    protected boolean performReleaseInBackground() {
+        // don't perform the close in the background as that just sets a flag. This does the real work.
+        return true;
     }
 
     protected void performRelease() {
@@ -505,7 +515,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             closeQuietly(raf);
             setClosed();
         }
-
     }
 
     @NotNull
@@ -539,11 +548,13 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
     public void setNewChunkListener(final NewChunkListener listener) {
         throwExceptionIfClosed();
+
         this.newChunkListener = listener;
     }
 
     public long actualSize() throws IORuntimeException {
         throwExceptionIfClosed();
+
         boolean interrupted = Thread.interrupted();
         try {
             return fileChannel.size();
@@ -602,4 +613,5 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                     '}';
         }
     }
+
 }
