@@ -151,18 +151,18 @@ public class VanillaBytes<Underlying>
     @Override
     public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
-        bytesStore(byteStore);
+        setBytesStore(byteStore);
         // assume its read-only
         readLimit(offset + length);
         writeLimit(offset + length);
         readPosition(offset);
     }
 
-    private void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
+    private void setBytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
             throws IllegalStateException {
         if (this.bytesStore != bytesStore) {
             @Nullable BytesStore oldBS = this.bytesStore;
-            this.bytesStore = bytesStore;
+            this.bytesStore(bytesStore);
             bytesStore.reserve(this);
             oldBS.release(this);
         }

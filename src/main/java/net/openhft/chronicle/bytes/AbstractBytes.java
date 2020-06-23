@@ -56,7 +56,7 @@ public abstract class AbstractBytes<Underlying>
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit, String name)
             throws IllegalStateException {
         super(bytesStore.isDirectMemory());
-        this.bytesStore = bytesStore;
+        this.bytesStore(bytesStore);
         bytesStore.reserve(this);
         readPosition = bytesStore.readPosition();
         this.uncheckedWritePosition(writePosition);
@@ -335,7 +335,7 @@ public abstract class AbstractBytes<Underlying>
         try {
             this.bytesStore.release(this);
         } finally {
-            this.bytesStore = ReleasedBytesStore.releasedBytesStore();
+            this.bytesStore(ReleasedBytesStore.releasedBytesStore());
         }
     }
 
@@ -1023,6 +1023,10 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public BytesStore bytesStore() {
         return bytesStore;
+    }
+
+    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+        this.bytesStore = bytesStore;
     }
 
     @Override

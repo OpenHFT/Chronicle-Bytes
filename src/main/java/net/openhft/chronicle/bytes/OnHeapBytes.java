@@ -86,7 +86,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
 
         BytesStore<Bytes<byte[]>, byte[]> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
-        this.bytesStore = store;
+        this.bytesStore(store);
         try {
             tempStore.release(this);
         } catch (IllegalStateException e) {

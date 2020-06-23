@@ -230,7 +230,7 @@ public class NativeBytes<Underlying>
         throwExceptionIfReleased();
         @Nullable BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
-        this.bytesStore = store;
+        this.bytesStore(store);
         try {
             tempStore.release(this);
         } catch (IllegalStateException e) {
