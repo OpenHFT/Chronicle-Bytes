@@ -203,6 +203,22 @@
                 </executions>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-jar-plugin</artifactId>
+                <configuration>
+                    <archive>
+                        <manifest>
+                            <addClasspath>true</addClasspath>
+                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+                        </manifest>
+                        <manifestEntries>
+                            <Automatic-Module-Name>chronicle.bytes</Automatic-Module-Name>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
         </plugins>
     </build>
 
