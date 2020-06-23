@@ -46,7 +46,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     private static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
 
-    @NotNull
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
 
@@ -61,6 +60,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 NoBytesStore.noBytesStore().writeLimit(),
                 name);
 
+        assert mappedFile != null;
         this.mappedFile = mappedFile;
         mappedFile.reserve(this);
         this.backingFileIsReadOnly = !mappedFile.file().canWrite();
@@ -270,7 +270,13 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public long capacity() {
-        return mappedFile == null ? 0L : mappedFile.capacity();
+        return mappedFile.capacity();
+    }
+
+    @Override
+    public Bytes<Void> readLimitToCapacity() throws BufferUnderflowException {
+        this.writePosition = mappedFile.capacity();
+        return this;
     }
 
     @Override
@@ -289,7 +295,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> readPositionRemaining(final long position, final long remaining) throws BufferUnderflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         final long limit = position + remaining;
         acquireNextByteStore(position, true);
@@ -310,7 +316,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> readPosition(final long position) throws BufferUnderflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         if (bytesStore.inside(position)) {
             return super.readPosition(position);
@@ -322,7 +328,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public long addressForRead(final long offset) throws BufferUnderflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         if (!bytesStore.inside(offset))
             acquireNextByteStore0(offset, true);
@@ -331,7 +337,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public long addressForRead(final long offset, final int buffer) throws UnsupportedOperationException, BufferUnderflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         if (!bytesStore.inside(offset, buffer))
             acquireNextByteStore0(offset, true);
@@ -340,7 +346,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public long addressForWrite(final long offset) throws UnsupportedOperationException, BufferOverflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         if (!bytesStore.inside(offset))
             acquireNextByteStore0(offset, true);
@@ -364,7 +370,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Nullable
     @Override
     public String read8bit() throws IORuntimeException, BufferUnderflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         return BytesInternal.read8bit(this);
     }
@@ -410,6 +416,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     // DON'T call this directly.
     // TODO Check whether we need synchronized; original comment; require protection from concurrent mutation to bytesStore field
     private synchronized void acquireNextByteStore0(final long offset, final boolean set) {
+        throwExceptionIfClosed();
+
         @Nullable final BytesStore oldBS = this.bytesStore;
         try {
             @NotNull final BytesStore newBS = mappedFile.acquireByteStore(this, offset, oldBS);
@@ -454,14 +462,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Nullable
     @Override
     public MappedBytesStore bytesStore() {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         return (MappedBytesStore) super.bytesStore();
     }
 
     @Override
     public long start() {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         return 0L;
     }
@@ -469,7 +477,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @NotNull
     @Override
     public Bytes<Void> writePosition(final long position) throws BufferOverflowException {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         if (position > writeLimit)
             throw new BufferOverflowException();
@@ -523,7 +531,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     public boolean isBackingFileReadOnly() {
-        throwExceptionIfClosed();
+//        throwExceptionIfClosed();
 
         return backingFileIsReadOnly;
     }

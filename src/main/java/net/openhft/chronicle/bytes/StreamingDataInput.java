@@ -45,7 +45,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     @NotNull
     default S readPositionUnlimited(long position) throws BufferUnderflowException {
-        return readLimit(capacity()).readPosition(position);
+        return readLimitToCapacity().readPosition(position);
     }
 
     @NotNull
@@ -56,6 +56,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     @NotNull
     S readLimit(long limit) throws BufferUnderflowException;
+
+    default S readLimitToCapacity() throws BufferUnderflowException {
+        return readLimit(capacity());
+    }
 
     /**
      * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
