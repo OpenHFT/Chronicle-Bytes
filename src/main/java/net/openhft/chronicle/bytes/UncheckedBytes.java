@@ -47,7 +47,7 @@ public class UncheckedBytes<Underlying>
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore = underlyingBytes;
+            this.bytesStore(underlyingBytes);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -61,7 +61,7 @@ public class UncheckedBytes<Underlying>
     public void ensureCapacity(long size) throws IllegalArgumentException {
         if (size > realCapacity()) {
             underlyingBytes.ensureCapacity(size);
-            bytesStore = underlyingBytes.bytesStore();
+            bytesStore(underlyingBytes.bytesStore());
         }
     }
 
