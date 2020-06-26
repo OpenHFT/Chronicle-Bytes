@@ -2,7 +2,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.UnsafeText;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
@@ -70,7 +69,6 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/128")
     @Test
     public void extraZeros() {
         Bytes bytes = Bytes.allocateDirect(32);
