@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.UnsafeText;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Random;
@@ -27,12 +28,13 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         assertEquals(message, l, bytes.parseLong());
     }
 
-    static void testAppendDouble(Bytes bytes, double l) {
+    static String testAppendDouble(Bytes bytes, double l) {
         long address = bytes.clear().addressForRead(0);
         long end = UnsafeText.appendDouble(address, l);
         bytes.readLimit(end - address);
         String message = bytes.toString();
         assertEquals(message, l, bytes.parseDouble(), Math.ulp(l));
+        return message;
     }
 
     static void testAppendFixed(Bytes bytes, double l, int digits) {
@@ -66,5 +68,18 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
                 0.0, -0.0, 0.1, 0.012, 0.00123, 1.0, Double.NaN, 1 / 0.0, -1 / 0.0})
             testAppendDouble(bytes, d);
         bytes.releaseLast();
+    }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/128")
+    @Test
+    public void extraZeros() {
+        Bytes bytes = Bytes.allocateDirect(32);
+        try {
+            double d = -0.00002;
+            String output = testAppendDouble(bytes, d);
+            assertEquals("-0.00002", output);
+        } finally {
+            bytes.releaseLast();
+        }
     }
 }
