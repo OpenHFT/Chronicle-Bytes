@@ -1,10 +1,8 @@
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Maths;
 import org.junit.Test;
 
 import java.text.DecimalFormat;
-import java.util.Random;
 
 import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
 import static org.junit.Assert.assertEquals;
@@ -27,16 +25,18 @@ public class Issue128Test {
 //    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/128")
     public void testCorrect() {
         Bytes bytes = Bytes.allocateDirect(32);
-        Random rand = new Random();
         try {
-            for (int i = 0; i < 10000; i++) {
-                // TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/issues/128
-                double smallest = 0.001;
-                double v = Math.pow(smallest, rand.nextDouble());
-                // TODO FIX https://github.com/OpenHFT/Chronicle-Bytes/issues/128
-                v = Maths.round8(v);
-                doTest(bytes, v);
-                doTest(bytes, 1 + v);
+            // odd ones are trouble.
+            for (int i = 1; i < 1_000_000; i += 2) {
+                double v6 = (double) i / 1_000_000;
+                doTest(bytes, v6);
+                doTest(bytes, 999 + v6);
+                double v7 = (double) i / 10_000_000;
+                doTest(bytes, v7);
+                double v8 = (double) i / 100_000_000;
+                doTest(bytes, v8);
+                double v9 = (double) i / 100_000_000;
+                doTest(bytes, v9);
             }
         } finally {
             bytes.releaseLast();
@@ -48,6 +48,6 @@ public class Issue128Test {
         String output = testAppendDouble(bytes, v);
         if (Double.parseDouble(output) != v || format.length() != output.length())
             assertEquals(DF.format(v), output);
+//            System.out.println(DF.format(v)+" != " + output);
     }
-
 }
