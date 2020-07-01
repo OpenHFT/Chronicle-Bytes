@@ -46,5 +46,9 @@ public class NativeByteStoreTest extends BytesTestCommon {
         assertNotEquals(hbs3, hbs);
         assertNotEquals(hbs, hbs4);
         assertNotEquals(hbs4, hbs);
+        hbs.releaseLast();
+        hbs2.releaseLast();
+        hbs3.releaseLast();
+        hbs4.releaseLast();
     }
 }
