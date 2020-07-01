@@ -82,7 +82,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @Override
     public void setValue(int value) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         withLock(() -> {
             bytes.append(offset + VALUE, value, DIGITS);
@@ -99,7 +99,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @Override
     public void setOrderedValue(int value) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         setValue(value);
     }
@@ -138,7 +138,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         if (length != template.length)
             throw new IllegalArgumentException(length + " != " + template.length);
@@ -157,8 +157,6 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @Override
     public long maxSize() {
-        throwExceptionIfClosed();
-
         return template.length;
     }
 

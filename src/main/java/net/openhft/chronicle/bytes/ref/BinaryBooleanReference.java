@@ -15,7 +15,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         if (length != maxSize())
             throw new IllegalArgumentException();

@@ -32,7 +32,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         if (length != maxSize())
             throw new IllegalArgumentException();
@@ -58,7 +58,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @Override
     public void setValue(int value) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes.writeInt(offset, value);
     }
@@ -72,7 +72,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @Override
     public void setOrderedValue(int value) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes.writeOrderedInt(offset, value);
     }

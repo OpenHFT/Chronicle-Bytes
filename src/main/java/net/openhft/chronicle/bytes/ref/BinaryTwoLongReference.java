@@ -22,8 +22,6 @@ import org.jetbrains.annotations.NotNull;
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
     @Override
     public long maxSize() {
-        throwExceptionIfClosed();
-
         return 2 * 8;
     }
 
@@ -34,57 +32,82 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
 
     @Override
     public long getValue2() {
-        throwExceptionIfClosed();
-
-        return bytes.readLong(offset + 8);
+        try {
+            return bytes.readLong(offset + 8);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public void setValue2(long value) {
-        throwExceptionIfClosed();
-
-        bytes.writeLong(offset + 8, value);
+        try {
+            bytes.writeLong(offset + 8, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long getVolatileValue2() {
-        throwExceptionIfClosed();
+        try {
+            return bytes.readVolatileLong(offset + 8);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
 
-        return bytes.readVolatileLong(offset + 8);
     }
 
     @Override
     public void setVolatileValue2(long value) {
-        throwExceptionIfClosed();
-
-        bytes.writeVolatileLong(offset + 8, value);
+        try {
+            bytes.writeVolatileLong(offset + 8, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public void setOrderedValue2(long value) {
-        throwExceptionIfClosed();
-
-        bytes.writeOrderedLong(offset + 8, value);
+        try {
+            bytes.writeOrderedLong(offset + 8, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long addValue2(long delta) {
-        throwExceptionIfClosed();
-
-        return bytes.addAndGetLong(offset + 8, delta);
+        try {
+            return bytes.addAndGetLong(offset + 8, delta);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long addAtomicValue2(long delta) {
-        throwExceptionIfClosed();
-
-        return addValue2(delta);
+        try {
+            return addValue2(delta);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public boolean compareAndSwapValue2(long expected, long value) {
-        throwExceptionIfClosed();
-
-        return bytes.compareAndSwapLong(offset + 8, expected, value);
+        try {
+            return bytes.compareAndSwapLong(offset + 8, expected, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 }

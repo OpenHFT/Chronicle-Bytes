@@ -40,7 +40,7 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
 
     @Override
     public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         if (length != maxSize()) throw new IllegalArgumentException();
         address = bytes.addressForRead(offset);
@@ -76,23 +76,32 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
 
     @Override
     public long getValue() {
-        throwExceptionIfClosed();
-
-        return unsafe.getLong(address);
+        try {
+            return unsafe.getLong(address);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public void setValue(long value) {
-        throwExceptionIfClosed();
-
-        unsafe.putLong(address, value);
+        try {
+            unsafe.putLong(address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long getVolatileValue() {
-        throwExceptionIfClosed();
-
-        return unsafe.getLongVolatile(null, address);
+        try {
+            return unsafe.getLongVolatile(null, address);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
@@ -108,47 +117,64 @@ public class UncheckedLongReference extends AbstractCloseable implements LongRef
 
     @Override
     public void setVolatileValue(long value) {
-        throwExceptionIfClosed();
-
-        unsafe.putLongVolatile(null, address, value);
+        try {
+            unsafe.putLongVolatile(null, address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public void setOrderedValue(long value) {
-        throwExceptionIfClosed();
-
-        unsafe.putOrderedLong(null, address, value);
+        try {
+            unsafe.putOrderedLong(null, address, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long addValue(long delta) {
-        throwExceptionIfClosed();
-
-        return unsafe.getAndAddLong(null, address, delta) + delta;
+        try {
+            return unsafe.getAndAddLong(null, address, delta) + delta;
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public long addAtomicValue(long delta) {
-        throwExceptionIfClosed();
-
-        return addValue(delta);
+        try {
+            return addValue(delta);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     public boolean compareAndSwapValue(long expected, long value) {
-        throwExceptionIfClosed();
-
-        return unsafe.compareAndSwapLong(null, address, expected, value);
+        try {
+            return unsafe.compareAndSwapLong(null, address, expected, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     @Override
     protected void performClose() {
         unsafe = null;
-        this.bytes.release(this);
+        if (this.bytes != null)
+            this.bytes.release(this);
+        this.bytes = null;
     }
 
     @Override
-    protected boolean threadSafetyCheck() {
+    protected boolean threadSafetyCheck(boolean isUsed) {
         return true;
     }
 }

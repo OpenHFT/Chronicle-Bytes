@@ -54,7 +54,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
 
     @Override
     public void setValue(final boolean value) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         write(value, bytes, offset);
     }

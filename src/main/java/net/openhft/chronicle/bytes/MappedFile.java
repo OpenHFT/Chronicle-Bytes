@@ -547,13 +547,12 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     public void setNewChunkListener(final NewChunkListener listener) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         this.newChunkListener = listener;
     }
 
     public long actualSize() throws IORuntimeException {
-        throwExceptionIfClosed();
 
         boolean interrupted = Thread.interrupted();
         try {
@@ -594,7 +593,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @Override
-    protected boolean threadSafetyCheck() {
+    protected boolean threadSafetyCheck(boolean isUsed) {
         // component is thread safe
         return true;
     }

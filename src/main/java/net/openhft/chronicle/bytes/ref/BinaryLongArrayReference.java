@@ -100,7 +100,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void setMaxUsed(long usedAtLeast) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes.writeMaxLong(offset + USED, usedAtLeast);
     }
@@ -114,7 +114,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void setValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes.writeLong(VALUES + offset + (index << 3), value);
     }
@@ -135,7 +135,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void setOrderedValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes.writeOrderedLong(VALUES + offset + (index << 3), value);
     }
@@ -154,7 +154,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void readMarshallable(BytesIn bytes) throws IORuntimeException {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         long position = bytes.readPosition();
         long capacity = bytes.readLong();
@@ -193,7 +193,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void reset() {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         bytes = null;
         offset = 0;
@@ -251,7 +251,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public ByteableLongArrayValues capacity(long arrayLength) {
-        throwExceptionIfClosed();
+        throwExceptionIfClosedInSetter();
 
         BytesStore bytesStore = bytesStore();
         long length = sizeInBytes(arrayLength);

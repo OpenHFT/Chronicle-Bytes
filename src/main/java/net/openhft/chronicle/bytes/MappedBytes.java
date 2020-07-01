@@ -265,8 +265,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     public void setNewChunkListener(final NewChunkListener listener) {
-        throwExceptionIfClosed();
-
         mappedFile.setNewChunkListener(listener);
     }
 
