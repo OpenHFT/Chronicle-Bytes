@@ -371,6 +371,11 @@ public interface Bytes<Underlying> extends
         return from(text.toString());
     }
 
+    @Deprecated
+    static Bytes<?> fromString(String text) {
+        return from(text);
+    }
+
     /**
      * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      * <p>
