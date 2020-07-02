@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-public interface RingBufferReader extends RingBufferReaderStats {
+import net.openhft.chronicle.core.io.Closeable;
+
+public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     long UNKNOWN_INDEX = -1;
 
     boolean isEmpty();
