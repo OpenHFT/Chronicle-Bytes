@@ -17,20 +17,17 @@
  */
 package net.openhft.chronicle.bytes;
 
-import java.io.Closeable;
-
-public interface RingBufferReader extends RingBufferReaderStats, Closeable {
+public interface RingBufferReader extends RingBufferReaderStats {
     long UNKNOWN_INDEX = -1;
 
     boolean isEmpty();
 
-    boolean isClosed();
+    boolean isStopped();
 
     /**
-     * Close the reader. After being closed, the reader will not block writers
+     * stop the reader. After being stopped, the reader will not block writers
      */
-    @Override
-    void close();
+    void stop();
 
     /**
      * the readPosition and readLimit will be adjusted so that the client can read the data
