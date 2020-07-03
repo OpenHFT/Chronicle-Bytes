@@ -26,8 +26,6 @@ import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -54,7 +52,7 @@ public class HeapBytesStore<Underlying>
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
-        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET + byteBuffer.arrayOffset();
+        this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
         this.capacity = byteBuffer.capacity();
     }
 
@@ -63,7 +61,7 @@ public class HeapBytesStore<Underlying>
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteArray;
         this.realUnderlyingObject = byteArray;
-        this.dataOffset = Unsafe.ARRAY_BYTE_BASE_OFFSET;
+        this.dataOffset = Jvm.arrayByteBaseOffset();
         this.capacity = byteArray.length;
     }
 
@@ -324,7 +322,7 @@ public class HeapBytesStore<Underlying>
         writeCheckOffset(offsetInRDO, length);
         assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
         if (bytes.isDirect()) {
-            MEMORY.copyMemory(((DirectBuffer) bytes).address(), realUnderlyingObject,
+            MEMORY.copyMemory(Jvm.address(bytes), realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
 
         } else {

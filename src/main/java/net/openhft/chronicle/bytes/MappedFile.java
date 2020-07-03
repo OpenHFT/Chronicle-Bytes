@@ -27,20 +27,16 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.nio.ch.Interruptible;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
-import java.lang.reflect.Field;
-import java.lang.reflect.Proxy;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
-import java.nio.channels.spi.AbstractInterruptibleChannel;
 import java.nio.file.Files;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -92,10 +88,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         this.capacity = capacity;
         this.readOnly = readOnly;
 
-        if (Jvm.isJava9Plus())
-            doNotCloseOnInterrupt9(this.fileChannel);
-        else
-            doNotCloseOnInterrupt(this.fileChannel);
+        Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
     }
 
     private static void logNewChunk(final String filename,
@@ -256,37 +249,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         }
     }
 
-    private void doNotCloseOnInterrupt(final FileChannel fc) {
-        try {
-            final Field field = AbstractInterruptibleChannel.class
-                    .getDeclaredField("interruptor");
-            Jvm.setAccessible(field);
-            field.set(fc, (Interruptible) thread
-                    -> System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt"));
-        } catch (Throwable e) {
-            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
-        }
-    }
-
-    // based on a solution by https://stackoverflow.com/users/9199167/max-vollmer
-    // https://stackoverflow.com/a/52262779/57695
-    private void doNotCloseOnInterrupt9(final FileChannel fc) {
-        try {
-            final Field field = AbstractInterruptibleChannel.class.getDeclaredField("interruptor");
-            final Class<?> interruptibleClass = field.getType();
-            Jvm.setAccessible(field);
-            field.set(fc, Proxy.newProxyInstance(
-                    interruptibleClass.getClassLoader(),
-                    new Class[]{interruptibleClass},
-                    (p, m, a) -> {
-                        System.err.println(getClass().getName() + " - " + fc + " not closed on interrupt");
-                        return null;
-                    }));
-        } catch (Throwable e) {
-            Jvm.warn().on(getClass(), "Couldn't disable close on interrupt", e);
-        }
-    }
-
     @NotNull
     public File file() {
         return file;
@@ -383,7 +345,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
             return mbs2;
         }
- }
+    }
 
     private void resizeRafIfTooSmall(final int chunk) throws IOException {
         Jvm.safepoint();

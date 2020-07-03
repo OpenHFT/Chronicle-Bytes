@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -324,9 +323,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         int len2 = (int) Math.min(len, readRemaining());
         int i = 0;
         while (i < len2 - 3) {
-            UnsafeMemory.UNSAFE.putInt(bytes,
-                    (long) Unsafe.ARRAY_BYTE_BASE_OFFSET + i + off,
-                    rawReadInt());
+            UnsafeMemory.putInt(bytes, i + off, rawReadInt());
             i += 4;
         }
         for (; i < len2; i++)

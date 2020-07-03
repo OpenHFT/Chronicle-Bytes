@@ -28,8 +28,6 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import sun.misc.Unsafe;
-import sun.nio.ch.DirectBuffer;
 
 import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
@@ -186,7 +184,7 @@ public class NativeBytesStore<Underlying>
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
-        setAddress(((DirectBuffer) bb).address());
+        setAddress(Jvm.address(bb));
         this.maximumLimit = bb.capacity();
     }
 
@@ -359,12 +357,6 @@ public class NativeBytesStore<Underlying>
         return memory.readVolatileInt(address + translate(offset));
     }
 
-    @ForceInline
-    public int fencedRead(long offset) {
-        UnsafeMemory.UNSAFE.loadFence();
-        return memory.readInt(address + translate(offset));
-    }
-
     @Override
     @ForceInline
     public long readVolatileLong(long offset) {
@@ -486,7 +478,7 @@ public class NativeBytesStore<Underlying>
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            memory.copyMemory(((DirectBuffer) bytes).address() + offset,
+            memory.copyMemory(Jvm.address(bytes) + offset,
                     address + translate(offsetInRDO), length);
 
         } else {
@@ -623,7 +615,6 @@ public class NativeBytesStore<Underlying>
         long address = this.address + translate(0);
         @Nullable Memory memory = this.memory;
         if (memory == null) throw new NullPointerException();
-        Unsafe unsafe = UnsafeMemory.UNSAFE;
         int i;
         ascii:
         {
@@ -636,14 +627,14 @@ public class NativeBytesStore<Underlying>
                 if ((c0 | c1 | c2 | c3) > 0x007F)
                     break ascii;
                 final int value = (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24);
-                unsafe.putInt(address + pos, value);
+                UnsafeMemory.unsafePutInt(address + pos, value);
                 pos += 4;
             }
             for (; i < length; i++) {
                 char c = chars[offset + i];
                 if (c > 0x007F)
                     break ascii;
-                unsafe.putByte(address + pos++, (byte) c);
+                UnsafeMemory.unsafePutByte(address + pos++, (byte) c);
             }
 
             return pos;
@@ -743,16 +734,15 @@ public class NativeBytesStore<Underlying>
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
         int i;
-        final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
         final long address = this.address + translate(offsetInRDI);
         for (i = 0; i < len - 7; i += 8)
-            UnsafeMemory.UNSAFE.putLong(bytes, (long) offset2 + i, memory.readLong(address + i));
+            UnsafeMemory.unsafePutLong(bytes, i, memory.readLong(address + i));
         if (i < len - 3) {
-            UnsafeMemory.UNSAFE.putInt(bytes, (long) offset2 + i, memory.readInt(address + i));
+            UnsafeMemory.unsafePutInt(bytes, i, memory.readInt(address + i));
             i += 4;
         }
         for (; i < len; i++)
-            UnsafeMemory.UNSAFE.putByte(bytes, (long) offset2 + i, memory.readByte(address + i));
+            UnsafeMemory.unsafePutByte(bytes, i, memory.readByte(address + i));
         return len;
     }
 

@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -50,7 +51,6 @@ import java.util.TimeZone;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
-import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
@@ -2496,14 +2496,7 @@ enum BytesInternal {
 
     public static void copyMemory(long from, long to, int length)
             throws BufferUnderflowException, BufferOverflowException {
-        long i = 0;
-        for (; i < length - 7; i += 8) {
-            UNSAFE.putLong(to, UNSAFE.getLong(from));
-            from += 8;
-            to += 8;
-        }
-        for (; i < length; i++)
-            UNSAFE.putByte(to++, UNSAFE.getByte(from++));
+        UnsafeMemory.copyMemory(from, to, length);
     }
 
     @NotNull

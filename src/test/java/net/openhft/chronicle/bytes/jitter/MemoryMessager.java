@@ -53,8 +53,8 @@ public class MemoryMessager {
 
     @SuppressWarnings("restriction")
     public int length() {
-        int length = UnsafeMemory.UNSAFE.getIntVolatile(null, address);
-        Jvm.safepoint();
+        UnsafeMemory.unsafeLoadFence();
+        int length = UnsafeMemory.unsafeGetInt(address);
         return length;
     }
 

@@ -24,7 +24,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -355,16 +354,15 @@ public class NativeBytes<Underlying>
 
             int len = (int) Math.min(length, readLimit() - offsetInRDI);
             int i;
-            final long offset2 = Unsafe.ARRAY_BYTE_BASE_OFFSET + offset;
             final long address = nativeBytesStore.address + nativeBytesStore.translate(offsetInRDI);
             for (i = 0; i < len - 7; i += 8)
-                UnsafeMemory.UNSAFE.putLong(bytes, (long) offset2 + i, nativeBytesStore.memory.readLong(address + i));
+                UnsafeMemory.unsafePutLong(bytes, i, nativeBytesStore.memory.readLong(address + i));
             if (i < len - 3) {
-                UnsafeMemory.UNSAFE.putInt(bytes, (long) offset2 + i, nativeBytesStore.memory.readInt(address + i));
+                UnsafeMemory.unsafePutInt(bytes, i, nativeBytesStore.memory.readInt(address + i));
                 i += 4;
             }
             for (; i < len; i++)
-                UnsafeMemory.UNSAFE.putByte(bytes, (long) offset2 + i, nativeBytesStore.memory.readByte(address + i));
+                UnsafeMemory.unsafePutByte(bytes, i, nativeBytesStore.memory.readByte(address + i));
             return len;
         }
     }

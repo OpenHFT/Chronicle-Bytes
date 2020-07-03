@@ -40,12 +40,7 @@ public class UncheckedLongReferenceTest extends BytesTestCommon {
             assertTrue(ref.compareAndSwapValue(-1, 2));
             assertEquals(8, ref.maxSize());
             assertEquals(nbs.addressForRead(16), ref.offset());
-            try {
-                assertEquals(nbs, ref.bytesStore());
-                fail();
-            } catch (UnsupportedOperationException e) {
-                // expected
-            }
+            assertEquals(nbs, ref.bytesStore());
             assertEquals(0L, nbs.readLong(0));
             assertEquals(0L, nbs.readLong(8));
             assertEquals(2L, nbs.readLong(16));
