@@ -18,10 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -201,9 +198,16 @@ public class NativeBytes<Underlying>
 
         boolean isByteBufferBacked = bytesStore.underlyingObject() instanceof ByteBuffer;
         if (isByteBufferBacked && size > MAX_BYTE_BUFFER_CAPACITY) {
+
+            // Add a stack trace to this relatively unusual event which will
+            // enable tracing of potentially derailed code or excessive buffer use.
+            final StackTrace stackTrace = new StackTrace();
+            final String stack = BytesUtil.asString("Calling stack is", stackTrace);
+
             Jvm.warn().on(getClass(), "Going to try to replace ByteBuffer-backed BytesStore with " +
                     "raw NativeBytesStore to grow to " + size / 1024 + " KB. If later it is assumed that " +
-                    "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown");
+                    "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. "+
+                    stack);
         }
 //        System.out.println("resize " + endOfBuffer + " to " + size);
         if (endOfBuffer > 1 << 20)
