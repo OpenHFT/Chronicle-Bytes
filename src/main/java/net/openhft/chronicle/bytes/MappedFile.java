@@ -340,8 +340,8 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             if (newChunkListener != null)
                 newChunkListener.onNewChunk(file.getPath(), chunk, elapsedNs / 1000);
 
-            if (elapsedNs > 5_000_000L)
-                Jvm.warn().on(getClass(), "Took " + elapsedNs / 1000L + " us to add mapping for " + file());
+            if (elapsedNs >= 2_000_000L)
+                Jvm.warn().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
 
             return mbs2;
         }
