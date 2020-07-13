@@ -35,6 +35,8 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
 
     MethodWriterBuilder<T> onClose(Closeable closeable);
 
+    // sourceId enables this, this isn't useful unless it's set.
+    @Deprecated
     MethodWriterBuilder<T> recordHistory(boolean recordHistory);
 
     MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
