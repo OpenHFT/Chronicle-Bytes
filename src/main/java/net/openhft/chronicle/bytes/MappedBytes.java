@@ -537,6 +537,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
+    protected boolean performReleaseInBackground() {
+        return true;
+    }
+
+    @Override
     public boolean isElastic() {
         return true;
     }
