@@ -45,14 +45,14 @@ import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
     private Allocator alloc1;
     private ThreadDump threadDump;
 
-    public BytesTest(String name, Allocator alloc1) {
+    public BytesTest(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
     }
 
@@ -739,6 +739,19 @@ public class BytesTest extends BytesTestCommon {
         } finally {
             a.releaseLast();
             b.releaseLast();
+        }
+    }
+
+    @Test
+    public void to8BitString() {
+        @NotNull Bytes a = alloc1.elasticBytes(16);
+        try {
+            assertEquals(a.toString(), a.to8bitString());
+            String hello = "hello";
+            a.append(hello);
+            assertEquals(a.toString(), a.to8bitString());
+        } finally {
+            a.releaseLast();
         }
     }
 }

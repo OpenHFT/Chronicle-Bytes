@@ -503,14 +503,22 @@ public class VanillaBytes<Underlying>
     }
 
     public void read8Bit(char[] chars, int length) {
-        long position = readPosition();
-        @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore();
-        nbs.read8bit(position, chars, length);
+        if (isDirectMemory()) {
+            long position = readPosition();
+            @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore();
+            nbs.read8bit(position, chars, length);
+        } else {
+            long pos = this.readPosition();
+            for (int i = 0; i < length; i++)
+                chars[i] = (char) this.readUnsignedByte(pos + i);
+        }
     }
 
+    // TODO: protected?
     @Override
     public int byteCheckSum(int start, int end) throws IORuntimeException {
         byte b = 0;
+        // the below cast is safe as should only be called from net.openhft.chronicle.bytes.AbstractBytes.byteCheckSum(long, long)
         @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
         @Nullable Memory memory = bytesStore.memory;
         assert memory != null;
