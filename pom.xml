@@ -129,6 +129,8 @@
             <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
+                    <forkCount>4</forkCount>
+                    <reuseForks>true</reuseForks>
                     <runOrder>hourly</runOrder>
                 </configuration>
             </plugin>
