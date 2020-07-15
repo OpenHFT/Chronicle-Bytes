@@ -200,7 +200,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     default B append(double d, int decimalPlaces) throws BufferOverflowException {
         if (decimalPlaces < 0)
             throw new IllegalArgumentException();
-        if (decimalPlaces < 20) {
+        if (decimalPlaces < 18) {
             double d2 = d * Maths.tens(decimalPlaces);
             if (d2 < Long.MAX_VALUE && d2 > Long.MIN_VALUE) {
                 // changed from java.lang.Math.round(d2) as this was shown up to cause latency

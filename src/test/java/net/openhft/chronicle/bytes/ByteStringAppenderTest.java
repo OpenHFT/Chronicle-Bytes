@@ -228,4 +228,28 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "1.100\n" +
                 "-0.0111\n", bytes.toString());
     }
+
+    @Test
+    public void tens() {
+        double d = 1;
+        for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
+            bytes.clear();
+            {
+                double expected = d;
+                bytes.append(expected).append(' ');
+                String s = bytes.toString();
+                double d2 = bytes.parseDouble();
+                double ulp = i < 90 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
+                assertEquals(s, expected, d2, ulp);
+            }
+            {
+                double expected = 1 / d;
+                bytes.append(expected).append(' ');
+                String s = bytes.toString();
+                double d2 = bytes.parseDouble();
+                assertEquals(s, expected, d2, 2e-40);
+            }
+            d *= 10;
+        }
+    }
 }

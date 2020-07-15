@@ -203,8 +203,12 @@ public abstract class AbstractBytes<Underlying>
 
     public AbstractBytes append(double d) throws BufferOverflowException {
         boolean fits = canWriteDirect(380);
+        double ad = Math.abs(d);
+        if (ad < 1e-18) {
+            append(Double.toString(d));
+            return this;
+        }
         if (!fits) {
-            double ad = Math.abs(d);
             fits = 1e-6 <= ad && ad < 1e20 && canWriteDirect(24);
         }
         if (fits) {

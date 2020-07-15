@@ -1668,15 +1668,15 @@ enum BytesInternal {
         }
         double d;
         if (deci > 0) {
-            if (deci <= 29) {
+            if (deci < 28) {
                 long fives = Maths.fives(deci);
                 long whole = value / fives;
                 long rem = value % fives;
                 d = whole + (double) rem / fives;
             } else {
-                d = value / Math.pow(5, -deci);
+                d = value / Math.pow(5, deci);
             }
-        } else if (deci < -29) {
+        } else if (deci < -27) {
             d = value * Math.pow(5, -deci);
 
         } else if (deci < 0) {
