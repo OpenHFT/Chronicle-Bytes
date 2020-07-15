@@ -48,7 +48,10 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     @Deprecated
     MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
 
-    MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor);
+    default MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
+        // todo replace
+        return null;
+    }
 
     default T build() {
         return get();
