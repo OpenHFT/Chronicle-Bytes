@@ -49,8 +49,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
 
     default MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
-        // todo replace
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     default T build() {
