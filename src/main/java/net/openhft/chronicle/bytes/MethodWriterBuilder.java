@@ -48,9 +48,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     @Deprecated
     MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
 
-    default MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
-        throw new UnsupportedOperationException();
-    }
+    MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor);
 
     default T build() {
         return get();
