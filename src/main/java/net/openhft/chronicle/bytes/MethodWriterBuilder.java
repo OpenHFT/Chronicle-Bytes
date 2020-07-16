@@ -39,15 +39,6 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
     @Deprecated
     MethodWriterBuilder<T> recordHistory(boolean recordHistory);
 
-    /**
-     * deprecated use {@link MethodWriterBuilder#updateInterceptor(net.openhft.chronicle.bytes.UpdateInterceptor)} instead
-     *
-     * @param writeInterceptor an interceptor
-     * @return that
-     */
-    @Deprecated
-    MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor);
-
     default MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         throw new UnsupportedOperationException();
     }

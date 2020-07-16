@@ -64,11 +64,6 @@ public class BytesMethodWriterBuilder<T> implements MethodWriterBuilder<T> {
     }
 
     @Override
-    public MethodWriterBuilder<T> methodWriterInterceptorReturns(MethodWriterInterceptorReturns writeInterceptor) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
     public MethodWriterBuilder<T> updateInterceptor(final UpdateInterceptor updateInterceptor) {
         throw new UnsupportedOperationException("todo");
     }
