@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -247,7 +248,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 bytes.append(expected).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                assertEquals(s, expected, d2, 2e-40);
+                assertEquals(s, expected, d2, Jvm.isArm() ? 2e-39 : 2e-40);
             }
             d *= 10;
         }
