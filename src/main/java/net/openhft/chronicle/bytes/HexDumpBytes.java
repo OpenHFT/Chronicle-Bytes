@@ -133,7 +133,7 @@ public class HexDumpBytes
 
     @Override
     public Bytes<Void> comment(CharSequence comment) {
-        if (this.comment.readRemaining() > 0 || comment.length() == 0)
+        if (this.comment.readRemaining() > 0)
             newLine();
         if (comment.length() > 0 && comment.charAt(0) == '#') {
             indent = 0;
