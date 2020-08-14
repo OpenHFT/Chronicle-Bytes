@@ -11,7 +11,9 @@ public interface UpdateInterceptor {
      *
      * @param methodName the name of the method
      * @param t          the input argument
+     *
+     * @return whether to proceed. If false, don't write
      */
-    void update(String methodName, Object t);
+    boolean update(String methodName, Object t);
 
 }
