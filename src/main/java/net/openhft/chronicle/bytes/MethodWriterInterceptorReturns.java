@@ -56,5 +56,5 @@ public interface MethodWriterInterceptorReturns {
         };
     }
 
-Object intercept(Method method, Object[] args, BiFunction<Method, Object[], Object> invoker);
+    Object intercept(Method method, Object[] args, BiFunction<Method, Object[], Object> invoker);
 }
