@@ -69,18 +69,19 @@ public class MappedFileTest extends BytesTestCommon {
         try (final MappedFile mappedFile = MappedFile.mappedFile(file, 64)) {
             final MappedBytesStore first = mappedFile.acquireByteStore(test, 1);
 
-            assertEquals(2, first.refCount());
+            int expected = MappedFile.RETAIN ? 2 : 1;
+            assertEquals(expected, first.refCount());
 
             final MappedBytesStore second = mappedFile.acquireByteStore(test, 1 + chunkSize);
 
-            assertEquals(2, first.refCount());
-            assertEquals(2, second.refCount());
+            assertEquals(expected, first.refCount());
+            assertEquals(expected, second.refCount());
 
             final MappedBytesStore third = mappedFile.acquireByteStore(test, 1 + chunkSize + chunkSize);
 
-            assertEquals(2, first.refCount());
-            assertEquals(2, second.refCount());
-            assertEquals(2, third.refCount());
+            assertEquals(expected, first.refCount());
+            assertEquals(expected, second.refCount());
+            assertEquals(expected, third.refCount());
 
             third.release(test);
             second.release(test);
@@ -125,16 +126,17 @@ public class MappedFileTest extends BytesTestCommon {
                 // expected
             }
             assertEquals(1, mf.refCount());
-            assertEquals(3, bs.refCount());
-            assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+            int expected = MappedFile.RETAIN ? 2 : 1;
+            assertEquals(expected + 1, bs.refCount());
+            assertEquals("refCount: 1, 0, " + (expected + 1), mf.referenceCounts());
 
             @Nullable BytesStore bs2 = mf.acquireByteStore(test, chunkSize + (1 << 10), bs);
             assertSame(bs, bs2);
-            assertEquals(3, bs2.refCount());
-            assertEquals("refCount: 1, 0, 3", mf.referenceCounts());
+            assertEquals(expected + 1, bs2.refCount());
+            assertEquals("refCount: 1, 0, " + (expected + 1), mf.referenceCounts());
             bytes.releaseLast();
-            assertEquals(2, bs2.refCount());
-            assertEquals("refCount: 1, 0, 2", mf.referenceCounts());
+            assertEquals(expected, bs2.refCount());
+            assertEquals("refCount: 1, 0, " + expected, mf.referenceCounts());
             bs.release(test);
         }
     }

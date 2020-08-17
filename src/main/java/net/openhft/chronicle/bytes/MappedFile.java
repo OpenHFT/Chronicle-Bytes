@@ -49,6 +49,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class MappedFile extends AbstractCloseableReferenceCounted {
+    static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
 
     // A single JVM cannot lock a distinct canonical file more than once
@@ -333,7 +334,8 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final MappedBytesStore mbs2 = mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
-            mbs2.reserve(this);
+            if (RETAIN)
+                mbs2.reserve(this);
             stores.set(chunk, mbs2);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -464,7 +466,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             synchronized (stores) {
                 for (int i = 0; i < stores.size(); i++) {
                     final MappedBytesStore mbs = stores.get(i);
-                    if (mbs != null) {
+                    if (mbs != null && RETAIN) {
                         // this MappedFile is the only referrer to the MappedBytesStore at this point,
                         // so ensure that it is released
                         mbs.release(this);
