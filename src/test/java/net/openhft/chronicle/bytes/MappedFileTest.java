@@ -28,9 +28,7 @@ import org.jetbrains.annotations.Nullable;
 import org.junit.*;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
+import java.io.*;
 import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
@@ -155,6 +153,40 @@ public class MappedFileTest extends BytesTestCommon {
         try (@NotNull MappedBytes bytes = MappedBytes.readOnly(file)) {
             Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
         }
+    }
+    @Test
+    public void testReadOnlyOpen() throws IOException {
+        String text = "Some text to put in this file. yay!\n";
+
+        @NotNull File file = File.createTempFile("readOnlyOpenFile", "deleteme");
+
+        // write some stuff to a file so it exits using stock java APIs
+        @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file));
+        outWrite.append(text);
+        outWrite.flush();
+        outWrite.close();
+
+        byte[] tmp = new byte[1024*16];
+
+        // Open and read the file w/ a MappedBytes to show it's readable
+        try (@NotNull MappedBytes mapBuf = MappedBytes.readOnly( file )) {
+            mapBuf.readLimit( file.length() );
+            int readLen = mapBuf.read(tmp, 0, tmp.length);
+            assertEquals(text, new String(tmp, 0, readLen));
+        }
+
+        // open up the same file via a mapped file
+        try (@NotNull MappedFile mapFile = MappedFile.mappedFile(file, OS.pageSize() * 16, OS.pageSize(), true)) {
+            // this throws a exception as of v2.20.9. it shouldn't
+            @NotNull Bytes buf = mapFile.acquireBytesForRead(ReferenceOwner.temporary("TEMP"), 0 );
+            buf.readLimit( file.length() );
+            int readLen = buf.read(tmp, 0, tmp.length);
+            assertEquals(text, new String(tmp, 0, readLen));
+        }
+
+
+
+        file.deleteOnExit();
     }
 
     @Test
