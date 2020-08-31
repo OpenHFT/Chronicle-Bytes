@@ -68,14 +68,17 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
 
     @Override
     public long currentTimeMicros() {
-        long time = provider.currentTimeMicros();
+        long timeus = provider.currentTimeMicros();
         while (true) {
             long time0 = bytes.readVolatileLong(LAST_TIME);
-            long time2 = time0 / 1000;
-            if (time0 >= time)
-                time = (time2 + 1) * 1000;
+            long time0us = time0 / 1000;
+            long time;
+            if (time0us >= timeus)
+                time = (time0us + 1) * 1000;
+            else
+                time = timeus * 1000;
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                return time;
+                return time / 1_000;
             Jvm.nanoPause();
         }
     }
@@ -86,7 +89,7 @@ public enum MappedUniqueMicroTimeProvider implements TimeProvider {
         while (true) {
             long time0 = bytes.readVolatileLong(LAST_TIME);
             if (time0 >= time)
-                time = time + 1;
+                time = time0 + 1;
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
                 return time;
             Jvm.nanoPause();
