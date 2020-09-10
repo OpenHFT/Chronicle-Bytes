@@ -99,19 +99,22 @@ public class BytesMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
-                    if (type == byte[].class)
-                        return new ByteArrayFieldAccess(field);
-                    if (type == int[].class)
-                        return new IntArrayFieldAccess(field);
-                    if (type == float[].class)
-                        return new FloatArrayFieldAccess(field);
-                    if (type == long[].class)
-                        return new LongArrayFieldAccess(field);
-                    if (type == double[].class)
-                        return new DoubleArrayFieldAccess(field);
-
-                    if (type.isArray())
-                        throw new UnsupportedOperationException("TODO");
+                    if (type.isArray()) {
+                        if (type.getComponentType().isPrimitive()) {
+                            if (type == byte[].class)
+                                return new ByteArrayFieldAccess(field);
+                            if (type == int[].class)
+                                return new IntArrayFieldAccess(field);
+                            if (type == float[].class)
+                                return new FloatArrayFieldAccess(field);
+                            if (type == long[].class)
+                                return new LongArrayFieldAccess(field);
+                            if (type == double[].class)
+                                return new DoubleArrayFieldAccess(field);
+                            throw new UnsupportedOperationException("TODO " + field.getType());
+                        }
+                        return new ObjectArrayFieldAccess(field);
+                    }
                     if (Collection.class.isAssignableFrom(type))
                         return new CollectionFieldAccess(field);
                     if (Map.class.isAssignableFrom(type))
@@ -280,6 +283,51 @@ public class BytesMarshaller<T> {
         }
     }
 */
+
+    static class ObjectArrayFieldAccess extends FieldAccess {
+        Class componentType;
+
+        public ObjectArrayFieldAccess(Field field) {
+            super(field);
+            componentType = field.getType().getComponentType();
+        }
+
+
+        @Override
+        protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
+            Object[] c = (Object[]) field.get(o);
+            if (c == null) {
+                write.writeStopBit(-1);
+                return;
+            }
+            int size = c.length;
+            write.writeStopBit(size);
+            if (size == 0)
+                return;
+            for (int i = 0; i < size; i++)
+                write.writeObject(componentType, c[i]);
+        }
+
+        @Override
+        protected void setValue(Object o, BytesIn read) throws IllegalAccessException {
+            Object[] c = (Object[]) field.get(o);
+            int length = Maths.toInt32(read.readStopBit());
+            if (length < 0) {
+                if (c != null)
+                    field.set(o, null);
+                return;
+            }
+            if (c.length != length)
+                field.set(o, c = Arrays.copyOf(c, length));
+            for (int i = 0; i < length; i++) {
+                Object o2 = c[i];
+                if (o2 instanceof BytesMarshallable)
+                    ((BytesMarshallable) o2).readMarshallable(read);
+                else
+                    c[i] = read.readObject(componentType);
+            }
+        }
+    }
 
     static class CollectionFieldAccess extends FieldAccess {
         final Supplier<Collection> collectionSupplier;
@@ -481,7 +529,11 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
-            write.writeStopBit(field.getChar(o));
+            char aChar = field.getChar(o);
+            if (aChar >= 65536 - 127)
+                write.writeStopBit(aChar - 65536);
+            else
+                write.writeStopBit(aChar);
         }
 
         @Override
@@ -606,17 +658,17 @@ public class BytesMarshaller<T> {
         }
     }
 
-static class LongFieldAccess extends FieldAccess {
-    public LongFieldAccess(Field field) {
-        super(field);
-    }
+    static class LongFieldAccess extends FieldAccess {
+        public LongFieldAccess(Field field) {
+            super(field);
+        }
 
-    @Override
-    protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
-        write.writeLong(field.getLong(o));
-    }
+        @Override
+        protected void getValue(Object o, @NotNull BytesOut write) throws IllegalAccessException {
+            write.writeLong(field.getLong(o));
+        }
 
-    @Override
+        @Override
         protected void setValue(Object o, @NotNull BytesIn read) throws IllegalAccessException {
             field.setLong(o, read.readLong());
         }
