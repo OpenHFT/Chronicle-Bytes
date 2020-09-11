@@ -38,6 +38,13 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         reserveTransfer(INIT, owner);
     }
 
+    /**
+     * Fetch the capacity of the underlying file
+     * This can differ from the exposed capacity() of this bytes store (which has been page aligned)
+     * @return - capacity of the underlying file
+     */
+    public long underlyingCapacity() { return mappedFile.capacity(); }
+
     @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
