@@ -33,15 +33,18 @@ public class PointerBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWrap() throws IllegalArgumentException {
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
+    public void testWrap() {
+        final NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(10000);
+        final PointerBytesStore pbs = BytesStore.nativePointer();
+        try {
+            pbs.set(nbs.addressForRead(nbs.start()), nbs.realCapacity());
+            final long nanoTime = System.nanoTime();
+            pbs.writeLong(0L, nanoTime);
 
-        @NotNull PointerBytesStore pbs = BytesStore.nativePointer();
-        pbs.set(nbs.addressForRead(nbs.start()), nbs.realCapacity());
-
-        long nanoTime = System.nanoTime();
-        pbs.writeLong(0L, nanoTime);
-
-        assertEquals(nanoTime, nbs.readLong(0L));
+            assertEquals(nanoTime, nbs.readLong(0L));
+        } finally {
+            nbs.releaseLast();
+            pbs.releaseLast();
+        }
     }
 }
