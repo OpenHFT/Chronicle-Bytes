@@ -93,8 +93,7 @@ public class MoreBytesTest {
             } finally {
                 to.releaseLast();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ignore) {
         }
     }
 
@@ -139,26 +138,22 @@ public class MoreBytesTest {
                 to.releaseLast();
             }
             fail("Should throw Exception");
-        } catch (BufferOverflowException e) {
-            e.printStackTrace();
+        } catch (BufferOverflowException ignore) {
+            // Ignore
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
+
+        final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
-            final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-            final Bytes<?> to = Bytes.wrapForWrite(bytes);
-            try {
-                to.append(0, 33333.14, 2, 6);
-            } finally {
-                to.releaseLast();
-            }
-            fail("Should throw Exception");
-        } catch (BufferOverflowException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            to.append(0, 33333.14, 2, 6);
+        } finally {
+            to.releaseLast();
         }
+
     }
 
     @Test
