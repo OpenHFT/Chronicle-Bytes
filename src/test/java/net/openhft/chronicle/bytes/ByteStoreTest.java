@@ -92,7 +92,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testCAS() {
-        if (Jvm.isArm()) return; // TODO FIX
+         // if (Jvm.isArm()) return; // TODO FIX
         final BytesStore<?, ?> bytes = BytesStore.wrap(ByteBuffer.allocate(100));
         bytes.compareAndSwapLong(0, 0L, 1L);
         assertEquals(1L, bytes.readLong(0));
@@ -132,7 +132,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testCompareAndSetLong() {
-        if (Jvm.isArm()) return; // TODO FIX
+        //if (Jvm.isArm()) return; // TODO FIX
 
         Assert.assertTrue(bytes.compareAndSwapLong(0L, 0L, 1L));
         Assert.assertFalse(bytes.compareAndSwapLong(0L, 0L, 1L));
@@ -381,8 +381,8 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testReadWriteThreadSafeLong() {
-        if (Jvm.isArm())
-            return; // TODO FIX
+        /*if (Jvm.isArm())
+            return; // TODO FIX*/
         for (long i = 0; i < 32; i += 8)
             bytes.writeOrderedLong(i, i);
         bytes.writePosition(32);
@@ -517,8 +517,8 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetLong() {
-        if (Jvm.isArm())
-            return; // TODO FIX
+/*        if (Jvm.isArm())
+            return; // TODO FIX*/
         final BytesStore<?, ?> bytesStore2 = BytesStore.wrap(new byte[128]);
         try {
             checkAddAndGetLong();
