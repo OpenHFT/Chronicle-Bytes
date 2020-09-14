@@ -18,7 +18,8 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
 public class MoreBytesTest {
-    private static void testIndexOf(@NotNull String sourceStr, @NotNull String subStr) {
+
+    private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         Assert.assertEquals(sourceStr.indexOf(subStr), source.indexOf(subBytes));
@@ -27,7 +28,7 @@ public class MoreBytesTest {
     @Test
     public void testOneRelease() {
         int count = 0;
-        for (@NotNull Bytes b : new Bytes[]{
+        for (@NotNull Bytes<?> b : new Bytes[]{
                 Bytes.allocateDirect(10),
                 Bytes.allocateDirect(new byte[5]),
                 Bytes.allocateElasticDirect(100),
@@ -54,9 +55,9 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendLongRandomPosition() {
-        @NotNull byte[] bytes = "00000".getBytes(ISO_8859_1);
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        Bytes to = Bytes.wrapForWrite(bb);
+        final @NotNull byte[] bytes = "00000".getBytes(ISO_8859_1);
+        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+        final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
             to.append(0, 1, 5);
             assertEquals("00001", Bytes.wrapForRead(bb).toString());
@@ -67,12 +68,12 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendLongRandomPosition2() {
-        @NotNull byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
-        ByteBuffer bb = ByteBuffer.wrap(bytes);
-        Bytes to = Bytes.wrapForWrite(bb);
+        final @NotNull byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
+        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+        final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
             to.append(5, 10, 5);
-            Bytes<ByteBuffer> bbb = Bytes.wrapForRead(bb);
+            final Bytes<ByteBuffer> bbb = Bytes.wrapForRead(bb);
             assertEquals("WWWWW00010", bbb.toString());
             bbb.releaseLast();
         } finally {
@@ -83,9 +84,9 @@ public class MoreBytesTest {
     @Test
     public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
         try {
-            @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
-            ByteBuffer bb = ByteBuffer.wrap(bytes);
-            Bytes to = Bytes.wrapForWrite(bb);
+            final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final Bytes<?> to = Bytes.wrapForWrite(bb);
             try {
                 to.append(0, 1000, 5);
                 fail("Should throw Exception");
@@ -100,9 +101,9 @@ public class MoreBytesTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
         try {
-            @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
-            ByteBuffer bb = ByteBuffer.wrap(bytes);
-            Bytes to = Bytes.wrapForWrite(bb);
+            final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
+            final ByteBuffer bb = ByteBuffer.wrap(bytes);
+            final Bytes<?> to = Bytes.wrapForWrite(bb);
             try {
                 to.append(0, 1000, 3);
             } finally {
@@ -117,8 +118,8 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendDoubleRandomPosition() {
-        @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-        Bytes to = Bytes.wrapForWrite(bytes);
+        final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
             to.append(0, 3.14, 2, 6);
         } finally {
@@ -130,8 +131,8 @@ public class MoreBytesTest {
     @Test
     public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
         try {
-            @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-            Bytes to = Bytes.wrapForWrite(bytes);
+            final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+            final Bytes<?> to = Bytes.wrapForWrite(bytes);
             try {
                 to.append(0, 3.14, 2, 8);
             } finally {
@@ -146,8 +147,8 @@ public class MoreBytesTest {
     @Test(expected = IllegalArgumentException.class)
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
         try {
-            @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-            Bytes to = Bytes.wrapForWrite(bytes);
+            final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+            final Bytes<?> to = Bytes.wrapForWrite(bytes);
             try {
                 to.append(0, 33333.14, 2, 6);
             } finally {
@@ -165,10 +166,10 @@ public class MoreBytesTest {
         int expected = 0;
         for (int i = 0x80; i <= 0xFF; i++)
             for (int j = 0x80; j <= 0xFF; j++) {
-                @NotNull byte[] b = {(byte) i, (byte) j};
-                @NotNull String s = new String(b, StandardCharsets.UTF_8);
+                final @NotNull byte[] b = {(byte) i, (byte) j};
+                final @NotNull String s = new String(b, StandardCharsets.UTF_8);
                 if (s.charAt(0) == 65533) {
-                    Bytes bytes = Bytes.wrapForRead(b);
+                    final Bytes<?> bytes = Bytes.wrapForRead(b);
                     try {
                         bytes.parseUtf8(StopCharTesters.ALL);
                         fail(Arrays.toString(b));
@@ -182,20 +183,20 @@ public class MoreBytesTest {
 
     @Test
     public void internBytes() throws IORuntimeException {
-        Bytes b = Bytes.from("Hello World");
+        final Bytes<?> b = Bytes.from("Hello World");
         try {
             b.readSkip(6);
             {
-                @NotNull StringInterner si = new StringInterner(128);
-                @Nullable String s = si.intern(b);
-                @Nullable String s2 = si.intern(b);
+                final @NotNull StringInterner si = new StringInterner(128);
+                final @Nullable String s = si.intern(b);
+                final @Nullable String s2 = si.intern(b);
                 assertEquals("World", s);
                 assertSame(s, s2);
             }
             {
-                @NotNull UTF8StringInterner si = new UTF8StringInterner(128);
-                String s = si.intern(b);
-                String s2 = si.intern(b);
+                final @NotNull UTF8StringInterner si = new UTF8StringInterner(128);
+                final String s = si.intern(b);
+                final String s2 = si.intern(b);
                 assertEquals("World", s);
                 assertSame(s, s2);
             }
@@ -206,8 +207,8 @@ public class MoreBytesTest {
 
     @Test
     public void testIndexOfExactMatchAfterReadSkip() {
-        String sourceStr = " some";
-        String subStr = "some";
+        final String sourceStr = " some";
+        final String subStr = "some";
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         source.readSkip(1);
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
@@ -216,8 +217,8 @@ public class MoreBytesTest {
 
     @Test
     public void testIndexOfExactMatchAfterReadSkipOnSubStr() {
-        String sourceStr = "some";
-        String subStr = " some";
+        final String sourceStr = "some";
+        final String subStr = " some";
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));
         final Bytes<?> subBytes = Bytes.wrapForRead(subStr.getBytes(StandardCharsets.ISO_8859_1));
         subBytes.readSkip(1);
@@ -229,63 +230,63 @@ public class MoreBytesTest {
 
     @Test
     public void testIndexOfAtEnd() {
-        String sourceStr = "A string of some data";
-        String subStr = "ta";
+        final String sourceStr = "A string of some data";
+        final String subStr = "ta";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfEmptySubStr() {
-        String sourceStr = "A string of some data";
-        String subStr = "";
+        final String sourceStr = "A string of some data";
+        final String subStr = "";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfEmptySubStrAndSource() {
-        String sourceStr = "";
-        String subStr = "";
+        final String sourceStr = "";
+        final String subStr = "";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfEmptySource() {
-        String sourceStr = "";
-        String subStr = "some";
+        final String sourceStr = "";
+        final String subStr = "some";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfExactMatch() {
-        String sourceStr = "some";
-        String subStr = "some";
+        final String sourceStr = "some";
+        final String subStr = "some";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfIncorrectExactMatch() {
-        String sourceStr = "some";
-        String subStr = " some";
+        final String sourceStr = "some";
+        final String subStr = " some";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfExactMatchAtChar1() {
-        String sourceStr = " some";
-        String subStr = "some";
+        final String sourceStr = " some";
+        final String subStr = "some";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testIndexOfLastChar() {
-        String sourceStr = " some";
-        String subStr = "e";
+        final String sourceStr = " some";
+        final String subStr = "e";
         testIndexOf(sourceStr, subStr);
     }
 
     @Test
     public void testCharAt() {
-        Bytes b = Bytes.from("Hello World");
+        final Bytes<?> b = Bytes.from("Hello World");
         try {
             b.readSkip(6);
             assertTrue(StringUtils.isEqual("World", b));
@@ -296,10 +297,11 @@ public class MoreBytesTest {
 
 @Test
     public void testReadWithLength() {
-        Bytes b = Bytes.from("Hello World");
+        final Bytes<?> b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {
-            b.readWithLength(2, bytesOut);
+            // Todo: Why is this cast needed?
+            b.readWithLength(2, (Bytes)bytesOut);
             assertEquals("He", bytesOut.toString());
         } finally {
             b.releaseLast();
@@ -309,15 +311,15 @@ public class MoreBytesTest {
 
     @Test
     public void testStartsWith() {
-        Bytes<?> aaa = Bytes.from("aaa");
-        Bytes<?> a = Bytes.from("a");
+        final Bytes<?> aaa = Bytes.from("aaa");
+        final Bytes<?> a = Bytes.from("a");
         assertTrue(aaa.startsWith(a));
-        Bytes<?> aa = Bytes.from("aa");
+        final Bytes<?> aa = Bytes.from("aa");
         assertTrue(aaa.startsWith(aa));
         assertTrue(aaa.startsWith(aaa));
-        Bytes<?> aaaa = Bytes.from("aaaa");
+        final Bytes<?> aaaa = Bytes.from("aaaa");
         assertFalse(aaa.startsWith(aaaa));
-        Bytes<?> b = Bytes.from("b");
+        final Bytes<?> b = Bytes.from("b");
         assertFalse(aaa.startsWith(b));
         a.releaseLast();
         aa.releaseLast();
