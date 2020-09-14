@@ -22,13 +22,13 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.Arrays;
 
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
@@ -72,7 +72,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 assertEquals(file0.referenceCounts(), 0, file0.refCount());
                 LOG.info("With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
-                Files.delete(tempFile.toPath());
+                deleteIfPossible(tempFile);
             }
         }
     }
@@ -95,7 +95,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 assertEquals(0, bytes.refCount());
                 LOG.info("With MappedNativeBytes,\t avg time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
-                Files.delete(tempFile.toPath());
+                deleteIfPossible(tempFile);
             }
         }
     }
@@ -126,7 +126,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 }
                 LOG.info("With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
-                Files.delete(tempFile.toPath());
+                deleteIfPossible(tempFile);
             }
         }
     }
@@ -159,9 +159,16 @@ public class MappedMemoryTest extends BytesTestCommon {
                 }
             }
         } finally {
-            Files.delete(tempFile.toPath());
+            deleteIfPossible(tempFile);
         }
         assertEquals(0, bytes0.refCount());
     }
+
+    private static void deleteIfPossible(@NotNull final File file) {
+        if (!file.delete()) {
+            System.out.println("Unable to delete " + file.getAbsolutePath());
+        }
+    }
+
 
 }
