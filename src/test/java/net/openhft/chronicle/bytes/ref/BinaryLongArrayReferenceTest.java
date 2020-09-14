@@ -44,45 +44,63 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         threadDump.assertNoNewThreads();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
-        int length = 128 * 8 + 2 * 8;
-        Bytes bytes = Bytes.allocateDirect(length);
-        BinaryLongArrayReference.write(bytes, 128);
+        final int length = 128 * 8 + 2 * 8;
+        final Bytes<?> bytes = Bytes.allocateDirect(length);
+        try {
+            BinaryLongArrayReference.write(bytes, 128);
 
-        try (@NotNull BinaryLongArrayReference array = new BinaryLongArrayReference()) {
-            array.bytesStore(bytes, 0, length);
+            try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
+                array.bytesStore(bytes, 0, length);
 
-            assertEquals(128, array.getCapacity());
-            for (int i = 0; i < 128; i++)
-                array.setValueAt(i, i + 1);
+                assertEquals(128, array.getCapacity());
+                for (int i = 0; i < 128; i++)
+                    array.setValueAt(i, i + 1);
 
-            for (int i = 0; i < 128; i++)
-                assertEquals(i + 1, array.getValueAt(i));
+                for (int i = 0; i < 128; i++)
+                    assertEquals(i + 1, array.getValueAt(i));
+            }
+        } finally {
             bytes.releaseLast();
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void marshallable() {
         assumeFalse(NativeBytes.areNewGuarded());
-        Bytes bytes = Bytes.allocateElasticDirect(256);
-        LongArrays la = new LongArrays(4, 8);
-        la.writeMarshallable(bytes);
-        System.out.println(bytes.toHexString());
+        final Bytes<?> bytes = Bytes.allocateElasticDirect(256);
+        try {
+            final LongArrays la = new LongArrays(4, 8);
+            la.writeMarshallable(bytes);
 
-        LongArrays la2 = new LongArrays(0, 0);
-        la2.readMarshallable(bytes);
-        assertEquals(4, la2.first.getCapacity());
-        assertEquals(8, la2.second.getCapacity());
-        la.closeAll();
-        la2.closeAll();
-        bytes.releaseLast();
+            final String expected =
+                    "00000000 04 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "........\n" +
+                            "00000030 08 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "00000040 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "........\n" +
+                            "00000070 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n";
+
+            final String actual = bytes.toHexString();
+
+            assertEquals(expected, actual);
+
+            //System.out.println(bytes.toHexString());
+
+            final LongArrays la2 = new LongArrays(0, 0);
+            la2.readMarshallable(bytes);
+            assertEquals(4, la2.first.getCapacity());
+            assertEquals(8, la2.second.getCapacity());
+            la.closeAll();
+            la2.closeAll();
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
-    static class LongArrays implements BytesMarshallable {
+    private static final class LongArrays implements BytesMarshallable {
         BinaryLongArrayReference first = new BinaryLongArrayReference();
         BinaryLongArrayReference second = new BinaryLongArrayReference();
 
