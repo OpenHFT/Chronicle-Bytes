@@ -32,7 +32,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     private final StringBuilder largeTextBuilder = new StringBuilder();
 
-    private String text;
+    private final String text;
 
     {
         for (int i = 0; i < 200; i++) {

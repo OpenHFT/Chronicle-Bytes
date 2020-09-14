@@ -16,6 +16,7 @@ import static org.junit.Assert.assertEquals;
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest {
+
     private final AbstractReference byteable;
 
     public ByteableReferenceTest(final String className, final AbstractReference byteable) {
@@ -50,18 +51,26 @@ public class ByteableReferenceTest {
     @Test
     public void shouldMakeReservationOnCurrentStore() {
         final NativeBytesStore<Void> firstStore = NativeBytesStore.nativeStore(64);
-        firstStore.writeLong(0, 17);
-        final NativeBytesStore<Void> secondStore = NativeBytesStore.nativeStore(64);
-        secondStore.writeLong(0, 17);
-        final long startCount = firstStore.refCount();
-        byteable.bytesStore(firstStore, 0, byteable.maxSize());
+        try {
+            firstStore.writeLong(0, 17);
+            final NativeBytesStore<Void> secondStore = NativeBytesStore.nativeStore(64);
+            try {
+                secondStore.writeLong(0, 17);
+                final long startCount = firstStore.refCount();
+                byteable.bytesStore(firstStore, 0, byteable.maxSize());
 
-        assertEquals(startCount + 1, firstStore.refCount());
+                assertEquals(startCount + 1, firstStore.refCount());
 
-        byteable.bytesStore(secondStore, 0, byteable.maxSize());
+                byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
-        assertEquals(startCount, firstStore.refCount());
-        byteable.close();
+                assertEquals(startCount, firstStore.refCount());
+                byteable.close();
+            } finally {
+                secondStore.releaseLast();
+            }
+        } finally {
+            firstStore.releaseLast();
+        }
     }
 
 }
