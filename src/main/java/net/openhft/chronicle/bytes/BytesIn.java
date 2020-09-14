@@ -44,7 +44,8 @@ public interface BytesIn<Underlying> extends
 
     <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object);
 
-    default <T> T readObject(Class<T> componentType) {
+    default <T> T readObject(Class<T> componentType0) {
+        Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
             BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);
             bm.readMarshallable(this);
