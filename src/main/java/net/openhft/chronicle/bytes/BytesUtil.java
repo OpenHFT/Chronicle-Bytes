@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -37,6 +38,16 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ;
+
+    static class WarnUncheckedElasticBytes {
+        static {
+            Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
+        }
+
+        static void warn() {
+            // static block does the work.
+        }
+    }
 
     public static String findFile(@NotNull String name) throws FileNotFoundException {
         File file = new File(name);
