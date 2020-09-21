@@ -754,4 +754,18 @@ public class BytesTest extends BytesTestCommon {
             a.releaseLast();
         }
     }
+
+    @Test
+    public void testParseDoubleReadLimit() {
+        Bytes<ByteBuffer> bytes = alloc1.fixedBytes(32);
+        try {
+            final String spaces = "   ";
+            bytes.append(spaces).append(1.23);
+            bytes.readLimit(spaces.length());
+            // only fails when assertions are off
+            assertEquals(0, BytesInternal.parseDouble(bytes), 0);
+        } finally {
+            bytes.releaseLast();
+        }
+    }
 }

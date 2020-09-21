@@ -2036,7 +2036,7 @@ enum BytesInternal {
         int ch;
         do {
             ch = in.rawReadByte() & 0xFF;
-        } while (ch == ' ');
+        } while (ch == ' ' && in.readRemaining() > 0);
 
         try {
             switch (ch) {
