@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -36,6 +37,7 @@ import java.nio.ByteBuffer;
 public abstract class AbstractBytes<Underlying>
         extends AbstractReferenceCounted
         implements Bytes<Underlying> {
+    private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -656,6 +658,12 @@ public abstract class AbstractBytes<Underlying>
     }
 
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
+        if (BYTES_BOUNDS_UNCHECKED)
+            return;
+        writeCheckOffset0(offset, adding);
+    }
+
+    private void writeCheckOffset0(long offset, long adding) {
         if (offset < start()) {
             throw newBOELower(offset);
         }
@@ -717,6 +725,12 @@ public abstract class AbstractBytes<Underlying>
     }
 
     void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
+        if (BYTES_BOUNDS_UNCHECKED)
+            return;
+        readCheckOffset0(offset, adding, given);
+    }
+
+    private void readCheckOffset0(long offset, long adding, boolean given) {
         if (offset < start()) {
             throw newBOEReadLower(offset);
         }
@@ -740,10 +754,12 @@ public abstract class AbstractBytes<Underlying>
     }
 
     void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
-        assert prewriteCheckOffset0(offset, subtracting);
+        if (BYTES_BOUNDS_UNCHECKED)
+            return;
+        prewriteCheckOffset0(offset, subtracting);
     }
 
-    private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
+    private void prewriteCheckOffset0(long offset, long subtracting) {
         if ((offset - subtracting) < start()) {
             throw newBOERange(offset, subtracting, "prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d", start());
         }
@@ -755,7 +771,6 @@ public abstract class AbstractBytes<Underlying>
             throw new DecoratedBufferOverflowException(
                     String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d", offset, limit0));
         }
-        return true;
     }
 
     @NotNull
