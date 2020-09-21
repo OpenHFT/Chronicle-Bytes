@@ -120,8 +120,7 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> clearAndPad(long length) throws BufferOverflowException {
         if ((start() + length) > capacity()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("clearAndPad failed. Start: %d + length: %d > capacity: %d", start(), length, capacity()));
+            throw newBOERange(start(), length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
         }
         long l = start() + length;
         readPosition = l;
@@ -657,18 +656,23 @@ public abstract class AbstractBytes<Underlying>
     }
 
     void writeCheckOffset(long offset, long adding) throws BufferOverflowException {
-        assert writeCheckOffset0(offset, adding);
-    }
-
-    protected boolean writeCheckOffset0(long offset, long adding) throws BufferOverflowException {
         if (offset < start()) {
-            throw new DecoratedBufferOverflowException(String.format("writeCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
+            throw newBOELower(offset);
         }
         if ((offset + adding) > writeLimit()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("writeCheckOffset0 failed. Offset: %d + adding %d> writeLimit: %d", offset, adding, writeLimit()));
+            throw newBOERange(offset, adding, "writeCheckOffset failed. Offset: %d + adding %d> writeLimit: %d", writeLimit());
         }
-        return true;
+    }
+
+    @NotNull
+    private DecoratedBufferOverflowException newBOERange(long offset, long adding, String msg, long limit) {
+        return new DecoratedBufferOverflowException(
+                String.format(msg, offset, adding, limit));
+    }
+
+    @NotNull
+    private DecoratedBufferOverflowException newBOELower(long offset) {
+        return new DecoratedBufferOverflowException(String.format("writeCheckOffset failed. Offset: %d < start: %d", offset, start()));
     }
 
     @Override
@@ -713,22 +717,26 @@ public abstract class AbstractBytes<Underlying>
     }
 
     void readCheckOffset(long offset, long adding, boolean given) throws BufferUnderflowException {
-        assert readCheckOffset0(offset, adding, given);
-    }
-
-    private boolean readCheckOffset0(long offset, long adding, boolean given) throws BufferUnderflowException {
         if (offset < start()) {
-            throw new DecoratedBufferUnderflowException(String.format("readCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
+            throw newBOEReadLower(offset);
         }
         long limit0 = given ? writeLimit() : readLimit();
         if ((offset + adding) > limit0) {
-            // assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-            // offset +
-            // ",adding=" + adding;
-            throw new DecoratedBufferUnderflowException(String
-                    .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit0, given));
+            throw newBOEReadUpper(offset, adding, given);
         }
-        return true;
+    }
+
+    @NotNull
+    private DecoratedBufferUnderflowException newBOEReadUpper(long offset, long adding, boolean given) {
+        long limit2 = given ? writeLimit() : readLimit();
+        DecoratedBufferUnderflowException e = new DecoratedBufferUnderflowException(String
+                .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit2, given));
+        return e;
+    }
+
+    @NotNull
+    private DecoratedBufferUnderflowException newBOEReadLower(long offset) {
+        return new DecoratedBufferUnderflowException(String.format("readCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
     }
 
     void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
@@ -737,8 +745,7 @@ public abstract class AbstractBytes<Underlying>
 
     private boolean prewriteCheckOffset0(long offset, long subtracting) throws BufferOverflowException {
         if ((offset - subtracting) < start()) {
-            throw new DecoratedBufferOverflowException(
-                    String.format("prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d", offset, subtracting, start()));
+            throw newBOERange(offset, subtracting, "prewriteCheckOffset0 failed. Offset: %d - subtracting: %d < start: %d", start());
         }
         long limit0 = readLimit();
         if (offset > limit0) {
