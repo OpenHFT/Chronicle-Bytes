@@ -95,7 +95,7 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-@Test
+    @Test
     public void writeAdv() {
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
@@ -397,10 +397,6 @@ public class BytesTest extends BytesTestCommon {
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(4);
         try {
-            boolean debug = false;
-            assert debug = true;
-            assumeTrue(!bytes.isDirectMemory() || debug);
-
             bytes.writeInt(-1, 1);
         } finally {
             bytes.releaseLast();
@@ -411,10 +407,6 @@ public class BytesTest extends BytesTestCommon {
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
         try {
-            boolean debug = false;
-            assert debug = true;
-            assumeTrue(!bytes.isDirectMemory() || debug);
-
             bytes.writeInt(-1, 1);
         } finally {
             bytes.releaseLast();
