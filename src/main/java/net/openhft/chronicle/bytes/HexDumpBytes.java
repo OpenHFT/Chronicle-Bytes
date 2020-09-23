@@ -728,7 +728,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writePosition(long position) throws BufferOverflowException {
-        base.writePosition(position);
+        base.writePosition(position & 0xFFFFFFFFL);
+        text.writePosition(position >>> 32);
         return this;
     }
 
@@ -763,6 +764,11 @@ public class HexDumpBytes
         }
     }
 
+    /**
+     * For HexDumpBytes it needs to remember the writePosition for the underlying bytes as well as the text hex dump, so it encodes both in one number so you can call writePosition later.
+     *
+     * @return the base and text writePositions.
+     */
     @Override
     public long writePosition() {
         return base.writePosition() | (text.writePosition() << 32);
@@ -1489,12 +1495,8 @@ public class HexDumpBytes
 
     @Override
     public void writePositionRemaining(long position, long length) {
-        long pos = base.writePosition();
-        try {
-            base.writePositionRemaining(position, length);
-        } finally {
-            copyToText(pos);
-        }
+        writePosition(position);
+        writeLimit(base.writePosition + length);
     }
 
     @Override
