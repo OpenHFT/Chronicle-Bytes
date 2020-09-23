@@ -40,6 +40,7 @@ import static org.junit.Assume.assumeFalse;
 public class BytesInternalTest extends BytesTestCommon {
 
     private final boolean guarded;
+    private ThreadDump threadDump;
 
     public BytesInternalTest(String name, boolean guarded) {
         this.guarded = guarded;
@@ -79,8 +80,6 @@ public class BytesInternalTest extends BytesTestCommon {
         bs.releaseLast();
     }
 
-    private ThreadDump threadDump;
-
     @Before
     public void threadDump() {
         threadDump = new ThreadDump();
@@ -99,6 +98,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         @NotNull byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
@@ -106,7 +106,12 @@ public class BytesInternalTest extends BytesTestCommon {
 
         @NotNull StringBuilder sb = new StringBuilder();
 
-        BytesInternal.parseUtf8(bytes, sb, 128);
+        BytesInternal.parseUtf8(bytes, sb, true, 128);
+        assertEquals(128, sb.length());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+        bytes.readPosition(0);
+        sb.setLength(0);
+        BytesInternal.parseUtf8(bytes, sb, false, 128);
         assertEquals(128, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
         bytes.releaseLast();
@@ -123,7 +128,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
         @NotNull StringBuilder sb = new StringBuilder();
 
-        BytesInternal.parseUtf8(bytes, sb, length);
+        BytesInternal.parseUtf8(bytes, sb, true, length);
         assertEquals(length, sb.length());
         String actual = sb.toString();
         sb = null; // free some memory.
@@ -176,7 +181,14 @@ public class BytesInternalTest extends BytesTestCommon {
 
         @NotNull StringBuilder sb = new StringBuilder();
 
-        BytesInternal.parseUtf81(bytes, sb, length);
+        BytesInternal.parseUtf81(bytes, sb, true, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+
+        bytes.readPosition(0);
+        sb.setLength(0);
+
+        BytesInternal.parseUtf81(bytes, sb, false, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
 
@@ -185,6 +197,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
@@ -193,15 +206,25 @@ public class BytesInternalTest extends BytesTestCommon {
 
         @NotNull StringBuilder sb = new StringBuilder();
 
-        BytesInternal.parseUtf8_SB1(bytes, sb, length);
+        BytesInternal.parseUtf8_SB1(bytes, sb, true, length);
         assertEquals(length, sb.length());
         assertEquals(new String(bytes2, US_ASCII), sb.toString());
+
+        bytes.readPosition(0);
+        sb.setLength(0);
+
+/*
+        BytesInternal.parseUtf8_SB1(bytes, sb, false, length);
+        assertEquals(length, sb.length());
+        assertEquals(new String(bytes2, US_ASCII), sb.toString());
+*/
 
         bytes.releaseLast();
     }
 
     @Test
     public void testParse8bit_LongString() throws Exception {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         @NotNull byte[] bytes2 = new byte[length];
@@ -257,6 +280,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testAppendUtf8LongString() throws Exception {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
@@ -276,6 +300,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testAppend8bitLongString() throws Exception {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);

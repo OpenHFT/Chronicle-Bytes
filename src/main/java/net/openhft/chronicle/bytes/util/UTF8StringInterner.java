@@ -37,7 +37,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     @NotNull
     protected String getValue(@NotNull BytesStore cs, int length) throws UTFDataFormatRuntimeException {
         StringBuilder sb = SBP.acquireStringBuilder();
-        AppendableUtil.parseUtf8(cs, sb, length);
+        AppendableUtil.parseUtf8(cs, sb, true, length);
         return sb.toString();
     }
 }

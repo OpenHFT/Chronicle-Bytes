@@ -258,7 +258,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             return false;
         int len = Maths.toUInt31(len0);
         if (len > 0)
-            BytesInternal.parseUtf8(this, sb, len);
+            BytesInternal.parseUtf8(this, sb, true, len);
         return true;
     }
 
@@ -383,10 +383,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         parseUtf8(sb, length);
     }
 
-    default void parseUtf8(Appendable sb, int length)
+    default void parseUtf8(Appendable sb, int encodedLength)
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+        parseUtf8(sb, true, encodedLength);
+    }
+
+    default void parseUtf8(Appendable sb, boolean utf, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
         AppendableUtil.setLength(sb, 0);
-        BytesInternal.parseUtf8(this, sb, length);
+        BytesInternal.parseUtf8(this, sb, utf, length);
     }
 
     default long parseHexLong() {

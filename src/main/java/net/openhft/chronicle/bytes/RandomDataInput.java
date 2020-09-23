@@ -432,7 +432,7 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen == -1)
             return ~offset;
         int len = Maths.toUInt31(utfLen);
-        BytesInternal.parseUtf8(this, offset, sb, len);
+        BytesInternal.parseUtf8(this, offset, sb, true, len);
         return offset + utfLen;
     }
 
@@ -486,7 +486,7 @@ public interface RandomDataInput extends RandomCommon {
         if (utfLen > maxUtf8Len)
             throw new IllegalStateException("Attempted to read a char sequence of " +
                     "utf8 size " + utfLen + ", when only " + maxUtf8Len + " allowed");
-        BytesInternal.parseUtf8(this, offset, sb, (int) utfLen);
+        BytesInternal.parseUtf8(this, offset, sb, true, (int) utfLen);
         return offset + utfLen;
     }
 

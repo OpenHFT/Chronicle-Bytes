@@ -133,34 +133,36 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
+            @NotNull StreamingDataInput bytes, Appendable appendable, boolean utf, int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         if (appendable instanceof StringBuilder
                 && bytes.isDirectMemory()
-                && utflen < 1 << 20) {
+                && length < 1 << 20
+                && utf) {
             // todo fix, a problem with very long sequences. #35
-            parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utflen);
+            parseUtf8_SB1((Bytes) bytes, (StringBuilder) appendable, utf, length);
         } else {
-            parseUtf81(bytes, appendable, utflen);
+            parseUtf81(bytes, appendable, utf, length);
         }
     }
 
     public static void parseUtf8(
-            @NotNull RandomDataInput input, long offset, Appendable appendable, int utflen)
+            @NotNull RandomDataInput input, long offset, Appendable appendable, boolean utf, int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
 
+        assert utf;
         if (appendable instanceof StringBuilder) {
             if (input instanceof NativeBytesStore) {
-                parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, utflen);
+                parseUtf8_SB1((NativeBytesStore) input, offset, (StringBuilder) appendable, length);
                 return;
             } else if (input instanceof Bytes
                     && ((Bytes) input).bytesStore() instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore bs = (NativeBytesStore) ((Bytes) input).bytesStore();
-                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, utflen);
+                parseUtf8_SB1(bs, offset, (StringBuilder) appendable, length);
                 return;
             }
         }
-        parseUtf81(input, offset, appendable, utflen);
+        parseUtf81(input, offset, appendable, length);
     }
 
     public static boolean compareUtf8(@NotNull RandomDataInput input, long offset, @Nullable CharSequence other)
@@ -289,12 +291,12 @@ enum BytesInternal {
     }
 
     public static void parseUtf81(
-            @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen)
+            @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
             int count = 0;
-            assert bytes.readRemaining() >= utflen;
-            while (count < utflen) {
+            assert bytes.readRemaining() >= length;
+            while (count < length) {
                 int c = bytes.readUnsignedByte();
                 if (c >= 128) {
                     bytes.readSkip(-1);
@@ -307,8 +309,8 @@ enum BytesInternal {
                 appendable.append((char) c);
             }
 
-            if (utflen > count)
-                parseUtf82(bytes, appendable, utflen, count);
+            if (length > count)
+                parseUtf82(bytes, appendable, utf, length, count);
         } catch (IOException e) {
             throw Jvm.rethrow(e);
         }
@@ -378,9 +380,10 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         try {
+            assert utf;
             int count = 0;
             if (utflen > bytes.readRemaining()) {
                 @NotNull final BufferUnderflowException bue = new BufferUnderflowException();
@@ -413,7 +416,7 @@ enum BytesInternal {
 
                 long rp0 = bytes.readPosition();
                 try {
-                    parseUtf82(bytes, sb, utflen, count);
+                    parseUtf82(bytes, sb, utf, utflen, count);
                 } catch (UTFDataFormatRuntimeException e) {
                     long rp = Math.max(rp0 - 128, 0);
                     throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200));
@@ -496,9 +499,9 @@ enum BytesInternal {
         return count;
     }
 
-    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen, int count)
+    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, int length, int count)
             throws IOException, UTFDataFormatRuntimeException {
-        while (count < utflen) {
+        while (count < length) {
             int c = bytes.readUnsignedByte();
             if (c < 0)
                 break;
@@ -519,8 +522,8 @@ enum BytesInternal {
                 case 12:
                 case 13: {
                     /* 110x xxxx 10xx xxxx */
-                    count += 2;
-                    if (count > utflen)
+                    count += utf ? 2 : 1;
+                    if (count > length)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = bytes.readUnsignedByte();
@@ -535,8 +538,8 @@ enum BytesInternal {
 
                 case 14: {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
-                    count += 3;
-                    if (count > utflen)
+                    count += utf ? 3 : 1;
+                    if (count > length)
                         throw new UTFDataFormatRuntimeException(
                                 "malformed input: partial character at end");
                     int char2 = bytes.readUnsignedByte();

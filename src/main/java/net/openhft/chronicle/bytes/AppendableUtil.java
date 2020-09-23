@@ -43,8 +43,8 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, int utflen) throws UTFDataFormatRuntimeException {
-        BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utflen);
+    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, int length) throws UTFDataFormatRuntimeException {
+        BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }
 
     @ForceInline

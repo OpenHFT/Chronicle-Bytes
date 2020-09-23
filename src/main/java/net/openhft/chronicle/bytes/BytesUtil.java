@@ -174,7 +174,7 @@ public static boolean bytesEqual(
     public static void parseUtf8(
             @NotNull StreamingDataInput in, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException {
-        BytesInternal.parseUtf8(in, appendable, utflen);
+        BytesInternal.parseUtf8(in, appendable, true, utflen);
     }
 
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs) {
