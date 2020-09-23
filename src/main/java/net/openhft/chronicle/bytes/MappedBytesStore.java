@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
+
 /**
  * BytesStore to wrap memory mapped data.
  */
@@ -41,9 +43,23 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     /**
      * Fetch the capacity of the underlying file
      * This can differ from the exposed capacity() of this bytes store (which has been page aligned)
+     *
      * @return - capacity of the underlying file
      */
-    public long underlyingCapacity() { return mappedFile.capacity(); }
+    public long underlyingCapacity() {
+        return mappedFile.capacity();
+    }
+
+    @Override
+    public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
+        try {
+            return new VanillaBytes<Void>(this)
+                    .readLimit(writeLimit())
+                    .readPosition(start());
+        } catch (BufferUnderflowException e) {
+            throw new IllegalStateException(e);
+        }
+    }
 
     @NotNull
     @Override
