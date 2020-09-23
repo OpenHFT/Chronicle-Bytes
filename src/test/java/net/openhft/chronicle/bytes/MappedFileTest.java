@@ -31,6 +31,7 @@ import java.io.*;
 import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedFileTest extends BytesTestCommon {
 
@@ -182,6 +183,8 @@ public class MappedFileTest extends BytesTestCommon {
 
     @Test
     public void testReadOnlyOpen() throws IOException {
+        assumeFalse(OS.isWindows());
+
         String text = "Some text to put in this file. yay!\n";
 
         @NotNull File file = File.createTempFile("readOnlyOpenFile", "deleteme");
