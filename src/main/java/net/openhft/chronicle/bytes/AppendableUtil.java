@@ -195,13 +195,13 @@ public enum AppendableUtil {
         }
     }
 
-    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen)
+    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int length)
             throws BufferUnderflowException {
-        if (utflen > bytes.readRemaining())
+        if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
         long offset = bytes.readPosition();
-        int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, utflen);
+        int count = BytesInternal.parse8bit_SB1(offset, nbs, sb, length);
         bytes.readSkip(count);
     }
 

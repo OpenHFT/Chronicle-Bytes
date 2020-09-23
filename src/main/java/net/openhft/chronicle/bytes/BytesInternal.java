@@ -465,10 +465,10 @@ enum BytesInternal {
         }
     }
 
-    public static int parse8bit_SB1(long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, int utflen) {
+    public static int parse8bit_SB1(long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, int length) {
         long address = nbs.address + nbs.translate(offset);
         @Nullable Memory memory = nbs.memory;
-        sb.ensureCapacity(utflen);
+        sb.ensureCapacity(length);
         int count = 0;
 
         if (Jvm.isJava9Plus()) {
@@ -476,21 +476,21 @@ enum BytesInternal {
 
             if (coder == JAVA9_STRING_CODER_LATIN) {
                 byte[] bytes = extractBytes(sb);
-                while (count < utflen) {
+                while (count < length) {
                     byte b = memory.readByte(address + count);
                     bytes[count++] = b;
                 }
             } else {
                 assert coder == JAVA9_STRING_CODER_UTF16;
-                sb.setLength(utflen);
-                while (count < utflen) {
+                sb.setLength(length);
+                while (count < length) {
                     byte b = memory.readByte(address + count);
                     sb.setCharAt(count++, (char) b);
                 }
             }
         } else {
             char[] chars = extractChars(sb);
-            while (count < utflen) {
+            while (count < length) {
                 int c = memory.readByte(address + count) & 0xFF;
                 chars[count++] = (char) c;
             }
