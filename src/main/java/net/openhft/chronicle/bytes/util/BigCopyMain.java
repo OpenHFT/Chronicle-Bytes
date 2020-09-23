@@ -10,7 +10,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Random;
 
-public class BytesTest {
+public class BigCopyMain {
 
     public static void main(String[] args) throws IOException {
         int initialCapacity = 10 * 1024 * 1024;
