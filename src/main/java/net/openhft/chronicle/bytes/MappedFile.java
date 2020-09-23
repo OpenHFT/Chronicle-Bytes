@@ -522,6 +522,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         try {
             return fileChannel.size();
 
+            // this was seen once deep in the JVM.
         } catch (ArrayIndexOutOfBoundsException aiooe) {
             // try again.
             return actualSize();
