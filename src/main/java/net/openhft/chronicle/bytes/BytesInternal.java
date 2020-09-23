@@ -2514,7 +2514,8 @@ enum BytesInternal {
             throws IOException {
         @NotNull byte[] bytes = new byte[512];
         long start = input.readPosition();
-        for (int i = 0, len; (len = (int) input.read(start + i, bytes, 0, bytes.length)) > 0; i += len) {
+        long i = 0;
+        for (int len; (len = (int) input.read(start + i, bytes, 0, bytes.length)) > 0; i += len) {
             output.write(bytes, 0, len);
         }
     }
