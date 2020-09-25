@@ -252,7 +252,7 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(BytesStore store) {
+    public long copyTo(@NotNull BytesStore store) {
         throw newIllegalStateException();
     }
 
@@ -282,7 +282,7 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
         throw newIllegalStateException();
     }
 

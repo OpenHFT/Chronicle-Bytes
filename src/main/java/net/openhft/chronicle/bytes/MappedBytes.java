@@ -148,9 +148,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 '}';
     }
 
-    public MappedBytes write(final byte[] bytes,
-                             final int offset,
-                             final int length) {
+    public @NotNull MappedBytes write(final byte[] bytes,
+                                      final int offset,
+                                      final int length) {
         throwExceptionIfClosed();
 
         write(writePosition, bytes, offset, length);
@@ -158,10 +158,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    public MappedBytes write(final long offsetInRDO,
-                             final byte[] bytes,
-                             int offset,
-                             final int length) {
+    public @NotNull MappedBytes write(final long offsetInRDO,
+                                      final byte[] bytes,
+                                      int offset,
+                                      final int length) {
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -199,10 +199,10 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
-    public MappedBytes write(final long writeOffset,
-                             final RandomDataInput bytes,
-                             long readOffset,
-                             final long length)
+    public @NotNull MappedBytes write(final long writeOffset,
+                                      final RandomDataInput bytes,
+                                      long readOffset,
+                                      final long length)
             throws BufferOverflowException, BufferUnderflowException {
         throwExceptionIfClosed();
 
@@ -470,9 +470,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
-    @Nullable
     @Override
-    public MappedBytesStore bytesStore() {
+    public @NotNull MappedBytesStore bytesStore() {
 //        throwExceptionIfClosed();
 
         return (MappedBytesStore) super.bytesStore();
@@ -621,7 +620,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     @NotNull
-    public MappedBytes write8bit(CharSequence s, int start, int length) {
+    public MappedBytes write8bit(@NotNull CharSequence s, int start, int length) {
         throwExceptionIfClosed();
 
         if (s == null) {
@@ -685,7 +684,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(CharSequence cs, int start, int length)
+    public Bytes<Void> appendUtf8(@NotNull CharSequence cs, int start, int length)
             throws BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
@@ -897,7 +896,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
-    public Bytes<Void> writeUtf8(String str) throws BufferOverflowException {
+    public @NotNull Bytes<Void> writeUtf8(String str) throws BufferOverflowException {
         throwExceptionIfClosed();
 
         if (str == null) {
@@ -1026,7 +1025,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return true;
     }
 
-    public MappedBytes write8bit(@Nullable BytesStore bs)
+    public @NotNull MappedBytes write8bit(@Nullable BytesStore bs)
             throws BufferOverflowException {
         throwExceptionIfClosed();
 

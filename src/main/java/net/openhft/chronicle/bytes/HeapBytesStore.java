@@ -56,7 +56,7 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteBuffer.capacity();
     }
 
-    private HeapBytesStore(@NotNull byte[] byteArray) {
+    private HeapBytesStore(@NotNull byte @NotNull [] byteArray) {
         super(false);
         //noinspection unchecked
         this.underlyingObject = (Underlying) byteArray;

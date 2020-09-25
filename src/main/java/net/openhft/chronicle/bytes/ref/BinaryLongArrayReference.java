@@ -43,7 +43,6 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     private static final int MAX_TO_STRING = 1024;
     @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
-    @Nullable
     private long length = 16;
 
     public static void startCollecting() {

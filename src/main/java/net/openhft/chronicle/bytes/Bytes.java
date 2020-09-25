@@ -789,7 +789,7 @@ public interface Bytes<Underlying> extends
     }
 
     @Override
-    default void copyTo(OutputStream out) throws IOException {
+    default void copyTo(@NotNull OutputStream out) throws IOException {
         BytesStore.super.copyTo(out);
     }
 

@@ -127,6 +127,22 @@ public class HexDumpBytes
     }
 
     @Override
+    public int hashCode() {
+        return base.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return base.equals(obj);
+    }
+
+    @Override
+    @NotNull
+    public String toString() {
+        return base.toString();
+    }
+
+    @Override
     public boolean retainsComments() {
         return true;
     }

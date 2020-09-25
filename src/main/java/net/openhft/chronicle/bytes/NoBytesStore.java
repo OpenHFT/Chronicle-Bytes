@@ -265,7 +265,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(BytesStore store) {
+    public long copyTo(@NotNull BytesStore store) {
         // nothing to copy.
         return 0L;
     }
@@ -296,7 +296,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
         return length == 0;
     }
 

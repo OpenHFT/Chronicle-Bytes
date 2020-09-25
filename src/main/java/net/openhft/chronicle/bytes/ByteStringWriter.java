@@ -46,12 +46,12 @@ class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(String str) throws IOException {
+    public void write(@NotNull String str) throws IOException {
         out.append(str);
     }
 
     @Override
-    public void write(String str, int off, int len) throws IOException {
+    public void write(@NotNull String str, int off, int len) throws IOException {
         out.append(str, off, off + len);
     }
 

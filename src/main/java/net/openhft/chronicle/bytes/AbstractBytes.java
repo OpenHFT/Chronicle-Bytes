@@ -202,7 +202,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
-    public AbstractBytes append(double d) throws BufferOverflowException {
+    public @NotNull AbstractBytes append(double d) throws BufferOverflowException {
         boolean fits = canWriteDirect(380);
         double ad = Math.abs(d);
         if (ad < 1e-18) {

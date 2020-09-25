@@ -319,7 +319,7 @@ public class VanillaBytes<Underlying>
 
     @NotNull
     @Override
-    public VanillaBytes appendUtf8(CharSequence str) throws BufferOverflowException {
+    public VanillaBytes appendUtf8(@NotNull CharSequence str) throws BufferOverflowException {
         try {
             if (isDirectMemory()) {
                 if (str instanceof BytesStore) {
@@ -472,7 +472,7 @@ public class VanillaBytes<Underlying>
     }
 
     @Override
-    public boolean equalBytes(BytesStore bytesStore, long length) throws BufferUnderflowException {
+    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) throws BufferUnderflowException {
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&
                 bytesStore.isDirectMemory()) {
