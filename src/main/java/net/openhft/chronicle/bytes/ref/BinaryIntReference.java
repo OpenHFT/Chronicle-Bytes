@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
  * This class acts as a Binary 32-bit in values. c.f. TextIntReference
  */
 public class BinaryIntReference extends AbstractReference implements IntValue {
+    public static final int INT_NOT_COMPLETE = Integer.MIN_VALUE;
 
     @SuppressWarnings("rawtypes")
     @Override

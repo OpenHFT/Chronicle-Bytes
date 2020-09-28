@@ -604,6 +604,26 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
+    /**
+     * Write a value which is not smaller.
+     *
+     * @param offset  to write to
+     * @param atLeast value it is at least.
+     */
+    default void writeMaxInt(long offset, int atLeast) throws BufferUnderflowException {
+        try {
+            for (; ; ) {
+                int v = readVolatileInt(offset);
+                if (v >= atLeast)
+                    return;
+                if (compareAndSwapInt(offset, v, atLeast))
+                    return;
+            }
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     default boolean isEmpty() {
         return readRemaining() == 0;
     }

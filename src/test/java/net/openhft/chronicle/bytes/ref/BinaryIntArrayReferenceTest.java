@@ -26,15 +26,15 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
-public class BinaryLongArrayReferenceTest extends BytesTestCommon {
+public class BinaryIntArrayReferenceTest extends BytesTestCommon {
     @Test
     public void getSetValues() {
-        final int length = 128 * 8 + 2 * 8;
+        final int length = 128 * 4 + 2 * 8;
         final Bytes<?> bytes = Bytes.allocateDirect(length);
         try {
-            BinaryLongArrayReference.write(bytes, 128);
+            BinaryIntArrayReference.write(bytes, 128);
 
-            try (BinaryLongArrayReference array = new BinaryLongArrayReference()) {
+            try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
                 array.bytesStore(bytes, 0, length);
 
                 assertEquals(128, array.getCapacity());
@@ -54,17 +54,15 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         assumeFalse(NativeBytes.areNewGuarded());
         final Bytes<?> bytes = Bytes.allocateElasticDirect(256);
         try {
-            final LongArrays la = new LongArrays(4, 8);
+            final IntArrays la = new IntArrays(4, 8);
             la.writeMarshallable(bytes);
 
             final String expected =
                     "00000000 04 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                             "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "........\n" +
-                            "00000030 08 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "00000040 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "........\n" +
-                            "00000070 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n";
+                            "00000020 08 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "00000030 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                            "00000040 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n";
 
             final String actual = bytes.toHexString();
 
@@ -72,7 +70,7 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
 
             //System.out.println(bytes.toHexString());
 
-            final LongArrays la2 = new LongArrays(0, 0);
+            final IntArrays la2 = new IntArrays(0, 0);
             la2.readMarshallable(bytes);
             assertEquals(4, la2.first.getCapacity());
             assertEquals(8, la2.second.getCapacity());
@@ -83,11 +81,11 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
         }
     }
 
-    private static final class LongArrays implements BytesMarshallable {
-        BinaryLongArrayReference first = new BinaryLongArrayReference();
-        BinaryLongArrayReference second = new BinaryLongArrayReference();
+    private static final class IntArrays implements BytesMarshallable {
+        BinaryIntArrayReference first = new BinaryIntArrayReference();
+        BinaryIntArrayReference second = new BinaryIntArrayReference();
 
-        public LongArrays(int firstLength, int secondLength) {
+        public IntArrays(int firstLength, int secondLength) {
             first.capacity(firstLength);
             second.capacity(secondLength);
         }

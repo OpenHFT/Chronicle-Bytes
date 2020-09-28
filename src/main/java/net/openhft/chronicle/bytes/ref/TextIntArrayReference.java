@@ -20,7 +20,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -30,12 +30,12 @@ The format for a long array in text is
 { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
 @SuppressWarnings("rawtypes")
-public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
+public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION3 = ", values: [ ".getBytes(ISO_8859_1);
     private static final byte[] SECTION4 = " ] }\n".getBytes(ISO_8859_1);
-    private static final byte[] ZERO = "00000000000000000000".getBytes(ISO_8859_1);
+    private static final byte[] ZERO = "0000000000".getBytes(ISO_8859_1);
     private static final byte[] SEP = ", ".getBytes(ISO_8859_1);
 
     private static final int DIGITS = ZERO.length;
@@ -75,12 +75,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getUsed() {
-try {
-    return bytes.parseLong(USED + offset);
-} catch (NullPointerException e) {
-    throwExceptionIfClosed();
-    throw e;
-}
+        try {
+            return bytes.parseLong(USED + offset);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     private void setUsed(long used) {
@@ -119,7 +119,7 @@ try {
     }
 
     @Override
-    public ByteableLongArrayValues capacity(long arrayLength) {
+    public ByteableIntArrayValues capacity(long arrayLength) {
         BytesStore bytesStore = bytesStore();
         long length = sizeInBytes(arrayLength);
         if (bytesStore == null) {
@@ -131,9 +131,9 @@ try {
     }
 
     @Override
-    public long getValueAt(long index) {
+    public int getValueAt(long index) {
         try {
-            return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
+            return (int) bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -142,7 +142,7 @@ try {
     }
 
     @Override
-    public void setValueAt(long index, long value) {
+    public void setValueAt(long index, int value) {
         try {
             bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
         } catch (NullPointerException e) {
@@ -152,24 +152,24 @@ try {
     }
 
     @Override
-    public void bindValueAt(long index, LongValue value) {
+    public void bindValueAt(long index, IntValue value) {
         throw new UnsupportedOperationException("todo");
     }
 
     @Override
-    public long getVolatileValueAt(long index) {
+    public int getVolatileValueAt(long index) {
         OS.memory().loadFence();
         return getValueAt(index);
     }
 
     @Override
-    public void setOrderedValueAt(long index, long value) {
+    public void setOrderedValueAt(long index, int value) {
         setValueAt(index, value);
         OS.memory().storeFence();
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value) {
+    public boolean compareAndSet(long index, int expected, int value) {
         try {
             if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                 return false;

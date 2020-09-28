@@ -31,7 +31,7 @@ import java.nio.BufferUnderflowException;
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
     @Nullable
-    protected BytesStore bytes;
+    protected BytesStore<?, ?> bytes;
     protected long offset;
 
     @Override

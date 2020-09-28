@@ -19,7 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.values.LongValue;
+import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -30,34 +30,34 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
-import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
+import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLETE;
 
 /**
  * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
  */
 @SuppressWarnings("rawtypes")
-public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
+public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
+    public static final int SHIFT = 2;
     private static final long CAPACITY = 0;
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
     private static final int MAX_TO_STRING = 1024;
-    public static final int SHIFT = 3;
     @Nullable
-    private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
+    private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
     private long length = 16;
 
     public static void startCollecting() {
-        binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
+        binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
     public static void forceAllToNotCompleteState() {
-        binaryLongArrayReferences.forEach(x -> {
-            @Nullable BinaryLongArrayReference binaryLongReference = x.get();
+        binaryIntArrayReferences.forEach(x -> {
+            @Nullable BinaryIntArrayReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
-                binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
+                binaryLongReference.setValueAt(0, INT_NOT_COMPLETE);
             }
         });
-        binaryLongArrayReferences = null;
+        binaryIntArrayReferences = null;
     }
 
     public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
@@ -95,7 +95,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     public long getUsed() {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileLong(offset + USED);
+        return bytes.readVolatileInt(offset + USED);
     }
 
     @Override
@@ -106,38 +106,38 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public long getValueAt(long index) throws BufferUnderflowException {
+    public int getValueAt(long index) throws BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readLong(VALUES + offset + (index << SHIFT));
+        return bytes.readInt(VALUES + offset + (index << SHIFT));
     }
 
     @Override
-    public void setValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+    public void setValueAt(long index, int value) throws IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeLong(VALUES + offset + (index << SHIFT), value);
+        bytes.writeInt(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
-    public long getVolatileValueAt(long index) throws BufferUnderflowException {
+    public int getVolatileValueAt(long index) throws BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileLong(VALUES + offset + (index << SHIFT));
+        return bytes.readVolatileInt(VALUES + offset + (index << SHIFT));
     }
 
     @Override
-    public void bindValueAt(long index, @NotNull LongValue value) {
+    public void bindValueAt(long index, @NotNull IntValue value) {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
+        ((BinaryIntReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override
-    public void setOrderedValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+    public void setOrderedValueAt(long index, int value) throws IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeOrderedLong(VALUES + offset + (index << SHIFT), value);
+        bytes.writeOrderedInt(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
@@ -250,7 +250,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public ByteableLongArrayValues capacity(long arrayLength) {
+    public ByteableIntArrayValues capacity(long arrayLength) {
         throwExceptionIfClosedInSetter();
 
         BytesStore bytesStore = bytesStore();
@@ -264,12 +264,12 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value) throws IllegalArgumentException, BufferOverflowException {
+    public boolean compareAndSet(long index, int expected, int value) throws IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)
-            binaryLongArrayReferences.add(new WeakReference<>(this));
-        return bytes.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
+        if (value == INT_NOT_COMPLETE && binaryIntArrayReferences != null)
+            binaryIntArrayReferences.add(new WeakReference<>(this));
+        return bytes.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
     }
 }
 
