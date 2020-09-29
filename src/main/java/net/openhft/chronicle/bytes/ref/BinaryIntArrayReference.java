@@ -44,7 +44,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     private static final int MAX_TO_STRING = 1024;
     @Nullable
     private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
-    private long length = 16;
+    private long length;
+
+    public BinaryIntArrayReference() {
+        this(0);
+    }
+
+    public BinaryIntArrayReference(long defaultCapacity) {
+        this.length = (defaultCapacity << SHIFT) + VALUES;
+    }
 
     public static void startCollecting() {
         binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -170,9 +178,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytesStore(((Bytes) bytes).bytesStore(), position, length);
     }
 
+
     @Override
     public void writeMarshallable(BytesOut bytes) {
-        ;
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
@@ -180,7 +188,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             bytes.writeLong(0);
             bytes.writeSkip(capacity << SHIFT);
         } else {
-            bytes.write(bytesStore, offset, VALUES + (length << SHIFT));
+            bytes.write(bytesStore, offset, length);
         }
     }
 

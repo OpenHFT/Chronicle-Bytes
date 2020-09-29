@@ -44,7 +44,15 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     public static final int SHIFT = 3;
     @Nullable
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
-    private long length = 16;
+    private long length;
+
+    public BinaryLongArrayReference() {
+        this(0);
+    }
+
+    public BinaryLongArrayReference(long defaultCapacity) {
+        this.length = (defaultCapacity << SHIFT) + VALUES;
+    }
 
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
@@ -172,7 +180,6 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     @Override
     public void writeMarshallable(BytesOut bytes) {
-        ;
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
@@ -180,7 +187,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             bytes.writeLong(0);
             bytes.writeSkip(capacity << SHIFT);
         } else {
-            bytes.write(bytesStore, offset, VALUES + (length << SHIFT));
+            bytes.write(bytesStore, offset, length);
         }
     }
 
