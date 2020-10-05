@@ -305,6 +305,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
     }
 
+    /**
+     * Writes the passed BytesStore
+     * @param bytes to write
+     * @return this
+     */
     default S write(@NotNull BytesStore bytes) {
         assert bytes != this : "you should not write to yourself !";
 

@@ -248,6 +248,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * This method is inherited from CharSequence so result should be the length of the contained
+     * chars sequence although it actually returns the number of underlying bytes. These 2 numbers are only the same
+     * if the encoding we are using is single char for single byte.
      * @return length in bytes to read or Integer.MAX_VALUE if longer.
      */
     @Override

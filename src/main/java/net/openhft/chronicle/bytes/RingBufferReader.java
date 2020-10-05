@@ -27,7 +27,8 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     boolean isStopped();
 
     /**
-     * stop the reader. After being stopped, the reader will not block writers
+     * stop the reader. After being stopped, the reader will not block writers.
+     * After being stopped the reader can be re-opened
      */
     void stop();
 
