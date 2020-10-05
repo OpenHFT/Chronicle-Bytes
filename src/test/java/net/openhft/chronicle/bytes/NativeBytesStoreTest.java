@@ -255,4 +255,23 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             dst.releaseLast();
         }
     }
+
+    @SuppressWarnings("rawtypes")
+    @Test
+    public void testEquals() {
+        @NotNull NativeBytesStore hbs = NativeBytesStore.from("Hello".getBytes());
+        @NotNull NativeBytesStore hbs2 = NativeBytesStore.from("Hello".getBytes());
+        @NotNull NativeBytesStore hbs3 = NativeBytesStore.from("He!!o".getBytes());
+        @NotNull NativeBytesStore hbs4 = NativeBytesStore.from("Hi".getBytes());
+        assertEquals(hbs, hbs2);
+        assertEquals(hbs2, hbs);
+        assertNotEquals(hbs, hbs3);
+        assertNotEquals(hbs3, hbs);
+        assertNotEquals(hbs, hbs4);
+        assertNotEquals(hbs4, hbs);
+        hbs.releaseLast();
+        hbs2.releaseLast();
+        hbs3.releaseLast();
+        hbs4.releaseLast();
+    }
 }
