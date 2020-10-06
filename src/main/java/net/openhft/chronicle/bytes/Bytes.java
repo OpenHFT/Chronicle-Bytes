@@ -90,7 +90,7 @@ public interface Bytes<Underlying> extends
      * @param maxCapacity     the max capacity given in bytes equal or greater than initialCapacity
      * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
      * the given {@code initialCapacity} which will be resized as required up
-     * to the given {@code maxSize}
+     * to the given {@code maxCapacity}
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {

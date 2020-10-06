@@ -23,9 +23,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -57,12 +55,10 @@ public class NativeBytesTest extends BytesTestCommon {
         });
     }
 
-    /*
     @After
     public void checkRegisteredBytes() {
         BytesUtil.checkRegisteredBytes();
     }
-    */
 
     @Before
     public void threadDump() {
@@ -114,6 +110,8 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @Test
     public void testResizeTwoPagesToThreePages() {
+        Assume.assumeFalse(alloc == HEAP);
+
         long pageSize = OS.pageSize();
         @NotNull NativeBytes<Void> nativeBytes = NativeBytes.nativeBytes(2 * pageSize);
         assertEquals(2 * pageSize, nativeBytes.realCapacity());
@@ -124,9 +122,10 @@ public class NativeBytesTest extends BytesTestCommon {
         nativeBytes.releaseLast();
     }
 
-    //@Test
-    //@Ignore("Long running test")
+    @Test
     public void tryGrowBeyondByteBufferCapacity() {
+        Assume.assumeFalse(alloc == HEAP);
+
         if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
             return;
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
@@ -143,5 +142,28 @@ public class NativeBytesTest extends BytesTestCommon {
         // Check this is not a dream
         bytes.writeInt(Integer.MAX_VALUE + 100L, 42);
         assertEquals(42, bytes.readInt(Integer.MAX_VALUE + 100L));
+    }
+
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/141")
+    public void tryGrowBeyondCapacity() {
+        Assume.assumeFalse(alloc == HEAP);
+
+        final int maxCapacity = 1024;
+        @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128, maxCapacity);
+        @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
+        assertTrue(byteBuffer.isDirect());
+
+        // trigger resize
+        bytes.write(new byte[256]);
+        try {
+            // Trigger growing beyond maxCapacity
+            bytes.write(new byte[maxCapacity]);
+            Assert.fail("should not get here");
+        } catch (Throwable t) {
+            // OK
+        } finally {
+            bytes.releaseLast();
+        }
     }
 }
