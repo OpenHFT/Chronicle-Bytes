@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,8 +48,8 @@ public class NativeBytes<Underlying>
     }
 
     public NativeBytes(@NotNull final BytesStore store) throws IllegalStateException {
-        super(store, 0, MAX_CAPACITY);
-        capacity = MAX_CAPACITY;
+        super(store, 0, store.capacity());
+        capacity = store.capacity();
     }
 
     /**
@@ -83,7 +84,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
         try {
-            return NativeBytes.wrapWithNativeBytes(noBytesStore());
+            return NativeBytes.wrapWithNativeBytes(noBytesStore(), Bytes.MAX_CAPACITY);
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
         }
@@ -94,7 +95,7 @@ public class NativeBytes<Underlying>
         @NotNull final NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
             try {
-                return NativeBytes.wrapWithNativeBytes(store);
+                return NativeBytes.wrapWithNativeBytes(store, Bytes.MAX_CAPACITY);
             } finally {
                 store.release(INIT);
             }
@@ -121,10 +122,17 @@ public class NativeBytes<Underlying>
     }
 
     @NotNull
-    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs) {
+    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity) {
         return s_newGuarded
-                ? new GuardedNativeBytes(bs)
-                : new NativeBytes<>(bs);
+                ? new GuardedNativeBytes(bs, capacity)
+                : new NativeBytes<>(bs, capacity);
+    }
+
+    protected static <T> long maxCapacityFor(@NotNull BytesStore<?, T> bs) {
+        return bs.underlyingObject() instanceof ByteBuffer
+                || bs.underlyingObject() instanceof byte[]
+                ? MAX_HEAP_CAPACITY
+                : Bytes.MAX_CAPACITY;
     }
 
     @Override
@@ -139,6 +147,8 @@ public class NativeBytes<Underlying>
             if (writeEnd <= bytesStore.safeLimit()) {
                 return; // do nothing.
             }
+            if (writeEnd >= capacity)
+                throw new BufferOverflowException(/*"Write exceeds capacity"*/);
             checkResize(writeEnd);
         } else {
             throw new BufferOverflowException();
@@ -151,7 +161,9 @@ public class NativeBytes<Underlying>
             assert size >= 0;
             writeCheckOffset(writePosition(), size);
         } catch (BufferOverflowException e) {
-            throw new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
+            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
+            iae.printStackTrace();
+            throw iae;
         }
     }
 
@@ -172,9 +184,9 @@ public class NativeBytes<Underlying>
             throws BufferOverflowException {
         throwExceptionIfReleased();
         if (endOfBuffer < 0)
-            throw new BufferOverflowException();
+            throw new DecoratedBufferOverflowException(endOfBuffer + "< 0");
         if (endOfBuffer > capacity())
-            throw new BufferOverflowException();
+            throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
 //            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
@@ -182,18 +194,18 @@ public class NativeBytes<Underlying>
         }
 
         // Grow by 50%
-        long size = Math.max(endOfBuffer, realCapacity * 3 / 2);
-        // Size must not be more than capacity(), it may break some assumptions in BytesStore or elsewhere
-        size = Math.min(size, capacity());
-        if (isDirectMemory() || size > MAX_BYTE_BUFFER_CAPACITY) {
+        long size = Math.max(endOfBuffer + 7, realCapacity * 3 / 2 + 32);
+        if (isDirectMemory() || size > MAX_HEAP_CAPACITY) {
             // Allocate direct memory of page granularity
             size = alignToPageSize(size);
-            // Cap the size with capacity() again
-            size = Math.min(size, capacity());
+        } else {
+            size &= ~0x7;
         }
+        // Cap the size with capacity() again
+        size = Math.min(size, capacity());
 
         final boolean isByteBufferBacked = bytesStore.underlyingObject() instanceof ByteBuffer;
-        if (isByteBufferBacked && size > MAX_BYTE_BUFFER_CAPACITY) {
+        if (isByteBufferBacked && size > MAX_HEAP_CAPACITY) {
 
             // Add a stack trace to this relatively unusual event which will
             // enable tracing of potentially derailed code or excessive buffer use.
@@ -202,7 +214,7 @@ public class NativeBytes<Underlying>
 
             Jvm.warn().on(getClass(), "Going to try to replace ByteBuffer-backed BytesStore with " +
                     "raw NativeBytesStore to grow to " + size / 1024 + " KB. If later it is assumed that " +
-                    "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. "+
+                    "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. " +
                     stack);
         }
 //        System.out.println("resize " + endOfBuffer + " to " + size);
@@ -213,7 +225,7 @@ public class NativeBytes<Underlying>
         final BytesStore store;
         int position = 0;
         try {
-            if (isByteBufferBacked && size <= MAX_BYTE_BUFFER_CAPACITY) {
+            if (isByteBufferBacked && size <= MAX_HEAP_CAPACITY) {
                 position = ((ByteBuffer) bytesStore.underlyingObject()).position();
                 store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
             } else {

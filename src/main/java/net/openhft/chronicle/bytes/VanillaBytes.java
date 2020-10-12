@@ -435,11 +435,12 @@ public class VanillaBytes<Underlying>
     }
 
     private String toString2(@NotNull NativeBytesStore bytesStore) {
-        int length = (int) Math.min(Integer.MAX_VALUE, readRemaining());
+        int length = (int)
+                Math.min(Bytes.MAX_HEAP_CAPACITY, readRemaining());
         @NotNull char[] chars = new char[length];
         @Nullable final Memory memory = bytesStore.memory;
         final long address = bytesStore.address + bytesStore.translate(readPosition());
-        for (int i = 0; i < length; i++)
+        for (int i = 0; i < length && i < realCapacity(); i++)
             chars[i] = (char) (memory.readByte(address + i) & 0xFF);
 
         return StringUtils.newString(chars);
@@ -447,7 +448,7 @@ public class VanillaBytes<Underlying>
 
     @NotNull
     protected String toString0() {
-        int length = (int) Math.min(Integer.MAX_VALUE, readRemaining());
+        int length = (int) Math.min(Bytes.MAX_HEAP_CAPACITY, readRemaining());
         @NotNull char[] chars = new char[length];
         try {
             for (int i = 0; i < length; i++) {

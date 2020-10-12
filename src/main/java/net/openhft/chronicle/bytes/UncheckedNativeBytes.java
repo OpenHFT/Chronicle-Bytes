@@ -268,7 +268,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     @ForceInline
     public long realCapacity() {
-        return capacity();
+        return bytesStore.realCapacity();
     }
 
     @Override

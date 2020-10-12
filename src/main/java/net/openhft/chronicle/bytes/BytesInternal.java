@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.pool.BytesPool;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -89,18 +90,32 @@ enum BytesInternal {
         if (b == null) return false;
         if (a.readRemaining() != b.readRemaining())
             return false;
+        // assume a >= b
+        if (a.realCapacity() < b.realCapacity())
+            return contentEqual(b, a);
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        long length = a.readRemaining();
+        long aLength = Math.min(a.realCapacity(), a.readRemaining());
+        long bLength = Math.min(b.realCapacity(), b.readRemaining());
         long i;
-        for (i = 0; i < length - 7; i += 8) {
+        for (i = 0; i < bLength - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
                 return false;
         }
-        for (; i < length; i++) {
+        for (; i < bLength; i++) {
             if (a.readByte(aPos + i) != b.readByte(bPos + i))
                 return false;
         }
+        // check for zeros
+        for (; i < aLength - 7; i += 8) {
+            if (a.readLong(aPos + i) != 0L)
+                return false;
+        }
+        for (; i < aLength; i++) {
+            if (a.readByte(aPos + i) != 0)
+                return false;
+        }
+
         return true;
     }
 
@@ -373,7 +388,8 @@ enum BytesInternal {
     public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen)
             throws BufferUnderflowException, IOException {
 
-        assert bytes.realCapacity() >= utflen + offset;
+        if (bytes.realCapacity() < utflen + offset)
+            throw new DecoratedBufferUnderflowException(bytes.realCapacity() + " < " + utflen + " +" + offset);
         for (int count = 0; count < utflen; count++) {
             int c = bytes.readUnsignedByte(offset + count);
             appendable.append((char) c);
@@ -1050,7 +1066,9 @@ enum BytesInternal {
             throws IllegalStateException {
 
         // the output will be no larger than this
-        final int size = (int) Math.min(bytes.readRemaining() + 3, MAX_STRING_LEN);
+        final long available =
+                Math.min(bytes.realCapacity(), bytes.readRemaining());
+        final int size = (int) Math.min(available, MAX_STRING_LEN - 3);
         @NotNull final StringBuilder sb = new StringBuilder(size);
 
         if (bytes.readRemaining() > size) {
@@ -1058,7 +1076,8 @@ enum BytesInternal {
             try {
                 bytes1.readLimit(bytes1.readPosition() + size);
                 toString(bytes1, sb);
-                sb.append("...");
+                if (size < available)
+                    sb.append("...");
                 return sb.toString();
             } finally {
                 bytes1.releaseLast();
@@ -1113,10 +1132,10 @@ enum BytesInternal {
         bytes.reserve(toString);
         assert bytes.start() <= bytes.readPosition();
         assert bytes.readPosition() <= bytes.readLimit();
-        assert bytes.readLimit() <= bytes.realCapacity();
+        long limit = Math.min(bytes.readLimit(), bytes.realCapacity());
 
         try {
-            for (long i = bytes.readPosition(); i < bytes.readLimit(); i++) {
+            for (long i = bytes.readPosition(); i < limit; i++) {
                 sb.append((char) bytes.readUnsignedByte(i));
             }
         } catch (BufferUnderflowException e) {
@@ -2504,7 +2523,7 @@ enum BytesInternal {
 
     @NotNull
     public static byte[] toByteArray(@NotNull RandomDataInput in) {
-        int len = (int) Math.min(Integer.MAX_VALUE, in.readRemaining());
+        int len = (int) Math.min(Bytes.MAX_HEAP_CAPACITY, in.readRemaining());
         @NotNull byte[] bytes = new byte[len];
         in.read(in.readPosition(), bytes, 0, bytes.length);
         return bytes;

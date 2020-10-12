@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -117,40 +118,33 @@ public class NativeBytesTest extends BytesTestCommon {
         assertEquals(2 * pageSize, nativeBytes.realCapacity());
         nativeBytes.writePosition(nativeBytes.realCapacity() - 3);
         nativeBytes.writeInt(0);
-        assertEquals(3 * pageSize, nativeBytes.realCapacity());
+        assertEquals(4 * pageSize, nativeBytes.realCapacity());
 
         nativeBytes.releaseLast();
     }
 
-    @Test
+    @Test(expected = DecoratedBufferOverflowException.class)
     public void tryGrowBeyondByteBufferCapacity() {
         Assume.assumeFalse(alloc == HEAP);
 
-        if (Runtime.getRuntime().totalMemory() < Integer.MAX_VALUE)
+        long maxMemory = Runtime.getRuntime().maxMemory();
+        if (maxMemory < Integer.MAX_VALUE && !OS.isLinux())
             return;
-        @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_BYTE_BUFFER_CAPACITY);
+        @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_HEAP_CAPACITY);
         @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
         assertFalse(byteBuffer.isDirect());
 
         // Trigger growing beyond ByteBuffer
         bytes.writePosition(bytes.realCapacity() - 1);
         bytes.writeInt(0);
-
-        assertTrue(bytes.realCapacity() > Integer.MAX_VALUE);
-        assertNull(bytes.underlyingObject());
-
-        // Check this is not a dream
-        bytes.writeInt(Integer.MAX_VALUE + 100L, 42);
-        assertEquals(42, bytes.readInt(Integer.MAX_VALUE + 100L));
     }
 
-    @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/141")
+    @Test(expected = BufferOverflowException.class)
     public void tryGrowBeyondCapacity() {
-        Assume.assumeFalse(alloc == HEAP);
-
         final int maxCapacity = 1024;
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128, maxCapacity);
+        assertEquals(128, bytes.realCapacity());
+        assertEquals(maxCapacity, bytes.capacity());
         @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
         assertTrue(byteBuffer.isDirect());
 
@@ -160,8 +154,6 @@ public class NativeBytesTest extends BytesTestCommon {
             // Trigger growing beyond maxCapacity
             bytes.write(new byte[maxCapacity]);
             Assert.fail("should not get here");
-        } catch (Throwable t) {
-            // OK
         } finally {
             bytes.releaseLast();
         }
