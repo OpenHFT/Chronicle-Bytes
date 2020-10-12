@@ -4,6 +4,7 @@ import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.ThreadIndexAssigner;
 import org.junit.Assert;
 import org.junit.Test;
@@ -13,10 +14,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assume.assumeTrue;
 
 public class ThreadIndexAssignerTest {
     @Test
     public void assignTwo() throws InterruptedException {
+        assumeTrue(OS.isLinux());
         BlockingQueue t0started = new LinkedBlockingQueue();
         BlockingQueue t1started = new LinkedBlockingQueue();
         BlockingQueue t2started = new LinkedBlockingQueue();
