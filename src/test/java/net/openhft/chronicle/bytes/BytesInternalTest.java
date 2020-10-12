@@ -444,8 +444,8 @@ public class BytesInternalTest extends BytesTestCommon {
 
         static {
             long maxMemory = Runtime.getRuntime().maxMemory();
-            int maxLength = 1 << 29;
-            LENGTH = (int) Math.min(maxMemory / 9, maxLength);
+            int maxLength = 1 << 28;
+            LENGTH = (int) Math.min(maxMemory / 16, maxLength);
             if (LENGTH < maxLength)
                 System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
         }

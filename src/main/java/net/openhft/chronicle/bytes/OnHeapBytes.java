@@ -6,7 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 
 public class OnHeapBytes extends VanillaBytes<byte[]> {
-    public static final int MAX_CAPACITY = Integer.MAX_VALUE - 7;
+    public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
     private final boolean elastic;
     private final long capacity;
 
