@@ -417,13 +417,35 @@ public class BytesInternalTest extends BytesTestCommon {
         Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
     }
 
+    @Test
+    public void contentsEqual() {
+        Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
+                .append("Hello")
+                .readLimit(16);
+        Bytes b = Bytes.elasticByteBuffer(5, 20)
+                .append("Hello")
+                .readLimit(16);
+        Bytes c = Bytes.elasticByteBuffer(15, 20)
+                .append("Hello")
+                .readLimit(16);
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", a.toString());
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", b.toString());
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", c.toString());
+        assertEquals(a, b);
+        assertEquals(b, c);
+        assertEquals(c, a);
+        a.releaseLast();
+        b.releaseLast();
+        c.releaseLast();
+    }
+
     static class Nested {
         public static final int LENGTH;
 
         static {
-            long totalMemory = Runtime.getRuntime().totalMemory();
+            long maxMemory = Runtime.getRuntime().maxMemory();
             int maxLength = 1 << 29;
-            LENGTH = (int) Math.min(totalMemory / 9, maxLength);
+            LENGTH = (int) Math.min(maxMemory / 9, maxLength);
             if (LENGTH < maxLength)
                 System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
         }

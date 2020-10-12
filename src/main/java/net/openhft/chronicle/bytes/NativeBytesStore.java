@@ -26,8 +26,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
@@ -35,11 +33,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
+import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
+
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<Underlying>
         extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    private static final Logger LOGGER = LoggerFactory.getLogger(NativeBytesStore.class);
     private static final Field BB_ADDRESS, BB_CAPACITY, BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
     //    static MappedBytes last;
@@ -54,7 +53,7 @@ public class NativeBytesStore<Underlying>
     protected long address;
     // on release, set this to null.
     protected Memory memory = OS.memory();
-    protected long maximumLimit;
+    protected long limit, maximumLimit;
     @Nullable
     private SimpleCleaner cleaner;
     private boolean elastic;
@@ -67,25 +66,31 @@ public class NativeBytesStore<Underlying>
     }
 
     private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
+        this(bb, elastic, Bytes.MAX_HEAP_CAPACITY);
+    }
+
+    public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
         this();
         init(bb, elastic);
+        this.maximumLimit = elastic ? maximumLimit : Math.min(limit, maximumLimit);
     }
 
     public NativeBytesStore(
-            long address, long maximumLimit) {
-        this(address, maximumLimit, null, false);
+            long address, long limit) {
+        this(address, limit, null, false);
     }
 
     public NativeBytesStore(
-            long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic) {
-        this(address, maximumLimit, deallocator, elastic, false);
+            long address, long limit, @Nullable Runnable deallocator, boolean elastic) {
+        this(address, limit, deallocator, elastic, false);
     }
 
     protected NativeBytesStore(
-            long address, long maximumLimit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
+            long address, long limit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
         super(monitored);
         setAddress(address);
-        this.maximumLimit = maximumLimit;
+        this.limit = limit;
+        this.maximumLimit = elastic ? MAX_CAPACITY : limit;
         this.cleaner = deallocator == null ? null : new SimpleCleaner(deallocator);
         underlyingObject = null;
         this.elastic = elastic;
@@ -145,12 +150,12 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer() {
-        return elasticByteBuffer(OS.pageSize(), Bytes.MAX_CAPACITY);
+        return elasticByteBuffer(OS.pageSize(), MAX_CAPACITY);
     }
 
     @NotNull
     public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size, long maxSize) {
-        return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true);
+        return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true, Math.toIntExact(maxSize));
     }
 
     @NotNull
@@ -161,7 +166,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     public static NativeBytesStore from(@NotNull byte[] bytes) {
         try {
-            @NotNull NativeBytesStore nbs = nativeStore(bytes.length);
+            @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
             Bytes<byte[]> bytes2 = Bytes.wrapForRead(bytes);
             bytes2.copyTo(nbs);
             bytes2.releaseLast();
@@ -178,19 +183,20 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public boolean canReadDirect(long length) {
-        return maximumLimit >= length;
+        return limit >= length;
     }
 
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
         setAddress(Jvm.address(bb));
-        this.maximumLimit = bb.capacity();
+        this.limit = bb.capacity();
     }
 
     public void uninit() {
         underlyingObject = null;
         address = 0;
+        limit = 0;
         maximumLimit = 0;
         cleaner = null;
     }
@@ -227,13 +233,15 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public VanillaBytes<Underlying> bytesForWrite() throws IllegalStateException {
-        return elastic ? NativeBytes.wrapWithNativeBytes(this) : new VanillaBytes<>(this);
+        return elastic
+                ? NativeBytes.wrapWithNativeBytes(this, this.capacity())
+                : new VanillaBytes<>(this);
     }
 
     @Override
     @ForceInline
     public long realCapacity() {
-        return maximumLimit;
+        return limit;
     }
 
     @Override
@@ -670,17 +678,17 @@ public class NativeBytesStore<Underlying>
     }
 
     public long copyToDirect(@NotNull BytesStore store) {
-        long read = Math.min(readRemaining(), writeRemaining());
-        if (read > 0) {
+        long toCopy = Math.min(limit, store.safeLimit());
+        if (toCopy > 0) {
             try {
                 long addr = address;
                 long addr2 = store.addressForWrite(0);
-                memory.copyMemory(addr, addr2, read);
+                memory.copyMemory(addr, addr2, toCopy);
             } catch (BufferOverflowException e) {
                 throw new AssertionError(e);
             }
         }
-        return read;
+        return toCopy;
     }
 
     @NotNull
@@ -761,7 +769,7 @@ public class NativeBytesStore<Underlying>
 //        last.writeLong(64, address2);
 //        last.writeBoolean(80, memory != null);
 //        last.writeVolatileByte(88, (byte) 1);
-        int ret = translate >= maximumLimit ? -1 :
+        int ret = translate >= limit ? -1 :
                 memory.readByte(address2) & 0xFF;
 //        last.writeVolatileByte(88, (byte) 0xFF);
 //        last.writeLong(24, Thread.currentThread().getId());
@@ -795,7 +803,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long safeLimit() {
-        return maximumLimit;
+        return limit;
     }
 
     static class Deallocator implements Runnable {

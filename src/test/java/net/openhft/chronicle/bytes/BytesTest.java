@@ -60,10 +60,10 @@ public class BytesTest extends BytesTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Native", NATIVE},
-                {"Heap", HEAP},
-                {"Heap ByteBuffer", BYTE_BUFFER},
+//                {"Heap", HEAP},
+//                {"Heap ByteBuffer", BYTE_BUFFER},
                 {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Heap Unchecked", HEAP_UNCHECKED}
+//                {"Heap Unchecked", HEAP_UNCHECKED}
         });
     }
 

@@ -33,7 +33,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     public void set(long address, long capacity) {
         isPresent = true;
         setAddress(address);
-        this.maximumLimit = capacity;
+        this.limit = maximumLimit = capacity;
     }
 
     @NotNull
@@ -44,7 +44,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public long safeLimit() {
-        return maximumLimit;
+        return limit;
     }
 
     @Override

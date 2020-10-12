@@ -154,7 +154,7 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public boolean canWriteDirect(long count) {
         return isDirectMemory() &&
-                Math.min(writeLimit, bytesStore.capacity())
+                Math.min(writeLimit, bytesStore.realCapacity())
                         >= count + writePosition;
     }
 
@@ -991,24 +991,10 @@ public abstract class AbstractBytes<Underlying>
         if (!(obj instanceof BytesStore)) {
             return false;
         }
-        @NotNull BytesStore b2 = (BytesStore) obj;
+        @NotNull BytesStore bs = (BytesStore) obj;
         long remaining = readRemaining();
-        return (b2.readRemaining() == remaining) && equalsBytes(b2, remaining);
-    }
-
-    public boolean equalsBytes(@NotNull BytesStore b2, long remaining) {
-        long i = 0;
-        for (; i < (remaining - 7); i += 8) {
-            if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i)) {
-                return false;
-            }
-        }
-        for (; i < remaining; i++) {
-            if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i)) {
-                return false;
-            }
-        }
-        return true;
+        return (bs.readRemaining() == remaining) &&
+                BytesInternal.contentEqual(this, bs);
     }
 
     @NotNull

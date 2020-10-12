@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -161,7 +160,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     public void testElasticByteBuffer() throws IORuntimeException, BufferOverflowException {
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
-            assertEquals(Bytes.MAX_CAPACITY, bbb.capacity());
+            assertEquals(Bytes.MAX_HEAP_CAPACITY, bbb.capacity());
             assertEquals(Bytes.DEFAULT_BYTE_BUFFER_CAPACITY, bbb.realCapacity());
             final @Nullable ByteBuffer bb = bbb.underlyingObject();
             assertNotNull(bb);
@@ -170,7 +169,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 bbb.writeSkip(1000);
                 bbb.writeLong(12345);
             }
-            assertEquals(OS.pageSize() * 5, bbb.realCapacity());
+            assertEquals(28672, bbb.realCapacity());
             final @Nullable ByteBuffer bb2 = bbb.underlyingObject();
             assertNotNull(bb2);
             assertNotSame(bb, bb2);

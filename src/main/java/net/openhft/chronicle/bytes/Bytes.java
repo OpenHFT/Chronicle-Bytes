@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -52,8 +51,10 @@ public interface Bytes<Underlying> extends
         BytesIn<Underlying>,
         BytesOut<Underlying> {
 
-    long MAX_CAPACITY = Long.MAX_VALUE; // 8 EiB - 1
-    int MAX_BYTE_BUFFER_CAPACITY = Integer.MAX_VALUE & ~(OS.pageSize() - 1);
+    long MAX_CAPACITY = Long.MAX_VALUE & ~0xF; // 8 EiB - 16
+    int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;  // 2 GiB - 16
+    @Deprecated
+    int MAX_BYTE_BUFFER_CAPACITY = MAX_HEAP_CAPACITY;
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
@@ -78,7 +79,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
-        return elasticByteBuffer(initialCapacity, MAX_BYTE_BUFFER_CAPACITY);
+        return elasticByteBuffer(initialCapacity, MAX_HEAP_CAPACITY);
     }
 
     /**
@@ -114,7 +115,7 @@ public interface Bytes<Underlying> extends
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
         @NotNull HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
-            return NativeBytes.wrapWithNativeBytes(bs);
+            return NativeBytes.wrapWithNativeBytes(bs, Bytes.MAX_HEAP_CAPACITY);
         } finally {
             bs.release(INIT);
         }
@@ -478,7 +479,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer) throws BufferUnderflowException {
-        return toString(buffer, Integer.MAX_VALUE - 4);
+        return toString(buffer, MAX_HEAP_CAPACITY);
     }
 
     /**
