@@ -1067,7 +1067,7 @@ enum BytesInternal {
 
         // the output will be no larger than this
         final long available =
-                Math.min(bytes.realCapacity(), bytes.readRemaining());
+                Math.min(bytes.realCapacity() - bytes.start(), bytes.readRemaining());
         final int size = (int) Math.min(available, MAX_STRING_LEN - 3);
         @NotNull final StringBuilder sb = new StringBuilder(size);
 

@@ -52,7 +52,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Un
 
     @Override
     public long readRemaining() {
-        return this.capacity();
+        return this.capacity() - this.start();
     }
 
     @Override
