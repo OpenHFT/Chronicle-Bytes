@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
@@ -355,6 +356,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes.rawWriteLong(rawReadLong());
         for (; i < len2; i++)
             bytes.rawWriteByte(rawReadByte());
+    }
+
+    default void unsafeReadObject(Object o, int length) {
+        unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + (OS.is64Bit() ? 12 : 8), length);
     }
 
     default void unsafeReadObject(Object o, int offset, int length) {
