@@ -192,6 +192,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     long readLong() throws BufferUnderflowException;
 
+    default long rawReadLong() {
+        return readLong();
+    }
+
     /**
      * @return a long using the bytes remaining
      */
@@ -313,19 +317,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default int read(@NotNull byte[] bytes) {
-        int len = (int) Math.min(bytes.length, readRemaining());
-        for (int i = 0; i < len; i++)
-            bytes[i] = rawReadByte();
-        return len;
+        return read(bytes, 0, bytes.length);
     }
 
     default int read(@NotNull byte[] bytes, int off, int len) {
-        int len2 = (int) Math.min(len, readRemaining());
+        long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        int len2 = (int) Math.min(len, remaining);
         int i = 0;
-        while (i < len2 - 3) {
-            UnsafeMemory.putInt(bytes, i + off, rawReadInt());
-            i += 4;
-        }
+        for (; i < len2 - 7; i += 8)
+            UnsafeMemory.unsafePutLong(bytes, i + off, rawReadLong());
         for (; i < len2; i++)
             bytes[off + i] = rawReadByte();
         return len2;
@@ -349,10 +351,21 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void read(@NotNull Bytes bytes, int length) {
         int len2 = (int) Math.min(length, readRemaining());
         int i = 0;
-        for (; i < len2 - 3; i += 4)
-            bytes.rawWriteInt(rawReadInt());
+        for (; i < len2 - 7; i += 8)
+            bytes.rawWriteLong(rawReadLong());
         for (; i < len2; i++)
             bytes.rawWriteByte(rawReadByte());
+    }
+
+    default void unsafeReadObject(Object o, int offset, int length) {
+        assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
+        if (readRemaining() < length)
+            throw new BufferUnderflowException();
+        int i = 0;
+        for (; i < length - 7; i += 8)
+            UnsafeMemory.unsafePutLong(o, offset + i, rawReadLong());
+        for (; i < length; i++)
+            UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
     }
 
     int readVolatileInt() throws BufferUnderflowException;

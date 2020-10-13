@@ -1,12 +1,15 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.Arrays;
 
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
+import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
 public class BytesUtilTest extends BytesTestCommon {
@@ -24,5 +27,58 @@ public class BytesUtilTest extends BytesTestCommon {
         String file = BytesUtil.findFile("file-to-find.txt");
         assertTrue(new File(file).exists());
         assertTrue(new File(file).canWrite());
+    }
+
+    @Test
+    public void triviallyCopyable() {
+        assumeTrue(Jvm.is64bit());
+
+        assertFalse(BytesUtil.isTriviallyCopyable(Nested.class));
+        // TODO allow a portion of B to be trivially copyable
+        assertFalse(BytesUtil.isTriviallyCopyable(B.class));
+        assertFalse(BytesUtil.isTriviallyCopyable(C.class));
+
+        assertTrue(BytesUtil.isTriviallyCopyable(A.class));
+        assertEquals("[12, 32]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
+        assertTrue(BytesUtil.isTriviallyCopyable(A.class, 12, 4 + 2 * 8));
+        assertTrue(BytesUtil.isTriviallyCopyable(A.class, 16, 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A.class, 8, 4 + 2 * 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A.class, 16, 4 + 2 * 8));
+
+        assertTrue(BytesUtil.isTriviallyCopyable(A2.class));
+        assertEquals("[12, 36]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
+        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, 12, 4 + 2 * 8 + 2 * 2));
+        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, 16, 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, 8, 4 + 2 * 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, 20, 4 + 2 * 8));
+    }
+
+    static class A {
+        int i;
+        long l;
+        double d;
+    }
+
+    static class A2 extends A {
+        short s;
+        char ch;
+    }
+
+    static class B {
+        int i;
+        long l;
+        double d;
+        String s;
+    }
+
+    static class C {
+        int i;
+        transient long l;
+        double d;
+    }
+
+    class Nested {
+        // implicit this$0
+        int i;
     }
 }

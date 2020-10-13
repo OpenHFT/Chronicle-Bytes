@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
@@ -276,8 +277,18 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return writeInt((int) Maths.toUInt32(i));
     }
 
+    /**
+     * Write a long
+     */
     @NotNull
     S writeLong(long i64) throws BufferOverflowException;
+
+    /**
+     * Write a long without a bounds check
+     */
+    default S rawWriteLong(long i) throws BufferOverflowException {
+        return writeLong(i);
+    }
 
     @NotNull
     S writeLongAdv(long i64, int advance) throws BufferOverflowException;
@@ -307,6 +318,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Writes the passed BytesStore
+     *
      * @param bytes to write
      * @return this
      */
@@ -386,6 +398,15 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @NotNull
     S write(byte[] bytes, int offset, int length) throws BufferOverflowException;
+
+    default S unsafeWriteObject(Object o, int offset, int length) {
+        int i = 0;
+        for (; i < length - 7; i += 8)
+            writeLong(UnsafeMemory.unsafeGetLong(o, offset + i));
+        for (; i < length; i++)
+            writeByte(UnsafeMemory.unsafeGetByte(o, offset + i));
+        return (S) this;
+    }
 
     @NotNull
     S writeSome(ByteBuffer buffer) throws BufferOverflowException;

@@ -18,8 +18,10 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -27,26 +29,82 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ;
+    private static final int[] NO_INTS = {};
+    private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
 
-    static class WarnUncheckedElasticBytes {
-        static {
-            Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
-        }
+    /**
+     * Is the whole class trivially copyable
+     *
+     * @param clazz to check
+     * @return true if the whole class is trivially copyable
+     */
+    public static boolean isTriviallyCopyable(Class clazz) {
+        return TRIVIALLY_COPYABLE.get(clazz).length > 0;
+    }
 
-        static void warn() {
-            // static block does the work.
+    static int[] isTriviallyCopyable0(Class clazz) {
+        List<Field> fields = new ArrayList<>();
+        while (clazz != null && clazz != Object.class) {
+            Collections.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
         }
+        int min = Integer.MAX_VALUE;
+        int max = Integer.MIN_VALUE;
+        for (Field field : fields) {
+            long offset2 = UnsafeMemory.UNSAFE.objectFieldOffset(field);
+            int size = sizeOf(field.getType());
+            min = (int) Math.min(min, offset2);
+            max = (int) Math.max(max, offset2 + size);
+            int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers))
+                continue;
+            if (Modifier.isTransient(modifiers))
+                return NO_INTS;
+            if (!field.getType().isPrimitive())
+                return NO_INTS;
+        }
+        return new int[]{min, max};
+    }
+
+    /**
+     * Are all the fields in the range given trivially copyable
+     *
+     * @param clazz to check
+     * @return true if the fields in range are trivially copyable.
+     */
+    public static boolean isTriviallyCopyable(Class clazz, int offset, int length) {
+        int[] ints = TRIVIALLY_COPYABLE.get(clazz);
+        if (ints.length == 0)
+            return false;
+        return offset >= ints[0] && offset + length <= ints[1];
+    }
+
+    public static int[] triviallyCopyableRange(Class clazz) {
+        return TRIVIALLY_COPYABLE.get(clazz);
+    }
+
+    private static int sizeOf(Class<?> type) {
+        return type == boolean.class || type == byte.class ? 1
+                : type == short.class || type == char.class ? 2
+                : type == int.class || type == float.class ? 4
+                : type == long.class || type == double.class ? 8
+                : UnsafeMemory.UNSAFE.ARRAY_OBJECT_INDEX_SCALE;
     }
 
     public static String findFile(@NotNull String name) throws FileNotFoundException {
@@ -85,17 +143,17 @@ public enum BytesUtil {
         }
     }
 
-public static boolean bytesEqual(
-        @NotNull RandomDataInput a, long offset,
-        @NotNull RandomDataInput second, long secondOffset, long len)
-        throws BufferUnderflowException {
-    long i = 0;
-    while (len - i >= 8L) {
-        if (a.readLong(offset + i) != second.readLong(secondOffset + i))
-            return false;
-        i += 8L;
-    }
-    if (len - i >= 4L) {
+    public static boolean bytesEqual(
+            @NotNull RandomDataInput a, long offset,
+            @NotNull RandomDataInput second, long secondOffset, long len)
+            throws BufferUnderflowException {
+        long i = 0;
+        while (len - i >= 8L) {
+            if (a.readLong(offset + i) != second.readLong(secondOffset + i))
+                return false;
+            i += 8L;
+        }
+        if (len - i >= 4L) {
             if (a.readInt(offset + i) != second.readInt(secondOffset + i))
                 return false;
             i += 4L;
@@ -251,5 +309,15 @@ public static boolean bytesEqual(
     public static boolean unregister(BytesStore bs) {
         AbstractReferenceCounted.unmonitor(bs);
         return true;
+    }
+
+    static class WarnUncheckedElasticBytes {
+        static {
+            Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
+        }
+
+        static void warn() {
+            // static block does the work.
+        }
     }
 }
