@@ -73,13 +73,13 @@ public enum BytesUtil {
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
         for (Field field : fields) {
+            int modifiers = field.getModifiers();
+            if (Modifier.isStatic(modifiers))
+                continue;
             long offset2 = UnsafeMemory.UNSAFE.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             min = (int) Math.min(min, offset2);
             max = (int) Math.max(max, offset2 + size);
-            int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers))
-                continue;
             if (Modifier.isTransient(modifiers))
                 return NO_INTS;
             if (!field.getType().isPrimitive())
