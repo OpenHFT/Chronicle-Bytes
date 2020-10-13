@@ -30,6 +30,25 @@ public class UnsafeRWObjectTest {
         bytes.releaseLast();
     }
 
+    @Test
+    public void array() {
+        assumeTrue(Jvm.is64bit());
+        assertEquals("[16]",
+                Arrays.toString(
+                        BytesUtil.triviallyCopyableRange(byte[].class)));
+        Bytes bytes = Bytes.allocateDirect(32);
+        byte[] byteArray = "Hello World.".getBytes();
+        bytes.unsafeWriteObject(byteArray, 16, byteArray.length);
+        assertEquals("" +
+                        "00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n",
+                bytes.toHexString());
+        byte[] byteArray2 = new byte[byteArray.length];
+        bytes.unsafeReadObject(byteArray2, 16, byteArray.length);
+        assertEquals("Hello World.", new String(byteArray2));
+        bytes.releaseLast();
+
+    }
+
     static class AA {
         int i;
         long l;

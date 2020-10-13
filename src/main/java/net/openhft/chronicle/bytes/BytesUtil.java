@@ -59,6 +59,12 @@ public enum BytesUtil {
     }
 
     static int[] isTriviallyCopyable0(Class clazz) {
+        if (clazz.isArray()) {
+            Class componentType = clazz.getComponentType();
+            if (componentType.isPrimitive())
+                return new int[]{UnsafeMemory.UNSAFE.arrayBaseOffset(clazz)};
+            return NO_INTS;
+        }
         List<Field> fields = new ArrayList<>();
         while (clazz != null && clazz != Object.class) {
             Collections.addAll(fields, clazz.getDeclaredFields());
@@ -92,7 +98,7 @@ public enum BytesUtil {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
-        return offset >= ints[0] && offset + length <= ints[1];
+        return offset >= ints[0] && (ints.length == 1 || offset + length <= ints[1]);
     }
 
     public static int[] triviallyCopyableRange(Class clazz) {
