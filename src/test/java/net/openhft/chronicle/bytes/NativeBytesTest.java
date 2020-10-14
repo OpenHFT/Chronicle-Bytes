@@ -35,8 +35,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-import static net.openhft.chronicle.bytes.Allocator.HEAP;
-import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 
 @RunWith(Parameterized.class)
@@ -52,7 +51,7 @@ public class NativeBytesTest extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE}, {HEAP}
+                {NATIVE}, {HEAP}, {BYTE_BUFFER}
         });
     }
 

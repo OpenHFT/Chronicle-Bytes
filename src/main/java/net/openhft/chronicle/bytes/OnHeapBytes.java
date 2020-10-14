@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
@@ -34,6 +35,8 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             throws BufferOverflowException {
         if (offset >= bytesStore.start()) {
             long writeEnd = offset + adding;
+            if (writeEnd > writeLimit)
+                throwBeyondWriteLimit(adding, writeEnd);
             if (writeEnd <= bytesStore.safeLimit()) {
                 return; // do nothing.
             }
@@ -41,6 +44,10 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         } else {
             throw new BufferOverflowException();
         }
+    }
+
+    private void throwBeyondWriteLimit(long advance, long writeEnd) {
+        throw new DecoratedBufferOverflowException("attempt to write " + advance + " bytes to " + writeEnd + " limit: " + writeLimit);
     }
 
     private void checkResize(long endOfBuffer)

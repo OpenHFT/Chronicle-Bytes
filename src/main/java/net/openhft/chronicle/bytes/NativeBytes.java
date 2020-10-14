@@ -315,10 +315,16 @@ public class NativeBytes<Underlying>
         if (writePosition < bytesStore.start())
             throw new BufferOverflowException();
         final long writeEnd = writePosition + adding;
-        if (writeEnd > bytesStore.safeLimit())
+        if (writeEnd > writeLimit)
+            throwBeyondWriteLimit(advance, writeEnd);
+        else if (writeEnd > bytesStore.safeLimit())
             checkResize(writeEnd);
         this.writePosition = writePosition + advance;
         return oldPosition;
+    }
+
+    private void throwBeyondWriteLimit(long advance, long writeEnd) {
+        throw new DecoratedBufferOverflowException("attempt to write " + advance + " bytes to " + writeEnd + " limit: " + writeLimit);
     }
 
     @NotNull
