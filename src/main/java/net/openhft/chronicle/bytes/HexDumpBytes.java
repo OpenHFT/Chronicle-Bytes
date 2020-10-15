@@ -44,8 +44,8 @@ public class HexDumpBytes
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
 
-    private final NativeBytes<Void> base = Bytes.allocateElasticDirect(128);
-    private final Bytes<byte[]> text = Bytes.allocateElasticOnHeap(512);
+    private final NativeBytes<Void> base = Bytes.allocateElasticDirect(256);
+    private final Bytes<byte[]> text = Bytes.allocateElasticOnHeap(1024);
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
