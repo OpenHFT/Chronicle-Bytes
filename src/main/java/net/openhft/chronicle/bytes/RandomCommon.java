@@ -43,6 +43,9 @@ interface RandomCommon extends ReferenceCounted {
         return Bytes.MAX_CAPACITY;
     }
 
+    /**
+     * @return the limit for this buffer without resizing
+     */
     default long realCapacity() {
         return capacity();
     }
