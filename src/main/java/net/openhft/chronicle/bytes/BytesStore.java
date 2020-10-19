@@ -125,9 +125,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     @NotNull
     default Bytes<Underlying> bytesForRead() throws IllegalStateException {
         try {
-            return bytesForWrite()
-                    .readLimit(writeLimit())
-                    .readPosition(start());
+            Bytes<Underlying> ret = bytesForWrite();
+            ret.readLimit(writeLimit());
+            ret.writeLimit(realCapacity());
+            ret.readPosition(start());
+            return ret;
         } catch (BufferUnderflowException e) {
             throw new IllegalStateException(e);
         }
@@ -149,7 +151,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * I.e {@code start() == readPosition() &amp;&amp; writeLimit() == capacity()}
      *
      * @return if the {@code readPosition} is at the {@code start} and
-     *         the {@code writeLimit} is at the {@code end}
+     * the {@code writeLimit} is at the {@code end}
      */
     default boolean isClear() {
         return true;
@@ -251,6 +253,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * This method is inherited from CharSequence so result should be the length of the contained
      * chars sequence although it actually returns the number of underlying bytes. These 2 numbers are only the same
      * if the encoding we are using is single char for single byte.
+     *
      * @return length in bytes to read or Integer.MAX_VALUE if longer.
      */
     @Override

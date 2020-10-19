@@ -43,6 +43,10 @@ interface RandomCommon extends ReferenceCounted {
         return Bytes.MAX_CAPACITY;
     }
 
+    default long realCapacity() {
+        return capacity();
+    }
+
     /**
      * The read position must be start() &lt;= readPosition() &amp;&amp; readPosition() &lt;= readLimit() &amp;&amp; readPosition &lt; safeLimit()
      *
@@ -85,12 +89,12 @@ interface RandomCommon extends ReferenceCounted {
      */
     @ForceInline
     default long readLimit() {
-        return capacity();
+        return realCapacity();
     }
 
     @ForceInline
     default long writeLimit() {
-        return capacity();
+        return realCapacity();
     }
 
     /**
