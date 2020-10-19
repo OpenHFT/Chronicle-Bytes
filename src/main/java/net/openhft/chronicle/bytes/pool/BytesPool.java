@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.ByteBuffer;
@@ -42,7 +42,7 @@ public class BytesPool {
     protected Bytes createBytes() {
         // use heap buffer as we never know when a thread will die and not release this resource.
         Bytes<ByteBuffer> bbb = Bytes.elasticHeapByteBuffer(256);
-        AbstractReferenceCounted.unmonitor(bbb);
+        IOTools.unmonitor(bbb);
         return bbb;
     }
 }

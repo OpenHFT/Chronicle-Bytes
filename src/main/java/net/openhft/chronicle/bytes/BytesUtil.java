@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -313,7 +314,7 @@ public enum BytesUtil {
 
     @Deprecated
     public static boolean unregister(BytesStore bs) {
-        AbstractReferenceCounted.unmonitor(bs);
+        IOTools.unmonitor(bs);
         return true;
     }
 

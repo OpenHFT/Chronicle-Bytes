@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -45,7 +45,7 @@ public enum NoBytesStore implements BytesStore {
         try {
             NO_PAGE = OS.memory().allocate(OS.pageSize());
             NO_BYTES = new VanillaBytes(noBytesStore());
-            AbstractReferenceCounted.unmonitor(NO_BYTES);
+            IOTools.unmonitor(NO_BYTES);
 
         } catch (@NotNull IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
