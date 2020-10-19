@@ -19,7 +19,7 @@ import static org.junit.Assume.assumeTrue;
 public class ThreadIndexAssignerTest {
     @Test
     public void assignTwo() throws InterruptedException {
-        assumeTrue(OS.isLinux());
+        assumeTrue(OS.isLinux() && !Jvm.isArm());
         BlockingQueue t0started = new LinkedBlockingQueue();
         BlockingQueue t1started = new LinkedBlockingQueue();
         BlockingQueue t2started = new LinkedBlockingQueue();
