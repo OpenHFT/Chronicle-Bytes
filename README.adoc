@@ -16,23 +16,23 @@ endif::[]
 :icons:
 :source-highlighter: highlight
 
-=== Chronicle-Bytes
+== Chronicle-Bytes
 
 toc::[]
 
-Chronicle Bytes contains all the low level memory access wrappers.  It is built on Chronicle Core's direct memory and OS system call access.
+Chronicle Bytes contains all the low level memory access wrappers.It is built on Chronicle Core's direct memory and OS system call access.
 
 Chronicle Bytes has a similar purpose to Java NIO's ByteBuffer with some extensions.
 
 The API supports.
 
- - 64-bit sizes
- - UTF-8 and ISO-8859-1 encoded strings.
- - thread safe off heap memory operations.
- - deterministic release of resources via reference counting.
- - compressed data types such as stop bit encoding.
- - elastic ByteBuffer wrappers which resize as required.
- - parsing text and writing text directly to off heap bytes.
+- 64-bit sizes
+- UTF-8 and ISO-8859-1 encoded strings.
+- thread safe off heap memory operations.
+- deterministic release of resources via reference counting.
+- compressed data types such as stop bit encoding.
+- elastic ByteBuffer wrappers which resize as required.
+- parsing text and writing text directly to off heap bytes.
 
 === Data types supported
 
@@ -570,18 +570,18 @@ The purpose of a Lambda function is to create a simple, highly reproducible, eas
 
 Once you have your data dumped as hexadecimal, you can create tests using that data, and make variations of those tests.
 
-==== What do we mean by a Lambda function?
+=== What do we mean by a Lambda function?
 
 In this context a Lambda function is one which is entirely input driven and produces a list of messages (one or more outputs).
 
-The simplest Lambda function is stateless, however this has limited application.  They are useful for message translation.
+The simplest Lambda function is stateless, however this has limited application.They are useful for message translation.
 
 If you need a stateful Lambda function, you can consider the input to the function to be every message it has ever consumed.
 Obviously this is inefficient, however with appropriate caches in your lamdba function, you can process and produce result incrementally.
 
-==== Data in and out.
+=== Data in and out.
 
-We module a Lambda function as having an interface for inputs and another for outputs.  These interfaces can be the same.
+We module a Lambda function as having an interface for inputs and another for outputs.These interfaces can be the same.
 
 .Sample interface for Lambda function
 [source, Java]
@@ -745,7 +745,7 @@ NOTE: In this case the input and outputs are expected to be the same.
 
 In this case, the test calls the methods with the matching method ids which in turn uses the same ids to encode the output.
 
-NOTE: Creating and maintain such tests can be an overhead you don't need.  In this case, you can use Chronicle Wire's YAML testing format to check functionality. WIre can be used for most of the tests even if you intend to use Bytes for production.
+NOTE: Creating and maintain such tests can be an overhead you don't need.In this case, you can use Chronicle Wire's YAML testing format to check functionality.WIre can be used for most of the tests even if you intend to use Bytes for production.
 
 === Comparison of access to native memory
 
@@ -838,3 +838,7 @@ When using intellij idea, you can set up a custom renderer to view the bytes, se
 image::images/customize-data-views-menu.tiff[]
 
 image::images/customize-data-views.png[]
+
+=== Performing code coverage
+
+When performing code coverage, you might wanty to exclude `AbstractBytes` as this significantly slows down the running of unit tests.
