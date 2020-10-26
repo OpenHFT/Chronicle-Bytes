@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Chronicle Software
+ * Copyright 2016-2020 chronicle.software
  *
  * https://chronicle.software
  *
@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Test;
 

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 Chronicle Software
+ * Copyright 2016-2020 chronicle.software
  *
  * https://chronicle.software
  *
@@ -50,7 +50,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
-                    "sales@higherfrequencytrading.com to unlock this feature.");
+                    "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);
         }
@@ -76,7 +76,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
         } catch (Exception e) {
             LOG.error("This is a a commercial feature, please contact " +
-                    "sales@higherfrequencytrading.com to unlock this feature.");
+                    "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);
         }
