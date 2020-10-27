@@ -56,4 +56,22 @@ public class PropertyReplacerTest {
 
         fail("Exception is expected");
     }
+
+    @Test
+    public void testLeadingAndTrailingSpacesInsideBracketsIgnored() {
+        final Properties props = new Properties();
+        props.setProperty("myFancyProperty", "myFancyValue");
+
+        String res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ myFancyProperty }", props);
+        assertEquals("plainKey: myFancyValue", res);
+
+        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${myFancyProperty}", props);
+        assertEquals("plainKey: myFancyValue", res);
+
+        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${  myFancyProperty  }", props);
+        assertEquals("plainKey: myFancyValue", res);
+
+        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${    myFancyProperty }", props);
+        assertEquals("plainKey: myFancyValue", res);
+    }
 }

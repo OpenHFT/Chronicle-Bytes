@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public enum PropertyReplacer {
     ;
 
-    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{([^}]*)\\}");
+    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{ *([^}]*?) *\\}");
 
     public static String replaceTokensWithProperties(String expression) {
 
@@ -37,10 +37,8 @@ public enum PropertyReplacer {
         int i = 0;
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
         while (matcher.find()) {
-            // Strip leading "${" and trailing "}" off.
-            result.append(expression.substring(i, matcher.start()));
-            String property = matcher.group();
-            property = property.substring(2, property.length() - 1);
+            result.append(expression, i, matcher.start());
+            String property = matcher.group(1);
 
             //look up property and replace
             String p = System.getProperty(property);
@@ -64,10 +62,8 @@ public enum PropertyReplacer {
         int i = 0;
         Matcher matcher = EXPRESSION_PATTERN.matcher(expression);
         while (matcher.find()) {
-            // Strip leading "${" and trailing "}" off.
-            result.append(expression.substring(i, matcher.start()));
-            String property = matcher.group();
-            property = property.substring(2, property.length() - 1);
+            result.append(expression, i, matcher.start());
+            String property = matcher.group(1);
 
             //look up property and replace
             String p = properties.getProperty(property);
