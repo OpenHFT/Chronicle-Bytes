@@ -444,7 +444,7 @@ public class MappedBytesTest extends BytesTestCommon {
                     try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
                         mb.addAndGetLong(0, 1);
                     } catch (FileNotFoundException e) {
-                        Jvm.rethrow(e);
+                        throw Jvm.rethrow(e);
                     }
                 });
         try (MappedBytes mb = MappedBytes.mappedBytes(tmpfile, 256 << 10)) {
