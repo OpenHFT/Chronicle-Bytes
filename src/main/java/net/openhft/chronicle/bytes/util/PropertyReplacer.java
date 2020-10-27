@@ -44,7 +44,13 @@ public enum PropertyReplacer {
 
             //look up property and replace
             String p = System.getProperty(property);
-            result.append((p != null) ? p : matcher.group());
+
+            if (p == null) {
+                throw new IllegalArgumentException(String.format("System property is missing: " +
+                        "[property=%s, expression=%s]", property, expression));
+            }
+
+            result.append(p);
 
             i = matcher.end();
         }
@@ -65,7 +71,13 @@ public enum PropertyReplacer {
 
             //look up property and replace
             String p = properties.getProperty(property);
-            result.append((p != null) ? p : matcher.group());
+
+            if (p == null) {
+                throw new IllegalArgumentException(String.format("Property is missing: " +
+                        "[property=%s, expression=%s, properties=%s]", property, expression, properties));
+            }
+
+            result.append(p);
 
             i = matcher.end();
         }
