@@ -73,5 +73,11 @@ public class PropertyReplacerTest {
 
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${    myFancyProperty }", props);
         assertEquals("plainKey: myFancyValue", res);
+
+        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${\tmyFancyProperty\t}", props);
+        assertEquals("plainKey: myFancyValue", res);
+
+        res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ \t\t\nmyFancyProperty \r\f}", props);
+        assertEquals("plainKey: myFancyValue", res);
     }
 }
