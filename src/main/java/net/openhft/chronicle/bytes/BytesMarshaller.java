@@ -289,8 +289,7 @@ public class BytesMarshaller<T> {
             componentType = field.getType().getComponentType();
         }
 
-
-        @Override
+@Override
         protected void getValue(Object o, BytesOut write) throws IllegalAccessException {
             Object[] c = (Object[]) field.get(o);
             if (c == null) {

@@ -43,7 +43,6 @@ import java.util.stream.Stream;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     volatile int bcs;

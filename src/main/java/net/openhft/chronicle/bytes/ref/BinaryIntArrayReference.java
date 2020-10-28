@@ -178,8 +178,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytesStore(((Bytes) bytes).bytesStore(), position, length);
     }
 
-
-    @Override
+@Override
     public void writeMarshallable(BytesOut bytes) {
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
