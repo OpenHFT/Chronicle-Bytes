@@ -4,6 +4,7 @@ import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.bytes.MappedFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.core.util.Time;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +29,7 @@ public class MemoryWriteJitterMain {
     public static void main(String[] args) throws IOException {
         MappedFile.warmup();
 
-        String path = "test-mem-" + System.nanoTime();
+        String path = "test-mem-" + Time.uniqueId();
         System.out.println("Writing to " + path);
 
         File file = new File(path);
