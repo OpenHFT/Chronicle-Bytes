@@ -49,7 +49,7 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
-    private Allocator alloc1;
+    private final Allocator alloc1;
     private ThreadDump threadDump;
 
     public BytesTest(String ignored, Allocator alloc1) {

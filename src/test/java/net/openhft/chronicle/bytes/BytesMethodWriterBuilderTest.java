@@ -2,7 +2,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.StringWriter;

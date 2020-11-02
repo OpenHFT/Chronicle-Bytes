@@ -37,5 +37,6 @@ public interface BytesContext extends Closeable {
         throw new UnsupportedOperationException("todo");
     }
 
-    default void rollbackOnClose() {}
+    default void rollbackOnClose() {
+    }
 }

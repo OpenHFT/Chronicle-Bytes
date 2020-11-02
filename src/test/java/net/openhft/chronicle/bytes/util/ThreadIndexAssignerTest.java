@@ -32,7 +32,7 @@ public class ThreadIndexAssignerTest {
         // bind to the template
         iav.readMarshallable(bytes);
         ThreadIndexAssigner ta = new ThreadIndexAssigner(iav) {
-            int next = 0;
+            final int next = 0;
 
             @Override
             protected int nextIndex(int size) {

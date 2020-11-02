@@ -75,12 +75,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     @Override
     public long getUsed() {
-try {
-    return bytes.parseLong(USED + offset);
-} catch (NullPointerException e) {
-    throwExceptionIfClosed();
-    throw e;
-}
+        try {
+            return bytes.parseLong(USED + offset);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        }
     }
 
     private void setUsed(long used) {

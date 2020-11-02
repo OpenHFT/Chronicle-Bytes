@@ -42,6 +42,11 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
 
+    private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc) throws IOException {
+        final long currentSize = fc.size();
+        raf.setLength(currentSize * 2);
+    }
+
     @Before
     public void setup() {
         if (!new File(BASE_DIR).mkdirs()) {
@@ -79,7 +84,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         System.out.println("testParallel2: " + summaryStatistics);
     }
 
-@Test
+    @Test
     public void testSequential() {
         final LongSummaryStatistics summaryStatistics = IntStream.range(0, RUNS)
                 .mapToLong(i -> test("testSequential " + i, Executors.newSingleThreadExecutor()))
@@ -127,6 +132,10 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         return elapsedNs;
     }
 
+    private File fileFromInt(int i) throws IOException {
+        return tmpDir.newFile(Integer.toString(i));
+    }
+
     private static final class Worker implements Runnable {
 
         private final File f;
@@ -153,15 +162,6 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
             final long elapsedNs = System.nanoTime() - beginNs;
             System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
         }
-    }
-
-    private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc) throws IOException {
-        final long currentSize = fc.size();
-        raf.setLength(currentSize * 2);
-    }
-
-    private File fileFromInt(int i) throws IOException {
-        return tmpDir.newFile(Integer.toString(i));
     }
 
 }

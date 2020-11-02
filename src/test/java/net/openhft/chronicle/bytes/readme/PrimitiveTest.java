@@ -80,39 +80,6 @@ public class PrimitiveTest extends BytesTestCommon {
         }
     }
 
-    private static final class Outer implements BytesMarshallable {
-
-        private String name;
-        private Inner innerA;
-        private Inner innerB;
-
-        public Outer(final String name,
-                     final Inner innerA,
-                     final Inner innerB) {
-            this.name = name;
-            this.innerA = innerA;
-            this.innerB = innerB;
-        }
-
-        public Outer() {
-            this(null, new Inner(), new Inner());
-        }
-    }
-
-    private static final class Inner implements BytesMarshallable {
-
-        private String key;
-        private double value;
-
-        public Inner(String key, double value) {
-            this.key = key;
-            this.value = value;
-        }
-
-        public Inner() {
-        }
-    }
-
     @Test
     public void testBinaryPrimitive() {
         final HexDumpBytes bytes = new HexDumpBytes();
@@ -181,38 +148,6 @@ public class PrimitiveTest extends BytesTestCommon {
             assertEquals(10, f64, 0.0);
         } finally {
             bytes.releaseLast();
-        }
-    }
-
-    private static final class PrimitiveDTO implements BytesMarshallable {
-        boolean flag;
-        byte s8;
-        short s16;
-        char ch;
-        int s32;
-        long s64;
-        float f32;
-        double f64;
-
-        public PrimitiveDTO(final boolean flag,
-                            final byte s8,
-                            final short s16,
-                            final char ch,
-                            final int s32,
-                            final long s64,
-                            final float f32,
-                            final double f64) {
-            this.flag = flag;
-            this.s8 = s8;
-            this.s16 = s16;
-            this.ch = ch;
-            this.s32 = s32;
-            this.s64 = s64;
-            this.f32 = f32;
-            this.f64 = f64;
-        }
-
-        public PrimitiveDTO() {
         }
     }
 
@@ -305,6 +240,71 @@ public class PrimitiveTest extends BytesTestCommon {
             assertEquals(6.2999999, f64b, 0.5e-4);
         } finally {
             bytes.releaseLast();
+        }
+    }
+
+    private static final class Outer implements BytesMarshallable {
+
+        private final String name;
+        private final Inner innerA;
+        private final Inner innerB;
+
+        public Outer(final String name,
+                     final Inner innerA,
+                     final Inner innerB) {
+            this.name = name;
+            this.innerA = innerA;
+            this.innerB = innerB;
+        }
+
+        public Outer() {
+            this(null, new Inner(), new Inner());
+        }
+    }
+
+    private static final class Inner implements BytesMarshallable {
+
+        private String key;
+        private double value;
+
+        public Inner(String key, double value) {
+            this.key = key;
+            this.value = value;
+        }
+
+        public Inner() {
+        }
+    }
+
+    private static final class PrimitiveDTO implements BytesMarshallable {
+        boolean flag;
+        byte s8;
+        short s16;
+        char ch;
+        int s32;
+        long s64;
+        float f32;
+        double f64;
+
+        public PrimitiveDTO(final boolean flag,
+                            final byte s8,
+                            final short s16,
+                            final char ch,
+                            final int s32,
+                            final long s64,
+                            final float f32,
+                            final double f64) {
+            this.flag = flag;
+            this.s8 = s8;
+            this.s16 = s16;
+            this.ch = ch;
+            this.s32 = s32;
+            this.s64 = s64;
+            this.f32 = f32;
+            this.f64 = f64;
+        }
+
+        public PrimitiveDTO() {
         }
     }
 }

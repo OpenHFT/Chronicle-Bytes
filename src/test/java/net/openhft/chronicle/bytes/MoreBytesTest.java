@@ -290,13 +290,13 @@ public class MoreBytesTest {
         }
     }
 
-@Test
+    @Test
     public void testReadWithLength() {
         final Bytes<?> b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {
             // Todo: Why is this cast needed?
-            b.readWithLength(2, (Bytes)bytesOut);
+            b.readWithLength(2, (Bytes) bytesOut);
             assertEquals("He", bytesOut.toString());
         } finally {
             b.releaseLast();

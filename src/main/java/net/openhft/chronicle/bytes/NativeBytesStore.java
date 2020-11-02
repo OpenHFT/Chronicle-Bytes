@@ -808,7 +808,8 @@ public class NativeBytesStore<Underlying>
 
     static class Deallocator implements Runnable {
 
-        private volatile long address, size;
+        private volatile long address;
+        private final long size;
 
         Deallocator(long address, long size) {
             assert address != 0;

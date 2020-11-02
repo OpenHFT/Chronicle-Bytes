@@ -754,7 +754,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public Bytes<Void> writeOrderedInt(long offset, int i) throws BufferOverflowException {
         throwExceptionIfClosed();
 
-        writeCheckOffset(offset, (long) 4);
+        writeCheckOffset(offset, 4);
         if (bytesStore == null || !bytesStore.inside(offset, 4)) {
             acquireNextByteStore0(offset, false);
         }

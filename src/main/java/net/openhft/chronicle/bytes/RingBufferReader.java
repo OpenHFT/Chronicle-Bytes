@@ -49,6 +49,7 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     /**
      * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}
+     *
      * @param bytes
      * @return whether read succeeded
      */

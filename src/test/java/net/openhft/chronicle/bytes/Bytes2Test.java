@@ -39,8 +39,8 @@ import static org.junit.Assert.assertTrue;
 @RunWith(Parameterized.class)
 public class Bytes2Test extends BytesTestCommon {
 
-    private Allocator alloc1;
-    private Allocator alloc2;
+    private final Allocator alloc1;
+    private final Allocator alloc2;
     private ThreadDump threadDump;
 
     public Bytes2Test(Allocator alloc1, Allocator alloc2) {

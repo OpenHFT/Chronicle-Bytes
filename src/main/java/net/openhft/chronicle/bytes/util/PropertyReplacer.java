@@ -81,7 +81,7 @@ public enum PropertyReplacer {
         return result.toString();
     }
 
-@NotNull
+    @NotNull
     public static String fileAsString(String fileName) throws IOException {
         try {
             Class<PropertyReplacer> propertyReplacerClass = PropertyReplacer.class;

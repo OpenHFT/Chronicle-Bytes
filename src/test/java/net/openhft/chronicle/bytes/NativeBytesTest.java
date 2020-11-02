@@ -42,7 +42,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class NativeBytesTest extends BytesTestCommon {
 
-    private Allocator alloc;
+    private final Allocator alloc;
     private ThreadDump threadDump;
 
     public NativeBytesTest(Allocator alloc) {

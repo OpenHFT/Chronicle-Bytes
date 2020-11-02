@@ -42,7 +42,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     @NotNull
     private ThreadDump threadDump;
     @SuppressWarnings("rawtypes")
-    private Bytes bytes;
+    private final Bytes bytes;
 
     public ByteStringAppenderTest(String name, boolean direct) {
         bytes = direct ? Bytes.allocateElasticDirect() : Bytes.elasticByteBuffer();

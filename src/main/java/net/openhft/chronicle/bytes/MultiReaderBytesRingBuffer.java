@@ -28,6 +28,7 @@ public interface MultiReaderBytesRingBuffer extends BytesRingBuffer {
 
     /**
      * Create a reader
+     *
      * @param id of reader as each reader has separate read position etc.
      * @return reader
      */

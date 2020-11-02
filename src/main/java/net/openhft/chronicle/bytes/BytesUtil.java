@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.misc.Unsafe;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -111,7 +112,7 @@ public enum BytesUtil {
                 : type == short.class || type == char.class ? 2
                 : type == int.class || type == float.class ? 4
                 : type == long.class || type == double.class ? 8
-                : UnsafeMemory.UNSAFE.ARRAY_OBJECT_INDEX_SCALE;
+                : Unsafe.ARRAY_OBJECT_INDEX_SCALE;
     }
 
     public static String findFile(@NotNull String name) throws FileNotFoundException {

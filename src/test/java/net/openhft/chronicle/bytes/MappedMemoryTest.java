@@ -41,6 +41,12 @@ public class MappedMemoryTest extends BytesTestCommon {
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
 
+    private static void deleteIfPossible(@NotNull final File file) {
+        if (!file.delete()) {
+            System.out.println("Unable to delete " + file.getAbsolutePath());
+        }
+    }
+
     @After
     public void checkRegisteredBytes() {
         AbstractReferenceCounted.assertReferencesReleased();
@@ -162,12 +168,6 @@ public class MappedMemoryTest extends BytesTestCommon {
             deleteIfPossible(tempFile);
         }
         assertEquals(0, bytes0.refCount());
-    }
-
-    private static void deleteIfPossible(@NotNull final File file) {
-        if (!file.delete()) {
-            System.out.println("Unable to delete " + file.getAbsolutePath());
-        }
     }
 
 }

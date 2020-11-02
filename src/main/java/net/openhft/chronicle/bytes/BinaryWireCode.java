@@ -24,79 +24,79 @@ import java.lang.reflect.Field;
 public interface BinaryWireCode {
 
     // sequence of length 0 - 255 bytes
-    public static final int BYTES_LENGTH8 = 0x80;
+    int BYTES_LENGTH8 = 0x80;
     //     sequence of length 0 - 2^16-1 bytes
-    public static final int BYTES_LENGTH16 = 0x81;
+    int BYTES_LENGTH16 = 0x81;
     // sequence of length 0 - 2^32-1
-    public static final int BYTES_LENGTH32 = 0x82;
+    int BYTES_LENGTH32 = 0x82;
     // sequence of length 0 - 255
 //        public static final int BYTES_LENGTH64 = 0x83;
 
-    public static final int FIELD_ANCHOR = 0x87;
-    public static final int ANCHOR = 0x88;
-    public static final int UPDATED_ALIAS = 0x89;
+    int FIELD_ANCHOR = 0x87;
+    int ANCHOR = 0x88;
+    int UPDATED_ALIAS = 0x89;
 
     // an array of unsigned bytes
-    public static final int U8_ARRAY = 0x8A;
+    int U8_ARRAY = 0x8A;
     //        public static final int U16_ARRAY = 0x8B;
 //        public static final int I32_ARRAY = 0x8C;
-    public static final int I64_ARRAY = 0x8D;
-    public static final int PADDING32 = 0x8E;
-    public static final int PADDING = 0x8F;
+    int I64_ARRAY = 0x8D;
+    int PADDING32 = 0x8E;
+    int PADDING = 0x8F;
 
-    public static final int FLOAT32 = 0x90;
-    public static final int FLOAT64 = 0x91;
-    public static final int FLOAT_STOP_2 = 0x92;
-    public static final int FLOAT_STOP_4 = 0x94;
-    public static final int FLOAT_STOP_6 = 0x96;
-    public static final int FLOAT_SET_LOW_0 = 0x9A;
-    public static final int FLOAT_SET_LOW_2 = 0x9B;
-    public static final int FLOAT_SET_LOW_4 = 0x9C;
+    int FLOAT32 = 0x90;
+    int FLOAT64 = 0x91;
+    int FLOAT_STOP_2 = 0x92;
+    int FLOAT_STOP_4 = 0x94;
+    int FLOAT_STOP_6 = 0x96;
+    int FLOAT_SET_LOW_0 = 0x9A;
+    int FLOAT_SET_LOW_2 = 0x9B;
+    int FLOAT_SET_LOW_4 = 0x9C;
     // 0x98 - 0x9F
 
-    public static final int UUID = 0xA0;
-    public static final int UINT8 = 0xA1;
-    public static final int UINT16 = 0xA2;
-    public static final int UINT32 = 0xA3;
-    public static final int INT8 = 0xA4;
-    public static final int INT16 = 0xA5;
-    public static final int INT32 = 0xA6;
-    public static final int INT64 = 0xA7;
-    public static final int SET_LOW_INT8 = 0xA8;
-    public static final int SET_LOW_INT16 = 0xA9;
+    int UUID = 0xA0;
+    int UINT8 = 0xA1;
+    int UINT16 = 0xA2;
+    int UINT32 = 0xA3;
+    int INT8 = 0xA4;
+    int INT16 = 0xA5;
+    int INT32 = 0xA6;
+    int INT64 = 0xA7;
+    int SET_LOW_INT8 = 0xA8;
+    int SET_LOW_INT16 = 0xA9;
     //    public static final int FIXED_5 = 0xAA;
 //    public static final int FIXED_4 = 0xAB;
 //    public static final int FIXED_3 = 0xAC;
 //    public static final int FIXED_2 = 0xAD;
-    public static final int STOP_BIT = 0xAE;
-    public static final int INT64_0x = 0xAF;
+    int STOP_BIT = 0xAE;
+    int INT64_0x = 0xAF;
 
-    public static final int FALSE = 0xB0;
-    public static final int TRUE = 0xB1;
-    public static final int TIME = 0xB2;
-    public static final int DATE = 0xB3;
-    public static final int DATE_TIME = 0xB4;
-    public static final int ZONED_DATE_TIME = 0xB5;
-    public static final int TYPE_PREFIX = 0xB6;
-    public static final int FIELD_NAME_ANY = 0xB7;
-    public static final int STRING_ANY = 0xB8;
-    public static final int EVENT_NAME = 0xB9;
-    public static final int FIELD_NUMBER = 0xBA;
-    public static final int NULL = 0xBB;
-    public static final int TYPE_LITERAL = 0xBC;
-    public static final int EVENT_OBJECT = 0xBD;
-    public static final int COMMENT = 0xBE;
-    public static final int HINT = 0xBF;
+    int FALSE = 0xB0;
+    int TRUE = 0xB1;
+    int TIME = 0xB2;
+    int DATE = 0xB3;
+    int DATE_TIME = 0xB4;
+    int ZONED_DATE_TIME = 0xB5;
+    int TYPE_PREFIX = 0xB6;
+    int FIELD_NAME_ANY = 0xB7;
+    int STRING_ANY = 0xB8;
+    int EVENT_NAME = 0xB9;
+    int FIELD_NUMBER = 0xBA;
+    int NULL = 0xBB;
+    int TYPE_LITERAL = 0xBC;
+    int EVENT_OBJECT = 0xBD;
+    int COMMENT = 0xBE;
+    int HINT = 0xBF;
 
-    public static final int FIELD_NAME0 = 0xC0;
+    int FIELD_NAME0 = 0xC0;
     // ...
-    public static final int FIELD_NAME31 = 0xDF;
+    int FIELD_NAME31 = 0xDF;
 
-    public static final int STRING_0 = 0xE0;
+    int STRING_0 = 0xE0;
     // ...
-    public static final int STRING_31 = 0xFF;
+    int STRING_31 = 0xFF;
 
-    public static final String[] STRING_FOR_CODE = _stringForCode(BinaryWireCode.class);
+    String[] STRING_FOR_CODE = _stringForCode(BinaryWireCode.class);
 
     static String[] _stringForCode(Class clazz) {
         String[] stringForCode = new String[256];

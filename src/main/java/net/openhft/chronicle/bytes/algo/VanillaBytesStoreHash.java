@@ -58,7 +58,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
             return agitate(l * K0 + (l >> 32) * K1);
         }
         // use two hashes so that when they are combined the 64-bit hash is more random.
-        long h0 = (long) length * K0;
+        long h0 = length * K0;
         long h1 = 0, h2 = 0, h3 = 0;
         int i;
         // optimise chunks of 32 bytes but this is the same as the next loop.

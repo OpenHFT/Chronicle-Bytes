@@ -254,6 +254,7 @@ public class HexDumpBytes
     public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
         throw new UnsupportedOperationException();
     }
+
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException {
         if (base.compareAndSwapInt(offset & 0xFFFFFFFFL, expected, value)) {
@@ -1134,28 +1135,6 @@ public class HexDumpBytes
         return base.lenient();
     }
 
-    private static class TextBytesReader extends Reader {
-        private final Reader reader;
-        private final Bytes base;
-
-        public TextBytesReader(Reader reader, Bytes base) {
-            this.reader = reader;
-            this.base = base;
-        }
-
-        @Override
-        public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
-            int len2 = reader.read(cbuf, off, len);
-            base.append(new String(cbuf, off, len)); // TODO Optimise
-            return len2;
-        }
-
-        @Override
-        public void close() throws IOException {
-            reader.close();
-        }
-    }
-
     @Override
     public void writeMarshallableLength16(WriteBytesMarshallable marshallable) {
         long pos = base.writePosition();
@@ -1552,6 +1531,28 @@ public class HexDumpBytes
             base.writeWithLength(bytes);
         } finally {
             copyToText(pos);
+        }
+    }
+
+    private static class TextBytesReader extends Reader {
+        private final Reader reader;
+        private final Bytes base;
+
+        public TextBytesReader(Reader reader, Bytes base) {
+            this.reader = reader;
+            this.base = base;
+        }
+
+        @Override
+        public int read(@NotNull char[] cbuf, int off, int len) throws IOException {
+            int len2 = reader.read(cbuf, off, len);
+            base.append(new String(cbuf, off, len)); // TODO Optimise
+            return len2;
+        }
+
+        @Override
+        public void close() throws IOException {
+            reader.close();
         }
     }
 }

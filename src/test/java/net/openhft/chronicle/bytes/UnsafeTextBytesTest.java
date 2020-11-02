@@ -10,19 +10,6 @@ import static org.junit.Assert.assertEquals;
 
 public class UnsafeTextBytesTest extends BytesTestCommon {
 
-    @Test
-    public void appendBase10() {
-        final Bytes<?> bytes = Bytes.allocateDirect(32);
-        try {
-            for (long l = Long.MAX_VALUE; l > 0; l /= 2) {
-                testAppendBase10(bytes, l);
-                testAppendBase10(bytes, 1 - l);
-            }
-        } finally {
-            bytes.releaseLast();
-        }
-    }
-
     static void testAppendBase10(final Bytes<?> bytes, final long l) {
         final long address = bytes.clear().addressForRead(0);
         final long end = UnsafeText.appendFixed(address, l);
@@ -50,6 +37,19 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
         final double expected = Maths.round4(l);
         final double actual = bytes.parseDouble();
         assertEquals(message, expected, actual, 0.0);
+    }
+
+    @Test
+    public void appendBase10() {
+        final Bytes<?> bytes = Bytes.allocateDirect(32);
+        try {
+            for (long l = Long.MAX_VALUE; l > 0; l /= 2) {
+                testAppendBase10(bytes, l);
+                testAppendBase10(bytes, 1 - l);
+            }
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
