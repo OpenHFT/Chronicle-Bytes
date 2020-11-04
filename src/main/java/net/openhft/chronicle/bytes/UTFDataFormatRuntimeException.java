@@ -24,4 +24,8 @@ public class UTFDataFormatRuntimeException extends IORuntimeException {
     public UTFDataFormatRuntimeException(String message) {
         super(message);
     }
+
+    public UTFDataFormatRuntimeException(String message, Exception cause) {
+        super(message, cause);
+    }
 }

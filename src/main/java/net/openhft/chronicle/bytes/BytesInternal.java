@@ -435,7 +435,7 @@ enum BytesInternal {
                     parseUtf82(bytes, sb, utf, utflen, count);
                 } catch (UTFDataFormatRuntimeException e) {
                     long rp = Math.max(rp0 - 128, 0);
-                    throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200));
+                    throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200), e);
                 }
             }
         } catch (IOException e) {
@@ -451,7 +451,7 @@ enum BytesInternal {
             if (offset + utflen > bytes.realCapacity())
                 throw new BufferUnderflowException();
             long address = bytes.address + bytes.translate(offset);
-            @Nullable Memory memory = bytes.memory;
+            Memory memory = bytes.memory;
             sb.ensureCapacity(utflen);
             int count = 0;
 
