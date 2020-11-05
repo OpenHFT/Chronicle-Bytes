@@ -697,25 +697,27 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
 
         if (Jvm.isJava9Plus()) {
-            byte[] bytes = extractBytes((String) cs);
+           // byte[] bytes = extractBytes((String) cs);
+            final String str = (String) cs;
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
             int i = 0;
             non_ascii:
             {
                 for (; i < length; i++) {
-                    byte c = bytes[i + start];
+                    char c = str.charAt(i + start);
+                    //byte c = bytes[i + start];
                     if (c > 127) {
                         writeSkip(i);
                         break non_ascii;
                     }
-                    memory.writeByte(address++, c);
+                    memory.writeByte(address++, (byte) c);
                 }
                 writeSkip(length);
                 return this;
             }
             for (; i < length; i++) {
-                byte c = bytes[i + start];
+                char c = str.charAt(i + start);
                 appendUtf8(c);
             }
         } else {
