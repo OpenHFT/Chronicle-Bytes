@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 
 import static java.lang.Math.min;
 
@@ -51,7 +52,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     static BytesStore from(@NotNull CharSequence cs) {
         if (cs instanceof BytesStore)
             return ((BytesStore) cs).copy();
-        return NativeBytesStore.from(cs.toString());
+        return HeapBytesStore.wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
     }
 
     /**
