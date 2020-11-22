@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -148,7 +149,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 '}';
     }
 
-    public @NotNull MappedBytes write(final byte[] bytes,
+    public @NotNull MappedBytes write(@NotNull final byte[] bytes,
                                       final int offset,
                                       final int length) {
         throwExceptionIfClosed();
@@ -623,10 +624,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public MappedBytes write8bit(@NotNull CharSequence s, int start, int length) {
         throwExceptionIfClosed();
 
-        if (s == null) {
-            writeStopBit(-1);
-            return this;
-        }
+        ObjectUtils.requireNonNull(s);
+
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
@@ -838,11 +837,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         // are we inside a cache line?
         if ((address & 63) <= 60) {
-            // if (memory == null) throw new NullPointerException();
-            memory.getClass(); // faster check for null.
-            UnsafeMemory.unsafeLoadFence();
+            ObjectUtils.requireNonNull(memory);
             return UnsafeMemory.unsafeGetInt(address);
-
         } else {
             return memory.readVolatileInt(address);
         }
