@@ -838,6 +838,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         // are we inside a cache line?
         if ((address & 63) <= 60) {
             ObjectUtils.requireNonNull(memory);
+            UnsafeMemory.unsafeLoadFence();
             return UnsafeMemory.unsafeGetInt(address);
         } else {
             return memory.readVolatileInt(address);
