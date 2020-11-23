@@ -599,6 +599,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     void rawCopy(final long length, final long fromAddress)
             throws BufferOverflowException, BufferUnderflowException {
+        this.throwExceptionIfReleased();
         OS.memory().copyMemory(fromAddress, addressForWritePosition(), length);
         uncheckedWritePosition(writePosition() + length);
     }

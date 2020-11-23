@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
@@ -543,6 +544,30 @@ public class BytesTest extends BytesTestCommon {
         } finally {
             b.releaseLast();
         }
+    }
+
+
+    @Test(expected = IllegalStateException.class)
+    public void testMove2() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+
+        b.append("Hello World");
+        b.move(3, 1, 3);
+        assertEquals("Hlo o World", b.toString());
+        b.releaseLast();
+        b.move(3, 5, 3);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void testMove2B() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+
+        b.append("Hello World");
+        b.bytesStore().move(3, 1, 3);
+        assertEquals("Hlo o World", b.toString());
+        b.releaseLast();
+        BackgroundResourceReleaser.releasePendingResources();
+        b.bytesStore().move(3, 5, 3);
     }
 
     @Test

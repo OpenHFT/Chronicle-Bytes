@@ -204,7 +204,22 @@ public class NativeBytesStore<Underlying>
     @Override
     public void move(long from, long to, long length) throws BufferUnderflowException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
-        OS.memory().copyMemory(address + from, address + to, length);
+        long address = this.address;
+        if (address == 0) throwException(null);
+        memoryCopyMemory(address + from, address + to, length);
+    }
+
+    private void memoryCopyMemory(long fromAddress, long toAddress, long length) {
+        try {
+            memory.copyMemory(fromAddress, toAddress, length);
+        } catch (NullPointerException ifReleased) {
+            throwException(ifReleased);
+        }
+    }
+
+    private void throwException(Throwable ifReleased) {
+        throwExceptionIfReleased();
+        throw new IllegalStateException(ifReleased);
     }
 
     @NotNull
@@ -213,7 +228,7 @@ public class NativeBytesStore<Underlying>
         try {
             if (underlyingObject == null) {
                 @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
-                memory.copyMemory(address, copy.address, capacity());
+                memoryCopyMemory(address, copy.address, capacity());
                 return (BytesStore) copy;
 
             } else if (underlyingObject instanceof ByteBuffer) {
@@ -486,8 +501,7 @@ public class NativeBytesStore<Underlying>
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         if (bytes.isDirect()) {
-            memory.copyMemory(Jvm.address(bytes) + offset,
-                    address + translate(offsetInRDO), length);
+            memoryCopyMemory(Jvm.address(bytes) + offset, address + translate(offsetInRDO), length);
 
         } else {
             memory.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
@@ -501,7 +515,7 @@ public class NativeBytesStore<Underlying>
             long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException {
         if (bytes.isDirectMemory()) {
-            memory.copyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
+            memoryCopyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
         } else {
             write0(writeOffset, bytes, readOffset, length);
         }
@@ -565,14 +579,14 @@ public class NativeBytesStore<Underlying>
     @ForceInline
     public void nativeRead(long position, long address, long size) throws BufferUnderflowException {
         // TODO add bounds checking.
-        memory.copyMemory(addressForRead(position), address, size);
+        memoryCopyMemory(addressForRead(position), address, size);
     }
 
     @Override
     @ForceInline
     public void nativeWrite(long address, long position, long size) throws BufferOverflowException {
         // TODO add bounds checking.
-        memory.copyMemory(address, addressForWrite(position), size);
+        memoryCopyMemory(address, addressForWrite(position), size);
     }
 
     void write8bit(long position, char[] chars, int offset, int length) {
@@ -584,7 +598,7 @@ public class NativeBytesStore<Underlying>
 
     void read8bit(long position, char[] chars, int length) {
         long addr = address + translate(position);
-        Memory memory = OS.memory();
+        Memory memory = this.memory;
         for (int i = 0; i < length; i++)
             chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
     }
@@ -683,7 +697,7 @@ public class NativeBytesStore<Underlying>
             try {
                 long addr = address;
                 long addr2 = store.addressForWrite(0);
-                memory.copyMemory(addr, addr2, toCopy);
+                memoryCopyMemory(addr, addr2, toCopy);
             } catch (BufferOverflowException e) {
                 throw new AssertionError(e);
             }

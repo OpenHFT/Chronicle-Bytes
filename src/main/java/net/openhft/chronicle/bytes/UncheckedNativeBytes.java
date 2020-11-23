@@ -229,6 +229,7 @@ public class UncheckedNativeBytes<Underlying>
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
+            this.throwExceptionIfReleased();
             OS.memory().copyMemory(bytes.addressForRead(offset), addressForWritePosition(), len);
             writeSkip(len);
         }
