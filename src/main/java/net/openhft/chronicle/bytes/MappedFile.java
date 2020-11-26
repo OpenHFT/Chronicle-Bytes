@@ -104,7 +104,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                 .append(" chunk in ").append(filename)
                 .append(" took ").append(delayMicros / 1e3).append(" ms.")
                 .toString();
-        Jvm.debug().on(MappedFile.class, message);
+        Jvm.perf().on(MappedFile.class, message);
     }
 
     @NotNull
@@ -343,7 +343,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                 newChunkListener.onNewChunk(file.getPath(), chunk, elapsedNs / 1000);
 
             if (elapsedNs >= 2_000_000L)
-                Jvm.warn().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
+                Jvm.perf().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
 
             return mbs2;
         }
@@ -400,7 +400,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                     }
                     final long elapsedNs = System.nanoTime() - beginNs;
                     if (elapsedNs >= 1_000_000L) {
-                        Jvm.warn().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
+                        Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
                     }
                 }
             }
