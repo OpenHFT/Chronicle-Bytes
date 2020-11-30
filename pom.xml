@@ -129,7 +129,7 @@
                             <goal>enforcer</goal>
                         </goals>
                         <configuration>
-                            <referenceVersion>2.20.175</referenceVersion>
+                            <referenceVersion>2.20.104</referenceVersion>
                         </configuration>
                     </execution>
                 </executions>
