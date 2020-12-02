@@ -364,7 +364,7 @@ public class BytesMarshaller<T> {
             write.writeStopBit(c.size());
             if (c.isEmpty())
                 return;
-            if (c instanceof Random && c instanceof List) {
+            if (c instanceof RandomAccess && c instanceof List) {
                 List l = (List) c;
                 for (int i = 0, size = l.size(); i < size; i++)
                     write.writeObject(componentType, l.get(i));
