@@ -235,7 +235,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     @Nullable
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default String readUTFΔ()
             throws IORuntimeException, BufferUnderflowException, IllegalArgumentException {
         return BytesInternal.readUtf8(this);
@@ -267,7 +267,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
         return readUtf8(sb);
@@ -395,7 +395,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readEnum(this, eClass);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default void parseUTF(Appendable sb, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
         parseUtf8(sb, length);

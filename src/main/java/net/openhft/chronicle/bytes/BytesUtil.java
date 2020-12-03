@@ -268,7 +268,7 @@ public enum BytesUtil {
                 .writeMarshallable(marshallable, bytes);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static long utf8Length(@NotNull CharSequence toWrite) {
         return AppendableUtil.findUtf8Length(toWrite);
     }
@@ -313,7 +313,7 @@ public enum BytesUtil {
         return bytes2.toDebugString(maxLength);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public static boolean unregister(BytesStore bs) {
         IOTools.unmonitor(bs);
         return true;

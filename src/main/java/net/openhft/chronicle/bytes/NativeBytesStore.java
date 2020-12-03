@@ -625,7 +625,7 @@ public class NativeBytesStore<Underlying>
         this.address = address;
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     public long appendUTF(long pos, char[] chars, int offset, int length) throws BufferOverflowException {
         return appendUtf8(pos, chars, offset, length);
     }

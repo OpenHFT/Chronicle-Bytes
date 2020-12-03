@@ -76,7 +76,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default String parseUTF(@NotNull StopCharTester stopCharTester) {
         return parseUtf8(stopCharTester);
     }
@@ -92,7 +92,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
         BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) throws BufferUnderflowException {
         parseUtf8(buffer, stopCharTester);
     }
@@ -109,7 +109,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
         BytesInternal.parseUtf8(this, buffer, stopCharsTester);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, IORuntimeException {
         parseUtf8(buffer, stopCharsTester);

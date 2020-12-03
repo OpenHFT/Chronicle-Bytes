@@ -29,7 +29,7 @@ import java.util.function.BiConsumer;
  * @deprecated Use MethodWriterInterceptorReturns
  */
 @FunctionalInterface
-@Deprecated
+@Deprecated(/* to be removed in x.22 */)
 public interface MethodWriterInterceptor {
 
     static MethodWriterInterceptor of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptor interceptor) {

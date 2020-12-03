@@ -149,7 +149,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default S writeUTFΔ(CharSequence cs) throws BufferOverflowException {
         return writeUtf8(cs);
     }

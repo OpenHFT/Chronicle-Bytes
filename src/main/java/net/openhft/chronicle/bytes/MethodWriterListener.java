@@ -22,7 +22,7 @@ package net.openhft.chronicle.bytes;
  *
  * @deprecated Use MethodWriterInterceptorReturns
  */
-@Deprecated
+@Deprecated(/* to be removed in x.22 */)
 @FunctionalInterface
 public interface MethodWriterListener {
     void onWrite(String name, Object[] args);

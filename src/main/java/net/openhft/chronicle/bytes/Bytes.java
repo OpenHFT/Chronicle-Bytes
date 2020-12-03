@@ -53,7 +53,7 @@ public interface Bytes<Underlying> extends
 
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF; // 8 EiB - 16
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;  // 2 GiB - 16
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     int MAX_BYTE_BUFFER_CAPACITY = MAX_HEAP_CAPACITY;
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
@@ -371,7 +371,7 @@ public interface Bytes<Underlying> extends
         return from(text.toString());
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     static Bytes<?> fromString(String text) {
         return from(text);
     }
@@ -870,7 +870,7 @@ public interface Bytes<Underlying> extends
         return indexOf(this, source, fromIndex);
     }
 
-    @Deprecated
+    @Deprecated(/* to be removed in x.22 */)
     default long indexOf(@NotNull Bytes source, int fromIndex) {
         return indexOf(this, source, fromIndex);
     }
