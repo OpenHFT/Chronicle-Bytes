@@ -439,7 +439,11 @@ throws IllegalStateException {
                         field.set(o, null);
                     return;
                 }
-                c.clear();
+                if (c == null) {
+                    field.set(o, c = collectionSupplier.get());
+                } else {
+                    c.clear();
+                }
                 for (int i = 0; i < length; i++)
                     c.add(read.readObject(componentType));
             } catch (IllegalAccessException e) {

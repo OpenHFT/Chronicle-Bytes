@@ -366,11 +366,11 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     @Test
-    public void serializeCollections() {
+    public void serializeNonNullCollections() {
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
-            final MyCollections mc = new MyCollections();
+            final NonNullCollections mc = new NonNullCollections();
             mc.words.add("Hello");
             mc.words.add("World");
             mc.scoreCountMap.put(1.3, 11L);
@@ -382,12 +382,59 @@ public class BytesMarshallableTest extends BytesTestCommon {
             mc.numbers.add(123);
             mc.writeMarshallable(bytes);
 
-            final MyCollections mc2 = new MyCollections();
+            final NonNullCollections mc2 = new NonNullCollections();
             mc2.readMarshallable(bytes);
             assertEquals(mc.words, mc2.words);
             assertEquals(mc.scoreCountMap, mc2.scoreCountMap);
             assertEquals(mc.policies, mc2.policies);
             assertEquals(mc.numbers, mc2.numbers);
+
+            final String expected = "" +
+                    "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
+                    "   02 cd cc cc cc cc cc f4 3f 0b 00 00 00 00 00 00 # scoreCountMap\n" +
+                    "   00 9a 99 99 99 99 99 01 40 16 00 00 00 00 00 00\n" +
+                    "   00 02 07 52 55 4e 54 49 4d 45 05 43 4c 41 53 53 # policies\n" +
+                    "   03 01 00 00 00 0c 00 00 00 7b 00 00 00          # numbers\n";
+            final String expectedG = "" +
+                    "   ae 02 ae 05 48 65 6c 6c 6f ae 05 57 6f 72 6c 64 # words\n" +
+                    "   ae 02 91 cd cc cc cc cc cc f4 3f a7 0b 00 00 00 # scoreCountMap\n" +
+                    "   00 00 00 00 91 9a 99 99 99 99 99 01 40 a7 16 00\n" +
+                    "   00 00 00 00 00 00 ae 02 07 52 55 4e 54 49 4d 45 # policies\n" +
+                    "   05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 0c 00 # numbers\n" +
+                    "   00 00 a6 7b 00 00 00\n";
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void serializeNullCollections() {
+        final Bytes<?> bytes = new HexDumpBytes();
+        try {
+            final NullCollections nc = new NullCollections();
+            nc.words = new ArrayList<>();
+            nc.scoreCountMap = new LinkedHashMap<>();
+            nc.policies = new ArrayList<>();
+            nc.numbers = new ArrayList<>();
+
+            nc.words.add("Hello");
+            nc.words.add("World");
+            nc.scoreCountMap.put(1.3, 11L);
+            nc.scoreCountMap.put(2.2, 22L);
+            nc.policies.add(RetentionPolicy.RUNTIME);
+            nc.policies.add(RetentionPolicy.CLASS);
+            nc.numbers.add(1);
+            nc.numbers.add(12);
+            nc.numbers.add(123);
+            nc.writeMarshallable(bytes);
+
+            final NullCollections nc2 = new NullCollections();
+            nc2.readMarshallable(bytes);
+            assertEquals(nc.words, nc2.words);
+            assertEquals(nc.scoreCountMap, nc2.scoreCountMap);
+            assertEquals(nc.policies, nc2.policies);
+            assertEquals(nc.numbers, nc2.numbers);
 
             final String expected = "" +
                     "   02 05 48 65 6c 6c 6f 05 57 6f 72 6c 64          # words\n" +
@@ -529,11 +576,18 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    private static final class MyCollections implements BytesMarshallable {
+    private static final class NonNullCollections implements BytesMarshallable {
         List<String> words = new ArrayList<>();
         Map<Double, Long> scoreCountMap = new LinkedHashMap<>();
         List<RetentionPolicy> policies = new ArrayList<>();
         List<Integer> numbers = new ArrayList<>();
+    }
+
+    private static final class NullCollections implements BytesMarshallable {
+        List<String> words;
+        Map<Double, Long> scoreCountMap;
+        List<RetentionPolicy> policies;
+        List<Integer> numbers;
     }
 
     private static final class BM1 implements BytesMarshallable {
