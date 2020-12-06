@@ -43,7 +43,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
-    private static final int RUNTIME_MS = Integer.getInteger("runtimems", 60_000);
+    private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
 
     private ThreadDump threadDump;
 
