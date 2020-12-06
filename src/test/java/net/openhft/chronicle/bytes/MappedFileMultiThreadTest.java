@@ -28,7 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -44,6 +43,7 @@ import static org.junit.Assert.assertNotNull;
 public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
+    private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
 
     private ThreadDump threadDump;
 
@@ -65,9 +65,8 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     @Test
     public void testMultiThreadLock() throws Exception {
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());
-        final File tmp = IOTools.createTempFile("testMultiThreadLock");
         final long chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
-        try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
+        try (MappedFile mf = MappedFile.mappedFile(TMP_FILE, chunkSize, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
 
             final List<Future<?>> futures = new ArrayList<>();
@@ -106,6 +105,6 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
             for (Future<?> f : futures)
                 f.get(1, TimeUnit.SECONDS);
         }
-        IOTools.deleteDirWithFiles(tmp);
+        IOTools.deleteDirWithFiles(TMP_FILE);
     }
 }
