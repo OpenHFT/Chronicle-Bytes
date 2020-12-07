@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -71,12 +72,13 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
 
             final List<Future<?>> futures = new ArrayList<>();
             final ExecutorService es = Executors.newFixedThreadPool(CORES);
+            final AtomicBoolean running = new AtomicBoolean(true);
             for (int i = 0; i < CORES; i++) {
                 int finalI = i;
                 futures.add(es.submit(() -> {
                     long offset = 1;
                     final ReferenceOwner test = ReferenceOwner.temporary("test" + finalI);
-                    while (!Thread.currentThread().isInterrupted()) {
+                    while (running.get()) {
                         garbage.add(test.referenceName() + offset);
                         MappedBytesStore bs = null;
                         Bytes<?> bytes = null;
@@ -101,9 +103,9 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
             }
 
             Jvm.pause(RUNTIME_MS);
-            es.shutdownNow();
+            running.set(false);
             for (Future<?> f : futures)
-                f.get(1, TimeUnit.SECONDS);
+                f.get(5, TimeUnit.SECONDS);
         }
         IOTools.deleteDirWithFiles(TMP_FILE);
     }
