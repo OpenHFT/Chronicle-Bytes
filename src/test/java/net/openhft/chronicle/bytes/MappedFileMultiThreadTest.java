@@ -106,6 +106,8 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
             running.set(false);
             for (Future<?> f : futures)
                 f.get(5, TimeUnit.SECONDS);
+            es.shutdownNow();
+            es.awaitTermination(1, TimeUnit.SECONDS);
         }
         IOTools.deleteDirWithFiles(TMP_FILE);
     }
