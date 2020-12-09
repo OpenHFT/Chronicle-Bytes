@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.FlakyTestRunner;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -549,6 +551,10 @@ public class BytesTest extends BytesTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void testMove2() {
+        FlakyTestRunner.run(OS.isWindows(), this::doTestMove2);
+    }
+
+    public void doTestMove2() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
         b.append("Hello World");
