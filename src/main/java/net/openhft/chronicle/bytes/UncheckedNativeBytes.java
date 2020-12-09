@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -326,6 +327,8 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     protected void performRelease() {
         this.underlyingBytes.release(this);
+        // need to wait as checks rely on this completing.
+        BackgroundResourceReleaser.releasePendingResources();
     }
 
     @Override
