@@ -8,6 +8,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.LongSummaryStatistics;
 import java.util.concurrent.ExecutorService;
@@ -48,10 +50,9 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     }
 
     @Before
-    public void setup() {
-        if (!new File(BASE_DIR).mkdirs()) {
-            fail("Unable to create directory " + BASE_DIR);
-        }
+    public void setup() throws IOException {
+        Files.createDirectories(Paths.get(BASE_DIR));
+
         workers = IntStream.range(0, NO_FILES)
                 .mapToObj(i -> {
                     try {
