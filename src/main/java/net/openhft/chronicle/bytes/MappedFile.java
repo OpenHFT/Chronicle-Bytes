@@ -32,14 +32,13 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.lang.ref.WeakReference;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
@@ -51,11 +50,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 public class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-
-    // A single JVM cannot lock a distinct canonical file more than once
-    private static final Map<String, WeakReference<NamedObject>> FILE_LOCKS = new HashMap<>();
-    private static final int EXPUNGE_MODULO = 64;
-    private static int EXPUNGE_COUNTER = 0;
 
     @NotNull
     private final RandomAccessFile raf;
@@ -78,7 +72,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                          final boolean readOnly) {
         this.file = file;
         try {
-            this.canonicalPath = file.getCanonicalPath();
+            this.canonicalPath = file.getCanonicalPath().intern();
         } catch (IOException ioe) {
             throw new IllegalStateException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
         }
@@ -360,33 +354,15 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
         // handle a possible race condition between processes.
         try {
+            // A single JVM cannot lock a distinct canonical file more than once.
 
             // We might have several MappedFile objects that maps to
             // the same underlying file (possibly via hard or soft links)
             // so we use the canonical path as a lock key
 
-            NamedObject namedObject;
-            synchronized (FILE_LOCKS) {
-                if (++EXPUNGE_COUNTER % EXPUNGE_MODULO == 0) {
-                    // Occasionally expunge all stale entries.
-                    final Set<String> expiredKeys = FILE_LOCKS.entrySet()
-                            .stream()
-                            .filter(e -> e.getValue().get() == null)
-                            .map(Map.Entry::getKey)
-                            .collect(Collectors.toSet());
-                    expiredKeys.forEach(FILE_LOCKS::remove);
-                }
-                do {
-                    final WeakReference<NamedObject> namedObjectRef = FILE_LOCKS.computeIfAbsent(canonicalPath, k -> new WeakReference<>(new NamedObject(k)));
-                    namedObject = namedObjectRef.get();
-                    if (namedObject == null)
-                        FILE_LOCKS.remove(canonicalPath); // Expunge a stale entry
-                } while (namedObject == null);
-            }
-
             // Ensure exclusivity for any and all MappedFile objects handling
             // the same canonical file.
-            synchronized (namedObject) {
+            synchronized (canonicalPath) {
                 size = fileChannel.size();
                 if (size < minSize) {
                     final long beginNs = System.nanoTime();
@@ -562,20 +538,4 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         // component is thread safe
         return true;
     }
-
-    private static final class NamedObject {
-        private final String name;
-
-        public NamedObject(@NotNull final String name) {
-            this.name = name;
-        }
-
-        @Override
-        public String toString() {
-            return "NamedObject{" +
-                    "name='" + name + '\'' +
-                    '}';
-        }
-    }
-
 }
