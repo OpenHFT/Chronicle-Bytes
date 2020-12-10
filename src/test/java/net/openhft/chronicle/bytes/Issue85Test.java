@@ -93,14 +93,14 @@ public class Issue85Test extends BytesTestCommon {
         bytes.clear().append(s);
         double d2 = bytes.parseDouble();
         if (d != d2) {
-            System.out.println(i + ": Parsing " + s + " != " + d2);
+//            System.out.println(i + ": Parsing " + s + " != " + d2);
             ++different2;
         }
 
         String s2 = bytes.append(d).toString();
         double d3 = Double.parseDouble(s2);
         if (d != d3) {
-            System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
+//            System.out.println(i + ": ToString " + s + " != " + s2 + " should be " + new BigDecimal(d));
             ++different;
         }
     }

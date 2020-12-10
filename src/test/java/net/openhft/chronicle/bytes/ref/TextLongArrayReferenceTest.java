@@ -44,7 +44,7 @@ public class TextLongArrayReferenceTest extends BytesTestCommon {
 
             @NotNull final String expected = "{ locked: false, capacity: 5                   , used: 00000000000000000000, " +
                     "values: [ 00000000000000000001, 00000000000000000002, 00000000000000000003, 00000000000000000004, 00000000000000000005 ] }\n";
-            System.out.println(expected.length());
+//            System.out.println(expected.length());
             assertEquals(expected,
                     bytes.toString());
             bytes.releaseLast();

@@ -100,7 +100,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                     hist.sampleNanos(time);
                 }
                 assertEquals(expected, dec.toString());
-                System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
+//                System.out.println("Encrypt/Decrypt took " + hist.toMicrosFormat());
             }
         } finally {
             bytes.releaseLast();
@@ -132,12 +132,12 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 final long len = enc.writePosition() - pos - 1;
                 assertEquals(0, len % 16);
                 enc.writeUnsignedByte(pos, Maths.toUInt8(len));
-                System.out.println(len);
+//                System.out.println(len);
             }
-            System.out.println("reading");
+//            System.out.println("reading");
             for (int t = 0; t < 9; t++) {
                 final int len = enc.readUnsignedByte();
-                System.out.println(len);
+//                System.out.println(len);
                 assertEquals(0, len % 16);
                 final long pos = enc.readPosition();
                 enc.readPositionRemaining(pos, len);
@@ -222,7 +222,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 nb.write(0, bytes);
                 assertEquals(Bytes.wrapForRead(bytes).byteCheckSum(), nb.byteCheckSum());
             }
-            for (int t = 0; t < 3; t++) {
+            for (int t = 2; t >= 0; t--) {
                 int runs = 10000000;
                 final long start = System.nanoTime();
                 for (int i = 0; i < runs; i += 4) {
@@ -233,6 +233,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                     }
                 }
                 long time = System.nanoTime() - start;
+                if (t == 0)
                 System.out.printf("Average time was %,d ns%n", time / runs);
             }
         } finally {

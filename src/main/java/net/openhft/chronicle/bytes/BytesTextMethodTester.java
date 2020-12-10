@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -100,7 +101,7 @@ public class BytesTextMethodTester<T> {
     }
 
     private void unknownMessageId(long id, BytesIn b) {
-        System.out.println("Unknown message id " + Long.toHexString(id));
+        Jvm.warn().on(getClass(), "Unknown message id " + Long.toHexString(id));
         b.readPosition(b.readLimit());
     }
 

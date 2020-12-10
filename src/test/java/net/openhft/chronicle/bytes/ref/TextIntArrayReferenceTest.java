@@ -43,7 +43,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
                 assertEquals(i + 1, array.getValueAt(i));
 
             @NotNull final String expected = "{ locked: false, capacity: 5         , used: 0000000000, values: [ 0000000001, 0000000002, 0000000003, 0000000004, 0000000005 ] }\n";
-            System.out.println(expected.length());
+//            System.out.println(expected.length());
             assertEquals(expected,
                     bytes.toString());
             bytes.releaseLast();

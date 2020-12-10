@@ -42,7 +42,7 @@ public class ThreadIndexAssignerTest {
         BlockingQueue<Throwable> throwables = new LinkedBlockingQueue<>();
         Thread t0 = new Thread(() -> {
             try {
-                System.out.println("0 started tid: " + Affinity.getThreadId());
+//                System.out.println("0 started tid: " + Affinity.getThreadId());
                 Assert.assertEquals(0, ta.getId());
                 t0started.put("");
                 testDone.poll(10, TimeUnit.SECONDS);
@@ -50,7 +50,7 @@ public class ThreadIndexAssignerTest {
                 ex.printStackTrace();
                 throwables.add(ex);
             }
-            System.out.println("0 stopped tid: " + Affinity.getThreadId());
+//            System.out.println("0 stopped tid: " + Affinity.getThreadId());
         });
         t0.start();
 
@@ -58,19 +58,19 @@ public class ThreadIndexAssignerTest {
 
         Thread t1 = new Thread(() -> {
             try {
-                System.out.println("1 started tid: " + Affinity.getThreadId());
+//                System.out.println("1 started tid: " + Affinity.getThreadId());
                 Assert.assertEquals(1, ta.getId());
                 t1started.put("");
                 t2started.poll(1, TimeUnit.SECONDS);
             } catch (Throwable ex) {
                 throwables.add(ex);
             }
-            System.out.println("1 stopped tid: " + Affinity.getThreadId());
+//            System.out.println("1 stopped tid: " + Affinity.getThreadId());
         });
         t1.start();
         t1started.poll(1, TimeUnit.SECONDS);
         try {
-            System.out.println("id=" + ta.getId());
+//            System.out.println("id=" + ta.getId());
             fail();
         } catch (IllegalStateException e) {
             // expected

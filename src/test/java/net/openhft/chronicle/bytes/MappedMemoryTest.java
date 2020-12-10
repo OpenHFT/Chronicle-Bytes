@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -43,7 +44,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     private static void deleteIfPossible(@NotNull final File file) {
         if (!file.delete()) {
-            System.out.println("Unable to delete " + file.getAbsolutePath());
+            Jvm.warn().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
         }
     }
 

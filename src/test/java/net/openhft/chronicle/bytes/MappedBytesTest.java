@@ -391,16 +391,16 @@ public class MappedBytesTest extends BytesTestCommon {
 
             // Print out the int in the two BytesStores.
             // This shows that the copy has the same contents of the original.
-            System.out.println("Original(0): " + original.readInt(0));
-            System.out.println("PBS(0): " + pbs.readInt(0));
+//            System.out.println("Original(0): " + original.readInt(0));
+//            System.out.println("PBS(0): " + pbs.readInt(0));
 
             // Now modify the copy and print out the new int in the two BytesStores again.
             pbs.writeInt(0, 4321);
-            System.out.println("Original(50): " + original.readInt(50));
-            System.out.println("PBS(0): " + pbs.readInt(0));
+//            System.out.println("Original(50): " + original.readInt(50));
+//            System.out.println("PBS(0): " + pbs.readInt(0));
             original.writeInt(54, 12345678);
-            System.out.println("Original(54): " + original.readInt(54));
-            System.out.println("PBS(4): " + pbs.readInt(4));
+//            System.out.println("Original(54): " + original.readInt(54));
+//            System.out.println("PBS(4): " + pbs.readInt(4));
         }
     }
 

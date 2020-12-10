@@ -125,8 +125,8 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
                     }
                 }
             scoreSum += 1.0 / score;
-            if (t % 50 == 0)
-                System.out.println(t + " - Score: " + score);
+//            if (t % 50 == 0)
+//                System.out.println(t + " - Score: " + score);
         }
         System.out.println("Average score: " + (long) (runs / scoreSum));
         System.out.printf("Average time %.3f us%n", time / timeCount / 1e3);

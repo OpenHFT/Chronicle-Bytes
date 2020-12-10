@@ -42,10 +42,11 @@ public class AllocationRatesTest extends BytesTestCommon {
 
     @Test
     public void compareAllocationRates() {
-        for (int i = 0; i < 5; i++) {
+        for (int i = 4; i >= 0; i--) {
             long timeHBB = timeHeapByteBufferAllocations();
             long timeDBB = timeDirectByteBufferAllocations();
             long timeDS = timeDirectStoreAllocations();
+            if (i == 0)
             System.out.printf("buffers %d KB took an average of %,d ns for heap ByteBuffer, %,d ns for direct ByteBuffer and %,d for DirectStore%n",
                     BUFFER_SIZE / 1024, timeHBB / ALLOCATIONS, timeDBB / ALLOCATIONS, timeDS / ALLOCATIONS);
         }

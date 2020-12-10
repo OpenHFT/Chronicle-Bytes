@@ -383,7 +383,7 @@ public class BytesInternalTest extends BytesTestCommon {
         double d2 = from.parseDouble();
         from.releaseLast();
         if (d != d2) {
-            System.out.println(d + " != " + d2);
+//            System.out.println(d + " != " + d2);
             ++different;
         }
         return different;
@@ -399,7 +399,7 @@ public class BytesInternalTest extends BytesTestCommon {
         if (s.length() != bytes.readRemaining()) {
             assertEquals(d, Double.parseDouble(s), 0.0);
             String s2 = bytes.toString();
-            System.out.println(s + " != " + s2);
+//            System.out.println(s + " != " + s2);
         }
         bytes.releaseLast();
     }

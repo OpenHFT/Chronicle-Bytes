@@ -82,7 +82,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        System.out.println("testParallel2: " + summaryStatistics);
+//        System.out.println("testParallel2: " + summaryStatistics);
     }
 
     @Test
@@ -92,7 +92,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        System.out.println("testSequential: " + summaryStatistics);
+//        System.out.println("testSequential: " + summaryStatistics);
 
     }
 
@@ -103,7 +103,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        System.out.println("testParallel: " + summaryStatistics);
+//        System.out.println("testParallel: " + summaryStatistics);
     }
 
     @Test
@@ -113,7 +113,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 .skip(4)
                 .summaryStatistics();
 
-        System.out.println("testSequential2: " + summaryStatistics);
+//        System.out.println("testSequential2: " + summaryStatistics);
 
     }
 
@@ -129,7 +129,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         }
 
         final long elapsedNs = System.nanoTime() - beginNs;
-        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
+//        System.out.format("%s: elapsedNs = %,d%n", name, elapsedNs);
         return elapsedNs;
     }
 
@@ -161,7 +161,7 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
                 }
             }
             final long elapsedNs = System.nanoTime() - beginNs;
-            System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
+//            System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
         }
     }
 

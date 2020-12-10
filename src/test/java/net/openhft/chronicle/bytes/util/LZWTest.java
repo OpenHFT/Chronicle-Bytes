@@ -64,7 +64,7 @@ public class LZWTest extends BytesTestCommon {
         for (int i = 0; i < bytes.length; i += 40)
             bytes[rand.nextInt(bytes.length)] = '1';
         byte[] compress = LZW.compress(bytes);
-        System.out.println(compress.length);
+//        System.out.println(compress.length);
 
         Bytes bytes2 = Bytes.wrapForRead(bytes);
         @NotNull Bytes bytes3 = Bytes.allocateElasticDirect();
