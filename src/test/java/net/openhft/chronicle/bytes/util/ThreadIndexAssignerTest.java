@@ -70,7 +70,8 @@ public class ThreadIndexAssignerTest {
         t1.start();
         t1started.poll(1, TimeUnit.SECONDS);
         try {
-//            System.out.println("id=" + ta.getId());
+            int id = ta.getId();
+            System.out.println("id=" + id);
             fail();
         } catch (IllegalStateException e) {
             // expected
