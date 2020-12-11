@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 
 public interface MethodReader extends Closeable {
     String HISTORY = "history";
@@ -27,13 +28,13 @@ public interface MethodReader extends Closeable {
     /**
      * Moves the queue to read a message if there is one, but is more expensive than {@link #lazyReadOne()}.
      * If there is an exception in the dispatching mechanics then this should be caught and Jvm.warn'd.
-     * If there is an exception in the invocation then this is wrapped in a {@link RuntimeInvocationTargetException}
+     * If there is an exception in the invocation then this is wrapped in a {@link InvocationTargetRuntimeException}
      * and thrown.
      *
      * @return true if there was a message, false if no more messages.
-     * @throws RuntimeInvocationTargetException if the receiver (target method) throws
+     * @throws InvocationTargetRuntimeException if the receiver (target method) throws
      */
-    boolean readOne();
+    boolean readOne() throws InvocationTargetRuntimeException;
 
     /**
      * Does a quick read which is simpler but might not read the next message. readOne() has to be called periodically.

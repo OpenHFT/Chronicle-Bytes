@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.SimpleCloseable;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
 import java.lang.reflect.InvocationTargetException;
@@ -65,7 +66,7 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         throw new UnsupportedOperationException();
     }
 
-    public boolean readOne() {
+    public boolean readOne() throws InvocationTargetRuntimeException {
         throwExceptionIfClosed();
 
         if (in.readRemaining() < 1)
