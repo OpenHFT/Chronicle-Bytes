@@ -156,6 +156,20 @@ public class NativeBytes<Underlying>
     }
 
     @Override
+    void prewriteCheckOffset(long offset, long subtracting) throws BufferOverflowException {
+        if (offset - subtracting >= bytesStore.start()) {
+            if (offset <= bytesStore.safeLimit()) {
+                return; // do nothing.
+            }
+            if (offset >= capacity)
+                throw new BufferOverflowException(/*"Write exceeds capacity"*/);
+            checkResize(offset);
+        } else {
+            throw new BufferOverflowException();
+        }
+    }
+
+    @Override
     public void ensureCapacity(final long size) throws IllegalArgumentException {
         try {
             assert size >= 0;
