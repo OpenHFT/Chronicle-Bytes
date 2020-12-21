@@ -275,7 +275,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
         </developerConnection>
-        <tag>master</tag>
+         <tag>ea</tag>
     </scm>
 
 </project>
