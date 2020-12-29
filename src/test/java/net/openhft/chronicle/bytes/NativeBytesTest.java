@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -126,11 +125,9 @@ public class NativeBytesTest extends BytesTestCommon {
     @Test(expected = DecoratedBufferOverflowException.class)
     public void tryGrowBeyondByteBufferCapacity() {
         Assume.assumeFalse(alloc == HEAP);
-        Assume.assumeFalse(Jvm.isArm());
-
         long maxMemory = Runtime.getRuntime().maxMemory();
-        if (maxMemory < Integer.MAX_VALUE && !OS.isLinux())
-            return;
+        Assume.assumeTrue(maxMemory >= Bytes.MAX_HEAP_CAPACITY * 3L / 2);
+
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(Bytes.MAX_HEAP_CAPACITY);
         @Nullable ByteBuffer byteBuffer = bytes.underlyingObject();
         assertFalse(byteBuffer.isDirect());
