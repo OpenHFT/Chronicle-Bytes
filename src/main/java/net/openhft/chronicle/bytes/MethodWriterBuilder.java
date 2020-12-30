@@ -22,8 +22,6 @@ import net.openhft.chronicle.core.io.Closeable;
 import java.util.function.Supplier;
 
 public interface MethodWriterBuilder<T> extends Supplier<T> {
-    @Deprecated(/* use methodWriterInterceptorReturns */)
-    MethodWriterBuilder<T> methodWriterListener(MethodWriterListener methodWriterListener);
 
     MethodWriterBuilder<T> genericEvent(String genericEvent);
 

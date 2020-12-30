@@ -342,25 +342,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return sum & 0xFF;
     }
 
-    /**
-     * Return the long sum of the readable bytes.
-     *
-     * @return signed long sum.
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default long longCheckSum() {
-        long sum = 0;
-        long i;
-        try {
-            for (i = readPosition(); i < readLimit() - 7; i += 8)
-                sum += readLong(i);
-            if (i < readLimit())
-                sum += readIncompleteLong(i);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
-        return sum;
-    }
 
     /**
      * Does the BytesStore end with a character?
@@ -409,23 +390,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return BytesInternal.to8bitString(this);
     }
 
-    /**
-     * Perform a <i>not</i> atomic add and get operation for a byte value.
-     *
-     * @param offset to add and get
-     * @param adding value to add, can be 1
-     * @return the sum
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default byte addAndGetByteNotAtomic(long offset, byte adding) throws BufferUnderflowException {
-        try {
-            byte r = (byte) (readByte(offset) + adding);
-            writeByte(offset, r);
-            return r;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
-    }
 
     /**
      * Perform a <i>not</i> atomic add and get operation for an unsigned byte value. This method
@@ -462,24 +426,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-    /**
-     * Perform a <i>not</i> atomic add and get operation for an unsigned short value. This method
-     * <i>does not</i> check for unsigned short overflow.
-     *
-     * @param offset to add and get
-     * @param adding value to add, can be 1
-     * @return the sum
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default int addAndGetUnsignedShortNotAtomic(long offset, int adding) throws BufferUnderflowException {
-        try {
-            int r = (readUnsignedShort(offset) + adding) & 0xFFFF;
-            writeShort(offset, (short) r);
-            return r;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
-    }
 
     /**
      * Perform a <i>not</i> atomic add and get operation for an int value.
@@ -498,42 +444,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-    /**
-     * Perform a <i>not</i> atomic add and get operation for an unsigned int value. This method
-     * <i>does not</i> check for unsigned int overflow.
-     *
-     * @param offset to add and get
-     * @param adding value to add, can be 1
-     * @return the sum
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default long addAndGetUnsignedIntNotAtomic(long offset, int adding) throws BufferUnderflowException {
-        try {
-            int r = readInt(offset) + adding;
-            writeInt(offset, r);
-            return r;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
-    }
 
-    /**
-     * Perform a <i>not</i> atomic add and get operation for a long value.
-     *
-     * @param offset to add and get
-     * @param adding value to add, can be 1
-     * @return the sum
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default long addAndGetLongNotAtomic(long offset, long adding) throws BufferUnderflowException {
-        try {
-            long r = readLong(offset) + adding;
-            writeLong(offset, r);
-            return r;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
-    }
+
 
     /**
      * Perform a <i>not</i> atomic add and get operation for a float value.
@@ -550,43 +462,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
         }
-    }
-
-    /**
-     * Perform a <i>not</i> atomic add and get operation for a double value.
-     *
-     * @param offset to add and get
-     * @param adding value to add, can be 1
-     * @return the sum
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default double addAndGetDoubleNotAtomic(long offset, double adding) throws BufferUnderflowException {
-        try {
-            double r = readDouble(offset) + adding;
-            writeDouble(offset, r);
-            return r;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    /**
-     * Clear and set the flag for present.
-     *
-     * @param isPresent if there is data, or false if not.
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default void isPresent(boolean isPresent) throws IllegalArgumentException {
-        if (!isPresent)
-            throw new IllegalArgumentException("isPresent=" + false + " not supported");
-    }
-
-    /**
-     * @return if there is data, or false if not.
-     */
-    @Deprecated(/* remove in 1.13 */)
-    default boolean isPresent() {
-        return true;
     }
 
     void move(long from, long to, long length) throws BufferUnderflowException;

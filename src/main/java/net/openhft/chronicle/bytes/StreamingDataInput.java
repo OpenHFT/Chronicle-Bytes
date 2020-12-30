@@ -379,15 +379,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     int peekUnsignedByte();
 
-    /**
-     * This is an expert level method for copying raw native memory in bulk.
-     *
-     * @param address of the memory.
-     * @param size    in bytes.
-     */
-    @Deprecated(/*to be removed in 1.13*/)
-    void nativeRead(long address, long size)
-            throws BufferUnderflowException;
 
     @NotNull
     default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)

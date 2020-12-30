@@ -49,12 +49,6 @@ public interface BytesOut<Underlying> extends
                 new BinaryBytesMethodWriterInvocationHandler(MethodEncoderLookup.BY_ANNOTATION, this));
     }
 
-    @Deprecated(/*is it used?*/)
-    @NotNull
-    default <T> MethodWriterBuilder<T> bytesMethodWriterBuilder(Function<Method, MethodEncoder> methodEncoderFunction, @NotNull Class<T> tClass) {
-        return new BytesMethodWriterBuilder<>(tClass, new BinaryBytesMethodWriterInvocationHandler(methodEncoderFunction, this));
-    }
-
     void writeMarshallableLength16(WriteBytesMarshallable marshallable);
 
     /**

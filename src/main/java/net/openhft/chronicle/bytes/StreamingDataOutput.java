@@ -427,16 +427,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     S writeOrderedLong(long i) throws BufferOverflowException;
 
-    /**
-     * This is an expert level method for writing out data to native memory.
-     *
-     * @param address to write to.
-     * @param size    in bytes.
-     */
-    @Deprecated(/*to be removed in 1.13*/)
-    void nativeWrite(long address, long size)
-            throws BufferOverflowException;
-
     default <E extends Enum<E>> S writeEnum(@NotNull E e)
             throws BufferOverflowException {
         return write8bit(e.name());

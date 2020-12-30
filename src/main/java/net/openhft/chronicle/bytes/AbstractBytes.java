@@ -98,17 +98,6 @@ public abstract class AbstractBytes<Underlying>
     }
 
     @Override
-    public void isPresent(boolean isPresent) {
-        clear();
-        this.isPresent = isPresent;
-    }
-
-    @Override
-    public boolean isPresent() {
-        return isPresent;
-    }
-
-    @Override
     @NotNull
     public Bytes<Underlying> clear() {
         long start = start();
@@ -632,13 +621,6 @@ public abstract class AbstractBytes<Underlying>
         return this;
     }
 
-    @Override
-    @Deprecated(/*Is this used?*/)
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
-
-    }
 
     @Override
     @NotNull
@@ -1005,20 +987,6 @@ public abstract class AbstractBytes<Underlying>
         } catch (Exception e) {
             return e.toString();
         }
-    }
-
-    @Override
-    public void nativeRead(long address, long size) throws BufferUnderflowException {
-        long position = readPosition();
-        readSkip(size);
-        bytesStore.nativeRead(position, address, size);
-    }
-
-    @Override
-    public void nativeWrite(long address, long size) throws BufferOverflowException {
-        long position = writePosition();
-        writeSkip(size);
-        bytesStore.nativeWrite(address, position, size);
     }
 
     @Override
