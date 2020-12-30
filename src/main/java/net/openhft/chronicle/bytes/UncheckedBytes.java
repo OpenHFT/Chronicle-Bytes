@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
@@ -284,5 +285,10 @@ public class UncheckedBytes<Underlying>
             BytesInternal.appendUtf8Char(this, c);
         }
         return this;
+    }
+
+    @Override
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+
     }
 }

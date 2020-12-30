@@ -621,6 +621,11 @@ public abstract class AbstractBytes<Underlying>
         return this;
     }
 
+    @Override
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+        writeCheckOffset(offsetInRDO, length);
+        bytesStore.write(offsetInRDO, bytes, offset, length);
+    }
 
     @Override
     @NotNull

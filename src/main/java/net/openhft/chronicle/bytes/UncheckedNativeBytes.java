@@ -828,12 +828,6 @@ public class UncheckedNativeBytes<Underlying>
         return BytesInternal.toString(this);
     }
 
-    @Override
-    @ForceInline
-    public void nativeRead(long address, long size) {
-        bytesStore.nativeRead(readPosition(), address, size);
-        readSkip(size);
-    }
 
     @Override
     public void lenient(boolean lenient) {
@@ -845,12 +839,7 @@ public class UncheckedNativeBytes<Underlying>
         return false;
     }
 
-    @Override
-    @ForceInline
-    public void nativeWrite(long address, long size) {
-        bytesStore.nativeWrite(address, writePosition(), size);
-        writeSkip(size);
-    }
+
 
     @Override
     @ForceInline

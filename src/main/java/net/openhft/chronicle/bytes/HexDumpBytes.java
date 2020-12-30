@@ -549,10 +549,6 @@ public class HexDumpBytes
         return base.peekUnsignedByte();
     }
 
-    @Override
-    public void nativeRead(long address, long size) throws BufferUnderflowException {
-        base.nativeRead(address, size);
-    }
 
     @Override
     public int lastDecimalPlaces() {
@@ -994,17 +990,6 @@ public class HexDumpBytes
         try {
             base.writeOrderedLong(i);
             return this;
-
-        } finally {
-            copyToText(pos);
-        }
-    }
-
-    @Override
-    public void nativeWrite(long address, long size) throws BufferOverflowException {
-        long pos = base.writePosition();
-        try {
-            nativeWrite(address, size);
 
         } finally {
             copyToText(pos);

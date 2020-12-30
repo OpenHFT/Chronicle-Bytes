@@ -51,14 +51,5 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     public long start() {
         return 0;
     }
-
-    @Override
-    public void isPresent(boolean isPresent) {
-        this.isPresent = isPresent;
-    }
-
-    @Override
-    public boolean isPresent() {
-        return isPresent;
-    }
+    
 }
