@@ -426,7 +426,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-
     /**
      * Perform a <i>not</i> atomic add and get operation for an int value.
      *
@@ -444,8 +443,22 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-
-
+    /**
+     * Perform a <i>not</i> atomic add and get operation for a float value.
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     */
+    default double addAndGetDoubleNotAtomic(long offset, double adding) throws BufferUnderflowException {
+        try {
+            double r = readDouble(offset) + adding;
+            writeDouble(offset, r);
+            return r;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
+    }
 
     /**
      * Perform a <i>not</i> atomic add and get operation for a float value.
