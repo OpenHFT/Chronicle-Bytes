@@ -22,7 +22,7 @@ endif::[]
 
 toc::[]
 
-Chronicle Bytes contains all the low level memory access wrappers.It is built on Chronicle Core's direct memory and OS system call access.
+Chronicle Bytes contains all the low level memory access wrappers. It is built on Chronicle Core's direct memory and OS system call access.
 
 Chronicle Bytes has a similar purpose to Java NIO's ByteBuffer with some extensions.
 
