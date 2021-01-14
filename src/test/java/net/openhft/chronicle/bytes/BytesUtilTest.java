@@ -52,7 +52,7 @@ public class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start - 4, 4 + 2 * 8));
-        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 8, 4 + 2 * 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 12, 4 + 2 * 8));
     }
 
     static class A {
