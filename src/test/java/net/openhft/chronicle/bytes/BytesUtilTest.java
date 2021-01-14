@@ -47,7 +47,8 @@ public class BytesUtilTest extends BytesTestCommon {
         assertFalse(BytesUtil.isTriviallyCopyable(A.class, start + 4, 4 + 2 * 8));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class));
-        assertEquals("[" + start + ", " + (start + 24) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
+        int size = Jvm.isAzulZing() ? 28 : 24;
+        assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start - 4, 4 + 2 * 8));
