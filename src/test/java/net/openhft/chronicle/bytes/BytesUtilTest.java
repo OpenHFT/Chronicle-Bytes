@@ -39,18 +39,19 @@ public class BytesUtilTest extends BytesTestCommon {
         assertFalse(BytesUtil.isTriviallyCopyable(C.class));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A.class));
-        assertEquals("[12, 32]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
-        assertTrue(BytesUtil.isTriviallyCopyable(A.class, 12, 4 + 2 * 8));
-        assertTrue(BytesUtil.isTriviallyCopyable(A.class, 16, 8));
-        assertFalse(BytesUtil.isTriviallyCopyable(A.class, 8, 4 + 2 * 8));
-        assertFalse(BytesUtil.isTriviallyCopyable(A.class, 16, 4 + 2 * 8));
+        int start = Jvm.objectHeaderSize();
+        assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
+        assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
+        assertTrue(BytesUtil.isTriviallyCopyable(A.class, start + 4, 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A.class, start - 4, 4 + 2 * 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A.class, start + 4, 4 + 2 * 8));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class));
-        assertEquals("[12, 36]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
-        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, 12, 4 + 2 * 8 + 2 * 2));
-        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, 16, 8));
-        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, 8, 4 + 2 * 8));
-        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, 20, 4 + 2 * 8));
+        assertEquals("[" + start + ", " + (start + 24) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
+        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start, 4 + 2 * 8 + 2 * 2));
+        assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start + 4, 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start - 4, 4 + 2 * 8));
+        assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 8, 4 + 2 * 8));
     }
 
     static class A {

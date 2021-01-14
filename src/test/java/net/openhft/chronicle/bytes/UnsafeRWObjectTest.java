@@ -11,7 +11,7 @@ import static org.junit.Assume.assumeTrue;
 public class UnsafeRWObjectTest {
     @Test
     public void shortObject() {
-        assumeTrue(Jvm.is64bit());
+        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
         assertEquals("[12, 32]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(AA.class)));
@@ -32,7 +32,7 @@ public class UnsafeRWObjectTest {
 
     @Test
     public void longObject() {
-        assumeTrue(Jvm.is64bit());
+        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
         assertEquals("[16, 80]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(BB.class)));
