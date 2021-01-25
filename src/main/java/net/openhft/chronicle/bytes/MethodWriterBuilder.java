@@ -29,6 +29,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
         return this;
     }
 
+    @Deprecated(/* to be removed in x.23 */)
     MethodWriterBuilder<T> useMethodIds(boolean useMethodIds);
 
     MethodWriterBuilder<T> onClose(Closeable closeable);
