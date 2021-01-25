@@ -384,6 +384,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write(@NotNull BytesStore bytes, long offset, long
             length)
             throws BufferOverflowException, BufferUnderflowException {
+        if (length + writePosition() > capacity())
+            throw new IllegalArgumentException("Cannot write " + length + " bytes as position is " + writePosition() + " and capacity is " + capacity());
         BytesInternal.writeFully(bytes, offset, length, this);
         return (S) this;
     }
