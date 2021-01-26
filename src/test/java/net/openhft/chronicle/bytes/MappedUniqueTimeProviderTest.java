@@ -48,14 +48,14 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     public void concurrentTimeNanos() {
         long start0 = System.nanoTime();
         final int runTimeUS = 1_000_000;
-        final int threads = 4;
+        final int threads = Jvm.isArm() ? 4 : 16;
+        final int stride = Jvm.isArm() ? 2 : threads;
         IntStream.range(0, threads)
                 .parallel()
                 .forEach(i -> {
                     TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
                     long start = tp.currentTimeNanos();
                     long last = start;
-                    int stride = Jvm.isArm() ? 2 : threads;
                     for (int j = 0; j < runTimeUS; j += stride) {
                         long now = tp.currentTimeNanos();
                         assertTrue(now < start + runTimeUS * 1000);
