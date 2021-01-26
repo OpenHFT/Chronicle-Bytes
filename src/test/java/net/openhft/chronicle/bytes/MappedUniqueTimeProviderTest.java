@@ -30,7 +30,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         long start = tp.currentTimeNanos();
         long last = start;
         int count = 0;
-        int runTime = Jvm.isArm() ? 3_000_000 : 500_000;
+        long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;
         for (; ; ) {
             long now = tp.currentTimeNanos();
             if (now > start + runTime)
