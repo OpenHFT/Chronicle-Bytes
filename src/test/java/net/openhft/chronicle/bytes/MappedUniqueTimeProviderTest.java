@@ -55,7 +55,8 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                     TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
                     long start = tp.currentTimeNanos();
                     long last = start;
-                    for (int j = 0; j < runTimeUS; j += threads) {
+                    int stride = Jvm.isArm() ? 2 : threads;
+                    for (int j = 0; j < runTimeUS; j += stride) {
                         long now = tp.currentTimeNanos();
                         assertTrue(now < start + runTimeUS * 1000);
                         // check the times are different after shifting by 5 bits.
