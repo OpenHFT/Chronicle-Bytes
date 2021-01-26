@@ -1,0 +1,68 @@
+package net.openhft.chronicle.bytes;
+
+import net.openhft.chronicle.core.time.LongTime;
+import net.openhft.chronicle.core.time.TimeProvider;
+import org.junit.Test;
+
+import java.util.stream.IntStream;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+
+    @Test
+    public void currentTimeMicros() {
+        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        long last = 0;
+        for (int i = 0; i < 100_000; i++) {
+            long time = tp.currentTimeMicros();
+            assertTrue(time > last);
+            assertEquals(LongTime.toMicros(time), time);
+            last = time;
+        }
+    }
+
+    @Test
+    public void currentTimeNanos() {
+        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        long start = tp.currentTimeNanos();
+        long last = start;
+        int count = 0;
+        for (; ; ) {
+            long now = tp.currentTimeNanos();
+            if (now > start + 500_000_000)
+                break;
+            // check the times are different after shifting by 5 bits.
+            assertTrue((now >>> 5) > (last >>> 5));
+            last = now;
+            count++;
+        }
+        System.out.printf("count: %,d%n", count);
+        assertTrue(count > 1000000);
+    }
+
+    @Test
+    public void concurrentTimeNanos() {
+        long start0 = System.nanoTime();
+        final int runTimeUS = 1_000_000;
+        final int threads = 4;
+        IntStream.range(0, threads)
+                .parallel()
+                .forEach(i -> {
+                    TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+                    long start = tp.currentTimeNanos();
+                    long last = start;
+                    for (int j = 0; j < runTimeUS; j += threads) {
+                        long now = tp.currentTimeNanos();
+                        assertTrue(now < start + runTimeUS * 1000);
+                        // check the times are different after shifting by 5 bits.
+                        assertTrue((now >>> 5) > (last >>> 5));
+                        last = now;
+                    }
+                });
+        long time0 = System.nanoTime() - start0;
+        System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
+        assertTrue(time0 < runTimeUS * 1000);
+    }
+}
