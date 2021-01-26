@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.Test;
@@ -29,9 +30,10 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         long start = tp.currentTimeNanos();
         long last = start;
         int count = 0;
+        int runTime = Jvm.isArm() ? 3_000_000 : 500_000;
         for (; ; ) {
             long now = tp.currentTimeNanos();
-            if (now > start + 1_000_000_000)
+            if (now > start + runTime)
                 break;
             // check the times are different after shifting by 5 bits.
             assertTrue((now >>> 5) > (last >>> 5));
@@ -39,7 +41,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count++;
         }
         System.out.printf("count: %,d%n", count);
-        assertTrue(count > 1500000);
+        assertTrue(count > 1_000_000);
     }
 
     @Test
