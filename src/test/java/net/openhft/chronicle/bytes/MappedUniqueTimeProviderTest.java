@@ -31,7 +31,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         int count = 0;
         for (; ; ) {
             long now = tp.currentTimeNanos();
-            if (now > start + 500_000_000)
+            if (now > start + 1_000_000_000)
                 break;
             // check the times are different after shifting by 5 bits.
             assertTrue((now >>> 5) > (last >>> 5));
@@ -39,7 +39,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count++;
         }
         System.out.printf("count: %,d%n", count);
-        assertTrue(count > 1000000);
+        assertTrue(count > 1500000);
     }
 
     @Test
