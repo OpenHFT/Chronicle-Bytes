@@ -29,7 +29,10 @@ import java.io.IOException;
 
 /**
  * Timestamps are unique across threads/processes on a single machine.
+ *
+ * @deprecated Use {@link MappedUniqueTimeProvider} instead.
  */
+@Deprecated(/* to be removed in x.23 */)
 public enum MappedUniqueMicroTimeProvider implements TimeProvider {
     INSTANCE;
 
