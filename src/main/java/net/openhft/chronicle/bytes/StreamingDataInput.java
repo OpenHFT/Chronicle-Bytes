@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -359,7 +360,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default void unsafeReadObject(Object o, int length) {
-        unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + (OS.is64Bit() ? 12 : 8), length);
+        unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
     default void unsafeReadObject(Object o, int offset, int length) {

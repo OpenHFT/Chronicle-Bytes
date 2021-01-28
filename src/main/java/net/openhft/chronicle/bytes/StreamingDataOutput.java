@@ -18,8 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.util.Histogram;
@@ -403,7 +403,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S write(byte[] bytes, int offset, int length) throws BufferOverflowException;
 
     default S unsafeWriteObject(Object o, int length) {
-        return unsafeWriteObject(o, (o.getClass().isArray() ? 4 : 0) + (OS.is64Bit() ? 12 : 8), length);
+        return unsafeWriteObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
     default S unsafeWriteObject(Object o, int offset, int length) {
