@@ -58,7 +58,7 @@ public class UnsafeRWObjectTest {
 
     @Test
     public void array() {
-        assumeTrue(Jvm.is64bit());
+        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
         assertEquals("[16]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(byte[].class)));
