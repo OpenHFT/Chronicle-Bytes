@@ -416,6 +416,18 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             buffer.put(readByte());
     }
 
+    /**
+     * Transfer as many bytes as possible.
+     * If you want to write all the bytes or fail use write.
+     *
+     * @param bytes to copy to.
+     * @see StreamingDataOutput#write(BytesStore)
+     */
+    default void read(Bytes bytes) {
+        int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));
+        read(bytes, length);
+    }
+
     default void read(@NotNull Bytes bytes, int length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int len2 = (int) Math.min(length, readRemaining());

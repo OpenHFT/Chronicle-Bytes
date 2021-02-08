@@ -354,10 +354,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes the passed BytesStore
+     * Writes all the the passed BytesStore or it fails.
+     * If you want to read only as much as there is use read
      *
      * @param bytes to write
      * @return this
+     * @see StreamingDataInput#read(Bytes)
      */
     default S write(@NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
