@@ -32,7 +32,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private final long start;
     private final long safeLimit;
 
-    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity) throws IllegalStateException {
+    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity)
+            throws IllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity), false);
         this.mappedFile = mappedFile;
         this.start = start;
@@ -51,20 +52,26 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
+    public @NotNull Bytes<Void> bytesForRead()
+            throws IllegalStateException {
         try {
             return new VanillaBytes<Void>(this)
                     .readLimit(writeLimit())
                     .readPosition(start());
-        } catch (BufferUnderflowException e) {
+        } catch (BufferUnderflowException | IllegalArgumentException e) {
             throw new IllegalStateException(e);
         }
     }
 
     @NotNull
     @Override
-    public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
-        return new VanillaBytes<>(this);
+    public VanillaBytes<Void> bytesForWrite()
+            throws IllegalStateException {
+        try {
+            return new VanillaBytes<>(this);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -90,7 +97,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeOrderedInt(long offset, int i) {
+    public NativeBytesStore<Void> writeOrderedInt(long offset, int i)
+            throws IllegalStateException {
         memory.writeOrderedInt(address - start + offset, i);
         return this;
     }

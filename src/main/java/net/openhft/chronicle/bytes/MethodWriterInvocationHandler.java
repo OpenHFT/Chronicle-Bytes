@@ -28,7 +28,8 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
 
     void onClose(Closeable closeable);
 
-    default void methodWriterInterceptorReturns(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptorReturns interceptor) {
+    default void methodWriterInterceptorReturns(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptorReturns interceptor)
+            throws IllegalArgumentException {
         if (methodWriterListener != null || interceptor != null)
             methodWriterInterceptorReturns(MethodWriterInterceptorReturns.of(methodWriterListener, interceptor));
     }

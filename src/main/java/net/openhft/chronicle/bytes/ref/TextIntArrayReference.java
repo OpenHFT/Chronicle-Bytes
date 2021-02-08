@@ -23,6 +23,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /*
@@ -49,51 +52,73 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
 
     private long length = VALUES;
 
-    public static void write(@NotNull Bytes bytes, long capacity) {
+    public static void write(@NotNull Bytes bytes, long capacity)
+            throws IllegalStateException, BufferOverflowException {
         long start = bytes.writePosition();
         bytes.write(SECTION1);
         bytes.append(capacity);
         while (bytes.writePosition() - start < CAPACITY + DIGITS) {
-            bytes.writeUnsignedByte(' ');
+            try {
+                bytes.writeUnsignedByte(' ');
+            } catch (ArithmeticException e) {
+                throw new AssertionError(e);
+            }
         }
         bytes.write(SECTION2);
         bytes.write(ZERO);
         bytes.write(SECTION3);
         for (long i = 0; i < capacity; i++) {
-            if (i > 0)
-                bytes.appendUtf8(", ");
+            if (i > 0) {
+                try {
+                    bytes.appendUtf8(", ");
+                } catch (BufferUnderflowException e) {
+                    throw new AssertionError(e);
+                }
+            }
             bytes.write(ZERO);
         }
         bytes.write(SECTION4);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset) {
+    public static long peakLength(@NotNull BytesStore bytes, long offset)
+            throws IllegalStateException {
         //todo check this, I think there could be a bug here
-        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
-                + VALUES + SECTION4.length;
+        try {
+            return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
+                    + VALUES + SECTION4.length;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public long getUsed() {
+    public long getUsed()
+            throws IllegalStateException {
         try {
             return bytes.parseLong(USED + offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
-    private void setUsed(long used) {
+    private void setUsed(long used)
+            throws IllegalStateException, IllegalArgumentException {
         try {
             bytes.append(VALUES + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setMaxUsed(long usedAtLeast) {
+    public void setMaxUsed(long usedAtLeast)
+            throws IllegalStateException {
         try {
             while (true) {
                 if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
@@ -110,6 +135,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -131,23 +158,29 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     }
 
     @Override
-    public int getValueAt(long index) {
+    public int getValueAt(long index)
+            throws IllegalStateException {
         try {
             return (int) bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
 
     }
 
     @Override
-    public void setValueAt(long index, int value) {
+    public void setValueAt(long index, int value)
+            throws IllegalStateException {
         try {
             bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -157,19 +190,22 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     }
 
     @Override
-    public int getVolatileValueAt(long index) {
+    public int getVolatileValueAt(long index)
+            throws IllegalStateException {
         OS.memory().loadFence();
         return getValueAt(index);
     }
 
     @Override
-    public void setOrderedValueAt(long index, int value) {
+    public void setOrderedValueAt(long index, int value)
+            throws IllegalStateException {
         setValueAt(index, value);
         OS.memory().storeFence();
     }
 
     @Override
-    public boolean compareAndSet(long index, int expected, int value) {
+    public boolean compareAndSet(long index, int expected, int value)
+            throws IllegalStateException {
         try {
             if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                 return false;
@@ -186,12 +222,15 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
 
     }
 
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         if (length != peakLength(bytes, offset))
@@ -206,7 +245,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     }
 
     @Override
-    public void reset() {
+    public void reset()
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         bytes = null;
@@ -229,7 +269,11 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
                     '}';
         }
 
-        return "value: " + getValueAt(0) + " ...";
+        try {
+            return "value: " + getValueAt(0) + " ...";
+        } catch (Exception e) {
+            return e.toString();
+        }
     }
 
     @Override

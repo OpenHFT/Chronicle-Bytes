@@ -21,6 +21,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 /**
  * An object which can be read or written directly to Bytes in a streaming manner.
  */
@@ -28,21 +31,27 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
     @Override
     @SuppressWarnings("rawtypes")
-    default void readMarshallable(BytesIn bytes) throws IORuntimeException {
+    default void readMarshallable(BytesIn bytes)
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         BytesUtil.readMarshallable(this, bytes);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    default void writeMarshallable(BytesOut bytes) {
+    default void writeMarshallable(BytesOut bytes)
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         BytesUtil.writeMarshallable(this, bytes);
     }
 
     default String $toString() {
-        HexDumpBytes bytes = new HexDumpBytes();
-        writeMarshallable(bytes);
-        String s = "# " + getClass().getName() + "\n" + bytes.toHexString();
-        bytes.releaseLast();
-        return s;
+        try {
+            HexDumpBytes bytes = new HexDumpBytes();
+            writeMarshallable(bytes);
+            String s = "# " + getClass().getName() + "\n" + bytes.toHexString();
+            bytes.releaseLast();
+            return s;
+        } catch (Throwable e) {
+            return e.toString();
+        }
     }
 }

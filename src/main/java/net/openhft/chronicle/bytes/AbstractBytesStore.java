@@ -36,7 +36,8 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Un
     }
 
     @Override
-    public int peekUnsignedByte(long offset) throws BufferUnderflowException {
+    public int peekUnsignedByte(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         return offset >= readLimit() ? -1 : readUnsignedByte(offset);
     }
 

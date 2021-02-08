@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
@@ -42,23 +41,28 @@ import java.nio.ByteBuffer;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     @NotNull
-    S readPosition(long position) throws BufferUnderflowException;
+    S readPosition(long position)
+            throws BufferUnderflowException, IllegalStateException;
 
     @NotNull
-    default S readPositionUnlimited(long position) throws BufferUnderflowException {
+    default S readPositionUnlimited(long position)
+            throws BufferUnderflowException, IllegalStateException {
         return readLimitToCapacity().readPosition(position);
     }
 
     @NotNull
-    default S readPositionRemaining(long position, long remaining) throws BufferUnderflowException {
+    default S readPositionRemaining(long position, long remaining)
+            throws BufferUnderflowException, IllegalStateException {
         readLimit(position + remaining);
         return readPosition(position);
     }
 
     @NotNull
-    S readLimit(long limit) throws BufferUnderflowException;
+    S readLimit(long limit)
+            throws BufferUnderflowException;
 
-    default S readLimitToCapacity() throws BufferUnderflowException {
+    default S readLimitToCapacity()
+            throws BufferUnderflowException {
         return readLimit(capacity());
     }
 
@@ -70,7 +74,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
     @NotNull
-    S readSkip(long bytesToSkip) throws BufferUnderflowException;
+    S readSkip(long bytesToSkip)
+            throws BufferUnderflowException, IllegalStateException;
 
     /**
      * Read skip 1 when you are sure this is safe. Use at your own risk when you find a performance problem.
@@ -86,7 +91,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Perform a set of actions with a temporary bounds mode.
      */
     default void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -104,7 +109,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Perform a set of actions with a temporary bounds mode.
      */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -123,85 +128,103 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return new StreamingInputStream(this);
     }
 
-    default long readStopBit() throws IORuntimeException {
+    default long readStopBit()
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         return BytesInternal.readStopBit(this);
     }
 
-    default char readStopBitChar() throws IORuntimeException {
+    default char readStopBitChar()
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         return BytesInternal.readStopBitChar(this);
     }
 
-    default double readStopBitDouble() {
+    default double readStopBitDouble()
+            throws IllegalStateException {
         return BytesInternal.readStopBitDouble(this);
     }
 
-    default double readStopBitDecimal() throws BufferOverflowException {
+    default double readStopBitDecimal()
+            throws IllegalStateException, BufferUnderflowException {
         long value = readStopBit();
         int scale = (int) (Math.abs(value) % 10);
         value /= 10;
         return (double) value / Maths.tens(scale);
     }
 
-    default boolean readBoolean() {
+    default boolean readBoolean()
+            throws IllegalStateException {
         byte b = readByte();
         return BytesUtil.byteToBoolean(b);
     }
 
-    byte readByte();
+    byte readByte()
+            throws IllegalStateException;
 
-    default byte rawReadByte() {
+    default byte rawReadByte()
+            throws IllegalStateException {
         return readByte();
     }
 
-    default char readChar() {
+    default char readChar()
+            throws IllegalStateException, BufferUnderflowException {
         return readStopBitChar();
     }
 
     /**
      * @return the next unsigned 8 bit value or -1;
      */
-    int readUnsignedByte();
+    int readUnsignedByte()
+            throws IllegalStateException;
 
     /**
      * @return the next unsigned 8 bit value or -1;
      */
     int uncheckedReadUnsignedByte();
 
-    short readShort() throws BufferUnderflowException;
+    short readShort()
+            throws BufferUnderflowException, IllegalStateException;
 
-    default int readUnsignedShort() throws BufferUnderflowException {
+    default int readUnsignedShort()
+            throws BufferUnderflowException, IllegalStateException {
         return readShort() & 0xFFFF;
     }
 
-    default int readInt24() throws BufferUnderflowException {
+    default int readInt24()
+            throws BufferUnderflowException, IllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 24 >> 8);
     }
 
-    default int readUnsignedInt24() throws BufferUnderflowException {
+    default int readUnsignedInt24()
+            throws BufferUnderflowException, IllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 16);
     }
 
-    int readInt() throws BufferUnderflowException;
+    int readInt()
+            throws BufferUnderflowException, IllegalStateException;
 
-    default int rawReadInt() {
+    default int rawReadInt()
+            throws BufferUnderflowException, IllegalStateException {
         return readInt();
     }
 
     default long readUnsignedInt()
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IllegalStateException {
         return readInt() & 0xFFFFFFFFL;
     }
 
-    long readLong() throws BufferUnderflowException;
+    long readLong()
+            throws BufferUnderflowException, IllegalStateException;
 
-    default long rawReadLong() {
+    default long rawReadLong()
+            throws BufferUnderflowException, IllegalStateException {
         return readLong();
     }
 
     /**
      * @return a long using the bytes remaining
      */
-    default long readIncompleteLong() {
+    default long readIncompleteLong()
+            throws IllegalStateException {
         long left = readRemaining();
         try {
             if (left >= 8)
@@ -219,9 +242,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
-    float readFloat() throws BufferUnderflowException;
+    float readFloat()
+            throws BufferUnderflowException, IllegalStateException;
 
-    double readDouble() throws BufferUnderflowException;
+    double readDouble()
+            throws BufferUnderflowException, IllegalStateException;
 
     /**
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
@@ -231,19 +256,20 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     @Nullable
     default String readUtf8()
-            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException {
+            throws BufferUnderflowException, IORuntimeException, IllegalStateException, ArithmeticException {
         return BytesInternal.readUtf8(this);
     }
 
     @Nullable
     @Deprecated(/* to be removed in x.22 */)
     default String readUTFΔ()
-            throws IORuntimeException, BufferUnderflowException, IllegalArgumentException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.readUtf8(this);
     }
 
     @Nullable
-    default String read8bit() throws IORuntimeException, BufferUnderflowException {
+    default String read8bit()
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.read8bit(this);
     }
 
@@ -254,10 +280,41 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
     default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
-            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
-        AppendableUtil.setLength(sb, 0);
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
+        try {
+            AppendableUtil.setLength(sb, 0);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
         if (readRemaining() <= 0)
-            // TODO throw BufferUnderflowException here? please review
+            return false;
+        long len0 = readStopBit();
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        if (len > 0)
+            BytesInternal.parseUtf8(this, sb, true, len);
+        return true;
+    }
+
+    default boolean readUtf8(@NotNull Bytes sb)
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
+        sb.readPositionRemaining(0, 0);
+        if (readRemaining() <= 0)
+            return false;
+        long len0 = readStopBit();
+        if (len0 == -1)
+            return false;
+        int len = Maths.toUInt31(len0);
+        if (len > 0)
+            BytesInternal.parseUtf8(this, sb, true, len);
+        return true;
+    }
+
+    default boolean readUtf8(@NotNull StringBuilder sb)
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
+        sb.setLength(0);
+        if (readRemaining() <= 0)
             return false;
         long len0 = readStopBit();
         if (len0 == -1)
@@ -270,26 +327,31 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     @Deprecated(/* to be removed in x.22 */)
     default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
-            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
         return readUtf8(sb);
     }
 
     default boolean read8bit(@NotNull Bytes b)
-            throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         b.clear();
         if (readRemaining() <= 0)
             return false;
         long len0 = this.readStopBit();
         if (len0 == -1)
             return false;
-        int len = Maths.toUInt31(len0);
-        b.write((BytesStore) this, readPosition(), len);
-        readSkip(len);
-        return true;
+        try {
+            int len = Maths.toUInt31(len0);
+            b.write((BytesStore) this, readPosition(), len);
+            readSkip(len);
+            return true;
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
+    @Deprecated(/* remove in x.23 */)
     default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
-            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalArgumentException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -304,7 +366,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default boolean read8bit(@NotNull StringBuilder sb)
-            throws IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
@@ -318,11 +380,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default int read(@NotNull byte[] bytes) {
+    default int read(@NotNull byte[] bytes)
+            throws BufferUnderflowException, IllegalStateException {
         return read(bytes, 0, bytes.length);
     }
 
-    default int read(@NotNull byte[] bytes, int off, int len) {
+    default int read(@NotNull byte[] bytes, int off, int len)
+            throws BufferUnderflowException, IllegalStateException {
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;
@@ -335,7 +399,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
-    default int read(@NotNull char[] bytes, int off, int len) {
+    default int read(@NotNull char[] bytes, int off, int len)
+            throws IllegalStateException {
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;
@@ -345,12 +410,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
-    default void read(@NotNull ByteBuffer buffer) {
+    default void read(@NotNull ByteBuffer buffer)
+            throws IllegalStateException {
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }
 
-    default void read(@NotNull Bytes bytes, int length) {
+    default void read(@NotNull Bytes bytes, int length)
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int len2 = (int) Math.min(length, readRemaining());
         int i = 0;
         for (; i < len2 - 7; i += 8)
@@ -359,11 +426,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes.rawWriteByte(rawReadByte());
     }
 
-    default void unsafeReadObject(Object o, int length) {
+    default void unsafeReadObject(Object o, int length)
+            throws BufferUnderflowException, IllegalStateException {
         unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
-    default void unsafeReadObject(Object o, int offset, int length) {
+    default void unsafeReadObject(Object o, int offset, int length)
+            throws BufferUnderflowException, IllegalStateException {
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
@@ -374,49 +443,57 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
     }
 
-    int readVolatileInt() throws BufferUnderflowException;
+    int readVolatileInt()
+            throws BufferUnderflowException, IllegalStateException;
 
-    long readVolatileLong() throws BufferUnderflowException;
+    long readVolatileLong()
+            throws BufferUnderflowException, IllegalStateException;
 
-    int peekUnsignedByte();
+    int peekUnsignedByte()
+            throws IllegalStateException;
 
 
     @NotNull
     default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
-            throws IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, BufferOverflowException {
         return BytesInternal.readEnum(this, eClass);
     }
 
     @Deprecated(/* to be removed in x.22 */)
     default void parseUTF(Appendable sb, int length)
-            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         parseUtf8(sb, length);
     }
 
     default void parseUtf8(Appendable sb, int encodedLength)
-            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         parseUtf8(sb, true, encodedLength);
     }
 
     default void parseUtf8(Appendable sb, boolean utf, int length)
-            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException {
+            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUtf8(this, sb, utf, length);
     }
 
-    default long parseHexLong() {
+    default long parseHexLong()
+            throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parseHexLong(this);
     }
 
-    void copyTo(OutputStream out) throws IOException;
+    void copyTo(OutputStream out)
+            throws IOException, IllegalStateException;
 
-    long copyTo(BytesStore to);
+    long copyTo(BytesStore to)
+            throws IllegalStateException;
 
-    default void readHistogram(@NotNull Histogram histogram) {
+    default void readHistogram(@NotNull Histogram histogram)
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         BytesInternal.readHistogram(this, histogram);
     }
 
-    default void readWithLength(Bytes bytes) {
+    default void readWithLength(Bytes bytes)
+            throws ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalStateException {
         bytes.clear();
         int length = Maths.toUInt31(readStopBit());
         int i;

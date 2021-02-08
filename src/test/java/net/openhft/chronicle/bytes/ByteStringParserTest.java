@@ -110,7 +110,8 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendParse() throws IOException, IORuntimeException {
+    public void testAppendParse()
+            throws IOException, IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
         bytes.append("word£€)").append(' ');
@@ -128,7 +129,8 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLastDecimalPlaces() throws IOException, IORuntimeException {
+    public void testLastDecimalPlaces()
+            throws IOException, IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.append("1").append(' ');
         bytes.append("1.").append(' ');
@@ -193,7 +195,8 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendParseUTF() throws IOException {
+    public void testAppendParseUTF()
+            throws IOException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (@NotNull String word : words) {
@@ -228,7 +231,8 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendSubstring() throws IOException {
+    public void testAppendSubstring()
+            throws IOException {
         bytes.append("Hello World", 2, 7).append("\n");
 
         assertEquals("Hello World".substring(2, 7), bytes.parseUtf8(CONTROL_STOP));

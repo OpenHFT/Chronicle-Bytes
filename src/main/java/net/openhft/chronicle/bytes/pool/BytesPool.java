@@ -30,10 +30,14 @@ public class BytesPool {
 
     public Bytes acquireBytes() {
         Bytes bytes = bytesTL.get();
-        if (bytes == null) {
-            bytesTL.set(bytes = createBytes());
+        if (bytes != null) {
+            try {
+                return bytes.clear();
+            } catch (IllegalStateException e) {
+                // ignored
+            }
         } else {
-            bytes.clear();
+            bytesTL.set(bytes = createBytes());
         }
         return bytes;
     }

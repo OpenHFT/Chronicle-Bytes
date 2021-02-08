@@ -35,27 +35,33 @@ public class ByteStringReader extends Reader {
 
     @Override
     public int read() {
-        return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        try {
+            return in.readRemaining() > 0 ? in.readUnsignedByte() : -1;
+        } catch (IllegalStateException e) {
+            return -1;
+        }
     }
 
     @Override
-    public long skip(long n) throws IOException {
+    public long skip(long n)
+            throws IOException {
         long len = Math.min(in.readRemaining(), n);
         try {
             in.readSkip(len);
 
-        } catch (BufferUnderflowException e) {
+        } catch (BufferUnderflowException | IllegalStateException e) {
             throw new IOException(e);
         }
         return len;
     }
 
     @Override
-    public int read(char[] cbuf, int off, int len) throws IOException {
+    public int read(char[] cbuf, int off, int len)
+            throws IOException {
         try {
             return in.read(cbuf, off, len);
 
-        } catch (BufferUnderflowException e) {
+        } catch (IllegalStateException e) {
             throw new IOException(e);
         }
     }

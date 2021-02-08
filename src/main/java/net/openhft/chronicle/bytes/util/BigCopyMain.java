@@ -4,15 +4,19 @@ import net.openhft.chronicle.bytes.Bytes;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.util.Random;
 
+@Deprecated(/* to be remoed in x.22 */)
 public class BigCopyMain {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)
+            throws IOException, IllegalArgumentException, IllegalStateException, BufferOverflowException, BufferUnderflowException {
         int initialCapacity = 10 * 1024 * 1024;
         long fileSize = 5368709120l;
         byte[] buffer = new byte[initialCapacity];

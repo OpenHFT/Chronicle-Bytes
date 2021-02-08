@@ -26,16 +26,20 @@ import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
+
 import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 
 public class StringInternerBytes extends StringInterner {
 
-    public StringInternerBytes(int capacity) {
+    public StringInternerBytes(int capacity)
+            throws IllegalArgumentException {
         super(capacity);
     }
 
     @SuppressWarnings("rawtypes")
-    public String intern(@NotNull final Bytes bytes) {
+    public String intern(@NotNull final Bytes bytes)
+            throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
 
@@ -50,7 +54,8 @@ public class StringInternerBytes extends StringInterner {
      * @return the string made from bytes only ( rather than chars )
      */
     @SuppressWarnings("rawtypes")
-    public String intern(@NotNull final Bytes bytes, int length) {
+    public String intern(@NotNull final Bytes bytes, int length)
+            throws IllegalStateException, BufferUnderflowException {
         try {
             int hash32 = BytesStoreHash.hash32(bytes, length);
             int h = hash32 & mask;

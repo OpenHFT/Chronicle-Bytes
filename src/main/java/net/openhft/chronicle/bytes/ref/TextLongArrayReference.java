@@ -19,9 +19,13 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
+
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
@@ -49,7 +53,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     private long length = VALUES;
 
-    public static void write(@NotNull Bytes bytes, long capacity) {
+    public static void write(@NotNull Bytes bytes, long capacity)
+            throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
         long start = bytes.writePosition();
         bytes.write(SECTION1);
         bytes.append(capacity);
@@ -67,33 +72,41 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         bytes.write(SECTION4);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset) {
+    public static long peakLength(@NotNull BytesStore bytes, long offset)
+            throws IllegalStateException, BufferUnderflowException {
         //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
                 + VALUES + SECTION4.length;
     }
 
     @Override
-    public long getUsed() {
+    public long getUsed()
+            throws IllegalStateException {
         try {
             return bytes.parseLong(USED + offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
-    private void setUsed(long used) {
+    private void setUsed(long used)
+            throws IllegalStateException {
         try {
             bytes.append(VALUES + offset, used, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setMaxUsed(long usedAtLeast) {
+    public void setMaxUsed(long usedAtLeast)
+            throws IllegalStateException {
         try {
             while (true) {
                 if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
@@ -110,6 +123,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (IllegalStateException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -131,23 +146,29 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public long getValueAt(long index) {
+    public long getValueAt(long index)
+            throws IllegalStateException {
         try {
             return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
 
     }
 
     @Override
-    public void setValueAt(long index, long value) {
+    public void setValueAt(long index, long value)
+            throws IllegalStateException {
         try {
             bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -157,19 +178,22 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public long getVolatileValueAt(long index) {
+    public long getVolatileValueAt(long index)
+            throws IllegalStateException {
         OS.memory().loadFence();
         return getValueAt(index);
     }
 
     @Override
-    public void setOrderedValueAt(long index, long value) {
+    public void setOrderedValueAt(long index, long value)
+            throws IllegalStateException {
         setValueAt(index, value);
         OS.memory().storeFence();
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value) {
+    public boolean compareAndSet(long index, long expected, long value)
+            throws IllegalStateException {
         try {
             if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
                 return false;
@@ -186,16 +210,25 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
 
     }
 
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+            throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosedInSetter();
 
-        if (length != peakLength(bytes, offset))
-            throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
+        long peakLength = 0;
+        try {
+            peakLength = peakLength(bytes, offset);
+        } catch (BufferUnderflowException e) {
+            throw new DecoratedBufferOverflowException(e.toString());
+        }
+        if (length != peakLength)
+            throw new IllegalArgumentException(length + " != " + peakLength);
         super.bytesStore(bytes, offset, length);
         this.length = length;
     }
@@ -206,7 +239,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public void reset() {
+    public void reset()
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         bytes = null;
@@ -229,7 +263,11 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
                     '}';
         }
 
-        return "value: " + getValueAt(0) + " ...";
+        try {
+            return "value: " + getValueAt(0) + " ...";
+        } catch (Exception e) {
+            return e.toString();
+        }
     }
 
     @Override

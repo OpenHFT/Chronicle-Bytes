@@ -19,13 +19,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Reader;
 import java.math.BigDecimal;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
@@ -54,12 +54,14 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return true, false, or null if neither.
      */
     @Nullable
-    default Boolean parseBoolean(@NotNull StopCharTester tester) {
+    default Boolean parseBoolean(@NotNull StopCharTester tester)
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.parseBoolean(this, tester);
     }
 
     @Nullable
-    default Boolean parseBoolean() {
+    default Boolean parseBoolean()
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.parseBoolean(this, StopCharTesters.NON_ALPHA_DIGIT);
     }
 
@@ -70,14 +72,15 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @return the text as a String.
      */
     @NotNull
-    @ForceInline
-    default String parseUtf8(@NotNull StopCharTester stopCharTester) {
+    default String parseUtf8(@NotNull StopCharTester stopCharTester)
+            throws IllegalStateException, ArithmeticException {
         return BytesInternal.parseUtf8(this, stopCharTester);
     }
 
     @NotNull
     @Deprecated(/* to be removed in x.22 */)
-    default String parseUTF(@NotNull StopCharTester stopCharTester) {
+    default String parseUTF(@NotNull StopCharTester stopCharTester)
+            throws IllegalStateException, ArithmeticException {
         return parseUtf8(stopCharTester);
     }
 
@@ -87,13 +90,14 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param buffer         to populate
      * @param stopCharTester to check if the end has been reached.
      */
-    @ForceInline
-    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) throws BufferUnderflowException {
+    default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
     @Deprecated(/* to be removed in x.22 */)
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester) throws BufferUnderflowException {
+    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         parseUtf8(buffer, stopCharTester);
     }
 
@@ -103,15 +107,14 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */
-    @ForceInline
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         BytesInternal.parseUtf8(this, buffer, stopCharsTester);
     }
 
     @Deprecated(/* to be removed in x.22 */)
     default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         parseUtf8(buffer, stopCharsTester);
     }
 
@@ -122,9 +125,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharTester to check if the end has been reached.
      */
     @SuppressWarnings("rawtypes")
-    @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
@@ -137,7 +139,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharTester to check if the end has been reached.
      */
     default String parse8bit(@NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parse8bit(this, stopCharTester);
     }
 
@@ -148,9 +150,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param stopCharsTester to check if the end has been reached.
      */
     @SuppressWarnings("rawtypes")
-    @ForceInline
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else
@@ -159,12 +160,12 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
 
     @SuppressWarnings("rawtypes")
     default void parse8bit(Bytes buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
     default void parse8bit(StringBuilder buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException {
+            throws IllegalStateException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
@@ -173,8 +174,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return an int.
      */
-    @ForceInline
-    default int parseInt() throws BufferUnderflowException {
+    default int parseInt()
+            throws BufferUnderflowException, ArithmeticException, IllegalStateException {
         return Maths.toInt32(BytesInternal.parseLong(this));
     }
 
@@ -183,8 +184,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return a long.
      */
-    @ForceInline
-    default long parseLong() throws BufferUnderflowException {
+    default long parseLong()
+            throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parseLong(this);
     }
 
@@ -195,7 +196,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return a float.
      */
-    default float parseFloat() throws BufferUnderflowException {
+    default float parseFloat()
+            throws BufferUnderflowException, IllegalStateException {
         return (float) BytesInternal.parseDouble(this);
     }
 
@@ -206,7 +208,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return a double.
      */
-    default double parseDouble() throws BufferUnderflowException {
+    default double parseDouble()
+            throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parseDouble(this);
     }
 
@@ -217,7 +220,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      *
      * @return the significant digits
      */
-    default long parseLongDecimal() throws BufferUnderflowException {
+    default long parseLongDecimal()
+            throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parseLongDecimal(this);
     }
 
@@ -239,13 +243,14 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * @param tester to stop at
      * @return true if a terminating character was found, false if the end of the buffer was reached.
      */
-    @ForceInline
-    default boolean skipTo(@NotNull StopCharTester tester) {
+    default boolean skipTo(@NotNull StopCharTester tester)
+            throws IllegalStateException {
         return BytesInternal.skipTo(this, tester);
     }
 
     @NotNull
-    default BigDecimal parseBigDecimal() {
+    default BigDecimal parseBigDecimal()
+            throws IllegalStateException, ArithmeticException {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
     }
 

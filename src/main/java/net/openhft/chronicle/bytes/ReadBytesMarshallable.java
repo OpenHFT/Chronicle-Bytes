@@ -21,6 +21,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
 
+import java.nio.BufferUnderflowException;
+
 /**
  * Read data directly as Bytes.
  */
@@ -33,5 +35,6 @@ public interface ReadBytesMarshallable extends CommonMarshallable {
      * @param bytes to read.
      */
     @SuppressWarnings("rawtypes")
-    void readMarshallable(BytesIn bytes) throws IORuntimeException;
+    void readMarshallable(BytesIn bytes)
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException;
 }

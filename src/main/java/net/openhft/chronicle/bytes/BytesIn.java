@@ -22,6 +22,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesIn<Underlying> extends
         RandomDataInput,
@@ -42,9 +45,11 @@ public interface BytesIn<Underlying> extends
         return new BytesMethodReaderBuilder(this);
     }
 
-    <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object);
+    <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object)
+            throws BufferUnderflowException, IllegalStateException;
 
-    default <T> T readObject(Class<T> componentType0) {
+    default <T> T readObject(Class<T> componentType0)
+            throws BufferUnderflowException, IllegalArgumentException, IllegalStateException, ArithmeticException, BufferOverflowException {
         Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
             BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);

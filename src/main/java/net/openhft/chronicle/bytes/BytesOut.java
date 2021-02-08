@@ -22,9 +22,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
-import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
-import java.util.function.Function;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesOut<Underlying> extends
@@ -41,7 +41,8 @@ public interface BytesOut<Underlying> extends
      * cast)
      */
     @NotNull
-    default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional) {
+    default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional)
+            throws IllegalArgumentException {
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked
@@ -49,7 +50,8 @@ public interface BytesOut<Underlying> extends
                 new BinaryBytesMethodWriterInvocationHandler(MethodEncoderLookup.BY_ANNOTATION, this));
     }
 
-    void writeMarshallableLength16(WriteBytesMarshallable marshallable);
+    void writeMarshallableLength16(WriteBytesMarshallable marshallable)
+            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException;
 
     /**
      * Write a limit set of writeObject types.
@@ -57,7 +59,8 @@ public interface BytesOut<Underlying> extends
      * @param componentType expected.
      * @param obj           of componentType
      */
-    default void writeObject(Class componentType, Object obj) {
+    default void writeObject(Class componentType, Object obj)
+            throws IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
         if (obj instanceof BytesMarshallable) {

@@ -20,8 +20,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -41,7 +42,8 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
     }
 
     @Override
-    protected Object doInvoke(Object proxy, Method method, Object[] args) throws InvocationTargetException, IllegalAccessException {
+    protected Object doInvoke(Object proxy, Method method, Object[] args)
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException {
         MethodEncoder info = methodToIdMap.computeIfAbsent(method, methodToId);
         if (info == null) {
             Jvm.warn().on(getClass(), "Unknown method " + method + " ignored");

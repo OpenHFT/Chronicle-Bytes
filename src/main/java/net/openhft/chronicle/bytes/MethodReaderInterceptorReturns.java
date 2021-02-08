@@ -22,5 +22,6 @@ import java.lang.reflect.Method;
 
 @FunctionalInterface
 public interface MethodReaderInterceptorReturns {
-    Object intercept(Method m, Object o, Object[] args, Invocation invocation) throws InvocationTargetException;
+    Object intercept(Method m, Object o, Object[] args, Invocation invocation)
+            throws InvocationTargetException;
 }

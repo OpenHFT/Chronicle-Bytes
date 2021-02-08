@@ -22,18 +22,21 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
+
 public class Bit8StringInterner extends AbstractInterner<String> {
 
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
-    public Bit8StringInterner(int capacity) throws IllegalArgumentException {
+    public Bit8StringInterner(int capacity)
+            throws IllegalArgumentException {
         super(capacity);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, int length) {
+    protected String getValue(@NotNull BytesStore cs, int length) throws IllegalStateException, BufferUnderflowException {
         StringBuilder sb = SBP.acquireStringBuilder();
         for (int i = 0; i < length; i++)
             sb.append((char) cs.readUnsignedByte(cs.readPosition() + i));

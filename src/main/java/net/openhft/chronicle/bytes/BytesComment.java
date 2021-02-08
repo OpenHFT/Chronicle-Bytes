@@ -34,7 +34,8 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @return this
      */
     @SuppressWarnings("unchecked")
-    default B comment(CharSequence comment) {
+    default B comment(CharSequence comment)
+            throws IllegalStateException {
         return (B) this;
     }
 
@@ -45,7 +46,8 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @return this.
      */
     @SuppressWarnings("unchecked")
-    default B indent(int n) {
+    default B indent(int n)
+            throws IllegalStateException {
         return (B) this;
     }
 }

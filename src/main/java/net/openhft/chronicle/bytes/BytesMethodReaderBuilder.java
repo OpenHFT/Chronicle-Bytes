@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("rawtypes")
@@ -33,7 +34,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     static BytesParselet createDefaultParselet() {
         return (msg, in) -> {
             Bytes bytes = (Bytes) in;
-            throw new IllegalArgumentException("Unknown message type " + msg + " " + bytes.toHexString());
+            Jvm.rethrow(new IllegalArgumentException("Unknown message type " + msg + " " + bytes.toHexString()));
         };
     }
 

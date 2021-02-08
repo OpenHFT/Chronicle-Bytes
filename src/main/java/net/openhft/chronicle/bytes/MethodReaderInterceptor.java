@@ -26,5 +26,6 @@ import java.lang.reflect.Method;
 @Deprecated(/* to be removed in x.22 */)
 @FunctionalInterface
 public interface MethodReaderInterceptor {
-    void intercept(Method m, Object o, Object[] args, Invocation invocation) throws InvocationTargetException;
+    void intercept(Method m, Object o, Object[] args, Invocation invocation)
+            throws InvocationTargetException;
 }

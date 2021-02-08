@@ -32,6 +32,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -193,7 +194,8 @@ public class ByteStoreTest extends BytesTestCommon {
             assertEquals(-1, this.bytes.read(bytes3));
         }*/
     @Test
-    public void testWriteReadUtf8() throws IORuntimeException {
+    public void testWriteReadUtf8()
+            throws IORuntimeException {
         bytes.writeUtf8(null);
         final String[] words = new String[]{"Hello", "World!", "Bye£€!", ""};
         for (String word : words) {
@@ -283,7 +285,8 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadWriteStop() throws IORuntimeException {
+    public void testReadWriteStop()
+            throws IORuntimeException {
         final long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
@@ -352,7 +355,8 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadWriteUnsignedInt() {
+    public void testReadWriteUnsignedInt()
+            throws ArithmeticException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
         for (int i = 0; i < 32; i += 4)
             bytes.writeUnsignedInt(i, ~i & 0xFFFF);
         bytes.writePosition(32);
@@ -439,7 +443,8 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testStream() throws IOException {
+    public void testStream()
+            throws IOException {
         final BytesStore<?, ByteBuffer> bytes0 = BytesStore.wrap(ByteBuffer.allocate(1000));
         final Bytes<?> bytes2 = bytes0.bytesForWrite();
         bytes0.release(INIT);
@@ -461,7 +466,8 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testStream2() throws IOException {
+    public void testStream2()
+            throws IOException {
         try (OutputStream out = bytes.outputStream()) {
             out.write(11);
             out.write(22);
@@ -617,7 +623,8 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testOverflowReadUtf8() throws IORuntimeException {
+    public void testOverflowReadUtf8()
+            throws IORuntimeException {
         final NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {

@@ -64,7 +64,8 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMultiThreadLock() throws Exception {
+    public void testMultiThreadLock()
+            throws Exception {
         final List<String> garbage = Collections.synchronizedList(new ArrayList<>());
         final long chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(TMP_FILE, chunkSize, 0)) {

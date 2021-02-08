@@ -658,7 +658,8 @@ Once we have interfaces, DTOs, and an implementation we can setup a test harness
 .Setup a test harness for a Lambda function
 [source, Java]
 ----
-protected void btmttTest(String input, String output) throws IOException {
+protected void btmttTest(String input, String output)
+throws IOException {
     BytesTextMethodTester tester = new BytesTextMethodTester<>(
             input,
             IBMImpl::new,
@@ -674,7 +675,8 @@ This allows us to give two files, one for expected inputs and one for expected o
 [source, Java]
 ----
 @Test
-public void run() throws IOException {
+public void run()
+throws IOException {
     btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
 }
 ----

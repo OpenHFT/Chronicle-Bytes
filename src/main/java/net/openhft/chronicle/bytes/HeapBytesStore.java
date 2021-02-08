@@ -83,7 +83,8 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public void move(long from, long to, long length) {
+    public void move(long from, long to, long length)
+            throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
         //noinspection SuspiciousSystemArraycopy
         System.arraycopy(realUnderlyingObject, Maths.toUInt31(from), realUnderlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
@@ -92,12 +93,7 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public String toString() {
-        try {
-            return BytesInternal.toString(this);
-
-        } catch (IllegalStateException e) {
-            return e.toString();
-        }
+        return BytesInternal.toString(this);
     }
 
     @NotNull
@@ -128,7 +124,8 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public void testAndSetInt(long offset, int expected, int value) {
+    public void testAndSetInt(long offset, int expected, int value)
+            throws IllegalStateException {
         MEMORY.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
     }
 
@@ -139,61 +136,71 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public byte readByte(long offset) throws BufferUnderflowException {
+    public byte readByte(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 1);
         return MEMORY.readByte(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public short readShort(long offset) throws BufferUnderflowException {
+    public short readShort(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 2);
         return MEMORY.readShort(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public int readInt(long offset) throws BufferUnderflowException {
+    public int readInt(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 4);
         return MEMORY.readInt(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public long readLong(long offset) throws BufferUnderflowException {
+    public long readLong(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 8);
         return MEMORY.readLong(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public float readFloat(long offset) throws BufferUnderflowException {
+    public float readFloat(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 4);
         return MEMORY.readFloat(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public double readDouble(long offset) throws BufferUnderflowException {
+    public double readDouble(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 8);
         return MEMORY.readDouble(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+    public byte readVolatileByte(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 1);
         return MEMORY.readVolatileByte(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public short readVolatileShort(long offset) throws BufferUnderflowException {
+    public short readVolatileShort(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 2);
         return MEMORY.readVolatileShort(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public int readVolatileInt(long offset) throws BufferUnderflowException {
+    public int readVolatileInt(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 4);
         return MEMORY.readVolatileInt(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
-    public long readVolatileLong(long offset) throws BufferUnderflowException {
+    public long readVolatileLong(long offset)
+            throws BufferUnderflowException {
         checkOffset(offset, 8);
         return MEMORY.readVolatileLong(realUnderlyingObject, dataOffset + offset);
     }
@@ -309,7 +316,8 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public HeapBytesStore<Underlying> write(
-            long offsetInRDO, byte[] bytes, int offset, int length) throws BufferOverflowException {
+            long offsetInRDO, byte[] bytes, int offset, int length)
+            throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         MEMORY.copyMemory(
                 bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
@@ -318,7 +326,8 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            throws BufferOverflowException {
         writeCheckOffset(offsetInRDO, length);
         assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
         if (bytes.isDirect()) {
@@ -334,7 +343,8 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public HeapBytesStore<Underlying> write(long writeOffset,
-                                            @NotNull RandomDataInput bytes, long readOffset, long length) {
+                                            @NotNull RandomDataInput bytes, long readOffset, long length)
+            throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         long i;
         for (i = 0; i < length - 7; i += 8) {
             long x = bytes.readLong(readOffset + i);
@@ -348,17 +358,20 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long addressForRead(long offset) throws UnsupportedOperationException {
+    public long addressForRead(long offset)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long addressForWrite(long offset) throws UnsupportedOperationException {
+    public long addressForWrite(long offset)
+            throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+    public long addressForWritePosition()
+            throws UnsupportedOperationException, BufferOverflowException {
         throw new UnsupportedOperationException();
     }
 
@@ -375,7 +388,11 @@ public class HeapBytesStore<Underlying>
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        try {
+            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
+        } catch (IllegalStateException e) {
+            return false;
+        }
     }
 
     @Override
@@ -383,16 +400,19 @@ public class HeapBytesStore<Underlying>
         return false;
     }
 
-    private void checkOffset(long offset, int size) throws BufferUnderflowException {
+    private void checkOffset(long offset, int size)
+            throws BufferUnderflowException {
         checkBounds(offset, size, DecoratedBufferUnderflowException::new);
     }
 
-    private void writeCheckOffset(long offset, int size) throws BufferOverflowException {
+    private void writeCheckOffset(long offset, int size)
+            throws BufferOverflowException {
         checkBounds(offset, size, DecoratedBufferOverflowException::new);
     }
 
-    private void checkBounds(final long offset, final int size,
-                             final Function<String, RuntimeException> exceptionFunction) {
+    private <T extends Exception> void checkBounds(final long offset, final int size,
+                                                   final Function<String, T> exceptionFunction)
+            throws T {
         if (offset < start() || offset + size > capacity) {
             throw exceptionFunction.apply(
                     String.format("Offset: %d, start: %d, size: %d, capacity: %d",

@@ -28,7 +28,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosed();
 
         if (length != maxSize())
@@ -44,44 +45,62 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
 
     @NotNull
     public String toString() {
-        return bytes == null ? "bytes is null" : "value: " + getValue();
-    }
-
-    @Override
-    public long getValue() {
-        return bytes == null ? 0L : bytes.readLong(offset);
-    }
-
-    @Override
-    public void setValue(long value) {
+        if (bytes == null) return "bytes is null";
         try {
-            bytes.writeLong(offset, value);
-        } catch (NullPointerException e) {
-            throwExceptionIfClosed();
-
-            throw e;
+            return "value: " + getValue();
+        } catch (Throwable e) {
+            return e.toString();
         }
     }
 
     @Override
-    public long getVolatileValue() {
+    public long getValue()
+            throws IllegalStateException {
+        try {
+            return bytes == null ? 0L : bytes.readLong(offset);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public void setValue(long value)
+            throws IllegalStateException {
+        try {
+            bytes.writeLong(offset, value);
+        } catch (NullPointerException e) {
+            throwExceptionIfClosed();
+            throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public long getVolatileValue()
+            throws IllegalStateException {
         try {
             return bytes.readVolatileLong(offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
 
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setVolatileValue(long value) {
+    public void setVolatileValue(long value)
+            throws IllegalStateException {
         try {
             bytes.writeVolatileLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
 
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -97,40 +116,50 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     }
 
     @Override
-    public void setOrderedValue(long value) {
+    public void setOrderedValue(long value)
+            throws IllegalStateException {
         try {
             bytes.writeOrderedLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
 
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public long addValue(long delta) {
+    public long addValue(long delta)
+            throws IllegalStateException {
         try {
             return bytes.addAndGetLong(offset, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
 
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public long addAtomicValue(long delta) {
+    public long addAtomicValue(long delta)
+            throws IllegalStateException {
         return addValue(delta);
     }
 
     @Override
-    public boolean compareAndSwapValue(long expected, long value) {
+    public boolean compareAndSwapValue(long expected, long value)
+            throws IllegalStateException {
         try {
             return bytes.compareAndSwapLong(offset, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
 
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 }

@@ -24,5 +24,6 @@ import org.jetbrains.annotations.NotNull;
 @FunctionalInterface
 public interface MappedBytesStoreFactory {
     @NotNull
-    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity);
+    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity)
+            throws IllegalStateException;
 }

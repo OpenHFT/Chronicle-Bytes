@@ -28,5 +28,6 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
      * @return this
      */
     @NotNull
-    S clear();
+    S clear()
+            throws IllegalStateException;
 }

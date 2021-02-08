@@ -34,7 +34,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @throws BufferOverflowException if the length &gt; capacity() - start()
      */
     @NotNull
-    B clearAndPad(long length) throws BufferOverflowException;
+    B clearAndPad(long length)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Prepends a long in decimal, this method moves the readPosition() backwards.
@@ -47,7 +48,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      */
     @SuppressWarnings("unchecked")
     @NotNull
-    default B prepend(long value) throws BufferOverflowException {
+    default B prepend(long value)
+            throws BufferOverflowException, IllegalStateException {
         BytesInternal.prepend(this, value);
         return (B) this;
     }
@@ -59,7 +61,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param bytes to prepend to.
      */
     @NotNull
-    B prewrite(byte[] bytes) throws BufferOverflowException;
+    B prewrite(byte[] bytes)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Write backward in binary a byte
@@ -69,7 +72,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    B prewrite(BytesStore bytes) throws BufferOverflowException;
+    B prewrite(BytesStore bytes)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Write backward in binary a byte
@@ -78,7 +82,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param b byte to prepend to.
      */
     @NotNull
-    B prewriteByte(byte b) throws BufferOverflowException;
+    B prewriteByte(byte b)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Write backward in binary a 2 byte int
@@ -87,7 +92,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i short to prepend to.
      */
     @NotNull
-    B prewriteShort(short i) throws BufferOverflowException;
+    B prewriteShort(short i)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Write backward in binary a 4 byte int
@@ -96,7 +102,8 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i integer to prepend to.
      */
     @NotNull
-    B prewriteInt(int i) throws BufferOverflowException;
+    B prewriteInt(int i)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Write backward in binary an 8 byte long
@@ -105,5 +112,6 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param l long to prepend to.
      */
     @NotNull
-    B prewriteLong(long l) throws BufferOverflowException;
+    B prewriteLong(long l)
+            throws BufferOverflowException, IllegalStateException;
 }

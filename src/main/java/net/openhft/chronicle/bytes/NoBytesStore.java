@@ -47,7 +47,7 @@ public enum NoBytesStore implements BytesStore {
             NO_BYTES = new VanillaBytes(noBytesStore());
             IOTools.unmonitor(NO_BYTES);
 
-        } catch (@NotNull IllegalArgumentException | IllegalStateException e) {
+        } catch (IllegalStateException | IllegalArgumentException e) {
             throw new AssertionError(e);
         }
     }
@@ -58,15 +58,18 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void reserve(ReferenceOwner owner) throws IllegalStateException {
+    public void reserve(ReferenceOwner owner)
+            throws IllegalStateException {
     }
 
     @Override
-    public void release(ReferenceOwner owner) throws IllegalStateException {
+    public void release(ReferenceOwner owner)
+            throws IllegalStateException {
     }
 
     @Override
-    public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+    public void releaseLast(ReferenceOwner id)
+            throws IllegalStateException {
     }
 
     @Override
@@ -214,22 +217,26 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+    public byte readVolatileByte(long offset)
+            throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public short readVolatileShort(long offset) throws BufferUnderflowException {
+    public short readVolatileShort(long offset)
+            throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int readVolatileInt(long offset) throws BufferUnderflowException {
+    public int readVolatileInt(long offset)
+            throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long readVolatileLong(long offset) throws BufferUnderflowException {
+    public long readVolatileLong(long offset)
+            throws BufferUnderflowException {
         throw new BufferUnderflowException();
     }
 
@@ -306,21 +313,24 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long addressForRead(long offset) throws BufferUnderflowException {
+    public long addressForRead(long offset)
+            throws BufferUnderflowException {
         if (offset != 0)
             throw new BufferUnderflowException();
         return NO_PAGE;
     }
 
     @Override
-    public long addressForWrite(long offset) throws BufferOverflowException {
+    public long addressForWrite(long offset)
+            throws BufferOverflowException {
         if (offset != 0)
             throw new BufferOverflowException();
         return NO_PAGE;
     }
 
     @Override
-    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+    public long addressForWritePosition()
+            throws UnsupportedOperationException, BufferOverflowException {
         return NO_PAGE;
     }
 

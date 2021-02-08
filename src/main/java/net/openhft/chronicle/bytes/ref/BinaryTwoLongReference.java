@@ -19,6 +19,9 @@ package net.openhft.chronicle.bytes.ref;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
     @Override
     public long maxSize() {
@@ -27,72 +30,95 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
 
     @NotNull
     public String toString() {
-        return bytes == null ? "bytes is null" : "value: " + getValue() + ", value2: " + getValue2();
+        try {
+            return bytes == null ? "bytes is null" : "value: " + getValue() + ", value2: " + getValue2();
+        } catch (Exception e) {
+            return e.toString();
+        }
     }
 
     @Override
-    public long getValue2() {
+    public long getValue2()
+            throws IllegalStateException {
         try {
             return bytes.readLong(offset + 8);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setValue2(long value) {
+    public void setValue2(long value)
+            throws IllegalStateException {
         try {
             bytes.writeLong(offset + 8, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public long getVolatileValue2() {
+    public long getVolatileValue2()
+            throws IllegalStateException {
         try {
             return bytes.readVolatileLong(offset + 8);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
 
     }
 
     @Override
-    public void setVolatileValue2(long value) {
+    public void setVolatileValue2(long value)
+            throws IllegalStateException {
         try {
             bytes.writeVolatileLong(offset + 8, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public void setOrderedValue2(long value) {
+    public void setOrderedValue2(long value)
+            throws IllegalStateException {
         try {
             bytes.writeOrderedLong(offset + 8, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public long addValue2(long delta) {
+    public long addValue2(long delta)
+            throws IllegalStateException {
         try {
             return bytes.addAndGetLong(offset + 8, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
     }
 
     @Override
-    public long addAtomicValue2(long delta) {
+    public long addAtomicValue2(long delta)
+            throws IllegalStateException {
         try {
             return addValue2(delta);
         } catch (NullPointerException e) {
@@ -102,12 +128,15 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     @Override
-    public boolean compareAndSwapValue2(long expected, long value) {
+    public boolean compareAndSwapValue2(long expected, long value)
+            throws IllegalStateException {
         try {
             return bytes.compareAndSwapLong(offset + 8, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 }

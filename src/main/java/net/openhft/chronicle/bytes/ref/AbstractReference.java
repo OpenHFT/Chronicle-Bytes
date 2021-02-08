@@ -35,7 +35,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     protected long offset;
 
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         acceptNewBytesStore(bytes);
@@ -56,7 +57,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     @Override
     public abstract long maxSize();
 
-    protected void acceptNewBytesStore(@NotNull final BytesStore bytes) {
+    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+            throws IllegalStateException {
         if (this.bytes != null) {
             this.bytes.release(this);
         }
@@ -65,14 +67,16 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     @Override
-    protected void performClose() {
+    protected void performClose()
+            throws IllegalStateException {
         if (this.bytes != null) {
             this.bytes.release(this);
             this.bytes = null;
         }
     }
 
-    public long address() {
+    public long address()
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytesStore().addressForRead(offset);
@@ -80,7 +84,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
 
 /* TODO FIX
         @Override
-    protected void finalize() throws Throwable {
+    protected void finalize()
+throws Throwable {
         warnIfNotClosed();
         super.finalize();
     }*/

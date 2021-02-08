@@ -51,7 +51,8 @@ public class GzipTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompress() throws IORuntimeException {
+    public void testCompress()
+            throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = GZIP.uncompress(GZIP.compress(bytes));
         assertArrayEquals(bytes, bytes2);
@@ -59,7 +60,8 @@ public class GzipTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testCompressionRatio() throws IORuntimeException {
+    public void testCompressionRatio()
+            throws IORuntimeException {
         assumeFalse(NativeBytes.areNewGuarded());
         @NotNull byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');

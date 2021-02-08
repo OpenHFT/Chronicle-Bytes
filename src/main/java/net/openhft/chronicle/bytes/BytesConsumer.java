@@ -31,6 +31,7 @@ public interface BytesConsumer {
      * @return false if this queue is empty
      */
     @SuppressWarnings("rawtypes")
-    boolean read(BytesOut bytes) throws BufferOverflowException;
+    boolean read(BytesOut bytes)
+            throws BufferOverflowException;
 
 }

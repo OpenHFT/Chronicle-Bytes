@@ -19,12 +19,12 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.util.ThrowingIntSupplier;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.function.IntSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
@@ -44,7 +44,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int DIGITS = 10;
 
     @SuppressWarnings("rawtypes")
-    public static void write(@NotNull Bytes bytes, int value) throws BufferOverflowException {
+    public static void write(@NotNull Bytes bytes, int value)
+            throws BufferOverflowException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);
         try {
@@ -54,13 +55,14 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }
     }
 
-    private int withLock(@NotNull IntSupplier call) throws BufferUnderflowException {
-        long alignedOffset = roundUpTo8ByteAlign(offset);
-        long lockValueOffset = alignedOffset + LOCKED;
-        int lockValue = bytes.readVolatileInt(lockValueOffset);
-        if (lockValue != FALSE && lockValue != TRUE)
-            throw new IllegalStateException();
+    private <T extends Throwable> int withLock(@NotNull ThrowingIntSupplier<Exception> call)
+            throws IllegalStateException {
         try {
+            long alignedOffset = roundUpTo8ByteAlign(offset);
+            long lockValueOffset = alignedOffset + LOCKED;
+            int lockValue = bytes.readVolatileInt(lockValueOffset);
+            if (lockValue != FALSE && lockValue != TRUE)
+                throw new IllegalStateException("lockValue: " + lockValue);
             while (true) {
                 if (bytes.compareAndSwapInt(lockValueOffset, FALSE, TRUE)) {
                     int t = call.getAsInt();
@@ -68,20 +70,24 @@ public class TextIntReference extends AbstractReference implements IntValue {
                     return t;
                 }
             }
-        } catch (BufferOverflowException e) {
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
             throw new AssertionError(e);
         }
     }
 
     @Override
-    public int getValue() {
+    public int getValue()
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return withLock(() -> (int) bytes.parseLong(offset + VALUE));
     }
 
     @Override
-    public void setValue(int value) {
+    public void setValue(int value)
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         withLock(() -> {
@@ -91,21 +97,24 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     @Override
-    public int getVolatileValue() {
+    public int getVolatileValue()
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return getValue();
     }
 
     @Override
-    public void setOrderedValue(int value) {
+    public void setOrderedValue(int value)
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         setValue(value);
     }
 
     @Override
-    public int addValue(int delta) {
+    public int addValue(int delta)
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return withLock(() -> {
@@ -116,14 +125,16 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     @Override
-    public int addAtomicValue(int delta) {
+    public int addAtomicValue(int delta)
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return addValue(delta);
     }
 
     @Override
-    public boolean compareAndSwapValue(int expected, int value) {
+    public boolean compareAndSwapValue(int expected, int value)
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return withLock(() -> {
@@ -137,7 +148,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         if (length != template.length)
@@ -151,8 +163,12 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
         super.bytesStore(bytes, newOffset, length);
 
-        if (bytes.readInt(newOffset) == UNINITIALIZED)
-            bytes.write(newOffset, template);
+        try {
+            if (bytes.readInt(newOffset) == UNINITIALIZED)
+                bytes.write(newOffset, template);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -162,6 +178,10 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @NotNull
     public String toString() {
-        return "value: " + getValue();
+        try {
+            return "value: " + getValue();
+        } catch (Exception e) {
+            return e.toString();
+        }
     }
 }

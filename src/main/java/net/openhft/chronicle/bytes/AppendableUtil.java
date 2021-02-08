@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.annotation.Java9;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -38,18 +37,22 @@ public enum AppendableUtil {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setCharAt(index, ch);
         else if (sb instanceof Bytes)
-            ((Bytes) sb).writeByte(index, ch);
+            try {
+                ((Bytes) sb).writeByte(index, ch);
+            } catch (ArithmeticException | IllegalStateException e) {
+                throw new AssertionError(e);
+            }
         else
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, int length) throws UTFDataFormatRuntimeException {
+    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, int length)
+            throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }
 
-    @ForceInline
     public static void setLength(@NotNull Appendable sb, int newLength)
-            throws BufferUnderflowException, IllegalArgumentException {
+            throws IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
@@ -59,7 +62,7 @@ public enum AppendableUtil {
     }
 
     public static void append(@NotNull Appendable sb, double value)
-            throws IllegalArgumentException, BufferOverflowException {
+            throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -69,7 +72,7 @@ public enum AppendableUtil {
     }
 
     public static void append(@NotNull Appendable sb, long value)
-            throws IllegalArgumentException, BufferOverflowException {
+            throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -88,7 +91,8 @@ public enum AppendableUtil {
 
     public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull StringBuilder appendable,
-                                         @NotNull StopCharsTester tester) {
+                                         @NotNull StopCharsTester tester)
+            throws IllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -102,7 +106,7 @@ public enum AppendableUtil {
     public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IllegalStateException {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
         } catch (IOException e) {
@@ -113,7 +117,7 @@ public enum AppendableUtil {
     public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull Appendable appendable,
                                          @NotNull StopCharsTester tester)
-            throws BufferUnderflowException, IOException {
+            throws BufferUnderflowException, IOException, IllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (c >= 128) {
@@ -196,7 +200,7 @@ public enum AppendableUtil {
     }
 
     public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int length)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
@@ -206,7 +210,7 @@ public enum AppendableUtil {
     }
 
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
-            throws BufferUnderflowException, IOException {
+            throws BufferUnderflowException, IOException, IllegalStateException {
         if (appendable instanceof StringBuilder) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
@@ -219,7 +223,8 @@ public enum AppendableUtil {
         }
     }
 
-    public static <ACS extends Appendable & CharSequence> void append(ACS a, CharSequence cs, long start, long len) {
+    public static <ACS extends Appendable & CharSequence> void append(ACS a, CharSequence cs, long start, long len)
+            throws ArithmeticException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
             if (cs instanceof Bytes)
                 ((StringBuilder) a).append(Bytes.toString(((Bytes) cs), start, len));
@@ -232,7 +237,8 @@ public enum AppendableUtil {
         }
     }
 
-    public static long findUtf8Length(@NotNull CharSequence str) throws IndexOutOfBoundsException {
+    public static long findUtf8Length(@NotNull CharSequence str)
+            throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {

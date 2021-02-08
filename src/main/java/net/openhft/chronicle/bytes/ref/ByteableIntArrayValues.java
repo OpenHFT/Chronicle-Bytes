@@ -25,7 +25,9 @@ import net.openhft.chronicle.core.values.IntArrayValues;
 @SuppressWarnings("rawtypes")
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {
     @Override
-    long sizeInBytes(long sizeInBytes);
+    long sizeInBytes(long sizeInBytes)
+            throws IllegalStateException;
 
-    ByteableIntArrayValues capacity(long arrayLength);
+    ByteableIntArrayValues capacity(long arrayLength)
+            throws IllegalStateException;
 }

@@ -37,7 +37,8 @@ public interface MethodWriterInterceptorReturns {
         };
     }
 
-    static MethodWriterInterceptorReturns of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptorReturns interceptor) {
+    static MethodWriterInterceptorReturns of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptorReturns interceptor)
+            throws IllegalArgumentException {
         if (methodWriterListener == null && interceptor == null)
             throw new IllegalArgumentException("both methodWriterListener and interceptor are NULL");
 

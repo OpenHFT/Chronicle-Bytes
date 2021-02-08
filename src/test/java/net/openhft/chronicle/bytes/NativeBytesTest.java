@@ -72,7 +72,8 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testWriteBytesWhereResizeNeeded0() throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
+    public void testWriteBytesWhereResizeNeeded0()
+            throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
@@ -87,7 +88,8 @@ public class NativeBytesTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testWriteBytesWhereResizeNeeded() throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
+    public void testWriteBytesWhereResizeNeeded()
+            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
         Bytes b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());

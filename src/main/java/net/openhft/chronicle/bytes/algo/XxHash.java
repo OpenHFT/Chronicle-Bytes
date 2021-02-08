@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
 
+import java.nio.BufferUnderflowException;
+
 // Migration of XxHash from Zero-Allocation-Hashing
 @SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore> {
@@ -44,27 +46,31 @@ public class XxHash implements BytesStoreHash<BytesStore> {
         return hash;
     }
 
-    long fetch64(BytesStore bytes, long off) {
+    long fetch64(BytesStore bytes, long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readLong(off);
     }
 
     // long because of unsigned nature of original algorithm
-    long fetch32(BytesStore bytes, long off) {
+    long fetch32(BytesStore bytes, long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedInt(off);
     }
 
     // int because of unsigned nature of original algorithm
-    long fetch8(BytesStore bytes, long off) {
+    long fetch8(BytesStore bytes, long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedByte(off);
     }
 
     @Override
     public long applyAsLong(BytesStore bytes) {
-        return applyAsLong(bytes, bytes.readRemaining());
+        try {
+            return applyAsLong(bytes, bytes.readRemaining());
+        } catch (IllegalStateException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public long applyAsLong(BytesStore bytes, long length) {
+    public long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException {
         long hash;
         long remaining = length;
         long off = bytes.readPosition();

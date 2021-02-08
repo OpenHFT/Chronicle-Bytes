@@ -24,18 +24,22 @@ import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
+
 public class UTF8StringInterner extends AbstractInterner<String> {
 
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
-    public UTF8StringInterner(int capacity) throws IllegalArgumentException {
+    public UTF8StringInterner(int capacity)
+            throws IllegalArgumentException {
         super(capacity);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, int length) throws UTFDataFormatRuntimeException {
+    protected String getValue(@NotNull BytesStore cs, int length)
+            throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
         StringBuilder sb = SBP.acquireStringBuilder();
         AppendableUtil.parseUtf8(cs, sb, true, length);
         return sb.toString();

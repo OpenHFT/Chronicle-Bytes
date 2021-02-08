@@ -44,13 +44,15 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
     @Rule
     public TemporaryFolder tmpDir = new TemporaryFolder();
 
-    private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc) throws IOException {
+    private static void bumpSize(File file, final RandomAccessFile raf, final FileChannel fc)
+            throws IOException {
         final long currentSize = fc.size();
         raf.setLength(currentSize * 2);
     }
 
     @Before
-    public void setup() throws IOException {
+    public void setup()
+            throws IOException {
         Files.createDirectories(Paths.get(BASE_DIR));
 
         workers = IntStream.range(0, NO_FILES)
@@ -133,7 +135,8 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
         return elapsedNs;
     }
 
-    private File fileFromInt(int i) throws IOException {
+    private File fileFromInt(int i)
+            throws IOException {
         return tmpDir.newFile(Integer.toString(i));
     }
 

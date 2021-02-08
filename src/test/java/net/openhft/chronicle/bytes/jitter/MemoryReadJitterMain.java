@@ -25,7 +25,8 @@ public class MemoryReadJitterMain {
         System.setProperty("org.slf4j.simpleLogger.defaultLogLevel", "info");
     }
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args)
+            throws IOException {
         MappedFile.warmup();
 
         String path = "test-mem-" + Time.uniqueId();

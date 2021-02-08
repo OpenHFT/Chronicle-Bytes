@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
@@ -49,10 +50,20 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param cs to convert
      * @return BytesStore
      */
-    static BytesStore from(@NotNull CharSequence cs) {
+    static BytesStore from(@NotNull CharSequence cs)
+            throws IllegalStateException {
         if (cs instanceof BytesStore)
-            return ((BytesStore) cs).copy();
-        return HeapBytesStore.wrap(cs.toString().getBytes(StandardCharsets.ISO_8859_1));
+            return from((BytesStore) cs);
+        return from(cs.toString());
+    }
+
+    static BytesStore from(@NotNull BytesStore cs)
+            throws IllegalStateException {
+        return cs.copy();
+    }
+
+    static BytesStore from(@NotNull String cs) {
+        return HeapBytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     /**
@@ -116,7 +127,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a copy of this BytesStore.
      */
-    BytesStore<B, Underlying> copy();
+    BytesStore<B, Underlying> copy()
+            throws IllegalStateException;
 
     /**
      * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
@@ -124,14 +136,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForRead() throws IllegalStateException {
+    default Bytes<Underlying> bytesForRead()
+            throws IllegalStateException {
         try {
             Bytes<Underlying> ret = bytesForWrite();
             ret.readLimit(writeLimit());
             ret.writeLimit(realCapacity());
             ret.readPosition(start());
             return ret;
-        } catch (BufferUnderflowException e) {
+        } catch (BufferUnderflowException | BufferOverflowException e) {
             throw new IllegalStateException(e);
         }
     }
@@ -141,8 +154,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForWrite() throws IllegalStateException {
-        return new VanillaBytes<>(this, writePosition(), writeLimit());
+    default Bytes<Underlying> bytesForWrite()
+            throws IllegalStateException {
+        try {
+            return new VanillaBytes<>(this, writePosition(), writeLimit());
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -202,7 +220,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param store to copy to
      * @return how many bytes were copied
      */
-    default long copyTo(@NotNull BytesStore store) {
+    default long copyTo(@NotNull BytesStore store)
+            throws IllegalStateException {
         long readPos = readPosition();
         long writePos = store.writePosition();
         long copy = min(readRemaining(), store.capacity());
@@ -218,7 +237,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return copy;
     }
 
-    default void copyTo(@NotNull OutputStream out) throws IOException {
+    default void copyTo(@NotNull OutputStream out)
+            throws IOException, IllegalStateException {
         BytesInternal.copy(this, out);
     }
 
@@ -231,7 +251,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default B zeroOut(long start, long end) {
+    default B zeroOut(long start, long end)
+            throws IllegalStateException {
         if (end <= start)
             return (B) this;
         if (start < start())
@@ -244,7 +265,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 writeLong(i, 0L);
             for (; i < end; i++)
                 writeByte(i, 0);
-        } catch (BufferOverflowException | IllegalArgumentException e) {
+        } catch (BufferOverflowException | IllegalArgumentException | ArithmeticException e) {
             throw new AssertionError(e);
         }
         return (B) this;
@@ -266,12 +287,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * Assume ISO-8859-1 encoding, subclasses can override this.
      */
     @Override
-    default char charAt(int index) throws IndexOutOfBoundsException {
+    default char charAt(int index)
+            throws IndexOutOfBoundsException {
         try {
             return (char) readUnsignedByte(readPosition() + index);
 
         } catch (BufferUnderflowException e) {
             throw new IndexOutOfBoundsException((readPosition() + index) + " >= " + readLimit());
+        } catch (IllegalStateException e) {
+            throw Jvm.rethrow(e);
         }
     }
 
@@ -290,8 +314,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return This BytesStore as a DebugString.
      */
     @NotNull
-    default String toDebugString() {
-        return toDebugString(512);
+    default String toDebugString()
+            throws IllegalStateException {
+        try {
+            return toDebugString(512);
+        } catch (ArithmeticException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -299,7 +328,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return This BytesStore as a DebugString.
      */
     @NotNull
-    default String toDebugString(long maxLength) {
+    default String toDebugString(long maxLength)
+            throws IllegalStateException, ArithmeticException {
         return BytesInternal.toDebugString(this, maxLength);
     }
 
@@ -319,7 +349,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return true      if the bytes up to min(length, this.length(), bytesStore.length()) matched.
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
-            throws BufferUnderflowException {
+            throws BufferUnderflowException, IllegalStateException {
         return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
@@ -330,11 +360,17 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      *
      * @return unsigned byte sum.
      */
-    default int byteCheckSum() throws IORuntimeException {
-        return byteCheckSum(readPosition(), readLimit());
+    default int byteCheckSum()
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        try {
+            return byteCheckSum(readPosition(), readLimit());
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
-    default int byteCheckSum(long start, long end) {
+    default int byteCheckSum(long start, long end)
+            throws BufferUnderflowException, IllegalStateException {
         int sum = 0;
         for (long i = start; i < end; i++) {
             sum += readByte(i);
@@ -349,7 +385,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean endsWith(char c) {
+    default boolean endsWith(char c)
+            throws IllegalStateException {
         try {
             return readRemaining() > 0 && readUnsignedByte(readLimit() - 1) == c;
         } catch (BufferUnderflowException e) {
@@ -363,7 +400,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param c to look for
      * @return true if its the last character.
      */
-    default boolean startsWith(char c) {
+    default boolean startsWith(char c)
+            throws IllegalStateException {
         try {
             return readRemaining() > 0 && readUnsignedByte(readPosition()) == c;
         } catch (BufferUnderflowException e) {
@@ -377,16 +415,18 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytesStore to compare with
      * @return true if they contain the same data.
      */
-    default boolean contentEquals(@Nullable BytesStore bytesStore) {
+    default boolean contentEquals(@Nullable BytesStore bytesStore)
+            throws IllegalStateException {
         return BytesInternal.contentEqual(this, bytesStore);
     }
 
-    default boolean startsWith(@Nullable BytesStore bytesStore) {
+    default boolean startsWith(@Nullable BytesStore bytesStore)
+            throws IllegalStateException {
         return BytesInternal.startsWith(this, bytesStore);
     }
 
     @NotNull
-    default String to8bitString() throws IllegalArgumentException {
+    default String to8bitString() {
         return BytesInternal.to8bitString(this);
     }
 
@@ -399,7 +439,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetUnsignedByteNotAtomic(long offset, int adding) throws BufferUnderflowException {
+    default int addAndGetUnsignedByteNotAtomic(long offset, int adding)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             int r = (readUnsignedByte(offset) + adding) & 0xFF;
             writeByte(offset, (byte) r);
@@ -416,12 +457,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default short addAndGetShortNotAtomic(long offset, short adding) throws BufferUnderflowException {
+    default short addAndGetShortNotAtomic(long offset, short adding)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             short r = (short) (readShort(offset) + adding);
             writeByte(offset, r);
             return r;
-        } catch (BufferOverflowException | IllegalArgumentException e) {
+        } catch (BufferOverflowException | IllegalArgumentException | ArithmeticException e) {
             throw new AssertionError(e);
         }
     }
@@ -433,7 +475,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetIntNotAtomic(long offset, int adding) throws BufferUnderflowException {
+    default int addAndGetIntNotAtomic(long offset, int adding)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             int r = readInt(offset) + adding;
             writeInt(offset, r);
@@ -450,7 +493,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default double addAndGetDoubleNotAtomic(long offset, double adding) throws BufferUnderflowException {
+    default double addAndGetDoubleNotAtomic(long offset, double adding)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             double r = readDouble(offset) + adding;
             writeDouble(offset, r);
@@ -467,7 +511,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default float addAndGetFloatNotAtomic(long offset, float adding) throws BufferUnderflowException {
+    default float addAndGetFloatNotAtomic(long offset, float adding)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             float r = readFloat(offset) + adding;
             writeFloat(offset, r);
@@ -477,7 +522,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-    void move(long from, long to, long length) throws BufferUnderflowException;
+    void move(long from, long to, long length)
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException;
 
     /**
      * Write a value which is not smaller.
@@ -485,7 +531,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param offset  to write to
      * @param atLeast value it is at least.
      */
-    default void writeMaxLong(long offset, long atLeast) throws BufferUnderflowException {
+    default void writeMaxLong(long offset, long atLeast)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
                 long v = readVolatileLong(offset);
@@ -505,7 +552,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param offset  to write to
      * @param atLeast value it is at least.
      */
-    default void writeMaxInt(long offset, int atLeast) throws BufferUnderflowException {
+    default void writeMaxInt(long offset, int atLeast)
+            throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
                 int v = readVolatileInt(offset);
@@ -523,7 +571,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return readRemaining() == 0;
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2) throws IllegalStateException {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
+            throws IllegalStateException {
         long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
@@ -557,7 +606,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes) throws IllegalStateException {
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes)
+            throws IllegalStateException {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
 

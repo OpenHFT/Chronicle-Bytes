@@ -134,7 +134,8 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     //@Test
     //@Ignore("Long running, avg score = 5414, avg time 0.043 us")
-    public void testSmallRandomness() throws IOException {
+    public void testSmallRandomness()
+            throws IOException {
         long time = 0, timeCount = 0;
         long scoreSum = 0;
 //        StringBuilder sb = new StringBuilder();

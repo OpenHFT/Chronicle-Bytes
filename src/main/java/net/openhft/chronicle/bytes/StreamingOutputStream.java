@@ -43,21 +43,23 @@ public class StreamingOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b, int off, int len) throws IOException {
+    public void write(byte[] b, int off, int len)
+            throws IOException {
         try {
             sdo.write(b, off, len);
 
-        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
+        } catch (BufferOverflowException | IllegalArgumentException | IllegalStateException e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void write(int b) throws IOException {
+    public void write(int b)
+            throws IOException {
         try {
             sdo.writeUnsignedByte(0xff & b);
 
-        } catch (@NotNull BufferOverflowException | IllegalArgumentException e) {
+        } catch (BufferOverflowException | ArithmeticException | IllegalStateException e) {
             throw new IOException(e);
         }
     }

@@ -51,9 +51,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @Override
     @NotNull
-    default B append(char ch) throws BufferOverflowException {
-        BytesInternal.appendUtf8Char(this, ch);
-        return (B) this;
+    default B append(char ch)
+            throws IllegalStateException {
+        try {
+            BytesInternal.appendUtf8Char(this, ch);
+            return (B) this;
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -65,14 +70,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @Override
     @NotNull
-    default B append(@NotNull CharSequence cs) throws BufferOverflowException {
+    default B append(@NotNull CharSequence cs) {
         if (cs.length() == 0)
             return (B) this;
-        try {
-            return append(cs, 0, cs.length());
-        } catch (IndexOutOfBoundsException e) {
-            throw new AssertionError(e);
-        }
+        return append(cs, 0, cs.length());
     }
 
     /**
@@ -84,7 +85,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(boolean flag) throws BufferOverflowException {
+    default B append(boolean flag)
+            throws BufferOverflowException, IllegalStateException {
         return append(flag ? 'T' : 'F');
     }
 
@@ -97,7 +99,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(int value) throws BufferOverflowException {
+    default B append(int value)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         BytesInternal.appendBase10(this, value);
         return (B) this;
     }
@@ -111,7 +114,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(long value) throws BufferOverflowException {
+    default B append(long value)
+            throws BufferOverflowException, IllegalStateException {
         if (value == (int) value)
             BytesInternal.appendBase10(this, (int) value);
         else
@@ -120,19 +124,22 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     @NotNull
-    default B appendBase(long value, int base) throws BufferOverflowException {
+    default B appendBase(long value, int base)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
         BytesInternal.append(this, value, base);
         return (B) this;
     }
 
     @NotNull
-    default B appendBase16(long value) throws BufferOverflowException {
+    default B appendBase16(long value)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         BytesInternal.appendBase16(this, value, 1);
         return (B) this;
     }
 
     @NotNull
-    default B appendBase16(long value, int minDigits) throws BufferOverflowException {
+    default B appendBase16(long value, int minDigits)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         BytesInternal.appendBase16(this, value, minDigits);
         return (B) this;
     }
@@ -147,7 +154,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B appendDecimal(long value, int decimalPlaces) throws BufferOverflowException {
+    default B appendDecimal(long value, int decimalPlaces)
+            throws BufferOverflowException, IllegalStateException, ArithmeticException, IllegalArgumentException {
         BytesInternal.appendDecimal(this, value, decimalPlaces);
         return (B) this;
     }
@@ -161,7 +169,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(float f) throws BufferOverflowException {
+    default B append(float f)
+            throws BufferOverflowException, IllegalStateException {
         float f2 = Math.abs(f);
         if (f2 > 1e6 || f2 < 1e-3) {
             return append(Float.toString(f));
@@ -180,7 +189,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(double d) throws BufferOverflowException {
+    default B append(double d)
+            throws BufferOverflowException, IllegalStateException {
         BytesInternal.append(this, d);
         return (B) this;
     }
@@ -197,7 +207,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      */
     @NotNull
-    default B append(double d, int decimalPlaces) throws BufferOverflowException {
+    default B append(double d, int decimalPlaces)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
         if (decimalPlaces < 0)
             throw new IllegalArgumentException();
         if (decimalPlaces < 18) {
@@ -225,12 +236,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start index of the first char inclusive
      * @param end   index of the last char exclusive.
      * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
      */
     @Override
     @NotNull
     default B append(@NotNull CharSequence cs, int start, int end)
-            throws IndexOutOfBoundsException, BufferOverflowException {
+            throws IndexOutOfBoundsException {
         BytesInternal.appendUtf8(this, cs, start, end - start);
         return (B) this;
     }
@@ -245,18 +256,30 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
-        return append8bit(cs, 0, cs.length());
+            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+        try {
+            return append8bit(cs, 0, cs.length());
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     default B append8bit(@NotNull BytesStore bs)
-            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
-        return write(bs, 0L, bs.readRemaining());
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        try {
+            return write(bs, 0L, bs.readRemaining());
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     default B append8bit(@NotNull String cs)
-            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
-        return append8bit(cs, 0, cs.length());
+            throws BufferOverflowException, IllegalStateException {
+        try {
+            return append8bit(cs, 0, cs.length());
+        } catch (IllegalArgumentException | IndexOutOfBoundsException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -271,7 +294,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
      */
     default B append8bit(@NotNull CharSequence cs, int start, int end)
-            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs, (long) start, end);
         }
@@ -284,18 +307,20 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     default B append8bit(@NotNull BytesStore bs, long start, long end)
-            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         return write(bs, start, end);
     }
 
     @NotNull
-    default B appendDateMillis(long dateInMillis) {
+    default B appendDateMillis(long dateInMillis)
+            throws BufferOverflowException, IllegalStateException {
         BytesInternal.appendDateMillis(this, dateInMillis);
         return (B) this;
     }
 
     @NotNull
-    default B appendTimeMillis(long timeOfDayInMillis) {
+    default B appendTimeMillis(long timeOfDayInMillis)
+            throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         BytesInternal.appendTimeMillis(this, timeOfDayInMillis % 86400_000L);
         return (B) this;
     }

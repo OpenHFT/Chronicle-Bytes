@@ -32,6 +32,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.channels.ClosedByInterruptException;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
@@ -69,12 +71,13 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                          final long chunkSize,
                          final long overlapSize,
                          final long capacity,
-                         final boolean readOnly) {
+                         final boolean readOnly)
+            throws IORuntimeException {
         this.file = file;
         try {
             this.canonicalPath = file.getCanonicalPath().intern();
         } catch (IOException ioe) {
-            throw new IllegalStateException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
+            throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
         }
         this.raf = raf;
         this.fileChannel = raf.getChannel();
@@ -105,7 +108,8 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public static MappedFile of(@NotNull final File file,
                                 final long chunkSize,
                                 final long overlapSize,
-                                final boolean readOnly) throws FileNotFoundException {
+                                final boolean readOnly)
+            throws FileNotFoundException {
 //        if (readOnly && OS.isWindows()) {
 //            Jvm.warn().on(MappedFile.class, "Read only mode not supported on Windows, defaulting to read/write");
 //            readOnly = false;
@@ -126,7 +130,8 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull final File file, final long chunkSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final File file, final long chunkSize)
+            throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
 
@@ -147,21 +152,24 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 */
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull final String filename, final long chunkSize) throws FileNotFoundException {
+    public static MappedFile mappedFile(@NotNull final String filename, final long chunkSize)
+            throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final String filename,
                                         final long chunkSize,
-                                        final long overlapSize) throws FileNotFoundException {
+                                        final long overlapSize)
+            throws FileNotFoundException {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
                                         final long chunkSize,
-                                        final long overlapSize) throws FileNotFoundException {
+                                        final long overlapSize)
+            throws FileNotFoundException {
         return mappedFile(file, chunkSize, overlapSize, false);
     }
 
@@ -169,12 +177,14 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public static MappedFile mappedFile(@NotNull final File file,
                                         final long chunkSize,
                                         final long overlapSize,
-                                        final boolean readOnly) throws FileNotFoundException {
+                                        final boolean readOnly)
+            throws FileNotFoundException {
         return MappedFile.of(file, chunkSize, overlapSize, readOnly);
     }
 
     @NotNull
-    public static MappedFile readOnly(@NotNull final File file) throws FileNotFoundException {
+    public static MappedFile readOnly(@NotNull final File file)
+            throws FileNotFoundException {
         long chunkSize = file.length();
         long overlapSize = 0;
         // Chunks of 4 GB+ not supported on Windows.
@@ -190,9 +200,10 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                                         final long capacity,
                                         final long chunkSize,
                                         final long overlapSize,
-                                        final boolean readOnly) throws IOException {
+                                        final boolean readOnly)
+            throws IOException {
         final RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
-        // Windows throws an exception when setting the length when you re-open
+        // Windows throws an exception when setting the length when you re - open
         if (raf.length() < capacity)
             raf.setLength(capacity);
         return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
@@ -234,13 +245,17 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
     private static void warmup0(final long mapAlignment,
                                 final int chunks,
-                                @NotNull final MappedFile mappedFile) throws IOException {
-        ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
-        for (int i = 0; i < chunks; i++) {
-            mappedFile.acquireBytesForRead(warmup, i * mapAlignment)
-                    .release(warmup);
-            mappedFile.acquireBytesForWrite(warmup, i * mapAlignment)
-                    .release(warmup);
+                                @NotNull final MappedFile mappedFile) {
+        try {
+            ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
+            for (int i = 0; i < chunks; i++) {
+                mappedFile.acquireBytesForRead(warmup, i * mapAlignment)
+                        .release(warmup);
+                mappedFile.acquireBytesForWrite(warmup, i * mapAlignment)
+                        .release(warmup);
+            }
+        } catch (BufferUnderflowException | IllegalArgumentException | IOException | IllegalStateException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
@@ -265,8 +280,12 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             ReferenceOwner owner,
             final long position,
             BytesStore oldByteStore)
-            throws IOException, IllegalArgumentException, IllegalStateException {
-        return acquireByteStore(owner, position, oldByteStore, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
+            throws IOException, IllegalStateException {
+        try {
+            return acquireByteStore(owner, position, oldByteStore, readOnly ? ReadOnlyMappedBytesStore::new : MappedBytesStore::new);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @NotNull
@@ -343,7 +362,8 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         }
     }
 
-    private void resizeRafIfTooSmall(final int chunk) throws IOException {
+    private void resizeRafIfTooSmall(final int chunk)
+            throws IOException {
         Jvm.safepoint();
 
         final long minSize = (chunk + 1L) * chunkSize + overlapSize;
@@ -390,7 +410,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
      */
     @NotNull
     public Bytes acquireBytesForRead(ReferenceOwner owner, final long position)
-            throws IOException, IllegalStateException, IllegalArgumentException {
+            throws IOException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -402,7 +422,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     public void acquireBytesForRead(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
-            throws IOException, IllegalStateException, IllegalArgumentException {
+            throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -411,7 +431,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
 
     @NotNull
     public Bytes acquireBytesForWrite(ReferenceOwner owner, final long position)
-            throws IOException, IllegalStateException, IllegalArgumentException {
+            throws IOException, IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosed();
 
         @Nullable MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -423,7 +443,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     public void acquireBytesForWrite(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
-            throws IOException, IllegalStateException, IllegalArgumentException {
+            throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -445,7 +465,11 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                     if (mbs != null && RETAIN) {
                         // this MappedFile is the only referrer to the MappedBytesStore at this point,
                         // so ensure that it is released
-                        mbs.release(this);
+                        try {
+                            mbs.release(this);
+                        } catch (IllegalStateException e) {
+                            Jvm.debug().on(getClass(), e);
+                        }
                     }
                     // Dereference released entities
                     stores.set(i, null);
@@ -487,16 +511,15 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     public void setNewChunkListener(final NewChunkListener listener) {
-        throwExceptionIfClosedInSetter();
-
         this.newChunkListener = listener;
     }
 
-    public long actualSize() throws IORuntimeException {
+    public long actualSize()
+            throws IORuntimeException, IllegalStateException {
 
         boolean interrupted = Thread.interrupted();
         try {
-            return fileChannel.size();
+            return fileChannelSize();
 
             // this was seen once deep in the JVM.
         } catch (ArrayIndexOutOfBoundsException aiooe) {
@@ -522,13 +545,19 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         }
     }
 
+    private long fileChannelSize()
+            throws IOException, ArrayIndexOutOfBoundsException {
+        return fileChannel.size();
+    }
+
     @NotNull
     public RandomAccessFile raf() {
         return raf;
     }
 
     @Override
-    protected void finalize() throws Throwable {
+    protected void finalize()
+            throws Throwable {
         warnAndReleaseIfNotReleased();
         super.finalize();
     }

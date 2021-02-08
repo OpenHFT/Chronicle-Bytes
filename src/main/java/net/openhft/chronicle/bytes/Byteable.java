@@ -37,8 +37,7 @@ public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
      * @param length     the length in the ByteStore
      */
     void bytesStore(BytesStore<B, Underlying> bytesStore, long offset, long length)
-            throws IllegalStateException, IllegalArgumentException, BufferOverflowException,
-            BufferUnderflowException;
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
 
     @Nullable
     BytesStore<B, Underlying> bytesStore();

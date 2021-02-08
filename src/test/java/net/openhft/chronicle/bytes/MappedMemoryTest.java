@@ -55,7 +55,8 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 3.3 ns
     @Test
-    public void testRawMemoryMapped() throws IOException {
+    public void testRawMemoryMapped()
+            throws IOException {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
         for (int t = 0; t < 5; t++) {
             final File tempFile = File.createTempFile("chronicle", "q");
@@ -86,7 +87,8 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.9 ns
     @Test
-    public void withMappedNativeBytesTest() throws IOException {
+    public void withMappedNativeBytesTest()
+            throws IOException {
 
         for (int t = 0; t < 3; t++) {
             final File tempFile = File.createTempFile("chronicle", "q");
@@ -109,7 +111,8 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     // on i7-3970X ~ 6.0 ns
     @Test
-    public void withRawNativeBytesTess() throws IOException {
+    public void withRawNativeBytesTess()
+            throws IOException {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
 
         for (int t = 0; t < 3; t++) {
@@ -139,7 +142,8 @@ public class MappedMemoryTest extends BytesTestCommon {
     }
 
     @Test
-    public void mappedMemoryTest() throws IOException, IORuntimeException {
+    public void mappedMemoryTest()
+            throws IOException, IORuntimeException {
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;

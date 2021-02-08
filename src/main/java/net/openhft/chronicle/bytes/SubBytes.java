@@ -20,12 +20,15 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private final long start;
     private final long capacity;
 
-    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity) throws IllegalStateException {
+    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity)
+            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);
         this.start = start;
         this.capacity = capacity;
@@ -33,7 +36,9 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
         readLimit(writeLimit());
     }
 
-    public SubBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
+    @Deprecated(/* to be removed in x.23 */)
+    public SubBytes(@NotNull BytesStore bytesStore)
+            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);
         this.start = 0;
         this.capacity = bytesStore.capacity();

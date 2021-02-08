@@ -71,7 +71,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCipherPerf() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testCipherPerf()
+            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         final byte[] keyBytes = new SecureRandom().generateSeed(16);
         final SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
         final Cipher encCipher = Cipher.getInstance("AES/ECB/PKCS5Padding");
@@ -110,7 +111,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCipher() throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
+    public void testCipher()
+            throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException {
         assumeFalse(NativeBytes.areNewGuarded());
         final byte[] keyBytes = new SecureRandom().generateSeed(16);
         final SecretKeySpec key = new SecretKeySpec(keyBytes, "AES");
@@ -156,7 +158,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void testElasticByteBuffer() throws IORuntimeException, BufferOverflowException {
+    public void testElasticByteBuffer()
+            throws IORuntimeException, BufferOverflowException {
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
             assertEquals(Bytes.MAX_HEAP_CAPACITY, bbb.capacity());
@@ -207,7 +210,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     }
 
     @Test
-    public void perfCheckSum() throws IORuntimeException {
+    public void perfCheckSum()
+            throws IORuntimeException {
         final NativeBytesStore<?>[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),
                 NativeBytesStore.nativeStoreWithFixedCapacity(149),

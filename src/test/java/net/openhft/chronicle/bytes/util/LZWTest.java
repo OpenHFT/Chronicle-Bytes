@@ -49,7 +49,8 @@ public class LZWTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompress() throws IORuntimeException {
+    public void testCompress()
+            throws IORuntimeException {
         @NotNull byte[] bytes = "hello world".getBytes(ISO_8859_1);
         byte[] bytes2 = LZW.uncompress(LZW.compress(bytes));
         assertArrayEquals(bytes, bytes2);
@@ -57,7 +58,8 @@ public class LZWTest extends BytesTestCommon {
 
     @SuppressWarnings("rawtypes")
     @Test
-    public void testCompressionRatio() throws IORuntimeException {
+    public void testCompressionRatio()
+            throws IORuntimeException {
         @NotNull byte[] bytes = new byte[1 << 20];
         Arrays.fill(bytes, (byte) 'X');
         @NotNull Random rand = new Random();

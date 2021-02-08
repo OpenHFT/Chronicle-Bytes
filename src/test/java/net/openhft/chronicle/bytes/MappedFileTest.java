@@ -60,7 +60,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldReleaseReferenceWhenNewStoreIsAcquired() throws IOException {
+    public void shouldReleaseReferenceWhenNewStoreIsAcquired()
+            throws IOException {
         final File file = tmpDir.newFile();
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
@@ -89,7 +90,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReferenceCounts() throws IOException {
+    public void testReferenceCounts()
+            throws IOException {
         final File tmp = IOTools.createTempFile("testReferenceCounts");
         final int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
@@ -143,7 +145,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void largeReadOnlyFile() throws IOException {
+    public void largeReadOnlyFile()
+            throws IOException {
         if (Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows())
             return;
 
@@ -159,7 +162,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void interrupted() throws FileNotFoundException {
+    public void interrupted()
+            throws FileNotFoundException {
         Thread.currentThread().interrupt();
         final String filename = IOTools.createTempFile("interrupted").getAbsolutePath();
         try (MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0)) {
@@ -169,7 +173,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCreateMappedFile() throws IOException {
+    public void testCreateMappedFile()
+            throws IOException {
         final File file = IOTools.createTempFile("mappedFile");
 
         final MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);
@@ -182,7 +187,8 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadOnlyOpen() throws IOException {
+    public void testReadOnlyOpen()
+            throws IOException {
         assumeFalse(OS.isWindows());
 
         String text = "Some text to put in this file. yay!\n";
@@ -205,7 +211,7 @@ public class MappedFileTest extends BytesTestCommon {
         }
 
         // open up the same file via a mapped file
-        try (@NotNull MappedFile mapFile = MappedFile.mappedFile(file, OS.pageSize() * 16, OS.pageSize(), true)) {
+        try (@NotNull MappedFile mapFile = MappedFile.mappedFile(file, OS.pageSize() * 16L, OS.pageSize(), true)) {
             // this throws a exception as of v2.20.9. it shouldn't
             ReferenceOwner temp = ReferenceOwner.temporary("TEMP");
             @NotNull Bytes buf = mapFile.acquireBytesForRead(temp, 0);

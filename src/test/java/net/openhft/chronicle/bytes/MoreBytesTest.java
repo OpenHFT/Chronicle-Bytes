@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -177,7 +178,8 @@ public class MoreBytesTest {
     }
 
     @Test
-    public void internBytes() throws IORuntimeException {
+    public void internBytes()
+            throws IORuntimeException {
         final Bytes<?> b = Bytes.from("Hello World");
         try {
             b.readSkip(6);
@@ -291,7 +293,8 @@ public class MoreBytesTest {
     }
 
     @Test
-    public void testReadWithLength() {
+    public void testReadWithLength()
+            throws BufferUnderflowException, IllegalStateException {
         final Bytes<?> b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {

@@ -20,6 +20,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 /**
  * Write data directly as Bytes.
  */
@@ -32,5 +35,6 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      *
      * @param bytes to write to.
      */
-    void writeMarshallable(BytesOut bytes);
+    void writeMarshallable(BytesOut bytes)
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException;
 }

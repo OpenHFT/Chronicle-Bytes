@@ -37,6 +37,7 @@ import org.junit.runners.Parameterized;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
@@ -117,7 +118,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testName() throws IORuntimeException {
+    public void testName()
+            throws IORuntimeException {
         Bytes<?> bytes = alloc1.fixedBytes(30);
         try {
             long expected = 12345L;
@@ -226,7 +228,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void internRegressionTest() throws IORuntimeException {
+    public void internRegressionTest()
+            throws IORuntimeException {
         UTF8StringInterner utf8StringInterner = new UTF8StringInterner(4096);
 
         Bytes bytes1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
@@ -241,7 +244,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testEqualBytesWithSecondStoreBeingLonger() throws IORuntimeException {
+    public void testEqualBytesWithSecondStoreBeingLonger()
+            throws IORuntimeException {
 
         BytesStore store1 = null, store2 = null;
         try {
@@ -255,7 +259,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testStopBitDouble() throws IORuntimeException {
+    public void testStopBitDouble()
+            throws IORuntimeException {
         Bytes b = alloc1.elasticBytes(1);
         try {
             testSBD(b, -0.0, "00000000 40                                               @         " +
@@ -273,7 +278,8 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    private void testSBD(@NotNull Bytes b, double v, String s) throws IORuntimeException {
+    private void testSBD(@NotNull Bytes b, double v, String s)
+            throws IORuntimeException {
         b.clear();
         b.writeStopBit(v);
         assertEquals(s, b.toHexString().toUpperCase());
@@ -333,7 +339,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testReadIncompleteLong() {
+    public void testReadIncompleteLong()
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(16);
         bytes.writeLong(0x0706050403020100L);
@@ -354,7 +361,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testUnwrite() {
+    public void testUnwrite()
+            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(1);
         try {
@@ -372,7 +380,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException() {
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException()
+            throws BufferOverflowException, IllegalStateException {
         Bytes<?> bytes = alloc1.elasticBytes(4);
         try {
             if (bytes.unchecked())
@@ -384,7 +393,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException() {
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException()
+            throws IllegalStateException, BufferOverflowException {
         Bytes<?> bytes = alloc1.elasticBytes(1);
 
         try {
@@ -417,7 +427,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriter() {
+    public void testWriter()
+            throws IllegalStateException {
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(1);
         @NotNull PrintWriter writer = new PrintWriter(bytes.writer());
@@ -449,7 +460,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUtf8High() {
+    public void testParseUtf8High()
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         assumeFalse(NativeBytes.areNewGuarded());
         @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
         for (int i = ' '; i < Character.MAX_VALUE; i++)
@@ -465,7 +477,8 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBigDecimalBinary() {
+    public void testBigDecimalBinary()
+            throws BufferUnderflowException, ArithmeticException {
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes b = alloc1.elasticBytes(16);
             b.writeBigDecimal(new BigDecimal(d));

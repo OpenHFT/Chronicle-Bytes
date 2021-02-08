@@ -27,6 +27,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.BufferOverflowException;
 import java.util.zip.*;
 
 @SuppressWarnings("rawtypes")
@@ -39,21 +40,22 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public byte[] uncompress(byte[] bytes) throws IORuntimeException {
+        public byte[] uncompress(byte[] bytes)
+                throws IORuntimeException {
             return bytes;
         }
 
         @Override
-        public void compress(@NotNull BytesIn from, @NotNull BytesOut to) {
+        public void compress(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
             copy(from, to);
         }
 
         @Override
-        public void uncompress(@NotNull BytesIn from, @NotNull BytesOut to) {
+        public void uncompress(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
             copy(from, to);
         }
 
-        private void copy(@NotNull BytesIn from, @NotNull BytesOut to) {
+        private void copy(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
             long copied = from.copyTo((BytesStore) to);
             to.writeSkip(copied);
         }
@@ -84,7 +86,8 @@ public enum Compressions implements Compression {
     GZIP {
         @NotNull
         @Override
-        public InputStream decompressingStream(@NotNull InputStream input) throws IORuntimeException {
+        public InputStream decompressingStream(@NotNull InputStream input)
+                throws IORuntimeException {
             try {
                 return new GZIPInputStream(input);
 

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
@@ -58,17 +59,22 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
-    public static void forceAllToNotCompleteState() {
-        binaryLongArrayReferences.forEach(x -> {
+    public static void forceAllToNotCompleteState()
+            throws IllegalStateException, BufferOverflowException {
+        if (binaryLongArrayReferences == null)
+            return;
+
+        for (WeakReference<BinaryLongArrayReference> x : binaryLongArrayReferences) {
             @Nullable BinaryLongArrayReference binaryLongReference = x.get();
             if (binaryLongReference != null) {
                 binaryLongReference.setValueAt(0, LONG_NOT_COMPLETE);
             }
-        });
+        }
         binaryLongArrayReferences = null;
     }
 
-    public static void write(@NotNull Bytes bytes, long capacity) throws BufferOverflowException, IllegalArgumentException {
+    public static void write(@NotNull Bytes bytes, long capacity)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
         bytes.writeLong(capacity);
@@ -78,7 +84,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static void lazyWrite(@NotNull Bytes bytes, long capacity) throws BufferOverflowException {
+    public static void lazyWrite(@NotNull Bytes bytes, long capacity)
+            throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
         bytes.writeLong(capacity);
@@ -86,74 +93,93 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset) throws BufferUnderflowException {
+    public static long peakLength(@NotNull BytesStore bytes, long offset)
+            throws BufferUnderflowException, IllegalStateException {
         final long capacity = bytes.readLong(offset + CAPACITY);
         assert capacity > 0 : "capacity too small " + capacity;
         return (capacity << SHIFT) + VALUES;
     }
 
     @Override
-    public long getCapacity() {
+    public long getCapacity()
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return (length - VALUES) >>> SHIFT;
     }
 
     @Override
-    public long getUsed() {
+    public long getUsed()
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytes.readVolatileLong(offset + USED);
     }
 
     @Override
-    public void setMaxUsed(long usedAtLeast) {
+    public void setMaxUsed(long usedAtLeast)
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
         bytes.writeMaxLong(offset + USED, usedAtLeast);
     }
 
     @Override
-    public long getValueAt(long index) throws BufferUnderflowException {
+    public long getValueAt(long index)
+            throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
         return bytes.readLong(VALUES + offset + (index << SHIFT));
     }
 
     @Override
-    public void setValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+    public void setValueAt(long index, long value)
+            throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         bytes.writeLong(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
-    public long getVolatileValueAt(long index) throws BufferUnderflowException {
+    public long getVolatileValueAt(long index)
+            throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
         return bytes.readVolatileLong(VALUES + offset + (index << SHIFT));
     }
 
     @Override
-    public void bindValueAt(long index, @NotNull LongValue value) {
+    public void bindValueAt(long index, @NotNull LongValue value)
+            throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
+        try {
+            ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public void setOrderedValueAt(long index, long value) throws IllegalArgumentException, BufferOverflowException {
+    public void setOrderedValueAt(long index, long value)
+            throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         bytes.writeOrderedLong(VALUES + offset + (index << SHIFT), value);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) throws BufferUnderflowException, IllegalArgumentException {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length)
+            throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        if (length != peakLength(bytes, offset))
-            throw new IllegalArgumentException(length + " != " + peakLength(bytes, offset));
+        try {
+            long peakLength = peakLength(bytes, offset);
+            if (length != peakLength)
+                throw new IllegalArgumentException(length + " != " + peakLength);
+        } catch (BufferUnderflowException e) {
+            throw new DecoratedBufferOverflowException(e.toString());
+        }
 
         assert (offset & 7) == 0 : "offset=" + offset;
         super.bytesStore(bytes, (offset + 7) & ~7, length);
@@ -161,7 +187,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+    public void readMarshallable(BytesIn bytes)
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
         long position = bytes.readPosition();
@@ -175,11 +202,16 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
         bytes.readSkip(capacity << SHIFT);
         long length = bytes.readPosition() - position;
-        bytesStore(((Bytes) bytes).bytesStore(), position, length);
+        try {
+            bytesStore(((Bytes) bytes).bytesStore(), position, length);
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public void writeMarshallable(BytesOut bytes) {
+    public void writeMarshallable(BytesOut bytes)
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
@@ -187,19 +219,25 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             bytes.writeLong(0);
             bytes.writeSkip(capacity << SHIFT);
         } else {
-            bytes.write(bytesStore, offset, length);
+            try {
+                bytes.write(bytesStore, offset, length);
+            } catch (IllegalArgumentException e) {
+                throw new AssertionError(e);
+            }
         }
     }
 
     @Override
-    public boolean isNull() {
+    public boolean isNull()
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return bytes == null;
     }
 
     @Override
-    public void reset() {
+    public void reset()
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         bytes = null;
@@ -229,11 +267,11 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             return "not set";
         @NotNull StringBuilder sb = new StringBuilder();
         sb.append("used: ");
-        long used = getUsed();
-        sb.append(used);
-        sb.append(", value: ");
-        @NotNull String sep = "";
         try {
+            long used = getUsed();
+            sb.append(used);
+            sb.append(", value: ");
+            @NotNull String sep = "";
             int i, max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {
                 long valueAt = getValueAt(i);
@@ -243,21 +281,23 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             if (i < getCapacity())
                 sb.append(" ...");
 
-        } catch (BufferUnderflowException e) {
+        } catch (Throwable e) {
             sb.append(" ").append(e);
         }
         return sb.toString();
     }
 
     @Override
-    public long sizeInBytes(long capacity) {
+    public long sizeInBytes(long capacity)
+            throws IllegalStateException {
         throwExceptionIfClosed();
 
         return (capacity << SHIFT) + VALUES;
     }
 
     @Override
-    public ByteableLongArrayValues capacity(long arrayLength) {
+    public ByteableLongArrayValues capacity(long arrayLength)
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
         BytesStore bytesStore = bytesStore();
@@ -271,7 +311,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value) throws IllegalArgumentException, BufferOverflowException {
+    public boolean compareAndSet(long index, long expected, long value)
+            throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
         if (value == LONG_NOT_COMPLETE && binaryLongArrayReferences != null)

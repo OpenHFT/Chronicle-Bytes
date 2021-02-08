@@ -43,7 +43,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMappedFileSafeLimitTooSmall() throws IOException {
+    public void testMappedFileSafeLimitTooSmall()
+            throws IOException {
 
         final int arraySize = 40_000;
 
@@ -65,7 +66,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testMappedFileSafeLimitTooSmall2() throws IOException {
+    public void testMappedFileSafeLimitTooSmall2()
+            throws IOException {
 
         final int arraySize = 40_000;
 
@@ -87,7 +89,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteBytes() throws IOException {
+    public void testWriteBytes()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
@@ -107,7 +110,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteReadBytes() throws IOException {
+    public void testWriteReadBytes()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
@@ -127,7 +131,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteBytesWithOffset() throws IOException {
+    public void testWriteBytesWithOffset()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
@@ -149,7 +154,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteReadBytesWithOffset() throws IOException {
+    public void testWriteReadBytesWithOffset()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
@@ -171,7 +177,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteBytesWithOffsetAndTextShift() throws IOException {
+    public void testWriteBytesWithOffsetAndTextShift()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 4, 4);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 200 << 10, 200 << 10)) {
@@ -193,7 +200,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteReadBytesWithOffsetAndTextShift() throws IOException {
+    public void testWriteReadBytesWithOffsetAndTextShift()
+            throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10);
              MappedBytes bytesR = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
@@ -215,7 +223,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLargeWrites() throws IOException {
+    public void testLargeWrites()
+            throws IOException {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
                 10, 64 << 10);
 
@@ -255,7 +264,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLargeWrites3() throws IOException {
+    public void testLargeWrites3()
+            throws IOException {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 47 <<
                 10, 21 << 10);
 
@@ -295,7 +305,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLargeWrites2() throws IOException {
+    public void testLargeWrites2()
+            throws IOException {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
                 10, 128 << 10);
 
@@ -335,7 +346,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldNotBeReadOnly() throws Exception {
+    public void shouldNotBeReadOnly()
+            throws Exception {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10);
         assertFalse(bytes.isBackingFileReadOnly());
         bytes.writeUtf8(null); // used to blow up.
@@ -344,7 +356,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void shouldBeReadOnly() throws Exception {
+    public void shouldBeReadOnly()
+            throws Exception {
         final File tempFile = File.createTempFile("mapped", "bytes");
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(4096);
@@ -359,7 +372,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void interrupted() throws FileNotFoundException {
+    public void interrupted()
+            throws FileNotFoundException {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
         file.deleteOnExit();
@@ -378,7 +392,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void multiBytes() throws FileNotFoundException {
+    public void multiBytes()
+            throws FileNotFoundException {
         File tmpfile = IOTools.createTempFile("data.dat");
         try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 10);
              MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
@@ -405,7 +420,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void memoryOverlapRegions() throws FileNotFoundException {
+    public void memoryOverlapRegions()
+            throws FileNotFoundException {
         String tmpfile = IOTools.createTempFile("memoryOverlapRegions").getAbsolutePath();
         int chunkSize = 256 << 16;
         int overlapSize = 64 << 16;
@@ -435,7 +451,8 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void threadSafeMappedBytes() throws FileNotFoundException {
+    public void threadSafeMappedBytes()
+            throws FileNotFoundException {
         String tmpfile = IOTools.createTempFile("threadSafeMappedBytes").getAbsolutePath();
         int count = 4000;
         IntStream.range(0, count)

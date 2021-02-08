@@ -47,34 +47,35 @@ public abstract class AbstractInterner<T> {
     protected final int mask, shift;
     protected boolean toggle = false;
 
-    public AbstractInterner(int capacity) throws IllegalArgumentException {
+    public AbstractInterner(int capacity)
+            throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = new InternerEntry[n];
         mask = n - 1;
     }
 
-    private static int hash32(@NotNull BytesStore bs, int length) {
+    private static int hash32(@NotNull BytesStore bs, int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
 
     public T intern(@NotNull Bytes cs)
-            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, (int) cs.readRemaining());
     }
 
     public T intern(@NotNull BytesStore cs)
-            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern(cs, (int) cs.readRemaining());
     }
 
     public T intern(@NotNull Bytes cs, int length)
-            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, length);
     }
 
     public T intern(@NotNull BytesStore cs, int length)
-            throws IllegalArgumentException, IORuntimeException, BufferUnderflowException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
         // TODO This needs to be reviewd.
@@ -99,7 +100,8 @@ public abstract class AbstractInterner<T> {
     }
 
     @NotNull
-    protected abstract T getValue(BytesStore bs, int length) throws IORuntimeException;
+    protected abstract T getValue(BytesStore bs, int length)
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {
         return toggle = !toggle;

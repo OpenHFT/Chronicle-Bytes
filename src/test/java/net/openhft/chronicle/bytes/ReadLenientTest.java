@@ -4,6 +4,7 @@ import org.junit.Test;
 
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static org.junit.Assert.*;
@@ -19,7 +20,8 @@ public class ReadLenientTest extends BytesTestCommon {
     }
 
     @SuppressWarnings("rawtypes")
-    private void doTest(Bytes bytes) {
+    private void doTest(Bytes bytes)
+            throws BufferUnderflowException, ArithmeticException, IllegalArgumentException {
         bytes.lenient(true);
         ByteBuffer bb = ByteBuffer.allocateDirect(32);
         bytes.read(bb);

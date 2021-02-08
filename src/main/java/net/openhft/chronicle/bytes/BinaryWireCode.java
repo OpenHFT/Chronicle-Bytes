@@ -118,7 +118,7 @@ public interface BinaryWireCode {
                     else
                         stringForCode[i] = "Unknown_" + (char) i;
             }
-        } catch (IllegalAccessException e) {
+        } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new AssertionError(e);
         }
         return stringForCode;

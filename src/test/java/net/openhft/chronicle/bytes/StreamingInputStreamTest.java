@@ -49,7 +49,8 @@ public class StreamingInputStreamTest extends BytesTestCommon {
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
     @Test
-    public void readOfZeroShouldReturnZero() throws IOException {
+    public void readOfZeroShouldReturnZero()
+            throws IOException {
         @NotNull Bytes b = Bytes.allocateElasticDirect();
         prepareBytes(b);
 
@@ -59,7 +60,8 @@ public class StreamingInputStreamTest extends BytesTestCommon {
     }
 
     @Test(timeout = 1000)
-    public void testReadBlock() throws IOException {
+    public void testReadBlock()
+            throws IOException {
 
         @NotNull Bytes b = Bytes.allocateElasticDirect();
         @NotNull byte[] test = prepareBytes(b);

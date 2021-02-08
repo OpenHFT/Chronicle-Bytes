@@ -36,141 +36,159 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     private static final String[] STRING_FOR_CODE = _stringForCode(GuardedNativeBytes.class);
 
-    public GuardedNativeBytes(@NotNull BytesStore store, long capacity) throws IllegalStateException {
+    public GuardedNativeBytes(@NotNull BytesStore store, long capacity)
+            throws IllegalStateException, IllegalArgumentException {
         super(store, capacity);
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(byte i8) throws BufferOverflowException {
+    public Bytes<Underlying> writeByte(byte i8)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(BYTE_T);
         return super.writeByte(i8);
     }
 
     @Override
-    public Bytes<Underlying> rawWriteByte(byte i8) throws BufferOverflowException {
+    public Bytes<Underlying> rawWriteByte(byte i8)
+            throws BufferOverflowException, IllegalStateException {
         return super.writeByte(i8);
     }
 
     @Override
-    public Bytes<Underlying> rawWriteInt(int i) throws BufferOverflowException {
+    public Bytes<Underlying> rawWriteInt(int i)
+            throws BufferOverflowException, IllegalStateException {
         return super.writeInt(i);
     }
 
     @Override
-    public byte readByte() {
+    public byte readByte() throws IllegalStateException {
         expectByte(BYTE_T);
         return super.readByte();
     }
 
     @Override
-    public byte rawReadByte() {
+    public byte rawReadByte() throws IllegalStateException {
         return super.readByte();
     }
 
     @Override
-    public int rawReadInt() {
+    public int rawReadInt() throws IllegalStateException, BufferUnderflowException {
         return super.readInt();
     }
 
     @Override
-    public int readUnsignedByte() {
+    public int readUnsignedByte() throws IllegalStateException {
         expectByte(BYTE_T);
         return super.readUnsignedByte();
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeShort(short i16) throws BufferOverflowException {
+    public Bytes<Underlying> writeShort(short i16)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(SHORT_T);
         return super.writeShort(i16);
     }
 
     @Override
-    public short readShort() throws BufferUnderflowException {
+    public short readShort()
+            throws BufferUnderflowException, IllegalStateException {
         expectByte(SHORT_T);
         return super.readShort();
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeStopBit(char x) throws BufferOverflowException {
+    public Bytes<Underlying> writeStopBit(char x)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(STOP_T);
         return super.writeStopBit(x);
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeStopBit(long x) throws BufferOverflowException {
+    public Bytes<Underlying> writeStopBit(long x)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(STOP_T);
         return super.writeStopBit(x);
     }
 
     @Override
-    public long readStopBit() throws IORuntimeException {
+    public long readStopBit()
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         expectByte(STOP_T);
         return super.readStopBit();
     }
 
     @Override
-    public char readStopBitChar() throws IORuntimeException {
+    public char readStopBitChar()
+            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         expectByte(STOP_T);
         return super.readStopBitChar();
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeInt(int i) throws BufferOverflowException {
+    public Bytes<Underlying> writeInt(int i)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(INT_T);
         return super.writeInt(i);
     }
 
     @Override
-    public int readInt() throws BufferUnderflowException {
+    public int readInt()
+            throws BufferUnderflowException, IllegalStateException {
         expectByte(INT_T);
         return super.readInt();
     }
 
     @NotNull
     @Override
-    public Bytes writeLong(long i64) throws BufferOverflowException {
+    public Bytes writeLong(long i64)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(LONG_T);
         return super.writeLong(i64);
     }
 
     @Override
-    public long readLong() throws BufferUnderflowException {
+    public long readLong()
+            throws BufferUnderflowException, IllegalStateException {
         expectByte(LONG_T);
         return super.readLong();
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeFloat(float f) throws BufferOverflowException {
+    public Bytes<Underlying> writeFloat(float f)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(FLOAT_T);
         return super.writeFloat(f);
     }
 
     @Override
-    public float readFloat() throws BufferUnderflowException {
+    public float readFloat()
+            throws BufferUnderflowException, IllegalStateException {
         expectByte(FLOAT_T);
         return super.readFloat();
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeDouble(double d) throws BufferOverflowException {
+    public Bytes<Underlying> writeDouble(double d)
+            throws BufferOverflowException, IllegalStateException {
         super.writeByte(DOUBLE_T);
         return super.writeDouble(d);
     }
 
     @Override
-    public double readDouble() throws BufferUnderflowException {
+    public double readDouble()
+            throws BufferUnderflowException, IllegalStateException {
         expectByte(DOUBLE_T);
         return super.readDouble();
     }
 
-    private void expectByte(byte expected) {
+    private void expectByte(byte expected) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected)
             throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]

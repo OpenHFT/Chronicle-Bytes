@@ -24,7 +24,8 @@ import java.io.*;
 
 public class PrintVdsoMain {
     @SuppressWarnings("rawtypes")
-    public static void main(String[] args) throws IOException, IllegalStateException {
+    public static void main(String[] args)
+            throws IOException, IllegalStateException {
         long start = 0;
         long end = 0;
         @NotNull String maps = "/proc/self/maps";

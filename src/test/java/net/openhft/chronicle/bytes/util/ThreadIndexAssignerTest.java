@@ -1,6 +1,5 @@
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.core.Jvm;
@@ -18,7 +17,8 @@ import static org.junit.Assume.assumeTrue;
 
 public class ThreadIndexAssignerTest {
     @Test
-    public void assignTwo() throws InterruptedException {
+    public void assignTwo()
+            throws InterruptedException {
         assumeTrue(OS.isLinux() && !Jvm.isArm());
         BlockingQueue t0started = new LinkedBlockingQueue();
         BlockingQueue t1started = new LinkedBlockingQueue();

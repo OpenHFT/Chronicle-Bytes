@@ -337,7 +337,8 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     @Test
-    public void serializeBytes() throws IOException {
+    public void serializeBytes()
+            throws IOException {
         Bytes<?> bytes = new HexDumpBytes();
         final Bytes<?> hello = Bytes.from("hello");
         final Bytes<?> byeee = Bytes.from("byeee");

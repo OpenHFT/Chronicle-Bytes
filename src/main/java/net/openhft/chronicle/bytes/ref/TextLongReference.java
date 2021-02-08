@@ -20,11 +20,11 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.util.ThrowingLongSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.function.LongSupplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
@@ -44,38 +44,40 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int DIGITS = 20;
 
     @SuppressWarnings("rawtypes")
-    public static void write(@NotNull Bytes bytes, long value) throws BufferOverflowException, IllegalArgumentException {
+    public static void write(@NotNull Bytes bytes, long value)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);
         bytes.append(position + VALUE, value, DIGITS);
     }
 
-    private long withLock(@NotNull LongSupplier call) throws IllegalStateException, BufferUnderflowException {
+    private <T extends Exception> long withLock(@NotNull ThrowingLongSupplier<T> call)
+            throws IllegalStateException {
         try {
             long valueOffset = offset + LOCKED;
             int value = bytes.readVolatileInt(valueOffset);
             if (value != FALSE && value != TRUE)
                 throw new IllegalStateException("Not a lock value");
-            try {
-                while (true) {
-                    if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
-                        long t = call.getAsLong();
-                        bytes.writeOrderedInt(valueOffset, FALSE);
-                        return t;
-                    }
+
+            while (true) {
+                if (bytes.compareAndSwapInt(valueOffset, FALSE, TRUE)) {
+                    long t = call.getAsLong();
+                    bytes.writeOrderedInt(valueOffset, FALSE);
+                    return t;
                 }
-            } catch (BufferOverflowException e) {
-                throw new AssertionError(e);
             }
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
+        } catch (Exception throwable) {
+            throw new AssertionError(throwable);
         }
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+            throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         if (length != template.length)
             throw new IllegalArgumentException();
 
@@ -87,17 +89,23 @@ public class TextLongReference extends AbstractReference implements LongReferenc
 
         super.bytesStore(bytes, newOffset, length);
 
-        if (bytes.readLong(newOffset) == UNINITIALIZED)
-            bytes.write(newOffset, template);
+        try {
+            if (bytes.readLong(newOffset) == UNINITIALIZED)
+                bytes.write(newOffset, template);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
-    public long getValue() {
+    public long getValue()
+            throws IllegalStateException {
         return withLock(() -> bytes.parseLong(offset + VALUE));
     }
 
     @Override
-    public void setValue(long value) {
+    public void setValue(long value)
+            throws IllegalStateException {
         withLock(() -> {
             bytes.append(offset + VALUE, value, DIGITS);
             return LONG_TRUE;
@@ -105,12 +113,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     }
 
     @Override
-    public long getVolatileValue() {
+    public long getVolatileValue()
+            throws IllegalStateException {
         return getValue();
     }
 
     @Override
-    public void setVolatileValue(long value) {
+    public void setVolatileValue(long value)
+            throws IllegalStateException {
         setValue(value);
     }
 
@@ -131,17 +141,23 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     }
 
     @Override
-    public void setOrderedValue(long value) {
+    public void setOrderedValue(long value)
+            throws IllegalStateException {
         setValue(value);
     }
 
     @NotNull
     public String toString() {
-        return "value: " + getValue();
+        try {
+            return "value: " + getValue();
+        } catch (Exception e) {
+            return e.toString();
+        }
     }
 
     @Override
-    public long addValue(long delta) {
+    public long addValue(long delta)
+            throws IllegalStateException {
         return withLock(() -> {
             long value = bytes.parseLong(offset + VALUE) + delta;
             bytes.append(offset + VALUE, value, DIGITS);
@@ -150,12 +166,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     }
 
     @Override
-    public long addAtomicValue(long delta) {
+    public long addAtomicValue(long delta)
+            throws IllegalStateException {
         return addValue(delta);
     }
 
     @Override
-    public boolean compareAndSwapValue(long expected, long value) {
+    public boolean compareAndSwapValue(long expected, long value)
+            throws IllegalStateException {
         return withLock(() -> {
             if (bytes.parseLong(offset + VALUE) == expected) {
                 bytes.append(offset + VALUE, value, DIGITS);

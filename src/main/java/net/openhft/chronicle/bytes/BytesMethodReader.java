@@ -7,6 +7,7 @@ import net.openhft.chronicle.core.util.ObjectUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.nio.BufferUnderflowException;
 import java.util.*;
 import java.util.function.Consumer;
 
@@ -44,10 +45,10 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
             array[0][i] = (BytesMarshallable) ObjectUtils.newInstance(parameterTypes[i]);
         }
         Consumer<BytesIn> reader = in -> {
-            array[0] = (BytesMarshallable[]) encoder.decode(array[0], in);
             try {
+                array[0] = (BytesMarshallable[]) encoder.decode(array[0], in);
                 method.invoke(object, array[0]);
-            } catch (IllegalAccessException | InvocationTargetException e) {
+            } catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException | IllegalArgumentException | IllegalStateException e) {
                 Jvm.warn().on(getClass(), "Exception calling " + method + " " + Arrays.toString(array[0]), e);
             }
         };
@@ -66,7 +67,8 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         throw new UnsupportedOperationException();
     }
 
-    public boolean readOne() throws InvocationTargetRuntimeException {
+    public boolean readOne()
+            throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         if (in.readRemaining() < 1)

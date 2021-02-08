@@ -21,6 +21,9 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.values.BooleanValue;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 /**
  * Implementation of a reference to a 32-bit in in text wire format.
  */
@@ -30,7 +33,8 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
     @SuppressWarnings("rawtypes")
-    public static void write(final boolean value, final BytesStore bytes, long offset) {
+    public static void write(final boolean value, final BytesStore bytes, long offset)
+            throws IllegalStateException, BufferOverflowException {
         bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
         bytes.writeByte(offset + 4, (byte) 'e');
     }
@@ -42,20 +46,30 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
 
     @NotNull
     public String toString() {
-        return "value: " + getValue();
+        try {
+            return "value: " + getValue();
+        } catch (IllegalStateException | BufferUnderflowException e) {
+            return e.toString();
+        }
     }
 
     @Override
-    public boolean getValue() {
+    public boolean getValue()
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytes.readVolatileInt(offset) == TRUE;
     }
 
     @Override
-    public void setValue(final boolean value) {
+    public void setValue(final boolean value)
+            throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        write(value, bytes, offset);
+        try {
+            write(value, bytes, offset);
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 }

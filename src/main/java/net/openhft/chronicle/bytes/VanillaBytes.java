@@ -42,11 +42,13 @@
             extends AbstractBytes<Underlying>
             implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
-        public VanillaBytes(@NotNull BytesStore bytesStore) throws IllegalStateException {
+        public VanillaBytes(@NotNull BytesStore bytesStore)
+                throws IllegalStateException, IllegalArgumentException {
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
 
-        public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit) throws IllegalStateException {
+        public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
+                throws IllegalStateException, IllegalArgumentException {
             super(bytesStore, writePosition, writeLimit);
         }
 
@@ -58,7 +60,7 @@
             try {
                 return new VanillaBytes<>(noBytesStore());
 
-            } catch (IllegalStateException e) {
+            } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new AssertionError(e);
             }
         }
@@ -114,7 +116,8 @@
             return true;
         }
 
-        private static boolean isEqual1(@NotNull char[] chars, @NotNull BytesStore bytesStore, long readPosition) throws BufferUnderflowException {
+        private static boolean isEqual1(@NotNull char[] chars, @NotNull BytesStore bytesStore, long readPosition)
+                throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < chars.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
                 if (b != chars[i])
@@ -124,7 +127,8 @@
         }
 
         @Java9
-        private static boolean isEqual1(@NotNull byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition) throws BufferUnderflowException {
+        private static boolean isEqual1(@NotNull byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
+                throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < bytes.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
                 char c;
@@ -143,23 +147,28 @@
         }
 
         @Override
-        public long readVolatileLong(long offset) throws BufferUnderflowException {
+        public long readVolatileLong(long offset)
+                throws BufferUnderflowException, IllegalStateException {
             readCheckOffset(offset, 8, true);
             return bytesStore.readVolatileLong(offset);
         }
 
         @Override
         public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
-                throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
+                throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
             setBytesStore(byteStore);
             // assume its read-only
             readLimit(offset + length);
-            writeLimit(offset + length);
             readPosition(offset);
+            try {
+                writeLimit(offset + length);
+            } catch (BufferOverflowException e) {
+                throw new AssertionError(e);
+            }
         }
 
         private void setBytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
-                throws IllegalStateException {
+                throws IllegalStateException, IllegalArgumentException {
             if (this.bytesStore != bytesStore) {
                 @Nullable BytesStore oldBS = this.bytesStore;
                 this.bytesStore(bytesStore);
@@ -186,14 +195,20 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> bytesForRead() throws IllegalStateException {
-            return isClear()
-                    ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
-                    : new SubBytes<>(bytesStore, readPosition(), readLimit());
+        public Bytes<Underlying> bytesForRead()
+                throws IllegalStateException {
+            try {
+                return isClear()
+                        ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
+                        : new SubBytes<>(bytesStore, readPosition(), readLimit());
+            } catch (IllegalArgumentException | BufferUnderflowException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @Override
-        public boolean isEqual(@Nullable String s) {
+        public boolean isEqual(@Nullable String s)
+                throws IllegalStateException {
             if (s == null || s.length() != readRemaining()) return false;
 
             try {
@@ -231,7 +246,8 @@
 
         @NotNull
         @Override
-        public BytesStore<Bytes<Underlying>, Underlying> copy() {
+        public BytesStore<Bytes<Underlying>, Underlying> copy()
+                throws IllegalStateException {
             if (bytesStore.underlyingObject() instanceof ByteBuffer) {
                 try {
                     ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
@@ -242,7 +258,7 @@
                     bb.put(slice);
                     bb.clear();
                     return (BytesStore) BytesStore.wrap(bb);
-                } catch (IllegalArgumentException e) {
+                } catch (ArithmeticException e) {
                     throw new AssertionError(e);
                 }
             } else {
@@ -253,12 +269,13 @@
         @NotNull
         @Override
         public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
-                throws BufferOverflowException, BufferUnderflowException, IllegalArgumentException {
+                throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             optimisedWrite(bytes, offset, length);
             return this;
         }
 
-        protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length) {
+        protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length)
+                throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
                 long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
                 if (len > 0) {
@@ -276,20 +293,26 @@
         }
 
         public void write(long position, @NotNull CharSequence str, int offset, int length)
-                throws BufferOverflowException, IllegalArgumentException {
+                throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
 
             ensureCapacity(length);
             if (offset + length > str.length())
                 throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
 
             for (int i = 0; i < length; i++) {
-                bytesStore.writeByte(position + i, str.charAt(offset + i));
+                int index = offset + i;
+                bytesStore.writeByte(position + i, charAt(str, index));
             }
+        }
+
+        private char charAt(@NotNull CharSequence str, int index) {
+            return str.charAt(index);
         }
 
         @Override
         @NotNull
-        public VanillaBytes append(@NotNull CharSequence str, int start, int end) throws IndexOutOfBoundsException {
+        public VanillaBytes append(@NotNull CharSequence str, int start, int end)
+                throws IndexOutOfBoundsException {
             assert end > start : "end=" + end + ",start=" + start;
             try {
                 if (isDirectMemory()) {
@@ -319,7 +342,8 @@
 
         @NotNull
         @Override
-        public VanillaBytes appendUtf8(@NotNull CharSequence str) throws BufferOverflowException {
+        public VanillaBytes appendUtf8(@NotNull CharSequence str)
+                throws BufferOverflowException {
             try {
                 if (isDirectMemory()) {
                     if (str instanceof BytesStore) {
@@ -350,7 +374,7 @@
         @Override
         @NotNull
         public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
-                throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+                throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
             if (cs instanceof RandomDataInput)
                 return write((RandomDataInput) cs);
 
@@ -362,14 +386,19 @@
         @Override
         @NotNull
         public Bytes<Underlying> append8bit(@NotNull BytesStore bs)
-                throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+                throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
             long remaining = bs.readLimit() - bs.readPosition();
-            return write(bs, 0L, remaining);
+            try {
+                return write(bs, 0L, remaining);
+            } catch (IllegalArgumentException e) {
+                throw new AssertionError(e);
+            }
         }
 
         @NotNull
         @Override
-        public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException {
+        public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+                throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             if (bytes.canReadDirect(length) && canWriteDirect(length) && length == (int) length) {
                 long wAddr = addressForWritePosition();
                 writeSkip(length);
@@ -385,14 +414,15 @@
         @Override
         @NotNull
         public Bytes<Underlying> append8bit(@NotNull String cs)
-                throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException {
+                throws BufferOverflowException, IllegalStateException {
             if (isDirectMemory())
                 return append8bitNBS_S(cs);
             return append8bit0(cs);
         }
 
         @NotNull
-        private Bytes<Underlying> append8bitNBS_S(@NotNull String s) throws BufferOverflowException {
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s)
+                throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
             @Nullable NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
@@ -429,9 +459,13 @@
 
         @NotNull
         public String toString() {
-            return bytesStore instanceof NativeBytesStore
-                    ? toString2((NativeBytesStore) bytesStore)
-                    : toString0();
+            try {
+                return bytesStore instanceof NativeBytesStore
+                        ? toString2((NativeBytesStore) bytesStore)
+                        : toString0();
+            } catch (IllegalStateException e) {
+                throw Jvm.rethrow(e);
+            }
         }
 
         private String toString2(@NotNull NativeBytesStore bytesStore) {
@@ -447,7 +481,8 @@
         }
 
         @NotNull
-        protected String toString0() {
+        protected String toString0()
+                throws IllegalStateException {
             int length = (int) Math.min(Bytes.MAX_HEAP_CAPACITY, readRemaining());
             @NotNull char[] chars = new char[length];
             try {
@@ -461,11 +496,12 @@
         }
 
         @NotNull
-        protected Bytes<Underlying> append8bit0(@NotNull CharSequence cs) throws BufferOverflowException, IndexOutOfBoundsException {
+        protected Bytes<Underlying> append8bit0(@NotNull CharSequence cs)
+                throws BufferOverflowException, IllegalStateException {
             int length = cs.length();
             long offset = writeOffsetPositionMoved(length);
             for (int i = 0; i < length; i++) {
-                char c = cs.charAt(i);
+                char c = charAt(cs, i);
                 if (c > 255) c = '?';
                 bytesStore.writeByte(offset + i, (byte) c);
             }
@@ -473,7 +509,8 @@
         }
 
         @Override
-        public boolean equalBytes(@NotNull BytesStore bytesStore, long length) throws BufferUnderflowException {
+        public boolean equalBytes(@NotNull BytesStore bytesStore, long length)
+                throws BufferUnderflowException, IllegalStateException {
             if (isDirectMemory() &&
                     bytesStore instanceof VanillaBytes &&
                     bytesStore.isDirectMemory()) {
@@ -503,7 +540,8 @@
             }
         }
 
-        public void read8Bit(char[] chars, int length) {
+        public void read8Bit(char[] chars, int length)
+                throws BufferUnderflowException, IllegalStateException {
             if (isDirectMemory()) {
                 long position = readPosition();
                 @NotNull NativeBytesStore nbs = (NativeBytesStore) bytesStore();
@@ -517,7 +555,8 @@
 
         // TODO: protected?
         @Override
-        public int byteCheckSum(int start, int end) throws IORuntimeException {
+        public int byteCheckSum(int start, int end)
+                throws IORuntimeException, BufferUnderflowException {
             byte b = 0;
             // the below cast is safe as should only be called from net.openhft.chronicle.bytes.AbstractBytes.byteCheckSum(long, long)
             @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
@@ -539,7 +578,8 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+        public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+                throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
             ensureCapacity(length);
             if (bytesStore instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
@@ -552,14 +592,16 @@
         }
 
         @Override
-        public ByteBuffer toTemporaryDirectByteBuffer() throws IllegalArgumentException {
+        public ByteBuffer toTemporaryDirectByteBuffer()
+                throws IllegalArgumentException, ArithmeticException, IllegalStateException {
             if (isClear())
                 return bytesStore.toTemporaryDirectByteBuffer();
             return super.toTemporaryDirectByteBuffer();
         }
 
         @Override
-        public int read(@NotNull byte[] bytes) {
+        public int read(@NotNull byte[] bytes)
+                throws BufferUnderflowException, IllegalStateException {
             int len = (int) Math.min(bytes.length, readRemaining());
             if (bytesStore instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
@@ -582,8 +624,8 @@
 
             int k = 0;
             while (k < lim) {
-                char c1 = bytesStore.charAt(k);
-                char c2 = cs.charAt(k);
+                char c1 = charAt(bytesStore, k);
+                char c2 = charAt(cs, k);
                 if (c1 != c2) {
                     return c1 - c2;
                 }
@@ -591,7 +633,6 @@
             }
             return (int) (len1 - len2);
         }
-
 
 
     }

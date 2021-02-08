@@ -23,19 +23,24 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeCloseable;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
     private BytesStore bytes;
 
     @NotNull
-    public static LongReference create(BytesStore bytesStore, long offset, int size) {
+    public static LongReference create(BytesStore bytesStore, long offset, int size)
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
         return ref;
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length) {
+    public void bytesStore(@NotNull BytesStore bytes, long offset, long length)
+            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
         if (length != maxSize()) throw new IllegalArgumentException();
@@ -66,26 +71,36 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
 
     @NotNull
     public String toString() {
-        return address == 0 ? "addressForRead is 0" : "value: " + getValue();
+        if (address == 0)
+            return "addressForRead is 0";
+        try {
+            return "value: " + getValue();
+        } catch (Throwable e) {
+            return "value: " + e;
+        }
     }
 
     @Override
-    public long getValue() {
+    public long getValue()
+            throws IllegalStateException {
         return getLong();
     }
 
     @Override
-    public void setValue(long value) {
+    public void setValue(long value)
+            throws IllegalStateException {
         setLong(value);
     }
 
     @Override
-    public long getVolatileValue() {
+    public long getVolatileValue()
+            throws IllegalStateException {
         return getVolatileLong();
     }
 
     @Override
-    public void setVolatileValue(long value) {
+    public void setVolatileValue(long value)
+            throws IllegalStateException {
         setVolatileLong(value);
     }
 
@@ -95,27 +110,32 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     }
 
     @Override
-    public void setOrderedValue(long value) {
+    public void setOrderedValue(long value)
+            throws IllegalStateException {
         setOrderedLong(value);
     }
 
     @Override
-    public long addValue(long delta) {
+    public long addValue(long delta)
+            throws IllegalStateException {
         return addLong(delta);
     }
 
     @Override
-    public long addAtomicValue(long delta) {
+    public long addAtomicValue(long delta)
+            throws IllegalStateException {
         return addAtomicLong(delta);
     }
 
     @Override
-    public boolean compareAndSwapValue(long expected, long value) {
+    public boolean compareAndSwapValue(long expected, long value)
+            throws IllegalStateException {
         return compareAndSwapLong(expected, value);
     }
 
     @Override
-    protected void performClose() {
+    protected void performClose()
+            throws IllegalStateException {
         if (this.bytes != null)
             this.bytes.release(this);
         this.bytes = null;

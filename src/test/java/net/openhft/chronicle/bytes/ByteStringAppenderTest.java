@@ -87,7 +87,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendInt() throws IORuntimeException {
+    public void testAppendInt()
+            throws IORuntimeException {
         for (int expected = 1; expected != 0; expected *= 2) {
             bytes.append(expected);
             bytes.append(",");
@@ -100,7 +101,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppend() throws IORuntimeException {
+    public void testAppend()
+            throws IORuntimeException {
         for (long expected = 1; expected != 0; expected *= 2) {
             bytes.clear();
             bytes.append(expected);
@@ -134,7 +136,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDouble() throws IORuntimeException {
+    public void testAppendDouble()
+            throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         testAppendDouble0(-1.42278619425894E11);
 /*
@@ -147,7 +150,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 */
     }
 
-    private void testAppendDouble0(double d) throws IORuntimeException {
+    private void testAppendDouble0(double d)
+            throws IORuntimeException {
         bytes.clear();
         bytes.append(d).append(' ');
 

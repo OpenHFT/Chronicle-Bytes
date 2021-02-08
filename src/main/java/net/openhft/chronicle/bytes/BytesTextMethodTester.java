@@ -4,6 +4,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
 import java.util.function.Function;
 
 @SuppressWarnings("rawtypes")
@@ -47,7 +48,8 @@ public class BytesTextMethodTester<T> {
     }
 
     @NotNull
-    public BytesTextMethodTester run() throws IOException {
+    public BytesTextMethodTester run()
+            throws IOException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
 
         Bytes<?> bytes2 = new HexDumpBytes();
         T writer = bytes2.bytesMethodWriter(outputClass);
@@ -102,7 +104,11 @@ public class BytesTextMethodTester<T> {
 
     private void unknownMessageId(long id, BytesIn b) {
         Jvm.warn().on(getClass(), "Unknown message id " + Long.toHexString(id));
-        b.readPosition(b.readLimit());
+        try {
+            b.readPosition(b.readLimit());
+        } catch (BufferUnderflowException | IllegalStateException e) {
+            throw new AssertionError(e);
+        }
     }
 
     public String expected() {

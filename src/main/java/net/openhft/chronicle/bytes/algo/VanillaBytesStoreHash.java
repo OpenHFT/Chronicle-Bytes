@@ -19,9 +19,10 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 @SuppressWarnings("rawtypes")
@@ -46,12 +47,16 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
 
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
-        int remaining = Maths.toInt32(store.readRemaining());
-        return applyAsLong(store, remaining);
+        int remaining = (int) Math.min(Integer.MAX_VALUE, store.readRemaining());
+        try {
+            return applyAsLong(store, remaining);
+        } catch (IllegalStateException | BufferUnderflowException e) {
+            throw Jvm.rethrow(e);
+        }
     }
 
     @Override
-    public long applyAsLong(BytesStore bytes, long length) {
+    public long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException {
         long start = bytes.readPosition();
         if (length <= 8) {
             long l = bytes.readIncompleteLong(start);

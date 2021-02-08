@@ -18,11 +18,11 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.io.Writer;
-import java.nio.BufferOverflowException;
 
 /**
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
@@ -36,43 +36,51 @@ class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(int c) throws IOException {
+    public void write(int c)
+            throws IOException {
         try {
             out.append((char) c);
 
-        } catch (@NotNull BufferOverflowException e) {
+        } catch (IllegalStateException e) {
             throw new IOException(e);
         }
     }
 
     @Override
-    public void write(@NotNull String str) throws IOException {
+    public void write(@NotNull String str)
+            throws IOException {
         out.append(str);
     }
 
     @Override
-    public void write(@NotNull String str, int off, int len) throws IOException {
+    public void write(@NotNull String str, int off, int len)
+            throws IOException {
         out.append(str, off, off + len);
     }
 
     @NotNull
     @Override
-    public Writer append(@NotNull CharSequence csq) throws IOException {
+    public Writer append(@NotNull CharSequence csq)
+            throws IOException {
         out.append(csq);
         return this;
     }
 
     @NotNull
     @Override
-    public Writer append(@NotNull CharSequence csq, int start, int end) throws IOException {
+    public Writer append(@NotNull CharSequence csq, int start, int end) {
         out.append(csq, start, end);
         return this;
     }
 
     @NotNull
     @Override
-    public Writer append(char c) throws IOException {
-        out.append(c);
+    public Writer append(char c) {
+        try {
+            out.append(c);
+        } catch (IllegalStateException e) {
+            throw Jvm.rethrow(e);
+        }
         return this;
     }
 
@@ -87,8 +95,13 @@ class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len) throws IOException {
-        for (int i = 0; i < len; i++)
-            out.append(cbuf[i + off]);
+    public void write(char[] cbuf, int off, int len)
+            throws IOException {
+        try {
+            for (int i = 0; i < len; i++)
+                out.append(cbuf[i + off]);
+        } catch (IllegalStateException e) {
+            throw Jvm.rethrow(e);
+        }
     }
 }

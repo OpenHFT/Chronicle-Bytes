@@ -12,7 +12,8 @@ public class UTF8BytesTest {
     private static final String MESSAGE = "awésome-message-1";
 
     @Test
-    public void testUtfEncoding() throws IOException {
+    public void testUtfEncoding()
+            throws IOException {
         File f = File.createTempFile("testUtfEncoding", "data");
         f.deleteOnExit();
         final MappedBytes bytes = MappedBytes.mappedBytes(f, 256);

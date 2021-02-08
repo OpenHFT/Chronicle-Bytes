@@ -59,21 +59,24 @@ public class CopyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes1() throws Exception {
+    public void testCanCopyBytesFromMappedBytes1()
+            throws Exception {
         File bytes = File.createTempFile("mapped-test", "bytes");
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), 0);
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes2() throws Exception {
+    public void testCanCopyBytesFromMappedBytes2()
+            throws Exception {
         File bytes = File.createTempFile("mapped-test", "bytes");
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), (64 << 10) - 8);
     }
 
     @Test
-    public void testCanCopyBytesFromMappedBytes3() throws Exception {
+    public void testCanCopyBytesFromMappedBytes3()
+            throws Exception {
         File bytes = File.createTempFile("mapped-test", "bytes");
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 16 << 10, 16 << 10), (64 << 10) - 8);

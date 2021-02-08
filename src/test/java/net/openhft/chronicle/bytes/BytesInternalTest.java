@@ -66,7 +66,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParse8bitAndStringBuilderWithUtf16Coder() throws BufferUnderflowException, IOException {
+    public void testParse8bitAndStringBuilderWithUtf16Coder()
+            throws BufferUnderflowException, IOException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
@@ -98,7 +99,8 @@ public class BytesInternalTest extends BytesTestCommon {
     */
 
     @Test
-    public void testParseUTF_SB1() throws UTFDataFormatRuntimeException {
+    public void testParseUTF_SB1()
+            throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         @NotNull byte[] bytes2 = new byte[128];
@@ -119,7 +121,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF8_LongString() throws UTFDataFormatRuntimeException {
+    public void testParseUTF8_LongString()
+            throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -172,7 +175,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF81_LongString() throws UTFDataFormatRuntimeException {
+    public void testParseUTF81_LongString()
+            throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -197,7 +201,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParseUTF_SB1_LongString() throws UTFDataFormatRuntimeException {
+    public void testParseUTF_SB1_LongString()
+            throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -224,7 +229,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testParse8bit_LongString() throws Exception {
+    public void testParse8bit_LongString()
+            throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -261,7 +267,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testWriteUtf8LongString() throws IORuntimeException {
+    public void testWriteUtf8LongString()
+            throws IORuntimeException, BufferUnderflowException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -280,7 +287,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendUtf8LongString() throws Exception {
+    public void testAppendUtf8LongString()
+            throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -300,7 +308,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppend8bitLongString() throws Exception {
+    public void testAppend8bitLongString()
+            throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
@@ -320,7 +329,8 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCompareUTF() throws IORuntimeException {
+    public void testCompareUTF()
+            throws IORuntimeException {
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));

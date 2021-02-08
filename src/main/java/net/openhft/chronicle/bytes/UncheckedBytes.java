@@ -38,13 +38,15 @@ public class UncheckedBytes<Underlying>
         extends AbstractBytes<Underlying> {
     Bytes underlyingBytes;
 
-    public UncheckedBytes(@NotNull Bytes underlyingBytes) throws IllegalStateException {
+    public UncheckedBytes(@NotNull Bytes underlyingBytes)
+            throws IllegalStateException {
         super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
     }
 
-    public void setBytes(@NotNull Bytes bytes) throws IllegalStateException {
+    public void setBytes(@NotNull Bytes bytes)
+            throws IllegalStateException {
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
@@ -59,7 +61,8 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    public void ensureCapacity(long size) throws IllegalArgumentException {
+    public void ensureCapacity(long size)
+            throws IllegalArgumentException, IllegalStateException {
         if (size > realCapacity()) {
             underlyingBytes.ensureCapacity(size);
             bytesStore(underlyingBytes.bytesStore());
@@ -157,14 +160,15 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    protected long prewriteOffsetPositionMoved(long subtracting) throws BufferOverflowException {
+    protected long prewriteOffsetPositionMoved(long subtracting)
+            throws BufferOverflowException {
         return readPosition -= subtracting;
     }
 
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -176,7 +180,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (bytes.underlyingObject() == null
@@ -194,7 +198,7 @@ public class UncheckedBytes<Underlying>
     @Override
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         if (cs instanceof RandomDataInput) {
             return write((RandomDataInput) cs);
         }
@@ -210,7 +214,7 @@ public class UncheckedBytes<Underlying>
     }
 
     long rawCopy(@NotNull BytesStore bytes, long offset, long length)
-            throws BufferOverflowException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
@@ -223,7 +227,8 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(byte i8) throws BufferOverflowException {
+    public Bytes<Underlying> writeByte(byte i8)
+            throws BufferOverflowException, IllegalStateException {
         long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -231,7 +236,8 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeUtf8(String s) throws BufferOverflowException {
+    public Bytes<Underlying> writeUtf8(String s)
+            throws BufferOverflowException, IllegalStateException {
         if (s == null) {
             writeStopBit(-1);
             return this;
@@ -259,7 +265,8 @@ public class UncheckedBytes<Underlying>
         return this;
     }
 
-    void append8bit(char[] chars) throws BufferOverflowException, IllegalArgumentException {
+    void append8bit(char[] chars)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             bytesStore.writeByte(writePosition++, (byte) c);
@@ -268,7 +275,8 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length) throws BufferOverflowException, IllegalArgumentException {
+    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         int i;
         ascii:
         {
@@ -288,7 +296,8 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws BufferOverflowException {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
+            throws BufferOverflowException {
 
     }
 }

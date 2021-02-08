@@ -40,12 +40,14 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public void reserve(ReferenceOwner id) throws IllegalStateException {
+    public void reserve(ReferenceOwner id)
+            throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void release(ReferenceOwner id) throws IllegalStateException {
+    public void release(ReferenceOwner id)
+            throws IllegalStateException {
         throw newIllegalStateException();
     }
 
@@ -55,7 +57,8 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean tryReserve(ReferenceOwner id) throws IllegalStateException {
+    public boolean tryReserve(ReferenceOwner id)
+            throws IllegalStateException {
         return false;
     }
 
@@ -65,13 +68,14 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+    public void releaseLast(ReferenceOwner id)
+            throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeByte(long offset, byte i8) {
+    public RandomDataOutput writeByte(long offset, byte i8) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
@@ -82,91 +86,91 @@ public enum ReleasedBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public RandomDataOutput writeShort(long offset, short i) {
+    public RandomDataOutput writeShort(long offset, short i) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeInt(long offset, int i) {
+    public RandomDataOutput writeInt(long offset, int i) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedInt(long offset, int i) {
+    public RandomDataOutput writeOrderedInt(long offset, int i) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeLong(long offset, long i) {
+    public RandomDataOutput writeLong(long offset, long i) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedLong(long offset, long i) {
+    public RandomDataOutput writeOrderedLong(long offset, long i) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeFloat(long offset, float d) {
+    public RandomDataOutput writeFloat(long offset, float d) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeDouble(long offset, double d) {
+    public RandomDataOutput writeDouble(long offset, double d) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileByte(long offset, byte i8) {
+    public RandomDataOutput writeVolatileByte(long offset, byte i8) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileShort(long offset, short i16) {
+    public RandomDataOutput writeVolatileShort(long offset, short i16) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileInt(long offset, int i32) {
+    public RandomDataOutput writeVolatileInt(long offset, int i32) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileLong(long offset, long i64) {
+    public RandomDataOutput writeVolatileLong(long offset, long i64) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {
+    public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) throws IllegalStateException {
         if (length != 0)
             throw newIllegalStateException();
         return this;
     }
 
     @Override
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
+    public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public byte readByte(long offset) {
+    public byte readByte(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
@@ -176,47 +180,51 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public short readShort(long offset) {
+    public short readShort(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public int readInt(long offset) {
+    public int readInt(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long readLong(long offset) {
+    public long readLong(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public float readFloat(long offset) {
+    public float readFloat(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public double readDouble(long offset) {
+    public double readDouble(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public byte readVolatileByte(long offset) throws BufferUnderflowException {
+    public byte readVolatileByte(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public short readVolatileShort(long offset) throws BufferUnderflowException {
+    public short readVolatileShort(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public int readVolatileInt(long offset) throws BufferUnderflowException {
+    public int readVolatileInt(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long readVolatileLong(long offset) throws BufferUnderflowException {
+    public long readVolatileLong(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
@@ -252,63 +260,66 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store) {
+    public long copyTo(@NotNull BytesStore store) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void nativeWrite(long address, long position, long size) {
+    public void nativeWrite(long address, long position, long size) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void nativeRead(long position, long address, long size) {
+    public void nativeRead(long position, long address, long size) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
+    public boolean compareAndSwapInt(long offset, int expected, int value) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void testAndSetInt(long offset, int expected, int value) {
+    public void testAndSetInt(long offset, int expected, int value) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
+    public boolean compareAndSwapLong(long offset, long expected, long value) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public void move(long from, long to, long length) {
+    public void move(long from, long to, long length) throws IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long addressForRead(long offset) throws BufferUnderflowException {
+    public long addressForRead(long offset)
+            throws BufferUnderflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long addressForWrite(long offset) throws BufferOverflowException {
+    public long addressForWrite(long offset)
+            throws BufferOverflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @Override
-    public long addressForWritePosition() throws UnsupportedOperationException, BufferOverflowException {
+    public long addressForWritePosition()
+            throws UnsupportedOperationException, BufferOverflowException, IllegalStateException {
         throw newIllegalStateException();
     }
 
     @NotNull
     @Override
-    public Bytes bytesForWrite() {
+    public Bytes bytesForWrite() throws IllegalStateException {
         throw newIllegalStateException();
     }
 

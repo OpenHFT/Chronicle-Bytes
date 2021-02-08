@@ -31,7 +31,7 @@ public enum PropertyReplacer {
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{\\s*([^}]*?)\\s*\\}");
 
-    public static String replaceTokensWithProperties(String expression) {
+    public static String replaceTokensWithProperties(String expression) throws IllegalArgumentException {
 
         StringBuilder result = new StringBuilder(expression.length());
         int i = 0;
@@ -56,7 +56,7 @@ public enum PropertyReplacer {
         return result.toString();
     }
 
-    public static String replaceTokensWithProperties(String expression, Properties properties) {
+    public static String replaceTokensWithProperties(String expression, Properties properties) throws IllegalArgumentException {
 
         StringBuilder result = new StringBuilder(expression.length());
         int i = 0;
@@ -82,7 +82,8 @@ public enum PropertyReplacer {
     }
 
     @NotNull
-    public static String fileAsString(String fileName) throws IOException {
+    public static String fileAsString(String fileName)
+            throws IOException {
         try {
             Class<PropertyReplacer> propertyReplacerClass = PropertyReplacer.class;
             InputStream is = propertyReplacerClass.getResourceAsStream(fileName);

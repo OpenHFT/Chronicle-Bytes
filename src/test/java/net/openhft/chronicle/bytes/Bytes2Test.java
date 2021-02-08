@@ -119,7 +119,8 @@ public class Bytes2Test extends BytesTestCommon {
     }
 
     @Test
-    public void testParseToBytes() throws IORuntimeException {
+    public void testParseToBytes()
+            throws IORuntimeException {
         Bytes from = alloc1.fixedBytes(64);
         Bytes to = alloc2.fixedBytes(32);
         try {

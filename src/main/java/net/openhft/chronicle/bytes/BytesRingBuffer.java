@@ -57,7 +57,8 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     }
 
     @NotNull
-    static Class<MultiReaderBytesRingBuffer> clazz() throws ClassNotFoundException {
+    static Class<MultiReaderBytesRingBuffer> clazz()
+            throws ClassNotFoundException {
         //noinspection AccessStaticViaInstance
         return (Class<MultiReaderBytesRingBuffer>) Class.forName(
                 "software.chronicle.enterprise.ring.EnterpriseRingBuffer");

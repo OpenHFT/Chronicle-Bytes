@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.annotation.ForceInline;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +29,6 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return The smallest position allowed in this buffer.
      */
-    @ForceInline
     default long start() {
         return 0L;
     }
@@ -38,7 +36,6 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return the highest limit allowed for this buffer.
      */
-    @ForceInline
     default long capacity() {
         return Bytes.MAX_CAPACITY;
     }
@@ -55,7 +52,6 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @return position to read from.
      */
-    @ForceInline
     default long readPosition() {
         return start();
     }
@@ -65,7 +61,6 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @return position to write to.
      */
-    @ForceInline
     default long writePosition() {
         return start();
     }
@@ -73,7 +68,6 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return How many more bytes can we read.
      */
-    @ForceInline
     default long readRemaining() {
         long remaining = readLimit() - readPosition();
         return remaining;
@@ -82,7 +76,6 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return How many more bytes can we written.
      */
-    @ForceInline
     default long writeRemaining() {
         return writeLimit() - writePosition();
     }
@@ -90,12 +83,10 @@ interface RandomCommon extends ReferenceCounted {
     /**
      * @return the highest offset or position allowed for this buffer.
      */
-    @ForceInline
     default long readLimit() {
         return realCapacity();
     }
 
-    @ForceInline
     default long writeLimit() {
         return realCapacity();
     }
@@ -109,10 +100,10 @@ interface RandomCommon extends ReferenceCounted {
      * @throws BufferUnderflowException      if the offset is before the start() or the after the capacity()
      */
     long addressForRead(long offset)
-            throws UnsupportedOperationException, BufferUnderflowException;
+            throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException;
 
     default long addressForRead(long offset, int buffer)
-            throws UnsupportedOperationException, BufferUnderflowException {
+            throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
         return addressForRead(offset);
     }
 
@@ -125,10 +116,10 @@ interface RandomCommon extends ReferenceCounted {
      * @throws BufferOverflowException       if the offset is before the start() or the after the capacity()
      */
     long addressForWrite(long offset)
-            throws UnsupportedOperationException, BufferOverflowException;
+            throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
 
     long addressForWritePosition()
-            throws UnsupportedOperationException, BufferOverflowException;
+            throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
 
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
@@ -139,14 +130,16 @@ interface RandomCommon extends ReferenceCounted {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytesForRead() throws IllegalStateException;
+    Bytes bytesForRead()
+            throws IllegalStateException;
 
     /**
      * @return the streaming bytes for writing.
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytesForWrite() throws IllegalStateException;
+    Bytes bytesForWrite()
+            throws IllegalStateException;
 
     /**
      * Perform a 32-bit CAS at a given offset.
@@ -157,9 +150,10 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapInt(long offset, int expected, int value)
-            throws BufferOverflowException;
+            throws BufferOverflowException, IllegalStateException;
 
-    void testAndSetInt(long offset, int expected, int value);
+    void testAndSetInt(long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Perform a 64-bit CAS at a given offset.
@@ -170,7 +164,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     boolean compareAndSwapLong(long offset, long expected, long value)
-            throws BufferOverflowException;
+            throws BufferOverflowException, IllegalStateException;
 
     /**
      * Perform a 32-bit float CAS at a given offset.
@@ -181,7 +175,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapFloat(long offset, float expected, float value)
-            throws BufferOverflowException {
+            throws BufferOverflowException, IllegalStateException {
         return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
     }
 
@@ -194,7 +188,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return true, if successful.
      */
     default boolean compareAndSwapDouble(long offset, double expected, double value)
-            throws BufferOverflowException {
+            throws BufferOverflowException, IllegalStateException {
         return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 

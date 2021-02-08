@@ -32,7 +32,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length) throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException {
+    public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length)
+            throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         if (length != maxSize())
@@ -47,53 +48,66 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @NotNull
     public String toString() {
-        return bytes == null ? "bytes is null" : "value: " + getValue();
+        if (bytes == null)
+            return "bytes is null";
+        try {
+            return "value: " + getValue();
+        } catch (Throwable e) {
+            return "value: " + e;
+        }
     }
 
     @Override
-    public int getValue() {
+    public int getValue()
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytes == null ? 0 : bytes.readInt(offset);
     }
 
     @Override
-    public void setValue(int value) {
+    public void setValue(int value)
+            throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         bytes.writeInt(offset, value);
     }
 
     @Override
-    public int getVolatileValue() {
+    public int getVolatileValue()
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytes.readVolatileInt(offset);
     }
 
     @Override
-    public void setOrderedValue(int value) {
+    public void setOrderedValue(int value)
+            throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
         bytes.writeOrderedInt(offset, value);
     }
 
     @Override
-    public int addValue(int delta) {
+    public int addValue(int delta)
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return bytes.addAndGetInt(offset, delta);
     }
 
     @Override
-    public int addAtomicValue(int delta) {
+    public int addAtomicValue(int delta)
+            throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         return addValue(delta);
     }
 
     @Override
-    public boolean compareAndSwapValue(int expected, int value) {
+    public boolean compareAndSwapValue(int expected, int value)
+            throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
         return bytes.compareAndSwapInt(offset, expected, value);

@@ -11,13 +11,18 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final boolean elastic;
     private final long capacity;
 
-    public OnHeapBytes(@NotNull BytesStore bytesStore, boolean elastic) throws IllegalStateException {
+    public OnHeapBytes(@NotNull BytesStore bytesStore, boolean elastic)
+            throws IllegalStateException, IllegalArgumentException {
         super(bytesStore);
         this.elastic = elastic;
         this.capacity = elastic ? MAX_CAPACITY : bytesStore.capacity();
 
-        writePosition(0);
-        writeLimit(capacity());
+        try {
+            writePosition(0);
+            writeLimit(capacity());
+        } catch (BufferOverflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -32,7 +37,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
 
     @Override
     protected void writeCheckOffset(long offset, long adding)
-            throws BufferOverflowException {
+            throws BufferOverflowException, IllegalStateException {
         if (offset >= bytesStore.start()) {
             long writeEnd = offset + adding;
             if (writeEnd > writeLimit)
@@ -46,12 +51,13 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         }
     }
 
-    private void throwBeyondWriteLimit(long advance, long writeEnd) {
+    private void throwBeyondWriteLimit(long advance, long writeEnd)
+            throws DecoratedBufferOverflowException {
         throw new DecoratedBufferOverflowException("attempt to write " + advance + " bytes to " + writeEnd + " limit: " + writeLimit);
     }
 
     private void checkResize(long endOfBuffer)
-            throws BufferOverflowException {
+            throws BufferOverflowException, IllegalStateException {
         if (isElastic())
             resize(endOfBuffer);
         else
@@ -60,7 +66,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(long endOfBuffer)
-            throws BufferOverflowException {
+            throws BufferOverflowException, IllegalStateException {
         if (endOfBuffer < 0)
             throw new BufferOverflowException();
         if (endOfBuffer > capacity())
@@ -85,7 +91,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         try {
             store = HeapBytesStore.wrap(new byte[size]);
             store.reserveTransfer(INIT, this);
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalStateException e) {
             BufferOverflowException boe = new BufferOverflowException();
             boe.initCause(e);
             throw boe;

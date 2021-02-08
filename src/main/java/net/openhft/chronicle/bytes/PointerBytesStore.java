@@ -38,8 +38,13 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
-        return new VanillaBytes<>(this);
+    public VanillaBytes<Void> bytesForWrite()
+            throws IllegalStateException {
+        try {
+            return new VanillaBytes<>(this);
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override
@@ -51,5 +56,5 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     public long start() {
         return 0;
     }
-    
+
 }

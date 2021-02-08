@@ -32,7 +32,8 @@ import java.util.function.BiConsumer;
 @Deprecated(/* to be removed in x.22 */)
 public interface MethodWriterInterceptor {
 
-    static MethodWriterInterceptor of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptor interceptor) {
+    static MethodWriterInterceptor of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptor interceptor)
+            throws IllegalArgumentException {
         if (methodWriterListener == null && interceptor == null)
             throw new IllegalArgumentException("both methodWriterListener and interceptor are NULL");
 

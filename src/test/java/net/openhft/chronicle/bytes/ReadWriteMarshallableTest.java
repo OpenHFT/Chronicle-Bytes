@@ -3,13 +3,16 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Test;
 
+import java.nio.BufferUnderflowException;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings("rawtypes")
 public class ReadWriteMarshallableTest extends BytesTestCommon {
     @Test
-    public void test() {
+    public void test()
+            throws BufferUnderflowException, IllegalStateException {
         // TODO Make guarded safe
         assumeFalse(NativeBytes.areNewGuarded());
 
@@ -38,7 +41,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn bytes)
+                throws IORuntimeException, BufferUnderflowException {
             BytesIn<?> in = (BytesIn<?>) bytes;
             i1 = in.readMarshallableLength16(RWInner.class, i1);
             i2 = in.readMarshallableLength16(RWInner.class, i2);
@@ -59,7 +63,8 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException {
+        public void readMarshallable(BytesIn bytes)
+                throws IORuntimeException {
             if (data == null) data = Bytes.allocateElasticOnHeap(64);
             data.clear().write((BytesStore) bytes);
         }

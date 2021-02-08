@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 
+import java.nio.BufferUnderflowException;
+
 public interface MethodReader extends Closeable {
     String HISTORY = "history";
 
@@ -34,7 +36,8 @@ public interface MethodReader extends Closeable {
      * @return true if there was a message, false if no more messages.
      * @throws InvocationTargetRuntimeException if the receiver (target method) throws
      */
-    boolean readOne() throws InvocationTargetRuntimeException;
+    boolean readOne()
+            throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException;
 
     /**
      * Does a quick read which is simpler but might not read the next message. readOne() has to be called periodically.
@@ -42,7 +45,8 @@ public interface MethodReader extends Closeable {
      *
      * @return true if there was a message, false if there is probably not a message.
      */
-    default boolean lazyReadOne() {
+    default boolean lazyReadOne()
+            throws IllegalStateException, BufferUnderflowException {
         return readOne();
     }
 

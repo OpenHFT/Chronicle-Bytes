@@ -42,137 +42,160 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
+    public boolean compareAndSwapInt(long offset, int expected, int value)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
-        throw checkReadOnly();
-    }
-
-    @NotNull
-    @Override
-    public NativeBytesStore<Void> writeByte(long offset, byte i8) {
+    public boolean compareAndSwapLong(long offset, long expected, long value)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeShort(long offset, short i16) {
+    public NativeBytesStore<Void> writeByte(long offset, byte i8)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeInt(long offset, int i32) {
+    public NativeBytesStore<Void> writeShort(long offset, short i16)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeLong(long offset, long i64) {
+    public NativeBytesStore<Void> writeInt(long offset, int i32)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeOrderedLong(long offset, long i) {
+    public NativeBytesStore<Void> writeLong(long offset, long i64)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeFloat(long offset, float f) {
+    public NativeBytesStore<Void> writeOrderedLong(long offset, long i)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeDouble(long offset, double d) {
+    public NativeBytesStore<Void> writeFloat(long offset, float f)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeVolatileByte(long offset, byte i8) {
+    public NativeBytesStore<Void> writeDouble(long offset, double d)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeVolatileShort(long offset, short i16) {
+    public NativeBytesStore<Void> writeVolatileByte(long offset, byte i8)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeVolatileInt(long offset, int i32) {
+    public NativeBytesStore<Void> writeVolatileShort(long offset, short i16)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeVolatileLong(long offset, long i64) {
+    public NativeBytesStore<Void> writeVolatileInt(long offset, int i32)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> write(long offsetInRDO, byte[] bytes, int offset, int length) {
+    public NativeBytesStore<Void> writeVolatileLong(long offset, long i64)
+            throws IllegalStateException {
+        throw checkReadOnly();
+    }
+
+    @NotNull
+    @Override
+    public NativeBytesStore<Void> write(long offsetInRDO, byte[] bytes, int offset, int length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
     public NativeBytesStore<Void> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
-            throws BufferOverflowException, BufferUnderflowException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length) {
+    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public void nativeWrite(long address, long position, long size) {
+    public void nativeWrite(long address, long position, long size)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    void write8bit(long position, char[] chars, int offset, int length) {
+    void write8bit(long position, char[] chars, int offset, int length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public long appendUTF(long pos, char[] chars, int offset, int length) {
+    public long appendUTF(long pos, char[] chars, int offset, int length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @Override
-    public long appendUtf8(long pos, char[] chars, int offset, int length) {
+    public long appendUtf8(long pos, char[] chars, int offset, int length)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public VanillaBytes<Void> bytesForWrite() throws IllegalStateException {
+    public VanillaBytes<Void> bytesForWrite()
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeOrderedInt(long offset, int i) {
+    public NativeBytesStore<Void> writeOrderedInt(long offset, int i)
+            throws IllegalStateException {
         throw checkReadOnly();
     }
 
-    private IllegalStateException checkReadOnly() throws IllegalStateException {
+    private IllegalStateException checkReadOnly()
+            throws IllegalStateException {
         throw new IllegalStateException("Read Only");
     }
 
