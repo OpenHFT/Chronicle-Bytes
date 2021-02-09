@@ -58,7 +58,8 @@ public enum BytesUtil {
      * @return true if the whole class is trivially copyable
      */
     public static boolean isTriviallyCopyable(Class clazz) {
-        return TRIVIALLY_COPYABLE.get(clazz).length > 0;
+        int[] ints = TRIVIALLY_COPYABLE.get(clazz);
+        return ints[1] == ints[2];
     }
 
     static int[] isTriviallyCopyable0(Class clazz) {
@@ -75,6 +76,7 @@ public enum BytesUtil {
         }
         int min = Integer.MAX_VALUE;
         int max = Integer.MIN_VALUE;
+        int firstNonCopyable = Integer.MAX_VALUE;
         for (Field field : fields) {
             int modifiers = field.getModifiers();
             if (Modifier.isStatic(modifiers))
@@ -83,12 +85,11 @@ public enum BytesUtil {
             int size = sizeOf(field.getType());
             min = (int) Math.min(min, offset2);
             max = (int) Math.max(max, offset2 + size);
-            if (Modifier.isTransient(modifiers))
-                return NO_INTS;
-            if (!field.getType().isPrimitive())
-                return NO_INTS;
+            if (Modifier.isTransient(modifiers) || !field.getType().isPrimitive()) {
+                firstNonCopyable = (int) Math.min(firstNonCopyable, offset2);
+            }
         }
-        return new int[]{min, max};
+        return new int[]{min, Math.min(max, firstNonCopyable), max};
     }
 
     /**

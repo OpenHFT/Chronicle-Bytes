@@ -12,7 +12,7 @@ public class UnsafeRWObjectTest {
     @Test
     public void shortObject() {
         assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
-        assertEquals("[12, 32]",
+        assertEquals("[12, 32, 32]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(AA.class)));
         Bytes bytes = Bytes.allocateDirect(32);
@@ -33,7 +33,7 @@ public class UnsafeRWObjectTest {
     @Test
     public void longObject() {
         assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
-        assertEquals("[16, 80]",
+        assertEquals("[16, 80, 80]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(BB.class)));
         Bytes bytes = Bytes.allocateDirect(8 * 8);
