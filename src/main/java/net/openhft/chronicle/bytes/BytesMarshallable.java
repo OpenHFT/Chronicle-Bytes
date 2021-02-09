@@ -30,6 +30,11 @@ import java.nio.BufferUnderflowException;
 @DontChain
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
     @Override
+    default boolean usesSelfDescribingMessage() {
+        return false;
+    }
+
+    @Override
     @SuppressWarnings("rawtypes")
     default void readMarshallable(BytesIn bytes)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
