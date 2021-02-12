@@ -349,4 +349,18 @@ public enum BytesUtil {
             // static block does the work.
         }
     }
+
+    public static void reverse(Bytes<?> text, int start) {
+        long rp = text.readPosition();
+        int end = text.length() - 1;
+        int mid = (start + end + 1) / 2;
+
+        for (int i = 0; i < mid - start; ++i) {
+            char ch = text.charAt(start + i);
+            text.writeUnsignedByte(rp + start + i, text.charAt(end - i));
+            text.writeUnsignedByte(rp + end - i, ch);
+        }
+
+    }
+
 }
