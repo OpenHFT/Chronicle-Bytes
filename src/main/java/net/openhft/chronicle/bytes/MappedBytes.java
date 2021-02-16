@@ -418,10 +418,16 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         if (offset < 0 || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException(offset);
-        if (bytesStore == null || !bytesStore.inside(offset, Math.toIntExact(adding))) {
+        if (bytesStore == null || !bytesStore.inside(offset, checkSize(adding))) {
             acquireNextByteStore0(offset, false);
         }
 //        super.writeCheckOffset(offset, adding);
+    }
+
+    private long checkSize(long adding) {
+        if (adding < 0 || adding > MAX_CAPACITY)
+            throw new IllegalArgumentException("Invalid size " + adding);
+        return adding;
     }
 
     @Override
@@ -429,9 +435,19 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (bytesStore == null || !bytesStore.inside(writePosition, Math.toIntExact(size))) {
+        if (bytesStore == null || !bytesStore.inside(writePosition, checkSize(size))) {
             acquireNextByteStore0(writePosition, false);
         }
+    }
+
+    @Override
+    public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
+            throws BufferOverflowException, IllegalStateException {
+        // only check up to 128 bytes are real.
+        writeCheckOffset(writePosition, Math.min(128, bytesToSkip));
+        // the rest can be lazily allocated.
+        uncheckedWritePosition(writePosition + bytesToSkip);
+        return this;
     }
 
     @NotNull
