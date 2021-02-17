@@ -93,6 +93,7 @@ public class ThreadIndexAssignerTest {
 
         // unchanged
         Assert.assertEquals(1, ta.getId());
+        iav.close();
         bytes.releaseLast();
 
         Throwable th = throwables.poll();
