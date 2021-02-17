@@ -94,6 +94,7 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
 
         // unchanged
         Assert.assertEquals(1, ta.getId());
+        iav.close();
         bytes.releaseLast();
 
         Throwable th = throwables.poll();
