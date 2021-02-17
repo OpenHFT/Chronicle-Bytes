@@ -47,7 +47,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
     @Test
     public void concurrentTimeNanos() {
         long start0 = System.nanoTime();
-        final int runTimeUS = 1_000_000;
+        final int runTimeUS = 5_000_000;
         final int threads = Jvm.isArm() ? 4 : 16;
         final int stride = Jvm.isArm() ? 1 : threads;
         IntStream.range(0, threads)
@@ -59,7 +59,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                     for (int j = 0; j < runTimeUS; j += stride) {
                         long now = tp.currentTimeNanos();
                         if (!Jvm.isArm())
-                            assertTrue(now < start + runTimeUS * 1000);
+                            assertTrue(now < start + runTimeUS * 1000L);
                         // check the times are different after shifting by 5 bits.
                         assertTrue((now >>> 5) > (last >>> 5));
                         last = now;
@@ -67,6 +67,6 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                 });
         long time0 = System.nanoTime() - start0;
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
-        assertTrue(Jvm.isArm() || time0 < runTimeUS * 1000);
+        assertTrue(Jvm.isArm() || time0 < runTimeUS * 1000L);
     }
 }
