@@ -100,6 +100,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return (capacity << SHIFT) + VALUES;
     }
 
+    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+            throws IllegalStateException {
+        if (this.bytes != null) {
+            this.bytes.release(this);
+        }
+        this.bytes = bytes;
+        this.bytes.reserve(this);
+    }
+
     @Override
     public long getCapacity()
             throws IllegalStateException {
@@ -200,7 +209,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.readSkip(capacity << SHIFT);
         long length = bytes.readPosition() - position;
         try {
-            bytesStore(((Bytes) bytes).bytesStore(), position, length);
+            bytesStore((Bytes) bytes, position, length);
         } catch (IllegalArgumentException | BufferOverflowException e) {
             throw new AssertionError(e);
         }

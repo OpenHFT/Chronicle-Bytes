@@ -73,6 +73,15 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         binaryLongArrayReferences = null;
     }
 
+    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+            throws IllegalStateException {
+        if (this.bytes != null) {
+            this.bytes.release(this);
+        }
+        this.bytes = bytes;
+        this.bytes.reserve(this);
+    }
+
     public static void write(@NotNull Bytes bytes, long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -203,7 +212,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.readSkip(capacity << SHIFT);
         long length = bytes.readPosition() - position;
         try {
-            bytesStore(((Bytes) bytes).bytesStore(), position, length);
+            bytesStore((Bytes) bytes, position, length);
         } catch (IllegalArgumentException | BufferOverflowException e) {
             throw new AssertionError(e);
         }
