@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -15,7 +16,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
 
-public class ThreadIndexAssignerTest {
+public class ThreadIndexAssignerTest extends BytesTestCommon {
     @Test
     public void assignTwo()
             throws InterruptedException {
