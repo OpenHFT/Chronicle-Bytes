@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -72,6 +73,16 @@ public class BytesUtilTest extends BytesTestCommon {
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start + 12, 4 + 2 * 8));
     }
 
+    @Test
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/170")
+    public void triviallyCopyable2() {
+        assertFalse(BytesUtil.isTriviallyCopyable(D.class));
+        assertFalse(BytesUtil.isTriviallyCopyable(E.class));
+        int size2 = Jvm.isAzulZing() ? 24 : 20;
+        int[] range = BytesUtil.triviallyCopyableRange(E.class);
+        assertEquals(size2, range[1] - range[0]);
+    }
+
     static class A {
         int i;
         long l;
@@ -97,6 +108,16 @@ public class BytesUtilTest extends BytesTestCommon {
     static class C {
         int i;
         transient long l;
+        double d;
+    }
+
+    static class D {
+        String user;
+    }
+
+    static class E extends D {
+        int i;
+        long l;
         double d;
     }
 
