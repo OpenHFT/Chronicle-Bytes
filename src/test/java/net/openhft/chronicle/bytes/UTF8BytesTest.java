@@ -23,5 +23,6 @@ public class UTF8BytesTest {
         StringBuilder sb = new StringBuilder();
         bytes.parseUtf8(sb, true, len);
         assertEquals(MESSAGE, sb.toString());
+        bytes.releaseLast();
     }
 }

@@ -2599,7 +2599,12 @@ enum BytesInternal {
     public static BytesStore subBytes(RandomDataInput from, long start, long length)
             throws BufferUnderflowException, IllegalStateException {
         try {
-            @NotNull BytesStore ret = NativeBytesStore.nativeStore(Math.max(0, length));
+            @NotNull BytesStore ret;
+            if (from.isDirectMemory()) {
+                ret = NativeBytesStore.nativeStore(Math.max(0, length));
+            } else {
+                ret = HeapBytesStore.wrap(new byte[Math.toIntExact(length)]);
+            }
             ret.write(0L, from, start, length);
             return ret;
         } catch (IllegalArgumentException | BufferOverflowException e) {

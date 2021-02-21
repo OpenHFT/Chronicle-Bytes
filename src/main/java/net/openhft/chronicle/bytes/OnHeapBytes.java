@@ -83,8 +83,9 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         int size = (int) Math.min(size0, capacity());
 
         //        System.out.println("resize " + endOfBuffer + " to " + size);
-        if (endOfBuffer > 1 << 20)
-            Jvm.warn().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
+        // native block of 128 KiB or more have an individual memory mapping so are more expensive.
+        if (endOfBuffer >= 128 << 10)
+            Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
         HeapBytesStore store;
