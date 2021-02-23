@@ -38,16 +38,16 @@ public class BytesUtilTest extends BytesTestCommon {
         int start = Jvm.objectHeaderSize();
         assertTrue(BytesUtil.isTriviallyCopyable(Nested.class));
         assertTrue(BytesUtil.isTriviallyCopyable(Nested.class, start, 4));
-        assertFalse(BytesUtil.isTriviallyCopyable(SubNested.class));
+        assertTrue(BytesUtil.isTriviallyCopyable(SubNested.class));
         assertTrue(BytesUtil.isTriviallyCopyable(SubNested.class, start, 4));
         // TODO allow a portion of B to be trivially copyable
-        assertFalse(BytesUtil.isTriviallyCopyable(B.class));
+        assertTrue(BytesUtil.isTriviallyCopyable(B.class));
         assertTrue(BytesUtil.isTriviallyCopyable(B.class, start, 20));
-        assertFalse(BytesUtil.isTriviallyCopyable(C.class));
+        assertTrue(BytesUtil.isTriviallyCopyable(C.class));
         assertTrue(BytesUtil.isTriviallyCopyable(C.class, start, 4));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A.class));
-        assertEquals("[" + start + ", " + (start + 20) + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
+        assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A.class, start - 4, 4 + 2 * 8));
@@ -55,16 +55,16 @@ public class BytesUtilTest extends BytesTestCommon {
 
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class));
         int size = Jvm.isAzulZing() ? 28 : 24;
-        assertEquals("[" + start + ", " + (start + size) + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
+        assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A2.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A2.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start - 4, 4 + 2 * 8));
         assertEquals(Jvm.isAzulZing(), BytesUtil.isTriviallyCopyable(A2.class, start + 8, 4 + 2 * 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 12, 4 + 2 * 8));
 
-        assertFalse(BytesUtil.isTriviallyCopyable(A3.class));
+        assertTrue(BytesUtil.isTriviallyCopyable(A3.class));
         // however by copying a region that is safe.
-        assertEquals("[" + start + ", " + (start + size) + ", " + (start + size + 4) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A3.class)));
+        assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A3.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start + 4, 8));
         assertFalse(BytesUtil.isTriviallyCopyable(A3.class, start - 4, 4 + 2 * 8));
@@ -73,7 +73,6 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-//    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/170")
     public void triviallyCopyable2() {
         assertFalse(BytesUtil.isTriviallyCopyable(D.class));
         assertTrue(BytesUtil.isTriviallyCopyable(E.class));
