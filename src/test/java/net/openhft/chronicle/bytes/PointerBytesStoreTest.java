@@ -18,18 +18,11 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import org.junit.After;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
 public class PointerBytesStoreTest extends BytesTestCommon {
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
 
     @Test
     public void testWrap() {

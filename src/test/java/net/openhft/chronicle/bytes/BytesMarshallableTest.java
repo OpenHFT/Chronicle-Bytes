@@ -20,7 +20,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -71,10 +70,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
     @Test
     public void serializePrimitives() {
         assumeFalse(NativeBytes.areNewGuarded());

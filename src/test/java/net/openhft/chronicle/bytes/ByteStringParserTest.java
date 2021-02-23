@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
@@ -43,9 +42,11 @@ public class ByteStringParserTest extends BytesTestCommon {
     private ThreadDump threadDump;
 
     @After
-    public void checkRegisteredBytes() {
+    @Override
+    public void afterChecks() {
         bytes.releaseLast();
-        AbstractReferenceCounted.assertReferencesReleased();
+
+        super.afterChecks();
     }
 
     @Before

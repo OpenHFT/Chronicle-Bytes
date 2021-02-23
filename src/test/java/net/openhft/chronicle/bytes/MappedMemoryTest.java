@@ -20,11 +20,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
@@ -46,11 +44,6 @@ public class MappedMemoryTest extends BytesTestCommon {
         if (!file.delete()) {
             Jvm.warn().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
         }
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     @Override

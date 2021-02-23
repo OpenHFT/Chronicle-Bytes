@@ -19,12 +19,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Rule;
+import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
@@ -37,22 +38,6 @@ public class MappedFileTest extends BytesTestCommon {
 
     @Rule
     public final TemporaryFolder tmpDir = new TemporaryFolder();
-    private ThreadDump threadDump;
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
-    }
 
     @Test
     public void testWarmup() {

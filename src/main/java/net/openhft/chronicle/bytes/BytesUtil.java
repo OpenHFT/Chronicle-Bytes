@@ -299,6 +299,7 @@ public enum BytesUtil {
     }
 
     // calls the BackgroundResourceReleaser and AbstractCloseable.assertCloseableClose first.
+    @Deprecated(/*to be removed in x.23*/)
     public static void checkRegisteredBytes() {
         AbstractReferenceCounted.assertReferencesReleased();
     }

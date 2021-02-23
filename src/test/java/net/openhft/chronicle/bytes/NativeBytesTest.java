@@ -21,10 +21,11 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.*;
+import org.junit.Assert;
+import org.junit.Assume;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -42,7 +43,6 @@ import static org.junit.Assert.*;
 public class NativeBytesTest extends BytesTestCommon {
 
     private final Allocator alloc;
-    private ThreadDump threadDump;
 
     public NativeBytesTest(Allocator alloc) {
         this.alloc = alloc;
@@ -53,21 +53,6 @@ public class NativeBytesTest extends BytesTestCommon {
         return Arrays.asList(new Object[][]{
                 {NATIVE}, {HEAP}, {BYTE_BUFFER}
         });
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        BytesUtil.checkRegisteredBytes();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
     }
 
     @SuppressWarnings("rawtypes")

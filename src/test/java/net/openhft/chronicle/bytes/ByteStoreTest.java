@@ -20,9 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Assert;
@@ -51,22 +49,12 @@ public class ByteStoreTest extends BytesTestCommon {
     private static final int SIZE = 128;
     private Bytes<?> bytes;
     private BytesStore<?, ?> bytesStore;
-    private ThreadDump threadDump;
 
     @After
-    public void checkRegisteredBytes() {
+    @Override
+    public void afterChecks() {
         bytes.releaseLast();
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
+        super.afterChecks();
     }
 
     @Before

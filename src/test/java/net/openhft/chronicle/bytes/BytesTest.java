@@ -25,11 +25,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -54,7 +51,6 @@ import static org.junit.Assume.assumeFalse;
 public class BytesTest extends BytesTestCommon {
 
     private final Allocator alloc1;
-    private ThreadDump threadDump;
 
     public BytesTest(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
@@ -69,21 +65,6 @@ public class BytesTest extends BytesTestCommon {
                 {"Native Unchecked", NATIVE_UNCHECKED},
                 {"Heap Unchecked", HEAP_UNCHECKED}
         });
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
     }
 
     @Test

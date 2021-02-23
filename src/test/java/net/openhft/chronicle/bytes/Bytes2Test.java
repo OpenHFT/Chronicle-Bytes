@@ -18,11 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -41,7 +37,6 @@ public class Bytes2Test extends BytesTestCommon {
 
     private final Allocator alloc1;
     private final Allocator alloc2;
-    private ThreadDump threadDump;
 
     public Bytes2Test(Allocator alloc1, Allocator alloc2) {
         this.alloc1 = alloc1;
@@ -53,21 +48,6 @@ public class Bytes2Test extends BytesTestCommon {
         return Arrays.asList(new Object[][]{
                 {NATIVE, NATIVE}, {HEAP, NATIVE}, {NATIVE, HEAP}, {HEAP, HEAP}
         });
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
     }
 
     @Test

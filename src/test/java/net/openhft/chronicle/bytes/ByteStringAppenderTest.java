@@ -19,13 +19,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.jetbrains.annotations.NotNull;
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -38,9 +34,6 @@ import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
-
-    @NotNull
-    private ThreadDump threadDump;
     @SuppressWarnings("rawtypes")
     private final Bytes bytes;
 
@@ -57,19 +50,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     }
 
     @After
-    public void checkRegisteredBytes() {
+    @Override
+    public void afterChecks() {
         bytes.releaseLast();
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
+        super.afterChecks();
     }
 
     @Test

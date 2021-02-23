@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
 
+import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
 public class BytesTestCommon {
@@ -67,7 +68,7 @@ public class BytesTestCommon {
 
         // find any discarded resources.
         System.gc();
-        Jvm.pause(Jvm.isAzulZing() ? 100 : 10);
+        waitForCloseablesToClose(100);
 
         assertReferencesReleased();
         checkThreadDump();

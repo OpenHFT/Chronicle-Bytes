@@ -19,14 +19,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.crypto.Cipher;
@@ -46,28 +42,12 @@ import static org.junit.Assume.assumeFalse;
 public class NativeBytesStoreTest extends BytesTestCommon {
 
     volatile int bcs;
-    private ThreadDump threadDump;
 
     private static void generate(final @NotNull Bytes<?> bytes, final int t) {
         bytes.clear();
         bytes.append("hello world ");
         for (int i = 0; i <= t; i++)
             bytes.append(t);
-    }
-
-    @After
-    public void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
     }
 
     @Test
