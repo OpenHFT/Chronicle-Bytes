@@ -194,7 +194,7 @@ public class ByteStoreTest extends BytesTestCommon {
         for (String word : words) {
             assertEquals(word, bytes.readUtf8());
         }
-        assertNull(bytes.readUtf8());
+        assertEquals("", bytes.readUtf8());
         assertEquals(26, bytes.readPosition()); // check the size
 
         bytes.readPosition(0);
@@ -204,7 +204,7 @@ public class ByteStoreTest extends BytesTestCommon {
             Assert.assertTrue(bytes.readUtf8(sb));
             Assert.assertEquals(word, sb.toString());
         }
-        assertFalse(bytes.readUtf8(sb));
+        assertTrue(bytes.readUtf8(sb));
         Assert.assertEquals("", sb.toString());
     }
 

@@ -287,7 +287,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throw new AssertionError(e);
         }
         if (readRemaining() <= 0)
-            return false;
+            return true;
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -301,7 +301,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.readPositionRemaining(0, 0);
         if (readRemaining() <= 0)
-            return false;
+            return true;
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -315,7 +315,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);
         if (readRemaining() <= 0)
-            return false;
+            return true;
         long len0 = readStopBit();
         if (len0 == -1)
             return false;
@@ -335,7 +335,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         b.clear();
         if (readRemaining() <= 0)
-            return false;
+            return true;
         long len0 = this.readStopBit();
         if (len0 == -1)
             return false;
@@ -353,6 +353,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalArgumentException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
+        if (readRemaining() <= 0)
+            return true;
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
@@ -368,6 +370,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default boolean read8bit(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);
+        if (readRemaining() <= 0)
+            return true;
         long len0 = BytesInternal.readStopBit(this);
         if (len0 == -1)
             return false;
