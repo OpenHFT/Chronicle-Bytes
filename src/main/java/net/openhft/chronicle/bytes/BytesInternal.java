@@ -85,19 +85,68 @@ enum BytesInternal {
         }
     }
 
+    /**
+     * Optimise for the common case where the length is 31-bit.
+     *
+     * @return
+     * @throws IllegalStateException
+     */
+    static boolean contentEqualInt(BytesStore a, BytesStore b)
+            throws IllegalStateException {
+        int aLength = (int) a.realReadRemaining();
+        int bLength = (int) b.realReadRemaining();
+        // assume a >= b
+        if (aLength < bLength)
+            return contentEqual(b, a);
+
+        long aPos = a.readPosition();
+        long bPos = b.readPosition();
+        try {
+            int i;
+            for (i = 0; i < bLength - 7; i += 8) {
+                if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                    return false;
+            }
+            for (; i < bLength; i++) {
+                if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                    return false;
+            }
+            // check for zeros
+            for (; i < aLength - 7; i += 8) {
+                if (a.readLong(aPos + i) != 0L)
+                    return false;
+            }
+            for (; i < aLength; i++) {
+                if (a.readByte(aPos + i) != 0)
+                    return false;
+            }
+
+            return true;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     public static boolean contentEqual(@Nullable BytesStore a, @Nullable BytesStore b)
             throws IllegalStateException {
         if (a == null) return b == null;
         if (b == null) return false;
-        if (a.readRemaining() != b.readRemaining())
+        long readRemaining = a.readRemaining();
+        if (readRemaining != b.readRemaining())
             return false;
+        return readRemaining <= Integer.MAX_VALUE
+                ? contentEqualInt(a, b)
+                : contentEqualsLong(a, b);
+    }
+
+    private static boolean contentEqualsLong(@NotNull BytesStore a, @NotNull BytesStore b) {
         // assume a >= b
         if (a.realCapacity() < b.realCapacity())
             return contentEqual(b, a);
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        long aLength = Math.min(a.realCapacity(), a.readRemaining());
-        long bLength = Math.min(b.realCapacity(), b.readRemaining());
+        long aLength = a.realReadRemaining();
+        long bLength = b.realReadRemaining();
         try {
             long i;
             for (i = 0; i < bLength - 7; i += 8) {
@@ -126,12 +175,13 @@ enum BytesInternal {
 
     static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b)
             throws IllegalStateException {
-        if (a.readRemaining() < b.readRemaining())
+        long bRealReadRemaining = b.realReadRemaining();
+        if (a.realReadRemaining() < bRealReadRemaining)
             return false;
         try {
             long aPos = a.readPosition();
             long bPos = b.readPosition();
-            long length = b.readRemaining();
+            long length = bRealReadRemaining;
             long i;
             for (i = 0; i < length - 7; i += 8) {
                 if (a.readLong(aPos + i) != b.readLong(bPos + i))
@@ -1076,8 +1126,7 @@ enum BytesInternal {
 
         try {
             // the output will be no larger than this
-            final long available =
-                    Math.min(bytes.realCapacity() - bytes.start(), bytes.readRemaining());
+            final long available = bytes.realReadRemaining();
             final int size = (int) Math.min(available, MAX_STRING_LEN - 3);
             @NotNull final StringBuilder sb = new StringBuilder(size);
 
@@ -1146,7 +1195,7 @@ enum BytesInternal {
         bytes.reserve(toString);
         assert bytes.start() <= bytes.readPosition();
         assert bytes.readPosition() <= bytes.readLimit();
-        long limit = Math.min(bytes.readLimit(), bytes.realCapacity());
+        long limit = bytes.realReadRemaining();
 
         try {
             for (long i = bytes.readPosition(); i < limit; i++) {
@@ -1804,7 +1853,7 @@ enum BytesInternal {
             throws IOException, IllegalStateException {
         try {
             @Nullable NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
-            int i = 0, len = (int) Math.min(Integer.MAX_VALUE, bytes.readRemaining());
+            int i = 0, len = Math.toIntExact(bytes.realReadRemaining());
             long address = nb.address + nb.translate(bytes.readPosition());
             @Nullable Memory memory = nb.memory;
 
@@ -2708,7 +2757,7 @@ enum BytesInternal {
     public static void assignBytesStoreToByteBuffer(@NotNull BytesStore bytesStore, @NotNull ByteBuffer byteBuffer)
             throws BufferUnderflowException, IllegalStateException {
         long address = bytesStore.addressForRead(bytesStore.readPosition());
-        long capacity = bytesStore.readRemaining();
+        long capacity = bytesStore.realReadRemaining();
         ByteBuffers.setAddressCapacity(byteBuffer, address, capacity);
         byteBuffer.clear();
     }

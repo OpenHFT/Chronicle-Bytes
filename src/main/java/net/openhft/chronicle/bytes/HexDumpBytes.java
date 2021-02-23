@@ -1074,6 +1074,7 @@ public class HexDumpBytes
         }
     }
 
+    @Deprecated(/* to be removed in x.22 */)
     @Override
     public long realWriteRemaining() {
         return base.realWriteRemaining();

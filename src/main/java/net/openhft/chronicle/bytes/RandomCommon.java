@@ -74,10 +74,24 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * @return how much can be safely read directly.
+     */
+    default long realReadRemaining() {
+        return Math.min(realCapacity(), readLimit()) - readPosition();
+    }
+
+    /**
      * @return How many more bytes can we written.
      */
     default long writeRemaining() {
         return writeLimit() - writePosition();
+    }
+
+    /**
+     * @return writeRemaining with resize
+     */
+    default long realWriteRemaining() {
+        return Math.min(realCapacity(), writeLimit()) - writePosition();
     }
 
     /**

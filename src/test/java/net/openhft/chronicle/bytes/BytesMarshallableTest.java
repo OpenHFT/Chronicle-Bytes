@@ -21,7 +21,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.Test;
@@ -69,7 +68,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
         NativeBytes.setNewGuarded(guarded);
     }
 
-    @After
     @Test
     public void serializePrimitives() {
         assumeFalse(NativeBytes.areNewGuarded());

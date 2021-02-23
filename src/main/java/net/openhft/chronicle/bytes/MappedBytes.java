@@ -51,6 +51,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     private final boolean backingFileIsReadOnly;
     private MappedBytesStore bytesStore;
     private boolean closed;
+    private long lastActualSize = 0;
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull final MappedFile mappedFile)
@@ -306,15 +307,31 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
+    public long realReadRemaining() {
+        long limit = readLimit();
+        if (limit > lastActualSize)
+            limit = Math.min(realCapacity(), limit);
+        return limit - readPosition();
+    }
+
+    @Override
+    public long realWriteRemaining() {
+        long limit = writeLimit();
+        if (limit > lastActualSize)
+            limit = Math.min(realCapacity(), limit);
+        return limit - writePosition();
+    }
+
+    @Override
     public long realCapacity() {
 
         try {
             throwExceptionIfClosed();
-            return mappedFile.actualSize();
+            return lastActualSize = mappedFile.actualSize();
 
         } catch (Exception e) {
             Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
-            return 0;
+            return lastActualSize = 0;
         }
     }
 
@@ -482,6 +499,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 this.bytesStore(newBS);
                 if (oldBS != null)
                     oldBS.release(this);
+                if (lastActualSize < newBS.maximumLimit)
+                    lastActualSize = newBS.maximumLimit;
             }
             assert this.bytesStore.reservedBy(this);
 

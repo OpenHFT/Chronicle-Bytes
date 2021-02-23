@@ -47,7 +47,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
 
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
-        int remaining = (int) Math.min(Integer.MAX_VALUE, store.readRemaining());
+        int remaining = Math.toIntExact(store.realReadRemaining());
         try {
             return applyAsLong(store, remaining);
         } catch (IllegalStateException | BufferUnderflowException e) {

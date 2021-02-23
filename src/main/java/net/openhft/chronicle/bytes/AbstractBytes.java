@@ -143,9 +143,10 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.capacity();
     }
 
+    @Deprecated(/* to be removed in x.22 */)
     @Override
     public long realWriteRemaining() {
-        return bytesStore.capacity() - writePosition;
+        return Math.min(realCapacity(), writeLimit()) - writePosition();
     }
 
     @Override

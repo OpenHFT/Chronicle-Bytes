@@ -439,9 +439,12 @@ public class BytesInternalTest extends BytesTestCommon {
         Bytes c = Bytes.elasticByteBuffer(15, 20)
                 .append("Hello")
                 .readLimit(16);
-        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", a.toString());
-        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", b.toString());
-        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0\0", c.toString());
+        String actual1 = a.toString();
+        assertEquals("Hello\0\0\0\0", actual1);
+        String actual2 = b.toString();
+        assertEquals("Hello", actual2);
+        String actual3 = c.toString();
+        assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3);
         assertEquals(a, b);
         assertEquals(b, c);
         assertEquals(c, a);

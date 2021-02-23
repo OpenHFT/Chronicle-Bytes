@@ -379,11 +379,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     long realCapacity();
 
-    /**
-     * @return writeRemaining with resize
-     */
-    long realWriteRemaining();
-
     default boolean canWriteDirect(long count) {
         return false;
     }

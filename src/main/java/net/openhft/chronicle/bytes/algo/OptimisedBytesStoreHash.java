@@ -250,7 +250,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
 
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
-        final int remaining = (int) Math.min(Integer.MAX_VALUE, store.readRemaining());
+        final int remaining = Math.toIntExact(store.realReadRemaining());
         try {
             return applyAsLong(store, remaining);
         } catch (IllegalStateException | BufferUnderflowException e) {

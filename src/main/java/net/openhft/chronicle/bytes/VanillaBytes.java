@@ -211,11 +211,12 @@
                 throws IllegalStateException {
             if (s == null || s.length() != readRemaining()) return false;
 
+            long realLength = realReadRemaining();
             try {
                 if (Jvm.isJava9Plus()) {
                     byte[] bytes = StringUtils.extractBytes(s);
                     byte coder = StringUtils.getStringCoder(s);
-                    if (bytesStore instanceof NativeBytesStore) {
+                    if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
                         @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
                         long address = bs.addressForRead(readPosition);
                         return isEqual0(bytes, coder, bs, address);
@@ -225,7 +226,7 @@
                     }
                 } else {
                     char[] chars = StringUtils.extractChars(s);
-                    if (bytesStore instanceof NativeBytesStore) {
+                    if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
                         @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
                         long address = bs.addressForRead(readPosition);
                         return isEqual0(chars, bs, address);
@@ -470,7 +471,7 @@
 
         private String toString2(@NotNull NativeBytesStore bytesStore) {
             int length = (int)
-                    Math.min(Bytes.MAX_HEAP_CAPACITY, readRemaining());
+                    Math.min(Bytes.MAX_HEAP_CAPACITY, realReadRemaining());
             @NotNull char[] chars = new char[length];
             @Nullable final Memory memory = bytesStore.memory;
             final long address = bytesStore.address + bytesStore.translate(readPosition());
