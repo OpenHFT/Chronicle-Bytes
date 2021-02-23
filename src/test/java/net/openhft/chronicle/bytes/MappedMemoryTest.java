@@ -53,6 +53,15 @@ public class MappedMemoryTest extends BytesTestCommon {
         AbstractReferenceCounted.assertReferencesReleased();
     }
 
+    @Override
+    public void recordExceptions() {
+        super.recordExceptions();
+
+        // TODO: make sure released
+        if (OS.isWindows())
+            expectException("Unable to delete");
+    }
+
     // on i7-3970X ~ 3.3 ns
     @Test
     public void testRawMemoryMapped()
