@@ -41,6 +41,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
@@ -59,7 +60,7 @@ public enum BytesUtil {
      */
     public static boolean isTriviallyCopyable(Class clazz) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
-        return ints[1] == ints[2];
+        return ints[1] > 0;
     }
 
     static int[] isTriviallyCopyable0(Class clazz) {
@@ -74,22 +75,27 @@ public enum BytesUtil {
             Collections.addAll(fields, clazz.getDeclaredFields());
             clazz = clazz.getSuperclass();
         }
-        int min = Integer.MAX_VALUE;
-        int max = Integer.MIN_VALUE;
-        int firstNonCopyable = Integer.MAX_VALUE;
+        fields.removeIf(field -> Modifier.isStatic(field.getModifiers()));
+        fields.sort(Comparator.comparingLong(UnsafeMemory.UNSAFE::objectFieldOffset));
+        int min = 0;
+        int max = 0;
         for (Field field : fields) {
             int modifiers = field.getModifiers();
-            if (Modifier.isStatic(modifiers))
-                continue;
-            long offset2 = UnsafeMemory.UNSAFE.objectFieldOffset(field);
+            int start = (int) UnsafeMemory.UNSAFE.objectFieldOffset(field);
             int size = sizeOf(field.getType());
-            min = (int) Math.min(min, offset2);
-            max = (int) Math.max(max, offset2 + size);
-            if (Modifier.isTransient(modifiers) || !field.getType().isPrimitive()) {
-                firstNonCopyable = (int) Math.min(firstNonCopyable, offset2);
+            int end = start + size;
+            boolean nonTrivial = Modifier.isTransient(modifiers) || !field.getType().isPrimitive();
+            if (nonTrivial) {
+                if (max > 0)
+                    break;
+                // otherwise skip them.
+            } else {
+                if (min == 0)
+                    min = start;
+                max = end;
             }
         }
-        return new int[]{min, Math.min(max, firstNonCopyable), max};
+        return new int[]{min, max};
     }
 
     /**

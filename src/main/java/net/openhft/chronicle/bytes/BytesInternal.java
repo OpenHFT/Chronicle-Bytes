@@ -1193,13 +1193,14 @@ enum BytesInternal {
             throws IllegalStateException {
         ReferenceOwner toString = temporary("toString");
         bytes.reserve(toString);
-        assert bytes.start() <= bytes.readPosition();
-        assert bytes.readPosition() <= bytes.readLimit();
-        long limit = bytes.realReadRemaining();
+        long start = bytes.readPosition();
+        assert bytes.start() <= start;
+        assert start <= bytes.readLimit();
+        int length = Math.toIntExact(bytes.realReadRemaining());
 
         try {
-            for (long i = bytes.readPosition(); i < limit; i++) {
-                sb.append((char) bytes.readUnsignedByte(i));
+            for (int i = 0; i < length; i++) {
+                sb.append((char) bytes.readUnsignedByte(start + i));
             }
         } catch (BufferUnderflowException e) {
             sb.append(' ').append(e);
