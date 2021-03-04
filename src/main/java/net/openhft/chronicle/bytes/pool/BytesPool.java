@@ -22,8 +22,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.ByteBuffer;
-
 @SuppressWarnings("rawtypes")
 public class BytesPool {
     final ThreadLocal<Bytes> bytesTL = new ThreadLocal<>();
@@ -44,8 +42,7 @@ public class BytesPool {
 
     @NotNull
     protected Bytes createBytes() {
-        // use heap buffer as we never know when a thread will die and not release this resource.
-        Bytes<ByteBuffer> bbb = Bytes.elasticHeapByteBuffer(256);
+        Bytes bbb = Bytes.allocateElasticDirect(256);
         IOTools.unmonitor(bbb);
         return bbb;
     }
