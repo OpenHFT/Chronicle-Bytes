@@ -157,7 +157,7 @@
         @Override
         public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length)
                 throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
-            setBytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) byteStore);
+            setBytesStore(byteStore);
             // assume its read-only
             readLimit(offset + length);
             readPosition(offset);
@@ -168,7 +168,7 @@
             }
         }
 
-        private void setBytesStore(@NotNull AbstractBytesStore<Bytes<Underlying>, Underlying> bytesStore)
+        private void setBytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore)
                 throws IllegalStateException, IllegalArgumentException {
             if (this.bytesStore != bytesStore) {
                 @Nullable BytesStore oldBS = this.bytesStore;
