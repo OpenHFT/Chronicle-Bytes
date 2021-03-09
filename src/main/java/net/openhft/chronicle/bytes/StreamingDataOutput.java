@@ -182,6 +182,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S write8bit(@NotNull CharSequence s, int start, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+        if (s instanceof String)
+            return write8bit((String) s, start, length);
+
         writeStopBit(length);
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
@@ -189,6 +192,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
         return (S) this;
     }
+
+    @NotNull
+    S write8bit(@NotNull String s, int start, int length);
 
     @NotNull
     default S write(CharSequence cs)
@@ -224,22 +230,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S write8bit(@Nullable BytesStore bs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
-        if (bs == null) {
-            writeStopBit(-1);
-        } else {
-            long offset = bs.readPosition();
-            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
-            writeStopBit(readRemaining);
-            try {
-                write(bs, offset, readRemaining);
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
-        }
-        return (S) this;
-    }
+    S write8bit(@Nullable BytesStore bs)
+            throws BufferOverflowException, IllegalStateException, BufferUnderflowException;
 
     @NotNull
     S writeByte(byte i8)

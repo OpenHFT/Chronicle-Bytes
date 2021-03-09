@@ -40,7 +40,7 @@ public class UncheckedBytes<Underlying>
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes)
             throws IllegalStateException {
-        super(underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
+        super((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
     }
@@ -50,7 +50,7 @@ public class UncheckedBytes<Underlying>
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore(underlyingBytes);
+            this.bytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -65,7 +65,7 @@ public class UncheckedBytes<Underlying>
             throws IllegalArgumentException, IllegalStateException {
         if (size > realCapacity()) {
             underlyingBytes.ensureCapacity(size);
-            bytesStore(underlyingBytes.bytesStore());
+            bytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore());
         }
     }
 

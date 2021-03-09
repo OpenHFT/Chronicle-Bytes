@@ -41,7 +41,7 @@ public class NativeBytes<Underlying>
         extends VanillaBytes<Underlying> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean s_newGuarded = BYTES_GUARDED;
-    private final long capacity;
+    private long capacity;
 
     public NativeBytes(@NotNull final BytesStore store, final long capacity)
             throws IllegalStateException, IllegalArgumentException {
@@ -203,6 +203,11 @@ public class NativeBytes<Underlying>
         return true;
     }
 
+    @Override
+    public boolean isEqual(long start, long length, String s) {
+        return bytesStore.isEqual(start, length, s);
+    }
+
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(final long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
@@ -287,6 +292,20 @@ public class NativeBytes<Underlying>
         }
     }
 
+    @Override
+    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+        if (capacity < bytesStore.capacity())
+            capacity = bytesStore.capacity();
+        super.bytesStore(bytesStore);
+    }
+
+    @Override
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+        if (capacity < offset + length)
+            capacity = offset + length;
+        super.bytesStore(byteStore, offset, length);
+    }
+
     @NotNull
     private BytesStore allocateNewByteBufferBackedStore(final int size) {
         if (isDirectMemory()) {
@@ -302,6 +321,7 @@ public class NativeBytes<Underlying>
                                    final int offset,
                                    final int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        ReportUnoptimised.reportOnce();
         if (length > writeRemaining())
             throw new BufferOverflowException();
         ensureCapacity(length);
@@ -323,6 +343,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes bytes)
             throws IllegalStateException {
+        ReportUnoptimised.reportOnce();
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());
             if (length + writePosition() >= 1 << 20)
@@ -369,25 +390,6 @@ public class NativeBytes<Underlying>
             throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
-        return this;
-    }
-
-    @NotNull
-    @Override
-    public Bytes<Underlying> write8bit(@Nullable final BytesStore bs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
-        if (bs == null) {
-            writeStopBit(-1);
-        } else {
-            final long offset = bs.readPosition();
-            final long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
-            writeStopBit(readRemaining);
-            try {
-                write(bs, offset, readRemaining);
-            } catch (IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
-        }
         return this;
     }
 

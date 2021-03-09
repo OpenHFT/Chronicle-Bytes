@@ -485,6 +485,16 @@ public class HexDumpBytes
     }
 
     @Override
+    public long write8bit(long position, BytesStore bs) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public void nativeWrite(long address, long position, long size) {
         throw new UnsupportedOperationException();
     }
@@ -1416,6 +1426,20 @@ public class HexDumpBytes
     @NotNull
     @Override
     public Bytes<Void> write8bit(@NotNull CharSequence s, int start, int length)
+            throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException, ArithmeticException {
+        long pos = base.writePosition();
+        try {
+            base.write8bit(s, start, length);
+            return this;
+
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> write8bit(@NotNull String s, int start, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException, ArithmeticException {
         long pos = base.writePosition();
         try {

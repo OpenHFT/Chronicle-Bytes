@@ -170,6 +170,16 @@ public enum ReleasedBytesStore implements BytesStore {
     }
 
     @Override
+    public long write8bit(long position, BytesStore bs) {
+        throw newIllegalStateException();
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        throw newIllegalStateException();
+    }
+
+    @Override
     public byte readByte(long offset) throws IllegalStateException {
         throw newIllegalStateException();
     }

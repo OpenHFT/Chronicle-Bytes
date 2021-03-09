@@ -253,6 +253,22 @@ public enum BytesUtil {
         BytesInternal.writeStopBit(out, n);
     }
 
+    /**
+     * @return the resulting offset
+     */
+    public static long writeStopBit(BytesStore bs, long offset, long n)
+            throws IllegalStateException, BufferOverflowException {
+        return BytesInternal.writeStopBit(bs, offset, n);
+    }
+
+    /**
+     * @return the resulting address
+     */
+    public static long writeStopBit(long addr, long n)
+            throws IllegalStateException, BufferOverflowException {
+        return BytesInternal.writeStopBit(addr, n);
+    }
+
     public static void parseUtf8(
             @NotNull StreamingDataInput in, Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
@@ -345,6 +361,10 @@ public enum BytesUtil {
     public static boolean unregister(BytesStore bs) {
         IOTools.unmonitor(bs);
         return true;
+    }
+
+    public static void copy8bit(BytesStore bs, long addressForWrite, long length) {
+        BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
     static class WarnUncheckedElasticBytes {

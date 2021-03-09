@@ -205,6 +205,26 @@ public class HeapBytesStore<Underlying>
         return MEMORY.readVolatileLong(realUnderlyingObject, dataOffset + offset);
     }
 
+    @Override
+    public long write8bit(long position, BytesStore bs) {
+        int length0 = Math.toIntExact(bs.readRemaining());
+        position = BytesUtil.writeStopBit(this, position, length0);
+        int i = 0;
+        for (; i < length0 - 7; i += 8)
+            writeLong(position + i, bs.readLong(i));
+        for (; i < length0; i++)
+            writeByte(position + i, bs.readByte(i));
+        return position + length0;
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        position = BytesUtil.writeStopBit(this, position, length);
+        for (int i = 0; i < length; i++)
+            writeByte(position + i, s.charAt(i));
+        return position + length;
+    }
+
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b)
@@ -345,6 +365,27 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> write(long writeOffset,
                                             @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
+        if (length == (int) length) {
+            int length0 = (int) length;
+
+            int i;
+            for (i = 0; i < length0 - 7; i += 8) {
+                long x = bytes.readLong(readOffset + i);
+                writeLong(writeOffset + i, x);
+            }
+            for (; i < length0; i++) {
+                byte x = bytes.readByte(readOffset + i);
+                writeByte(writeOffset + i, x);
+            }
+        } else {
+            writeLongLength(writeOffset, bytes, readOffset, length);
+        }
+        return this;
+    }
+
+    private void writeLongLength(long writeOffset,
+                                 @NotNull RandomDataInput bytes, long readOffset, long length)
+            throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         long i;
         for (i = 0; i < length - 7; i += 8) {
             long x = bytes.readLong(readOffset + i);
@@ -354,7 +395,6 @@ public class HeapBytesStore<Underlying>
             byte x = bytes.readByte(readOffset + i);
             writeByte(writeOffset + i, x);
         }
-        return this;
     }
 
     @Override

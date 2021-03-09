@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
+import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
@@ -615,6 +617,22 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return whether this BytesStore is writable.
      */
     default boolean readWrite() {
+        return true;
+    }
+
+    default long hash(long length) {
+        return bytesStore() instanceof NativeBytesStore
+                ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(this, length)
+                : VanillaBytesStoreHash.INSTANCE.applyAsLong(this, length);
+    }
+
+    default boolean isEqual(long start, long length, String s) {
+        if (s == null || s.length() != length)
+            return false;
+        int length2 = (int) length;
+        for (int i = 0; i < length2; i++)
+            if (s.charAt(i) != readUnsignedByte(start + i))
+                return false;
         return true;
     }
 }

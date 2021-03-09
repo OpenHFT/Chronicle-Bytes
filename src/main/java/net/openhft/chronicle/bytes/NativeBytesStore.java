@@ -33,6 +33,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<Underlying>
@@ -255,7 +256,7 @@ public class NativeBytesStore<Underlying>
         try {
             return elastic
                     ? NativeBytes.wrapWithNativeBytes(this, this.capacity())
-                    : new VanillaBytes<>(this);
+                    : new NativeBytes<>(this);
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }
@@ -591,6 +592,42 @@ public class NativeBytesStore<Underlying>
             memory.writeByte(addr + i, (byte) chars[offset + i]);
     }
 
+    @Override
+    public long write8bit(long position, BytesStore bs) {
+        long addressForWrite = addressForWrite(position);
+        final long length = bs.readRemaining();
+
+        addressForWrite = BytesUtil.writeStopBit(addressForWrite, length);
+
+        if (bs.isDirectMemory()) {
+            copy8bit(bs.addressForRead(bs.readPosition()), addressForWrite, length);
+        } else {
+            final Object o = bs.underlyingObject();
+            if (o instanceof byte[])
+                copy8bit((byte[]) o, bs.readPosition(), addressForWrite, length);
+            else
+                BytesUtil.copy8bit(bs, addressForWrite, length);
+        }
+        return addressForWrite + length;
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        position = BytesUtil.writeStopBit(this, position, length);
+        MEMORY.copy8bit(s, start, length, addressForWrite(position));
+        return position + length;
+    }
+
+    private void copy8bit(byte[] arr, long readPosition, long addressForWrite, long readRemaining) {
+        int readOffset = Math.toIntExact(readPosition);
+        int length = Math.toIntExact(readRemaining);
+        MEMORY.copyMemory(arr, readOffset, addressForWrite, length);
+    }
+
+    private void copy8bit(long addressForRead, long addressForWrite, long length) {
+        OS.memory().copyMemory(addressForRead, addressForWrite, length);
+    }
+
     void read8bit(long position, char[] chars, int length) {
         long addr = address + translate(position);
         Memory memory = this.memory;
@@ -855,5 +892,12 @@ public class NativeBytesStore<Underlying>
             super.finalize();
             warnAndReleaseIfNotReleased();
         }
+    }
+
+    @Override
+    public boolean isEqual(long start, long length, String s) {
+        if (s == null || s.length() != length)
+            return false;
+        return MEMORY.isEqual(addressForRead(start), s, (int) length);
     }
 }
