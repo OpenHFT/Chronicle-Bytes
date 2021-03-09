@@ -41,7 +41,7 @@ public class NativeBytes<Underlying>
         extends VanillaBytes<Underlying> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean s_newGuarded = BYTES_GUARDED;
-    private final long capacity;
+    private long capacity;
 
     public NativeBytes(@NotNull final BytesStore store, final long capacity)
             throws IllegalStateException, IllegalArgumentException {
@@ -290,6 +290,20 @@ public class NativeBytes<Underlying>
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
+    }
+
+    @Override
+    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+        if (capacity < bytesStore.capacity())
+            capacity = bytesStore.capacity();
+        super.bytesStore(bytesStore);
+    }
+
+    @Override
+    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+        if (capacity < offset + length)
+            capacity = offset + length;
+        super.bytesStore(byteStore, offset, length);
     }
 
     @NotNull
