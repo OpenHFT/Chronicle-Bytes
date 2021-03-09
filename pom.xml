@@ -117,7 +117,7 @@
     <build>
         <plugins>
 
-            <plugin>
+          <!--  <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
                 <version>1.0.7</version>
@@ -133,7 +133,7 @@
                         </configuration>
                     </execution>
                 </executions>
-            </plugin>
+            </plugin>-->
 
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
