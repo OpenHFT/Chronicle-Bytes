@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -915,5 +916,41 @@ public class UncheckedNativeBytes<Underlying>
         } catch (BufferOverflowException | BufferUnderflowException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public long write8bit(long position, BytesStore bs) {
+        return bytesStore.write8bit(position, bs);
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        return bytesStore.write8bit(position, s, start, length);
+    }
+
+    @Override
+    public Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        if (bs == null) {
+            writeStopBit(-1);
+        } else {
+            final long offset = bs.readPosition();
+            final long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
+            writeStopBit(readRemaining);
+            try {
+                write(bs, offset, readRemaining);
+            } catch (IllegalArgumentException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Underlying> write8bit(@NotNull String s, int start, int length) {
+        long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + length;
+        long position = writeOffsetPositionMoved(toWriteLength, 0);
+        bytesStore.write8bit(position, s, start, length);
+        writePosition += toWriteLength;
+        return this;
     }
 }

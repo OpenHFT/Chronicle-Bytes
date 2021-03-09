@@ -39,12 +39,12 @@ public enum NoBytesStore implements BytesStore {
     public static final long NO_PAGE;
 
     @NotNull
-    public static final Bytes NO_BYTES;
+    public static final Bytes<Void> NO_BYTES;
 
     static {
         try {
             NO_PAGE = OS.memory().allocate(OS.pageSize());
-            NO_BYTES = new VanillaBytes(noBytesStore());
+            NO_BYTES = new NativeBytes<>(noBytesStore());
             IOTools.unmonitor(NO_BYTES);
 
         } catch (IllegalStateException | IllegalArgumentException e) {
@@ -281,6 +281,17 @@ public enum NoBytesStore implements BytesStore {
     public void nativeWrite(long address, long position, long size) {
         throw new UnsupportedOperationException();
     }
+
+    @Override
+    public long write8bit(long position, BytesStore bs) {
+        throw new BufferOverflowException();
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        throw new BufferOverflowException();
+    }
+
 
     @Override
     public void nativeRead(long position, long address, long size) {

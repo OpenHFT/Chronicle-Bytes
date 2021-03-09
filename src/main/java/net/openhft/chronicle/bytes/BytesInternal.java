@@ -51,6 +51,7 @@ import java.util.TimeZone;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
@@ -941,6 +942,21 @@ enum BytesInternal {
         writeStopBit0(out, n);
     }
 
+    public static long writeStopBit(@NotNull long addr, long n)
+            throws BufferOverflowException, IllegalStateException {
+        if ((n & ~0x7F) == 0) {
+            UnsafeMemory.INSTANCE.writeByte(addr, (byte) n);
+            return addr + 1;
+        }
+        if ((n & ~0x3FFF) == 0) {
+            int lo = (int) ((n & 0x7f) | 0x80);
+            int hi = (int) (n >> 7);
+            MEMORY.writeShort(addr, (short) ((lo << 8) | hi));
+            return addr + 2;
+        }
+        return writeStopBit0(addr, n);
+    }
+
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
@@ -1014,6 +1030,31 @@ enum BytesInternal {
             out.rawWriteByte((byte) (0x80L | n));
             out.rawWriteByte((byte) 0);
         }
+    }
+
+    static long writeStopBit0(long addr, long n)
+            throws BufferOverflowException, IllegalStateException {
+        int i = 0;
+        boolean neg = false;
+        if (n < 0) {
+            neg = true;
+            n = ~n;
+        }
+
+        long n2;
+        while ((n2 = n >>> 7) != 0) {
+            MEMORY.writeByte(addr + i++, (byte) (0x80L | n));
+            n = n2;
+        }
+        // final byte
+        if (!neg) {
+            MEMORY.writeByte(addr + i++, (byte) n);
+
+        } else {
+            MEMORY.writeByte(addr + i++, (byte) (0x80L | n));
+            MEMORY.writeByte(addr + i++, (byte) 0);
+        }
+        return addr + i;
     }
 
     static long writeStopBit0(@NotNull RandomDataOutput out, long offset, long n)
@@ -1808,7 +1849,7 @@ enum BytesInternal {
             throws BufferUnderflowException, IORuntimeException, ArithmeticException, IllegalStateException {
         Bytes bytes = acquireBytes();
         try {
-            return in.read8bit(bytes) ? SI.intern(bytes) : null;
+            return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
         }
@@ -2773,6 +2814,15 @@ enum BytesInternal {
         StringBuilder sb = BytesInternal.acquireStringBuilder();
         BytesInternal.parse8bit(bsp, sb, stopCharTester);
         return BytesInternal.SI.intern(sb);
+    }
+
+    public static void copy8bit(BytesStore bs, long addressForWrite, long length) {
+        int length0 = Math.toIntExact(length);
+        int i = 0;
+        for (; i < length0 - 7; i += 8)
+            MEMORY.writeLong(addressForWrite + i, bs.readLong(i));
+        for (; i < length0; i++)
+            MEMORY.writeByte(addressForWrite + i, bs.readByte(i));
     }
 
     static class DateCache {

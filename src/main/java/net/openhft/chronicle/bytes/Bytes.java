@@ -399,6 +399,10 @@ public interface Bytes<Underlying> extends
         return from(text.toString());
     }
 
+    static Bytes<?> fromDirect(@NotNull CharSequence text) {
+        return NativeBytes.nativeBytes(text.length()).append(text);
+    }
+
     @Deprecated(/* to be removed in x.22 */)
     static Bytes<?> fromString(String text) {
         return from(text);
@@ -458,7 +462,7 @@ public interface Bytes<Underlying> extends
         @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
             try {
-                return new VanillaBytes<>(bs);
+                return new NativeBytes<>(bs);
             } finally {
                 bs.release(INIT);
             }
@@ -1022,5 +1026,6 @@ public interface Bytes<Underlying> extends
         }
         return this;
     }
+
 
 }

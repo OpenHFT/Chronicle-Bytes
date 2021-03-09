@@ -793,4 +793,84 @@ public class BytesTest extends BytesTestCommon {
             bytes.releaseLast();
         }
     }
+
+    @Test
+    public void write8BitString() {
+        @NotNull Bytes bytes = alloc1.elasticBytes(703);
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (int i = 0; i <= 36; i++) {
+                final String s = sb.toString();
+                bytes.write8bit(s);
+                String s2 = bytes.read8bit();
+                assertEquals(s, s2);
+                sb.append(Integer.toString(i, 36));
+            }
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void write8BitNativeBytes() {
+        @NotNull Bytes bytes = alloc1.elasticBytes(703);
+        Bytes nbytes = Bytes.allocateDirect(36);
+        Bytes nbytes2 = Bytes.allocateDirect(36);
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (int i = 0; i <= 36; i++) {
+                nbytes.clear().append(sb);
+                bytes.write8bit(nbytes);
+                bytes.read8bit(nbytes2.clear());
+
+                final String s = sb.toString();
+                assertEquals(s, nbytes2.toString());
+                sb.append(Integer.toString(i, 36));
+            }
+        } finally {
+            bytes.releaseLast();
+            nbytes.releaseLast();
+            nbytes2.releaseLast();
+        }
+    }
+
+    @Test
+    public void write8BitHeapBytes() {
+        @NotNull Bytes bytes = alloc1.elasticBytes(703);
+        Bytes nbytes = Bytes.allocateElasticOnHeap(36);
+        Bytes nbytes2 = Bytes.allocateElasticOnHeap(36);
+        StringBuilder sb = new StringBuilder();
+        try {
+            for (int i = 0; i <= 36; i++) {
+                nbytes.clear().append(sb);
+                bytes.write8bit(nbytes);
+                bytes.read8bit(nbytes2.clear());
+
+                assertEquals(sb.toString(), nbytes2.toString());
+                sb.append(Integer.toString(i, 36));
+            }
+        } finally {
+            bytes.releaseLast();
+            nbytes.releaseLast();
+            nbytes2.releaseLast();
+        }
+    }
+
+    @Test
+    public void write8BitCharSequence() {
+        @NotNull Bytes bytes = alloc1.elasticBytes(703);
+        StringBuilder sb = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        try {
+            for (int i = 0; i <= 36; i++) {
+                bytes.write8bit(sb);
+                bytes.read8bit(sb2);
+
+                assertEquals(sb.toString(), sb2.toString());
+                sb.append(Integer.toString(i, 36));
+            }
+        } finally {
+            bytes.releaseLast();
+        }
+    }
 }

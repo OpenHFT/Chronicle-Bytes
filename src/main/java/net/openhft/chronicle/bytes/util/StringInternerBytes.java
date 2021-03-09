@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.pool.StringInterner;
@@ -61,15 +60,16 @@ public class StringInternerBytes extends StringInterner {
             int h = hash32 & mask;
             String s = interner[h];
             long position = bytes.readPosition();
-            if (BytesUtil.bytesEqual(s, bytes, position, length))
+            if (bytes.isEqual(position, length, s))
                 return s;
             int h2 = (hash32 >> shift) & mask;
             String s2 = interner[h2];
-            if (BytesUtil.bytesEqual(s2, bytes, position, length))
+            if (bytes.isEqual(position, length, s2))
                 return s2;
 
             char[] chars = toCharArray(bytes, position, length);
-            return interner[s == null || (s2 != null && toggle()) ? h : h2] = StringUtils.newString(chars);
+            final int toPlace = s == null || (s2 != null && toggle()) ? h : h2;
+            return interner[toPlace] = StringUtils.newString(chars);
         } finally {
             bytes.readSkip(length);
         }

@@ -40,13 +40,16 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
 
+    private final String name;
     private final boolean guarded;
 
     public BytesMarshallableTest(String name, boolean guarded) {
+        this.name = name;
         this.guarded = guarded;
     }
 
@@ -364,6 +367,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @Test
     public void serializeCollections() {
+        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyCollections mc = new MyCollections();

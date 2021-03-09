@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -49,6 +50,16 @@ public abstract class AbstractBytes<Underlying>
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
+
+    static class ReportUnoptimised {
+        static {
+            Jvm.reportUnoptimised();
+        }
+
+        static void reportOnce() {
+        }
+    }
+
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
@@ -698,6 +709,39 @@ public abstract class AbstractBytes<Underlying>
             remaining -= copy;
         }
         return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Underlying> write8bit(@NotNull String s, int start, int length) throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+        long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + length;
+        long position = writeOffsetPositionMoved(toWriteLength, 0);
+        bytesStore.write8bit(position, s, start, length);
+        uncheckedWritePosition(writePosition + toWriteLength);
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        if (bs == null) {
+            writeStopBit(-1);
+            return this;
+        }
+        long readRemaining = bs.readRemaining();
+        long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(readRemaining) + readRemaining;
+        long position = writeOffsetPositionMoved(toWriteLength, 0);
+        bytesStore.write8bit(position, bs);
+        uncheckedWritePosition(writePosition + toWriteLength);
+        return this;
+    }
+
+    @Override
+    public long write8bit(long position, BytesStore bs) {
+        return bytesStore.write8bit(position, bs);
+    }
+
+    @Override
+    public long write8bit(long position, String s, int start, int length) {
+        return bytesStore.write8bit(position, s, start, length);
     }
 
     void writeCheckOffset(long offset, long adding)
