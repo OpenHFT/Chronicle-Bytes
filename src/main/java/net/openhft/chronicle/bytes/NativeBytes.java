@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -263,6 +264,8 @@ public class NativeBytes<Underlying>
                 }
             } else {
                 store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                if (referenceCounted.unmonitored())
+                    AbstractReferenceCounted.unmonitor(store);
             }
             store.reserveTransfer(INIT, this);
         } catch (IllegalArgumentException e) {
