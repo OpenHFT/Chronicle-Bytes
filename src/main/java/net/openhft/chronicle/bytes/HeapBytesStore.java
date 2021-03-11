@@ -220,8 +220,9 @@ public class HeapBytesStore<Underlying>
     @Override
     public long write8bit(long position, String s, int start, int length) {
         position = BytesUtil.writeStopBit(this, position, length);
+        writeCheckOffset(position, length);
         for (int i = 0; i < length; i++)
-            writeByte(position + i, s.charAt(i));
+            MEMORY.writeByte(realUnderlyingObject, dataOffset + position + i, (byte) s.charAt(i));
         return position + length;
     }
 
