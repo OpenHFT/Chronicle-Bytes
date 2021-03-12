@@ -22,15 +22,14 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.Memory;
-import net.openhft.chronicle.core.OS;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.Function;
+
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
@@ -38,8 +37,6 @@ import java.util.function.Function;
 @SuppressWarnings("restriction")
 public class HeapBytesStore<Underlying>
         extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
-    @Nullable
-    private static final Memory MEMORY = OS.memory();
     @NotNull
     private final Object realUnderlyingObject;
     private final int dataOffset;
@@ -221,8 +218,7 @@ public class HeapBytesStore<Underlying>
     public long write8bit(long position, String s, int start, int length) {
         position = BytesUtil.writeStopBit(this, position, length);
         writeCheckOffset(position, length);
-        for (int i = 0; i < length; i++)
-            MEMORY.writeByte(realUnderlyingObject, dataOffset + position + i, (byte) s.charAt(i));
+        MEMORY.write8bit(s, start, realUnderlyingObject, dataOffset + position, length);
         return position + length;
     }
 

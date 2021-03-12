@@ -406,8 +406,8 @@
         @Override
         public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-            if (bytes.canReadDirect(length)) {
-                if (canWriteDirect(length) && length == (int) length) {
+            if (length == (int) length) {
+                if (bytes.canReadDirect(length) && canWriteDirect(length)) {
                     long wAddr = addressForWritePosition();
                     writeSkip(length);
                     long rAddr = bytes.addressForRead(offset);
