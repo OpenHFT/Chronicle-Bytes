@@ -16,6 +16,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.threads.ThreadDump;
@@ -62,6 +63,8 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Before
     public void setGuarded() {
+        assumeFalse(Jvm.isMacArm());
+
         NativeBytes.setNewGuarded(guarded);
     }
 
