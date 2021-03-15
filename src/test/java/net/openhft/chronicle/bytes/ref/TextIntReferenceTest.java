@@ -31,6 +31,7 @@ public class TextIntReferenceTest extends BytesTestCommon {
     @Test
     public void test() {
         @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(64);
+        nbs.zeroOut(0, 64);
         try (@NotNull TextIntReference ref = new TextIntReference()) {
             ref.bytesStore(nbs, 16, ref.maxSize());
             assertEquals(0, ref.getValue());
@@ -40,7 +41,7 @@ public class TextIntReferenceTest extends BytesTestCommon {
             assertEquals("value: -1", ref.toString());
             assertFalse(ref.compareAndSwapValue(0, 1));
             assertTrue(ref.compareAndSwapValue(-1, 2));
-            assertEquals(47, ref.maxSize());
+            assertEquals(46, ref.maxSize());
             assertEquals(16, ref.offset());
             assertEquals(nbs, ref.bytesStore());
             assertEquals(0L, nbs.readLong(0));
