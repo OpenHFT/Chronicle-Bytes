@@ -57,7 +57,7 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @BeforeClass
-    public void notMacArm() {
+    public static void notMacArm() {
         assumeFalse(Jvm.isMacArm());
     }
 
