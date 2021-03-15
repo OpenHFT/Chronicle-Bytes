@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
@@ -140,6 +141,8 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     @Test
     public void testElasticByteBuffer()
             throws IORuntimeException, BufferOverflowException {
+        assumeFalse(Jvm.isMacArm());
+
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
             assertEquals(Bytes.MAX_HEAP_CAPACITY, bbb.capacity());

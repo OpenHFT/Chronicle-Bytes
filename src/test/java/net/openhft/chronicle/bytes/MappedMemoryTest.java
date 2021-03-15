@@ -33,6 +33,7 @@ import java.util.Arrays;
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class MappedMemoryTest extends BytesTestCommon {
 
@@ -146,6 +147,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
+        assumeFalse(Jvm.isMacArm());
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;

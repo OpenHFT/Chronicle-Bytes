@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -77,6 +78,8 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void testReferenceCounts()
             throws IOException {
+        assumeFalse(Jvm.isMacArm());
+
         final File tmp = IOTools.createTempFile("testReferenceCounts");
         final int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
