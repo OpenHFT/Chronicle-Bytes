@@ -315,30 +315,6 @@ public class NativeBytes<Underlying>
         }
     }
 
-    @NotNull
-    @Override
-    public Bytes<Underlying> write(@NotNull final byte[] bytes,
-                                   final int offset,
-                                   final int length)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        ReportUnoptimised.reportOnce();
-        if (length > writeRemaining())
-            throw new BufferOverflowException();
-        ensureCapacity(length);
-        super.write(bytes, offset, length);
-        return this;
-    }
-
-    @NotNull
-    public Bytes<Underlying> write(@NotNull final BytesStore bytes,
-                                   final long offset,
-                                   final long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        ensureCapacity(length);
-        super.write(bytes, offset, length);
-        return this;
-    }
-
     @Override
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes bytes)

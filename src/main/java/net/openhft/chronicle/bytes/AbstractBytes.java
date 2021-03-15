@@ -1036,6 +1036,7 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
+
         if ((length + offset) > bytes.length) {
             throw new DecoratedBufferOverflowException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
         }
@@ -1043,6 +1044,7 @@ public abstract class AbstractBytes<Underlying>
             throw new DecoratedBufferOverflowException(
                     String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
         }
+        ensureCapacity(writePosition + length);
         int remaining = length;
         while (remaining > 0) {
             int copy = Math.min(remaining, safeCopySize()); // copy 64 KB at a time.

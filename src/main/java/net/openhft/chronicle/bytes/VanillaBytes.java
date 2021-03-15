@@ -275,6 +275,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+            ensureCapacity(writePosition + length);
             optimisedWrite(bytes, offset, length);
             return this;
         }
@@ -300,7 +301,7 @@
         public void write(long position, @NotNull CharSequence str, int offset, int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
 
-            ensureCapacity(length);
+            ensureCapacity(writePosition + length);
             if (offset + length > str.length())
                 throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
 
@@ -406,6 +407,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+            ensureCapacity(writePosition + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {
                     long wAddr = addressForWritePosition();
@@ -415,7 +417,7 @@
                     return this;
 
                 } else {
-                    bytesStore.write(writePosition, bytes, offset, length);
+                    bytesStore.write(writePosition, bytes.bytesStore(), offset, length);
                     uncheckedWritePosition(writePosition + length);
                     return this;
                 }

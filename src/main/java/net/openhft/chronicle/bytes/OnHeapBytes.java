@@ -5,7 +5,6 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
@@ -37,24 +36,6 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             resize(size);
         else
             super.ensureCapacity(size);
-    }
-
-    @Override
-    public @NotNull Bytes<byte[]> write(@NotNull RandomDataInput bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        ensureCapacity(writePosition + length);
-        return super.write(bytes, offset, length);
-    }
-
-    @Override
-    public void write(long position, @NotNull CharSequence str, int offset, int length) throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
-        ensureCapacity(writePosition + length);
-        super.write(position, str, offset, length);
-    }
-
-    @Override
-    public @NotNull Bytes<byte[]> write(@NotNull BytesStore bytes, long offset, long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        ensureCapacity(writePosition + length);
-        return super.write(bytes, offset, length);
     }
 
     @Override

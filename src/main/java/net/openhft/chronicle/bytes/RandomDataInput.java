@@ -59,6 +59,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the boolean
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default boolean readBoolean(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -71,6 +72,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the byte
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     byte readByte(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -81,6 +83,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the unsigned byte
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default int readUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -92,6 +95,8 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset to read
      * @return the unsigned byte or -1
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     int peekUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -102,6 +107,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the short
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     short readShort(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -112,6 +118,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the unsigned short
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default int readUnsignedShort(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -124,6 +131,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the int
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default int readUnsignedInt24(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -136,6 +144,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the int
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     int readInt(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -146,6 +155,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the unsigned int
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default long readUnsignedInt(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -158,6 +168,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the long
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     long readLong(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -168,6 +179,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the float
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     float readFloat(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -178,6 +190,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the double
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     double readDouble(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -188,6 +201,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the byte in a printable form.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default String printable(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -200,6 +214,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the byte value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     byte readVolatileByte(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -210,6 +225,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the short value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     short readVolatileShort(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -220,6 +236,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the int value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     int readVolatileInt(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -230,6 +247,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the float value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default float readVolatileFloat(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -242,6 +260,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the long value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     long readVolatileLong(long offset)
             throws BufferUnderflowException, IllegalStateException;
@@ -252,6 +271,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset to read
      * @return the double value
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default double readVolatileDouble(long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -270,6 +290,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param address  in native memory
      * @param size     in bytes
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     void nativeRead(long position, long address, long size)
             throws BufferUnderflowException, IllegalStateException;
@@ -279,6 +300,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return the length actually read.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default int copyTo(@NotNull byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
@@ -293,6 +315,8 @@ public interface RandomDataInput extends RandomCommon {
      * {@link ByteBuffer#remaining()}. Starting from {@link #start()} in this RandomDataInput and from {@link
      * ByteBuffer#position()} of the given bb. Does NOT change the position or limit or mark of the given ByteBuffer.
      * Returns the number of the copied bytes.
+     *
+     * @throws IllegalStateException if released
      */
     default int copyTo(@NotNull ByteBuffer bb)
             throws BufferUnderflowException, IllegalStateException {
@@ -312,6 +336,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset to read from
      * @return the long which might be padded.
+     * @throws IllegalStateException    if released
      */
     default long readIncompleteLong(long offset)
             throws IllegalStateException {
@@ -346,6 +371,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default int addAndGetInt(long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
@@ -359,6 +385,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default long addAndGetLong(long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
@@ -385,6 +412,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     default double addAndGetDouble(long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
@@ -397,6 +425,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param start  of bytes
      * @param length of bytes
      * @return ByteStore copy.
+     * @throws IllegalStateException    if released
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -423,6 +452,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
+     * @throws IllegalStateException    if released
      */
     default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
@@ -472,6 +502,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param <ACS>      buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
+     * @throws IllegalStateException    if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     default <ACS extends Appendable & CharSequence> long readUtf8Limited(
@@ -519,6 +550,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
      * @return the char sequence was read
+     * @throws IllegalStateException    if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     @Nullable
@@ -537,6 +569,7 @@ public interface RandomDataInput extends RandomCommon {
      *               is written
      * @param other  the second char sequence to compare
      * @return {@code true} if two char sequences are equal
+     * @throws IllegalStateException    if released
      * @throws IORuntimeException if the contents are not a valid string.
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other)

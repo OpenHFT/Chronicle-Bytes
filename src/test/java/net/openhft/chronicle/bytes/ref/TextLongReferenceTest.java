@@ -32,6 +32,7 @@ public class TextLongReferenceTest extends BytesTestCommon {
     @Test
     public void testSetValue() {
         @NotNull NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(64);
+        bytesStore.zeroOut(0, 64);
         try (@NotNull final TextLongReference value = new TextLongReference()) {
             value.bytesStore(bytesStore, 0, value.maxSize());
             int expected = 10;
