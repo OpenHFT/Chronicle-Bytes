@@ -178,13 +178,14 @@ public class NativeBytes<Underlying>
     }
 
     @Override
-    public void ensureCapacity(final long size)
+    public void ensureCapacity(final long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         try {
-            assert size >= 0;
-            writeCheckOffset(writePosition(), size);
+            assert desiredCapacity >= 0;
+            final long wp = writePosition();
+            writeCheckOffset(wp, desiredCapacity - wp);
         } catch (BufferOverflowException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + size + " limit: " + capacity());
+            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + desiredCapacity + " limit: " + capacity());
             iae.printStackTrace();
             throw iae;
         }
@@ -325,7 +326,7 @@ public class NativeBytes<Underlying>
             if (length + writePosition() >= 1 << 20)
                 length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
             final long offset = bytes.readPosition();
-            ensureCapacity(length);
+            ensureCapacity(writePosition + length);
             optimisedWrite(bytes, offset, length);
             if (length == bytes.readRemaining()) {
                 bytes.clear();

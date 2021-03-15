@@ -31,11 +31,11 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     @Override
-    public void ensureCapacity(long size) throws IllegalArgumentException, IllegalStateException {
-        if (isElastic() && bytesStore.capacity() < size)
-            resize(size);
+    public void ensureCapacity(long desiredCapacity) throws IllegalArgumentException, IllegalStateException {
+        if (isElastic() && bytesStore.capacity() < desiredCapacity)
+            resize(desiredCapacity);
         else
-            super.ensureCapacity(size);
+            super.ensureCapacity(desiredCapacity);
     }
 
     @Override

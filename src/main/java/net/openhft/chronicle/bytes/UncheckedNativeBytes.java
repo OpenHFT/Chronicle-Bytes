@@ -63,10 +63,10 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public void ensureCapacity(long size)
+    public void ensureCapacity(long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
-        if (size > realCapacity()) {
-            underlyingBytes.ensureCapacity(size);
+        if (desiredCapacity > realCapacity()) {
+            underlyingBytes.ensureCapacity(desiredCapacity);
             bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
         }
     }
@@ -888,7 +888,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        ensureCapacity(length);
+        ensureCapacity(writePosition + length * 3L);
         @NotNull NativeBytesStore nbs = this.bytesStore;
         long position = nbs.appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);

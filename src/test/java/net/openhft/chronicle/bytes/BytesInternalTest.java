@@ -431,13 +431,13 @@ public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void contentsEqual() {
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
-                .append("Hello")
+                .append(Bytes.from("Hello"))
                 .readLimit(16);
         Bytes b = Bytes.elasticByteBuffer(5, 20)
-                .append("Hello")
+                .append(Bytes.from("Hello"))
                 .readLimit(16);
         Bytes c = Bytes.elasticByteBuffer(15, 20)
-                .append("Hello")
+                .append(Bytes.from("Hello"))
                 .readLimit(16);
         String actual1 = a.toString();
         assertEquals("Hello\0\0\0\0", actual1);

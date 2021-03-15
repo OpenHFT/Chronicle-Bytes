@@ -448,11 +448,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     }
 
     @Override
-    public void ensureCapacity(final long size)
+    public void ensureCapacity(final long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (bytesStore == null || !bytesStore.inside(writePosition, checkSize(size))) {
+        if (bytesStore == null || !bytesStore.inside(writePosition, checkSize(desiredCapacity))) {
             acquireNextByteStore0(writePosition, false);
         }
     }
@@ -1117,21 +1117,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     @Override
     public boolean isDirectMemory() {
         return true;
-    }
-
-    public @NotNull MappedBytes write8bit(@Nullable BytesStore bs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
-        throwExceptionIfClosed();
-
-        if (bs == null) {
-            writeStopBit(-1);
-        } else {
-            long offset = bs.readPosition();
-            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
-            writeStopBit(readRemaining);
-            write(bs, offset, readRemaining);
-        }
-        return this;
     }
 
     // used by the Pretoucher, don't change this without considering the impact.

@@ -228,9 +228,9 @@ public class HexDumpBytes
     }
 
     @Override
-    public void ensureCapacity(long size)
+    public void ensureCapacity(long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
-        base.ensureCapacity(size);
+        base.ensureCapacity(desiredCapacity);
     }
 
     @Override

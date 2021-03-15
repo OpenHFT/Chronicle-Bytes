@@ -40,7 +40,7 @@ public class TextIntReferenceTest extends BytesTestCommon {
             assertEquals("value: -1", ref.toString());
             assertFalse(ref.compareAndSwapValue(0, 1));
             assertTrue(ref.compareAndSwapValue(-1, 2));
-            assertEquals(46, ref.maxSize());
+            assertEquals(47, ref.maxSize());
             assertEquals(16, ref.offset());
             assertEquals(nbs, ref.bytesStore());
             assertEquals(0L, nbs.readLong(0));

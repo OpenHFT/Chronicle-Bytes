@@ -61,10 +61,10 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    public void ensureCapacity(long size)
+    public void ensureCapacity(long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
-        if (size > realCapacity()) {
-            underlyingBytes.ensureCapacity(size);
+        if (desiredCapacity > realCapacity()) {
+            underlyingBytes.ensureCapacity(desiredCapacity);
             bytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore());
         }
     }

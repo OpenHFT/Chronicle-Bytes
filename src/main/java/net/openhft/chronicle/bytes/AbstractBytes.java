@@ -1066,7 +1066,7 @@ public abstract class AbstractBytes<Underlying>
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         int length = (int) Math.min(buffer.remaining(), writeRemaining());
         try {
-            ensureCapacity(length);
+            ensureCapacity(writePosition + length);
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }

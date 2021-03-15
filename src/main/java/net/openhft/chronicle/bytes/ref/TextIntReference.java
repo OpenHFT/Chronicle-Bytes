@@ -33,7 +33,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * Implementation of a reference to a 32-bit in in text wire format.
  */
 public class TextIntReference extends AbstractReference implements IntValue {
-    private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
+    private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }\n".getBytes(ISO_8859_1);
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
     private static final int UNINITIALIZED = 0;

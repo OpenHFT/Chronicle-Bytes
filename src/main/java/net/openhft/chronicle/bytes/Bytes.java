@@ -799,12 +799,12 @@ public interface Bytes<Underlying> extends
      * enough capacity then this method will
      * throws {@link java.nio.BufferOverflowException}
      *
-     * @param size the capacity that you required
+     * @param desiredCapacity the capacity that you required
      * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space
      */
-    default void ensureCapacity(long size)
+    default void ensureCapacity(long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
-        if (size > capacity())
+        if (desiredCapacity > capacity())
             throw new IllegalArgumentException(isElastic() ? "todo" : "not elastic");
     }
 

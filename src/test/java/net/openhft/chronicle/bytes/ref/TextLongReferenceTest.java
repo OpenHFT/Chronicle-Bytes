@@ -45,7 +45,7 @@ public class TextLongReferenceTest extends BytesTestCommon {
 
             assertFalse(value.compareAndSwapValue(0, 1));
             assertTrue(value.compareAndSwapValue(10, 2));
-            assertEquals(56, value.maxSize());
+            assertEquals(57, value.maxSize());
             assertEquals(0, value.offset());
 
             Bytes<Void> bytes = bytesStore.bytesForRead();

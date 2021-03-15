@@ -34,7 +34,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  */
 public class TextLongReference extends AbstractReference implements LongReference {
     static final int VALUE = 34;
-    private static final byte[] template = "!!atomic {  locked: false, value: 00000000000000000000 }".getBytes(ISO_8859_1);
+    private static final byte[] template = "!!atomic {  locked: false, value: 00000000000000000000 }\n".getBytes(ISO_8859_1);
     private static final int FALSE = BytesUtil.asInt("fals");
     private static final int TRUE = BytesUtil.asInt(" tru");
     private static final long UNINITIALIZED = 0x0L;
