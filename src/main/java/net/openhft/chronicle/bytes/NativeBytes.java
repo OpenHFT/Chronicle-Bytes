@@ -326,7 +326,7 @@ public class NativeBytes<Underlying>
             if (length + writePosition() >= 1 << 20)
                 length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
             final long offset = bytes.readPosition();
-            ensureCapacity(writePosition + length);
+            ensureCapacity(writePosition() + length);
             optimisedWrite(bytes, offset, length);
             if (length == bytes.readRemaining()) {
                 bytes.clear();
@@ -344,15 +344,15 @@ public class NativeBytes<Underlying>
     @Override
     protected long writeOffsetPositionMoved(final long adding, final long advance)
             throws BufferOverflowException, IllegalStateException {
-        final long oldPosition = writePosition;
+        final long oldPosition = writePosition();
         if (writePosition < bytesStore.start())
             throw new BufferOverflowException();
-        final long writeEnd = writePosition + adding;
+        final long writeEnd = writePosition() + adding;
         if (writeEnd > writeLimit)
             throwBeyondWriteLimit(advance, writeEnd);
         else if (writeEnd > bytesStore.safeLimit())
             checkResize(writeEnd);
-        uncheckedWritePosition(writePosition + advance);
+        uncheckedWritePosition(writePosition() + advance);
         return oldPosition;
     }
 
@@ -381,7 +381,7 @@ public class NativeBytes<Underlying>
 
     @Override
     public long readRemaining() {
-        return writePosition - readPosition;
+        return writePosition() - readPosition;
     }
 
     @Deprecated(/* to be removed in x.23 */)

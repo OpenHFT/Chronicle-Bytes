@@ -275,7 +275,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-            ensureCapacity(writePosition + length);
+            ensureCapacity(writePosition() + length);
             optimisedWrite(bytes, offset, length);
             return this;
         }
@@ -301,7 +301,7 @@
         public void write(long position, @NotNull CharSequence str, int offset, int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
 
-            ensureCapacity(writePosition + length);
+            ensureCapacity(writePosition() + length);
             if (offset + length > str.length())
                 throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
 
@@ -407,7 +407,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-            ensureCapacity(writePosition + length);
+            ensureCapacity(writePosition() + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {
                     long wAddr = addressForWritePosition();
@@ -417,8 +417,8 @@
                     return this;
 
                 } else {
-                    bytesStore.write(writePosition, bytes.bytesStore(), offset, length);
-                    uncheckedWritePosition(writePosition + length);
+                    bytesStore.write(writePosition(), bytes.bytesStore(), offset, length);
+                    uncheckedWritePosition(writePosition() + length);
                     return this;
                 }
             }
@@ -600,7 +600,7 @@
         @Override
         public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
-            ensureCapacity(writePosition + length * 3L);
+            ensureCapacity(writePosition() + length * 3L);
             if (bytesStore instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
                 long position = nbs.appendUtf8(writePosition(), chars, offset, length);

@@ -164,8 +164,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        write(writePosition, bytes, offset, length);
-        writePosition += Math.min(length, bytes.length - offset);
+        write(writePosition(), bytes, offset, length);
+        uncheckedWritePosition(writePosition() + Math.min(length, bytes.length - offset));
         return this;
     }
 
@@ -257,8 +257,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         assert bytes != this : "you should not write to yourself !";
         final long remaining = bytes.readRemaining();
-        write(writePosition, bytes);
-        writePosition += remaining;
+        write(writePosition(), bytes);
+        uncheckedWritePosition(writePosition() + remaining);
         return this;
     }
 
@@ -302,7 +302,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     @Override
     public Bytes<Void> readLimitToCapacity() {
-        this.writePosition = mappedFile.capacity();
+        uncheckedWritePosition(mappedFile.capacity());
         return this;
     }
 
@@ -452,8 +452,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (bytesStore == null || !bytesStore.inside(writePosition, checkSize(desiredCapacity))) {
-            acquireNextByteStore0(writePosition, false);
+        if (bytesStore == null || !bytesStore.inside(writePosition(), checkSize(desiredCapacity))) {
+            acquireNextByteStore0(writePosition(), false);
         }
     }
 
@@ -461,9 +461,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
         // only check up to 128 bytes are real.
-        writeCheckOffset(writePosition, Math.min(128, bytesToSkip));
+        writeCheckOffset(writePosition(), Math.min(128, bytesToSkip));
         // the rest can be lazily allocated.
-        uncheckedWritePosition(writePosition + bytesToSkip);
+        uncheckedWritePosition(writePosition() + bytesToSkip);
         return this;
     }
 
@@ -564,7 +564,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throw new BufferOverflowException();
         if (position < readPosition)
             this.readPosition = position;
-        this.writePosition = position;
+        uncheckedWritePosition(position);
         return this;
     }
 
@@ -577,7 +577,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
         long start = 0L;
         readPosition = start;
-        this.writePosition = start;
+        uncheckedWritePosition(start);
         writeLimit = mappedFile.capacity();
         return this;
     }
@@ -588,14 +588,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        final long oldPosition = writePosition;
-        if (writePosition < 0 || writePosition > capacity() - (long) 1)
-            throw writeBufferOverflowException(writePosition);
-        if (bytesStore == null || !bytesStore.inside(writePosition, 1)) {
+        final long oldPosition = writePosition();
+        if (writePosition() < 0 || writePosition() > capacity() - 1)
+            throw writeBufferOverflowException(writePosition());
+        if (bytesStore == null || !bytesStore.inside(writePosition(), 1)) {
             // already determined we need it
-            acquireNextByteStore0(writePosition, false);
+            acquireNextByteStore0(writePosition(), false);
         }
-        this.writePosition = writePosition + (long) 1;
+        uncheckedWritePosition(writePosition() + 1);
         bytesStore.writeByte(oldPosition, i8);
         return this;
     }
@@ -660,7 +660,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 if (length <= bytes.bytesStore().realCapacity() - offset) {
                     this.acquireNextByteStore(writePosition(), false);
                     // can we do a direct copy of raw memory?
-                    if (bytesStore.realCapacity() - writePosition >= length) {
+                    if (bytesStore.realCapacity() - writePosition() >= length) {
                         rawCopy(length, fromAddress);
                         return this;
                     }
@@ -1018,8 +1018,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (writePosition < 0 || writePosition > capacity() - (long) 1 + length)
-            throw writeBufferOverflowException(writePosition);
+        if (writePosition() < 0 || writePosition() > capacity() - (long) 1 + length)
+            throw writeBufferOverflowException(writePosition());
         int i;
         ascii:
         {
@@ -1027,11 +1027,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 char c = chars[offset + i];
                 if (c > 0x007F)
                     break ascii;
-                long oldPosition = writePosition;
-                if (bytesStore == null || ((writePosition & 0xff) == 0 && !bytesStore.inside(writePosition, (length - i) * 3L))) {
-                    acquireNextByteStore0(writePosition, false);
+                long oldPosition = writePosition();
+                if (bytesStore == null || ((writePosition() & 0xff) == 0 && !bytesStore.inside(writePosition(), (length - i) * 3L))) {
+                    acquireNextByteStore0(writePosition(), false);
                 }
-                this.writePosition = writePosition + (long) 1;
+                uncheckedWritePosition(writePosition() + 1);
                 bytesStore.writeByte(oldPosition, (byte) c);
             }
             return this;

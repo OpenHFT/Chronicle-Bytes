@@ -98,8 +98,8 @@ public class MappedBytesTest extends BytesTestCommon {
             // write
             Bytes<?> from = Bytes.from(text);
             bytesW.write(from);
-            long wp = bytesW.writePosition;
-            Assert.assertEquals(text.length(), bytesW.writePosition);
+            long wp = bytesW.writePosition();
+            Assert.assertEquals(text.length(), bytesW.writePosition());
 
             // read
             bytesR.readLimit(wp);

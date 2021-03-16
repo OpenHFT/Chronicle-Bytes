@@ -1686,7 +1686,7 @@ public class HexDumpBytes
     public void writePositionRemaining(long position, long length)
             throws BufferOverflowException {
         writePosition(position);
-        writeLimit(base.writePosition + length);
+        writeLimit(base.writePosition() + length);
     }
 
     @Override

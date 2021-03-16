@@ -267,7 +267,7 @@ public class UncheckedBytes<Underlying>
 
     void append8bit(char[] chars)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        long wp = writePosition;
+        long wp = writePosition();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
             bytesStore.writeByte(wp++, (byte) c);
@@ -279,7 +279,7 @@ public class UncheckedBytes<Underlying>
     @Override
     public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        long wp = writePosition;
+        long wp = writePosition();
         int i;
         ascii:
         {

@@ -1,5 +1,8 @@
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.HeapBytesStore;
+import net.openhft.chronicle.bytes.VanillaBytes;
 import org.jetbrains.annotations.NotNull;
 
 public class EnbeddedBytes<Underlying> extends VanillaBytes<Underlying> {
@@ -17,5 +20,10 @@ public class EnbeddedBytes<Underlying> extends VanillaBytes<Underlying> {
     protected void uncheckedWritePosition(long writePosition) {
         super.uncheckedWritePosition(writePosition);
         bytesStore.writeUnsignedByte(bytesStore.start() - 1, (int) writePosition);
+    }
+
+    @Override
+    public long writePosition() {
+        return bytesStore.readUnsignedByte(bytesStore.start() - 1);
     }
 }
