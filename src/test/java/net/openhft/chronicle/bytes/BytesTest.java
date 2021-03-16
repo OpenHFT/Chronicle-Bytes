@@ -20,8 +20,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
-import net.openhft.chronicle.core.FlakyTestRunner;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -63,7 +61,8 @@ public class BytesTest extends BytesTestCommon {
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
                 {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Heap Unchecked", HEAP_UNCHECKED}
+                {"Heap Unchecked", HEAP_UNCHECKED},
+                {"Heap Embedded", HEAP_EMBEDDED}
         });
     }
 
@@ -134,6 +133,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void writeHistogram() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes bytes = alloc1.elasticBytes(0xFFFFF);
         @NotNull Histogram hist = new Histogram();
         hist.sample(10);
@@ -156,6 +157,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testCopy() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         Bytes<ByteBuffer> bbb = alloc1.fixedBytes(1024);
         try {
             for (int i = 'a'; i <= 'z'; i++)
@@ -172,6 +175,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void toHexString() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         Bytes bytes = alloc1.elasticBytes(1020);
         try {
             bytes.append("Hello World");
@@ -195,6 +200,8 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void fromHexString() {
         assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         Bytes bytes = alloc1.elasticBytes(260);
         try {
             for (int i = 0; i < 259; i++)
@@ -444,6 +451,8 @@ public class BytesTest extends BytesTestCommon {
     public void testParseUtf8High()
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         assumeFalse(NativeBytes.areNewGuarded());
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
         for (int i = ' '; i < Character.MAX_VALUE; i++)
             if (Character.isValidCodePoint(i))
@@ -472,6 +481,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testBigDecimalText() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
         for (double d : new double[]{1.0, 1000.0, 0.1}) {
             @NotNull Bytes b = alloc1.elasticBytes(0xFFFF);
             b.append(new BigDecimal(d));
@@ -545,17 +555,33 @@ public class BytesTest extends BytesTestCommon {
 
     @Test(expected = IllegalStateException.class)
     public void testMove2() {
-        FlakyTestRunner.run(OS.isWindows(), this::doTestMove2);
-    }
-
-    public void doTestMove2() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
-        b.append("Hello World");
+        b.append("0123456789");
         b.move(3, 1, 3);
-        assertEquals("Hlo o World", b.toString());
+        assertEquals("0345456789", b.toString());
         b.releaseLast();
         b.move(3, 5, 3);
+    }
+
+    @Test
+    public void testMoveForward() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+
+        b.append("0123456789abcdefg");
+        b.move(1, 3, 10);
+        assertEquals("012123456789adefg", b.toString());
+        b.releaseLast();
+    }
+
+    @Test
+    public void testMoveBackward() {
+        @NotNull Bytes b = alloc1.elasticBytes(16);
+
+        b.append("0123456789abcdefg");
+        b.move(3, 1, 10);
+        assertEquals("03456789abcbcdefg", b.toString());
+        b.releaseLast();
     }
 
     @Test(expected = IllegalStateException.class)
@@ -726,7 +752,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testWriteOffset() {
-        int length = 128;
+        int length = 127;
         Bytes from = NativeBytes.nativeBytes(length).unchecked(true);
         Bytes to = alloc1.elasticBytes(length);
 
@@ -796,6 +822,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void write8BitString() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes bytes = alloc1.elasticBytes(703);
         StringBuilder sb = new StringBuilder();
         try {
@@ -813,6 +841,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void write8BitNativeBytes() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes bytes = alloc1.elasticBytes(703);
         Bytes nbytes = Bytes.allocateDirect(36);
         Bytes nbytes2 = Bytes.allocateDirect(36);
@@ -836,6 +866,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void write8BitHeapBytes() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes bytes = alloc1.elasticBytes(703);
         Bytes nbytes = Bytes.allocateElasticOnHeap(36);
         Bytes nbytes2 = Bytes.allocateElasticOnHeap(36);
@@ -858,6 +890,8 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void write8BitCharSequence() {
+        assumeFalse(alloc1 == HEAP_EMBEDDED);
+
         @NotNull Bytes bytes = alloc1.elasticBytes(703);
         StringBuilder sb = new StringBuilder();
         StringBuilder sb2 = new StringBuilder();

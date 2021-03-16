@@ -88,6 +88,25 @@ public enum Allocator {
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocate(capacity);
         }
+    },
+    HEAP_EMBEDDED {
+        @Override
+        @NotNull Bytes<?> elasticBytes(int capacity) {
+            return fixedBytes(Math.max(capacity, 127));
+        }
+
+        @Override
+        @NotNull ByteBuffer byteBuffer(int capacity) {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        Bytes fixedBytes(int capacity) {
+            if (capacity >= 128)
+                throw new IllegalArgumentException();
+            Padding padding = new Padding();
+            return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
+        }
     };
 
     @NotNull
@@ -96,7 +115,16 @@ public enum Allocator {
     @NotNull
     abstract ByteBuffer byteBuffer(int capacity);
 
-    Bytes<ByteBuffer> fixedBytes(int capacity) {
+    Bytes fixedBytes(int capacity) {
         return Bytes.wrapForWrite(byteBuffer(capacity));
+    }
+
+    static class Parent {
+        int start;
+    }
+
+    static class Padding extends Parent {
+        // 128 bytes
+        transient long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15;
     }
 }

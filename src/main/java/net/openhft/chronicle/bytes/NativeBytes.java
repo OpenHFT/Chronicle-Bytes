@@ -352,7 +352,7 @@ public class NativeBytes<Underlying>
             throwBeyondWriteLimit(advance, writeEnd);
         else if (writeEnd > bytesStore.safeLimit())
             checkResize(writeEnd);
-        this.writePosition = writePosition + advance;
+        uncheckedWritePosition(writePosition + advance);
         return oldPosition;
     }
 

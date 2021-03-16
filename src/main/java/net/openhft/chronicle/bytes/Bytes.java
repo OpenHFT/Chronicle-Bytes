@@ -136,6 +136,21 @@ public interface Bytes<Underlying> extends
         return elasticHeapByteBuffer(128);
     }
 
+    static <T> Bytes<T> forFieldGroup(T t, String groupName) {
+        @NotNull HeapBytesStore<T> bs = HeapBytesStore.forFields(t, groupName, 1);
+        try {
+            return EnbeddedBytes.wrap(bs);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            throw new AssertionError(e);
+        } finally {
+            try {
+                bs.release(INIT);
+            } catch (IllegalStateException ise) {
+                throw new AssertionError(ise);
+            }
+        }
+    }
+
     /**
      * Wrap the ByteBuffer ready for reading
      * Method for convenience only - might not be ideal for performance (creates garbage).

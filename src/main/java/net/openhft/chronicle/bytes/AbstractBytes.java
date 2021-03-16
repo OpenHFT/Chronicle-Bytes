@@ -949,7 +949,7 @@ public abstract class AbstractBytes<Underlying>
         return oldPosition;
     }
 
-    void uncheckedWritePosition(long writePosition) {
+    protected void uncheckedWritePosition(long writePosition) {
         this.writePosition = writePosition;
     }
 

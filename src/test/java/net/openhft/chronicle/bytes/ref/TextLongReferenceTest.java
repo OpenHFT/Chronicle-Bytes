@@ -35,6 +35,7 @@ public class TextLongReferenceTest extends BytesTestCommon {
         bytesStore.zeroOut(0, 64);
         try (@NotNull final TextLongReference value = new TextLongReference()) {
             value.bytesStore(bytesStore, 0, value.maxSize());
+            bytesStore.writeByte(value.maxSize(), 0);
             int expected = 10;
             value.setValue(expected);
 

@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
@@ -59,6 +60,21 @@ public class HeapBytesStore<Underlying>
         this.capacity = byteArray.length;
     }
 
+    private HeapBytesStore(Object object, long start, long length) {
+        super(false);
+        this.underlyingObject = (Underlying) object;
+        this.realUnderlyingObject = object;
+        this.dataOffset = Math.toIntExact(start);
+        this.capacity = length;
+    }
+
+    public static <T> HeapBytesStore<T> forFields(Object o, String groupName, int padding) {
+        final BytesFieldInfo lookup = BytesFieldInfo.lookup(o.getClass());
+        final long start = lookup.startOf(groupName);
+        final long length = lookup.lengthOf(groupName);
+        return new HeapBytesStore<T>(o, start + padding, length - padding);
+    }
+
     // Used by Chronicle-Map.
     @NotNull
     public static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
@@ -80,8 +96,7 @@ public class HeapBytesStore<Underlying>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
-        //noinspection SuspiciousSystemArraycopy
-        System.arraycopy(realUnderlyingObject, Maths.toUInt31(from), realUnderlyingObject, Maths.toUInt31(to), Maths.toUInt31(length));
+        MEMORY.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, Maths.toUInt31(length));
     }
 
     @NotNull
