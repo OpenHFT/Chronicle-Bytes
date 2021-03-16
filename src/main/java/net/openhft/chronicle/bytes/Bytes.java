@@ -140,7 +140,8 @@ public interface Bytes<Underlying> extends
     static <T> Bytes<T> forFieldGroup(T t, String groupName) {
         @NotNull HeapBytesStore<T> bs = HeapBytesStore.forFields(t, groupName, 1);
         try {
-            return EnbeddedBytes.wrap(bs);
+            final EnbeddedBytes<T> bytes = EnbeddedBytes.wrap(bs);
+            return bytes.writeLimit(bs.writeLimit());
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
         } finally {

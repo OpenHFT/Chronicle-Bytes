@@ -80,11 +80,10 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
-            int modifiers = field.getModifiers();
             int start = (int) UnsafeMemory.UNSAFE.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
-            boolean nonTrivial = Modifier.isTransient(modifiers) || !field.getType().isPrimitive();
+            boolean nonTrivial = !field.getType().isPrimitive();
             if (nonTrivial) {
                 if (max > 0)
                     break;
