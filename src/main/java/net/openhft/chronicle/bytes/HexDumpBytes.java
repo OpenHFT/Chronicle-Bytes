@@ -249,7 +249,9 @@ public class HexDumpBytes
     @NotNull
     public Bytes clear()
             throws IllegalStateException {
-        return base.clear();
+        base.clear();
+        text.clear();
+        return this;
     }
 
     @Override

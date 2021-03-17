@@ -55,25 +55,25 @@ public class BytesFieldInfo {
                     }
                     nonHeader = true;
                     position = UnsafeMemory.MEMORY.getFieldOffset(field);
-                    size = sizeOf(field.getType());
-                    switch (size) {
-                        case 1:
-                            bytes++;
-                            break;
-                        case 2:
-                            assert bytes == 0;
-                            shorts++;
-                            break;
-                        case 4:
-                            assert shorts == 0 && bytes == 0;
-                            ints++;
-                            break;
-                        case 8:
-                            assert ints == 0 && shorts == 0 && bytes == 0;
-                            longs++;
-                            break;
-                    }
                     matches = prefix.equals(prefix0);
+                }
+                size = sizeOf(field.getType());
+                switch (size) {
+                    case 1:
+                        bytes++;
+                        break;
+                    case 2:
+                        assert bytes == 0;
+                        shorts++;
+                        break;
+                    case 4:
+                        assert shorts == 0 && bytes == 0;
+                        ints++;
+                        break;
+                    case 8:
+                        assert ints == 0 && shorts == 0 && bytes == 0;
+                        longs++;
+                        break;
                 }
             }
             if (matches) {

@@ -80,6 +80,9 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
+            final FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
+            if (fieldGroup != null && FieldGroup.HEADER.equals(fieldGroup.value()))
+                continue;
             int start = (int) UnsafeMemory.UNSAFE.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
