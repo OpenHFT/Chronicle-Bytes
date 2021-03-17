@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.FieldGroup;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -8,14 +9,11 @@ import sun.misc.Unsafe;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class BytesFieldInfo {
     private static final ClassLocal<BytesFieldInfo> CACHE = ClassLocal.withInitial(BytesFieldInfo::init);
-    static final Pattern nameDigits = Pattern.compile("^(\\w*\\D)\\d+$");
     static final Field $END$;
 
     static {
@@ -28,6 +26,7 @@ public class BytesFieldInfo {
 
     private final Map<String, BFIEntry> groups = new LinkedHashMap<>();
     private final Class<?> aClass;
+    private final int description;
 
     BytesFieldInfo(Class<?> aClass) {
         this.aClass = aClass;
@@ -37,6 +36,8 @@ public class BytesFieldInfo {
                 .collect(Collectors.toList());
         String prefix0 = "";
         BFIEntry entry = null;
+        int longs = 0, ints = 0, shorts = 0, bytes = 0;
+        boolean nonHeader = false;
         for (int i = 0; i <= fields.size(); i++) {
             final Field field = i == fields.size() ? $END$ : fields.get(i);
             boolean matches = false;
@@ -44,12 +45,34 @@ public class BytesFieldInfo {
             long position = 0;
             int size = 0;
             if (field.getType().isPrimitive()) {
-                final Matcher matcher = nameDigits.matcher(field.getName());
-                if (matcher.matches()) {
+                FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
+                if (fieldGroup != null) {
+                    prefix = fieldGroup.value();
+                    if (prefix.equals(FieldGroup.HEADER)) {
+                        if (nonHeader)
+                            throw new IllegalStateException("The " + FieldGroup.HEADER + " FieldGroup must be at the start");
+                        continue;
+                    }
+                    nonHeader = true;
                     position = UnsafeMemory.MEMORY.getFieldOffset(field);
                     size = sizeOf(field.getType());
-
-                    prefix = matcher.group(1);
+                    switch (size) {
+                        case 1:
+                            bytes++;
+                            break;
+                        case 2:
+                            assert bytes == 0;
+                            shorts++;
+                            break;
+                        case 4:
+                            assert shorts == 0 && bytes == 0;
+                            ints++;
+                            break;
+                        case 8:
+                            assert ints == 0 && shorts == 0 && bytes == 0;
+                            longs++;
+                            break;
+                    }
                     matches = prefix.equals(prefix0);
                 }
             }
@@ -70,6 +93,15 @@ public class BytesFieldInfo {
                 }
             }
         }
+        assert longs < 256;
+        assert ints < 256;
+        assert shorts < 128;
+        assert bytes < 256;
+        int description = (longs << 24) | (ints << 16) | (shorts << 8) | bytes;
+        // ensure the header has an odd parity as a validity check
+        if (Integer.bitCount(description) % 2 == 0)
+            description |= 0x8000;
+        this.description = description;
     }
 
     private static int sizeOf(Class<?> type) {
@@ -78,6 +110,10 @@ public class BytesFieldInfo {
                 : type == int.class || type == float.class ? 4
                 : type == long.class || type == double.class ? 8
                 : Unsafe.ARRAY_OBJECT_INDEX_SCALE;
+    }
+
+    public int description() {
+        return description;
     }
 
     static class BFIEntry {
