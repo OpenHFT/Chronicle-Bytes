@@ -392,4 +392,17 @@ public enum BytesUtil {
 
     }
 
+    // Based on Maths.roundNup
+    public static long roundNup(double d, long factor) {
+        boolean neg = d < 0;
+        d = Math.abs(d);
+        final double df = d * factor;
+        long ldf = (long) df;
+        final double residual = df - ldf + Math.ulp(d) * (factor * 0.983);
+        if (residual >= 0.5)
+            ldf++;
+        if (neg)
+            ldf = -ldf;
+        return ldf;
+    }
 }

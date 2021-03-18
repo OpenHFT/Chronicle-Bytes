@@ -204,6 +204,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         bytes.append(1.1, 3).append('\n');
         bytes.append(-0.01111, 4).append('\n');
 
+        bytes.append(64.5501985, 6).append('\n');
+
         assertEquals("1\n" +
                 "-1.3\n" +
                 "1.28\n" +
@@ -216,7 +218,8 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "-1.1\n" +
                 "0.11\n" +
                 "1.100\n" +
-                "-0.0111\n", bytes.toString());
+                "-0.0111\n" +
+                "64.550199\n", bytes.toString());
     }
 
     @Ignore
