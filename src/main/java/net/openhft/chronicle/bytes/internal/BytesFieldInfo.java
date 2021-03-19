@@ -38,6 +38,7 @@ public class BytesFieldInfo {
         BFIEntry entry = null;
         int longs = 0, ints = 0, shorts = 0, bytes = 0;
         boolean nonHeader = false;
+        boolean hasHeader = false;
         for (int i = 0; i <= fields.size(); i++) {
             final Field field = i == fields.size() ? $END$ : fields.get(i);
             boolean matches = false;
@@ -49,6 +50,7 @@ public class BytesFieldInfo {
                 if (fieldGroup != null) {
                     prefix = fieldGroup.value();
                     if (prefix.equals(FieldGroup.HEADER)) {
+                        hasHeader = true;
                         if (nonHeader)
                             throw new IllegalStateException("The " + FieldGroup.HEADER + " FieldGroup must be at the start");
                         continue;
@@ -63,15 +65,15 @@ public class BytesFieldInfo {
                         bytes++;
                         break;
                     case 2:
-                        assert bytes == 0;
+                        assert !hasHeader || bytes == 0;
                         shorts++;
                         break;
                     case 4:
-                        assert shorts == 0 && bytes == 0;
+                        assert !hasHeader || (shorts == 0 && bytes == 0);
                         ints++;
                         break;
                     case 8:
-                        assert ints == 0 && shorts == 0 && bytes == 0;
+                        assert !hasHeader || (ints == 0 && shorts == 0 && bytes == 0);
                         longs++;
                         break;
                 }
