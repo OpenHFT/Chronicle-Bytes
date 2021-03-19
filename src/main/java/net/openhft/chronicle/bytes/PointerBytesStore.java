@@ -41,7 +41,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     public VanillaBytes<Void> bytesForWrite()
             throws IllegalStateException {
         try {
-            return new NativeBytes<>(this);
+            return new NativeBytes<>(this, Bytes.MAX_CAPACITY);
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }

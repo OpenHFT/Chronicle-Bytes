@@ -39,4 +39,12 @@ public class PointerBytesStoreTest extends BytesTestCommon {
             pbs.releaseLast();
         }
     }
+
+    @Test
+    public void testWriteLimit() {
+        final PointerBytesStore pbs = new PointerBytesStore();
+        final Bytes<Void> wrapper = pbs.bytesForRead();
+        pbs.set(NoBytesStore.NO_PAGE, 200);
+        wrapper.writeLimit(pbs.capacity());
+    }
 }
