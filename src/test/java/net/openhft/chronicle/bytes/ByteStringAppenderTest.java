@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.junit.After;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -220,16 +219,6 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 "1.100\n" +
                 "-0.0111\n" +
                 "64.550199\n", bytes.toString());
-    }
-
-    @Ignore
-    @Test
-    public void testAppendDoublePrecision2() {
-        assumeFalse(GuardedNativeBytes.areNewGuarded());
-
-        bytes.append(64.5501985, 6).append('\n');
-
-        assertEquals("64.550199\n", bytes.toString());
     }
 
     @Test

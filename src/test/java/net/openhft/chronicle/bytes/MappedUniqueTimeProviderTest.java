@@ -33,6 +33,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;
         for (; ; ) {
             long now = tp.currentTimeNanos();
+            assertEquals(LongTime.toNanos(now), now);
             if (now > start + runTime)
                 break;
             // check the times are different after shifting by 5 bits.

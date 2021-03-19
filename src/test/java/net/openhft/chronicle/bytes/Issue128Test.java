@@ -22,7 +22,6 @@ public class Issue128Test {
     }
 
     @Test
-//    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/128")
     public void testCorrect() {
         Bytes bytes = Bytes.allocateDirect(32);
         try {
