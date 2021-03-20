@@ -1043,6 +1043,4 @@ public interface Bytes<Underlying> extends
         }
         return this;
     }
-
-
 }

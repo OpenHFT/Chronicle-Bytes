@@ -468,7 +468,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     int peekUnsignedByte()
             throws IllegalStateException;
 
-
     @NotNull
     default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, BufferOverflowException {

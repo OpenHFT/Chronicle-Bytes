@@ -39,5 +39,4 @@ public class AppendableUtilTest extends BytesTestCommon {
         assertEquals("HelloXWorld", b.toString());
         b.releaseLast();
     }
-
 }

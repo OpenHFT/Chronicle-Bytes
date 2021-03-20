@@ -292,7 +292,6 @@ public enum NoBytesStore implements BytesStore {
         throw new BufferOverflowException();
     }
 
-
     @Override
     public void nativeRead(long position, long address, long size) {
         throw new UnsupportedOperationException();
@@ -355,5 +354,4 @@ public enum NoBytesStore implements BytesStore {
     public boolean sharedMemory() {
         return false;
     }
-
 }

@@ -92,5 +92,4 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     public MethodReader closeIn(boolean closeIn) {
         return this;
     }
-
 }

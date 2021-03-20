@@ -60,7 +60,6 @@ public abstract class AbstractBytes<Underlying>
         }
     }
 
-
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
         this(bytesStore, writePosition, writeLimit, "");

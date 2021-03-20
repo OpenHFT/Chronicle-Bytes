@@ -167,5 +167,4 @@ public class ConcurrentRafAccessTest extends BytesTestCommon {
 //            System.out.format("%s: elapsedNs = %,d%n", Thread.currentThread().getName(), elapsedNs);
         }
     }
-
 }

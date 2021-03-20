@@ -56,5 +56,4 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
     public long start() {
         return 0;
     }
-
 }

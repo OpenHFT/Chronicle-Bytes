@@ -253,5 +253,4 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
             throws IllegalStateException, ArithmeticException {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
     }
-
 }

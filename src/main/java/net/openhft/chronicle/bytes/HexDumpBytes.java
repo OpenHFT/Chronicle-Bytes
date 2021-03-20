@@ -624,7 +624,6 @@ public class HexDumpBytes
         return base.peekUnsignedByte();
     }
 
-
     @Override
     public int lastDecimalPlaces() {
         return base.lastDecimalPlaces();

@@ -178,5 +178,4 @@ public class MappedMemoryTest extends BytesTestCommon {
         }
         assertEquals(0, bytes0.refCount());
     }
-
 }

@@ -380,7 +380,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return sum & 0xFF;
     }
 
-
     /**
      * Does the BytesStore end with a character?
      *
@@ -431,7 +430,6 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     default String to8bitString() {
         return BytesInternal.to8bitString(this);
     }
-
 
     /**
      * Perform a <i>not</i> atomic add and get operation for an unsigned byte value. This method

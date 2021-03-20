@@ -552,7 +552,6 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test(expected = IllegalStateException.class)
     public void testMove2() {
         @NotNull Bytes b = alloc1.elasticBytes(16);

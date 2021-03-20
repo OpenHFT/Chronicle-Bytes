@@ -133,5 +133,4 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
         }
 
     }
-
 }

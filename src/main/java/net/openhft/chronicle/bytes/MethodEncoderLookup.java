@@ -61,5 +61,4 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
             }
         };
     }
-
 }

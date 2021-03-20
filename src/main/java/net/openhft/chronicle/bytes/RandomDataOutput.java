@@ -370,7 +370,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
     }
 
-
     /**
      * Write the stop bit length and copy the BytesStore
      *

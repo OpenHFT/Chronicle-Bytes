@@ -96,5 +96,4 @@ public interface BytesOut<Underlying> extends
                 throw new UnsupportedOperationException("Not supported " + componentType);
         }
     }
-
 }

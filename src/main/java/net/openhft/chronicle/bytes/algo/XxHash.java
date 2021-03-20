@@ -163,5 +163,4 @@ public class XxHash implements BytesStoreHash<BytesStore> {
 
         return finalize(hash);
     }
-
 }

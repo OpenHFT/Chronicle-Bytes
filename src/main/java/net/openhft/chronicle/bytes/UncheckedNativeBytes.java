@@ -820,7 +820,6 @@ public class UncheckedNativeBytes<Underlying>
         return BytesInternal.toString(this);
     }
 
-
     @Override
     public void lenient(boolean lenient) {
         throw new UnsupportedOperationException();
@@ -830,7 +829,6 @@ public class UncheckedNativeBytes<Underlying>
     public boolean lenient() {
         return false;
     }
-
 
     @Override
     public void nativeRead(long position, long address, long size)
