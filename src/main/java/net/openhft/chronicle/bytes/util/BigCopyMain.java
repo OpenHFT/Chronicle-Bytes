@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
-import java.util.Random;
+import java.security.SecureRandom;
 
 @Deprecated(/* to be remoed in x.22 */)
 public class BigCopyMain {
@@ -20,7 +20,7 @@ public class BigCopyMain {
         int initialCapacity = 10 * 1024 * 1024;
         long fileSize = 5368709120l;
         byte[] buffer = new byte[initialCapacity];
-        new Random().nextBytes(buffer);
+        new SecureRandom().nextBytes(buffer);
 
         Bytes bytes = Bytes.allocateElasticDirect(initialCapacity);
         while (bytes.writePosition() < fileSize) {
@@ -39,7 +39,7 @@ public class BigCopyMain {
         }
 
         bytes = Bytes.allocateElasticDirect(initialCapacity);
-        new Random().nextBytes(buffer);
+        new SecureRandom().nextBytes(buffer);
         while (bytes.writePosition() < fileSize) {
             bytes.write(buffer);
         }
