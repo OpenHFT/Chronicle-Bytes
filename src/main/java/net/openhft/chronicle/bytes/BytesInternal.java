@@ -942,16 +942,18 @@ enum BytesInternal {
         writeStopBit0(out, n);
     }
 
-    public static long writeStopBit(@NotNull long addr, long n)
+    public static long writeStopBit(@NotNull final long addr, final long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
             UnsafeMemory.INSTANCE.writeByte(addr, (byte) n);
             return addr + 1;
         }
         if ((n & ~0x3FFF) == 0) {
-            int lo = (int) ((n & 0x7f) | 0x80);
-            int hi = (int) (n >> 7);
-            MEMORY.writeShort(addr, (short) ((lo << 8) | hi));
+            final int lo = (int) ((n & 0x7f) | 0x80);
+            final int hi = (int) (n >> 7);
+            UnsafeMemory.INSTANCE.writeByte(addr, (byte) lo);
+            UnsafeMemory.INSTANCE.writeByte(addr + 1, (byte) hi);
+            // Note: Refrain from using writeShort as this assumes a certain endian
             return addr + 2;
         }
         return writeStopBit0(addr, n);

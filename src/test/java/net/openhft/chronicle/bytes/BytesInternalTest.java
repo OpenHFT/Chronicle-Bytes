@@ -459,6 +459,27 @@ public class BytesInternalTest extends BytesTestCommon {
         c.releaseLast();
     }
 
+    @Test
+    public void testStopBits() {
+        final VanillaBytes<Void> bytes = Bytes.allocateDirect(10);
+
+        for (int i = 0; i < (1L << (2 * 7)) + 1; i++) {
+            bytes.writePosition(0);
+            bytes.clearAndPad(10);
+            bytes.writePosition(0);
+            BytesInternal.writeStopBit(bytes, i);
+
+            bytes.readPosition(0);
+            final long l = BytesInternal.readStopBit(bytes);
+
+            // System.out.printf("0x%04x : %02x %02x %02x%n", i, bytes.readByte(0), bytes.readByte(1), bytes.readByte(3));
+
+            assertEquals(i, l);
+        }
+
+        bytes.releaseLast();
+    }
+
     static class Nested {
         public static final int LENGTH;
 
