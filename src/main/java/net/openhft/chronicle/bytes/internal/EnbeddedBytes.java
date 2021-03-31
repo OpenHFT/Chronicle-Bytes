@@ -5,14 +5,20 @@ import net.openhft.chronicle.bytes.HeapBytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import org.jetbrains.annotations.NotNull;
 
-public class EnbeddedBytes<Underlying> extends VanillaBytes<Underlying> {
-    private EnbeddedBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit) throws IllegalStateException, IllegalArgumentException {
+/**
+ *
+ * @param <U> Underlying type (e.g. ByteBuffer or byte[])
+ */
+public class EnbeddedBytes<U> extends VanillaBytes<U> {
+    private EnbeddedBytes(@NotNull BytesStore<?, ?> bytesStore,
+                          long writePosition,
+                          long writeLimit) throws IllegalStateException, IllegalArgumentException {
         super(bytesStore, writePosition, writeLimit);
     }
 
-    public static <U> EnbeddedBytes<U> wrap(HeapBytesStore bytesStore) {
-        long wp = bytesStore.start();
-        int length = bytesStore.readUnsignedByte(wp - 1);
+    public static <U> EnbeddedBytes<U> wrap(HeapBytesStore<?> bytesStore) {
+        final long wp = bytesStore.start();
+        final int length = bytesStore.readUnsignedByte(wp - 1);
         return new EnbeddedBytes<>(bytesStore, wp, wp + length);
     }
 

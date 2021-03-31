@@ -68,5 +68,6 @@ public class ByteStringReader extends Reader {
 
     @Override
     public void close() {
+        // Do nothing
     }
 }

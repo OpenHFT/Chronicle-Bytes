@@ -21,18 +21,18 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
     public void assignTwo()
             throws InterruptedException {
         assumeTrue(OS.isLinux() && !Jvm.isArm());
-        BlockingQueue t0started = new LinkedBlockingQueue();
-        BlockingQueue t1started = new LinkedBlockingQueue();
-        BlockingQueue t2started = new LinkedBlockingQueue();
-        BlockingQueue testDone = new LinkedBlockingQueue();
+        final BlockingQueue<String> t0started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> t1started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> t2started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> testDone = new LinkedBlockingQueue<>();
 
-        Bytes bytes = Bytes.allocateDirect(64);
-        BinaryIntArrayReference iav = new BinaryIntArrayReference(2);
+        Bytes<?> bytes = Bytes.allocateDirect(64);
+        final BinaryIntArrayReference iav = new BinaryIntArrayReference(2);
         // write the template
         iav.writeMarshallable(bytes);
         // bind to the template
         iav.readMarshallable(bytes);
-        ThreadIndexAssigner ta = new ThreadIndexAssigner(iav) {
+        final ThreadIndexAssigner ta = new ThreadIndexAssigner(iav) {
             final int next = 0;
 
             @Override
@@ -40,7 +40,7 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
                 return next % size;
             }
         };
-        BlockingQueue<Throwable> throwables = new LinkedBlockingQueue<>();
+        final BlockingQueue<Throwable> throwables = new LinkedBlockingQueue<>();
         Thread t0 = new Thread(() -> {
             try {
 //                System.out.println("0 started tid: " + Affinity.getThreadId());

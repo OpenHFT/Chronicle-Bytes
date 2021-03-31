@@ -26,12 +26,16 @@ import java.lang.reflect.Proxy;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+/**
+ *
+ * @param <U> Underlying type (e.g. ByteBuffer or byte[])
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesOut<Underlying> extends
-        StreamingDataOutput<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>>,
-        BytesPrepender<Bytes<Underlying>>,
-        BytesComment<BytesOut<Underlying>> {
+public interface BytesOut<U> extends
+        StreamingDataOutput<Bytes<U>>,
+        ByteStringAppender<Bytes<U>>,
+        BytesPrepender<Bytes<U>>,
+        BytesComment<BytesOut<U>> {
 
     /**
      * Proxy an interface so each message called is written to a file for replay.

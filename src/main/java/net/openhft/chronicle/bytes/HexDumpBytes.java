@@ -733,6 +733,7 @@ public class HexDumpBytes
 
     }
 
+    @Deprecated(/* to be removed in x.22 */)
     @Nullable
     @Override
     public String readUTFΔ()
@@ -773,6 +774,7 @@ public class HexDumpBytes
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
+    @Deprecated(/* to be removed in x.22 */)
     @Override
     public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -787,6 +789,7 @@ public class HexDumpBytes
 
     }
 
+    @Deprecated(/* to be removed in x.23 */)
     @Override
     public <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {

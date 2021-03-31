@@ -46,5 +46,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
         final Bytes<Void> wrapper = pbs.bytesForRead();
         pbs.set(NoBytesStore.NO_PAGE, 200);
         wrapper.writeLimit(pbs.capacity());
+
+        assertEquals(200, wrapper.writeLimit());
     }
 }

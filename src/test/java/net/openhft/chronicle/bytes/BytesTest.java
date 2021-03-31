@@ -453,10 +453,13 @@ public class BytesTest extends BytesTestCommon {
         assumeFalse(NativeBytes.areNewGuarded());
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
-        @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
+        final StringBuilder expected = new StringBuilder();
+        final Bytes b = alloc1.elasticBytes(0xFFFFF);
         for (int i = ' '; i < Character.MAX_VALUE; i++)
-            if (Character.isValidCodePoint(i))
+            if (Character.isValidCodePoint(i)) {
                 b.appendUtf8(i);
+                expected.append((char) i);
+            }
         b.appendUtf8(0);
         @NotNull StringBuilder sb = new StringBuilder();
         b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
@@ -464,6 +467,14 @@ public class BytesTest extends BytesTestCommon {
         b.readPosition(0);
         b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
         b.releaseLast();
+
+        // Fails: See https://github.com/OpenHFT/Chronicle-Bytes/issues/178
+
+        // assertEquals(expected.length(), sb.length());
+        /*for (int i = 0; i < expected.length(); i++) {
+            assertEquals("Failed at " + i, expected.charAt(i), sb.charAt(i));
+        }*/
+
     }
 
     @Test

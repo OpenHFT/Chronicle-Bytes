@@ -97,9 +97,8 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
             long time0 = bytes.readVolatileLong(LAST_TIME);
             long timeNanos5 = time0 >>> 5;
 
-            if (time5 > timeNanos5)
-                if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                    return time;
+            if (time5 > timeNanos5 && bytes.compareAndSwapLong(LAST_TIME, time0, time))
+                return time;
 
             while (true) {
                 time0 = bytes.readVolatileLong(LAST_TIME);

@@ -32,6 +32,8 @@ import java.nio.BufferUnderflowException;
 public enum AppendableUtil {
     ;
 
+    public static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
+
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
         if (sb instanceof StringBuilder)
@@ -162,7 +164,7 @@ public enum AppendableUtil {
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char2));
+                                MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(char2));
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if (tester.isStopChar(c2, bytes.peekUnsignedByte()))
@@ -178,10 +180,10 @@ public enum AppendableUtil {
 
                     if (((char2 & 0xC0) != 0x80))
                         throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char2));
+                                MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(char2));
                     if ((char3 & 0xC0) != 0x80)
                         throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char3));
+                                MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(char3));
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -194,7 +196,7 @@ public enum AppendableUtil {
                 default:
                     /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
-                            "malformed input around byte " + Integer.toHexString(c));
+                            MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
             }
         }
     }

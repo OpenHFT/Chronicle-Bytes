@@ -12,17 +12,17 @@ import java.nio.file.Paths;
 import java.nio.file.StandardOpenOption;
 import java.security.SecureRandom;
 
-@Deprecated(/* to be remoed in x.22 */)
+@Deprecated(/* to be removed in x.22 */)
 public class BigCopyMain {
 
     public static void main(String[] args)
             throws IOException, IllegalArgumentException, IllegalStateException, BufferOverflowException, BufferUnderflowException {
         int initialCapacity = 10 * 1024 * 1024;
-        long fileSize = 5368709120l;
+        long fileSize = 5368709120L;
         byte[] buffer = new byte[initialCapacity];
         new SecureRandom().nextBytes(buffer);
 
-        Bytes bytes = Bytes.allocateElasticDirect(initialCapacity);
+        Bytes<?> bytes = Bytes.allocateElasticDirect(initialCapacity);
         while (bytes.writePosition() < fileSize) {
             bytes.write(buffer);
         }

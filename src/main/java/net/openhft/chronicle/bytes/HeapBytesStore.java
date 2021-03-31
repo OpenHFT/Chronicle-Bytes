@@ -31,21 +31,23 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
+ *
+ * @param <U> Underlying type (e.g. ByteBuffer or byte[])
  */
 @SuppressWarnings("restriction")
-public class HeapBytesStore<Underlying>
-        extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
+public class HeapBytesStore<U>
+        extends AbstractBytesStore<HeapBytesStore<U>, U> {
     @NotNull
     private final Object realUnderlyingObject;
     private final int dataOffset;
     private final long capacity;
     @NotNull
-    private final Underlying underlyingObject;
+    private final U underlyingObject;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         super(false);
         //noinspection unchecked
-        this.underlyingObject = (Underlying) byteBuffer;
+        this.underlyingObject = (U) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
         this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
         this.capacity = byteBuffer.capacity();
@@ -54,7 +56,7 @@ public class HeapBytesStore<Underlying>
     private HeapBytesStore(@NotNull byte @NotNull [] byteArray) {
         super(false);
         //noinspection unchecked
-        this.underlyingObject = (Underlying) byteArray;
+        this.underlyingObject = (U) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
         this.capacity = byteArray.length;
@@ -62,7 +64,7 @@ public class HeapBytesStore<Underlying>
 
     private HeapBytesStore(Object object, long start, long length) {
         super(false);
-        this.underlyingObject = (Underlying) object;
+        this.underlyingObject = (U) object;
         this.realUnderlyingObject = object;
         this.dataOffset = Math.toIntExact(start);
         this.capacity = length;
@@ -72,7 +74,7 @@ public class HeapBytesStore<Underlying>
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(o.getClass());
         final long start = lookup.startOf(groupName);
         final long length = lookup.lengthOf(groupName);
-        return new HeapBytesStore<T>(o, start + padding, length - padding);
+        return new HeapBytesStore<>(o, start + padding, length - padding);
     }
 
     // Used by Chronicle-Map.
@@ -107,7 +109,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public BytesStore<HeapBytesStore<Underlying>, Underlying> copy() {
+    public BytesStore<HeapBytesStore<U>, U> copy() {
         throw new UnsupportedOperationException("todo");
     }
 
@@ -123,7 +125,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public Underlying underlyingObject() {
+    public U underlyingObject() {
         return underlyingObject;
     }
 
@@ -225,7 +227,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeByte(long offset, byte b)
+    public HeapBytesStore<U> writeByte(long offset, byte b)
             throws BufferOverflowException {
         MEMORY.writeByte(realUnderlyingObject, dataOffset + offset, b);
         return this;
@@ -233,7 +235,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeShort(long offset, short i16)
+    public HeapBytesStore<U> writeShort(long offset, short i16)
             throws BufferOverflowException {
         MEMORY.writeShort(realUnderlyingObject, dataOffset + offset, i16);
         return this;
@@ -241,7 +243,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeInt(long offset, int i32)
+    public HeapBytesStore<U> writeInt(long offset, int i32)
             throws BufferOverflowException {
         MEMORY.writeInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
@@ -249,7 +251,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32)
+    public HeapBytesStore<U> writeOrderedInt(long offset, int i32)
             throws BufferOverflowException {
         MEMORY.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
@@ -257,7 +259,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeLong(long offset, long i64)
+    public HeapBytesStore<U> writeLong(long offset, long i64)
             throws BufferOverflowException {
         MEMORY.writeLong(realUnderlyingObject, dataOffset + offset, i64);
         return this;
@@ -265,7 +267,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeOrderedLong(long offset, long i)
+    public HeapBytesStore<U> writeOrderedLong(long offset, long i)
             throws BufferOverflowException {
         MEMORY.writeOrderedLong(realUnderlyingObject, dataOffset + offset, i);
         return this;
@@ -273,7 +275,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeFloat(long offset, float f)
+    public HeapBytesStore<U> writeFloat(long offset, float f)
             throws BufferOverflowException {
         MEMORY.writeFloat(realUnderlyingObject, dataOffset + offset, f);
         return this;
@@ -281,7 +283,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeDouble(long offset, double d)
+    public HeapBytesStore<U> writeDouble(long offset, double d)
             throws BufferOverflowException {
         MEMORY.writeDouble(realUnderlyingObject, dataOffset + offset, d);
         return this;
@@ -289,7 +291,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
+    public HeapBytesStore<U> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException {
         MEMORY.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
         return this;
@@ -297,7 +299,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileShort(long offset, short i16)
+    public HeapBytesStore<U> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException {
         MEMORY.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
         return this;
@@ -305,7 +307,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileInt(long offset, int i32)
+    public HeapBytesStore<U> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException {
         MEMORY.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
@@ -313,7 +315,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileLong(long offset, long i64)
+    public HeapBytesStore<U> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException {
         MEMORY.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
         return this;
@@ -321,7 +323,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(
+    public HeapBytesStore<U> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
         MEMORY.copyMemory(
@@ -346,8 +348,8 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(long writeOffset,
-                                            @NotNull RandomDataInput bytes, long readOffset, long length)
+    public HeapBytesStore<U> write(long writeOffset,
+                                   @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         if (length == (int) length) {
             int length0 = (int) length;

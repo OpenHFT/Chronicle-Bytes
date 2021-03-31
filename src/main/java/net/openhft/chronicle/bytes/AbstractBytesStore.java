@@ -24,9 +24,14 @@ import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
 import java.nio.BufferUnderflowException;
 
-public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
+/**
+ *
+ * @param <B> ByteStore type
+ * @param <U> Underlying type (e.g. ByteBuffer or byte[])
+ */
+public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         extends AbstractReferenceCounted
-        implements BytesStore<B, Underlying> {
+        implements BytesStore<B, U> {
 
     protected AbstractBytesStore() {
     }

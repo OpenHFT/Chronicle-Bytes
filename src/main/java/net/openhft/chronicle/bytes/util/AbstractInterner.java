@@ -44,7 +44,8 @@ import java.util.stream.Stream;
 public abstract class AbstractInterner<T> {
     @NotNull
     protected final InternerEntry<T>[] entries;
-    protected final int mask, shift;
+    protected final int mask;
+    protected final int shift;
     protected boolean toggle = false;
 
     public AbstractInterner(int capacity)

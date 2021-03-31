@@ -22,8 +22,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 
+/**
+ *
+ * @param <U> Underlying type (e.g. ByteBuffer or byte[])
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
+public class SubBytes<U> extends VanillaBytes<U> {
     private final long start;
     private final long capacity;
 

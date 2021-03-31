@@ -127,7 +127,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
                     if (getUsed() < usedAtLeast) {
                         setUsed(usedAtLeast);
                     }
-                    return;
+                    break;
                 } finally {
                     bytes.writeInt(LOCK_OFFSET + offset, FALS);
                 }
@@ -148,11 +148,11 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     @Override
     public ByteableIntArrayValues capacity(long arrayLength) {
         BytesStore bytesStore = bytesStore();
-        long length = sizeInBytes(arrayLength);
+        final long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
-            this.length = length;
+            this.length = len;
         } else {
-            assert this.length == length;
+            assert this.length == len;
         }
         return this;
     }

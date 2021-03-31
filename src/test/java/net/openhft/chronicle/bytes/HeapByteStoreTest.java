@@ -42,9 +42,14 @@ public class HeapByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testElasticBytesEnsuringCapacity() {
-        Bytes<?> bytes = Bytes.elasticHeapByteBuffer();
-        bytes.clearAndPad(bytes.realCapacity() + 128);
+        final int delta = 128;
+        final Bytes<?> bytes = Bytes.elasticHeapByteBuffer();
+        final long initialRealCapacity = bytes.realCapacity();
+        System.out.println("initialRealCapacity = " + initialRealCapacity);
+        bytes.clearAndPad(initialRealCapacity + delta);
         // ensure this succeeds even though we are above the real capacity - this should trigger resize
         bytes.prewriteInt(1);
+
+        assertEquals(initialRealCapacity+delta, bytes.writePosition());
     }
 }

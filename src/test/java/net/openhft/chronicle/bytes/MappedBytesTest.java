@@ -62,7 +62,10 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+
+            assertEquals(bytesW, bytesR);
         }
+
     }
 
     @Test
@@ -85,6 +88,7 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+            assertEquals(bytesW, bytesR);
         }
     }
 
@@ -223,8 +227,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLargeWrites()
-            throws IOException {
+    public void testLargeWrites() throws IOException {
         MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
                 10, 64 << 10);
 

@@ -11,7 +11,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final boolean elastic;
     private final long capacity;
 
-    public OnHeapBytes(@NotNull BytesStore bytesStore, boolean elastic)
+    public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
             throws IllegalStateException, IllegalArgumentException {
         super(bytesStore);
         this.elastic = elastic;

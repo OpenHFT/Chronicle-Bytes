@@ -100,19 +100,15 @@ public class MoreBytesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
+
+        final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
+        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+        final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
-            final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
-            final ByteBuffer bb = ByteBuffer.wrap(bytes);
-            final Bytes<?> to = Bytes.wrapForWrite(bb);
-            try {
-                to.append(0, 1000, 3);
-            } finally {
-                to.releaseLast();
-            }
+            to.append(0, 1000, 3);
             fail("Should throw Exception");
-        } catch (BufferOverflowException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+        } finally {
+            to.releaseLast();
         }
     }
 
@@ -130,17 +126,15 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
+        final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
-            final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-            final Bytes<?> to = Bytes.wrapForWrite(bytes);
-            try {
-                to.append(0, 3.14, 2, 8);
-            } finally {
-                to.releaseLast();
-            }
+            to.append(0, 3.14, 2, 8);
             fail("Should throw Exception");
         } catch (BufferOverflowException ignore) {
             // Ignore
+        } finally {
+            to.releaseLast();
         }
     }
 
@@ -162,7 +156,7 @@ public class MoreBytesTest {
         int expected = 0;
         for (int i = 0x80; i <= 0xFF; i++)
             for (int j = 0x80; j <= 0xFF; j++) {
-                final @NotNull byte[] b = {(byte) i, (byte) j};
+                final byte[] b = {(byte) i, (byte) j};
                 final @NotNull String s = new String(b, StandardCharsets.UTF_8);
                 if (s.charAt(0) == 65533) {
                     final Bytes<?> bytes = Bytes.wrapForRead(b);

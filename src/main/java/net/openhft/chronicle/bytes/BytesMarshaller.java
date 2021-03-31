@@ -39,10 +39,11 @@ public class BytesMarshaller<T> {
     private final FieldAccess[] fields;
 
     public BytesMarshaller(@NotNull Class<T> tClass) {
-        @NotNull Map<String, Field> map = new LinkedHashMap<>();
+        final Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         fields = map.values().stream()
-                .map(FieldAccess::create).toArray(FieldAccess[]::new);
+                .map(FieldAccess::create)
+                .toArray(FieldAccess[]::new);
     }
 
     public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {

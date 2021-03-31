@@ -86,12 +86,12 @@ class ByteStringWriter extends Writer {
 
     @Override
     public void flush() {
-
+        // Does not need to do anything
     }
 
     @Override
     public void close() {
-
+        // Do nothing
     }
 
     @Override

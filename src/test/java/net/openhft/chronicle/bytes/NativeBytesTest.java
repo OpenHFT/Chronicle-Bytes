@@ -92,6 +92,10 @@ public class NativeBytesTest extends BytesTestCommon {
     public void testAppendCharArrayNonAscii() {
         Bytes b = alloc.elasticBytes(1);
         b.appendUtf8(new char[]{'Δ'}, 0, 1);
+
+        // Fails. See https://github.com/OpenHFT/Chronicle-Bytes/issues/179
+        // assertEquals("Δ", b.toString());
+
         b.releaseLast();
     }
 

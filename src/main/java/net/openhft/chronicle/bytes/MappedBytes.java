@@ -158,6 +158,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
                 '}';
     }
 
+    @Override
     public @NotNull MappedBytes write(@NotNull final byte[] bytes,
                                       final int offset,
                                       final int length)
@@ -169,6 +170,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         return this;
     }
 
+    @Override
     public @NotNull MappedBytes write(final long offsetInRDO,
                                       final byte[] bytes,
                                       int offset,
@@ -211,6 +213,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
 
     }
 
+    @Override
     public @NotNull MappedBytes write(final long writeOffset,
                                       final RandomDataInput bytes,
                                       long readOffset,
