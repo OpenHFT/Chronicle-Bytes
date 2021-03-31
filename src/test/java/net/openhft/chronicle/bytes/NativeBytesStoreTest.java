@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.junit.Assert;
 import org.junit.Test;
 
 import javax.crypto.Cipher;
@@ -35,6 +36,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;
@@ -49,6 +52,32 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         bytes.append("hello world ");
         for (int i = 0; i <= t; i++)
             bytes.append(t);
+    }
+
+    @Test
+    public void issue176StopBits() {
+        final int stepLength = 23; // A prime of reasonable size (lagom) so we save some time stepping through the iterations
+        final int maxLen = (1 << (7 * 2)) + stepLength;
+
+        final NativeBytesStore<Void> bytesStore = NativeBytesStore.nativeStoreWithFixedCapacity(maxLen + 5);
+
+        String expected = "";
+
+        for (int i = 0; i < maxLen; i += stepLength) {
+            final Bytes<byte[]> bytes = Bytes.from(expected);
+
+            bytesStore.write8bit(0, bytes);
+
+            // System.out.printf("0x%04x : 0x%02x, 0x%02x%n", i, bytesStore.readByte(0), bytesStore.readByte(1));
+
+            final StringBuilder sb = new StringBuilder();
+            bytesStore.readUtf8(0, sb);
+
+            Assert.assertEquals("failed at " + i, expected, sb.toString());
+
+            bytes.releaseLast();
+            expected = expected + "a";
+        }
     }
 
     @Test
@@ -221,7 +250,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 }
                 long time = System.nanoTime() - start;
                 if (t == 0)
-                System.out.printf("Average time was %,d ns%n", time / runs);
+                    System.out.printf("Average time was %,d ns%n", time / runs);
             }
         } finally {
             Stream.of(nbs)
