@@ -590,7 +590,7 @@ public class NativeBytesStore<U>
 
     void write8bit(long position, char[] chars, int offset, int length)
             throws IllegalStateException {
-        long addr = address + translate(position);
+        final long addr = address + translate(position);
         @Nullable Memory memory = this.memory;
         for (int i = 0; i < length; i++)
             memory.writeByte(addr + i, (byte) chars[offset + i]);
@@ -633,10 +633,10 @@ public class NativeBytesStore<U>
     }
 
     void read8bit(long position, char[] chars, int length) {
-        long addr = address + translate(position);
-        Memory memory = this.memory;
+        final long addr = address + translate(position);
+        final Memory mem = this.memory;
         for (int i = 0; i < length; i++)
-            chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
+            chars[i] = (char) (mem.readByte(addr + i) & 0xFF);
     }
 
     @Override
@@ -771,24 +771,25 @@ public class NativeBytesStore<U>
         return byteCheckSum(start(), readLimit());
     }
 
+    @Override
     public int byteCheckSum(long position, long limit) {
-        @Nullable Memory memory = this.memory;
-        assert memory != null;
+        @Nullable final Memory mem = this.memory;
+        assert mem != null;
         int b = 0;
         long ptr = address + position;
         long end = address + limit;
         for (; ptr < end - 7; ptr += 8) {
-            b += memory.readByte(ptr)
-                    + memory.readByte(ptr + 1)
-                    + memory.readByte(ptr + 2)
-                    + memory.readByte(ptr + 3)
-                    + memory.readByte(ptr + 4)
-                    + memory.readByte(ptr + 5)
-                    + memory.readByte(ptr + 6)
-                    + memory.readByte(ptr + 7);
+            b += mem.readByte(ptr)
+                    + mem.readByte(ptr + 1)
+                    + mem.readByte(ptr + 2)
+                    + mem.readByte(ptr + 3)
+                    + mem.readByte(ptr + 4)
+                    + mem.readByte(ptr + 5)
+                    + mem.readByte(ptr + 6)
+                    + mem.readByte(ptr + 7);
         }
         for (; ptr < end; ptr++) {
-            b += memory.readByte(ptr);
+            b += mem.readByte(ptr);
         }
         return b & 0xFF;
     }
@@ -800,39 +801,29 @@ public class NativeBytesStore<U>
 
     @Override
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
-        int len = (int) Math.min(length, readLimit() - offsetInRDI);
+        final int len = (int) Math.min(length, readLimit() - offsetInRDI);
         int i;
-        final long address = this.address + translate(offsetInRDI);
+        final long addr = this.address + translate(offsetInRDI);
         for (i = 0; i < len - 7; i += 8)
-            UnsafeMemory.unsafePutLong(bytes, i, memory.readLong(address + i));
+            UnsafeMemory.unsafePutLong(bytes, i, memory.readLong(addr + i));
         if (i < len - 3) {
-            UnsafeMemory.unsafePutInt(bytes, i, memory.readInt(address + i));
+            UnsafeMemory.unsafePutInt(bytes, i, memory.readInt(addr + i));
             i += 4;
         }
         for (; i < len; i++)
-            UnsafeMemory.unsafePutByte(bytes, i, memory.readByte(address + i));
+            UnsafeMemory.unsafePutByte(bytes, i, memory.readByte(addr + i));
         return len;
     }
 
     @Override
     public int peekUnsignedByte(long offset) {
-        final long address = this.address;
-        @Nullable final Memory memory = this.memory;
+        final long addr = this.address;
+        @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
-//        assert translate >= 0;
-        final long address2 = address + translate;
-//        last.writeLong(8, Thread.currentThread().getId());
-//        last.writeLong(0, offset);
-//        last.writeLong(16, translate);
-//        last.writeLong(32, maximumLimit);
-//        last.writeLong(48, addressForRead);
-//        last.writeLong(64, address2);
-//        last.writeBoolean(80, memory != null);
-//        last.writeVolatileByte(88, (byte) 1);
-        int ret = translate >= limit ? -1 :
-                memory.readByte(address2) & 0xFF;
-//        last.writeVolatileByte(88, (byte) 0xFF);
-//        last.writeLong(24, Thread.currentThread().getId());
+        final long address2 = addr + translate;
+        final int ret = translate >= limit
+                ? -1
+                : mem.readByte(address2) & 0xFF;
         return ret;
     }
 

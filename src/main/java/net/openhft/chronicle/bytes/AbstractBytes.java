@@ -46,7 +46,6 @@ public abstract class AbstractBytes<U>
     // used for debugging
     @UsedViaReflection
     private final String name;
-    @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
     protected long writePosition;

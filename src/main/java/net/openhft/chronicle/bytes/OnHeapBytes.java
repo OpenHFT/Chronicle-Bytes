@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
 
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
@@ -81,7 +82,6 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             throw new BufferOverflowException();
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
-//            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
             return;
         }
 
@@ -90,7 +90,6 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         // Size must not be more than capacity(), it may break some assumptions in BytesStore or elsewhere
         int size = (int) Math.min(size0, capacity());
 
-        //        System.out.println("resize " + endOfBuffer + " to " + size);
         // native block of 128 KiB or more have an individual memory mapping so are more expensive.
         if (endOfBuffer >= 128 << 10)
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
