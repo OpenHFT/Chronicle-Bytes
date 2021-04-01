@@ -332,9 +332,9 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
-        final long writePosition = writePosition();
-        writeCheckOffset(writePosition, bytesToSkip);
-        uncheckedWritePosition(writePosition + bytesToSkip);
+        final long wp = writePosition();
+        writeCheckOffset(wp, bytesToSkip);
+        uncheckedWritePosition(wp + bytesToSkip);
         return this;
     }
 

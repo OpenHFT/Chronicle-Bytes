@@ -45,7 +45,6 @@ public class NativeBytesStore<U>
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Field BB_ADDRESS, BB_CAPACITY, BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
-    //    static MappedBytes last;
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -209,9 +208,9 @@ public class NativeBytesStore<U>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, IllegalStateException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
-        long address = this.address;
-        if (address == 0) throwException(null);
-        memoryCopyMemory(address + from, address + to, length);
+        final long addr = this.address;
+        if (addr == 0) throwException(null);
+        memoryCopyMemory(addr + from, addr + to, length);
     }
 
     private void memoryCopyMemory(long fromAddress, long toAddress, long length)
@@ -335,6 +334,7 @@ public class NativeBytesStore<U>
         return memory.readByte(address + translate(offset));
     }
 
+    @Override
     public int readUnsignedByte(long offset)
             throws BufferUnderflowException {
         return readByte(offset) & 0xFF;
@@ -352,9 +352,9 @@ public class NativeBytesStore<U>
 
     @Override
     public long readLong(long offset) {
-        long address = this.address;
-        assert address != 0;
-        return memory.readLong(address + translate(offset));
+        long addr = this.address;
+        assert addr != 0;
+        return memory.readLong(addr + translate(offset));
     }
 
     @Override

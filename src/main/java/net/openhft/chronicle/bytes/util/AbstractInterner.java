@@ -79,7 +79,7 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
-        // TODO This needs to be reviewd.
+        // TODO This needs to be reviewed.
 //        UnsafeMemory.UNSAFE.loadFence();
         int hash = hash32(cs, length);
         int h = hash & mask;

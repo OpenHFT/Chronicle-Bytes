@@ -110,23 +110,10 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
                                 final long overlapSize,
                                 final boolean readOnly)
             throws FileNotFoundException {
-//        if (readOnly && OS.isWindows()) {
-//            Jvm.warn().on(MappedFile.class, "Read only mode not supported on Windows, defaulting to read/write");
-//            readOnly = false;
-//        }
 
         @NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
-//        try {
-        final long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
+        final long capacity = DEFAULT_CAPACITY;
         return new MappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
-/*
-        } catch (IOException e) {
-            Closeable.closeQuietly(raf);
-            @NotNull FileNotFoundException fnfe = new FileNotFoundException("Unable to open " + file);
-            fnfe.initCause(e);
-            throw fnfe;
-        }
-*/
     }
 
     @NotNull
@@ -134,22 +121,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
-
-/*
-    private void check(Throwable throwable, int[] count) {
-        for (int i = 0; i < stores.size(); i++) {
-            WeakReference<MappedBytesStore> storeRef = stores.get(i);
-            if (storeRef == null)
-                continue;
-            @Nullable MappedBytesStore mbs = storeRef.get();
-            if (mbs != null && mbs.refCount() > 0) {
-                mbs.releaseLast();
-                throwable.printStackTrace();
-                count[0]++;
-            }
-        }
-    }
-*/
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final String filename, final long chunkSize)

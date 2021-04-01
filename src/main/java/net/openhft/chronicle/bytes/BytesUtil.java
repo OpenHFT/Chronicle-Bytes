@@ -151,10 +151,7 @@ public enum BytesUtil {
             url = urlFor(name);
             file = new File(url.getFile());
         }
-        return // name.endsWith(".gz") || !file.exists() || OS.isWindows() ?
-                Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
-        //: MappedFile.readOnly(file).acquireBytesForRead(0);
-
+        return Bytes.wrapForRead(readAsBytes(url == null ? new FileInputStream(file) : open(url)));
     }
 
     public static void writeFile(String file, Bytes<byte[]> bytes)
@@ -369,7 +366,10 @@ public enum BytesUtil {
         BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
-    static class WarnUncheckedElasticBytes {
+    static final class WarnUncheckedElasticBytes {
+
+        private WarnUncheckedElasticBytes() {}
+
         static {
             Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
         }
