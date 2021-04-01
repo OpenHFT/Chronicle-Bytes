@@ -147,7 +147,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
-        assumeFalse(Jvm.isMacArm());
+        // assumeFalse(Jvm.isMacArm());
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;

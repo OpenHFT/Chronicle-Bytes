@@ -170,7 +170,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     @Test
     public void testElasticByteBuffer()
             throws IORuntimeException, BufferOverflowException {
-        assumeFalse(Jvm.isMacArm());
+        // assumeFalse(Jvm.isMacArm());
 
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
