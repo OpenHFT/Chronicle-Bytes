@@ -184,8 +184,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 bbb.writeLong(12345);
             }
 
-            System.out.println("OS.pageSize() = " + OS.pageSize());
-
+            // page size on a Mac m1 is 0x4000 and not the usual 0x1000
             final long expectedRealCapacity = Jvm.isMacArm() ? 0x8000 : 0x7000;
             assertEquals(expectedRealCapacity, bbb.realCapacity());
             final @Nullable ByteBuffer bb2 = bbb.underlyingObject();
