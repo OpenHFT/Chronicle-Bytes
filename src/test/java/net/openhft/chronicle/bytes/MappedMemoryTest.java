@@ -167,10 +167,16 @@ public class MappedMemoryTest extends BytesTestCommon {
                     Arrays.fill(chars, '.');
                     chars[chars.length - 1] = '*';
                     bytes.writeUtf8(new String(chars));
+
+                    final int pos = Math.toIntExact(bytes.writePosition());
+
+                    System.out.println("pos = " + pos);
+                    System.out.println(chars.length + stopBytes + 1);
+
                     final String text = "hello this is some very long text";
                     bytes.writeUtf8(text);
                     final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(chars.length + stopBytes + 1));
+                    assertEquals(text, textValue.substring(pos + 1));
                     assertEquals(2, bytes.refCount());
                 } finally {
                     bytes.release(test);
