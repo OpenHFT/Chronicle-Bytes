@@ -92,18 +92,8 @@ public class MappedFileTest extends BytesTestCommon {
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
 
-            System.out.println("mf.chunkSize() = " + mf.chunkSize());
-            System.out.println("mf.actualSize() = " + mf.actualSize());
-            System.out.println("mf.capacity() = " + mf.capacity());
-            System.out.println("mf.overlapSize() = " + mf.overlapSize());
-
             final ReferenceOwner test = ReferenceOwner.temporary("test");
             final MappedBytesStore bs = mf.acquireByteStore(test, chunkSize + (1 << 10));
-
-            System.out.println("bs.start() = " + bs.start());
-            System.out.println("bs.realCapacity() = " + bs.realCapacity());
-            System.out.println("bs.writePosition() = " + bs.writePosition());
-            System.out.println("bs.readPosition() = " + bs.readPosition());
 
             try {
                 assertEquals(chunkSize, bs.start());
