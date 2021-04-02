@@ -78,15 +78,23 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void testReferenceCounts()
             throws IOException {
-        assumeFalse(Jvm.isMacArm());
+/*        assumeFalse(Jvm.isMacArm());*/
 
         final File tmp = IOTools.createTempFile("testReferenceCounts");
-        final int chunkSize = OS.isWindows() ? 64 << 10 : 4 << 10;
+        final int chunkSize;
+        if (OS.isWindows()) {
+            chunkSize = 64 << 10;
+        } else if (Jvm.isMacArm()) {
+            chunkSize = 16 << 10;
+        } else
+            chunkSize = 4 << 10;
+
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
 
             final ReferenceOwner test = ReferenceOwner.temporary("test");
             final MappedBytesStore bs = mf.acquireByteStore(test, chunkSize + (1 << 10));
+
             try {
                 assertEquals(chunkSize, bs.start());
                 assertEquals(chunkSize * 2, bs.capacity());

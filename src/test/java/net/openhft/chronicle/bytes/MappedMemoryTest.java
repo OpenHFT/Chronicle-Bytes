@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -29,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.stream.IntStream;
 
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
@@ -147,7 +149,6 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
-        assumeFalse(Jvm.isMacArm());
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;
@@ -159,14 +160,20 @@ public class MappedMemoryTest extends BytesTestCommon {
                     assertEquals(1, bytes.refCount());
                     bytes.reserve(test);
                     assertEquals(2, bytes.refCount());
-                    final char[] chars = new char[OS.pageSize() * 11];
+
+                    // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
+                    final char[] chars = new char[OS.pageSize() * 7];
+
                     Arrays.fill(chars, '.');
                     chars[chars.length - 1] = '*';
                     bytes.writeUtf8(new String(chars));
+
+                    final int pos = Math.toIntExact(bytes.writePosition());
+
                     final String text = "hello this is some very long text";
                     bytes.writeUtf8(text);
                     final String textValue = bytes.toString();
-                    assertEquals(text, textValue.substring(chars.length + 4));
+                    assertEquals(text, textValue.substring(pos + 1));
                     assertEquals(2, bytes.refCount());
                 } finally {
                     bytes.release(test);

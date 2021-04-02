@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
@@ -170,7 +171,6 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     @Test
     public void testElasticByteBuffer()
             throws IORuntimeException, BufferOverflowException {
-        assumeFalse(Jvm.isMacArm());
 
         final Bytes<ByteBuffer> bbb = Bytes.elasticByteBuffer();
         try {
@@ -183,7 +183,10 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 bbb.writeSkip(1000);
                 bbb.writeLong(12345);
             }
-            assertEquals(28672, bbb.realCapacity());
+
+            // page size on a Mac m1 is 0x4000 and not the usual 0x1000
+            final long expectedRealCapacity = Jvm.isMacArm() ? 0x8000 : 0x7000;
+            assertEquals(expectedRealCapacity, bbb.realCapacity());
             final @Nullable ByteBuffer bb2 = bbb.underlyingObject();
             assertNotNull(bb2);
             assertNotSame(bb, bb2);

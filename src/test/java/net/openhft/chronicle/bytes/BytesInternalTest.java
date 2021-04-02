@@ -55,12 +55,14 @@ public class BytesInternalTest extends BytesTestCommon {
                 {"Guarded", true}
         });
     }
+/*
 
     @BeforeClass
     public static void notMacArm() {
         assumeFalse(Jvm.isMacArm());
     }
 
+*/
     @AfterClass
     public static void resetGuarded() {
         NativeBytes.resetNewGuarded();
