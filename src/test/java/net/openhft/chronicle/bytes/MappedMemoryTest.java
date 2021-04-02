@@ -161,7 +161,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                     bytes.reserve(test);
                     assertEquals(2, bytes.refCount());
 
-                    final char[] chars = new char[OS.pageSize() * 11];
+                    final char[] chars = new char[OS.pageSize() * 7];
                     // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to check the number of stop bits actually used
                     final int stopBytes = 1 + Maths.intLog2(chars.length) / 7;
                     Arrays.fill(chars, '.');
