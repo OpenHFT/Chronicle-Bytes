@@ -10,7 +10,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class BytesFieldInfo {
     private static final ClassLocal<BytesFieldInfo> CACHE = ClassLocal.withInitial(BytesFieldInfo::init);
@@ -30,10 +29,7 @@ public class BytesFieldInfo {
 
     BytesFieldInfo(Class<?> aClass) {
         this.aClass = aClass;
-        List<Field> fields = Stream.of(aClass.getDeclaredFields())
-                .filter(f -> !Modifier.isStatic(f.getModifiers()))
-                .sorted(Comparator.comparingLong(UnsafeMemory.MEMORY::getFieldOffset))
-                .collect(Collectors.toList());
+        List<Field> fields = fields(aClass);
         String prefix0 = "";
         BFIEntry entry = null;
         int longs = 0, ints = 0, shorts = 0, bytes = 0;
@@ -154,5 +150,17 @@ public class BytesFieldInfo {
                 .map(e -> e.getKey() + ": " + e.getValue().start + " to " + e.getValue().end)
                 .collect(Collectors.joining(", ")));
         return sb.append(" }").toString();
+    }
+
+    // internal only
+    public static List<Field> fields(Class clazz) {
+        List<Field> fields = new ArrayList<>();
+        while (clazz != null && clazz != Object.class) {
+            Collections.addAll(fields, clazz.getDeclaredFields());
+            clazz = clazz.getSuperclass();
+        }
+        fields.removeIf(field -> Modifier.isStatic(field.getModifiers()));
+        fields.sort(Comparator.comparingLong(UnsafeMemory.UNSAFE::objectFieldOffset));
+        return fields;
     }
 }

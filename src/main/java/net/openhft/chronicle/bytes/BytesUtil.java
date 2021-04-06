@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -32,16 +33,12 @@ import sun.misc.Unsafe;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 import static net.openhft.chronicle.core.io.IOTools.*;
@@ -70,13 +67,7 @@ public enum BytesUtil {
                 return new int[]{UnsafeMemory.UNSAFE.arrayBaseOffset(clazz)};
             return NO_INTS;
         }
-        List<Field> fields = new ArrayList<>();
-        while (clazz != null && clazz != Object.class) {
-            Collections.addAll(fields, clazz.getDeclaredFields());
-            clazz = clazz.getSuperclass();
-        }
-        fields.removeIf(field -> Modifier.isStatic(field.getModifiers()));
-        fields.sort(Comparator.comparingLong(UnsafeMemory.UNSAFE::objectFieldOffset));
+        List<Field> fields = BytesFieldInfo.fields(clazz);
         int min = 0;
         int max = 0;
         for (Field field : fields) {

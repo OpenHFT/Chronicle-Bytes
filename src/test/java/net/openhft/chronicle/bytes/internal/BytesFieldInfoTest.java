@@ -15,6 +15,9 @@ public class BytesFieldInfoTest {
         final BytesFieldInfo lookup2 = BytesFieldInfo.lookup(Groups2.class);
         assertEquals("type: BytesFieldInfo, groups: { hi: 12 to 16, pad: 16 to 48, add: 48 to 64 }", lookup2.dump());
         assertEquals("4050000", Integer.toHexString(lookup2.description()));
+        final BytesFieldInfo lookup3 = BytesFieldInfo.lookup(Groups3.class);
+        assertEquals("type: BytesFieldInfo, groups: { pad: 16 to 48, hi: 48 to 52, add: 52 to 68 }", lookup3.dump());
+        assertEquals("4050000", Integer.toHexString(lookup3.description()));
     }
 
     static class Groups1 {
@@ -35,6 +38,18 @@ public class BytesFieldInfoTest {
     static class Groups2 {
         @FieldGroup("pad")
         long pad0, pad1, pad3, pad2;
+        @FieldGroup("hi")
+        int hi99;
+        @FieldGroup("add")
+        int add1, add2, add3, add4;
+    }
+
+    static class GroupsBase {
+        @FieldGroup("pad")
+        long pad0, pad1, pad3, pad2;
+    }
+
+    static class Groups3 extends GroupsBase {
         @FieldGroup("hi")
         int hi99;
         @FieldGroup("add")
