@@ -940,7 +940,7 @@ enum BytesInternal {
             return;
         }
         if ((n & 0xFF80) == 0xFF80) {
-            out.rawWriteByte((byte) (~n & 0x7f  | 0x80));
+            out.rawWriteByte((byte) (~n & 0x7f | 0x80));
             out.rawWriteByte((byte) 0);
             return;
         }
@@ -1260,18 +1260,28 @@ enum BytesInternal {
 
     public static char readStopBitChar(@NotNull StreamingDataInput in)
             throws IORuntimeException, IllegalStateException {
-        int l;
-        if ((l = in.rawReadByte()) >= 0)
-            return (char) l;
-        return (char) readStopBit0(in, l);
+        byte b;
+        if ((b = in.rawReadByte()) >= 0)
+            return (char) b;
+        // see if it -1
+        if (b == -128 && in.peekUnsignedByte() == 0) {
+            in.readSkip(1);
+            return Character.MAX_VALUE;
+        }
+        return (char) readStopBit0(in, b);
     }
 
     public static long readStopBit(@NotNull StreamingDataInput in)
             throws IORuntimeException, IllegalStateException {
-        long l;
-        if ((l = in.rawReadByte()) >= 0)
-            return l;
-        return readStopBit0(in, l);
+        byte b;
+        if ((b = in.rawReadByte()) >= 0)
+            return b;
+        // see if it -1
+        if (b == -128 && in.peekUnsignedByte() == 0) {
+            in.readSkip(1);
+            return -1;
+        }
+        return readStopBit0(in, b);
     }
 
     static long readStopBit0(@NotNull StreamingDataInput in, long l)
@@ -1854,6 +1864,13 @@ enum BytesInternal {
     @Nullable
     public static String read8bit(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IORuntimeException, ArithmeticException, IllegalStateException {
+        if (in.peekUnsignedByte() == 0x80 && in instanceof RandomDataInput) {
+            RandomDataInput rdi = (RandomDataInput) in;
+            if (rdi.peekUnsignedByte(in.readPosition()+1) == 0) {
+                in.readSkip(2);
+                return null;
+            }
+        }
         Bytes bytes = acquireBytes();
         try {
             return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
