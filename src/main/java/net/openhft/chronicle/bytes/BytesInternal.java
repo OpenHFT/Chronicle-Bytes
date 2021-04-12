@@ -939,6 +939,11 @@ enum BytesInternal {
             out.rawWriteByte((byte) (n >> 7));
             return;
         }
+        if ((n & 0xFF80) == 0xFF80) {
+            out.rawWriteByte((byte) (~n & 0x7f));
+            out.rawWriteByte((byte) 0);
+            return;
+        }
         writeStopBit0(out, n);
     }
 

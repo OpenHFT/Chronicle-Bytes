@@ -906,4 +906,19 @@ public class BytesTest extends BytesTestCommon {
             bytes.releaseLast();
         }
     }
+
+    @Test
+    public void stopBitChar() {
+        final Bytes bytes = alloc1.fixedBytes(64);
+        for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
+            bytes.clear();
+            char ch = (char) i;
+            bytes.writeStopBit(ch);
+            bytes.writeUnsignedByte(0);
+            char c2 = bytes.readStopBitChar();
+            assertEquals(c2, c2);
+            assertEquals(0, bytes.readUnsignedByte());
+        }
+        bytes.releaseLast();
+    }
 }
