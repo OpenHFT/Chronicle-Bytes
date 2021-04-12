@@ -921,4 +921,27 @@ public class BytesTest extends BytesTestCommon {
         }
         bytes.releaseLast();
     }
+
+    @Test
+    public void stopBitLong() {
+        final Bytes bytes = alloc1.fixedBytes(64);
+        for (int i = 0; i <= 63; i++) {
+            long l = 1L << i;
+            stopBitLong0(bytes, l);
+            stopBitLong0(bytes, l - 1);
+            stopBitLong0(bytes, -l);
+            stopBitLong0(bytes, ~l);
+        }
+        bytes.releaseLast();
+    }
+
+    private void stopBitLong0(Bytes bytes, long l) {
+        bytes.clear();
+        bytes.writeStopBit(l);
+        bytes.writeUnsignedByte(0x80);
+        long l2 = bytes.readStopBit();
+        assertEquals(l, l2);
+        assertEquals(0x80, bytes.readUnsignedByte());
+    }
+
 }
