@@ -914,10 +914,10 @@ public class BytesTest extends BytesTestCommon {
             bytes.clear();
             char ch = (char) i;
             bytes.writeStopBit(ch);
-            bytes.writeUnsignedByte(0);
+            bytes.writeUnsignedByte(0x80);
             char c2 = bytes.readStopBitChar();
-            assertEquals(c2, c2);
-            assertEquals(0, bytes.readUnsignedByte());
+            assertEquals(ch, c2);
+            assertEquals(0x80, bytes.readUnsignedByte());
         }
         bytes.releaseLast();
     }

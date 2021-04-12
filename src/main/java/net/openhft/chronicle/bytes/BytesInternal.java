@@ -935,12 +935,12 @@ enum BytesInternal {
             return;
         }
         if ((n & ~0x3FFF) == 0) {
-            out.rawWriteByte((byte) ((n & 0x7f) | 0x80));
+            out.rawWriteByte((byte) (n & 0x7f | 0x80));
             out.rawWriteByte((byte) (n >> 7));
             return;
         }
         if ((n & 0xFF80) == 0xFF80) {
-            out.rawWriteByte((byte) (~n & 0x7f));
+            out.rawWriteByte((byte) (~n & 0x7f  | 0x80));
             out.rawWriteByte((byte) 0);
             return;
         }
