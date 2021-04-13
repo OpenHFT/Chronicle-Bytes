@@ -39,6 +39,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
@@ -957,6 +958,16 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void isClear() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
+        assertTrue(bytes.isClear());
+    }
+
+    @Test
+    public void isClear2() {
+        final Bytes<?> bytes = alloc1.elasticBytes(20);
+        bytes.writeInt(42);
+        assertEquals(42, bytes.readInt());
+        assertFalse(bytes.isClear());
+        bytes.clear();
         assertTrue(bytes.isClear());
     }
 
