@@ -908,6 +908,44 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
+    @Test
+    public void stopBitChar() {
+        final Bytes bytes = alloc1.fixedBytes(64);
+        for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
+            bytes.clear();
+            char ch = (char) i;
+            bytes.writeStopBit(ch);
+            bytes.writeUnsignedByte(0x80);
+            char c2 = bytes.readStopBitChar();
+            assertEquals(ch, c2);
+            assertEquals(0x80, bytes.readUnsignedByte());
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void stopBitLong() {
+        final Bytes bytes = alloc1.fixedBytes(64);
+        for (int i = 0; i <= 63; i++) {
+            long l = 1L << i;
+            stopBitLong0(bytes, l);
+            stopBitLong0(bytes, l - 1);
+            stopBitLong0(bytes, -l);
+            stopBitLong0(bytes, ~l);
+        }
+        bytes.releaseLast();
+    }
+
+    private void stopBitLong0(Bytes bytes, long l) {
+        bytes.clear();
+        bytes.writeStopBit(l);
+        bytes.writeUnsignedByte(0x80);
+        long l2 = bytes.readStopBit();
+        assertEquals(l, l2);
+        assertEquals(0x80, bytes.readUnsignedByte());
+    }
+
+
     @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {

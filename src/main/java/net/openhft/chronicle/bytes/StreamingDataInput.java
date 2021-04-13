@@ -336,9 +336,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         b.clear();
         if (readRemaining() <= 0)
             return true;
-        long len0 = this.readStopBit();
-        if (len0 == -1)
+        long len0;
+        byte b1;
+        if ((b1 = rawReadByte()) >= 0) {
+            len0 = b1;
+        } else if (b1 == -128 && peekUnsignedByte() == 0) {
+            ((StreamingDataInput) this).readSkip(1);
             return false;
+        } else {
+            len0 = BytesInternal.readStopBit0(this, b1);
+        }
         try {
             int len = Maths.toUInt31(len0);
             b.write((BytesStore) this, readPosition(), len);
