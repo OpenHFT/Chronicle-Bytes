@@ -1,14 +1,17 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.FieldGroup;
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 public class BytesFieldInfoTest {
 
     @Test
     public void lookup() {
+        assumeFalse(Jvm.isArm());
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(Groups1.class);
         assertEquals("type: BytesFieldInfo, groups: { pad: 16 to 48, other: 64 to 96, hi: 96 to 100, add: 104 to 120 }", lookup.dump());
         assertEquals("a068000", Integer.toHexString(lookup.description()));
