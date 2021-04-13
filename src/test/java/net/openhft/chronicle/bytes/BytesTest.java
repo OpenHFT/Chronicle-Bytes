@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -906,4 +907,19 @@ public class BytesTest extends BytesTestCommon {
             bytes.releaseLast();
         }
     }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
+    @Test
+    public void capacityVsWriteLimitInvariant() {
+        final Bytes<?> bytes = alloc1.elasticBytes(20);
+        assertEquals(bytes.capacity(), bytes.writeLimit());
+    }
+
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
+    @Test
+    public void isClear() {
+        final Bytes<?> bytes = alloc1.elasticBytes(20);
+        assertTrue(bytes.isClear());
+    }
+
 }
