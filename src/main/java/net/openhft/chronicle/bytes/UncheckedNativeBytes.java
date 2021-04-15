@@ -929,7 +929,8 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
-            writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(this);
+
         } else {
             final long offset = bs.readPosition();
             final long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);

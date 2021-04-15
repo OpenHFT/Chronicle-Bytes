@@ -937,6 +937,15 @@ public class BytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
+    @Test
+    public void stopBitNeg1() {
+        final Bytes bytes = alloc1.fixedBytes(64);
+        BytesInternal.writeStopBitNeg1(bytes);
+        BytesInternal.writeStopBitNeg1(bytes);
+        assertEquals(-1, bytes.readStopBit());
+        assertEquals(0xFFFF, bytes.readStopBitChar());
+        bytes.releaseLast();
+    }
     private void stopBitLong0(Bytes bytes, long l) {
         bytes.clear();
         bytes.writeStopBit(l);

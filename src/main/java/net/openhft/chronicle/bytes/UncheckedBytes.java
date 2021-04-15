@@ -239,7 +239,7 @@ public class UncheckedBytes<Underlying>
     public Bytes<Underlying> writeUtf8(String s)
             throws BufferOverflowException, IllegalStateException {
         if (s == null) {
-            writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(this);
             return this;
         }
 

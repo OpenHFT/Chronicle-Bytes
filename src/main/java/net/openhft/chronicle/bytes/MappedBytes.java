@@ -973,7 +973,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
             return this;
         }
         if (str == null) {
-            this.writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(this);
 
         } else {
             long utfLength = AppendableUtil.findUtf8Length(str);
@@ -989,7 +989,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         throwExceptionIfClosed();
 
         if (str == null) {
-            writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(this);
             return this;
         }
 
