@@ -44,6 +44,7 @@ import java.io.UTFDataFormatException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.TimeZone;
@@ -76,6 +77,7 @@ enum BytesInternal {
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
     private static final int MAX_STRING_LEN = Integer.getInteger("bytes.max-string-len", 128 * 1024);
+    private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
     static {
         try {
@@ -708,7 +710,7 @@ enum BytesInternal {
     public static void writeUtf8(@NotNull StreamingDataOutput bytes, @Nullable String str)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         if (str == null) {
-            bytes.writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(bytes);
             return;
         }
 
@@ -733,7 +735,7 @@ enum BytesInternal {
             return;
         }
         if (str == null) {
-            bytes.writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(bytes);
 
         } else {
             long utfLength = AppendableUtil.findUtf8Length(str);
@@ -926,6 +928,10 @@ enum BytesInternal {
             out.writeByte(offset++, (byte) (0x80 | (c & 0x3F)));
         }
         return offset;
+    }
+
+    public static void writeStopBitNeg1(@NotNull StreamingDataOutput out) {
+        out.writeUnsignedShort(NEG_ONE);
     }
 
     public static void writeStopBit(@NotNull StreamingDataOutput out, char n)
@@ -1866,7 +1872,7 @@ enum BytesInternal {
             throws BufferUnderflowException, IORuntimeException, ArithmeticException, IllegalStateException {
         if (in.peekUnsignedByte() == 0x80 && in instanceof RandomDataInput) {
             RandomDataInput rdi = (RandomDataInput) in;
-            if (rdi.peekUnsignedByte(in.readPosition()+1) == 0) {
+            if (rdi.peekUnsignedByte(in.readPosition() + 1) == 0) {
                 in.readSkip(2);
                 return null;
             }

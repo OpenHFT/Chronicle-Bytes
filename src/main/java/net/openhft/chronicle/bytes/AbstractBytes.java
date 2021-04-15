@@ -723,7 +723,7 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public @NotNull Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
-            writeStopBit(-1);
+            BytesInternal.writeStopBitNeg1(this);
             return this;
         }
         long readRemaining = bs.readRemaining();

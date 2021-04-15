@@ -254,7 +254,7 @@ public class BytesMarshaller<T> {
                 throw new AssertionError(e);
             }
             if (bytes == null) {
-                write.writeStopBit(-1);
+                BytesInternal.writeStopBitNeg1(write);
                 return;
             }
             long offset = bytes.readPosition();
@@ -333,7 +333,7 @@ throws IllegalStateException {
             try {
                 Object[] c = (Object[]) field.get(o);
                 if (c == null) {
-                    write.writeStopBit(-1);
+                    BytesInternal.writeStopBitNeg1(write);
                     return;
                 }
                 int size = c.length;
@@ -408,7 +408,7 @@ throws IllegalStateException {
             try {
                 Collection c = (Collection) field.get(o);
                 if (c == null) {
-                    write.writeStopBit(-1);
+                    BytesInternal.writeStopBitNeg1(write);
                     return;
                 }
                 write.writeStopBit(c.size());
@@ -488,7 +488,7 @@ throws IllegalStateException {
                 throw new AssertionError(e);
             }
             if (m == null) {
-                write.writeStopBit(-1);
+                BytesInternal.writeStopBitNeg1(write);
                 return;
             }
             write.writeStopBit(m.size());

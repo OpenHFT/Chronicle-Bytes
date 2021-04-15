@@ -167,8 +167,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S write8bit(@Nullable CharSequence cs)
             throws BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException {
-        if (cs == null)
-            return writeStopBit(-1);
+        if (cs == null) {
+            BytesInternal.writeStopBitNeg1(this);
+            return (S) this;
+        }
 
         if (cs instanceof BytesStore)
             return write8bit((BytesStore) cs);
