@@ -26,7 +26,6 @@ public class Bytes4Test {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
     public void bufferOverflow() {
         byte[] arr = new byte[4];
         final HeapBytesStore<byte[]> bs = BytesStore.wrap(arr);

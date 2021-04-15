@@ -27,6 +27,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.internal.AddressRangeAssertionUtil.isInRange;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
@@ -96,6 +97,7 @@ public class HeapBytesStore<Underlying>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
+        assert isInRange(to, capacity, length);
         MEMORY.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, Maths.toUInt31(length));
     }
 
@@ -129,17 +131,20 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
+        assert isInRange(offset, capacity, Integer.BYTES);
         return MEMORY.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
     }
 
     @Override
     public void testAndSetInt(long offset, int expected, int value)
             throws IllegalStateException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         MEMORY.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
     }
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
+        assert isInRange(offset, capacity, Long.BYTES);
         return MEMORY.compareAndSwapLong(
                 realUnderlyingObject, dataOffset + offset, expected, value);
     }
@@ -147,66 +152,77 @@ public class HeapBytesStore<Underlying>
     @Override
     public byte readByte(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Byte.BYTES);
         return MEMORY.readByte(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public short readShort(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Short.BYTES);
         return MEMORY.readShort(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public int readInt(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         return MEMORY.readInt(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public long readLong(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Long.BYTES);
         return MEMORY.readLong(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public float readFloat(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Float.BYTES);
         return MEMORY.readFloat(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public double readDouble(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Double.BYTES);
         return MEMORY.readDouble(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public byte readVolatileByte(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Short.BYTES);
         return MEMORY.readVolatileByte(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public short readVolatileShort(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Short.BYTES);
         return MEMORY.readVolatileShort(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public int readVolatileInt(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         return MEMORY.readVolatileInt(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public long readVolatileLong(long offset)
             throws BufferUnderflowException {
+        assert isInRange(offset, capacity, Long.BYTES);
         return MEMORY.readVolatileLong(realUnderlyingObject, dataOffset + offset);
     }
 
     @Override
     public long write8bit(long position, BytesStore bs) {
         int length0 = Math.toIntExact(bs.readRemaining());
+        assert isInRange(position, capacity, BytesUtil.stopBitLength(length0) + length0);
         position = BytesUtil.writeStopBit(this, position, length0);
         int i = 0;
         for (; i < length0 - 7; i += 8)
@@ -218,6 +234,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, String s, int start, int length) {
+        assert isInRange(position, capacity, BytesUtil.stopBitLength(length) + length);
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.write8bit(s, start, realUnderlyingObject, dataOffset + position, length);
         return position + length;
@@ -227,6 +244,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Byte.BYTES);
         MEMORY.writeByte(realUnderlyingObject, dataOffset + offset, b);
         return this;
     }
@@ -235,6 +253,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeShort(long offset, short i16)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Short.BYTES);
         MEMORY.writeShort(realUnderlyingObject, dataOffset + offset, i16);
         return this;
     }
@@ -243,6 +262,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeInt(long offset, int i32)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         MEMORY.writeInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
     }
@@ -251,6 +271,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         MEMORY.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
     }
@@ -259,6 +280,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeLong(long offset, long i64)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Long.BYTES);
         MEMORY.writeLong(realUnderlyingObject, dataOffset + offset, i64);
         return this;
     }
@@ -267,6 +289,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeOrderedLong(long offset, long i)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Long.BYTES);
         MEMORY.writeOrderedLong(realUnderlyingObject, dataOffset + offset, i);
         return this;
     }
@@ -275,6 +298,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeFloat(long offset, float f)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Float.BYTES);
         MEMORY.writeFloat(realUnderlyingObject, dataOffset + offset, f);
         return this;
     }
@@ -283,6 +307,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeDouble(long offset, double d)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Double.BYTES);
         MEMORY.writeDouble(realUnderlyingObject, dataOffset + offset, d);
         return this;
     }
@@ -291,6 +316,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Byte.BYTES);
         MEMORY.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
         return this;
     }
@@ -299,6 +325,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Short.BYTES);
         MEMORY.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
         return this;
     }
@@ -307,6 +334,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Integer.BYTES);
         MEMORY.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
         return this;
     }
@@ -315,6 +343,7 @@ public class HeapBytesStore<Underlying>
     @Override
     public HeapBytesStore<Underlying> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException {
+        assert isInRange(offset, capacity, Long.BYTES);
         MEMORY.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
         return this;
     }
@@ -324,6 +353,7 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
+        assert isInRange(offsetInRDO, capacity, length);
         MEMORY.copyMemory(
                 bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
         return this;
@@ -334,6 +364,7 @@ public class HeapBytesStore<Underlying>
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
         assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
+        assert isInRange(offset, capacity, length);
         if (bytes.isDirect()) {
             MEMORY.copyMemory(Jvm.address(bytes), realUnderlyingObject,
                     this.dataOffset + offsetInRDO, length);
@@ -349,6 +380,7 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> write(long writeOffset,
                                             @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
+        assert isInRange(writeOffset, capacity, length);
         if (length == (int) length) {
             int length0 = (int) length;
 
