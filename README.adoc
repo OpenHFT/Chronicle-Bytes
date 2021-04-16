@@ -68,7 +68,7 @@ The API supports.
 | peek	|  peek is an operation which returns the value of the bytes without effecting its read position |
 | stop bit compression	|  https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding |
 | search	|  is any algorithm which solves the search problem, namely, to retrieve information stored within some data structure |
-| addAndGet	| atomically adds the given value to the current value. | 
+| addAndGet	| atomically adds the given value to the current value. |
 | copy	| to transfer data from one structure to another |
 | hash	|  https://en.wikipedia.org/wiki/Hash_function 	|
 | bytes marshallable	|  a serialization funciton	|
@@ -106,9 +106,148 @@ Bytes bytes = Bytes.allocateElasticDirect();
 bytes.releaseLast(); // when it can be freed.
 ----
 
+=== Bytes capacity, read/write position and limit
+
+A Bytes buffer provides the following cursors.
+
+- start: The smallest index in the buffer which is '0L'.
+- capacity: The largest possible capacity for the buffer which is usually 2147483632 (it can be more)
+for a Bytes buffer.
+- realCapacity: The current capacity of the buffer. Bytes are resizable when it is required.
+- readLimit: The largest index that can be read from.
+- writeLimit: The largest index that can be written to.
+- readPosition: The index to read from. This index should be always smaller than writePosition.
+- writePosition: The index to write to.
+
+[#img-Bytes]
+.An illustration of a Bytes buffer with its read/write position cursors.
+image::bytes2.jpg[300,300]
+
+Figure 1 illustrates a Bytes buffer with read/write cursors. `readPosition` should always be
+less than `writePosition` and greater than or equal to `start`.
+
+=== BytesStore
+BytesStore is a block of memory with fixed size into which you can write data and later read.
+You can create a BytesStore using the bytes in a CharSequence, String, ByteBuffer or another
+BytesStore.
+
+[source,Java]
+----
+//Create a BytesStore bs using bytes in a String. This gives you a BytesStore with
+//fixed size 14.
+BytesStore bs = BytesStore.from("This is an example");
+
+//or
+//Create a BytesStore from ByteBuffer
+ByteBuffer buf = ByteBuffer.allocate(20);
+BytesStore bs2 = BytesStore.wrap(buf);
+----
+You can see the buffer cursors of bs.
+
+[source,Java]
+----
+//Prints out buffer properties of bs
+System.out.println("readlimit  " + bs.readLimit());
+System.out.println("writelimit " + bs.writeLimit());
+System.out.println("readposition " + bs.readPosition());
+System.out.println("writeposition " + bs.writePosition());
+System.out.println("capacity " + bs.capacity());
+System.out.println("real capacity " + bs.realCapacity());
+System.out.println("start " + bs.start());
+----
+
+prints
+
+[source,text]
+----
+readlimit  18
+writelimit 18
+readposition 0
+writeposition 0
+capacity 18
+real capacity 18
+start 0
+----
+You can write into a BytesStore from an offset, however if your data is larger than the
+capacity of BytesStore, the ByteStore will not extend.
+
+NOTE: The returned object (BytesStore) is unchecked in terms of memory access, therefore the user code
+must make every effort not to exceed the underlying memory segment limit. Otherwise, the result is
+unspecified side effects including silently writing over other memory segments, and crashing the JVM.
+
+[source,Java]
+----
+//Write String "Another example.." into bs starting from offset 0.
+bs.writeUtf8(0,"Another example..");
+
+//Prints out: "Another example.."
+System.out.println( bs.to8bitString());
+----
+
+==== Bytes versus BytesStore
+- In contrast to a BytesStore, a Bytes extends if you write into it data which is larger than the realCapacity of
+a Bytes.
+
+[source,Java]
+----
+//Create a Bytes with initial capacity 14 and write into it "This is an example" that
+//needs 18 bytes.
+Bytes<ByteBuffer> bb = Bytes.elasticByteBuffer(14);
+bb.write("This is an example");
+----
+The realCapacity of bb extends to 4096. Now, the cursors of bb Bytes are:
+
+[source,text]
+----
+readLimit  18
+writeLimit 2147483632
+readPosition 0
+writePosition 18
+capacity 2147483632
+realCapacity 4096
+start 0
+----
+- Bytes gives you access to the cursors, thus you can use them to raed/write from/into a
+desired index. In contrast, you cannot use the cursors with a BytesStore.
+
+[source,Java]
+----
+//Create a Bytes with initial capacity 14 and write into it "This is an example" that
+//needs 18 bytes.
+bb.writePosition(5);
+bb.write("sentence was overwritten from index 5 using writePosition cursor");
+
+//Prints out: "This sentence was overwritten from index 5 using writePosition cursor"
+System.out.println(by.toString());
+
+//reading bb from index 43
+bb.readPosition(43);
+String st = bb.to8bitString();
+
+//Prints out: "using writePosition cursor"
+System.out.println(st);
+----
+
+- In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced
+data is accessed in a thread-safe manner.
+
+//Figure 2 illustrates multiple threads accessing data in a
+//BytesStore.
+//
+//[#img-Thread]
+//.Multiple threads accessing a BytesStore.
+//image::thread.jpg[300,300]
+
+//=== bytesForRead() and bytesForWrite()
+//you can create Bytes from a section of a BytesStore or a Bytes using bytesForRead() or
+//bytesForWrite() methods. The new Bytes is not elastic and its size depends on `Limit` and `Position`
+//cursors.
+
+
+
 === Flipping Bytes
 
-ByteBuffer needs to be flipped to switch between reading and writing.
+Standard Java ByteBuffer needs to be flipped to switch between reading and writing.
 
 Bytes holds a read position and a write position allowing you to write and immediately read without flipping.
 
@@ -229,7 +368,7 @@ Chronicle Bytes supports variants of the write primitives which have a store bar
 
 NOTE: write ordered doesn't stall the pipeline to wait for the write to occur, making it possible for a single thread to read an old value after the ordered write.
 
-=== Working wth text
+=== Working with text
 
 You can also write and read text to Bytes for low level, direct to native memory text processing.
 
@@ -267,7 +406,7 @@ double f64 = bytes.parseDouble();
 double f64b = bytes.parseDouble();
 ----
 
-NOTE: There are less methods for text as 8, 16 and 24 bit can use methods for `int`, Unsigned int can use the `long` method.
+NOTE: There are fewer methods for text as 8, 16 and 24 bit can use methods for `int`, Unsigned int can use the `long` method.
 
 === Reading and Writing Strings
 
