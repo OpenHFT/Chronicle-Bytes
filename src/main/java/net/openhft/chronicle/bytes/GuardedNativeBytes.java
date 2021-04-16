@@ -117,7 +117,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
     @Override
     public long readStopBit()
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
-        expectByte(STOP_T);
+        expectByte(STOP_T, SHORT_T);
         return super.readStopBit();
     }
 
@@ -191,6 +191,13 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
     private void expectByte(byte expected) throws IllegalStateException {
         byte type = super.readByte();
         if (type != expected)
+            throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]
+                    + " but was " + STRING_FOR_CODE[type & 0xFF]);
+    }
+
+    private void expectByte(byte expected, byte expected2) throws IllegalStateException {
+        byte type = super.readByte();
+        if (type != expected && type != expected2)
             throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
     }

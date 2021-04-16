@@ -222,7 +222,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, ArithmeticException, IllegalStateException {
         try {
             if (s == null)
-                writeStopBit(-1);
+                BytesInternal.writeStopBitNeg1(this);
             else
                 write8bit(s, 0, (int) Math.min(writeRemaining(), s.length()));
             return (S) this;
