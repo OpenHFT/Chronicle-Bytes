@@ -458,13 +458,13 @@ public class BytesTest extends BytesTestCommon {
 
             b.clear();
             b.appendUtf8(i);
-            b.appendUtf8(0);
+            b.appendUtf8("\r\n");
             @NotNull StringBuilder sb = new StringBuilder();
             b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
             assertEquals(Character.toString((char) i), sb.toString());
             sb.setLength(0);
             b.readPosition(0);
-            b.parseUtf8(sb, (ch, nextCh) -> ch <= 0);
+            b.parseUtf8(sb, (ch, nextCh) -> ch < ' ' && nextCh < ' ');
             assertEquals(Character.toString((char) i), sb.toString());
         }
         postTest(b);
