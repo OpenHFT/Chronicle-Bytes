@@ -367,7 +367,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     @Test
     public void serializeCollections() {
-        assumeTrue(name.equals("Unguarded"));
+//        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
         try {
             final MyCollections mc = new MyCollections();
@@ -399,9 +399,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
                     "   ae 02 ae 05 48 65 6c 6c 6f ae 05 57 6f 72 6c 64 # words\n" +
                     "   ae 02 91 cd cc cc cc cc cc f4 3f a7 0b 00 00 00 # scoreCountMap\n" +
                     "   00 00 00 00 91 9a 99 99 99 99 99 01 40 a7 16 00\n" +
-                    "   00 00 00 00 00 00 ae 02 ae 07 52 55 4e 54 49 4d # policies\n" +
-                    "   45 ae 05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 # numbers\n" +
-                    "   0c 00 00 00 a6 7b 00 00 00\n";
+                    "   00 00 00 00 00 00 ae 02 07 52 55 4e 54 49 4d 45 # policies\n" +
+                    "   05 43 4c 41 53 53 ae 03 a6 01 00 00 00 a6 0c 00 # numbers\n" +
+                    "   00 00 a6 7b 00 00 00\n";
             assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
         } finally {
             bytes.releaseLast();
