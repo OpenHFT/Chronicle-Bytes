@@ -27,6 +27,7 @@ import java.nio.BufferUnderflowException;
 /**
  * BytesStore to wrap memory mapped data.
  */
+@Deprecated(/* to be moved to internal in x.22*/)
 public class MappedBytesStore extends NativeBytesStore<Void> {
     private final MappedFile mappedFile;
     private final long start;

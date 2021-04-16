@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
  * @see NoBytesStore
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
+@Deprecated(/* to be moved to internal in x.22*/)
 public enum ReleasedBytesStore implements BytesStore {
     RELEASED_BYTES_STORE;
 

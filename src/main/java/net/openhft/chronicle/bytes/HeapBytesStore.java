@@ -32,6 +32,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 /**
  * Wrapper for Heap ByteBuffers and arrays.
  */
+@Deprecated(/* to be moved to internal in x.22*/)
 @SuppressWarnings("restriction")
 public class HeapBytesStore<Underlying>
         extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {

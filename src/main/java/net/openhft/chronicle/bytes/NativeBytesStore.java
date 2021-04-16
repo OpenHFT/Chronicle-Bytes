@@ -36,6 +36,7 @@ import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
+@Deprecated(/* to be moved to internal in x.22*/)
 public class NativeBytesStore<Underlying>
         extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;

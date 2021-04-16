@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
 import java.nio.BufferUnderflowException;
 
+@Deprecated(/* to be moved to internal in x.22*/)
 public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends AbstractReferenceCounted
         implements BytesStore<B, Underlying> {
