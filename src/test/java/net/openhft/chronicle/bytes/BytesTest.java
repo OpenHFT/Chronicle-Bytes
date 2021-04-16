@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -39,7 +38,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Scanner;
-import java.util.function.Supplier;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
@@ -452,19 +450,21 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testParseUtf8High()
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
-        assumeFalse(NativeBytes.areNewGuarded());
-        assumeFalse(alloc1 == HEAP_EMBEDDED);
 
-        @NotNull Bytes b = alloc1.elasticBytes(0xFFFFF);
-        for (int i = ' '; i < Character.MAX_VALUE; i++)
-            if (Character.isValidCodePoint(i))
-                b.appendUtf8(i);
-        b.appendUtf8(0);
-        @NotNull StringBuilder sb = new StringBuilder();
-        b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
-        sb.setLength(0);
-        b.readPosition(0);
-        b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+        @NotNull Bytes b = alloc1.elasticBytes(4);
+        for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
+            if (!Character.isValidCodePoint(i))
+                continue;
+
+            b.clear();
+            b.appendUtf8(i);
+            b.appendUtf8(0);
+            @NotNull StringBuilder sb = new StringBuilder();
+            b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
+            sb.setLength(0);
+            b.readPosition(0);
+            b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+        }
         postTest(b);
     }
 
@@ -964,7 +964,7 @@ public class BytesTest extends BytesTestCommon {
     }
 
 
-//    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
+    //    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
