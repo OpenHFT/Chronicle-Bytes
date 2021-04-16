@@ -1847,6 +1847,13 @@ enum BytesInternal {
     @Nullable
     public static String readUtf8(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException, ArithmeticException {
+        if (in.peekUnsignedByte() == 0x80 && in instanceof RandomDataInput) {
+            RandomDataInput rdi = (RandomDataInput) in;
+            if (rdi.peekUnsignedByte(in.readPosition() + 1) == 0) {
+                in.readSkip(2);
+                return null;
+            }
+        }
         StringBuilder sb = acquireStringBuilder();
         return in.readUtf8(sb) ? SI.intern(sb) : null;
     }
