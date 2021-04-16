@@ -32,6 +32,7 @@ import org.junit.runners.Parameterized;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -55,11 +56,10 @@ public class NativeBytesTest extends BytesTestCommon {
         });
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testWriteBytesWhereResizeNeeded0()
             throws IORuntimeException, BufferUnderflowException, BufferOverflowException {
-        Bytes b = alloc.elasticBytes(1);
+        Bytes<?> b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(1, b.realCapacity());
@@ -71,11 +71,10 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testWriteBytesWhereResizeNeeded()
             throws IllegalArgumentException, IORuntimeException, BufferUnderflowException, BufferOverflowException {
-        Bytes b = alloc.elasticBytes(1);
+        Bytes<?> b = alloc.elasticBytes(1);
         assertEquals(b.start(), b.readLimit());
         assertEquals(b.capacity(), b.writeLimit());
         assertEquals(1, b.realCapacity());
@@ -87,13 +86,47 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testAppendCharArrayNonAscii() {
-        Bytes b = alloc.elasticBytes(1);
+        Bytes<?> b = alloc.elasticBytes(4);
+        b.appendUtf8('Δ');
+        final byte[] bytes = "Δ".getBytes(StandardCharsets.UTF_8);
+        assertEquals(Bytes.wrapForRead(bytes).toHexString(), b.toHexString());
+
+        StringBuilder sb = new StringBuilder();
+        b.parseUtf8(sb, 2);
+        assertEquals("Δ", sb.toString());
+
+        b.readPosition(0);
+        b.parseUtf8(sb, false, 1);
+        assertEquals("Δ", sb.toString());
+
+        b.clear();
         b.appendUtf8(new char[]{'Δ'}, 0, 1);
+        b.parseUtf8(sb, 2);
+        assertEquals("Δ", sb.toString());
+
+        b.readPosition(0);
+        assertEquals(new String(bytes, ISO_8859_1), b.toString());
         b.releaseLast();
     }
+
+    @Test(expected = UTFDataFormatRuntimeException.class )
+    public void testAppendCharArrayNonAsciiToShort() {
+        Bytes<?> b = alloc.elasticBytes(4);
+        try {
+            b.appendUtf8('Δ');
+            final byte[] bytes = "Δ".getBytes(StandardCharsets.UTF_8);
+            assertEquals(Bytes.wrapForRead(bytes).toHexString(), b.toHexString());
+
+            StringBuilder sb = new StringBuilder();
+            b.parseUtf8(sb, 1);
+            fail();
+        } finally {
+            b.releaseLast();
+        }
+    }
+
 
     @Test
     public void testResizeTwoPagesToThreePages() {

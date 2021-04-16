@@ -487,11 +487,22 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         parseUtf8(sb, length);
     }
 
+    /**
+     * parse a UTF8 string.
+     * @param sb buffer to copy into
+     * @param encodedLength length of the UTF encoded data in bytes
+     */
     default void parseUtf8(Appendable sb, int encodedLength)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         parseUtf8(sb, true, encodedLength);
     }
 
+    /**
+     * parse a UTF8 string.
+     * @param sb buffer to copy into
+     * @param utf true if the length is the UTF-8 encoded length, false if the length is the length of chars
+     * @param length to limit the read.
+     */
     default void parseUtf8(Appendable sb, boolean utf, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
