@@ -48,7 +48,7 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * The read position must be start() &lt;= readPosition() &amp;&amp; readPosition() &lt;= readLimit() &amp;&amp; readPosition &lt; safeLimit()
+     * The read position must be {@code start() <= readPosition() && readPosition() <= readLimit() && readPosition < safeLimit()}
      *
      * @return position to read from.
      */
@@ -57,7 +57,7 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * The read position must be readPosition() &lt;= writePosition() &amp;&amp; writePosition() &lt;= writeLimit()
+     * The write position must be {@code readPosition() <= writePosition() && writePosition() <= writeLimit()}
      *
      * @return position to write to.
      */

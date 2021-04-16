@@ -37,7 +37,7 @@ import java.nio.charset.StandardCharsets;
 import static java.lang.Math.min;
 
 /**
- * A immutable reference to some bytes with fixed extents. This can be shared safely across thread
+ * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
  */
@@ -169,7 +169,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * Returns if the {@code readPosition} is at the {@code start} and
      * the {@code writeLimit} is at the {@code end}.
      * <p>
-     * I.e {@code start() == readPosition() &amp;&amp; writeLimit() == capacity()}
+     * I.e {@code start() == readPosition() && writeLimit() == capacity()}
      *
      * @return if the {@code readPosition} is at the {@code start} and
      * the {@code writeLimit} is at the {@code end}
