@@ -452,7 +452,7 @@ public class BytesTest extends BytesTestCommon {
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
 
         @NotNull Bytes b = alloc1.elasticBytes(4);
-        for (int i = Character.MIN_VALUE; i <= Character.MAX_VALUE; i++) {
+        for (int i = ' '; i <= Character.MAX_VALUE; i++) {
             if (!Character.isValidCodePoint(i))
                 continue;
 
@@ -461,9 +461,11 @@ public class BytesTest extends BytesTestCommon {
             b.appendUtf8(0);
             @NotNull StringBuilder sb = new StringBuilder();
             b.parseUtf8(sb, StopCharTesters.CONTROL_STOP);
+            assertEquals(Character.toString((char) i), sb.toString());
             sb.setLength(0);
             b.readPosition(0);
-            b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
+            b.parseUtf8(sb, (c1, c2) -> c1 <= 0);
+            assertEquals(Character.toString((char) i), sb.toString());
         }
         postTest(b);
     }

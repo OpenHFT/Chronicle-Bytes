@@ -31,10 +31,10 @@ public interface StopCharsTester {
      * <p>Note: for safety reasons, you should stop on a 0 byte or throw an IllegalStateException.
      *
      * @param ch  to test, 0 should return true or throw an exception.
-     * @param ch2 to test, 0 should return true or throw an exception.
+     * @param peekNextCh previous char to test, 0 should return true or throw an exception.
      * @return if this byte is a stop character.
      */
-    boolean isStopChar(int ch, int ch2);
+    boolean isStopChar(int ch, int peekNextCh);
 
     @NotNull
     default StopCharsTester escaping() {

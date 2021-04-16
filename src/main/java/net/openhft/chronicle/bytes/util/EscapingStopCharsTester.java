@@ -29,7 +29,7 @@ public class EscapingStopCharsTester implements StopCharsTester {
     }
 
     @Override
-    public boolean isStopChar(int ch, int ch2) {
+    public boolean isStopChar(int ch, int peekNextCh) {
         if (escaped) {
             escaped = false;
             return false;
@@ -38,6 +38,6 @@ public class EscapingStopCharsTester implements StopCharsTester {
             escaped = true;
             return false;
         }
-        return sct.isStopChar(ch, ch2);
+        return sct.isStopChar(ch, peekNextCh);
     }
 }
