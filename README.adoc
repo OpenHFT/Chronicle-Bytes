@@ -113,7 +113,7 @@ A Bytes buffer provides the following cursors.
 - start: The smallest index in the buffer which is '0L'.
 - capacity: The largest possible capacity for the buffer which is usually 2147483632 (it can be more)
 for a Bytes buffer.
-- realCapacity: The current capacity of the buffer. Bytes are resizable when it is required.
+- realCapacity: The current capacity of the buffer. Bytes are extended when it is required.
 - readLimit: The largest index that can be read from.
 - writeLimit: The largest index that can be written to.
 - readPosition: The index to read from. This index should be always smaller than writePosition.
@@ -134,7 +134,7 @@ BytesStore.
 [source,Java]
 ----
 //Create a BytesStore bs using bytes in a String. This gives you a BytesStore with
-//fixed size 14.
+//fixed size 18.
 BytesStore bs = BytesStore.from("This is an example");
 
 //or
@@ -146,13 +146,13 @@ You can see the buffer cursors of bs.
 
 [source,Java]
 ----
-//Prints out buffer properties of bs
-System.out.println("readlimit  " + bs.readLimit());
-System.out.println("writelimit " + bs.writeLimit());
-System.out.println("readposition " + bs.readPosition());
-System.out.println("writeposition " + bs.writePosition());
+//Print cursors of bs.
+System.out.println("readLimit  " + bs.readLimit());
+System.out.println("writeLimit " + bs.writeLimit());
+System.out.println("readPosition " + bs.readPosition());
+System.out.println("writePosition " + bs.writePosition());
 System.out.println("capacity " + bs.capacity());
-System.out.println("real capacity " + bs.realCapacity());
+System.out.println("realCapacity " + bs.realCapacity());
 System.out.println("start " + bs.start());
 ----
 
@@ -160,12 +160,12 @@ prints
 
 [source,text]
 ----
-readlimit  18
-writelimit 18
-readposition 0
-writeposition 0
+readLimit  18
+writeLimit 18
+readPosition 0
+writePosition 0
 capacity 18
-real capacity 18
+realCapacity 18
 start 0
 ----
 You can write into a BytesStore from an offset, however if your data is larger than the
@@ -185,8 +185,8 @@ System.out.println( bs.to8bitString());
 ----
 
 ==== Bytes versus BytesStore
-- In contrast to a BytesStore, a Bytes extends if you write into it data which is larger than the realCapacity of
-a Bytes.
+- In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the
+realCapacity of the Bytes.
 
 [source,Java]
 ----
@@ -207,20 +207,19 @@ capacity 2147483632
 realCapacity 4096
 start 0
 ----
-- Bytes gives you access to the cursors, thus you can use them to raed/write from/into a
+- Bytes gives you access to the cursors, thus you can use them to read/write from/into a
 desired index. In contrast, you cannot use the cursors with a BytesStore.
 
 [source,Java]
 ----
-//Create a Bytes with initial capacity 14 and write into it "This is an example" that
-//needs 18 bytes.
+//Write another data starting from index 5 which needs more bytes therefore bb extends.
 bb.writePosition(5);
 bb.write("sentence was overwritten from index 5 using writePosition cursor");
 
 //Prints out: "This sentence was overwritten from index 5 using writePosition cursor"
 System.out.println(by.toString());
 
-//reading bb from index 43
+//Read bb from index 43
 bb.readPosition(43);
 String st = bb.to8bitString();
 
@@ -231,17 +230,10 @@ System.out.println(st);
 - In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced
 data is accessed in a thread-safe manner.
 
-//Figure 2 illustrates multiple threads accessing data in a
-//BytesStore.
-//
-//[#img-Thread]
-//.Multiple threads accessing a BytesStore.
-//image::thread.jpg[300,300]
-
-//=== bytesForRead() and bytesForWrite()
-//you can create Bytes from a section of a BytesStore or a Bytes using bytesForRead() or
-//bytesForWrite() methods. The new Bytes is not elastic and its size depends on `Limit` and `Position`
-//cursors.
+=== bytesForRead() and bytesForWrite()
+You can create Bytes from a section of a BytesStore or a Bytes using bytesForRead() or
+bytesForWrite() methods. The new Bytes is not elastic and its size depends on `Limit` and `Position`
+cursors.
 
 
 
