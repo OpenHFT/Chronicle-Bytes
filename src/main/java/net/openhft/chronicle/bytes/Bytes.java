@@ -42,9 +42,10 @@ import java.nio.charset.StandardCharsets;
  * Bytes is a pointer to a region of memory within a BytesStore. It can be for a fixed region of
  * memory or an "elastic" buffer which can be resized, but not for a fixed region. <p></p> This is a
  * BytesStore which is mutable and not thread safe. It has a write position and read position which
- * must follow these constraints <p></p> start() &lt;= readPosition() &lt;= writePosition() &lt;=
- * writeLimit() &lt;= capacity() <p></p> Also readLimit() == writePosition() and readPosition()
- * &lt;= safeLimit(); <p></p>
+ * must follow these constraints <p></p> {@code start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()}
+ * <p></p> Also {@code readLimit() == writePosition() && readPosition() <= safeLimit()}
+ * <p></p>
+ *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<Underlying> extends
