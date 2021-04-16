@@ -72,7 +72,7 @@ public class BytesTest extends BytesTestCommon {
     public void throwExceptionIfReleased() {
         Bytes bytes = alloc1.elasticBytes(16);
         ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
-        bytes.releaseLast();
+        postTest(bytes);
         try {
             ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
             fail();
@@ -87,7 +87,7 @@ public class BytesTest extends BytesTestCommon {
         for (int i = 0; i < 4; i++)
             bytes.writeIntAdv('1', 1);
         assertEquals("1111", bytes.toString());
-        bytes.releaseLast();
+        postTest(bytes);
     }
 
     @Test
@@ -96,7 +96,7 @@ public class BytesTest extends BytesTestCommon {
         for (int i = 0; i < 4; i++)
             bytes.writeLongAdv('1', 1);
         assertEquals("1111", bytes.toString());
-        bytes.releaseLast();
+        postTest(bytes);
     }
 
     @Test
@@ -111,7 +111,7 @@ public class BytesTest extends BytesTestCommon {
             bytes.writePosition(offset + 8);
             assertEquals(expected, bytes.readLong(offset));
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -129,7 +129,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(0x11, bytes.readUnsignedByte(1));
 
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -154,7 +154,7 @@ public class BytesTest extends BytesTestCommon {
 
         assertEquals(hist, histB);
         assertEquals(hist2, histC);
-        bytes.releaseLast();
+        postTest(bytes);
     }
 
     @Test
@@ -171,7 +171,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
             copy.releaseLast();
         } finally {
-            bbb.releaseLast();
+            postTest(bbb);
         }
     }
 
@@ -195,7 +195,7 @@ public class BytesTest extends BytesTestCommon {
                     "000000f0 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "... truncated", bytes.toHexString(256));
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -211,9 +211,9 @@ public class BytesTest extends BytesTestCommon {
             @NotNull String s = bytes.toHexString();
             Bytes bytes2 = Bytes.fromHexString(s);
             assertEquals(s, bytes2.toHexString());
-            bytes2.releaseLast();
+            postTest(bytes2);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -229,8 +229,8 @@ public class BytesTest extends BytesTestCommon {
         assertEquals(bytes2.toString(), intern);
         String intern2 = utf8StringInterner.intern(bytes1);
         assertEquals(bytes1.toString(), intern2);
-        bytes1.releaseLast();
-        bytes2.releaseLast();
+        postTest(bytes1);
+        postTest(bytes2);
     }
 
     @Test
@@ -264,7 +264,7 @@ public class BytesTest extends BytesTestCommon {
             testSBD(b, 0.1, "00000000 9F EE B3 99 CC E6 B3 99  4D                      ········ M       \n");
             testSBD(b, Double.NaN, "00000000 BF 7E                                            ·~               \n");
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -287,7 +287,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("Hello World", s);
             assertEquals(1, bytes.refCount());
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
             assertEquals(0, bytes.refCount());
         }
     }
@@ -299,7 +299,7 @@ public class BytesTest extends BytesTestCommon {
         try {
             to.write(array);
         } finally {
-            to.releaseLast();
+            postTest(to);
         }
     }
 
@@ -310,7 +310,7 @@ public class BytesTest extends BytesTestCommon {
 
         to.writeSome(bb);
         assertEquals("World", Bytes.wrapForRead(bb).toString());
-        to.releaseLast();
+        postTest(to);
     }
 
     @Test
@@ -324,7 +324,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("rld", from.toString());
             assertEquals(0, from.readPosition());
         } finally {
-            from.releaseLast();
+            postTest(from);
         }
     }
 
@@ -346,7 +346,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(0, bytes.readPositionRemaining(4, 0).readIncompleteLong());
 
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -365,7 +365,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(25, bytes.writePosition());
             assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -378,7 +378,7 @@ public class BytesTest extends BytesTestCommon {
                 throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -392,7 +392,7 @@ public class BytesTest extends BytesTestCommon {
                 throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -402,7 +402,7 @@ public class BytesTest extends BytesTestCommon {
         try {
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -412,7 +412,7 @@ public class BytesTest extends BytesTestCommon {
         try {
             bytes.writeInt(-1, 1);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -445,7 +445,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("bye", scan.nextLine());
             assertEquals("for now", scan.nextLine());
             assertFalse(scan.hasNext());
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -465,7 +465,7 @@ public class BytesTest extends BytesTestCommon {
         sb.setLength(0);
         b.readPosition(0);
         b.parseUtf8(sb, (c1, c2) -> c2 <= 0);
-        b.releaseLast();
+        postTest(b);
     }
 
     @Test
@@ -477,7 +477,7 @@ public class BytesTest extends BytesTestCommon {
 
             @NotNull BigDecimal bd = b.readBigDecimal();
             assertEquals(new BigDecimal(d), bd);
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -490,7 +490,7 @@ public class BytesTest extends BytesTestCommon {
 
             @NotNull BigDecimal bd = b.parseBigDecimal();
             assertEquals(new BigDecimal(d), bd);
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -510,10 +510,10 @@ public class BytesTest extends BytesTestCommon {
         b.readWithLength(b2);
         assertEquals("world", b2.toString());
 
-        b.releaseLast();
-        b2.releaseLast();
-        hello.releaseLast();
-        world.releaseLast();
+        postTest(b);
+        postTest(b2);
+        postTest(hello);
+        postTest(world);
     }
 
     @Test
@@ -526,7 +526,7 @@ public class BytesTest extends BytesTestCommon {
                 assertEquals(s, b.toString());
             }
         }
-        b.releaseLast();
+        postTest(b);
     }
 
     @Test
@@ -537,7 +537,7 @@ public class BytesTest extends BytesTestCommon {
             b.clear().appendBase16(value);
             assertEquals(s, b.toString());
         }
-        b.releaseLast();
+        postTest(b);
     }
 
     @Test
@@ -550,7 +550,7 @@ public class BytesTest extends BytesTestCommon {
             b.move(3, 5, 3);
             assertEquals("Hlo o o rld", b.toString());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -561,7 +561,7 @@ public class BytesTest extends BytesTestCommon {
         b.append("0123456789");
         b.move(3, 1, 3);
         assertEquals("0345456789", b.toString());
-        b.releaseLast();
+        postTest(b);
         b.move(3, 5, 3);
     }
 
@@ -572,7 +572,7 @@ public class BytesTest extends BytesTestCommon {
         b.append("0123456789abcdefg");
         b.move(1, 3, 10);
         assertEquals("012123456789adefg", b.toString());
-        b.releaseLast();
+        postTest(b);
     }
 
     @Test
@@ -582,7 +582,7 @@ public class BytesTest extends BytesTestCommon {
         b.append("0123456789abcdefg");
         b.move(3, 1, 10);
         assertEquals("03456789abcbcdefg", b.toString());
-        b.releaseLast();
+        postTest(b);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -592,7 +592,7 @@ public class BytesTest extends BytesTestCommon {
         b.append("Hello World");
         b.bytesStore().move(3, 1, 3);
         assertEquals("Hlo o World", b.toString());
-        b.releaseLast();
+        postTest(b);
         BackgroundResourceReleaser.releasePendingResources();
         b.bytesStore().move(3, 5, 3);
     }
@@ -606,7 +606,7 @@ public class BytesTest extends BytesTestCommon {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -619,7 +619,7 @@ public class BytesTest extends BytesTestCommon {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -632,7 +632,7 @@ public class BytesTest extends BytesTestCommon {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -645,7 +645,7 @@ public class BytesTest extends BytesTestCommon {
         } catch (DecoratedBufferUnderflowException ex) {
             assertFalse(b.unchecked());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -664,7 +664,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals('H', b.uncheckedReadUnsignedByte());
             assertEquals(0xFF, b.uncheckedReadUnsignedByte());
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -682,7 +682,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(4, b.readVolatileLong(7));
 
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -708,7 +708,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(0x54ab5df8, b.hashCode());
 
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -723,7 +723,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(NATIVE, b.readEnum(Allocator.class));
 
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -735,7 +735,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("03:25:45.678", b.toString());
 
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -747,7 +747,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("20031020", b.toString());
 
         } finally {
-            b.releaseLast();
+            postTest(b);
         }
     }
 
@@ -761,14 +761,14 @@ public class BytesTest extends BytesTestCommon {
         for (int i = 0; i < length; i++) {
             from.write(i, a, 0L, 1);
         }
-        a.releaseLast();
+        postTest(a);
 
         try {
             to.write(from, 0L, length);
             assertEquals(from.readLong(0), to.readLong(0));
         } finally {
-            from.releaseLast();
-            to.releaseLast();
+            postTest(from);
+            postTest(to);
         }
     }
 
@@ -789,8 +789,8 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(a, b);
             assertEquals(a.bytesStore(), b.bytesStore());
         } finally {
-            a.releaseLast();
-            b.releaseLast();
+            postTest(a);
+            postTest(b);
         }
     }
 
@@ -803,7 +803,7 @@ public class BytesTest extends BytesTestCommon {
             a.append(hello);
             assertEquals(a.toString(), a.to8bitString());
         } finally {
-            a.releaseLast();
+            postTest(a);
         }
     }
 
@@ -817,7 +817,7 @@ public class BytesTest extends BytesTestCommon {
             // only fails when assertions are off
             assertEquals(0, BytesInternal.parseDouble(bytes), 0);
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -836,7 +836,7 @@ public class BytesTest extends BytesTestCommon {
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -859,9 +859,9 @@ public class BytesTest extends BytesTestCommon {
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
-            bytes.releaseLast();
-            nbytes.releaseLast();
-            nbytes2.releaseLast();
+            postTest(bytes);
+            postTest(nbytes);
+            postTest(nbytes2);
         }
     }
 
@@ -883,9 +883,9 @@ public class BytesTest extends BytesTestCommon {
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
-            bytes.releaseLast();
-            nbytes.releaseLast();
-            nbytes2.releaseLast();
+            postTest(bytes);
+            postTest(nbytes);
+            postTest(nbytes2);
         }
     }
 
@@ -905,7 +905,7 @@ public class BytesTest extends BytesTestCommon {
                 sb.append(Integer.toString(i, 36));
             }
         } finally {
-            bytes.releaseLast();
+            postTest(bytes);
         }
     }
 
@@ -921,7 +921,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(ch, c2);
             assertEquals(0x80, bytes.readUnsignedByte());
         }
-        bytes.releaseLast();
+        postTest(bytes);
     }
 
     @Test
@@ -934,7 +934,7 @@ public class BytesTest extends BytesTestCommon {
             stopBitLong0(bytes, -l);
             stopBitLong0(bytes, ~l);
         }
-        bytes.releaseLast();
+        postTest(bytes);
     }
 
     @Test
@@ -944,8 +944,16 @@ public class BytesTest extends BytesTestCommon {
         BytesInternal.writeStopBitNeg1(bytes);
         assertEquals(-1, bytes.readStopBit());
         assertEquals(0xFFFF, bytes.readStopBitChar());
+        postTest(bytes);
+    }
+
+    private void postTest(Bytes bytes) {
+        bytes.clear();
+        assertTrue(bytes.isClear());
+        assertEquals(0, bytes.readRemaining());
         bytes.releaseLast();
     }
+
     private void stopBitLong0(Bytes bytes, long l) {
         bytes.clear();
         bytes.writeStopBit(l);
@@ -956,28 +964,17 @@ public class BytesTest extends BytesTestCommon {
     }
 
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
+//    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
         assertEquals(bytes.capacity(), bytes.writeLimit());
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void isClear() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
         assertTrue(bytes.isClear());
+        bytes.releaseLast();
     }
-
-    @Test
-    public void isClear2() {
-        final Bytes<?> bytes = alloc1.elasticBytes(20);
-        bytes.writeInt(42);
-        assertEquals(42, bytes.readInt());
-        assertFalse(bytes.isClear());
-        bytes.clear();
-        assertTrue(bytes.isClear());
-    }
-
 }

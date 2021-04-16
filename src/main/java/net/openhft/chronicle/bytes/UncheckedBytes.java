@@ -40,7 +40,9 @@ public class UncheckedBytes<Underlying>
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes)
             throws IllegalStateException {
-        super((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore(), underlyingBytes.writePosition(), underlyingBytes.writeLimit());
+        super((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore(),
+                underlyingBytes.writePosition(),
+                Math.min(underlyingBytes.writeLimit(), underlyingBytes.realCapacity()));
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
     }
