@@ -464,7 +464,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(Character.toString((char) i), sb.toString());
             sb.setLength(0);
             b.readPosition(0);
-            b.parseUtf8(sb, (c1, c2) -> c1 <= 0);
+            b.parseUtf8(sb, (ch, nextCh) -> ch <= 0);
             assertEquals(Character.toString((char) i), sb.toString());
         }
         postTest(b);
