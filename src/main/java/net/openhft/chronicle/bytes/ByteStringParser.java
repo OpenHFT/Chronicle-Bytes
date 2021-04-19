@@ -194,7 +194,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
-     * @return a float.
+     * @return a float  or -0.0 if there were no digits present
      */
     default float parseFloat()
             throws BufferUnderflowException, IllegalStateException {
@@ -206,7 +206,7 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
      * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()
      *
-     * @return a double.
+     * @return a double or -0.0 if there were no digits present
      */
     default double parseDouble()
             throws BufferUnderflowException, IllegalStateException {

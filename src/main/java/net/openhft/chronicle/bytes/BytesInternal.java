@@ -973,7 +973,7 @@ enum BytesInternal {
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
-            out.rawWriteByte((byte) (n & 0x7f));
+            out.rawWriteByte((byte) n);
             return;
         }
         if ((n & ~0x3FFF) == 0) {
@@ -987,7 +987,7 @@ enum BytesInternal {
     public static long writeStopBit(@NotNull RandomDataOutput out, long offset, long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
-            out.writeByte(offset++, (byte) (n & 0x7f));
+            out.writeByte(offset++, (byte) n);
             return offset;
         }
         if ((n & ~0x3FFF) == 0) {
@@ -2225,7 +2225,7 @@ enum BytesInternal {
                     ch = in.rawReadByte();
                     break;
             }
-            int tens = 0;
+            int tens = 0, digits = 0;
             while (true) {
                 if (ch >= '0' && ch <= '9') {
                     while (value >= MAX_VALUE_DIVIDE_10) {
@@ -2234,6 +2234,7 @@ enum BytesInternal {
                     }
                     value = value * 10 + (ch - '0');
                     decimalPlaces++;
+                    digits++;
 
                 } else if (ch == '.') {
                     decimalPlaces = 0;
@@ -2249,6 +2250,8 @@ enum BytesInternal {
                     break;
                 ch = in.rawReadByte();
             }
+            if (digits == 0)
+                return -0.0;
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
 

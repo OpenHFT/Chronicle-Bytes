@@ -150,6 +150,18 @@ public class BytesInternalTest extends BytesTestCommon {
     }
 
     @Test
+    public void parseDoubleEmpty() {
+        for (String s : ", , .,-,-0,-0.0,x, .e".split(","))
+            assertEquals(s,0, Double.compare(-0.0, Bytes.from(s).parseDouble()));
+    }
+
+    @Test
+    public void parseDoubleEmptyZero() {
+        for (String s : "0, 0, .0,0-,0x, .0e".split(","))
+            assertEquals(s,0, Double.compare(0.0, Bytes.from(s).parseDouble()));
+    }
+
+    @Test
     public void parseDoubleScientificNegative() {
         String strDouble = "6.1E-4";
         double expected = 6.1E-4;
