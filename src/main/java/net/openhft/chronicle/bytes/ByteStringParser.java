@@ -238,6 +238,16 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     void lastDecimalPlaces(int lastDecimalPlaces);
 
     /**
+     * @return the last number had digits
+     */
+    boolean lastNumberHadDigits();
+
+    /**
+     * @param lastNumberHadDigits set the last number had digits
+     */
+    void lastNumberHadDigits(boolean lastNumberHadDigits);
+
+    /**
      * Skip text until a terminating character is reached.
      *
      * @param tester to stop at

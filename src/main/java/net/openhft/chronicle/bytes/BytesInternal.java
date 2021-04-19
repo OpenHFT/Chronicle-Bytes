@@ -2199,6 +2199,7 @@ enum BytesInternal {
         int exp = 0;
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
+        boolean digits = false;
         int ch;
         do {
             ch = in.rawReadByte() & 0xFF;
@@ -2225,7 +2226,7 @@ enum BytesInternal {
                     ch = in.rawReadByte();
                     break;
             }
-            int tens = 0, digits = 0;
+            int tens = 0;
             while (true) {
                 if (ch >= '0' && ch <= '9') {
                     while (value >= MAX_VALUE_DIVIDE_10) {
@@ -2234,7 +2235,7 @@ enum BytesInternal {
                     }
                     value = value * 10 + (ch - '0');
                     decimalPlaces++;
-                    digits++;
+                    digits = true;
 
                 } else if (ch == '.') {
                     decimalPlaces = 0;
@@ -2250,7 +2251,7 @@ enum BytesInternal {
                     break;
                 ch = in.rawReadByte();
             }
-            if (digits == 0)
+            if (!digits)
                 return -0.0;
             if (decimalPlaces < 0)
                 decimalPlaces = 0;
@@ -2259,7 +2260,9 @@ enum BytesInternal {
 
             return asDouble(value, exp, negative, decimalPlaces);
         } finally {
-            ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
+            final ByteStringParser bsp = (ByteStringParser) in;
+            bsp.lastDecimalPlaces(decimalPlaces);
+            bsp.lastNumberHadDigits(digits);
         }
     }
 
@@ -2289,9 +2292,15 @@ enum BytesInternal {
         long num = 0;
         boolean negative = false;
         int b = in.peekUnsignedByte();
+        while (b >= 0 && b <= ' ') {
+            in.readSkip(1);
+            b = in.peekUnsignedByte();
+        }
+        boolean digits = false;
         if (b == '0') {
             in.readSkip(1);
             b = in.peekUnsignedByte();
+            digits = true;
             if (b == 'x' || b == 'X') {
                 in.readSkip(1);
                 return parseLongHexaDecimal(in);
@@ -2302,6 +2311,7 @@ enum BytesInternal {
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
+                digits = true;
             } else if (b == '-') {
                 negative = true;
             } else if (b == ']' || b == '}') {
@@ -2316,6 +2326,7 @@ enum BytesInternal {
                 break;
             }
         }
+        ((ByteStringParser) in).lastNumberHadDigits(digits);
         return negative ? -num : num;
     }
 
@@ -2364,26 +2375,34 @@ enum BytesInternal {
         long num = 0;
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
+        boolean digits = false, first = true;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
             // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
                 decimalPlaces++;
+                digits = true;
+                first = false;
             } else if (b == '.') {
                 decimalPlaces = 0;
+                first = false;
             } else if (b == '-') {
                 negative = true;
+                first = false;
             } else if (b == ']' || b == '}') {
                 in.readSkip(-1);
                 break;
             } else if (b == '_') {
                 // ignore
-            } else {
+                first = false;
+            } else if (!first || b > ' ') {
                 break;
             }
         }
-        ((ByteStringParser) in).lastDecimalPlaces(decimalPlaces);
+        final ByteStringParser bsp = (ByteStringParser) in;
+        bsp.lastDecimalPlaces(decimalPlaces);
+        bsp.lastNumberHadDigits(digits);
         return negative ? -num : num;
     }
 

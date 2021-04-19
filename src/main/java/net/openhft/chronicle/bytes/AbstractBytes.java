@@ -50,6 +50,7 @@ public abstract class AbstractBytes<Underlying>
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
+    private boolean lastNumberHadDigits = false;
 
     static class ReportUnoptimised {
         static {
@@ -1172,6 +1173,26 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public void lastDecimalPlaces(int lastDecimalPlaces) {
         this.lastDecimalPlaces = Math.max(0, lastDecimalPlaces);
+    }
+
+    @Override
+    public boolean lastNumberHadDigits() {
+        return lastNumberHadDigits;
+    }
+
+    @Override
+    public void lastNumberHadDigits(boolean lastNumberHadDigits) {
+        this.lastNumberHadDigits = lastNumberHadDigits;
+    }
+
+    @Override
+    public BytesStore<Bytes<Underlying>, Underlying> copy() throws IllegalStateException {
+        return null;
+    }
+
+    @Override
+    public boolean isElastic() {
+        return false;
     }
 
     @Override

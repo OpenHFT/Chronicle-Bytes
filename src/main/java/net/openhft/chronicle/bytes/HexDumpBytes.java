@@ -634,6 +634,16 @@ public class HexDumpBytes
         base.lastDecimalPlaces(lastDecimalPlaces);
     }
 
+    @Override
+    public boolean lastNumberHadDigits() {
+        return base.lastNumberHadDigits();
+    }
+
+    @Override
+    public void lastNumberHadDigits(boolean lastNumberHadDigits) {
+base.lastNumberHadDigits(lastNumberHadDigits);
+    }
+
     @NotNull
     @Override
     public BigDecimal readBigDecimal()
