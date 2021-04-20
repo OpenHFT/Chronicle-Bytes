@@ -294,7 +294,7 @@ start 0
 
 . When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity`and the new Bytes is *not* elastic.
 
-Regardless if bytesForRead() or byteForWrite() is used, you can both read and write from/into the new Bytes using cursors.
+Regardless if bytesForRead() or bytesForWrite() is used, you can both read and write from/into the new Bytes using cursors.
 [source,Java]
 ----
 //Create a Bytes bb with default size (256 bytes) and write a text into it.
