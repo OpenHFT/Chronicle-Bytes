@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.nio.channels.FileLock;
 import java.nio.channels.OverlappingFileLockException;
 
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 public class LockingByteableTest {
@@ -29,10 +30,34 @@ public class LockingByteableTest {
                 BinaryLongReference blr = new BinaryLongReference();
                 blr.bytesStore(mbs, 0, 8);
                 try (FileLock fl = blr.lock(true)) {
+                    assertNotNull(fl);
+                }
+                try (FileLock fl = blr.lock(true)) {
+                    assertNotNull(fl);
                 }
             }
         }
     }
+
+    @Test
+    public void tryLockableShared() throws IOException {
+        final String tmp = IOTools.tempName("lockableShared");
+        new File(tmp).deleteOnExit();
+
+        for (int i = 0; i < 3; i++) {
+            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10)) {
+                BinaryLongReference blr = new BinaryLongReference();
+                blr.bytesStore(mbs, 0, 8);
+                try (FileLock fl = blr.tryLock(true)) {
+                    assertNotNull(fl);
+                }
+                try (FileLock fl = blr.tryLock(true)) {
+                    assertNotNull(fl);
+                }
+            }
+        }
+    }
+
 
     @Test(expected = OverlappingFileLockException.class)
     public void doubleLockableShared() throws IOException {
