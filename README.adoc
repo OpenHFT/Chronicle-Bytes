@@ -121,7 +121,7 @@ for a Bytes buffer.
 
 [#img-Bytes]
 .An illustration of a Bytes buffer with its read/write position cursors.
-image::bytes2.jpg[300,300]
+image::images/bytes2.jpg[300,300]
 
 Figure 1 illustrates a Bytes buffer with read/write cursors. `readPosition` should always be
 less than `writePosition` and greater than or equal to `start`.
