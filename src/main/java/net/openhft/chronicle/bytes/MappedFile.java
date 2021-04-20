@@ -579,6 +579,6 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
      * Calls tryLock on the underlying file channel
      */
     public FileLock tryLock(long position, long size, boolean shared) throws IOException {
-        return fileChannel.lock(position, size, shared);
+        return fileChannel.tryLock(position, size, shared);
     }
 }

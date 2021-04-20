@@ -138,6 +138,6 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * Calls tryLock on the underlying file channel
      */
     public FileLock tryLock(long position, long size, boolean shared) throws IOException {
-        return mappedFile.lock(position, size, shared);
+        return mappedFile.tryLock(position, size, shared);
     }
 }
