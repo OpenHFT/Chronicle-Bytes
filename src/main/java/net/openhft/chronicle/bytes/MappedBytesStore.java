@@ -22,7 +22,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
 import java.nio.BufferUnderflowException;
+import java.nio.channels.FileLock;
 
 /**
  * BytesStore to wrap memory mapped data.
@@ -121,5 +123,21 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public long readPosition() {
         return start();
+    }
+
+
+    /**
+     * Calls lock on the underlying file channel
+     */
+    public FileLock lock(long position, long size, boolean shared) throws IOException {
+
+        return mappedFile.lock(position, size, shared);
+    }
+
+    /**
+     * Calls tryLock on the underlying file channel
+     */
+    public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+        return mappedFile.lock(position, size, shared);
     }
 }

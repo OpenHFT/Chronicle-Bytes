@@ -19,13 +19,17 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.MappedBytesStore;
+import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.channels.FileLock;
 
 @SuppressWarnings("rawtypes")
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
@@ -62,7 +66,9 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         if (this.bytes != null) {
             this.bytes.release(this);
         }
+        bytes.readByte(offset); // wake it up if it's not pointing to anything yet.
         this.bytes = bytes.bytesStore();
+
         this.bytes.reserve(this);
     }
 
@@ -82,7 +88,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return bytesStore().addressForRead(offset);
     }
 
-/* TODO FIX
+/* TODO FIX in x.22
         @Override
     protected void finalize()
 throws Throwable {
@@ -94,5 +100,23 @@ throws Throwable {
     protected boolean threadSafetyCheck(boolean isUsed) {
         // References are thread safe
         return true;
+    }
+
+    @Override
+    public FileLock lock(boolean shared) throws IOException {
+        if (bytesStore() instanceof MappedBytesStore) {
+            final MappedBytesStore mbs = (MappedBytesStore) bytesStore();
+            return mbs.lock(offset, maxSize(), shared);
+        }
+        return Byteable.super.lock(shared);
+    }
+
+    @Override
+    public FileLock tryLock(boolean shared) throws IOException {
+        if (bytesStore() instanceof MappedBytesStore) {
+            final MappedBytesStore mbs = (MappedBytesStore) bytesStore();
+            return mbs.tryLock(offset, maxSize(), shared);
+        }
+        return Byteable.super.tryLock(shared);
     }
 }
