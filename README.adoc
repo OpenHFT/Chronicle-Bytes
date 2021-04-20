@@ -231,12 +231,124 @@ System.out.println(st);
 data is accessed in a thread-safe manner.
 
 === bytesForRead() and bytesForWrite()
-You can create Bytes from a section of a BytesStore or a Bytes using bytesForRead() or
-bytesForWrite() methods. The new Bytes is not elastic and its size depends on `Limit` and `Position`
-cursors.
+Using bytesForRead() or bytesForWrite() methods, you can create Bytes from a section of a BytesStore
+or a Bytes . The size of the new Bytes depends on `Limit` and `Position` cursors of the original Object.
 
+- Create bytesForRead/Write From BytesStore:
 
+. When you use bytesForWrite() `readLimit` and `writePosition` cursors are set to `start`.
 
+. When you use bytesForRead(), `readPosition` is set to `start`, and `readLimit` and `writePosition` cursors
+are set to `realCapacity`.
+
+The new Bytes is not elastic and whether you use bytesForRead() or bytesForWrite() you can read and write from/into
+the new Bytes using cursors.
+
+[source,Java]
+----
+//Create a BytesStore bs using bytes in a String.
+BytesStore bs = BytesStore.from("This is an example");
+
+//Create a Bytes from bs using bytesForRead().
+Bytes bfr = bs.bytesForRead();
+
+//Create a Bytes from bs using bytesForwrite().
+Bytes bfw = bs.bytesForWrite();
+----
+The cursors of bs:
+[source,text]
+----
+readLimit  18
+writeLimit 18
+readPosition 0
+writePosition 0
+capacity 18
+realCapacity 18
+start 0
+----
+
+The cursors of bfr:
+
+[source,text]
+----
+readLimit  18
+writeLimit 18
+readPosition 0
+writePosition 18
+capacity 18
+realCapacity 18
+start 0
+----
+The cursors of bfw:
+
+[source,text]
+----
+readLimit  0
+writeLimit 18
+readPosition 0
+writePosition 0
+capacity 18
+realCapacity 18
+start 0
+----
+
+- Create bytesForRead/Write from a Bytes:
+. When you use bytesForWrite() `writeLimit` is set to `capacity` besides, the new Bytes is elastic.
+
+. When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity`
+besides, the new Bytes is not elastic.
+
+Whether you use bytesForRead() or byteForWrite(), You can both read and write from/into the new Bytes
+using cursors.
+[source,Java]
+----
+//Create a Bytes bb with default size (256 bytes) and write a text into it.
+Bytes<ByteBuffer> bb = Bytes.elasticByteBuffer();
+bb.write("This is an example");
+
+//Create a Bytes bfr2 from bb using bytesForRead().
+Bytes bfr2 = bb.bytesForRead();
+
+//Create a Bytes bfw2 from bb using bytesForWrite().
+Bytes bfw2 = bb.bytesForWrite();
+----
+
+The cursors of bb:
+
+[source,text]
+----
+readLimit  18
+writeLimit 2147483632
+readPosition 0
+writePosition 18
+capacity 2147483632
+realCapacity 256
+start 0
+----
+The cursors of bfr2:
+
+[source,text]
+----
+readLimit  18
+writeLimit 256
+readPosition 0
+writePosition 18
+capacity 2147483632
+realCapacity 256
+start 0
+----
+The cursors of bfw2:
+
+[source,text]
+----
+readLimit  18
+writeLimit 2147483632
+readPosition 0
+writePosition 18
+capacity 2147483632
+realCapacity 256
+start 0
+----
 === Flipping Bytes
 
 Standard Java ByteBuffer needs to be flipped to switch between reading and writing.
