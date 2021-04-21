@@ -23,9 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
-import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -44,14 +42,32 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class MappedBytes extends AbstractBytes<Void> implements Closeable {
+public class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable {
 
     private static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
     private final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
     private MappedBytesStore bytesStore;
-    private boolean closed;
     private long lastActualSize = 0;
+    private boolean disableThreadSafetyCheck;
+
+    private final AbstractCloseable closeable = new AbstractCloseable() {
+        @Override
+        protected void performClose() throws IllegalStateException {
+            MappedBytes.this.performClose();
+        }
+
+        @Override
+        protected boolean threadSafetyCheck(boolean isUsed) throws IllegalStateException {
+            return disableThreadSafetyCheck || super.threadSafetyCheck(isUsed);
+        }
+    };
+
+    @Override
+    public void clearUsedByThread() {
+        super.clearUsedByThread();
+        closeable.clearUsedByThread();
+    }
 
     // assume the mapped file is reserved already.
     protected MappedBytes(@NotNull final MappedFile mappedFile)
@@ -326,7 +342,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public long realCapacity() {
 
         try {
-            throwExceptionIfClosed();
             return lastActualSize = mappedFile.actualSize();
 
         } catch (Exception e) {
@@ -433,6 +448,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     protected void writeCheckOffset(final long offset, final long adding)
             throws BufferOverflowException, IllegalStateException {
 
+        throwExceptionIfClosed();
         if (offset < 0 || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException(offset);
         if (bytesStore == null || !bytesStore.inside(offset, checkSize(adding))) {
@@ -935,31 +951,44 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
     public void release(ReferenceOwner id)
             throws IllegalStateException {
         super.release(id);
-        closed |= refCount() <= 0;
+        if (refCount() <= 0)
+            closeable.close();
     }
 
     @Override
     public void releaseLast(ReferenceOwner id)
             throws IllegalStateException {
         super.releaseLast(id);
-        closed = true;
+        closeable.close();
     }
 
     @Override
     public void close() {
-        if (closed)
-            return;
+        closeable.close();
+    }
+
+    void performClose() {
         try {
-            release(INIT);
+            if (refCount() > 0)
+                release(INIT);
         } catch (IllegalStateException e) {
             Jvm.warn().on(getClass(), e);
         }
-        closed = true;
     }
 
     @Override
     public boolean isClosed() {
-        return closed;
+        return closeable.isClosed();
+    }
+
+    @Override
+    public void warnAndCloseIfNotClosed() {
+        closeable.warnAndCloseIfNotClosed();
+    }
+
+    @Override
+    public void throwExceptionIfClosed() throws IllegalStateException {
+        closeable.throwExceptionIfClosed();
     }
 
     @NotNull
@@ -1132,5 +1161,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable {
         }
 //        super.writeCheckOffset(offset, adding);
         return bytesStore.compareAndSwapLong(offset, expected, value);
+    }
+
+
+    public MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck) {
+        this.disableThreadSafetyCheck = disableThreadSafetyCheck;
+        return this;
     }
 }
