@@ -368,7 +368,7 @@ public class BytesInternalTest {
     @Test
     public void testNoneDirectWritePerformance() {
         final int size = 64;
-        Bytes a = Bytes.allocateElasticOnHeap(size);
+        Bytes a = Bytes.allocateElasticOnHeap(size + 8);
         Bytes b = Bytes.allocateElasticOnHeap(size + 8);
         Bytes c = Bytes.allocateElasticOnHeap(size + 8);
         Bytes d = Bytes.allocateElasticOnHeap(size + 8);
