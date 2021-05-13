@@ -2676,8 +2676,12 @@ enum BytesInternal {
     public static void writeFully(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
-        for (; i < length - 3; i += 4)
+        for (; i < length - 7; i += 8)
+            sdo.rawWriteLong(bytes.readLong(offset + i));
+        if (i < length - 3) {
             sdo.rawWriteInt(bytes.readInt(offset + i));
+            i += 4;
+        }
         for (; i < length; i++)
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
