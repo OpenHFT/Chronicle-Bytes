@@ -390,6 +390,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         }
     }
 
+    /**
+     * This single-argument version of the call returns an address which is guarateed safe for a contiguous
+     * read up to the overlap size.
+     *
+     * NOTE: If called with an offset which is already in the overlap region this call with therefore
+     *       prompt a remapping to the new segment, which in turn may unmap the current segment.
+     *       Any other handles using data in the current segment may therefore result in a memory violation
+     *       when next used.
+     *
+     *       If manipulating offsets which may reside in the overlap region, always use the 2-argument version below
+     */
     @Override
     public long addressForRead(final long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -400,6 +411,17 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         return bytesStore.addressForRead(offset);
     }
 
+    /**
+     * This two-argument version of the call returns an address which is guaranteed safe for a contiguous
+     * read up to the requested buffer size.
+     *
+     * NOTE: In contrast to the single-argument version this call will not prompt a remapping if
+     *       called within the overlap region (provided the full extent remains in the overlap region)
+     *
+     *       This version is therefore safe to use cooperatively with other handles in a defined sequence 
+     *       of bytes (eg returned from a DocumentContext) regardless of whether the handles span the
+     *       overlap region
+     */
     @Override
     public long addressForRead(final long offset, final int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
