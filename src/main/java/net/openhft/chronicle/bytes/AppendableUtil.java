@@ -320,19 +320,23 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull char[] chars) {
-        long utflen = chars.length;/* use charAt instead of copying String to char array */
-        for (char c : chars) {
+    public static long findUtf8Length(@NotNull char[] chars, int offset, int length) {
+        long utflen = length;
+        for (int i = offset, end = offset + length; i < end; i++) {
+            char c = chars[i];
             if (c <= 0x007F) {
                 continue;
             }
             if (c <= 0x07FF) {
                 utflen++;
-
             } else {
                 utflen += 2;
             }
         }
         return utflen;
+    }
+
+    public static long findUtf8Length(@NotNull char[] chars) {
+        return findUtf8Length(chars, 0, chars.length);
     }
 }
