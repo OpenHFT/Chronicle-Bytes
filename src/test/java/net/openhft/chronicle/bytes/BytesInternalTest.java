@@ -425,9 +425,9 @@ public class BytesInternalTest {
                         }
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
-                            f.clear().writeSkip(t);
+                            g.clear().writeSkip(t);
                             start6 = System.nanoTime();
-                            simpleWriteFully4(a, o, s, f);
+                            simpleWriteFully4(a, o, s, g);
                             end6 = System.nanoTime();
                         }
                         time1 += end1 - start1;
