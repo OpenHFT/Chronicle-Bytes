@@ -36,11 +36,12 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZonedDateTime;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentSkipListSet;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assume.assumeFalse;
-import static org.junit.Assume.assumeTrue;
 
 @RunWith(Parameterized.class)
 public class BytesMarshallableTest extends BytesTestCommon {
@@ -409,6 +410,136 @@ public class BytesMarshallableTest extends BytesTestCommon {
     }
 
     @Test
+    public void collectionsNotInitializedInConstructor() {
+        final Bytes<?> bytes = new HexDumpBytes();
+
+        try {
+            final UninitializedCollections uc = new UninitializedCollections();
+
+            uc.justList = new ArrayList<>();
+            uc.justList.add("a");
+            uc.justList.add("b");
+
+            uc.justCollection = new LinkedList<>();
+            uc.justCollection.add("c");
+            uc.justCollection.add("d");
+            uc.justCollection.add("e");
+
+            uc.justSortedSet = new TreeSet<>();
+            uc.justSortedSet.add(6L);
+
+            uc.justNavigableSet = new TreeSet<>();
+            uc.justNavigableSet.add(7L);
+            uc.justNavigableSet.add(8L);
+            uc.justNavigableSet.add(9L);
+            uc.justNavigableSet.add(10L);
+
+            uc.justBytesMarshallableCollection = new ArrayList<>();
+            final BM3 bm3 = new BM3();
+            bm3.value = 11L;
+            uc.justBytesMarshallableCollection.add(bm3);
+
+            uc.justSet = new HashSet<>();
+            uc.justSet.add(RetentionPolicy.RUNTIME);
+
+            uc.justMap = new HashMap<>();
+            uc.justMap.put("i", 12L);
+            uc.justMap.put("j", 13L);
+            uc.justMap.put("k", 14L);
+            uc.justMap.put("l", 15L);
+            uc.justMap.put("m", 16L);
+
+            uc.justNavigableMap = new TreeMap<>();
+
+            uc.justSortedMap = new TreeMap<>();
+            uc.justSortedMap.put(17, "n");
+            uc.justSortedMap.put(18, "o");
+
+            uc.writeMarshallable(bytes);
+
+            UninitializedCollections uc2 = new UninitializedCollections();
+            uc2.readMarshallable(bytes);
+
+            assertEquals(uc, uc2);
+
+            final String expected = "   02 01 61 01 62                                  # justList\n" +
+                    "   03 01 63 01 64 01 65                            # justCollection\n" +
+                    "   01 06 00 00 00 00 00 00 00                      # justSortedSet\n" +
+                    "   04 07 00 00 00 00 00 00 00 08 00 00 00 00 00 00 # justNavigableSet\n" +
+                    "   00 09 00 00 00 00 00 00 00 0a 00 00 00 00 00 00\n" +
+                    "   00 01                                           # justBytesMarshallableCollection\n" +
+                    "      0b 00 00 00 00 00 00 00                         # value\n" +
+                    "   01 07 52 55 4e 54 49 4d 45                      # justSet\n" +
+                    "   80 00                                           # nullCollection\n" +
+                    "   05 01 69 0c 00 00 00 00 00 00 00 01 6a 0d 00 00 # justMap\n" +
+                    "   00 00 00 00 00 01 6b 0e 00 00 00 00 00 00 00 01\n" +
+                    "   6c 0f 00 00 00 00 00 00 00 01 6d 10 00 00 00 00\n" +
+                    "   00 00 00 00                                     # justNavigableMap\n" +
+                    "   02 11 00 00 00 01 6e 12 00 00 00 01 6f          # justSortedMap\n" +
+                    "   80 00                                           # nullMap\n";
+
+            final String expectedG = "   ae 02 ae 01 61 ae 01 62                         # justList\n" +
+                    "   ae 03 ae 01 63 ae 01 64 ae 01 65                # justCollection\n" +
+                    "   ae 01 a7 06 00 00 00 00 00 00 00                # justSortedSet\n" +
+                    "   ae 04 a7 07 00 00 00 00 00 00 00 a7 08 00 00 00 # justNavigableSet\n" +
+                    "   00 00 00 00 a7 09 00 00 00 00 00 00 00 a7 0a 00\n" +
+                    "   00 00 00 00 00 00 ae 01                         # justBytesMarshallableCollection\n" +
+                    "      a7 0b 00 00 00 00 00 00 00                      # value\n" +
+                    "   ae 01 07 52 55 4e 54 49 4d 45                   # justSet\n" +
+                    "   a5 80 00                                        # nullCollection\n" +
+                    "   ae 05 ae 01 69 a7 0c 00 00 00 00 00 00 00 ae 01 # justMap\n" +
+                    "   6a a7 0d 00 00 00 00 00 00 00 ae 01 6b a7 0e 00\n" +
+                    "   00 00 00 00 00 00 ae 01 6c a7 0f 00 00 00 00 00\n" +
+                    "   00 00 ae 01 6d a7 10 00 00 00 00 00 00 00 ae 00 # justNavigableMap\n" +
+                    "   ae 02 a6 11 00 00 00 ae 01 6e a6 12 00 00 00 ae # justSortedMap\n" +
+                    "   01 6f a5 80 00                                  # nullMap\n";
+
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void testSpecificCollections() {
+        final Bytes<?> bytes = new HexDumpBytes();
+
+        try {
+            final SpecificUninitializedCollections suc = new SpecificUninitializedCollections();
+
+            suc.specificSet = new ConcurrentSkipListSet<>();
+            suc.specificSet.add("a");
+            suc.specificSet.add("b");
+            suc.specificSet.add("c");
+
+            suc.specificMap = new ConcurrentHashMap<>();
+            suc.specificMap.put(1L, 10L);
+            suc.specificMap.put(2L, 20L);
+
+            suc.writeMarshallable(bytes);
+
+            SpecificUninitializedCollections suc2 = new SpecificUninitializedCollections();
+            suc2.readMarshallable(bytes);
+
+            assertEquals(suc, suc2);
+
+            final String expected = "   03 01 61 01 62 01 63                            # specificSet\n" +
+                    "   02 01 00 00 00 00 00 00 00 0a 00 00 00 00 00 00 # specificMap\n" +
+                    "   00 02 00 00 00 00 00 00 00 14 00 00 00 00 00 00\n" +
+                    "   00\n";
+
+            final String expectedG = "   ae 03 ae 01 61 ae 01 62 ae 01 63                # specificSet\n" +
+                    "   ae 02 a7 01 00 00 00 00 00 00 00 a7 0a 00 00 00 # specificMap\n" +
+                    "   00 00 00 00 a7 02 00 00 00 00 00 00 00 a7 14 00\n" +
+                    "   00 00 00 00 00 00\n";
+
+            assertEquals(NativeBytes.areNewGuarded() ? expectedG : expected, bytes.toHexString());
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
     public void nested() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -549,10 +680,36 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     private static final class BM2 implements BytesMarshallable {
         String text;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BM2 bm2 = (BM2) o;
+            return Objects.equals(text, bm2.text);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(text);
+        }
     }
 
     private static final class BM3 implements BytesMarshallable {
         long value;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BM3 bm3 = (BM3) o;
+            return value == bm3.value;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(value);
+        }
     }
 
     private static final class BMA implements BytesMarshallable {
@@ -561,5 +718,64 @@ public class BytesMarshallableTest extends BytesTestCommon {
         float[] floats;
         long[] longs;
         double[] doubles;
+    }
+
+    private static final class UninitializedCollections implements BytesMarshallable {
+        List<String> justList;
+        Collection<String> justCollection;
+        SortedSet<Long> justSortedSet;
+        NavigableSet<Long> justNavigableSet;
+        Collection<BM3> justBytesMarshallableCollection;
+        Set<RetentionPolicy> justSet;
+        Collection<Integer> nullCollection;
+
+        Map<String, Long> justMap;
+        NavigableMap<String, BM2> justNavigableMap;
+        SortedMap<Integer, String> justSortedMap;
+        Map<Integer, Integer> nullMap;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            UninitializedCollections that = (UninitializedCollections) o;
+            return Objects.equals(justList, that.justList) &&
+                    Objects.equals(justCollection, that.justCollection) &&
+                    Objects.equals(justSortedSet, that.justSortedSet) &&
+                    Objects.equals(justNavigableSet, that.justNavigableSet) &&
+                    Objects.equals(justBytesMarshallableCollection, that.justBytesMarshallableCollection) &&
+                    Objects.equals(justSet, that.justSet) &&
+                    Objects.equals(nullCollection, that.nullCollection) &&
+                    Objects.equals(justMap, that.justMap) &&
+                    Objects.equals(justNavigableMap, that.justNavigableMap) &&
+                    Objects.equals(justSortedMap, that.justSortedMap) &&
+                    Objects.equals(nullMap, that.nullMap);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(justList, justCollection, justSortedSet, justNavigableSet,
+                    justBytesMarshallableCollection, justSet, nullCollection, justMap, justNavigableMap,
+                    justSortedMap, nullMap);
+        }
+    }
+
+    private static final class SpecificUninitializedCollections implements BytesMarshallable {
+        ConcurrentSkipListSet<String> specificSet;
+        ConcurrentHashMap<Long, Long> specificMap;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SpecificUninitializedCollections that = (SpecificUninitializedCollections) o;
+            return Objects.equals(specificSet, that.specificSet) &&
+                    Objects.equals(specificMap, that.specificMap);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(specificSet, specificMap);
+        }
     }
 }
