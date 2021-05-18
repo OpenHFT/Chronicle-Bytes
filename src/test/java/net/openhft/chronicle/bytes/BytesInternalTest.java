@@ -384,8 +384,8 @@ public class BytesInternalTest {
             for (int i = 0; i < runs; i++) {
                 for (int o = 0; o <= 8; o++)
                     for (int s = 0; s <= size - o; s++) {
-                        long start1=0, end1=0, start2=0, end2=0, start3=0, end3=0;
-                        long start4=0, end4=0, start5=0, end5=0, start6=0, end6=0;
+                        long start1 = 0, end1 = 0, start2 = 0, end2 = 0, start3 = 0, end3 = 0;
+                        long start4 = 0, end4 = 0, start5 = 0, end5 = 0, start6 = 0, end6 = 0;
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
                             b.clear().writeSkip(t);
@@ -414,7 +414,7 @@ public class BytesInternalTest {
                             d.clear().writeSkip(t);
                             start4 = System.nanoTime();
                             simpleWriteFully2(a, o, s, d);
-                            end4= System.nanoTime();
+                            end4 = System.nanoTime();
                         }
                         for (int r = 0; r < retry; r++) {
                             a.clear().writeSkip(size);
