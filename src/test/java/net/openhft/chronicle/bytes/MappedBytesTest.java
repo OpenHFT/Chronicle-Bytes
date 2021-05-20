@@ -351,11 +351,11 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnly()
             throws Exception {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10);
-        assertFalse(bytes.isBackingFileReadOnly());
-        bytes.writeUtf8(null); // used to blow up.
-        assertNull(bytes.readUtf8());
-        bytes.releaseLast();
+        try (MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
+            assertFalse(bytes.isBackingFileReadOnly());
+            bytes.writeUtf8(null); // used to blow up.
+            assertNull(bytes.readUtf8());
+        }
     }
 
     @Test
@@ -365,12 +365,13 @@ public class MappedBytesTest extends BytesTestCommon {
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(4096);
             assertTrue(tempFile.setWritable(false));
-            final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
+            try (final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile)) {
 
-            assertTrue(mappedBytes.
-                    isBackingFileReadOnly());
-            mappedBytes.releaseLast();
-            assertEquals(0, mappedBytes.refCount());
+                assertTrue(mappedBytes.
+                        isBackingFileReadOnly());
+                mappedBytes.releaseLast();
+                assertEquals(0, mappedBytes.refCount());
+            }
         }
     }
 
@@ -380,12 +381,9 @@ public class MappedBytesTest extends BytesTestCommon {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
         file.deleteOnExit();
-        MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10);
-        try {
+        try (MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10)) {
             mb.realCapacity();
             assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            mb.releaseLast();
         }
     }
 
