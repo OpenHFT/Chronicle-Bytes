@@ -396,4 +396,8 @@ public enum BytesUtil {
             ldf = -ldf;
         return ldf;
     }
+
+    public static long padOffset(long from) {
+        return (-from) & 0x3L;
+    }
 }

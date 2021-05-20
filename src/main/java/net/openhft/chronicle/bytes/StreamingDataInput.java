@@ -78,6 +78,19 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IllegalStateException;
 
     /**
+     * obtain the readPosition skipping any padding needed for a header.
+     *
+     * @param skipPadding optional aligning to 4 bytes
+     * @return the read position.
+     */
+    default long readPositionForHeader(boolean skipPadding) {
+        long position = readPosition();
+        if (skipPadding)
+            return readSkip(BytesUtil.padOffset(position)).readPosition();
+        return position;
+    }
+
+    /**
      * Read skip 1 when you are sure this is safe. Use at your own risk when you find a performance problem.
      */
     void uncheckedReadSkipOne();
@@ -489,7 +502,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * parse a UTF8 string.
-     * @param sb buffer to copy into
+     *
+     * @param sb            buffer to copy into
      * @param encodedLength length of the UTF encoded data in bytes
      */
     default void parseUtf8(Appendable sb, int encodedLength)
@@ -499,8 +513,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * parse a UTF8 string.
-     * @param sb buffer to copy into
-     * @param utf true if the length is the UTF-8 encoded length, false if the length is the length of chars
+     *
+     * @param sb     buffer to copy into
+     * @param utf    true if the length is the UTF-8 encoded length, false if the length is the length of chars
      * @param length to limit the read.
      */
     default void parseUtf8(Appendable sb, boolean utf, int length)
