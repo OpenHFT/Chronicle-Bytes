@@ -359,7 +359,6 @@ public class MappedBytesTest extends BytesTestCommon {
         }
     }
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/198")
     @Test
     public void shouldBeReadOnly()
             throws Exception {
