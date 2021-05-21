@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -358,6 +359,7 @@ public class MappedBytesTest extends BytesTestCommon {
         }
     }
 
+    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/198")
     @Test
     public void shouldBeReadOnly()
             throws Exception {
