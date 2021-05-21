@@ -357,8 +357,8 @@ public class MappedBytesTest extends BytesTestCommon {
             assertNull(bytes.readUtf8());
         }
     }
-// TODO FIX https://github.com/OpenHFT/Chronicle-Wire/issues/281
-//    @Test
+
+    @Test
     public void shouldBeReadOnly()
             throws Exception {
         final File tempFile = File.createTempFile("mapped", "bytes");
