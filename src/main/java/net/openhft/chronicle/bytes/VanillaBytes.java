@@ -600,7 +600,8 @@
         @Override
         public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
-            ensureCapacity(writePosition() + length * 3L);
+            long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
+            ensureCapacity(writePosition() + actualUTF8Length);
             if (bytesStore instanceof NativeBytesStore) {
                 @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
                 long position = nbs.appendUtf8(writePosition(), chars, offset, length);

@@ -20,8 +20,10 @@ package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.Nullable;
 
+import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.channels.FileLock;
 
 /**
  * This Interface allows a reference to off heap memory to be reassigned.
@@ -48,4 +50,22 @@ public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
      * @return the maximum size in byte for this reference.
      */
     long maxSize();
+
+    /**
+     * Calls lock on the underlying file
+     * @param shared if the lock is shared or not.
+     * @return the FileLock
+     */
+    default FileLock lock(boolean shared) throws IOException {
+        throw new UnsupportedOperationException();
+    }
+
+    /**
+     * Calls lock on the underlying file
+     * @param shared if the lock is shared or not.
+     * @return the FileLock
+     */
+    default FileLock tryLock(boolean shared) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }

@@ -5,6 +5,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -12,6 +13,9 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Queue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -348,11 +352,11 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnly()
             throws Exception {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10);
-        assertFalse(bytes.isBackingFileReadOnly());
-        bytes.writeUtf8(null); // used to blow up.
-        assertNull(bytes.readUtf8());
-        bytes.releaseLast();
+        try (MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
+            assertFalse(bytes.isBackingFileReadOnly());
+            bytes.writeUtf8(null); // used to blow up.
+            assertNull(bytes.readUtf8());
+        }
     }
 
     @Test
@@ -362,12 +366,13 @@ public class MappedBytesTest extends BytesTestCommon {
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(4096);
             assertTrue(tempFile.setWritable(false));
-            final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile);
+            try (final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile)) {
 
-            assertTrue(mappedBytes.
-                    isBackingFileReadOnly());
-            mappedBytes.releaseLast();
-            assertEquals(0, mappedBytes.refCount());
+                assertTrue(mappedBytes.
+                        isBackingFileReadOnly());
+                mappedBytes.releaseLast();
+                assertEquals(0, mappedBytes.refCount());
+            }
         }
     }
 
@@ -377,12 +382,9 @@ public class MappedBytesTest extends BytesTestCommon {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
         file.deleteOnExit();
-        MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10);
-        try {
+        try (MappedBytes mb = MappedBytes.mappedBytes(file, 64 << 10)) {
             mb.realCapacity();
             assertTrue(Thread.currentThread().isInterrupted());
-        } finally {
-            mb.releaseLast();
         }
     }
 
@@ -468,5 +470,39 @@ public class MappedBytesTest extends BytesTestCommon {
             assertEquals(count, mb.readVolatileLong(0));
         }
         IOTools.deleteDirWithFiles(tmpfile, 2);
+    }
+
+    @Test
+    public void disableThreadSafety() throws InterruptedException {
+        Thread t = null;
+        try {
+            BlockingQueue<MappedBytes> tq = new LinkedBlockingQueue<>();
+            t = new Thread(() -> {
+                try {
+                    MappedBytes bytes = MappedBytes.mappedBytes(IOTools.createTempFile("disableThreadSafety"), 64 << 10);
+                    bytes.writeLong(128);
+                    tq.add(bytes);
+                    Jvm.pause(1000);
+                } catch (IOException ioe) {
+                    ioe.printStackTrace();
+                    // cause the caller to fail.
+                    ((Queue) tq).add(ioe);
+                }
+            });
+            t.start();
+            try (MappedBytes bytes = tq.take()) {
+                try {
+                    bytes.writeLong(1234);
+                    fail();
+                } catch (IllegalStateException expected) {
+//                expected.printStackTrace();
+                }
+                bytes.disableThreadSafetyCheck(true)
+                        .writeLong(-1);
+            }
+        } finally {
+            t.interrupt();
+            t.join(Jvm.isDebug() ? 60_000 : 1000);
+        }
     }
 }

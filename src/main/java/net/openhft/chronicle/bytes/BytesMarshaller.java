@@ -165,17 +165,6 @@ public class BytesMarshaller<T> {
 
         protected abstract void setValue(Object o, BytesIn read)
                 throws BufferUnderflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferOverflowException;
-
-        @NotNull
-        protected Supplier<Map> newInstance(@NotNull Class type) {
-            try {
-                return (Supplier<Map>) type.newInstance();
-            } catch (IllegalAccessException e) {
-                throw new AssertionError(e);
-            } catch (InstantiationException e) {
-                throw Jvm.rethrow(e);
-            }
-        }
     }
 
     static class ScalarFieldAccess extends FieldAccess<Object> {
@@ -391,7 +380,7 @@ throws IllegalStateException {
             else if (type == Set.class)
                 collectionSupplier = LinkedHashSet::new;
             else
-                collectionSupplier = newInstance(type);
+                collectionSupplier = () -> ObjectUtils.newInstance((Class<? extends Collection>) type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 @NotNull ParameterizedType pType = (ParameterizedType) genericType;
@@ -439,7 +428,12 @@ throws IllegalStateException {
                         field.set(o, null);
                     return;
                 }
-                c.clear();
+
+                if (c == null)
+                    field.set(o, c = collectionSupplier.get());
+                else
+                    c.clear();
+
                 for (int i = 0; i < length; i++)
                     c.add(read.readObject(componentType));
             } catch (IllegalAccessException e) {
@@ -464,7 +458,7 @@ throws IllegalStateException {
             else if (type == SortedMap.class || type == NavigableMap.class)
                 collectionSupplier = TreeMap::new;
             else
-                collectionSupplier = newInstance(type);
+                collectionSupplier = () -> ObjectUtils.newInstance((Class<? extends Map>) type);
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 @NotNull ParameterizedType pType = (ParameterizedType) genericType;
@@ -510,7 +504,7 @@ throws IllegalStateException {
                     return;
                 }
                 if (m == null) {
-                    field.set(o, m = new LinkedHashMap<>());
+                    field.set(o, m = collectionSupplier.get());
                 } else {
                     m.clear();
                 }

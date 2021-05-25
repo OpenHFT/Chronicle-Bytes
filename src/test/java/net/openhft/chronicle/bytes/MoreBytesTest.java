@@ -325,4 +325,12 @@ public class MoreBytesTest {
         aaaa.releaseLast();
         b.releaseLast();
     }
+
+    @Test
+    public void testDoesNotRequire3xCapacity() {
+        final String SYMBOL_STR = "LCOM1";
+        final Bytes SYMBOL = Bytes.allocateDirect(SYMBOL_STR.length());
+        SYMBOL.clear();
+        SYMBOL.append(SYMBOL_STR);
+    }
 }

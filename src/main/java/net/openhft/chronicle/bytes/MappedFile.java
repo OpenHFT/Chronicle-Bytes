@@ -567,4 +567,18 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
         // component is thread safe
         return true;
     }
+
+    /**
+     * Calls lock on the underlying file channel
+     */
+    public FileLock lock(long position, long size, boolean shared) throws IOException {
+        return fileChannel.lock(position, size, shared);
+    }
+
+    /**
+     * Calls tryLock on the underlying file channel
+     */
+    public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+        return fileChannel.tryLock(position, size, shared);
+    }
 }

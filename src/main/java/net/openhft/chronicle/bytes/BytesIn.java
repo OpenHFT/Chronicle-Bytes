@@ -71,11 +71,6 @@ public interface BytesIn<Underlying> extends
                 return (T) (Integer) readInt();
 
             default:
-                if (BytesMarshallable.class.isAssignableFrom(componentType)) {
-                    BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);
-                    bm.readMarshallable(this);
-                    return (T) bm;
-                }
                 throw new UnsupportedOperationException("Unsupported " + componentType);
         }
     }
