@@ -982,9 +982,10 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendReallySmallDouble() {
-        NativeBytes<Void> bytes = Bytes.allocateElasticDirect(512);
+        Bytes<?> bytes = alloc1.elasticBytes(32);
 
         for (double d = 2e-11; d >= 1e-19; d *= 0.99) {
+            bytes.clear();
             bytes.append(d);
         }
     }
