@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -981,11 +980,12 @@ public class BytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Ignore("Broken - https://github.com/OpenHFT/Chronicle-Bytes/issues/199")
     @Test
     public void testAppendReallySmallDouble() {
         NativeBytes<Void> bytes = Bytes.allocateElasticDirect(512);
 
-        bytes.append(4.460177372466667E-16);
+        for (double d = 2e-11; d >= 1e-19; d *= 0.99) {
+            bytes.append(d);
+        }
     }
 }
