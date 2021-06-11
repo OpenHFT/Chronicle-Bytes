@@ -982,11 +982,16 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendReallySmallDouble() {
+        assumeFalse(alloc1 == NATIVE);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
-        for (double d = 2e-11; d >= 1e-19; d *= 0.99) {
+        for (double d = 1; d >= 1e-19; d *= 0.99) {
             bytes.clear();
             bytes.append(d);
+            double err = d > 4.3e-10 ? 0
+                    : d > 2.14e-13 ? Math.ulp(d)
+                    : 2 * Math.ulp(d);
+            assertEquals(d, bytes.parseDouble(), err);
         }
     }
 }
