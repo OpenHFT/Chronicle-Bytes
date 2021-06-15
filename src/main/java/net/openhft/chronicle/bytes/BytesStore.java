@@ -92,6 +92,23 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * this is an elastic native store
+     *
+     * @param capacity of the buffer
+     */
+    static BytesStore<?, Void> nativeStore(long capacity) {
+        return NativeBytesStore.nativeStore(capacity);
+    }
+
+    static BytesStore<?, Void> nativeStoreWithFixedCapacity(long capacity) {
+        return NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
+    }
+
+    static BytesStore<?, Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
+        return NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(capacity);
+    }
+
+    /**
      * @return a PointerBytesStore which can be set to any addressForRead
      */
     @NotNull
