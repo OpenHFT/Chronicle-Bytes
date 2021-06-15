@@ -34,13 +34,13 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
 
     @NotNull
-    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
+    static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
     }
 
     @NotNull
     static MultiReaderBytesRingBuffer newInstance(
-            @NotNull NativeBytesStore<Void> bytesStore,
+            @NotNull BytesStore<?, Void> bytesStore,
             int numReaders) {
         try {
             @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
@@ -59,7 +59,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     @NotNull
     static Class<MultiReaderBytesRingBuffer> clazz()
             throws ClassNotFoundException {
-        //noinspection AccessStaticViaInstance
         return (Class<MultiReaderBytesRingBuffer>) Class.forName(
                 "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
@@ -70,7 +69,6 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
 
     static long sizeFor(long capacity, int numReaders) {
         try {
-            //noinspection AccessStaticViaInstance
             final Method sizeFor = Class.forName(
                     "software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);
             return (long) sizeFor.invoke(null, capacity, numReaders);
