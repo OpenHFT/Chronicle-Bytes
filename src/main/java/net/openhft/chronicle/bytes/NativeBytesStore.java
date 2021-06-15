@@ -101,6 +101,11 @@ public class NativeBytesStore<Underlying>
             finalizer = new Finalizer();
     }
 
+    /**
+     * @deprecated use {@link BytesStore#wrap(ByteBuffer)}
+     * @param bb ByteBuffer
+     * @return BytesStore
+     */
     @NotNull
     public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
@@ -113,7 +118,7 @@ public class NativeBytesStore<Underlying>
 
     /**
      * this is an elastic native store
-     *
+     * @deprecated use {@link BytesStore#nativeStore(long)} 
      * @param capacity of the buffer.
      */
     @NotNull
@@ -137,12 +142,18 @@ public class NativeBytesStore<Underlying>
         return new NativeBytesStore<>(address, capacity, deallocator, elastic);
     }
 
+    /**
+     * @deprecated use {@link BytesStore#nativeStoreWithFixedCapacity(long)}
+     */
     @NotNull
     public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity)
             throws IllegalArgumentException {
         return of(capacity, true, false);
     }
 
+    /**
+     * @deprecated use {@link BytesStore#lazyNativeBytesStoreWithFixedCapacity(long)}
+     */
     @NotNull
     public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity)
             throws IllegalArgumentException {
