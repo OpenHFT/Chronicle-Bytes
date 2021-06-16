@@ -363,9 +363,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
             if (writeLimit < limit)
                 writeLimit(limit);
 
-            boolean debug = false;
-            assert debug = true;
-            if (debug)
+            if (Jvm.isAssertEnabled())
                 readLimit(limit);
             else
                 uncheckedWritePosition(limit);
