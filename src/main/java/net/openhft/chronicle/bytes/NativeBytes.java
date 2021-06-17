@@ -96,7 +96,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public static NativeBytes<Void> nativeBytes(final long initialCapacity)
             throws IllegalArgumentException {
-        @NotNull final NativeBytesStore<Void> store = nativeStoreWithFixedCapacity(initialCapacity);
+        @NotNull final BytesStore<?, Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
             try {
                 return NativeBytes.wrapWithNativeBytes(store, Bytes.MAX_CAPACITY);
