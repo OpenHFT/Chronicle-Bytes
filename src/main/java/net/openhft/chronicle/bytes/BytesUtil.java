@@ -22,14 +22,13 @@ import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
 
 import java.io.*;
 import java.lang.reflect.Field;
@@ -41,6 +40,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 @SuppressWarnings("rawtypes")
@@ -64,7 +64,7 @@ public enum BytesUtil {
         if (clazz.isArray()) {
             Class componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
-                return new int[]{UnsafeMemory.UNSAFE.arrayBaseOffset(clazz)};
+                return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
         }
         List<Field> fields = BytesFieldInfo.fields(clazz);
@@ -74,7 +74,7 @@ public enum BytesUtil {
             final FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
             if (fieldGroup != null && FieldGroup.HEADER.equals(fieldGroup.value()))
                 continue;
-            int start = (int) UnsafeMemory.UNSAFE.objectFieldOffset(field);
+            int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());
             int end = start + size;
             boolean nonTrivial = !field.getType().isPrimitive();
@@ -109,11 +109,7 @@ public enum BytesUtil {
     }
 
     private static int sizeOf(Class<?> type) {
-        return type == boolean.class || type == byte.class ? 1
-                : type == short.class || type == char.class ? 2
-                : type == int.class || type == float.class ? 4
-                : type == long.class || type == double.class ? 8
-                : Unsafe.ARRAY_OBJECT_INDEX_SCALE;
+        return Memory.sizeOf(type);
     }
 
     public static String findFile(@NotNull String name)

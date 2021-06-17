@@ -3,13 +3,14 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.FieldGroup;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.UnsafeMemory;
-import sun.misc.Unsafe;
+import net.openhft.chronicle.core.Memory;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.*;
 import java.util.stream.Collectors;
+
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 public class BytesFieldInfo {
     private static final ClassLocal<BytesFieldInfo> CACHE = ClassLocal.withInitial(BytesFieldInfo::init);
@@ -52,7 +53,7 @@ public class BytesFieldInfo {
                         continue;
                     }
                     nonHeader = true;
-                    position = UnsafeMemory.MEMORY.getFieldOffset(field);
+                    position = MEMORY.getFieldOffset(field);
                     matches = prefix.equals(prefix0);
                 }
                 size = sizeOf(field.getType());
@@ -103,11 +104,7 @@ public class BytesFieldInfo {
     }
 
     private static int sizeOf(Class<?> type) {
-        return type == boolean.class || type == byte.class ? 1
-                : type == short.class || type == char.class ? 2
-                : type == int.class || type == float.class ? 4
-                : type == long.class || type == double.class ? 8
-                : Unsafe.ARRAY_OBJECT_INDEX_SCALE;
+        return Memory.sizeOf(type);
     }
 
     public int description() {
@@ -160,7 +157,7 @@ public class BytesFieldInfo {
             clazz = clazz.getSuperclass();
         }
         fields.removeIf(field -> Modifier.isStatic(field.getModifiers()));
-        fields.sort(Comparator.comparingLong(UnsafeMemory.UNSAFE::objectFieldOffset));
+        fields.sort(Comparator.comparingLong(MEMORY::objectFieldOffset));
         return fields;
     }
 }
