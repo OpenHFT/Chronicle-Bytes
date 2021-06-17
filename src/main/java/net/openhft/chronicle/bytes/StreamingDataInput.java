@@ -35,6 +35,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+
 /**
  * This data input has a a position() and a limit()
  */
@@ -472,9 +474,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
+        if (isDirectMemory()) {
+            MEMORY.copyMemory(addressForRead(readPosition()), o, offset, length);
+            readSkip(length);
+            return;
+        }
         int i = 0;
         for (; i < length - 7; i += 8)
             UnsafeMemory.unsafePutLong(o, offset + i, rawReadLong());
+        if (i < length - 3)
+            UnsafeMemory.unsafePutInt(o, offset + i, rawReadInt());
         for (; i < length; i++)
             UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
     }
