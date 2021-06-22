@@ -98,6 +98,12 @@ public enum StopCharTesters implements StopCharTester {
             return ch < '0' || !(Character.isAlphabetic(ch) || Character.isDigit(ch));
         }
     },
+    NON_NUL {
+        @Override
+        public boolean isStopChar(int ch) {
+            return ch <= 0;
+        }
+    },
     ALL {
         @Override
         public boolean isStopChar(int ch) {

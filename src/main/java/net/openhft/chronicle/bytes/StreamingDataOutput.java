@@ -36,6 +36,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+
 /**
  * Position based access.  Once data has been read, the position() moves.
  * <p>The use of this instance is single threaded, though the use of the data
@@ -464,6 +466,28 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             writeLong(UnsafeMemory.unsafeGetLong(o, offset + i));
         for (; i < length; i++)
             writeByte(UnsafeMemory.unsafeGetByte(o, offset + i));
+        return (S) this;
+    }
+
+    /**
+     * Write raw native memory for a ifixed length
+     *
+     * @param address
+     * @param length
+     * @return this
+     */
+    default S unsafeWrite(long address, int length) {
+        if (isDirectMemory()) {
+            long destAddress = addressForWrite(writePosition());
+            writeSkip(length); // blow up if there isn't that much space left
+            MEMORY.copyMemory(address, destAddress, length);
+        } else {
+            int i = 0;
+            for (; i < length - 7; i += 8)
+                writeLong(UnsafeMemory.unsafeGetLong(address + i));
+            for (; i < length; i++)
+                writeByte(UnsafeMemory.unsafeGetByte(address + i));
+        }
         return (S) this;
     }
 
