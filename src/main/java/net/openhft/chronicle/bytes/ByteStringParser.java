@@ -43,8 +43,8 @@ interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataI
     }
 
     /**
-     * Return true or false, or null if it could not be detected
-     * as true or false.  Case is not important
+     * Return <code>true</code> or false, or null if it could not be detected
+     * as <code>true</code> or false.  Case is not important
      * <p>
      * <p>false: f, false, n, no, 0
      * <p>

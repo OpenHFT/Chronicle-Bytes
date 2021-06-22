@@ -561,7 +561,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * When there is no more data to read, return zero, false and empty string.
+     * When there is no more data to read, return zero, <code>false</code> and empty string.
      *
      * @param lenient if true, return nothing rather than error.
      */
