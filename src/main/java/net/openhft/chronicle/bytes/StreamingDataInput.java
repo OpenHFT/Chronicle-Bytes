@@ -482,8 +482,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         int i = 0;
         for (; i < length - 7; i += 8)
             UnsafeMemory.unsafePutLong(o, offset + i, rawReadLong());
-        if (i < length - 3)
+        if (i < length - 3) {
             UnsafeMemory.unsafePutInt(o, offset + i, rawReadInt());
+            i += 4;
+        }
         for (; i < length; i++)
             UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
     }
