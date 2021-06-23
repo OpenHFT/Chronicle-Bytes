@@ -21,7 +21,7 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.24</version>
+        <version>1.1.26</version>
         <relativePath />
     </parent>
 
@@ -41,7 +41,7 @@
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
                 <type>pom</type>
-                <version>3.19.4</version>
+                <version>3.19.9</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -287,7 +287,6 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.6</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -306,7 +305,6 @@
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
-                        <version>3.8.0.2131</version>
                     </plugin>
                 </plugins>
             </build>
