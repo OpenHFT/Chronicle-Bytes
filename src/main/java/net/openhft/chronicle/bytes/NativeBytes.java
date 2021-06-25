@@ -28,7 +28,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.bytes.NativeBytesStore.nativeStoreWithFixedCapacity;
+import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 
 /**
@@ -264,7 +264,7 @@ public class NativeBytes<Underlying>
                     throw new AssertionError(e);
                 }
             } else {
-                store = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                store = BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
                 if (referenceCounted.unmonitored())
                     AbstractReferenceCounted.unmonitor(store);
             }
@@ -310,9 +310,9 @@ public class NativeBytes<Underlying>
     @NotNull
     private BytesStore allocateNewByteBufferBackedStore(final int size) {
         if (isDirectMemory()) {
-            return NativeBytesStore.elasticByteBuffer(size, capacity());
+            return BytesStore.elasticByteBuffer(size, capacity());
         } else {
-            return HeapBytesStore.wrap(ByteBuffer.allocate(size));
+            return BytesStore.wrap(ByteBuffer.allocate(size));
         }
     }
 

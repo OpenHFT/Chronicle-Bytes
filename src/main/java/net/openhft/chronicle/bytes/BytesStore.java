@@ -65,7 +65,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     static BytesStore from(@NotNull String cs) {
-        return HeapBytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
+        return BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
+    }
+
+    static <T> BytesStore<?, T> forFields(Object o, String groupName, int padding) {
+        return HeapBytesStore.forFields(o, groupName, padding);
     }
 
     /**
@@ -74,6 +78,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytes to wrap
      * @return BytesStore
      */
+    // change to BytesStore in x.22
     static HeapBytesStore<byte[]> wrap(@NotNull byte[] bytes) {
         return HeapBytesStore.wrap(bytes);
     }
@@ -106,6 +111,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
 
     static BytesStore<?, Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
         return NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(capacity);
+    }
+
+    static BytesStore<?, ByteBuffer> elasticByteBuffer(int size, long maxSize) {
+        return NativeBytesStore.elasticByteBuffer(size, maxSize);
     }
 
     /**
@@ -598,7 +607,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             if (this.isDirectMemory()) {
                 inBytes = this;
             } else {
-                inBytes = NativeBytesStore.nativeStore(size);
+                inBytes = BytesStore.nativeStore(size);
                 this.copyTo(inBytes);
             }
             BytesInternal.assignBytesStoreToByteBuffer(inBytes, using1);

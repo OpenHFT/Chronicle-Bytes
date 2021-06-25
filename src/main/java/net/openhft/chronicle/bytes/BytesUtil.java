@@ -117,7 +117,7 @@ public enum BytesUtil {
         File file = new File(name);
         URL url = null;
         if (!file.exists()) {
-            url = urlFor(name);
+            url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             String file2 = url.getFile()
                     .replace("target/test-classes", "src/test/resources");
             file = new File(file2);
@@ -135,7 +135,7 @@ public enum BytesUtil {
         File file = new File(name);
         URL url = null;
         if (!file.exists()) {
-            url = urlFor(name);
+            url = urlFor(Thread.currentThread().getContextClassLoader(), name);
             file = new File(url.getFile());
         }
         return // name.endsWith(".gz") || !file.exists() || OS.isWindows() ?

@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -31,13 +30,13 @@ import java.util.function.ToLongFunction;
 @SuppressWarnings("rawtypes")
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
     static long hash(@NotNull BytesStore b) {
-        return b.isDirectMemory() && b.bytesStore() instanceof NativeBytesStore
+        return b.isDirectMemory() && b.bytesStore().isDirectMemory()
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b);
     }
 
     static long hash(@NotNull BytesStore b, long length) throws IllegalStateException, BufferUnderflowException {
-        return b.isDirectMemory() && b.bytesStore() instanceof NativeBytesStore
+        return b.isDirectMemory() && b.bytesStore().isDirectMemory()
                 ? OptimisedBytesStoreHash.INSTANCE.applyAsLong(b, length)
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(b, length);
     }

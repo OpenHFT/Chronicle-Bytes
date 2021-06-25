@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -61,7 +60,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     static long applyAsLong9to16(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -87,7 +86,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     static long applyAsLong17to32(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -113,7 +112,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
 
@@ -146,7 +145,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     public static long applyAsLongAny(@NotNull BytesStore store, long remaining) throws BufferUnderflowException {
-        @NotNull final NativeBytesStore bytesStore = (NativeBytesStore) store.bytesStore();
+        @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
 

@@ -212,7 +212,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     public static void warmup() {
         final List<IOException> errorsDuringWarmup = new ArrayList<>();
         try {
-            Jvm.setExceptionHandlers(Slf4jExceptionHandler.FATAL, null, null);
+            Jvm.setExceptionHandlers(Slf4jExceptionHandler.ERROR, null, null);
 
             @NotNull final File file = File.createTempFile("delete_warming_up", "me");
             file.deleteOnExit();

@@ -96,9 +96,9 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        HeapBytesStore store;
+        BytesStore store;
         try {
-            store = HeapBytesStore.wrap(new byte[size]);
+            store = BytesStore.wrap(new byte[size]);
             store.reserveTransfer(INIT, this);
         } catch (IllegalStateException e) {
             BufferOverflowException boe = new BufferOverflowException();

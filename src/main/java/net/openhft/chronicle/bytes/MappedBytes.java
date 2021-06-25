@@ -391,13 +391,13 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     /**
      * This single-argument version of the call returns an address which is guarateed safe for a contiguous
      * read up to the overlap size.
-     *
+     * <p>
      * NOTE: If called with an offset which is already in the overlap region this call with therefore
-     *       prompt a remapping to the new segment, which in turn may unmap the current segment.
-     *       Any other handles using data in the current segment may therefore result in a memory violation
-     *       when next used.
-     *
-     *       If manipulating offsets which may reside in the overlap region, always use the 2-argument version below
+     * prompt a remapping to the new segment, which in turn may unmap the current segment.
+     * Any other handles using data in the current segment may therefore result in a memory violation
+     * when next used.
+     * <p>
+     * If manipulating offsets which may reside in the overlap region, always use the 2-argument version below
      */
     @Override
     public long addressForRead(final long offset)
@@ -412,13 +412,13 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     /**
      * This two-argument version of the call returns an address which is guaranteed safe for a contiguous
      * read up to the requested buffer size.
-     *
+     * <p>
      * NOTE: In contrast to the single-argument version this call will not prompt a remapping if
-     *       called within the overlap region (provided the full extent remains in the overlap region)
-     *
-     *       This version is therefore safe to use cooperatively with other handles in a defined sequence 
-     *       of bytes (eg returned from a DocumentContext) regardless of whether the handles span the
-     *       overlap region
+     * called within the overlap region (provided the full extent remains in the overlap region)
+     * <p>
+     * This version is therefore safe to use cooperatively with other handles in a defined sequence
+     * of bytes (eg returned from a DocumentContext) regardless of whether the handles span the
+     * overlap region
      */
     @Override
     public long addressForRead(final long offset, final int buffer)
@@ -640,7 +640,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     protected void performRelease() {
         super.performRelease();
         try {
-            mappedFile.release(this);
+            if (mappedFile.refCount() > 0)
+                mappedFile.release(this);
         } catch (IllegalStateException e) {
             Jvm.warn().on(getClass(), e);
         }

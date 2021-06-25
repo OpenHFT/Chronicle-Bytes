@@ -45,6 +45,7 @@ public interface MethodReader extends Closeable {
      *
      * @return true if there was a message, false if there is probably not a message.
      */
+    @Deprecated(/* to be removed in x.23*/)
     default boolean lazyReadOne()
             throws IllegalStateException, BufferUnderflowException {
         return readOne();

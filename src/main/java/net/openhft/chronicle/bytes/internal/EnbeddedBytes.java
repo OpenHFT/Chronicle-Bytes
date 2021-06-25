@@ -10,6 +10,10 @@ public class EnbeddedBytes<Underlying> extends VanillaBytes<Underlying> {
         super(bytesStore, writePosition, writeLimit);
     }
 
+    public static <U> EnbeddedBytes<U> wrap(BytesStore bytesStore) {
+        return wrap((HeapBytesStore) bytesStore);
+    }
+
     public static <U> EnbeddedBytes<U> wrap(HeapBytesStore bytesStore) {
         long wp = bytesStore.start();
         int length = bytesStore.readUnsignedByte(wp - 1);

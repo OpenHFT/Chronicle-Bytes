@@ -97,7 +97,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity, int maxCapacity) {
-        @NotNull NativeBytesStore<ByteBuffer> bs = NativeBytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
+        @NotNull BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
         try {
             try {
                 return bs.bytesForWrite();
@@ -119,7 +119,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
-        @NotNull HeapBytesStore<ByteBuffer> bs = HeapBytesStore.wrap(ByteBuffer.allocate(initialCapacity));
+        @NotNull BytesStore<?, ByteBuffer> bs = BytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
             return NativeBytes.wrapWithNativeBytes(bs, Bytes.MAX_HEAP_CAPACITY);
         } catch (IllegalArgumentException | IllegalStateException e) {
@@ -139,7 +139,7 @@ public interface Bytes<Underlying> extends
     }
 
     static <T> Bytes<T> forFieldGroup(T t, String groupName) {
-        @NotNull HeapBytesStore<T> bs = HeapBytesStore.forFields(t, groupName, 1);
+        @NotNull BytesStore<?, T> bs = BytesStore.forFields(t, groupName, 1);
         try {
             final EnbeddedBytes<T> bytes = EnbeddedBytes.wrap(bs);
             return bytes.writeLimit(bs.writeLimit());
@@ -333,7 +333,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
-        @NotNull HeapBytesStore<byte[]> bs = BytesStore.wrap(byteArray);
+        @NotNull BytesStore<?, byte[]> bs = BytesStore.wrap(byteArray);
         try {
             try {
                 return bs.bytesForRead();
@@ -436,7 +436,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     static Bytes<?> directFrom(@NotNull String text) {
-        NativeBytesStore from = NativeBytesStore.from(text);
+        BytesStore from = BytesStore.from(text);
         try {
             try {
                 return from.bytesForRead();
@@ -477,7 +477,7 @@ public interface Bytes<Underlying> extends
     @NotNull
     static VanillaBytes<Void> allocateDirect(long capacity)
             throws IllegalArgumentException {
-        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
+        @NotNull BytesStore<?, Void> bs = BytesStore.nativeStoreWithFixedCapacity(capacity);
         try {
             try {
                 return new NativeBytes<>(bs);
@@ -522,7 +522,7 @@ public interface Bytes<Underlying> extends
 
     @NotNull
     static OnHeapBytes allocateElasticOnHeap(int initialCapacity) {
-        HeapBytesStore<byte[]> wrap = HeapBytesStore.wrap(new byte[initialCapacity]);
+        BytesStore<?, byte[]> wrap = BytesStore.wrap(new byte[initialCapacity]);
         try {
             try {
                 return new OnHeapBytes(wrap, true);

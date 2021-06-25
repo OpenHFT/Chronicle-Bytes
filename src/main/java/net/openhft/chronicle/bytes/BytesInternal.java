@@ -2755,9 +2755,9 @@ enum BytesInternal {
         try {
             @NotNull BytesStore ret;
             if (from.isDirectMemory()) {
-                ret = NativeBytesStore.nativeStore(Math.max(0, length));
+                ret = BytesStore.nativeStore(Math.max(0, length));
             } else {
-                ret = HeapBytesStore.wrap(new byte[Math.toIntExact(length)]);
+                ret = BytesStore.wrap(new byte[Math.toIntExact(length)]);
             }
             ret.write(0L, from, start, length);
             return ret;
