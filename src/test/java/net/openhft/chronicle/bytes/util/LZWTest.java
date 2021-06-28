@@ -21,10 +21,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -35,18 +32,6 @@ import static net.openhft.chronicle.bytes.util.Compressions.LZW;
 import static org.junit.Assert.*;
 
 public class LZWTest extends BytesTestCommon {
-
-    private ThreadDump threadDump;
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
-    }
 
     @Test
     public void testCompress()

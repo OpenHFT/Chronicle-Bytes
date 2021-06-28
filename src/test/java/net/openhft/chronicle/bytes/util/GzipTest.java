@@ -22,10 +22,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.NativeBytes;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Arrays;
@@ -37,18 +34,6 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class GzipTest extends BytesTestCommon {
-
-    private ThreadDump threadDump;
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
-    }
 
     @Test
     public void testCompress()

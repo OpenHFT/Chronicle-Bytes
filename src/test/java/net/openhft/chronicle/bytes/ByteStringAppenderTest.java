@@ -21,7 +21,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
-import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -49,7 +48,6 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         });
     }
 
-    @After
     @Override
     public void afterChecks() {
         bytes.releaseLast();

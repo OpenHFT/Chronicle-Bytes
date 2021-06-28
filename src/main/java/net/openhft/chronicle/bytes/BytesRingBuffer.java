@@ -31,11 +31,26 @@ import java.nio.BufferOverflowException;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
 
+    @Deprecated(/* to be removed in x.22*/)
     Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
 
     @NotNull
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
+    }
+
+    @Deprecated(/* to be removed in x.22*/)
+    @NotNull
+    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
+        return newInstance(bytesStore, 1);
+    }
+
+    @Deprecated(/* to be removed in x.22*/)
+    @NotNull
+    static MultiReaderBytesRingBuffer newInstance(
+            @NotNull NativeBytesStore<Void> bytesStore,
+            int numReaders) {
+        return BytesRingBuffer.newInstance((BytesStore<?, Void>) bytesStore, numReaders);
     }
 
     @NotNull
@@ -49,8 +64,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
             return constructor.newInstance(bytesStore, numReaders);
 
         } catch (Exception e) {
-            LOG.error("This is a a commercial feature, please contact " +
-                    "sales@chronicle.software to unlock this feature.");
+            Jvm.error().on(BytesRingBuffer.class,
+                    "This is a a commercial feature, please contact " +
+                            "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);
         }
@@ -74,8 +90,9 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
             return (long) sizeFor.invoke(null, capacity, numReaders);
 
         } catch (Exception e) {
-            LOG.error("This is a a commercial feature, please contact " +
-                    "sales@chronicle.software to unlock this feature.");
+            Jvm.error().on(BytesRingBuffer.class,
+                    "This is a a commercial feature, please contact " +
+                            "sales@chronicle.software to unlock this feature.");
 
             throw Jvm.rethrow(e);
         }

@@ -44,8 +44,7 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
 @SuppressWarnings("rawtypes")
-public enum BytesUtil {
-    ;
+public enum BytesUtil {;
     private static final int[] NO_INTS = {};
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
 

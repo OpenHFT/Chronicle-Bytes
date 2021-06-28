@@ -39,7 +39,7 @@ public enum NoBytesStore implements BytesStore {
     public static final long NO_PAGE;
 
     @NotNull
-    public static final Bytes<Void> NO_BYTES;
+    public static final Bytes NO_BYTES;
 
     static {
         try {

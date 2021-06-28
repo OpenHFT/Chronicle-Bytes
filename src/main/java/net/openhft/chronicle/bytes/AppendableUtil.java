@@ -29,8 +29,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 @SuppressWarnings("rawtypes")
-public enum AppendableUtil {
-    ;
+public enum AppendableUtil {;
 
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {

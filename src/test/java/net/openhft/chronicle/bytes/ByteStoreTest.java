@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,7 +49,6 @@ public class ByteStoreTest extends BytesTestCommon {
     private Bytes<?> bytes;
     private BytesStore<?, ?> bytesStore;
 
-    @After
     @Override
     public void afterChecks() {
         bytes.releaseLast();
@@ -278,7 +276,7 @@ public class ByteStoreTest extends BytesTestCommon {
         final long[] longs = {Long.MIN_VALUE, Long.MAX_VALUE, Integer.MIN_VALUE, Integer.MAX_VALUE};
         for (long i : longs) {
             bytes.writeStopBit(i);
-//            LOG.info(i + " " + bytes.position());
+//            Jvm.debug().on(getClass(), i + " " + bytes.position());
         }
         assertEquals(9 + 10, +5 + 6, bytes.writePosition());
 
@@ -380,7 +378,7 @@ public class ByteStoreTest extends BytesTestCommon {
         bytes.writePosition(32);
         for (long i = 32; i < 64; i += 8)
             bytes.writeOrderedLong(i);
-//        LOG.info(bytes.bytes().toDebugString());
+//        Jvm.debug().on(getClass(), bytes.bytes().toDebugString());
 
         for (long i = 0; i < 32; i += 8)
             assertEquals(i, bytes.readVolatileLong());

@@ -26,8 +26,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public enum PropertyReplacer {
-    ;
+public enum PropertyReplacer {;
 
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{\\s*([^}]*?)\\s*\\}");
 

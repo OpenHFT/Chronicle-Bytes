@@ -247,9 +247,24 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
     }
 
+    // @Deprecated(/* to be made non-default in x.22 */)
     @NotNull
-    S write8bit(@Nullable BytesStore bs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException;
+    default S write8bit(@Nullable BytesStore bs)
+            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        if (bs == null) {
+            writeStopBit(-1);
+        } else {
+            long offset = bs.readPosition();
+            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
+            writeStopBit(readRemaining);
+            try {
+                write(bs, offset, readRemaining);
+            } catch (BufferUnderflowException | IllegalArgumentException e) {
+                throw new AssertionError(e);
+            }
+        }
+        return (S) this;
+    }
 
     @NotNull
     S writeByte(byte i8)
@@ -472,8 +487,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Write raw native memory for a ifixed length
      *
-     * @param address
-     * @param length
      * @return this
      */
     default S unsafeWrite(long address, int length) {

@@ -19,10 +19,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.ByteArrayOutputStream;
@@ -35,17 +32,6 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings("rawtypes")
 public class StreamingInputStreamTest extends BytesTestCommon {
-    private ThreadDump threadDump;
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
-    }
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
     @Test

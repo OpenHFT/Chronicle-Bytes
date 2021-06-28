@@ -19,11 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.After;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -39,24 +36,12 @@ public class ByteStringParserTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
     Bytes bytes = Bytes.elasticByteBuffer();
-    private ThreadDump threadDump;
 
-    @After
     @Override
     public void afterChecks() {
         bytes.releaseLast();
 
         super.afterChecks();
-    }
-
-    @Before
-    public void threadDump() {
-        threadDump = new ThreadDump();
-    }
-
-    @After
-    public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
     }
 
     @SuppressWarnings("rawtypes")
