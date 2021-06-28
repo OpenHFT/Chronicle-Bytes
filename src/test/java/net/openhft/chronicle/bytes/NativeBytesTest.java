@@ -127,7 +127,6 @@ public class NativeBytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void testResizeTwoPagesToThreePages() {
         Assume.assumeFalse(alloc == HEAP);

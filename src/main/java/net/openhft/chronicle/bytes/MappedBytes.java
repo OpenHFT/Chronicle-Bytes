@@ -1184,7 +1184,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
-
     public MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck) {
         this.disableThreadSafetyCheck = disableThreadSafetyCheck;
         return this;

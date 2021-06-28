@@ -302,7 +302,6 @@ public class BytesInternalTest {
         bytes.releaseLast();
     }
 
-
     @Test
     public void testParseDouble() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
@@ -457,7 +456,6 @@ public class BytesInternalTest {
             Thread.yield();
         }
     }
-
 
     public static void simpleWriteFully1(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {

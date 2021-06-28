@@ -125,7 +125,6 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return start();
     }
 
-
     /**
      * Calls lock on the underlying file channel
      */

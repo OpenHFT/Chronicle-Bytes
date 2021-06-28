@@ -52,8 +52,6 @@ public class Bytes4Test {
             //System.exit(0);
         }
 
-
-
         BytesStore bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();

@@ -965,7 +965,6 @@ public class BytesTest extends BytesTestCommon {
         assertEquals(0x80, bytes.readUnsignedByte());
     }
 
-
     //    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {

@@ -58,7 +58,6 @@ public class LockingByteableTest {
         }
     }
 
-
     @Test(expected = OverlappingFileLockException.class)
     public void doubleLockableShared() throws IOException {
         final String tmp = IOTools.tempName("doubleLockableShared");
