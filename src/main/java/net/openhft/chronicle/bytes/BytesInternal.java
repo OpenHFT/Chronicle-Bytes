@@ -61,7 +61,8 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * accessed directly.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-enum BytesInternal {;
+enum BytesInternal {
+    ; // none
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));

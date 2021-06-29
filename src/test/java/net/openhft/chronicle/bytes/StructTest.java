@@ -279,7 +279,8 @@ public class StructTest {
         }
     }
 
-    enum Locks {;
+    enum Locks {
+        ; // none
 
         public static void lock(long address) {
             int threadId = Affinity.getThreadId();
