@@ -490,6 +490,23 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
     }
 
+
+    default S unsafeRead(long address, int length) {
+        if (isDirectMemory()) {
+            long src = addressForRead(readPosition());
+            readSkip(length);
+            MEMORY.copyMemory(src, address, length);
+        } else {
+            int i = 0;
+            for( ; i < length - 7; i += 8)
+                MEMORY.writeLong(address + i, readLong());
+            for( ; i < length; ++i)
+                MEMORY.writeByte(address + i, readByte());
+        }
+
+        return (S) this;
+    }
+
     int readVolatileInt()
             throws BufferUnderflowException, IllegalStateException;
 
