@@ -133,6 +133,13 @@ public interface Bytes<Underlying> extends
         }
     }
 
+    /**
+     * Creates and returns a new elastic wrapper for a heap ByteBuffer with
+     * the {@code initialCapacity} 128 bytes which will be resized as required.
+     *
+     * @return a new elastic wrapper for a heap ByteBuffer with the {@code initialCapacity}
+     * 128 bytes which will be resized as required
+     */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer() {
         return elasticHeapByteBuffer(128);
@@ -221,7 +228,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Wrap the ByteBuffer ready for writing
+     * Wraps the ByteBuffer ready for writing
      * Method for convenience only - might not be ideal for performance (creates garbage).
      * To avoid garbage, use something like this example:
      * <pre>{@code
@@ -287,7 +294,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Wrap the byte[] ready for reading
+     * Wraps the byte[] ready for reading
      * Method for convenience only - might not be ideal for performance (creates garbage).
      * To avoid garbage, use something like this example:
      * <pre>{@code
@@ -346,7 +353,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Wrap the byte[] ready for writing
+     * Wraps the byte[] ready for writing
      * Method for convenience only - might not be ideal for performance (creates garbage).
      * To avoid garbage, use something like this example:
      * <pre>{@code
@@ -405,7 +412,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * Converts text to bytes using ISO-8859-1 encoding and returns a Bytes ready for reading.
      * <p>
      * Note: this returns a direct Bytes now
      *
@@ -427,7 +434,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * Converts text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      * <p>
      * Note: this returns a direct Bytes now
      *
@@ -449,7 +456,7 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Convert text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
+     * Converts text to bytes using ISO-8859-1 encoding and returns a Bytes ready for reading.
      * <p>
      * Note: this returns a heap Bytes
      *
@@ -515,11 +522,24 @@ public interface Bytes<Underlying> extends
         return NativeBytes.nativeBytes(initialCapacity);
     }
 
+    /**
+     * Creates and returns a new elastic wrapper for on heap memory with the
+     * {@code initialCapacity} 32 bytes which will be resized as required.
+     *
+     * @return a new elastic wrapper for on heap memory
+     */
     @NotNull
     static OnHeapBytes allocateElasticOnHeap() {
         return allocateElasticOnHeap(32);
     }
 
+    /**
+     * Creates and returns a new elastic wrapper for on heap memory with the specified
+     * {@code initialCapacity} which will be resized as required.
+     *
+     * @param initialCapacity the initial capacity of the wrapper in bytes
+     * @return                a new elastic wrapper for on-heap memory with an initial capacity of initialCapacity
+     */
     @NotNull
     static OnHeapBytes allocateElasticOnHeap(int initialCapacity) {
         BytesStore<?, byte[]> wrap = BytesStore.wrap(new byte[initialCapacity]);
@@ -535,11 +555,11 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
+     * Creates and returns a string from the {@code readPosition} to the {@code readLimit}, The buffer is not modified
      * by this call
      *
      * @param buffer the buffer to use
-     * @return a string contain the text from the {@code position}  to the  {@code limit}
+     * @return a string contain the text from the {@code readPosition}  to the  {@code readLimit}
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer)
@@ -548,12 +568,15 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Creates a string from the {@code position} to the {@code limit}, The buffer is not modified
-     * by this call
+     * Creates and returns a string from the {@code readPosition} to the {@code readLimit} with a specified maximum length, The buffer is not modified
+     * by this call.
+     * <p>
+     * If the length of the string between {@code readPosition} to {@code readLimit} is greater than the specified maximum length,
+     * the "..." will be appended to the resulting string; in this case the length of the resulting string will be the specified maximum length+3.
      *
      * @param buffer the buffer to use
-     * @param maxLen of the result returned
-     * @return a string contain the text from the {@code position}  to the  {@code limit}
+     * @param maxLen the maximum length from the buffer, used to create a new string
+     * @return       a string contain the text from the {@code readPosition} to the {@code readLimit} of the buffer
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer, long maxLen) throws
@@ -593,12 +616,13 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * The buffer is not modified by this call
+     * Creates and returns a string from the bytes of a given buffer with a specified length and from an specified offset.
+     * The buffer is not modified by this call.
      *
      * @param buffer   the buffer to use
-     * @param position the position to create the string from
-     * @param len      the number of characters to show in the string
-     * @return a string contain the text from offset {@code position}
+     * @param position the offset position to create the string from
+     * @param len      the number of characters to include in the string
+     * @return         a string with length len contain the text from offset position
      */
     @NotNull
     static String toString(@NotNull final Bytes buffer, long position, long len) {
@@ -710,11 +734,11 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Return a Bytes which is optionally unchecked.  This allows bounds checks to be turned off.
+     * Returns a Bytes which is optionally unchecked. This allows bounds checks to be turned off.
      * Note: this means that the result is no longer elastic, even if <code>this</code> is elastic.
      *
-     * @param unchecked if true, minimal bounds checks will be performed.
-     * @return Bytes without bounds checking.
+     * @param unchecked if true, minimal bounds checks will be performed
+     * @return Bytes without bounds checking
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
@@ -774,9 +798,9 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
+     * Displays the hex data of {@link Bytes} from the {@code readPosition} up to the specified length.
      *
-     * @param maxLength limit the number of bytes to be dumped.
+     * @param maxLength limit the number of bytes to be dumped
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
@@ -785,9 +809,10 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * display the hex data of {@link Bytes} from the position() to the limit()
+     * Displays the hex data of {@link Bytes} with the specified maximum length from the specified offset.
      *
-     * @param maxLength limit the number of bytes to be dumped.
+     * @param offset the specified offset to start from
+     * @param maxLength limit the number of bytes to be dumped
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
     @NotNull
@@ -813,7 +838,7 @@ public interface Bytes<Underlying> extends
     boolean isElastic();
 
     /**
-     * grow the buffer if the buffer is elastic, if the buffer is not elastic and there is not
+     * Grows the buffer if the buffer is elastic, if the buffer is not elastic and there is not
      * enough capacity then this method will
      * throws {@link java.nio.BufferOverflowException}
      *
@@ -827,10 +852,10 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Creates a slice of the current Bytes based on its position() and limit().  As a sub-section
+     * Creates a slice of the current Bytes based on its readPosition and limit. As a sub-section
      * of a Bytes it cannot be elastic.
      *
-     * @return a slice of the existing Bytes where the start is moved to the position and the
+     * @return a slice of the existing Bytes where the start is moved to the readPosition and the
      * current limit determines the capacity.
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
@@ -867,10 +892,10 @@ public interface Bytes<Underlying> extends
             throws IllegalStateException;
 
     /**
-     * copy bytes from one ByteStore to another
+     * Copies bytes from this Bytes to another ByteStore.
      *
-     * @param store to copy to
-     * @return the number of bytes copied.
+     * @param store the BytesStore to copy to
+     * @return      the number of bytes copied
      */
     @Override
     default long copyTo(@NotNull BytesStore store)
@@ -878,6 +903,13 @@ public interface Bytes<Underlying> extends
         return BytesStore.super.copyTo(store);
     }
 
+    /**
+     * Copies bytes from this Bytes to a specified OutputStream.
+     *
+     * @param out  the specified OutputStream that this BytesStore is copied to
+     * @throws IllegalStateException if this Bytes has been released
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     default void copyTo(@NotNull OutputStream out)
             throws IOException, IllegalStateException {
@@ -890,9 +922,11 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * will unwrite from the offset upto the current write position of the destination bytes
+     * Will un-write a specified number of bytes from an offset from this Bytes.
+     * <p>
+     * Calling this method will update the cursors of this Bytes.
      *
-     * @param fromOffset the offset from the target byytes
+     * @param fromOffset the offset from the target bytes
      * @param count      the number of bytes to un-write
      */
     default void unwrite(long fromOffset, int count)
@@ -927,18 +961,18 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Returns the index within this bytes of the first occurrence of the
+     * Returns the index within this Bytes of the first occurrence of the
      * specified sub-bytes.
      * <p>
-     * <p>The returned index is the smallest value <i>k</i> for which:
+     * The returned index is the smallest value <i>k</i> for which:
      * <blockquote><pre>
      * this.startsWith(bytes, <i>k</i>)
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
      * @param source the sub-bytes to search for.
-     * @return the index of the first occurrence of the specified sub-bytes,
-     * or {@code -1} if there is no such occurrence.
+     * @return       the index of the first occurrence of the specified sub-bytes,
+     *               or {@code -1} if there is no such occurrence.
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
@@ -946,19 +980,19 @@ public interface Bytes<Underlying> extends
     }
 
     /**
-     * Returns the index within this bytes of the first occurrence of the
-     * specified subbytes.
+     * Returns the index within this Bytes of the first occurrence of the
+     * specified sub-bytes.
      * <p>
-     * <p>The returned index is the smallest value <i>k</i> for which:
+     * The returned index is the smallest value <i>k</i> for which:
      * <blockquote><pre>
      * this.startsWith(bytes, <i>k</i>)
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
      * @param source    the sub-bytes to search for.
-     * @param fromIndex start the seach from this offset
-     * @return the index of the first occurrence of the specified sub-bytes,
-     * or {@code -1} if there is no such occurrence.
+     * @param fromIndex start the search from this offset
+     * @return          the index of the first occurrence of the specified sub-bytes,
+     *                  or {@code -1} if there is no such occurrence.
      */
     default int indexOf(@NotNull BytesStore source, int fromIndex)
             throws IllegalStateException {

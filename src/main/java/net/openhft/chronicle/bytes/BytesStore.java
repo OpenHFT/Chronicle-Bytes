@@ -46,11 +46,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
-     * This method builds a BytesStore using the bytes in a CharSequence. This chars are encoded
+     * Returns a BytesStore using the bytes in a specified CharSequence. This chars are encoded
      * using ISO_8859_1
      *
-     * @param cs to convert
-     * @return BytesStore
+     * @param cs a CharSequence to convert
+     * @return   a BytesStore which contains the bytes in cs
      */
     static BytesStore from(@NotNull CharSequence cs)
             throws IllegalStateException {
@@ -59,11 +59,25 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return from(cs.toString());
     }
 
+    /**
+     * Returns a BytesStore using the bytes in another specified BytesStore.
+     *
+     * @param cs a BytesStore
+     * @return   the resulting BytesStore
+     * @throws   IllegalStateException
+     */
     static BytesStore from(@NotNull BytesStore cs)
             throws IllegalStateException {
         return cs.copy();
     }
 
+    /**
+     * Returns a BytesStore using the bytes in a String. The characters in the String are encoded
+     * using ISO_8859_1
+     *
+     * @param cs a String
+     * @return   BytesStore
+     */
     static BytesStore from(@NotNull String cs) {
         return BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
     }
@@ -73,7 +87,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Wraps a byte[].  This means there is one copy in memory.
+     * Wraps a byte[]. This means there is one copy in memory.
      *
      * @param bytes to wrap
      * @return BytesStore
@@ -86,8 +100,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * Wraps a ByteBuffer which can be either on heap or off heap.
      *
-     * @param bb to wrap
-     * @return BytesStore
+     * @param bb the ByteBuffer to wrap
+     * @return   BytesStore
      */
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
@@ -97,7 +111,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * this is an elastic native store
+     * This is an elastic native store.
      *
      * @param capacity of the buffer
      */
@@ -126,11 +140,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Return the addressForRead and length as a BytesStore
+     * Returns a PointerBytesStore that wraps bytes from a starting address in memory.
      *
-     * @param address for the start
-     * @param length  of data
-     * @return as a BytesStore
+     * @param address the start address of PointerBytesStore
+     * @param length  the length of PointerBytesStore
+     * @return        a PointerBytesStore
      */
     @NotNull
     static PointerBytesStore wrap(long address, long length) {
@@ -159,8 +173,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             throws IllegalStateException;
 
     /**
-     * @return a Bytes to wrap this ByteStore from the start() to the realCapacity().
-     * @throws IllegalStateException if this Bytes has been released.
+     * Returns a Bytes that wraps this ByteStore from the {@code start} to the {@code realCapacity}.
+     * <p>
+     * The returned Bytes is not elastic and can be both read and written using cursors.
+     *
+     * @return a Bytes that wraps this ByteStore
+     * @throws IllegalStateException if this Bytes has been released
      */
     @Override
     @NotNull
@@ -178,7 +196,12 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @return a Bytes for writing to this BytesStore
+     * Returns a Bytes that wraps this ByteStore from the {@code start} to the {@code realCapacity}.
+     * <p>
+     * The returned Bytes is not elastic and can be both read and written using cursors.
+     *
+     * @return a Bytes that wraps this BytesStore
+     * @throws IllegalStateException if this BytesStore has been released
      */
     @Override
     @NotNull
@@ -205,7 +228,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @return the actual capacity available before resizing.
+     * @return the actual capacity available before resizing
      */
     @Override
     default long realCapacity() {
@@ -225,12 +248,24 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     Underlying underlyingObject();
 
     /**
+     * Returns if a specified offset is inside this BytesStore limits.
+     * <p>
      * Use this test to determine if an offset is considered safe.
+     *
+     * @param offset the specified offset to check
+     * @return       <code>true</code> if offset is safe
      */
     default boolean inside(long offset) {
         return start() <= offset && offset < safeLimit();
     }
 
+    /**
+     * Returns if a number of bytes starting from an offset are inside this ByteStore limits.
+     *
+     * @param offset the starting index to check
+     * @param buffer the number of bytes after the offset to check
+     * @return       <code>true</code> if the bytes between the offset and offset+buffer are inside the BytesStore
+     */
     default boolean inside(long offset, long buffer) {
         return start() <= offset && offset + buffer < safeLimit();
     }
@@ -243,10 +278,13 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Copy the data to another BytesStore  as long as there is space available in the destination store.
+     * Returns the number of bytes that were copied from this BytesStore to a destination BytesStore.
+     * <p>
+     * Copies the data to another BytesStore as long as space is available in the destination BytesStore.
      *
-     * @param store to copy to
+     * @param store the BytesStore to copy to
      * @return how many bytes were copied
+     * @throws IllegalStateException if this BytesStore has been released
      */
     default long copyTo(@NotNull BytesStore store)
             throws IllegalStateException {
@@ -265,17 +303,24 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         return copy;
     }
 
+    /**
+     * Copies the bytes in the BytesStore to an OutputStream object.
+     *
+     * @param out  the specified OutputStream that this BytesStore is copied to
+     * @throws     IllegalStateException if this Bytes has been released
+     * @see        java.io.OutputStream
+     */
     default void copyTo(@NotNull OutputStream out)
             throws IOException, IllegalStateException {
         BytesInternal.copy(this, out);
     }
 
     /**
-     * Fill the BytesStore with zeros
+     * Fills the BytesStore with zeros.
      *
      * @param start first byte inclusive
-     * @param end   last byte exclusive.
-     * @return this.
+     * @param end   last byte exclusive
+     * @return this
      */
     @Override
     @NotNull
@@ -337,9 +382,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * By default the maximum length of data shown is 256 characters. Use toDebugString(long) if you want more.
+     * By default the maximum length of data shown is 256 characters. Use {@link #toDebugString(long)} if you want more.
      *
-     * @return This BytesStore as a DebugString.
+     * @return this BytesStore as a DebugString
      */
     @NotNull
     default String toDebugString()
@@ -352,8 +397,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * @param maxLength the maximum len of the output
-     * @return This BytesStore as a DebugString.
+     * @param maxLength the maximum length of the output
+     * @return this BytesStore as a DebugString.
      */
     @NotNull
     default String toDebugString(long maxLength)
@@ -370,11 +415,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Check if a portion of a BytesStore matches this one.
+     * Returns if a portion of a specified BytesStore matches this BytesStore.
      *
-     * @param bytesStore to match against
-     * @param length     to match.
-     * @return true      if the bytes up to min(length, this.length(), bytesStore.length()) matched.
+     * @param bytesStore the BytesStore to match against
+     * @param length     the length to match
+     * @return           <code>true</code> if the bytes up to min(length, this.length(), bytesStore.length()) matched.
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
             throws BufferUnderflowException, IllegalStateException {
@@ -384,9 +429,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Return the bytes sum of the readable bytes.
+     * Returns the bytes sum of the readable bytes in this BytesStore.
      *
-     * @return unsigned byte sum.
+     * @return                          unsigned bytes sum
+     * @throws IllegalStateException    if the BytesStore has been released
      */
     default int byteCheckSum()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -397,6 +443,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
+    /**
+     * Returns the bytes sum between the specified indexes; start (inclusive) and end (exclusive).
+     *
+     * @param start                     the index of the first byte to sum
+     * @param end                       the index of the last byte to sum
+     * @return                          unsigned bytes sum
+     * @throws BufferUnderflowException if the specified indexes are outside the limits of the BytesStore
+     * @throws IllegalStateException    if the BytesStore has been released
+     */
     default int byteCheckSum(long start, long end)
             throws BufferUnderflowException, IllegalStateException {
         int sum = 0;
@@ -407,10 +462,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Does the BytesStore end with a character?
+     * Returns if the BytesStore ends with a specified character.
      *
-     * @param c to look for
-     * @return true if its the last character.
+     * @param c the character to look for
+     * @return  <code>true</code> if the specified character is the same as the last character of this BytesStore
      */
     default boolean endsWith(char c)
             throws IllegalStateException {
@@ -422,10 +477,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Does the BytesStore start with a character?
+     * Returns if the BytesStore starts with a specified character.
      *
-     * @param c to look for
-     * @return true if its the last character.
+     * @param c the character to look for
+     * @return  <code>true</code> if the specified character is the same as the first character of this BytesStore
      */
     default boolean startsWith(char c)
             throws IllegalStateException {
@@ -437,21 +492,34 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Compare the contents of the BytesStores.
+     * Returns if the content of this BytesStore is the same as the content of a specified BytesStore.
      *
-     * @param bytesStore to compare with
-     * @return true if they contain the same data.
+     * @param bytesStore the BytesStore to compare with
+     * @return           <code>true</code> if this BytesStore and the input BytesStore contain the same data
+     * @throws           IllegalStateException if this BytesStore has been released
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
         return BytesInternal.contentEqual(this, bytesStore);
     }
 
+    /**
+     * Returns if the content of this BytesStore starts with bytes equal to the content of a specified BytesStore.
+     *
+     * @param bytesStore the BytesStore to compare with
+     * @return           <code>true</code> if the content of this BytesStore starts with bytesStore
+     * @throws           IllegalStateException if this BytesStore has been released
+     */
     default boolean startsWith(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
         return BytesInternal.startsWith(this, bytesStore);
     }
 
+    /**
+     * Returns the content of this BytesStore in 8bitString format.
+     *
+     * @return a String from the content of this BytesStore
+     */
     @NotNull
     default String to8bitString() {
         return BytesInternal.to8bitString(this);
@@ -552,10 +620,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
             throws BufferUnderflowException, IllegalStateException, ArithmeticException;
 
     /**
-     * Write a value which is not smaller.
+     * Writes a long value at a specified offset if the value is not smaller than the current value at that offset.
      *
-     * @param offset  to write to
-     * @param atLeast value it is at least.
+     * @param offset  the offset to write to
+     * @param atLeast the long value that is to be written at offset if it is not less than the current value at offset
      */
     default void writeMaxLong(long offset, long atLeast)
             throws BufferUnderflowException, IllegalStateException {
@@ -573,10 +641,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Write a value which is not smaller.
+     * Writes an int value at a specified offset if the value is not smaller than the current value at that offset.
      *
-     * @param offset  to write to
-     * @param atLeast value it is at least.
+     * @param offset  the offset to write to
+     * @param atLeast the int value that is to be written at offset if it is not less than the current value at offset
      */
     default void writeMaxInt(long offset, int atLeast)
             throws BufferUnderflowException, IllegalStateException {
@@ -593,6 +661,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
         }
     }
 
+    /**
+     *
+     * @return <code>true</code> if the number of readable bytes of this BytesStore is zero.
+     */
     default boolean isEmpty() {
         return readRemaining() == 0;
     }
@@ -638,6 +710,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
+     * Returns <code>true</code>.
      * @return whether this BytesStore is writable.
      */
     default boolean readWrite() {
@@ -650,6 +723,15 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                 : VanillaBytesStoreHash.INSTANCE.applyAsLong(this, length);
     }
 
+    /**
+     * Returns if a specified portion of this BytesStore is equal to a specified String.
+     * The portion is specified with its offset and length.
+     *
+     * @param start  the portion offset
+     * @param length the number of bytes from this BytesStore that should be compared to s
+     * @param s      the String to compare to
+     * @return       <code>true</code> if the specified portion of this BytesStore is equal to s
+     */
     default boolean isEqual(long start, long length, String s) {
         if (s == null || s.length() != length)
             return false;

@@ -292,7 +292,7 @@ start 0
 - Create bytesForRead/Write from a Bytes:
 . When you use bytesForWrite() `writeLimit` is set to `capacity` and the new Bytes is elastic.
 
-. When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity`and the new Bytes is *not* elastic.
+. When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity` and the new Bytes is *not* elastic.
 
 Regardless if bytesForRead() or bytesForWrite() is used, you can both read and write from/into the new Bytes using cursors.
 [source,Java]
@@ -815,14 +815,14 @@ Once you have your data dumped as hexadecimal, you can create tests using that d
 
 In this context a Lambda function is one which is entirely input driven and produces a list of messages (one or more outputs).
 
-The simplest Lambda function is stateless, however this has limited application.They are useful for message translation.
+The simplest Lambda function is stateless, however this has limited application. They are useful for message translation.
 
 If you need a stateful Lambda function, you can consider the input to the function to be every message it has ever consumed.
 Obviously this is inefficient, however with appropriate caches in your lamdba function, you can process and produce result incrementally.
 
 === Data in and out.
 
-We module a Lambda function as having an interface for inputs and another for outputs.These interfaces can be the same.
+We module a Lambda function as having an interface for inputs and another for outputs. These interfaces can be the same.
 
 .Sample interface for Lambda function
 [source, Java]
@@ -988,7 +988,7 @@ NOTE: In this case the input and outputs are expected to be the same.
 
 In this case, the test calls the methods with the matching method ids which in turn uses the same ids to encode the output.
 
-NOTE: Creating and maintain such tests can be an overhead you don't need.In this case, you can use Chronicle Wire's YAML testing format to check functionality.WIre can be used for most of the tests even if you intend to use Bytes for production.
+NOTE: Creating and maintain such tests can be an overhead you don't need. In this case, you can use Chronicle Wire's YAML testing format to check functionality. Wire can be used for most of the tests even if you intend to use Bytes for production.
 
 === Comparison of access to native memory
 
@@ -1076,7 +1076,7 @@ NOTE: Creating and maintain such tests can be an overhead you don't need.In this
 
 === View Chronicle-Bytes in the debugger
 
-When using intellij idea, you can set up a custom renderer to view the bytes, see the images below :
+When using IntelliJ Idea, you can set up a custom renderer to view the bytes, see the images below :
 
 image::/docs/images/customize-data-views-menu.jpg[]
 
@@ -1084,4 +1084,4 @@ image::/docs/images/customize-data-views.png[]
 
 === Performing code coverage
 
-When performing code coverage, you might wanty to exclude `AbstractBytes` as this significantly slows down the running of unit tests.
+When performing code coverage, you might want to exclude `AbstractBytes` as this significantly slows down the running of unit tests.
