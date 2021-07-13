@@ -16,7 +16,9 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
+
+import net.openhft.chronicle.bytes.ByteStringParser;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -25,7 +27,6 @@ import java.nio.BufferUnderflowException;
 /**
  * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
  */
-@Deprecated(/* to be moved to internal in x.22*/)
 @SuppressWarnings("rawtypes")
 public class ByteStringReader extends Reader {
     private final ByteStringParser in;

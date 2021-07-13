@@ -31,7 +31,7 @@ import java.nio.BufferUnderflowException;
 /**
  * Supports parsing bytes as text.  You can parse them as special or white space terminated text.
  */
-interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
+public interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
     /**
      * Access these bytes as an ISO-8859-1 encoded Reader
      *

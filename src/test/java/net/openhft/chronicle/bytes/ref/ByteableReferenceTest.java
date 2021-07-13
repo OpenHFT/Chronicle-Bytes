@@ -1,7 +1,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
-import net.openhft.chronicle.bytes.NativeBytesStore;
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.Test;
@@ -50,10 +50,10 @@ public class ByteableReferenceTest {
 
     @Test
     public void shouldMakeReservationOnCurrentStore() {
-        final NativeBytesStore<Void> firstStore = NativeBytesStore.nativeStore(64);
+        final BytesStore firstStore = BytesStore.nativeStore(64);
         try {
             firstStore.writeLong(0, 17);
-            final NativeBytesStore<Void> secondStore = NativeBytesStore.nativeStore(64);
+            final BytesStore secondStore = BytesStore.nativeStore(64);
             try {
                 secondStore.writeLong(0, 17);
                 final long startCount = firstStore.refCount();

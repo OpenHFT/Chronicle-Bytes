@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.AbstractBytesStore;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;

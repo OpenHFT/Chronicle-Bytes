@@ -18,8 +18,8 @@
 
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import net.openhft.chronicle.bytes.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public class BooleanReferenceTest extends BytesTestCommon {
     @Test
     public void testBinary() {
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(1);
+        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(1);
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
             byte i8 = (byte) 0xB0;
             nbs.writeByte(0, i8);
@@ -49,7 +49,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
 
     @Test
     public void testText() {
-        @NotNull NativeBytesStore<Void> nbs = NativeBytesStore.nativeStoreWithFixedCapacity(5);
+        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(5);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
 
             nbs.write(0, "false".getBytes(StandardCharsets.ISO_8859_1));

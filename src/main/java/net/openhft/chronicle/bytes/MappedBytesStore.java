@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
@@ -101,14 +102,14 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public NativeBytesStore<Void> writeOrderedInt(long offset, int i)
+    public MappedBytesStore writeOrderedInt(long offset, int i)
             throws IllegalStateException {
         memory.writeOrderedInt(address - start + offset, i);
         return this;
     }
 
     @Override
-    protected long translate(long offset) {
+    public long translate(long offset) {
         assert offset >= start;
         assert offset < limit;
 

@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.ByteStringAppender;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
@@ -28,8 +29,7 @@ import java.io.Writer;
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
  */
 @SuppressWarnings("rawtypes")
-@Deprecated(/* to be moved to internal in x.22*/)
-class ByteStringWriter extends Writer {
+public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 
     ByteStringWriter(ByteStringAppender out) {

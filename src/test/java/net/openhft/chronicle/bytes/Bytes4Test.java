@@ -29,7 +29,7 @@ public class Bytes4Test {
     @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
     public void bufferOverflow() {
         byte[] arr = new byte[4];
-        final HeapBytesStore<byte[]> bs = BytesStore.wrap(arr);
+        final BytesStore bs = BytesStore.wrap(arr);
         try {
             bs.writeInt(-1000, 1);
             fail("No address range check");

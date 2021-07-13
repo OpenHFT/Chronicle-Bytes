@@ -20,6 +20,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
@@ -93,8 +96,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return BytesStore
      */
     // change to BytesStore in x.22
-    static HeapBytesStore<byte[]> wrap(@NotNull byte[] bytes) {
-        return HeapBytesStore.wrap(bytes);
+    static net.openhft.chronicle.bytes.HeapBytesStore<byte[]> wrap(@NotNull byte[] bytes) {
+        return net.openhft.chronicle.bytes.HeapBytesStore.wrap(bytes);
     }
 
     /**
