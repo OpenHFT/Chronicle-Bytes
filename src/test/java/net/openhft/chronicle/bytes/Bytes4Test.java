@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.junit.Ignore;
 import org.junit.Test;
 

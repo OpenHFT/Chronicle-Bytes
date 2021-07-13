@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
 import org.jetbrains.annotations.NotNull;

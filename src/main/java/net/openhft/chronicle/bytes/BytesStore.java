@@ -20,6 +20,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;

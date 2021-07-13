@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 

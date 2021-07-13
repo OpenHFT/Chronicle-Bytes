@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;

@@ -18,9 +18,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
@@ -37,8 +37,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static org.junit.Assert.*;

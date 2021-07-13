@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 public interface MethodReaderBuilder {
+    @Deprecated
     default MethodReaderBuilder methodReaderInterceptor(MethodReaderInterceptor methodReaderInterceptor) {
         return methodReaderInterceptorReturns((m, o, a, i) -> {
             methodReaderInterceptor.intercept(m, o, a, i);

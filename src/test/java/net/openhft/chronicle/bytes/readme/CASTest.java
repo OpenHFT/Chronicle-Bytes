@@ -19,12 +19,12 @@ public class CASTest extends BytesTestCommon {
         try {
 
             bytes.comment("s32").writeUtf8("s32");
-            bytes.alignBy(4);
+            bytes.writeSkip((-bytes.writePosition()) & (4 - 1));
             long s32 = bytes.writePosition();
             bytes.writeInt(0);
 
             bytes.comment("s64").writeUtf8("s64");
-            bytes.alignBy(8);
+            bytes.writeSkip((-bytes.writePosition()) & (8 - 1));
             long s64 = bytes.writePosition();
             bytes.writeLong(0);
 

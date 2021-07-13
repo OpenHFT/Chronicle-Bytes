@@ -19,6 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -44,7 +46,7 @@ public class UncheckedNativeBytes<Underlying>
     @NotNull
     private final Bytes<Underlying> underlyingBytes;
     @NotNull
-    protected NativeBytesStore<Underlying> bytesStore;
+    protected BytesStore<?, Underlying> bytesStore;
     protected long readPosition;
     protected long writePosition;
     protected long writeLimit;
@@ -55,7 +57,7 @@ public class UncheckedNativeBytes<Underlying>
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
         underlyingBytes.reserve(this);
-        this.bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
+        this.bytesStore = underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
         writeLimit = underlyingBytes.writeLimit();
@@ -68,7 +70,7 @@ public class UncheckedNativeBytes<Underlying>
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
-            bytesStore = (NativeBytesStore<Underlying>) underlyingBytes.bytesStore();
+            bytesStore = underlyingBytes.bytesStore();
         }
     }
 
@@ -342,7 +344,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public int readUnsignedByte() {
         long offset = readOffsetPositionMoved(1);
-        return bytesStore.memory.readByte(bytesStore.address + offset) & 0xFF;
+        return bytesStore.readByte(offset) & 0xFF;
     }
 
     @Override
@@ -353,7 +355,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public byte readByte() {
         long offset = readOffsetPositionMoved(1);
-        return bytesStore.memory.readByte(bytesStore.address + offset);
+        return bytesStore.readByte(offset);
     }
 
     @Override
@@ -554,7 +556,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     public int readUnsignedByte(long offset) {
-        return bytesStore.memory.readByte(bytesStore.address + offset) & 0xFF;
+        return bytesStore.readByte(offset) & 0xFF;
     }
 
     @Override
@@ -591,7 +593,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public Bytes<Underlying> writeByte(byte i8) {
         long offset = writeOffsetPositionMoved(1);
-        bytesStore.memory.writeByte(bytesStore.address + offset, i8);
+        bytesStore.writeByte(offset, i8);
         return this;
     }
 
@@ -599,7 +601,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public Bytes<Underlying> prewriteByte(byte i8) {
         long offset = prewriteOffsetPositionMoved(1);
-        bytesStore.memory.writeByte(bytesStore.address + offset, i8);
+        bytesStore.writeByte(offset, i8);
         return this;
     }
 
@@ -866,7 +868,7 @@ public class UncheckedNativeBytes<Underlying>
         int length = cs.length();
         long offset = writeOffsetPositionMoved(length);
         long address = bytesStore.addressForWrite(offset);
-        @Nullable Memory memory = bytesStore.memory;
+        @Nullable Memory memory = UnsafeMemory.MEMORY;
         assert memory != null;
         int i = 0;
         for (; i < length - 1; i += 2) {
@@ -889,8 +891,10 @@ public class UncheckedNativeBytes<Underlying>
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
-        @NotNull NativeBytesStore nbs = this.bytesStore;
-        long position = nbs.appendUtf8(writePosition(), chars, offset, length);
+        @NotNull BytesStore nbs = this.bytesStore;
+        long position = nbs instanceof NativeBytesStore ?
+                ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length) :
+                ((net.openhft.chronicle.bytes.NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;
     }

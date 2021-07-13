@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -380,4 +381,5 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     long write8bit(long position, BytesStore bs);
 
     long write8bit(long position, String s, int start, int length);
+
 }

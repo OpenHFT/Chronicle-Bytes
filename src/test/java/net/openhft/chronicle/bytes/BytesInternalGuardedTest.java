@@ -16,11 +16,12 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.threads.ThreadDump;
 import org.jetbrains.annotations.NotNull;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
@@ -31,7 +32,6 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
@@ -71,7 +71,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void testParse8bitAndStringBuilderWithUtf16Coder()
             throws BufferUnderflowException, IOException {
-        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        @NotNull BytesStore bs = BytesStore.nativeStore(32);
         bs.write(0, new byte[]{0x76, 0x61, 0x6c, 0x75, 0x65}); // "value" string
 
         StringBuilder sb = new StringBuilder();
@@ -88,7 +88,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
     @Test
     public void testCompareUTF()
             throws IORuntimeException {
-        @NotNull NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        @NotNull BytesStore bs = BytesStore.nativeStore(32);
         bs.writeUtf8(0, "test");
         assertTrue(BytesInternal.compareUtf8(bs, 0, "test"));
         assertFalse(BytesInternal.compareUtf8(bs, 0, null));

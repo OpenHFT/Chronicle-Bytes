@@ -30,6 +30,7 @@ import java.util.function.BiFunction;
  */
 @FunctionalInterface
 public interface MethodWriterInterceptorReturns {
+    @Deprecated
     static MethodWriterInterceptorReturns of(MethodWriterInterceptor interceptor) {
         return (m, a, i) -> {
             interceptor.intercept(m, a, i::apply);
@@ -37,6 +38,7 @@ public interface MethodWriterInterceptorReturns {
         };
     }
 
+    @Deprecated
     static MethodWriterInterceptorReturns of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptorReturns interceptor)
             throws IllegalArgumentException {
         if (methodWriterListener == null && interceptor == null)

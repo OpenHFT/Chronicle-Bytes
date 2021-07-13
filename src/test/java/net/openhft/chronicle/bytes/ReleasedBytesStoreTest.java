@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.ReleasedBytesStore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
