@@ -443,17 +443,19 @@
                 throws BufferOverflowException, IllegalStateException {
             BytesStore<Bytes<Underlying>, Underlying> bs = this.bytesStore;
             if (bs instanceof NativeBytesStore)
-                append8bitNBS_S(s, (NativeBytesStore) bs);
+                append8bitNBS_S(s, (NativeBytesStore) null);
             else
-                append8bitNBS_S(s, (net.openhft.chronicle.bytes.NativeBytesStore) bs);
+                append8bitNBS_S(s, (net.openhft.chronicle.bytes.NativeBytesStore) null);
             return this;
         }
 
         @NotNull
-        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, NativeBytesStore bytesStore)
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, NativeBytesStore unused)
                 throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
+            // only valid after the previous call
+            NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
             final long address = bytesStore.address + bytesStore.translate(offset);
             @Nullable final Memory memory = bytesStore.memory;
 
@@ -486,10 +488,11 @@
         }
 
         @NotNull
-        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, net.openhft.chronicle.bytes.NativeBytesStore bytesStore)
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, net.openhft.chronicle.bytes.NativeBytesStore unused)
                 throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
+            net.openhft.chronicle.bytes.NativeBytesStore bytesStore = (net.openhft.chronicle.bytes.NativeBytesStore) this.bytesStore;
             final long address = bytesStore.address + bytesStore.translate(offset);
             @Nullable final Memory memory = bytesStore.memory;
 
