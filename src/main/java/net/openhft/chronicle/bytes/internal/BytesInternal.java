@@ -83,7 +83,7 @@ enum BytesInternal {
 
     static {
         try {
-            SI = new StringInternerBytes(4096);
+            SI = new StringInternerBytes(Integer.getInteger("wire.string-interner.size", 4096));
             ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
         } catch (Exception e) {
             throw new AssertionError(e);
