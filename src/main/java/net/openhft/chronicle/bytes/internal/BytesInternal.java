@@ -90,6 +90,7 @@ enum BytesInternal {
         }
     }
 
+
     /**
      * Optimise for the common case where the length is 31-bit.
      */
