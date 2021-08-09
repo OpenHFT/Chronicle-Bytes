@@ -27,6 +27,17 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     private final long start;
     private final long capacity;
 
+    /**
+     * Class constructor. Creates a SubBytes from the bytes in a specified BytesStore from a specified Offset to
+     * a specified index (excluding).
+     *
+     * @param bytesStore the specified BytesStore used to create this SubBytes
+     * @param start      the offset of bytesStore
+     * @param capacity   the last index (excluding) of bytesStore to be included in this SubBytes
+     * @throws IllegalStateException if bytesStore is released
+     * @throws BufferUnderflowException if capacity is less than start
+     * @throws IllegalArgumentException
+     */
     public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);

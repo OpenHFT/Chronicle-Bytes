@@ -19,6 +19,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.ReleasedBytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;

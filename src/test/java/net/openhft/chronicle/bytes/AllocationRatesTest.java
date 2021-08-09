@@ -76,9 +76,9 @@ public class AllocationRatesTest extends BytesTestCommon {
     private long timeDirectStoreAllocations() {
         long start = System.nanoTime();
         for (int i = 0; i < ALLOCATIONS; i += BATCH) {
-            @NotNull NativeBytesStore[] ds = new NativeBytesStore[BATCH];
+            @NotNull BytesStore[] ds = new BytesStore[BATCH];
             for (int j = 0; j < BATCH; j++)
-                ds[j] = NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
+                ds[j] = BytesStore.lazyNativeBytesStoreWithFixedCapacity(BUFFER_SIZE);
             for (int j = 0; j < BATCH; j++) {
                 ds[j].releaseLast();
                 assertEquals(0, ds[j].refCount());

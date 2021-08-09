@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
-import net.openhft.chronicle.bytes.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 

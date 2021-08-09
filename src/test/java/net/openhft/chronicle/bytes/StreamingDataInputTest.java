@@ -4,6 +4,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -48,7 +49,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.read(byteArr, 2, 6);
-        assertEquals("AB012345IJKLMNOP", new String(byteArr, 0));
+        assertEquals("AB012345IJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
         assertEquals('6', b.readByte());
         b.releaseLast();
     }

@@ -18,6 +18,8 @@
 
     package net.openhft.chronicle.bytes;
 
+    import net.openhft.chronicle.bytes.internal.BytesInternal;
+    import net.openhft.chronicle.bytes.internal.NativeBytesStore;
     import net.openhft.chronicle.core.*;
     import net.openhft.chronicle.core.annotation.Java9;
     import net.openhft.chronicle.core.io.IORuntimeException;
@@ -39,13 +41,13 @@
             extends AbstractBytes<Underlying>
             implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
-        @Deprecated(/* make protected in x.22 */)
+        /* make protected in x.22 */
         public VanillaBytes(@NotNull BytesStore bytesStore)
                 throws IllegalStateException, IllegalArgumentException {
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
 
-        @Deprecated(/* make protected in x.22 */)
+        /* make protected in x.22 */
         public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
                 throws IllegalStateException, IllegalArgumentException {
             super(bytesStore, writePosition, writeLimit);
@@ -439,9 +441,58 @@
         @NotNull
         private Bytes<Underlying> append8bitNBS_S(@NotNull String s)
                 throws BufferOverflowException, IllegalStateException {
+            BytesStore<Bytes<Underlying>, Underlying> bs = this.bytesStore;
+            if (bs instanceof NativeBytesStore)
+                append8bitNBS_S(s, (NativeBytesStore) null);
+            else
+                append8bitNBS_S(s, (net.openhft.chronicle.bytes.NativeBytesStore) null);
+            return this;
+        }
+
+        @NotNull
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, NativeBytesStore unused)
+                throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
-            @Nullable NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
+            // only valid after the previous call
+            NativeBytesStore bytesStore = (NativeBytesStore) this.bytesStore;
+            final long address = bytesStore.address + bytesStore.translate(offset);
+            @Nullable final Memory memory = bytesStore.memory;
+
+            if (memory == null)
+                bytesStore.throwExceptionIfReleased();
+
+            if (Jvm.isJava9Plus()) {
+                final byte[] chars = StringUtils.extractBytes(s);
+
+                int i;
+                for (i = 0; i < length; i++) {
+                    memory.writeByte(address + i, chars[i]);
+                }
+            } else {
+                final char[] chars = StringUtils.extractChars(s);
+                int i;
+                for (i = 0; i < length - 3; i += 4) {
+                    int c0 = chars[i] & 0xFF;
+                    int c1 = chars[i + 1] & 0xFF;
+                    int c2 = chars[i + 2] & 0xFF;
+                    int c3 = chars[i + 3] & 0xFF;
+                    memory.writeInt(address + i, c0 | (c1 << 8) | (c2 << 16) | (c3 << 24));
+                }
+                for (; i < length; i++) {
+                    int c0 = chars[i];
+                    memory.writeByte(address + i, (byte) c0);
+                }
+            }
+            return this;
+        }
+
+        @NotNull
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s, net.openhft.chronicle.bytes.NativeBytesStore unused)
+                throws BufferOverflowException, IllegalStateException {
+            int length = s.length();
+            long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
+            net.openhft.chronicle.bytes.NativeBytesStore bytesStore = (net.openhft.chronicle.bytes.NativeBytesStore) this.bytesStore;
             final long address = bytesStore.address + bytesStore.translate(offset);
             @Nullable final Memory memory = bytesStore.memory;
 

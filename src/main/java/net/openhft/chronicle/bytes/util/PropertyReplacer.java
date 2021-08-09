@@ -81,6 +81,8 @@ public enum PropertyReplacer {
         return result.toString();
     }
 
+    // use IOTools.readFile(Class, String) as this is needed for Java 11.
+    @Deprecated(/* to be removed in x.23 */)
     @NotNull
     public static String fileAsString(String fileName)
             throws IOException {

@@ -16,8 +16,9 @@
  * limitations under the License.
  */
 
-package net.openhft.chronicle.bytes;
+package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -31,7 +32,6 @@ import java.nio.ByteBuffer;
  * @see NoBytesStore
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-@Deprecated(/* moved to internal in x.22*/)
 public enum ReleasedBytesStore implements BytesStore {
     RELEASED_BYTES_STORE;
 

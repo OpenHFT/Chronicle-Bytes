@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -481,7 +482,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGet() {
-        final BytesStore<?, ?> bytesStore2 = NativeBytesStore.nativeStore(128);
+        final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
             for (int i = 0; i < 10; i++)
                 bytesStore.addAndGetInt(0L, 10);
@@ -501,7 +502,7 @@ public class ByteStoreTest extends BytesTestCommon {
     public void testAddAndGetLongNative() {
         if (Jvm.isArm())
             return; // TODO FIX
-        final BytesStore<?, ?> bytesStore2 = NativeBytesStore.nativeStore(128);
+        final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
             checkAddAndGetLong();
         } finally {
@@ -535,7 +536,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetFloat() {
-        final BytesStore<?, ?> bytesStore2 = NativeBytesStore.nativeStore(128);
+        final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
 
             for (int i = 0; i < 10; i++)
@@ -554,7 +555,7 @@ public class ByteStoreTest extends BytesTestCommon {
 
     @Test
     public void testAddAndGetDouble() {
-        final BytesStore<?, ?> bytesStore2 = NativeBytesStore.nativeStore(128);
+        final BytesStore<?, ?> bytesStore2 = BytesStore.nativeStore(128);
         try {
 
             for (int i = 0; i < 10; i++)
@@ -574,7 +575,7 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test
     public void testToString() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        NativeBytesStore<Void> bytes0 = NativeBytesStore.nativeStore(32);
+        BytesStore bytes0 = BytesStore.nativeStore(32);
         final Bytes<?> bytes = bytes0.bytesForWrite();
         bytes0.release(INIT);
         try {
@@ -611,7 +612,7 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test
     public void testOverflowReadUtf8()
             throws IORuntimeException {
-        final NativeBytesStore<Void> bs = NativeBytesStore.nativeStore(32);
+        final BytesStore bs = BytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {
             bs.readUtf8(10, new StringBuilder());

@@ -1,7 +1,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.HeapBytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import org.jetbrains.annotations.NotNull;
 

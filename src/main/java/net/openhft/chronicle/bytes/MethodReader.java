@@ -24,6 +24,7 @@ import java.nio.BufferUnderflowException;
 
 public interface MethodReader extends Closeable {
     String HISTORY = "history";
+    int MESSAGE_HISTORY_METHOD_ID = -1;
 
     MethodReaderInterceptorReturns methodReaderInterceptorReturns();
 

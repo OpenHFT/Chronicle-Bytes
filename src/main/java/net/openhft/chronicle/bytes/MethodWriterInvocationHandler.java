@@ -28,6 +28,7 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
 
     void onClose(Closeable closeable);
 
+    @Deprecated
     default void methodWriterInterceptorReturns(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptorReturns interceptor)
             throws IllegalArgumentException {
         if (methodWriterListener != null || interceptor != null)

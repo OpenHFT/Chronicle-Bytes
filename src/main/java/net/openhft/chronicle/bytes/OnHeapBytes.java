@@ -11,6 +11,17 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final boolean elastic;
     private final long capacity;
 
+    /**
+     * Creates an OnHeapBytes using the bytes in a BytesStore which can be elastic or not as specified.
+     * <p>
+     * If the OnHeapBytes is specified elastic, its capacity is set to {@code MAX_CAPACITY}, otherwise its capacity will be
+     * set to the BytesStore capacity. Whether the OnHeapBytes is elastic or not it can be read/written using cursors.
+     *
+     * @param bytesStore the specified BytesStore to wrap
+     * @param elastic    if <code>true</code> this OnHeapBytes is elastic
+     * @throws IllegalStateException if bytesStore has been released
+     * @throws IllegalArgumentException
+     */
     public OnHeapBytes(@NotNull BytesStore bytesStore, boolean elastic)
             throws IllegalStateException, IllegalArgumentException {
         super(bytesStore);
