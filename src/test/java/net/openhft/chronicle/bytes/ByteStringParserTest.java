@@ -24,7 +24,6 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
@@ -98,7 +97,7 @@ public class ByteStringParserTest extends BytesTestCommon {
 
     @Test
     public void testAppendParse()
-            throws IOException, IORuntimeException {
+            throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.write("word£€) ".getBytes(StandardCharsets.UTF_8));
         bytes.append("word£€)").append(' ');
@@ -116,8 +115,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLastDecimalPlaces()
-            throws IOException, IORuntimeException {
+    public void testLastDecimalPlaces() throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         bytes.append("1").append(' ');
         bytes.append("1.").append(' ');
@@ -182,8 +180,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendParseUTF()
-            throws IOException {
+    public void testAppendParseUTF() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull String[] words = "Hello,World!,Bye£€!".split(",");
         for (@NotNull String word : words) {
@@ -218,8 +215,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendSubstring()
-            throws IOException {
+    public void testAppendSubstring() {
         bytes.append("Hello World", 2, 7).append("\n");
 
         assertEquals("Hello World".substring(2, 7), bytes.parseUtf8(CONTROL_STOP));
