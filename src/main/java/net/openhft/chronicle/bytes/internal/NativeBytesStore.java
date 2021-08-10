@@ -55,8 +55,8 @@ public class NativeBytesStore<Underlying>
     public long address;
     // on release, set this to null.
     public Memory memory = OS.memory();
-    protected long limit;
     public long maximumLimit;
+    protected long limit;
     @Nullable
     private SimpleCleaner cleaner;
     private boolean elastic;
@@ -294,7 +294,25 @@ public class NativeBytesStore<Underlying>
         if (end > capacity())
             end = capacity();
 
-        memory.setMemory(address + translate(start), end - start, (byte) 0);
+
+        // don't dirty cache lines unnecessarily
+        long address = this.address + translate(start);
+        long size = end - start;
+        // align the start
+        while ((address & 0x7) != 0 && size > 0) {
+            if (memory.readByte(address, 0) != 0)
+                memory.writeByte(address, (byte) 0);
+            address++;
+            size--;
+        }
+        long i = 0;
+        for (; i < size - 7; i += 8)
+            if (memory.readLong(address + i, 0) != 0)
+                memory.writeLong(address + i, 0);
+
+        for (; i < size; i++)
+            if (memory.readByte(address + i, 0) != 0)
+                memory.writeByte(address + i, (byte) 0);
         return this;
     }
 
@@ -869,6 +887,13 @@ public class NativeBytesStore<Underlying>
         return limit;
     }
 
+    @Override
+    public boolean isEqual(long start, long length, String s) {
+        if (s == null || s.length() != length)
+            return false;
+        return MEMORY.isEqual(addressForRead(start), s, (int) length);
+    }
+
     static class Deallocator implements Runnable {
 
         private final long size;
@@ -898,12 +923,5 @@ public class NativeBytesStore<Underlying>
             super.finalize();
             warnAndReleaseIfNotReleased();
         }
-    }
-
-    @Override
-    public boolean isEqual(long start, long length, String s) {
-        if (s == null || s.length() != length)
-            return false;
-        return MEMORY.isEqual(addressForRead(start), s, (int) length);
     }
 }

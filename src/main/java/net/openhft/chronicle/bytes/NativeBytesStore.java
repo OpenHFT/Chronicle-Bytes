@@ -102,9 +102,9 @@ public class NativeBytesStore<Underlying>
     }
 
     /**
-     * @deprecated use {@link BytesStore#wrap(ByteBuffer)}
      * @param bb ByteBuffer
      * @return BytesStore
+     * @deprecated use {@link BytesStore#wrap(ByteBuffer)}
      */
     @NotNull
     public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
@@ -118,8 +118,9 @@ public class NativeBytesStore<Underlying>
 
     /**
      * this is an elastic native store
-     * @deprecated use {@link BytesStore#nativeStore(long)} 
+     *
      * @param capacity of the buffer.
+     * @deprecated use {@link BytesStore#nativeStore(long)}
      */
     @NotNull
     public static NativeBytesStore<Void> nativeStore(long capacity)
@@ -300,7 +301,25 @@ public class NativeBytesStore<Underlying>
         if (end > capacity())
             end = capacity();
 
-        memory.setMemory(address + translate(start), end - start, (byte) 0);
+
+        // don't dirty cache lines unnecessarily
+        long address = this.address + translate(start);
+        long size = end - start;
+        // align the start
+        while ((address & 0x7) != 0 && size > 0) {
+            if (memory.readByte(address, 0) != 0)
+                memory.writeByte(address, (byte) 0);
+            address++;
+            size--;
+        }
+        long i = 0;
+        for (; i < size - 7; i += 8)
+            if (memory.readLong(address + i, 0) != 0)
+                memory.writeLong(address + i, 0);
+
+        for (; i < size; i++)
+            if (memory.readByte(address + i, 0) != 0)
+                memory.writeByte(address + i, (byte) 0);
         return this;
     }
 
@@ -875,6 +894,13 @@ public class NativeBytesStore<Underlying>
         return limit;
     }
 
+    @Override
+    public boolean isEqual(long start, long length, String s) {
+        if (s == null || s.length() != length)
+            return false;
+        return MEMORY.isEqual(addressForRead(start), s, (int) length);
+    }
+
     static class Deallocator implements Runnable {
 
         private final long size;
@@ -904,12 +930,5 @@ public class NativeBytesStore<Underlying>
             super.finalize();
             warnAndReleaseIfNotReleased();
         }
-    }
-
-    @Override
-    public boolean isEqual(long start, long length, String s) {
-        if (s == null || s.length() != length)
-            return false;
-        return MEMORY.isEqual(addressForRead(start), s, (int) length);
     }
 }
