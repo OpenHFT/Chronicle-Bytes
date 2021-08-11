@@ -76,7 +76,7 @@ public class BytesUtilTest extends BytesTestCommon {
     public void triviallyCopyable2() {
         assertFalse(BytesUtil.isTriviallyCopyable(D.class));
         assertTrue(BytesUtil.isTriviallyCopyable(E.class));
-        int size2 = Jvm.isAzulZing() ? 24 : 20;
+        int size2 = 20;
         int[] range = BytesUtil.triviallyCopyableRange(E.class);
         assertEquals(size2, range[1] - range[0]);
     }
