@@ -11,7 +11,7 @@ public class BytesFieldInfoTest {
 
     @Test
     public void lookup() {
-        assumeFalse(Jvm.isArm());
+        assumeFalse(Jvm.isArm() || Jvm.isAzulZing());
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(Groups1.class);
         assertEquals("type: BytesFieldInfo, groups: { pad: 16 to 48, other: 64 to 96, hi: 96 to 100, add: 104 to 120 }", lookup.dump());
         assertEquals("a068000", Integer.toHexString(lookup.description()));

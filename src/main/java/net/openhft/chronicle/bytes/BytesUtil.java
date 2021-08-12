@@ -62,6 +62,8 @@ public enum BytesUtil {
     }
 
     static int[] isTriviallyCopyable0(Class clazz) {
+        if (Jvm.isAzulZing())
+            throw new UnsupportedOperationException();
         if (clazz.isArray()) {
             Class componentType = clazz.getComponentType();
             if (componentType.isPrimitive())

@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -9,6 +10,7 @@ import java.util.Arrays;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
@@ -56,6 +58,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @Test
     public void roundTripWorksOnHeap() {
+        assumeFalse(Jvm.isAzulZing());
         Bytes<?> b = bytesType.createBuffer();
         TestObject source = new TestObject(123L, 123, false);
         b.unsafeWriteObject(source, 13);
