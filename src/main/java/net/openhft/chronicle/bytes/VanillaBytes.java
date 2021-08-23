@@ -41,7 +41,8 @@
             extends AbstractBytes<Underlying>
             implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
-        protected VanillaBytes(@NotNull BytesStore bytesStore)
+        @Deprecated(/* make protected in x.23, used in Chronicle-Map */)
+        public VanillaBytes(@NotNull BytesStore bytesStore)
                 throws IllegalStateException, IllegalArgumentException {
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
