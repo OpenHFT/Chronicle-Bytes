@@ -253,6 +253,11 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
+    public @NotNull Bytes bytesForRead() throws IllegalStateException {
+        return new VanillaBytes(this, 0, 0);
+    }
+
+    @Override
     public long capacity() {
         return 0;
     }
@@ -350,6 +355,7 @@ public enum NoBytesStore implements BytesStore {
     public Bytes bytesForWrite() {
         throw new UnsupportedOperationException("todo");
     }
+
 
     @Override
     public boolean sharedMemory() {
