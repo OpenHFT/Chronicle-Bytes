@@ -50,18 +50,11 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     private final boolean backingFileIsReadOnly;
     private MappedBytesStore bytesStore;
     private long lastActualSize = 0;
-    private boolean disableThreadSafetyCheck;
 
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
         protected void performClose() throws IllegalStateException {
             MappedBytes.this.performClose();
-        }
-
-        @Override
-        protected void threadSafetyCheck(boolean isUsed) throws IllegalStateException {
-            if (!disableThreadSafetyCheck)
-                super.threadSafetyCheck(isUsed);
         }
     };
 
@@ -1179,7 +1172,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     }
 
     public MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck) {
-        this.disableThreadSafetyCheck = disableThreadSafetyCheck;
+        closeable.disableThreadSafetyCheck(disableThreadSafetyCheck);
         return this;
     }
 }

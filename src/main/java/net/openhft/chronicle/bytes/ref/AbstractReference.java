@@ -37,6 +37,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     protected BytesStore<?, ?> bytes;
     protected long offset;
 
+    public AbstractReference() {
+        // assume thread safe.
+        disableThreadSafetyCheck(true);
+    }
+
     @Override
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
@@ -86,11 +91,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         throwExceptionIfClosed();
 
         return bytesStore().addressForRead(offset);
-    }
-
-    @Override
-    protected void threadSafetyCheck(boolean isUsed) {
-        // References are thread safe
     }
 
     @Override
