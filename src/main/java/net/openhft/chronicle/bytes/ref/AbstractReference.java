@@ -88,18 +88,9 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return bytesStore().addressForRead(offset);
     }
 
-/* TODO FIX in x.22
-        @Override
-    protected void finalize()
-throws Throwable {
-        warnIfNotClosed();
-        super.finalize();
-    }*/
-
     @Override
-    protected boolean threadSafetyCheck(boolean isUsed) {
+    protected void threadSafetyCheck(boolean isUsed) {
         // References are thread safe
-        return true;
     }
 
     @Override
