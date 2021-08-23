@@ -59,8 +59,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         }
 
         @Override
-        protected boolean threadSafetyCheck(boolean isUsed) throws IllegalStateException {
-            return disableThreadSafetyCheck || super.threadSafetyCheck(isUsed);
+        protected void threadSafetyCheck(boolean isUsed) throws IllegalStateException {
+            if (!disableThreadSafetyCheck)
+                super.threadSafetyCheck(isUsed);
         }
     };
 
