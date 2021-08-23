@@ -41,14 +41,12 @@
             extends AbstractBytes<Underlying>
             implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
-        /* make protected in x.22 */
-        public VanillaBytes(@NotNull BytesStore bytesStore)
+        protected VanillaBytes(@NotNull BytesStore bytesStore)
                 throws IllegalStateException, IllegalArgumentException {
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
 
-        /* make protected in x.22 */
-        public VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
+        protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
                 throws IllegalStateException, IllegalArgumentException {
             super(bytesStore, writePosition, writeLimit);
         }
