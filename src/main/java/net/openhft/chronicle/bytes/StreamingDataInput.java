@@ -277,13 +277,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     @Nullable
-    @Deprecated(/* to be removed in x.22 */)
-    default String readUTFΔ()
-            throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return BytesInternal.readUtf8(this);
-    }
-
-    @Nullable
     default String read8bit()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.read8bit(this);
@@ -339,12 +332,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (len > 0)
             BytesInternal.parseUtf8(this, sb, true, len);
         return true;
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    default <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
-            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
-        return readUtf8(sb);
     }
 
     default boolean read8bit(@NotNull Bytes b)
@@ -521,12 +508,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, BufferOverflowException {
         return BytesInternal.readEnum(this, eClass);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    default void parseUTF(Appendable sb, int length)
-            throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
-        parseUtf8(sb, length);
     }
 
     /**

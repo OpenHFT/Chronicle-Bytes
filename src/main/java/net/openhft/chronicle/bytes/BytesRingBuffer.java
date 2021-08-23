@@ -18,12 +18,9 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -32,26 +29,9 @@ import java.nio.BufferOverflowException;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
 
-    @Deprecated(/* to be removed in x.22*/)
-    Logger LOG = LoggerFactory.getLogger(BytesRingBuffer.class);
-
     @NotNull
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
-    }
-
-    @Deprecated(/* to be removed in x.22*/)
-    @NotNull
-    static BytesRingBuffer newInstance(@NotNull NativeBytesStore<Void> bytesStore) {
-        return newInstance(bytesStore, 1);
-    }
-
-    @Deprecated(/* to be removed in x.22*/)
-    @NotNull
-    static MultiReaderBytesRingBuffer newInstance(
-            @NotNull NativeBytesStore<Void> bytesStore,
-            int numReaders) {
-        return BytesRingBuffer.newInstance((BytesStore<?, Void>) bytesStore, numReaders);
     }
 
     @NotNull

@@ -95,9 +95,8 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytes to wrap
      * @return BytesStore
      */
-    // change to BytesStore in x.22
-    static net.openhft.chronicle.bytes.HeapBytesStore<byte[]> wrap(@NotNull byte[] bytes) {
-        return net.openhft.chronicle.bytes.HeapBytesStore.wrap(bytes);
+    static BytesStore<?, byte[]> wrap(@NotNull byte[] bytes) {
+        return HeapBytesStore.wrap(bytes);
     }
 
     /**

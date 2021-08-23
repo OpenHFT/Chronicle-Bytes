@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -299,12 +298,6 @@ public enum BytesUtil {
         }
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    public static long utf8Length(@NotNull CharSequence toWrite)
-            throws IndexOutOfBoundsException {
-        return AppendableUtil.findUtf8Length(toWrite);
-    }
-
     static String asString(String s, Throwable t) {
         StringWriter sw = new StringWriter();
         sw.append(s).append("\n");
@@ -347,12 +340,6 @@ public enum BytesUtil {
             throws IllegalStateException, BufferUnderflowException, ArithmeticException {
         BytesStore bytes2 = bytes.subBytes(start, maxLength);
         return bytes2.toDebugString(maxLength);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    public static boolean unregister(BytesStore bs) {
-        IOTools.unmonitor(bs);
-        return true;
     }
 
     public static void copy8bit(BytesStore bs, long addressForWrite, long length) {

@@ -162,13 +162,6 @@ public class ReadOnlyMappedBytesStore extends MappedBytesStore {
         throw checkReadOnly();
     }
 
-    @Deprecated
-    @Override
-    public long appendUTF(long pos, char[] chars, int offset, int length)
-            throws IllegalStateException {
-        throw checkReadOnly();
-    }
-
     @Override
     public long appendUtf8(long pos, char[] chars, int offset, int length)
             throws IllegalStateException {

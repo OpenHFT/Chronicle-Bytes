@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.ByteStringReader;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
@@ -77,13 +78,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         return BytesInternal.parseUtf8(this, stopCharTester);
     }
 
-    @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    default String parseUTF(@NotNull StopCharTester stopCharTester)
-            throws IllegalStateException, ArithmeticException {
-        return parseUtf8(stopCharTester);
-    }
-
     /**
      * parse text with UTF-8 decoding as character terminated.
      *
@@ -95,12 +89,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
-        parseUtf8(buffer, stopCharTester);
-    }
-
     /**
      * parse text with UTF-8 decoding as one or two character terminated.
      *
@@ -110,12 +98,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         BytesInternal.parseUtf8(this, buffer, stopCharsTester);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    default void parseUTF(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
-        parseUtf8(buffer, stopCharsTester);
     }
 
     /**

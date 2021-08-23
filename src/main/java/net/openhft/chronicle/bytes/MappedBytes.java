@@ -332,14 +332,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     }
 
     @Override
-    public long realWriteRemaining() {
-        long limit = writeLimit();
-        if (limit > lastActualSize)
-            limit = Math.min(realCapacity(), limit);
-        return limit - writePosition();
-    }
-
-    @Override
     public long realCapacity() {
 
         try {

@@ -32,7 +32,7 @@ import java.io.Writer;
 public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 
-    ByteStringWriter(ByteStringAppender out) {
+    public ByteStringWriter(ByteStringAppender out) {
         this.out = out;
     }
 

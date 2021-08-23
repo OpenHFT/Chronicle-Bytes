@@ -156,12 +156,6 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.capacity();
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    @Override
-    public long realWriteRemaining() {
-        return Math.min(realCapacity(), writeLimit()) - writePosition();
-    }
-
     @Override
     public boolean canWriteDirect(long count) {
         return isDirectMemory() &&
@@ -723,7 +717,6 @@ public abstract class AbstractBytes<Underlying>
         return this;
     }
 
-    @Override
     public @NotNull Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
