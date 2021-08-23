@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.pool.BytesPool;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
@@ -554,78 +555,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull net.openhft.chronicle.bytes.internal.NativeBytesStore bytes, long offset,
-                                     @NotNull StringBuilder sb, int utflen)
-            throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
-        try {
-            if (offset + utflen > bytes.realCapacity())
-                throw new BufferUnderflowException();
-            long address = bytes.address + bytes.translate(offset);
-            Memory memory = bytes.memory;
-            sb.ensureCapacity(utflen);
-            int count = 0;
-
-            if (Jvm.isJava9Plus()) {
-                sb.setLength(utflen);
-                while (count < utflen) {
-                    byte c = memory.readByte(address + count);
-                    if (c < 0)
-                        break;
-                    sb.setCharAt(count++, (char) c);
-                }
-            } else {
-                char[] chars = extractChars(sb);
-                while (count < utflen) {
-                    int c = memory.readByte(address + count);
-                    if (c < 0)
-                        break;
-                    chars[count++] = (char) c;
-                }
-            }
-            setCount(sb, count);
-            if (count < utflen)
-                parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
-            assert bytes.memory != null;
-        } catch (IOException e) {
-            throw Jvm.rethrow(e);
-        }
-    }
-
     public static int parse8bit_SB1(long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, int length) {
-        long address = nbs.address + nbs.translate(offset);
-        @Nullable Memory memory = nbs.memory;
-        sb.ensureCapacity(length);
-        int count = 0;
-
-        if (Jvm.isJava9Plus()) {
-            byte coder = getStringCoder(sb);
-
-            if (coder == JAVA9_STRING_CODER_LATIN) {
-                byte[] bytes = extractBytes(sb);
-                while (count < length) {
-                    byte b = memory.readByte(address + count);
-                    bytes[count++] = b;
-                }
-            } else {
-                assert coder == JAVA9_STRING_CODER_UTF16;
-                sb.setLength(length);
-                while (count < length) {
-                    byte b = memory.readByte(address + count);
-                    sb.setCharAt(count++, (char) b);
-                }
-            }
-        } else {
-            char[] chars = extractChars(sb);
-            while (count < length) {
-                int c = memory.readByte(address + count) & 0xFF;
-                chars[count++] = (char) c;
-            }
-        }
-        setCount(sb, count);
-        return count;
-    }
-
-    public static int parse8bit_SB1(long offset, @NotNull net.openhft.chronicle.bytes.internal.NativeBytesStore nbs, @NotNull StringBuilder sb, int length) {
         long address = nbs.address + nbs.translate(offset);
         @Nullable Memory memory = nbs.memory;
         sb.ensureCapacity(length);
@@ -2018,52 +1948,6 @@ enum BytesInternal {
 
     private static void readUtf8_SB1(
             @NotNull Bytes bytes, NativeBytesStore nb, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
-            throws IOException, IllegalStateException {
-        try {
-            int i = 0, len = Math.toIntExact(bytes.realReadRemaining());
-            long address = nb.address + nb.translate(bytes.readPosition());
-            @Nullable Memory memory = nb.memory;
-
-            if (Jvm.isJava9Plus()) {
-                int appendableLength = appendable.capacity();
-                for (; i < len && i < appendableLength; i++) {
-                    int c = memory.readByte(address + i);
-                    if (c < 0) // we have hit a non-ASCII character.
-                        break;
-                    if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1);
-                        StringUtils.setCount(appendable, i);
-                        return;
-                    }
-                    appendable.append((char) c);
-                }
-            } else {
-                final char[] chars = StringUtils.extractChars(appendable);
-                for (; i < len && i < chars.length; i++) {
-                    int c = memory.readByte(address + i);
-                    if (c < 0) // we have hit a non-ASCII character.
-                        break;
-                    if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1);
-                        StringUtils.setCount(appendable, i);
-                        return;
-                    }
-                    chars[i] = (char) c;
-//            appendable.appendDouble((char) c);
-                }
-            }
-            StringUtils.setCount(appendable, i);
-            bytes.readSkip(i);
-            if (i < len) {
-                readUtf8_SB2(bytes, appendable, tester);
-            }
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    private static void readUtf8_SB1(
-            @NotNull Bytes bytes, net.openhft.chronicle.bytes.internal.NativeBytesStore nb, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, IllegalStateException {
         try {
             int i = 0, len = Math.toIntExact(bytes.realReadRemaining());

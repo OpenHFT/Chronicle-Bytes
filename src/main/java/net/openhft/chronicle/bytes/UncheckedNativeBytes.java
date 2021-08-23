@@ -892,9 +892,7 @@ public class UncheckedNativeBytes<Underlying>
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
         @NotNull BytesStore nbs = this.bytesStore;
-        long position = nbs instanceof NativeBytesStore ?
-                ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length) :
-                ((net.openhft.chronicle.bytes.NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
+        long position = ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;
     }
@@ -942,7 +940,6 @@ public class UncheckedNativeBytes<Underlying>
         return bytesStore.write8bit(position, s, start, length);
     }
 
-    @Override
     public Bytes<Underlying> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);

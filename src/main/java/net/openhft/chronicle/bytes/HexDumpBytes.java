@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Histogram;
@@ -744,10 +745,9 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Nullable
-    @Override
     public String readUTFΔ()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return base.readUTFΔ();
+        return BytesInternal.readUtf8(base);
 
     }
 
@@ -783,10 +783,9 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
-    @Override
     public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return base.readUTFΔ(sb);
+        return base.readUtf8(sb);
 
     }
 
@@ -1095,12 +1094,6 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         }
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    @Override
-    public long realWriteRemaining() {
-        return base.realWriteRemaining();
-    }
-
     @Override
     @NotNull
     public Bytes<Void> write(byte[] bytes, int offset, int length)
@@ -1407,12 +1400,11 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
-    @Override
     public Bytes<Void> writeUTFΔ(CharSequence cs)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
-            base.writeUTFΔ(cs);
+            base.writeUtf8(cs);
             return this;
 
         } finally {
@@ -1502,12 +1494,22 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
-    @Override
     public Bytes<Void> write8bit(@Nullable BytesStore bs)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
-            base.write8bit(bs);
+            if (bs == null) {
+                base.writeStopBit(-1);
+            } else {
+                long offset = bs.readPosition();
+                long readRemaining = Math.min(base.writeRemaining(), bs.readLimit() - offset);
+                base.writeStopBit(readRemaining);
+                try {
+                    base.write(bs, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e) {
+                    throw new AssertionError(e);
+                }
+            }
             return this;
         } finally {
             copyToText(pos);

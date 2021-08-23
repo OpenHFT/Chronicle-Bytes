@@ -17,8 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import org.jetbrains.annotations.Nullable;
-
 import java.lang.reflect.Method;
 import java.util.function.BiFunction;
 
@@ -30,34 +28,6 @@ import java.util.function.BiFunction;
  */
 @FunctionalInterface
 public interface MethodWriterInterceptorReturns {
-    @Deprecated
-    static MethodWriterInterceptorReturns of(MethodWriterInterceptor interceptor) {
-        return (m, a, i) -> {
-            interceptor.intercept(m, a, i::apply);
-            return null;
-        };
-    }
-
-    @Deprecated
-    static MethodWriterInterceptorReturns of(@Nullable final MethodWriterListener methodWriterListener, @Nullable final MethodWriterInterceptorReturns interceptor)
-            throws IllegalArgumentException {
-        if (methodWriterListener == null && interceptor == null)
-            throw new IllegalArgumentException("both methodWriterListener and interceptor are NULL");
-
-        if (methodWriterListener == null)
-            return interceptor;
-
-        if (interceptor == null)
-            return (method, args, invoker) -> {
-                methodWriterListener.onWrite(method.getName(), args);
-                return invoker.apply(method, args);
-            };
-
-        return (method, args, invoker) -> {
-            methodWriterListener.onWrite(method.getName(), args);
-            return interceptor.intercept(method, args, invoker);
-        };
-    }
 
     Object intercept(Method method, Object[] args, BiFunction<Method, Object[], Object> invoker);
 }

@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes;
 import org.junit.Assert;
 import org.junit.Test;
 
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -21,11 +22,22 @@ public class StopBitTest {
 
             final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
 
-            b.write8bit(expectedBytes);
+            if (expectedBytes == null) {
+                b.writeStopBit(-1);
+            } else {
+                long offset = expectedBytes.readPosition();
+                long readRemaining = Math.min(b.writeRemaining(), expectedBytes.readLimit() - offset);
+                b.writeStopBit(readRemaining);
+                try {
+                    b.write(expectedBytes, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e) {
+                    throw new AssertionError(e);
+                }
+            }
 
             // System.out.printf("0x%04x : %02x %02x %02x%n", i, b.readByte(0), b.readByte(1), b.readByte(3));
 
-            Assert.assertEquals("failed at "+i, expected, b.read8bit());
+            Assert.assertEquals("failed at " + i, expected, b.read8bit());
         }
 
     }
@@ -41,7 +53,18 @@ public class StopBitTest {
 
         final Bytes<ByteBuffer> b = Bytes.elasticByteBuffer();
 
-        b.write8bit(bytes);
+        if (bytes == null) {
+            b.writeStopBit(-1);
+        } else {
+            long offset = bytes.readPosition();
+            long readRemaining = Math.min(b.writeRemaining(), bytes.readLimit() - offset);
+            b.writeStopBit(readRemaining);
+            try {
+                b.write(bytes, offset, readRemaining);
+            } catch (BufferUnderflowException | IllegalArgumentException e) {
+                throw new AssertionError(e);
+            }
+        }
 
         Assert.assertEquals(s, b.read8bit());
 

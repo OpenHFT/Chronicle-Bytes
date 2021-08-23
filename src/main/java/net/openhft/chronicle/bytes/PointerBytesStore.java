@@ -18,20 +18,19 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * A BytesStore which can point to arbitrary memory.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
-    private boolean isPresent = false;
 
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
     public void set(long address, long capacity) {
-        isPresent = true;
         setAddress(address);
         this.limit = maximumLimit = capacity;
     }

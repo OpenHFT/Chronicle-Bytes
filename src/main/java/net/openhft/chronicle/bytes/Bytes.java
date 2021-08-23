@@ -429,11 +429,6 @@ public interface Bytes<Underlying> extends
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
 
-    @Deprecated(/* to be removed in x.22 */)
-    static Bytes<?> fromString(String text) {
-        return from(text);
-    }
-
     /**
      * Converts text to bytes using ISO-8859-1 encoding and return a Bytes ready for reading.
      * <p>
@@ -977,7 +972,7 @@ public interface Bytes<Underlying> extends
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
-        return indexOf(source, 0);
+        return indexOf(this, source, 0);
     }
 
     /**
@@ -996,12 +991,6 @@ public interface Bytes<Underlying> extends
      *                  or {@code -1} if there is no such occurrence.
      */
     default int indexOf(@NotNull BytesStore source, int fromIndex)
-            throws IllegalStateException {
-        return indexOf(this, source, fromIndex);
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    default long indexOf(@NotNull Bytes source, int fromIndex)
             throws IllegalStateException {
         return indexOf(this, source, fromIndex);
     }

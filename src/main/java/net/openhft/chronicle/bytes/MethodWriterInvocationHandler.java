@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.Closeable;
-import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.InvocationHandler;
 
@@ -27,13 +26,6 @@ public interface MethodWriterInvocationHandler extends InvocationHandler {
     void recordHistory(boolean recordHistory);
 
     void onClose(Closeable closeable);
-
-    @Deprecated
-    default void methodWriterInterceptorReturns(MethodWriterListener methodWriterListener, @Nullable MethodWriterInterceptorReturns interceptor)
-            throws IllegalArgumentException {
-        if (methodWriterListener != null || interceptor != null)
-            methodWriterInterceptorReturns(MethodWriterInterceptorReturns.of(methodWriterListener, interceptor));
-    }
 
     void methodWriterInterceptorReturns(MethodWriterInterceptorReturns methodWriterInterceptor);
 

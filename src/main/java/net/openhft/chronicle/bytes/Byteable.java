@@ -44,7 +44,18 @@ public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
     @Nullable
     BytesStore<B, Underlying> bytesStore();
 
+    /**
+     * @return The offset within the BytesStore (not the address)
+     */
     long offset();
+
+    /**
+     * @return The absolute address
+     * @throws UnsupportedOperationException if not set ot the underlying byteStore isn't native.
+     */
+    default long address() throws UnsupportedOperationException {
+        return bytesStore().addressForRead(offset());
+    }
 
     /**
      * @return the maximum size in byte for this reference.

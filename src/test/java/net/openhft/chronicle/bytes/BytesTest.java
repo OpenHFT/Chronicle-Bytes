@@ -854,7 +854,18 @@ public class BytesTest extends BytesTestCommon {
         try {
             for (int i = 0; i <= 36; i++) {
                 nbytes.clear().append(sb);
-                bytes.write8bit(nbytes);
+                if (nbytes == null) {
+                    bytes.writeStopBit(-1);
+                } else {
+                    long offset = nbytes.readPosition();
+                    long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
+                    bytes.writeStopBit(readRemaining);
+                    try {
+                        bytes.write(nbytes, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
+                }
                 bytes.read8bit(nbytes2.clear());
 
                 final String s = sb.toString();
@@ -879,7 +890,18 @@ public class BytesTest extends BytesTestCommon {
         try {
             for (int i = 0; i <= 36; i++) {
                 nbytes.clear().append(sb);
-                bytes.write8bit(nbytes);
+                if (nbytes == null) {
+                    bytes.writeStopBit(-1);
+                } else {
+                    long offset = nbytes.readPosition();
+                    long readRemaining = Math.min(bytes.writeRemaining(), nbytes.readLimit() - offset);
+                    bytes.writeStopBit(readRemaining);
+                    try {
+                        bytes.write(nbytes, offset, readRemaining);
+                    } catch (BufferUnderflowException | IllegalArgumentException e) {
+                        throw new AssertionError(e);
+                    }
+                }
                 bytes.read8bit(nbytes2.clear());
 
                 assertEquals(sb.toString(), nbytes2.toString());

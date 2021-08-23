@@ -192,6 +192,7 @@ public class NativeBytesStore<Underlying>
         return limit >= length;
     }
 
+    // Used in Chronicle Map
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
@@ -199,6 +200,7 @@ public class NativeBytesStore<Underlying>
         this.limit = bb.capacity();
     }
 
+    // Used in Chronicle Map
     public void uninit() {
         underlyingObject = null;
         address = 0;
@@ -683,12 +685,6 @@ public class NativeBytesStore<Underlying>
         if ((address & ~0x3FFF) == 0)
             throw new AssertionError("Invalid addressForRead " + Long.toHexString(address));
         this.address = address;
-    }
-
-    @Deprecated(/* to be removed in x.22 */)
-    public long appendUTF(long pos, char[] chars, int offset, int length)
-            throws BufferOverflowException, IllegalStateException {
-        return appendUtf8(pos, chars, offset, length);
     }
 
     public long appendUtf8(long pos, char[] chars, int offset, int length)

@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MappedBytesStore;
-import net.openhft.chronicle.bytes.NoBytesStore;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
@@ -81,6 +80,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         }
     }
 
+    @Override
     public long address()
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();

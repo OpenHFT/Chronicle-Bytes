@@ -175,13 +175,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    @Deprecated(/* to be removed in x.22 */)
-    default S writeUTFΔ(CharSequence cs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
-        return writeUtf8(cs);
-    }
-
-    @NotNull
     default S write8bit(@Nullable CharSequence cs)
             throws BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         if (cs == null) {
@@ -189,8 +182,21 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             return (S) this;
         }
 
-        if (cs instanceof BytesStore)
-            return write8bit((BytesStore) cs);
+        if (cs instanceof BytesStore) {
+            if ((BytesStore) cs == null) {
+                writeStopBit(-1);
+            } else {
+                long offset = ((BytesStore) cs).readPosition();
+                long readRemaining = Math.min(writeRemaining(), ((BytesStore) cs).readLimit() - offset);
+                writeStopBit(readRemaining);
+                try {
+                    write((BytesStore) cs, offset, readRemaining);
+                } catch (BufferUnderflowException | IllegalArgumentException e) {
+                    throw new AssertionError(e);
+                }
+            }
+            return (S) this;
+        }
 
         if (cs instanceof String)
             return write8bit((String) cs);
@@ -246,25 +252,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
-    }
-
-    // @Deprecated(/* to be made non-default in x.22 */)
-    @NotNull
-    default S write8bit(@Nullable BytesStore bs)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
-        if (bs == null) {
-            writeStopBit(-1);
-        } else {
-            long offset = bs.readPosition();
-            long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
-            writeStopBit(readRemaining);
-            try {
-                write(bs, offset, readRemaining);
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
-        }
-        return (S) this;
     }
 
     @NotNull
