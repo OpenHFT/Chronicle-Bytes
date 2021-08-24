@@ -630,7 +630,8 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
             if (mappedFile.refCount() > 0)
                 mappedFile.release(this);
         } catch (IllegalStateException e) {
-            Jvm.warn().on(getClass(), e);
+            if (!e.getMessage().contains("MappedFile already released"))
+                Jvm.warn().on(getClass(), e);
         }
     }
 
