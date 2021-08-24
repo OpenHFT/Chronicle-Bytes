@@ -175,7 +175,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S write8bit(@Nullable CharSequence cs)
+    default S write8bit(final @Nullable CharSequence cs)
             throws BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         if (cs == null) {
             BytesInternal.writeStopBitNeg1(this);
@@ -183,17 +183,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
 
         if (cs instanceof BytesStore) {
-            if ((BytesStore) cs == null) {
-                writeStopBit(-1);
-            } else {
-                long offset = ((BytesStore) cs).readPosition();
-                long readRemaining = Math.min(writeRemaining(), ((BytesStore) cs).readLimit() - offset);
-                writeStopBit(readRemaining);
-                try {
-                    write((BytesStore) cs, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
-                }
+            final long offset = ((BytesStore) cs).readPosition();
+            final long readRemaining = Math.min(writeRemaining(), ((BytesStore) cs).readLimit() - offset);
+            writeStopBit(readRemaining);
+            try {
+                write((BytesStore) cs, offset, readRemaining);
+            } catch (BufferUnderflowException | IllegalArgumentException e) {
+                throw new AssertionError(e);
             }
             return (S) this;
         }
@@ -473,7 +469,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Write raw native memory for a ifixed length
+     * Write raw native memory for a fixed length
      *
      * @return this
      */
