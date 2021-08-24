@@ -26,8 +26,8 @@ public class LockingByteableTest {
         new File(tmp).deleteOnExit();
 
         for (int i = 0; i < 3; i++) {
-            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10)) {
-                BinaryLongReference blr = new BinaryLongReference();
+            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
                 blr.bytesStore(mbs, 0, 8);
                 try (FileLock fl = blr.lock(true)) {
                     assertNotNull(fl);
@@ -45,8 +45,8 @@ public class LockingByteableTest {
         new File(tmp).deleteOnExit();
 
         for (int i = 0; i < 3; i++) {
-            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10)) {
-                BinaryLongReference blr = new BinaryLongReference();
+            try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
                 blr.bytesStore(mbs, 0, 8);
                 try (FileLock fl = blr.tryLock(true)) {
                     assertNotNull(fl);
@@ -63,8 +63,8 @@ public class LockingByteableTest {
         final String tmp = IOTools.tempName("doubleLockableShared");
         new File(tmp).deleteOnExit();
 
-        try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10)) {
-            BinaryLongReference blr = new BinaryLongReference();
+        try (MappedBytes mbs = MappedBytes.mappedBytes(tmp, 64 << 10);
+             BinaryLongReference blr = new BinaryLongReference()) {
             blr.bytesStore(mbs, 0, 8);
             try (FileLock fl = blr.lock(true)) {
                 blr.lock(false);
