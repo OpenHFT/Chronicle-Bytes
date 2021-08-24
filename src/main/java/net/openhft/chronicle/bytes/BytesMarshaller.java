@@ -625,7 +625,7 @@ throws IllegalStateException {
             try {
                 char aChar = field.getChar(o);
                 if (aChar >= 65536 - 127)
-                    write.writeStopBit(aChar - 65536);
+                    write.writeStopBit(aChar - 65536L);
                 else
                     write.writeStopBit(aChar);
             } catch (IllegalAccessException e) {

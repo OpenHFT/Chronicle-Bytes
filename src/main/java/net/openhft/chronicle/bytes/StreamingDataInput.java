@@ -469,13 +469,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
         int i = 0;
         for (; i < length - 7; i += 8)
-            UnsafeMemory.unsafePutLong(o, offset + i, rawReadLong());
+            UnsafeMemory.unsafePutLong(o, (long) offset + i, rawReadLong());
         if (i < length - 3) {
-            UnsafeMemory.unsafePutInt(o, offset + i, rawReadInt());
+            UnsafeMemory.unsafePutInt(o, (long) offset + i, rawReadInt());
             i += 4;
         }
         for (; i < length; i++)
-            UnsafeMemory.unsafePutByte(o, offset + i, rawReadByte());
+            UnsafeMemory.unsafePutByte(o, (long) offset + i, rawReadByte());
     }
 
 
@@ -486,9 +486,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             MEMORY.copyMemory(src, address, length);
         } else {
             int i = 0;
-            for( ; i < length - 7; i += 8)
+            for (; i < length - 7; i += 8)
                 MEMORY.writeLong(address + i, readLong());
-            for( ; i < length; ++i)
+            for (; i < length; ++i)
                 MEMORY.writeByte(address + i, readByte());
         }
 

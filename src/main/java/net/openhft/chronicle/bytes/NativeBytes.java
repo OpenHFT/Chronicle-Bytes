@@ -123,7 +123,7 @@ public class NativeBytes<Underlying>
     }
 
     private static long alignToPageSize(final long size) {
-        long mask = OS.pageSize() - 1;
+        final long mask = OS.pageSize() - 1L;
         return (size + mask) & ~mask;
     }
 

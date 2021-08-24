@@ -466,9 +466,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, IllegalStateException {
         int i = 0;
         for (; i < length - 7; i += 8)
-            writeLong(UnsafeMemory.unsafeGetLong(o, offset + i));
+            writeLong(UnsafeMemory.unsafeGetLong(o, (long) offset + i));
         for (; i < length; i++)
-            writeByte(UnsafeMemory.unsafeGetByte(o, offset + i));
+            writeByte(UnsafeMemory.unsafeGetByte(o, (long) offset + i));
         return (S) this;
     }
 

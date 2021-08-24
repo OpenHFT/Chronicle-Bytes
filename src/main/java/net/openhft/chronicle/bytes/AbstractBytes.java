@@ -710,8 +710,8 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     public @NotNull Bytes<Underlying> write8bit(@NotNull String s, int start, int length) throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
-        long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + length;
-        long position = writeOffsetPositionMoved(toWriteLength, 0);
+        final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
+        final long position = writeOffsetPositionMoved(toWriteLength, 0);
         bytesStore.write8bit(position, s, start, length);
         uncheckedWritePosition(writePosition() + toWriteLength);
         return this;

@@ -958,9 +958,9 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public @NotNull Bytes<Underlying> write8bit(@NotNull String s, int start, int length) {
-        long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + length;
-        long position = writeOffsetPositionMoved(toWriteLength, 0);
+    public @NotNull Bytes<Underlying> write8bit(final @NotNull String s, final int start, final int length) {
+        final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
+        final long position = writeOffsetPositionMoved(toWriteLength, 0);
         bytesStore.write8bit(position, s, start, length);
         writePosition += toWriteLength;
         return this;

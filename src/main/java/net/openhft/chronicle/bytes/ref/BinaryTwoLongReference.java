@@ -25,7 +25,7 @@ import java.nio.BufferUnderflowException;
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
     @Override
     public long maxSize() {
-        return 2 * 8;
+        return 2 * 8L;
     }
 
     @NotNull

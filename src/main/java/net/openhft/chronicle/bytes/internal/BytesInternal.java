@@ -1181,7 +1181,7 @@ enum BytesInternal {
         try {
             // the output will be no larger than this
             final long available = bytes.realReadRemaining();
-            final int size = (int) Math.min(available, MAX_STRING_LEN - 3);
+            final int size = (int) Math.min(available, MAX_STRING_LEN - 3L);
             @NotNull final StringBuilder sb = new StringBuilder(size);
 
             if (bytes.readRemaining() > size) {
@@ -1943,7 +1943,7 @@ enum BytesInternal {
                     if (c < 0) // we have hit a non-ASCII character.
                         break;
                     if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1);
+                        bytes.readSkip(i + 1L);
                         StringUtils.setCount(appendable, i);
                         return;
                     }
@@ -1956,7 +1956,7 @@ enum BytesInternal {
                     if (c < 0) // we have hit a non-ASCII character.
                         break;
                     if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1);
+                        bytes.readSkip(i + 1L);
                         StringUtils.setCount(appendable, i);
                         return;
                     }

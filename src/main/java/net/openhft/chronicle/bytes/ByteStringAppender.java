@@ -240,7 +240,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
                     ldf = -ldf;
                 long round = ldf;
 
-                if (canWriteDirect(20 + decimalPlaces)) {
+                if (canWriteDirect(20L + decimalPlaces)) {
                     long address = addressForWritePosition();
                     long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
                     writeSkip(address2 - address);

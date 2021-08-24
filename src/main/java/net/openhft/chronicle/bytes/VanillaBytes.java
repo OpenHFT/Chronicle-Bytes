@@ -325,7 +325,7 @@
                 if (isDirectMemory()) {
                     if (str instanceof BytesStore) {
 
-                        write((BytesStore) str, (long) start, end - start);
+                        write((BytesStore) str, start, (long) end - start);
                         return this;
                     }
                     if (str instanceof String) {
