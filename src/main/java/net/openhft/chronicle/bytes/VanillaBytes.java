@@ -581,11 +581,12 @@
                 throws IORuntimeException, BufferUnderflowException {
             byte b = 0;
             // the below cast is safe as should only be called from net.openhft.chronicle.bytes.AbstractBytes.byteCheckSum(long, long)
-            @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
-            @Nullable Memory memory = bytesStore.memory;
+            @Nullable final NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
+            @Nullable final Memory memory = bytesStore.memory;
             assert memory != null;
-            long addr = bytesStore.addressForRead(start);
-            int i = 0, len = end - start;
+            final long addr = bytesStore.addressForRead(start);
+            int i = 0;
+            final int len = end - start;
             for (; i < len - 3; i += 4) {
                 b += memory.readByte(addr + i)
                         + memory.readByte(addr + i + 1)

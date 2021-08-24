@@ -61,16 +61,19 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public void reserve(ReferenceOwner owner)
             throws IllegalStateException {
+        // Do nothing
     }
 
     @Override
     public void release(ReferenceOwner owner)
             throws IllegalStateException {
+        // Do nothing
     }
 
     @Override
     public void releaseLast(ReferenceOwner id)
             throws IllegalStateException {
+        // Do nothing
     }
 
     @Override

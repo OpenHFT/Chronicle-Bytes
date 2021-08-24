@@ -318,9 +318,7 @@ enum BytesInternal {
                                 "malformed input: partial character at end");
                     int char2 = input.readUnsignedByte(offset++);
                     if ((char2 & 0xC0) != 0x80)
-                        throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + (offset - limit + utfLen) +
-                                        " was " + char2);
+                        throw newUTFDataFormatRuntimeException((offset - limit + utfLen), "was " + char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if ((char) c2 != other.charAt(charI))
@@ -350,8 +348,7 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw new UTFDataFormatRuntimeException(
-                            "malformed input around byte " + (offset - limit + utfLen));
+                    throw newUTFDataFormatRuntimeException(offset - limit + utfLen, "");
             }
             charI++;
         }
@@ -627,8 +624,7 @@ enum BytesInternal {
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + (count - 1) + " was " + char2 + " " + char3);
+                        throw newUTFDataFormatRuntimeException(count - 1, " was " + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -638,9 +634,7 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-
-                    throw new UTFDataFormatRuntimeException(
-                            "malformed input around byte " + count);
+                    throw newUTFDataFormatRuntimeException(count, "");
             }
         }
     }
@@ -671,9 +665,7 @@ enum BytesInternal {
                                 "malformed input: partial character at end");
                     int char2 = input.readUnsignedByte(offset++);
                     if ((char2 & 0xC0) != 0x80)
-                        throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + (offset - limit + utflen) +
-                                        " was " + char2);
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen, "was " + char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     appendable.append((char) c2);
@@ -689,9 +681,7 @@ enum BytesInternal {
                     int char3 = input.readUnsignedByte(offset++);
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + (offset - limit + utflen - 1) +
-                                        " was " + char2 + " " + char3);
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, " was " + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -701,8 +691,7 @@ enum BytesInternal {
                 // TODO add code point of characters > 0xFFFF support.
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw new UTFDataFormatRuntimeException(
-                            "malformed input around byte " + (offset - limit + utflen));
+                    throw newUTFDataFormatRuntimeException(offset - limit + utflen, "");
             }
         }
     }
@@ -1931,13 +1920,14 @@ enum BytesInternal {
             @NotNull Bytes bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, IllegalStateException {
         try {
-            @Nullable NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
-            int i = 0, len = Math.toIntExact(bytes.realReadRemaining());
-            long address = nb.address + nb.translate(bytes.readPosition());
-            @Nullable Memory memory = nb.memory;
+            @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
+            int i = 0;
+            final int len = Math.toIntExact(bytes.realReadRemaining());
+            final long address = nb.address + nb.translate(bytes.readPosition());
+            @Nullable final Memory memory = nb.memory;
 
             if (Jvm.isJava9Plus()) {
-                int appendableLength = appendable.capacity();
+                final int appendableLength = appendable.capacity();
                 for (; i < len && i < appendableLength; i++) {
                     int c = memory.readByte(address + i);
                     if (c < 0) // we have hit a non-ASCII character.
@@ -1998,8 +1988,7 @@ enum BytesInternal {
                     /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
-                        throw new UTFDataFormatException(
-                                "malformed input around byte");
+                        throw newUTFDataFormatException(-1, "");
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if (tester.isStopChar(c2))
@@ -2014,8 +2003,7 @@ enum BytesInternal {
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw new UTFDataFormatException(
-                                "malformed input around byte ");
+                        throw newUTFDataFormatException(-1, "");
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -2027,10 +2015,17 @@ enum BytesInternal {
 
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw new UTFDataFormatException(
-                            "malformed input around byte ");
+                    throw newUTFDataFormatException(-1, "");
             }
         }
+    }
+
+    private static UTFDataFormatException newUTFDataFormatException(final long offset, final String suffix) {
+        return new UTFDataFormatException("malformed input around byte " + offset + " " + suffix);
+    }
+
+    private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(final long offset, final String suffix) {
+        return new UTFDataFormatRuntimeException("malformed input around byte " + offset + " " + suffix);
     }
 
     private static void readUtf81(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)

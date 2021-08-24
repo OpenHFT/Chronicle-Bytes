@@ -64,7 +64,9 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         }
         // use two hashes so that when they are combined the 64-bit hash is more random.
         long h0 = length * K0;
-        long h1 = 0, h2 = 0, h3 = 0;
+        long h1 = 0;
+        long h2 = 0;
+        long h3 = 0;
         int i;
         // optimise chunks of 32 bytes but this is the same as the next loop.
         for (i = 0; i < length - 31; i += 32) {

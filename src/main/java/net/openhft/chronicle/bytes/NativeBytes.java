@@ -386,7 +386,7 @@ public class NativeBytes<Underlying>
     }
 
     @Deprecated(/* to be removed in x.23 */)
-    public final static class NativeSubBytes extends SubBytes {
+    public static final class NativeSubBytes extends SubBytes {
         private final NativeBytesStore nativeBytesStore;
 
         public NativeSubBytes(@NotNull final BytesStore bytesStore,

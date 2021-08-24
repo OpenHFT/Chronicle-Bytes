@@ -69,8 +69,7 @@ interface RandomCommon extends ReferenceCounted {
      * @return How many more bytes can we read.
      */
     default long readRemaining() {
-        long remaining = readLimit() - readPosition();
-        return remaining;
+        return readLimit() - readPosition();
     }
 
     /**

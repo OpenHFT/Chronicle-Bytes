@@ -1056,7 +1056,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (writePosition() < 0 || writePosition() > capacity() - (long) 1 + length)
+        if (writePosition() < 0 || writePosition() > capacity() - 1L + length)
             throw writeBufferOverflowException(writePosition());
         int i;
         ascii:
@@ -1163,7 +1163,7 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (offset < 0 || offset > mappedFile.capacity() - (long) 8)
+        if (offset < 0 || offset > mappedFile.capacity() - 8L)
             throw writeBufferOverflowException(offset);
         if (bytesStore == null || bytesStore.start() > offset || offset + 8 >= bytesStore.safeLimit()) {
             acquireNextByteStore0(offset, false);

@@ -28,7 +28,9 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.Objects;
 
+import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 
@@ -42,7 +44,7 @@ public class UncheckedBytes<Underlying>
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes)
             throws IllegalStateException {
-        super((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore(),
+        super(requireNonNull(underlyingBytes.bytesStore()),
                 underlyingBytes.writePosition(),
                 Math.min(underlyingBytes.writeLimit(), underlyingBytes.realCapacity()));
         this.underlyingBytes = underlyingBytes;
@@ -54,7 +56,7 @@ public class UncheckedBytes<Underlying>
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes);
+            this.bytesStore(underlyingBytes);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -69,7 +71,7 @@ public class UncheckedBytes<Underlying>
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
-            bytesStore((AbstractBytesStore<Bytes<Underlying>, Underlying>) underlyingBytes.bytesStore());
+            bytesStore(underlyingBytes.bytesStore());
         }
     }
 
@@ -86,14 +88,17 @@ public class UncheckedBytes<Underlying>
 
     @Override
     void writeCheckOffset(long offset, long adding) {
+        // Do nothing
     }
 
     @Override
     void readCheckOffset(long offset, long adding, boolean given) {
+        // Do nothing
     }
 
     @Override
     void prewriteCheckOffset(long offset, long subtracting) {
+        // Do nothing
     }
 
     @NotNull

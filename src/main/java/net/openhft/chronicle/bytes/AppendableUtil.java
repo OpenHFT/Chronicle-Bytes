@@ -34,6 +34,8 @@ import java.nio.BufferUnderflowException;
 public enum AppendableUtil {
     ; // none
 
+    private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
+
     public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
         if (sb instanceof StringBuilder)
@@ -163,8 +165,7 @@ public enum AppendableUtil {
                     /* 110x xxxx 10xx xxxx */
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
-                        throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char2));
+                        throw newUTFDataFormatException(char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     if (tester.isStopChar(c2, bytes.peekUnsignedByte()))
@@ -179,11 +180,9 @@ public enum AppendableUtil {
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80))
-                        throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char2));
+                        throw newUTFDataFormatException(char2);
                     if ((char3 & 0xC0) != 0x80)
-                        throw new UTFDataFormatException(
-                                "malformed input around byte " + Integer.toHexString(char3));
+                        throw newUTFDataFormatException(char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -195,10 +194,13 @@ public enum AppendableUtil {
 
                 default:
                     /* 10xx xxxx, 1111 xxxx */
-                    throw new UTFDataFormatException(
-                            "malformed input around byte " + Integer.toHexString(c));
+                    throw  newUTFDataFormatException(c);
             }
         }
+    }
+
+    private static UTFDataFormatException newUTFDataFormatException(final int c) {
+        return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
     }
 
     public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int length)

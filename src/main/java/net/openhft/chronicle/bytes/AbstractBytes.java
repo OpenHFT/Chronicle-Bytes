@@ -60,6 +60,7 @@ public abstract class AbstractBytes<Underlying>
         }
 
         static void reportOnce() {
+            // Do nothing
         }
     }
 
@@ -837,9 +838,8 @@ public abstract class AbstractBytes<Underlying>
     @NotNull
     private DecoratedBufferUnderflowException newBOEReadUpper(long offset, long adding, boolean given) {
         long limit2 = given ? writeLimit() : readLimit();
-        DecoratedBufferUnderflowException e = new DecoratedBufferUnderflowException(String
+        return new DecoratedBufferUnderflowException(String
                 .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit2, given));
-        return e;
     }
 
     @NotNull

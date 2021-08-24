@@ -114,7 +114,10 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
-        long h0 = (long) remaining * K0, h1 = 0, h2 = 0, h3 = 0;
+        long h0 = (long) remaining * K0;
+        long h1 = 0;
+        long h2 = 0;
+        long h3 = 0;
 
         int i;
         for (i = 0; i < remaining - 31; i += 32) {
@@ -147,7 +150,10 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     public static long applyAsLongAny(@NotNull BytesStore store, long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
-        long h0 = remaining * K0, h1 = 0, h2 = 0, h3 = 0;
+        long h0 = remaining * K0;
+        long h1 = 0;
+        long h2 = 0;
+        long h3 = 0;
 
         int i;
         for (i = 0; i < remaining - 31; i += 32) {

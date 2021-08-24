@@ -6,6 +6,7 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.nio.BufferUnderflowException;
 import java.util.function.Function;
+import java.util.function.UnaryOperator;
 
 @SuppressWarnings("rawtypes")
 public class BytesTextMethodTester<T> {
@@ -42,7 +43,7 @@ public class BytesTextMethodTester<T> {
     }
 
     @NotNull
-    public BytesTextMethodTester afterRun(Function<String, String> afterRun) {
+    public BytesTextMethodTester afterRun(UnaryOperator<String> afterRun) {
         this.afterRun = afterRun;
         return this;
     }

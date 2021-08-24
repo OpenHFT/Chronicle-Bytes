@@ -239,7 +239,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             Jvm.warn().on(MappedFile.class, "Error during warmup", e);
         } finally {
             Jvm.resetExceptionHandlers();
-            if (errorsDuringWarmup.size() > 0)
+            if (!errorsDuringWarmup.isEmpty())
                 Jvm.warn().on(MappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
         }
     }
