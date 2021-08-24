@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -10,6 +11,7 @@ import java.util.stream.IntStream;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+@Ignore("flaky test - https://github.com/OpenHFT/Chronicle-Bytes/issues/211")
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
