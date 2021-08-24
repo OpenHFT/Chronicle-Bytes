@@ -1368,7 +1368,7 @@ enum BytesInternal {
             int digit = (int) (num & 0xF);
             num >>>= 4;
             numberBuffer[len++] = (byte) HEXADECIMAL[digit];
-        } while (--minDigits > 0 | num > 0);
+        } while (--minDigits > 0 || num > 0);
         for (int i = len - 1; i >= 0; i--)
             out.rawWriteByte(numberBuffer[i]);
     }
