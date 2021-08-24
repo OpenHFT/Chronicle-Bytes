@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.ByteStringReader;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
