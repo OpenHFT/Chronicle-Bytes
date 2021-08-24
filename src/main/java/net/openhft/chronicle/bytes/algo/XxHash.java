@@ -37,7 +37,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
         this.seed = seed;
     }
 
-    private static long finalize(long hash) {
+    private static long finishUp(long hash) {
         hash ^= hash >>> 33;
         hash *= P2;
         hash ^= hash >>> 29;
@@ -161,6 +161,6 @@ public class XxHash implements BytesStoreHash<BytesStore> {
             ++off;
         }
 
-        return finalize(hash);
+        return finishUp(hash);
     }
 }
