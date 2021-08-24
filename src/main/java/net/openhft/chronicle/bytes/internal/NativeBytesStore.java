@@ -357,6 +357,7 @@ public class NativeBytesStore<Underlying>
         return memory.readByte(address + translate(offset));
     }
 
+    @Override
     public int readUnsignedByte(long offset)
             throws BufferUnderflowException {
         return readByte(offset) & 0xFF;
