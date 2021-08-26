@@ -66,6 +66,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
     private final String canonicalPath;
     private final boolean readOnly;
     private NewChunkListener newChunkListener = MappedFile::logNewChunk;
+    private long[] chunkCount = {0L};
 
     protected MappedFile(@NotNull final File file,
                          @NotNull final RandomAccessFile raf,
@@ -355,7 +356,7 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
             final long elapsedNs = System.nanoTime() - beginNs;
             if (newChunkListener != null)
                 newChunkListener.onNewChunk(file.getPath(), chunk, elapsedNs / 1000);
-
+            chunkCount[0]++;
             if (elapsedNs >= 2_000_000L)
                 Jvm.perf().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
 
@@ -581,5 +582,13 @@ public class MappedFile extends AbstractCloseableReferenceCounted {
      */
     public FileLock tryLock(long position, long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
+    }
+
+    public long chunkCount() {
+        return chunkCount[0];
+    }
+
+    public void chunkCount(long[] chunkCount) {
+        this.chunkCount = chunkCount;
     }
 }

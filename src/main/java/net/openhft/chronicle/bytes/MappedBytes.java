@@ -51,24 +51,18 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     private MappedBytesStore bytesStore;
     private long lastActualSize = 0;
 
+    // assume the mapped file is reserved already.
+    protected MappedBytes(@NotNull final MappedFile mappedFile)
+            throws IllegalStateException {
+        this(mappedFile, "");
+    }
+
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
         protected void performClose() throws IllegalStateException {
             MappedBytes.this.performClose();
         }
     };
-
-    @Override
-    public void clearUsedByThread() {
-        super.clearUsedByThread();
-        closeable.clearUsedByThread();
-    }
-
-    // assume the mapped file is reserved already.
-    protected MappedBytes(@NotNull final MappedFile mappedFile)
-            throws IllegalStateException {
-        this(mappedFile, "");
-    }
 
     protected MappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {
@@ -142,6 +136,12 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         } catch (IllegalStateException e) {
             throw new AssertionError(e);
         }
+    }
+
+    @Override
+    public void clearUsedByThread() {
+        super.clearUsedByThread();
+        closeable.clearUsedByThread();
     }
 
     @Override
@@ -293,6 +293,14 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
 
     public void setNewChunkListener(final NewChunkListener listener) {
         mappedFile.setNewChunkListener(listener);
+    }
+
+    public long chunkCount() {
+        return mappedFile.chunkCount();
+    }
+
+    public void chunkCount(long[] chunkCount) {
+        mappedFile.chunkCount(chunkCount);
     }
 
     @NotNull
@@ -1175,4 +1183,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         closeable.disableThreadSafetyCheck(disableThreadSafetyCheck);
         return this;
     }
+
+
 }
