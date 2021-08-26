@@ -73,7 +73,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         if (this.bytes != null) {
             this.bytes.release(this);
         }
-        bytes.readByte(offset); // wake it up if it's not pointing to anything yet.
+        bytes.readInt(offset); // wake it up if it's not pointing to anything yet.
         this.bytes = bytes.bytesStore();
 
         this.bytes.reserve(this);
