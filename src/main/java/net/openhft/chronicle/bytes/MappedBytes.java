@@ -564,7 +564,6 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
     @Override
     public @NotNull MappedBytesStore bytesStore() {
 //        throwExceptionIfClosed();
-
         return (MappedBytesStore) super.bytesStore();
     }
 

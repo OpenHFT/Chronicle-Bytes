@@ -182,8 +182,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
+        BytesStore bytesStore = bytes.bytesStore();
         try {
-            long peakLength = peakLength(bytes, offset);
+            long peakLength = peakLength(bytesStore, offset);
             if (length != peakLength)
                 throw new IllegalArgumentException(length + " != " + peakLength);
         } catch (BufferUnderflowException e) {
@@ -191,7 +192,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         }
 
         assert (offset & 7) == 0 : "offset=" + offset;
-        super.bytesStore(bytes, (offset + 7) & ~7, length);
+        super.bytesStore(bytesStore, (offset + 7) & ~7, length);
         this.length = length;
     }
 

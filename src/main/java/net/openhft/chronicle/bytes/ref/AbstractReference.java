@@ -46,8 +46,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     public void bytesStore(@NotNull final BytesStore bytes, final long offset, final long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
+        // trigger it to move to this
+        bytes.readInt(offset);
+        BytesStore bytesStore = bytes.bytesStore();
 
-        acceptNewBytesStore(bytes);
+        acceptNewBytesStore(bytesStore);
         this.offset = offset;
     }
 
