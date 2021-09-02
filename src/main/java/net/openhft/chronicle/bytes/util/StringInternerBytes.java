@@ -49,13 +49,17 @@ public class StringInternerBytes extends StringInterner {
      * pool.
      *
      * @param bytes  the bytes to convert to a string
-     * @param length parse the string up to the length
+     * @param length parse the string up to the length, must be positive
      * @return the string made from bytes only ( rather than chars )
      */
     @SuppressWarnings("rawtypes")
     public String intern(@NotNull final Bytes bytes, int length)
             throws IllegalStateException, BufferUnderflowException {
         try {
+
+            if (length < 0)
+                throw new IllegalArgumentException("length=" + length);
+
             int hash32 = BytesStoreHash.hash32(bytes, length);
             int h = hash32 & mask;
             String s = interner[h];
