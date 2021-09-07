@@ -1184,5 +1184,4 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
         return this;
     }
 
-
 }

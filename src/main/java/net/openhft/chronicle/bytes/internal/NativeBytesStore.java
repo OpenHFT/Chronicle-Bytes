@@ -296,7 +296,6 @@ public class NativeBytesStore<Underlying>
         if (end > capacity())
             end = capacity();
 
-
         // don't dirty cache lines unnecessarily
         long address = this.address + translate(start);
         long size = end - start;

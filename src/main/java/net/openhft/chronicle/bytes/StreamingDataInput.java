@@ -478,7 +478,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             UnsafeMemory.unsafePutByte(o, (long) offset + i, rawReadByte());
     }
 
-
     default S unsafeRead(long address, int length) {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());

@@ -359,7 +359,6 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException("todo");
     }
 
-
     @Override
     public boolean sharedMemory() {
         return false;
