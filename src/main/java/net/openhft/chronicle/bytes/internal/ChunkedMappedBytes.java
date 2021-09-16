@@ -41,6 +41,8 @@ import java.nio.BufferUnderflowException;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
+    private long[] chunkCount = {0};
+
     // assume the mapped file is reserved already.
     public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {

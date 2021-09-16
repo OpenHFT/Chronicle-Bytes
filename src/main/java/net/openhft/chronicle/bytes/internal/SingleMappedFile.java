@@ -50,7 +50,6 @@ public class SingleMappedFile extends MappedFile {
     private final FileChannel fileChannel;
     private final MappedBytesStore store;
     private final long capacity;
-    private long[] chunkCount = {0L};
 
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
@@ -75,7 +74,6 @@ public class SingleMappedFile extends MappedFile {
             final long elapsedNs = System.nanoTime() - beginNs;
             if (newChunkListener != null)
                 newChunkListener.onNewChunk(file().getPath(), 0, elapsedNs / 1000);
-            chunkCount[0]++;
             if (elapsedNs >= 2_000_000L)
                 Jvm.perf().on(getClass(), "Took " + elapsedNs / 1_000_000L + " ms to add mapping for " + file());
 
@@ -268,11 +266,11 @@ public class SingleMappedFile extends MappedFile {
     }
 
     public long chunkCount() {
-        return chunkCount[0];
+        return 1;
     }
 
     public void chunkCount(long[] chunkCount) {
-        this.chunkCount = chunkCount;
+        chunkCount[0] = 1;
     }
 
     @Override

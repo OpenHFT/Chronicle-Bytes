@@ -609,4 +609,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 "isClosed=" + isClosed() +
                 '}';
     }
+
+    @Override
+    public void chunkCount(long[] chunkCount) {
+        mappedFile.chunkCount(chunkCount);
+    }
 }

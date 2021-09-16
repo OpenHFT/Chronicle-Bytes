@@ -148,4 +148,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     public abstract MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck);
+
+    public abstract void chunkCount(long[] chunkCount);
+
+    public abstract MappedFile mappedFile();
 }
