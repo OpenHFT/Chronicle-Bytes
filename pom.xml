@@ -59,6 +59,7 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>posix</artifactId>
+            <version>1.22ea3-SNAPSHOT</version>
         </dependency>
 
         <dependency>
@@ -134,7 +135,7 @@
                         <configuration>
                             <referenceVersion>2.22ea1</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>90.6</binaryCompatibilityPercentageRequired>
+                            <!--                            <binaryCompatibilityPercentageRequired>90.6</binaryCompatibilityPercentageRequired>-->
                         </configuration>
                     </execution>
                 </executions>
