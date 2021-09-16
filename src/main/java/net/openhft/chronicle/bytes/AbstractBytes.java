@@ -741,7 +741,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.write8bit(position, s, start, length);
     }
 
-    void writeCheckOffset(long offset, long adding)
+    protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalStateException {
         if (BYTES_BOUNDS_UNCHECKED)
             return;
@@ -817,7 +817,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.readDouble(offset);
     }
 
-    void readCheckOffset(long offset, long adding, boolean given)
+    protected void readCheckOffset(long offset, long adding, boolean given)
             throws BufferUnderflowException, IllegalStateException {
         if (BYTES_BOUNDS_UNCHECKED)
             return;

@@ -158,6 +158,23 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
+    public void largeReadOnlyFileSingle()
+            throws IOException {
+        if (Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows())
+            return;
+
+        final File file = File.createTempFile("largeReadOnlyFile", "deleteme");
+        file.deleteOnExit();
+        try (MappedBytes bytes = MappedBytes.singleMappedBytes(file, 4L << 30)) {
+            bytes.writeLong(3L << 30, 0x12345678); // make the file 3 GB.
+        }
+
+        try (MappedBytes bytes = MappedBytes.singleMappedBytes(file, 4L << 30, false)) {
+            Assert.assertEquals(0x12345678L, bytes.readLong(3L << 30));
+        }
+    }
+
+    @Test
     public void interrupted()
             throws FileNotFoundException {
         Thread.currentThread().interrupt();

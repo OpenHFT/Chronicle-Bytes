@@ -24,7 +24,9 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 
 /**
@@ -33,9 +35,11 @@ import java.nio.channels.FileLock;
  * <b>WARNING: Handle with care as this assumes the caller has correct bounds checking</b>
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
+    public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
     private final MappedFile mappedFile;
     private final long start;
     private final long safeLimit;
+    protected final Runnable writeCheck;
 
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity)
             throws IllegalStateException {
@@ -43,7 +47,19 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         this.mappedFile = mappedFile;
         this.start = start;
         this.safeLimit = start + safeCapacity;
+        this.writeCheck = mappedFile.readOnly()
+                ? MappedBytesStore::throwReadOnly
+                : MappedBytesStore::readWriteOk;
+
         reserveTransfer(INIT, owner);
+    }
+
+    static void throwReadOnly() {
+        throw new IllegalStateException("Read Only");
+    }
+
+    static void readWriteOk() {
+        // nothing to do
     }
 
     /**
@@ -72,6 +88,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public VanillaBytes<Void> bytesForWrite()
             throws IllegalStateException {
+        writeCheck.run();
         try {
             return new NativeBytes<>(this);
         } catch (IllegalArgumentException e) {
@@ -104,6 +121,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public MappedBytesStore writeOrderedInt(long offset, int i)
             throws IllegalStateException {
+        writeCheck.run();
+
         memory.writeOrderedInt(address - start + offset, i);
         return this;
     }
@@ -139,5 +158,173 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      */
     public FileLock tryLock(long position, long size, boolean shared) throws IOException {
         return mappedFile.tryLock(position, size, shared);
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore zeroOut(long start, long end) {
+        writeCheck.run();
+        super.zeroOut(start, end);
+        return this;
+    }
+
+    @Override
+    public boolean compareAndSwapInt(long offset, int expected, int value)
+            throws IllegalStateException {
+        writeCheck.run();
+        return super.compareAndSwapInt(offset, expected, value);
+    }
+
+    @Override
+    public boolean compareAndSwapLong(long offset, long expected, long value)
+            throws IllegalStateException {
+        writeCheck.run();
+        return super.compareAndSwapLong(offset, expected, value);
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeByte(long offset, byte i8)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeByte(offset, i8);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeShort(long offset, short i16)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeShort(offset, i16);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeInt(long offset, int i32)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeInt(offset, i32);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeLong(long offset, long i64)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeLong(offset, i64);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeOrderedLong(long offset, long i)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeOrderedLong(offset, i);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeFloat(long offset, float f)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeFloat(offset, f);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeDouble(long offset, double d)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeDouble(offset, d);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeVolatileByte(long offset, byte i8)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeVolatileByte(offset, i8);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeVolatileShort(long offset, short i16)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeVolatileShort(offset, i16);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeVolatileInt(long offset, int i32)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeVolatileInt(offset, i32);
+        return this;
+    }
+
+
+    @NotNull
+    @Override
+    public MappedBytesStore writeVolatileLong(long offset, long i64)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.writeVolatileLong(offset, i64);
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore write(long offsetInRDO, byte[] bytes, int offset, int length)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.write(offsetInRDO, bytes, offset, length);
+        return this;
+    }
+
+    @Override
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.write(offsetInRDO, bytes, offset, length);
+    }
+
+    @NotNull
+    @Override
+    public MappedBytesStore write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        writeCheck.run();
+        super.write(writeOffset, bytes, readOffset, length);
+        return this;
+    }
+
+    @Override
+    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.write0(offsetInRDO, bytes, offset, length);
+    }
+
+    @Override
+    public void nativeWrite(long address, long position, long size)
+            throws IllegalStateException {
+        writeCheck.run();
+        super.nativeWrite(address, position, size);
+    }
+
+    @Override
+    public long appendUtf8(long pos, char[] chars, int offset, int length)
+            throws IllegalStateException {
+        writeCheck.run();
+        return super.appendUtf8(pos, chars, offset, length);
     }
 }

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
+import static net.openhft.chronicle.bytes.MappedBytes.singleMappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
 
@@ -149,6 +150,46 @@ public class MappedMemoryTest extends BytesTestCommon {
         Bytes<?> bytes0;
         try {
             try (MappedBytes bytes = mappedBytes(tempFile, OS.pageSize())) {
+                bytes0 = bytes;
+                final ReferenceOwner test = ReferenceOwner.temporary("test");
+                try {
+                    assertEquals(1, bytes.refCount());
+                    bytes.reserve(test);
+                    assertEquals(2, bytes.refCount());
+
+                    // The page size is 0x4000 on Mac M1 (and not 0x1000) so we need to stay in reasonable bounds
+                    final char[] chars = new char[OS.pageSize() * 7];
+
+                    Arrays.fill(chars, '.');
+                    chars[chars.length - 1] = '*';
+                    bytes.writeUtf8(new String(chars));
+
+                    final int pos = Math.toIntExact(bytes.writePosition());
+
+                    final String text = "hello this is some very long text";
+                    bytes.writeUtf8(text);
+                    final String textValue = bytes.toString();
+                    assertEquals(text, textValue.substring(pos + 1));
+                    assertEquals(2, bytes.refCount());
+                } finally {
+                    bytes.release(test);
+                    assertEquals(1, bytes.refCount());
+                }
+            }
+        } finally {
+            deleteIfPossible(tempFile);
+        }
+        assertEquals(0, bytes0.refCount());
+    }
+
+    @Test
+    public void mappedMemoryTestSingle()
+            throws IOException, IORuntimeException {
+
+        final File tempFile = File.createTempFile("chronicle", "q");
+        Bytes<?> bytes0;
+        try {
+            try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8)) {
                 bytes0 = bytes;
                 final ReferenceOwner test = ReferenceOwner.temporary("test");
                 try {

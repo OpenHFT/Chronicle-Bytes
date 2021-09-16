@@ -72,4 +72,58 @@ public class LockingByteableTest {
             }
         }
     }
+
+
+    @Test
+    public void lockableSharedSingle() throws IOException {
+        final String tmp = IOTools.tempName("lockableShared");
+        new File(tmp).deleteOnExit();
+
+        for (int i = 0; i < 3; i++) {
+            try (MappedBytes mbs = MappedBytes.singleMappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(mbs, 0, 8);
+                try (FileLock fl = blr.lock(true)) {
+                    assertNotNull(fl);
+                }
+                try (FileLock fl = blr.lock(true)) {
+                    assertNotNull(fl);
+                }
+            }
+        }
+    }
+
+    @Test
+    public void tryLockableSharedSingle() throws IOException {
+        final String tmp = IOTools.tempName("lockableShared");
+        new File(tmp).deleteOnExit();
+
+        for (int i = 0; i < 3; i++) {
+            try (MappedBytes mbs = MappedBytes.singleMappedBytes(tmp, 64 << 10);
+                 BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(mbs, 0, 8);
+                try (FileLock fl = blr.tryLock(true)) {
+                    assertNotNull(fl);
+                }
+                try (FileLock fl = blr.tryLock(true)) {
+                    assertNotNull(fl);
+                }
+            }
+        }
+    }
+
+    @Test(expected = OverlappingFileLockException.class)
+    public void doubleLockableSharedSingle() throws IOException {
+        final String tmp = IOTools.tempName("doubleLockableShared");
+        new File(tmp).deleteOnExit();
+
+        try (MappedBytes mbs = MappedBytes.singleMappedBytes(tmp, 64 << 10);
+             BinaryLongReference blr = new BinaryLongReference()) {
+            blr.bytesStore(mbs, 0, 8);
+            try (FileLock fl = blr.lock(true)) {
+                blr.lock(false);
+                fail();
+            }
+        }
+    }
 }

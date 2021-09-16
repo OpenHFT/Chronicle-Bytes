@@ -5,7 +5,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.File;
@@ -360,6 +359,16 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
+    public void shouldNotBeReadOnlySingle()
+            throws Exception {
+        try (MappedBytes bytes = MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
+            assertFalse(bytes.isBackingFileReadOnly());
+            bytes.writeUtf8(null); // used to blow up.
+            assertNull(bytes.readUtf8());
+        }
+    }
+
+    @Test
     public void shouldBeReadOnly()
             throws Exception {
         final File tempFile = File.createTempFile("mapped", "bytes");
@@ -388,6 +397,18 @@ public class MappedBytesTest extends BytesTestCommon {
         }
     }
 
+    @Test
+    public void interruptedSingle()
+            throws FileNotFoundException {
+        Thread.currentThread().interrupt();
+        File file = IOTools.createTempFile("interrupted");
+        file.deleteOnExit();
+        try (MappedBytes mb = MappedBytes.singleMappedBytes(file, 64 << 10)) {
+            mb.realCapacity();
+            assertTrue(Thread.currentThread().isInterrupted());
+        }
+    }
+
     @After
     public void clearInterrupt() {
         Thread.interrupted();
@@ -398,6 +419,34 @@ public class MappedBytesTest extends BytesTestCommon {
             throws FileNotFoundException {
         File tmpfile = IOTools.createTempFile("data.dat");
         try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 10);
+             MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
+            original.zeroOut(0, 1000);
+
+            original.writeInt(0, 1234);
+
+            PointerBytesStore pbs = new PointerBytesStore();
+            pbs.set(original.addressForRead(50), 100);
+
+            // Print out the int in the two BytesStores.
+            // This shows that the copy has the same contents of the original.
+//            System.out.println("Original(0): " + original.readInt(0));
+//            System.out.println("PBS(0): " + pbs.readInt(0));
+
+            // Now modify the copy and print out the new int in the two BytesStores again.
+            pbs.writeInt(0, 4321);
+//            System.out.println("Original(50): " + original.readInt(50));
+//            System.out.println("PBS(0): " + pbs.readInt(0));
+            original.writeInt(54, 12345678);
+//            System.out.println("Original(54): " + original.readInt(54));
+//            System.out.println("PBS(4): " + pbs.readInt(4));
+        }
+    }
+
+    @Test
+    public void multiBytesSingle()
+            throws FileNotFoundException {
+        File tmpfile = IOTools.createTempFile("data.dat");
+        try (MappedFile mappedFile = MappedFile.ofSingle(tmpfile, 64 << 10, false);
              MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
             original.zeroOut(0, 1000);
 

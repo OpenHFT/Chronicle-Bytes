@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.AbstractBytesStore;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -28,7 +27,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.Objects;
 
 import static java.util.Objects.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
@@ -87,12 +85,12 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    void writeCheckOffset(long offset, long adding) {
+    protected void writeCheckOffset(long offset, long adding) {
         // Do nothing
     }
 
     @Override
-    void readCheckOffset(long offset, long adding, boolean given) {
+    protected void readCheckOffset(long offset, long adding, boolean given) {
         // Do nothing
     }
 

@@ -56,6 +56,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>posix</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>net.openhft</groupId>
