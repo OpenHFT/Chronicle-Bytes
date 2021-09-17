@@ -567,7 +567,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         if (offset < 0 || offset > mappedFile.capacity() - 8L)
             throw writeBufferOverflowException(offset);
-        if (bytesStore == null || bytesStore.start() > offset || offset + 8 >= bytesStore.safeLimit()) {
+        if (bytesStore == null || !bytesStore.inside(offset, 8)) {
             acquireNextByteStore0(offset, false);
         }
 //        super.writeCheckOffset(offset, adding);
