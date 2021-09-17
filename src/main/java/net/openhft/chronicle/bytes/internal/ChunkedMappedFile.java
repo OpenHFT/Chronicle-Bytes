@@ -187,6 +187,8 @@ public class ChunkedMappedFile extends MappedFile {
 
             final long beginNs = System.nanoTime();
 
+            throwExceptionIfClosed();
+
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final MappedBytesStore mbs2 =
                     mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
