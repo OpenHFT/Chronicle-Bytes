@@ -195,18 +195,6 @@ public class SingleMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-    @Override
-    protected void performRelease() {
-        super.performRelease();
-        try {
-            if (mappedFile.refCount() > 0)
-                mappedFile.release(this);
-        } catch (IllegalStateException e) {
-            if (!e.getMessage().contains("MappedFile already released"))
-                Jvm.warn().on(getClass(), e);
-        }
-    }
-
     @SuppressWarnings("restriction")
     @Override
     public int peekVolatileInt()

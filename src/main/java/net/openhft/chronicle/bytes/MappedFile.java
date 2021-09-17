@@ -45,10 +45,9 @@ import java.nio.channels.FileLock;
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-
+    protected final String canonicalPath;
     @NotNull
     private final File file;
-    protected final String canonicalPath;
     private final boolean readOnly;
     protected NewChunkListener newChunkListener = MappedFile::logNewChunk;
 

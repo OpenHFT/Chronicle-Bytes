@@ -65,18 +65,18 @@ public abstract class CommonMappedBytes extends MappedBytes {
         clear();
     }
 
+    @Override
+    public void clearUsedByThread() {
+        super.clearUsedByThread();
+        closeable.clearUsedByThread();
+    }
+
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
         protected void performClose() throws IllegalStateException {
             CommonMappedBytes.this.performClose();
         }
     };
-
-    @Override
-    public void clearUsedByThread() {
-        super.clearUsedByThread();
-        closeable.clearUsedByThread();
-    }
 
     @Override
     protected void bytesStore(BytesStore bytesStore) {
@@ -244,13 +244,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     protected void performRelease() {
         super.performRelease();
-        try {
-            if (mappedFile.refCount() > 0)
-                mappedFile.release(this);
-        } catch (IllegalStateException e) {
-            if (!e.getMessage().contains("MappedFile already released"))
-                Jvm.warn().on(getClass(), e);
-        }
+        mappedFile.release(this);
     }
 
     @Override
@@ -614,4 +608,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public void chunkCount(long[] chunkCount) {
         mappedFile.chunkCount(chunkCount);
     }
+
+
 }
