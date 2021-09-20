@@ -135,11 +135,6 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         }
     }
 
-    @Override
-    protected boolean canReleaseInBackground() {
-        return true;
-    }
-
     public abstract boolean isBackingFileReadOnly();
 
     @Override
