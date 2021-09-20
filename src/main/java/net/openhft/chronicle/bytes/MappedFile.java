@@ -258,7 +258,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @Override
-    protected boolean performReleaseInBackground() {
+    protected boolean canReleaseInBackground() {
         // don't perform the close in the background as that just sets a flag. This does the real work.
         return true;
     }

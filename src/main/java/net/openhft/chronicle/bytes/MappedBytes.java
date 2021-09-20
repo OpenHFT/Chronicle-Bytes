@@ -136,7 +136,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @Override
-    protected boolean performReleaseInBackground() {
+    protected boolean canReleaseInBackground() {
         return true;
     }
 

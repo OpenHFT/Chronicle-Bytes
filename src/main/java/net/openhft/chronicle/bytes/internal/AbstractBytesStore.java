@@ -68,7 +68,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Un
     }
 
     @Override
-    protected boolean performReleaseInBackground() {
+    protected boolean canReleaseInBackground() {
         return isDirectMemory();
     }
 }

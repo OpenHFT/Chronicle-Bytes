@@ -578,6 +578,13 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
+    protected void backgroundPerformRelease() {
+        // eagerly clear
+        memory = null;
+        super.backgroundPerformRelease();
+    }
+
+    @Override
     protected void performRelease() {
         memory = null;
         if (cleaner != null) {
