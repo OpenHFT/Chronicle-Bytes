@@ -46,6 +46,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     private final boolean backingFileIsReadOnly;
     protected MappedBytesStore bytesStore;
     protected long lastActualSize = 0;
+    private boolean initReleased;
 
     // assume the mapped file is reserved already.
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile)
@@ -70,13 +71,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         super.clearUsedByThread();
         closeable.clearUsedByThread();
     }
-
-    private final AbstractCloseable closeable = new AbstractCloseable() {
-        @Override
-        protected void performClose() throws IllegalStateException {
-            CommonMappedBytes.this.performClose();
-        }
-    };
 
     @Override
     protected void bytesStore(BytesStore bytesStore) {
@@ -110,6 +104,13 @@ public abstract class CommonMappedBytes extends MappedBytes {
         uncheckedWritePosition(writePosition() + remaining);
         return this;
     }
+
+    private final AbstractCloseable closeable = new AbstractCloseable() {
+        @Override
+        protected void performClose() throws IllegalStateException {
+            CommonMappedBytes.this.performClose();
+        }
+    };
 
     @NotNull
     public CommonMappedBytes write(final long offsetInRDO, @NotNull final RandomDataInput bytes)
@@ -412,6 +413,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public void release(ReferenceOwner id)
             throws IllegalStateException {
         super.release(id);
+        initReleased |= id == INIT;
         if (refCount() <= 0)
             closeable.close();
     }
@@ -420,6 +422,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public void releaseLast(ReferenceOwner id)
             throws IllegalStateException {
         super.releaseLast(id);
+        initReleased |= id == INIT;
         closeable.close();
     }
 
@@ -429,12 +432,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     void performClose() {
-        try {
-            if (refCount() > 0)
-                release(INIT);
-        } catch (IllegalStateException e) {
-            Jvm.warn().on(getClass(), e);
-        }
+        if (!initReleased)
+            release(INIT);
     }
 
     @Override
