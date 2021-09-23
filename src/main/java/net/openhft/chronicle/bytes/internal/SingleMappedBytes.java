@@ -18,10 +18,7 @@
 
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.MappedBytesStore;
-import net.openhft.chronicle.bytes.MappedFile;
-import net.openhft.chronicle.bytes.RandomDataInput;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
@@ -200,7 +197,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     public int peekVolatileInt()
             throws IllegalStateException {
 
-        @Nullable MappedBytesStore bytesStore = this.bytesStore;
+        @Nullable MappedBytesStore bytesStore = (MappedBytesStore) (BytesStore) this.bytesStore;
         long address = bytesStore.address + bytesStore.translate(readPosition);
         @Nullable Memory memory = bytesStore.memory;
 

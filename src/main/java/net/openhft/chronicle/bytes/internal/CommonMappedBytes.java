@@ -44,7 +44,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     protected final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
-    protected MappedBytesStore bytesStore;
     protected long lastActualSize = 0;
     private boolean initReleased;
 
@@ -75,10 +74,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     protected void bytesStore(BytesStore bytesStore) {
         super.bytesStore(bytesStore);
-        if (bytesStore instanceof MappedBytesStore)
-            this.bytesStore = (MappedBytesStore) bytesStore;
-        else
-            this.bytesStore = null;
     }
 
     public @NotNull CommonMappedBytes write(@NotNull final byte[] bytes,
@@ -200,12 +195,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
-    public @NotNull MappedBytesStore bytesStore() {
-//        throwExceptionIfClosed();
-        return (MappedBytesStore) super.bytesStore();
-    }
-
-    @Override
     public long start() {
 //        throwExceptionIfClosed();
 
@@ -305,10 +294,11 @@ public abstract class CommonMappedBytes extends MappedBytes {
     private CommonMappedBytes append8bit0(@NotNull String s, int start, int length)
             throws BufferOverflowException, IllegalStateException {
 
+        ensureCapacity(writePosition + length);
+        long address = addressForWritePosition();
+        Memory memory = ((MappedBytesStore) bytesStore()).memory;
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
-            long address = addressForWritePosition();
-            Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
                 int c0 = bytes[i + start] & 0xff;
@@ -325,8 +315,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
             writeSkip(length);
         } else {
             char[] chars = extractChars(s);
-            long address = addressForWritePosition();
-            Memory memory = bytesStore().memory;
             int i = 0;
             for (; i < length - 3; i += 4) {
                 int c0 = chars[i + start] & 0xff;
