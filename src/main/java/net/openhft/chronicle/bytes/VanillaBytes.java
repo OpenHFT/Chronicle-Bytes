@@ -344,7 +344,9 @@
                 return this;
 
             } catch (Exception e) {
-                throw new IndexOutOfBoundsException(e.toString());
+                final IndexOutOfBoundsException ioobe = new IndexOutOfBoundsException(e.toString());
+                ioobe.initCause(e);
+                throw ioobe;
             }
         }
 

@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.ReleasedBytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -53,16 +52,6 @@ public abstract class AbstractBytes<Underlying>
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
-
-    static class ReportUnoptimised {
-        static {
-            Jvm.reportUnoptimised();
-        }
-
-        static void reportOnce() {
-            // Do nothing
-        }
-    }
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
@@ -358,8 +347,6 @@ public abstract class AbstractBytes<Underlying>
             this.bytesStore.release(this);
         } catch (IllegalStateException e) {
             Jvm.warn().on(getClass(), e);
-        } finally {
-            this.bytesStore(ReleasedBytesStore.releasedBytesStore());
         }
     }
 
@@ -1221,5 +1208,15 @@ public abstract class AbstractBytes<Underlying>
             sum += readByte(i);
         }
         return sum & 0xFF;
+    }
+
+    static class ReportUnoptimised {
+        static {
+            Jvm.reportUnoptimised();
+        }
+
+        static void reportOnce() {
+            // Do nothing
+        }
     }
 }

@@ -23,13 +23,12 @@ import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
@@ -43,6 +42,7 @@ public class HeapBytesStore<Underlying>
     private final long capacity;
     @NotNull
     private final Underlying underlyingObject;
+    private UnsafeMemory memory = UnsafeMemory.MEMORY;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         super(false);
@@ -98,7 +98,13 @@ public class HeapBytesStore<Underlying>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
-        MEMORY.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, Maths.toUInt31(length));
+        throwExceptionIfReleased();
+        try {
+            memory.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, Maths.toUInt31(length));
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
@@ -115,7 +121,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     protected void performRelease() {
-        // nothing to do
+        memory = null;
     }
 
     @Override
@@ -131,79 +137,146 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value) {
-        return MEMORY.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
+        try {
+            return memory.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public void testAndSetInt(long offset, int expected, int value)
             throws IllegalStateException {
-        MEMORY.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
+        try {
+            memory.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value) {
-        return MEMORY.compareAndSwapLong(
-                realUnderlyingObject, dataOffset + offset, expected, value);
+        try {
+            return memory.compareAndSwapLong(
+                    realUnderlyingObject, dataOffset + offset, expected, value);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public byte readByte(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readByte(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readByte(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public short readShort(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readShort(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readShort(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public int readInt(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readInt(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readInt(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public long readLong(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readLong(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readLong(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public float readFloat(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readFloat(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readFloat(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public double readDouble(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readDouble(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readDouble(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public byte readVolatileByte(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readVolatileByte(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readVolatileByte(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public short readVolatileShort(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readVolatileShort(realUnderlyingObject, dataOffset + offset);
+        try {
+            return memory.readVolatileShort(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public int readVolatileInt(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readVolatileInt(realUnderlyingObject, dataOffset + offset);
+        try {
+            throwExceptionIfReleased();
+            return memory.readVolatileInt(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public long readVolatileLong(long offset)
             throws BufferUnderflowException {
-        return MEMORY.readVolatileLong(realUnderlyingObject, dataOffset + offset);
+        try {
+            throwExceptionIfReleased();
+            return memory.readVolatileLong(realUnderlyingObject, dataOffset + offset);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
@@ -220,105 +293,177 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, String s, int start, int length) {
-        position = BytesInternal.writeStopBit(this, position, length);
-        MEMORY.write8bit(s, start, realUnderlyingObject, dataOffset + position, length);
-        return position + length;
+        try {
+            throwExceptionIfReleased();
+            position = BytesInternal.writeStopBit(this, position, length);
+            memory.write8bit(s, start, realUnderlyingObject, dataOffset + position, length);
+            return position + length;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeByte(long offset, byte b)
             throws BufferOverflowException {
-        MEMORY.writeByte(realUnderlyingObject, dataOffset + offset, b);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeByte(realUnderlyingObject, dataOffset + offset, b);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeShort(long offset, short i16)
             throws BufferOverflowException {
-        MEMORY.writeShort(realUnderlyingObject, dataOffset + offset, i16);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeShort(realUnderlyingObject, dataOffset + offset, i16);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeInt(long offset, int i32)
             throws BufferOverflowException {
-        MEMORY.writeInt(realUnderlyingObject, dataOffset + offset, i32);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeInt(realUnderlyingObject, dataOffset + offset, i32);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32)
             throws BufferOverflowException {
-        MEMORY.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeOrderedInt(realUnderlyingObject, dataOffset + offset, i32);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeLong(long offset, long i64)
             throws BufferOverflowException {
-        MEMORY.writeLong(realUnderlyingObject, dataOffset + offset, i64);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeLong(realUnderlyingObject, dataOffset + offset, i64);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeOrderedLong(long offset, long i)
             throws BufferOverflowException {
-        MEMORY.writeOrderedLong(realUnderlyingObject, dataOffset + offset, i);
-        return this;
+        try {
+            throwExceptionIfReleased();
+            memory.writeOrderedLong(realUnderlyingObject, dataOffset + offset, i);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeFloat(long offset, float f)
             throws BufferOverflowException {
-        MEMORY.writeFloat(realUnderlyingObject, dataOffset + offset, f);
-        return this;
+        try {
+            memory.writeFloat(realUnderlyingObject, dataOffset + offset, f);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeDouble(long offset, double d)
             throws BufferOverflowException {
-        MEMORY.writeDouble(realUnderlyingObject, dataOffset + offset, d);
-        return this;
+        try {
+            memory.writeDouble(realUnderlyingObject, dataOffset + offset, d);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException {
-        MEMORY.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
-        return this;
+        try {
+            memory.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException {
-        MEMORY.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
-        return this;
+        try {
+            memory.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException {
-        MEMORY.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
-        return this;
+        try {
+            memory.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
     @Override
     public HeapBytesStore<Underlying> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException {
-        MEMORY.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
-        return this;
+        try {
+            memory.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @NotNull
@@ -326,23 +471,33 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
-        MEMORY.copyMemory(
-                bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
-        return this;
+        try {
+            memory.copyMemory(
+                    bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+            return this;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
     }
 
     @Override
     public void write(
             long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
-        assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
-        if (bytes.isDirect()) {
-            MEMORY.copyMemory(Jvm.address(bytes), realUnderlyingObject,
-                    this.dataOffset + offsetInRDO, length);
+        try {
+            assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
+            if (bytes.isDirect()) {
+                memory.copyMemory(Jvm.address(bytes), realUnderlyingObject,
+                        this.dataOffset + offsetInRDO, length);
 
-        } else {
-            MEMORY.copyMemory(bytes.array(), offset, realUnderlyingObject,
-                    this.dataOffset + offsetInRDO, length);
+            } else {
+                memory.copyMemory(bytes.array(), offset, realUnderlyingObject,
+                        this.dataOffset + offsetInRDO, length);
+            }
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
         }
     }
 

@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.ReleasedBytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -30,8 +29,6 @@ import java.nio.ByteBuffer;
 
 /**
  * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStire with space)
- *
- * @see ReleasedBytesStore
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {

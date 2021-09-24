@@ -1,7 +1,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.ReleasedBytesStore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -16,11 +15,11 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
         bytes.writeLong(0, 0);
         assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
         bytes.releaseLast();
-        assertEquals(ReleasedBytesStore.class, bytes.bytesStore().getClass());
+        assertEquals(0, bytes.bytesStore().refCount());
         try {
             bytes.writeLong(0, 0);
             fail();
-        } catch (IllegalStateException e) {
+        } catch (NullPointerException e) {
             // expected.
         }
     }
