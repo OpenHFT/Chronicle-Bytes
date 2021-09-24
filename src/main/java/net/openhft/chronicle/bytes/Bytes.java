@@ -931,7 +931,7 @@ public interface Bytes<Underlying> extends
             return;
 
         write(fromOffset, this, fromOffset + count, wp - fromOffset - count);
-        writeSkip(-count);
+        writePosition(wp - count);
     }
 
     @NotNull
