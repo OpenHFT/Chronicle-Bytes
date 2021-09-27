@@ -19,7 +19,11 @@ public class BytesFieldInfoTest {
         assertEquals("type: BytesFieldInfo, groups: { hi: 12 to 16, pad: 16 to 48, add: 48 to 64 }", lookup2.dump());
         assertEquals("4050000", Integer.toHexString(lookup2.description()));
         final BytesFieldInfo lookup3 = BytesFieldInfo.lookup(Groups3.class);
-        assertEquals("type: BytesFieldInfo, groups: { pad: 16 to 48, hi: 48 to 52, add: 52 to 68 }", lookup3.dump());
+        // field layout changed with Java 15 - https://bugs.openjdk.java.net/browse/JDK-8237767
+        final String groups3 = Jvm.isJava15Plus() ?
+                "type: BytesFieldInfo, groups: { hi: 12 to 16, pad: 16 to 48, add: 48 to 64 }" :
+                "type: BytesFieldInfo, groups: { pad: 16 to 48, hi: 48 to 52, add: 52 to 68 }";
+        assertEquals(groups3, lookup3.dump());
         assertEquals("4050000", Integer.toHexString(lookup3.description()));
     }
 
