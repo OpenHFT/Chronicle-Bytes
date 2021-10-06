@@ -67,8 +67,11 @@ public class SingleMappedFile extends MappedFile {
         final long beginNs = System.nanoTime();
         boolean ok = false;
         try {
+            Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
+
             resizeRafIfTooSmall(capacity);
             final long address = OS.map(fileChannel, mode, 0, capacity);
+//            System.out.println("Mapped "+Long.toUnsignedString(address, 16));
             final MappedBytesStore mbs2 = MAPPED_BYTES_STORE_FACTORY.create(this, this, 0, address, capacity, capacity);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -79,7 +82,6 @@ public class SingleMappedFile extends MappedFile {
 
             store = mbs2;
 
-            Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
             ok = true;
 
         } catch (IOException ioe) {
@@ -101,6 +103,7 @@ public class SingleMappedFile extends MappedFile {
 
         if (position != 0)
             throw new IllegalArgumentException();
+        store.reserve(owner);
         return store;
     }
 

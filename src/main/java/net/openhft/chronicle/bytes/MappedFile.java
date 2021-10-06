@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedFile;
+import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -97,7 +98,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             throws FileNotFoundException {
 
         @NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
-        return new ChunkedMappedFile(file, raf, capacity, 0, capacity, readOnly);
+        return new SingleMappedFile(file, raf, capacity, readOnly);
     }
 
     @NotNull
