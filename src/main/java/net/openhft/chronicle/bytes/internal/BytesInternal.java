@@ -2222,7 +2222,7 @@ enum BytesInternal {
             int tens = 0;
             while (true) {
                 if (ch >= '0' && ch <= '9') {
-                    // -value is always negative!
+                    // -absValue is always negative!
                     if (-absValue < -MAX_VALUE_DIVIDE_10) {
                         if (tens == 0 &&
                                 (sign < 0 || absValue != Long.MAX_VALUE) &&
