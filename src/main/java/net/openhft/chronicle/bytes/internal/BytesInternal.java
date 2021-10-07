@@ -2187,6 +2187,118 @@ enum BytesInternal {
         bytes2.writeUnsignedByte(ch);
     }
 
+    public static long parseFlexibleLong(@NotNull StreamingDataInput in)
+            throws BufferUnderflowException, IllegalStateException {
+        long absValue = 0; // Math.abs(absValue) == absValue
+        int sign = 1;
+        int decimalPlaces = Integer.MIN_VALUE;
+        boolean digits = false;
+        int ch;
+        do {
+            ch = in.rawReadByte() & 0xFF;
+        } while (ch == ' ' && in.readRemaining() > 0);
+
+        try {
+            switch (ch) {
+                case 'N':
+                    if (compareRest(in, "aN"))
+                        return 0L;
+                    in.readSkip(-1);
+
+                    return 0L;
+                case 'I':
+                    //noinspection SpellCheckingInspection
+                    if (compareRest(in, "nfinity"))
+                        return Long.MAX_VALUE;
+                    in.readSkip(-1);
+                    return 0L;
+                case '-':
+                    if (compareRest(in, "Infinity"))
+                        return Long.MIN_VALUE;
+                    sign = -1;
+                    ch = in.rawReadByte();
+                    break;
+            }
+            int tens = 0;
+            while (true) {
+                if (ch >= '0' && ch <= '9') {
+                    // -value is always negative!
+                    if (-absValue < -MAX_VALUE_DIVIDE_10) {
+                        if (tens == 0 &&
+                                (sign < 0 || absValue != Long.MAX_VALUE) &&
+                                absValue != Long.MIN_VALUE &&
+                                ch >= '5')
+                            absValue++; // Rounding
+                        tens++;
+
+                    } else if (absValue == MAX_VALUE_DIVIDE_10) {
+                        if (ch <= '7' || (sign < 0 && ch == '8'))
+                            absValue = absValue * 10 + (ch - '0');
+                        else {
+                            if (tens == 0)
+                                absValue++; // Rounding
+                            tens++;
+                        }
+                    }
+                    else {
+                        absValue = absValue * 10 + (ch - '0');
+                    }
+                    decimalPlaces++;
+                    digits = true;
+
+                } else if (ch == '.') {
+                    decimalPlaces = 0;
+
+                } else if (ch == 'E' || ch == 'e') {
+                    tens += (int) parseLong(in);
+                    break;
+
+                } else {
+                    break;
+                }
+                if (in.readRemaining() == 0)
+                    break;
+                ch = in.rawReadByte();
+            }
+            if (!digits)
+                return 0L;
+
+            if (decimalPlaces < 0)
+                decimalPlaces = 0;
+
+            tens -= decimalPlaces;
+
+            if (tens <= 0) {
+                absValue *= sign;
+
+                for (int i = 0; i < -tens; i++) {
+                    int truncatingDigit = (int) Math.abs(absValue % 10);
+
+                    absValue /= 10;
+
+                    if (truncatingDigit >= 5)
+                        absValue += sign;
+                }
+
+                return absValue;
+            } else {
+                for (int i = 0; i < tens; i++) {
+                    if (-absValue < -MAX_VALUE_DIVIDE_10)
+                        return sign > 0 ? Long.MAX_VALUE : Long.MIN_VALUE;
+                    else
+                        absValue *= 10;
+                }
+
+                return sign * absValue;
+            }
+        } finally {
+            final ByteStringParser bsp = (ByteStringParser) in;
+            bsp.lastDecimalPlaces(decimalPlaces);
+            bsp.lastNumberHadDigits(digits);
+        }
+    }
+
+
     public static double parseDouble(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IllegalStateException {
         long value = 0;
