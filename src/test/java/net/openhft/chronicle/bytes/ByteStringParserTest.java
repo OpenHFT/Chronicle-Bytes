@@ -418,5 +418,15 @@ public class ByteStringParserTest extends BytesTestCommon {
 
         bytes.append("NaN").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        // Test regular longs again - to check that input is properly consumed
+        bytes.append("0").append(' ');
+        assertEquals(0L, bytes.parseFlexibleLong());
+
+        bytes.append("1").append(' ');
+        assertEquals(1L, bytes.parseFlexibleLong());
+
+        bytes.append("-1").append(' ');
+        assertEquals(-1L, bytes.parseFlexibleLong());
     }
 }
