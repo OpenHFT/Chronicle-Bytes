@@ -30,6 +30,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StopCharTesters.CONTROL_STOP;
 import static net.openhft.chronicle.bytes.StopCharTesters.SPACE_STOP;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 
 public class ByteStringParserTest extends BytesTestCommon {
@@ -228,5 +229,204 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes.write(4, "0 w".getBytes(ISO_8859_1));
 
         assertEquals("Hell0 worl bye", bytes.parseUtf8(CONTROL_STOP));
+    }
+
+    @Test
+    public void testFlexibleLong() {
+        // Test regular longs
+        bytes.append("0").append(' ');
+        assertEquals(0L, bytes.parseFlexibleLong());
+
+        bytes.append("1").append(' ');
+        assertEquals(1L, bytes.parseFlexibleLong());
+
+        bytes.append("-1").append(' ');
+        assertEquals(-1L, bytes.parseFlexibleLong());
+
+        bytes.append("6432643").append(' ');
+        assertEquals(6432643L, bytes.parseFlexibleLong());
+
+        bytes.append("-16432620987").append(' ');
+        assertEquals(-16432620987L, bytes.parseFlexibleLong());
+
+        bytes.append("27209782482844").append(' ');
+        assertEquals(27209782482844L, bytes.parseFlexibleLong());
+
+        bytes.append("-37218967980573232").append(' ');
+        assertEquals(-37218967980573232L, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 20)).append(' ');
+        assertEquals(Long.MAX_VALUE - 20, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 20)).append(' ');
+        assertEquals(Long.MIN_VALUE + 20, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 3)).append(' ');
+        assertEquals(Long.MAX_VALUE - 3, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 3)).append(' ');
+        assertEquals(Long.MIN_VALUE + 3, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE)).append(' ');
+        assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE)).append(' ');
+        assertEquals(Long.MIN_VALUE, bytes.parseFlexibleLong());
+
+        // Test regular longs with a point, with varying number of zeros
+        bytes.append("0.0").append(' ');
+        assertEquals(0L, bytes.parseFlexibleLong());
+
+        bytes.append("1.000").append(' ');
+        assertEquals(1L, bytes.parseFlexibleLong());
+
+        bytes.append("-0001.00000").append(' ');
+        assertEquals(-1L, bytes.parseFlexibleLong());
+
+        bytes.append("6432643.0").append(' ');
+        assertEquals(6432643L, bytes.parseFlexibleLong());
+
+        bytes.append("-16432620987.").append(' ');
+        assertEquals(-16432620987L, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 20)).append(".0").append(' ');
+        assertEquals(Long.MAX_VALUE - 20, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 20)).append(".0").append(' ');
+        assertEquals(Long.MIN_VALUE + 20, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 3)).append(".0").append(' ');
+        assertEquals(Long.MAX_VALUE - 3, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 3)).append(".0").append(' ');
+        assertEquals(Long.MIN_VALUE + 3, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE)).append(".0").append(' ');
+        assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE)).append(".0").append(' ');
+        assertEquals(Long.MIN_VALUE, bytes.parseFlexibleLong());
+
+        // Test scientific format
+        bytes.append("1e1").append(' ');
+        assertEquals(10L, bytes.parseFlexibleLong());
+
+        bytes.append("1E1").append(' ');
+        assertEquals(10L, bytes.parseFlexibleLong());
+
+        bytes.append("-1E1").append(' ');
+        assertEquals(-10L, bytes.parseFlexibleLong());
+
+        bytes.append("-4E6").append(' ');
+        assertEquals(-4000000L, bytes.parseFlexibleLong());
+
+        bytes.append("100E10").append(' ');
+        assertEquals(1000000000000L, bytes.parseFlexibleLong());
+
+        bytes.append("9E12").append(' ');
+        assertEquals(9000000000000L, bytes.parseFlexibleLong());
+
+        bytes.append("6410269E3").append(' ');
+        assertEquals(6410269000L, bytes.parseFlexibleLong());
+
+        bytes.append("5000000000E-3").append(' ');
+        assertEquals(5000000, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE)).append("e0").append(' ');
+        assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE)).append("E0").append(' ');
+        assertEquals(Long.MIN_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE)).append("000000e-6").append(' ');
+        assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE)).append("00000000000000000000E-20").append(' ');
+        assertEquals(Long.MIN_VALUE, bytes.parseFlexibleLong());
+
+        bytes.append("0.000000000000000000000000000001E33").append(' ');
+        assertEquals(1000L, bytes.parseFlexibleLong());
+
+        bytes.append("789000000000000000000000000000000E-25").append(' ');
+        assertEquals(78900000L, bytes.parseFlexibleLong());
+
+        // Test values outside long range
+        bytes.append("9E40").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("-8473289704324748391027491830").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(Long.MAX_VALUE).append("0").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        // Test rounded fractional numbers
+        bytes.append("0.1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("1e-2").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("0.9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("56765e-2").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("-0.1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("-0.9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("4.4000000000000000000000000000001E1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("4.3999999999999999999999999999991E1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE)).append(".1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 1)).append(".9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MAX_VALUE - 1)).append(".1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE)).append(".1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 1)).append(".9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 1)).append(".1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 5)).append(".1").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append(String.valueOf(Long.MIN_VALUE + 5)).append(".9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        // Test extreme double values
+        bytes.append("Infinity").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("-Infinity").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("NaN").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        // Test regular longs again - to check that input is properly consumed
+        bytes.append("0").append(' ');
+        assertEquals(0L, bytes.parseFlexibleLong());
+
+        bytes.append("1").append(' ');
+        assertEquals(1L, bytes.parseFlexibleLong());
+
+        bytes.append("-1").append(' ');
+        assertEquals(-1L, bytes.parseFlexibleLong());
     }
 }

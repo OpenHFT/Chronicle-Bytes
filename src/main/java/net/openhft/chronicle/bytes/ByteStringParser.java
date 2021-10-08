@@ -173,6 +173,19 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
+     * Parses a long in regular or scientific format.
+     * In case text corresponds to a valid long value, returns it without precision errors
+     * (unlike result of {@link #parseDouble()} casted to long).
+     *
+     * @throws IORuntimeException if text parses to a fractional number or to a number outside of the long's range.
+     * @return a long.
+     */
+    default long parseFlexibleLong()
+            throws BufferUnderflowException, IllegalStateException, IORuntimeException {
+        return BytesInternal.parseFlexibleLong(this);
+    }
+
+    /**
      * parse text as a float decimal. The terminating character is consumed.
      * <p>
      * The number of decimal places can be retrieved with  lastDecimalPlaces()

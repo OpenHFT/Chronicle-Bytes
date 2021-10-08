@@ -2187,6 +2187,125 @@ enum BytesInternal {
         bytes2.writeUnsignedByte(ch);
     }
 
+    public static long parseFlexibleLong(@NotNull StreamingDataInput in)
+            throws BufferUnderflowException, IllegalStateException, IORuntimeException {
+        long absValue = 0; // Math.abs(absValue) == absValue
+        int sign = 1;
+        int decimalPlaces = Integer.MIN_VALUE;
+        boolean digits = false;
+        int ch;
+        do {
+            ch = in.rawReadByte() & 0xFF;
+        } while (ch == ' ' && in.readRemaining() > 0);
+
+        try {
+            switch (ch) {
+                case 'N':
+                    if (compareRest(in, "aN"))
+                        throw new IORuntimeException("Expected flexible long, but got: NaN");
+                    in.readSkip(-1);
+
+                    throw new IORuntimeException("Expected flexible long, but got: N");
+                case 'I':
+                    //noinspection SpellCheckingInspection
+                    if (compareRest(in, "nfinity"))
+                        throw new IORuntimeException("Expected flexible long, but got: Infinity");
+                    in.readSkip(-1);
+                    throw new IORuntimeException("Expected flexible long, but got: I");
+                case '-':
+                    if (compareRest(in, "Infinity"))
+                        throw new IORuntimeException("Expected flexible long, but got: -Infinity");
+                    sign = -1;
+                    ch = in.rawReadByte();
+                    break;
+            }
+
+            int tens = 0;
+            IORuntimeException parsingError = null;
+            while (true) {
+                if (ch >= '0' && ch <= '9') {
+                    // -absValue is always negative!
+                    if (-absValue < -MAX_VALUE_DIVIDE_10) {
+                        if (ch == '0')
+                            tens++;
+                        else if (parsingError == null) {
+                            parsingError = new IORuntimeException("Can't parse flexible long without precision loss: " +
+                                    (sign * absValue) + " <- " + ((char) ch));
+                        }
+
+                    } else if (absValue == MAX_VALUE_DIVIDE_10) {
+                        if (ch <= '7' || (sign < 0 && ch == '8'))
+                            absValue = absValue * 10 + (ch - '0');
+                        else if (parsingError == null) {
+                            parsingError = new IORuntimeException("Can't parse flexible long without precision loss: " +
+                                    (sign * absValue) + " <- " + ((char) ch));
+                        }
+                    } else {
+                        absValue = absValue * 10 + (ch - '0');
+                    }
+                    decimalPlaces++;
+                    digits = true;
+
+                } else if (ch == '.') {
+                    decimalPlaces = 0;
+
+                } else if (ch == 'E' || ch == 'e') {
+                    tens += (int) parseLong(in);
+                    break;
+
+                } else {
+                    break;
+                }
+                if (in.readRemaining() == 0)
+                    break;
+                ch = in.rawReadByte();
+            }
+
+            if (parsingError != null)
+                throw parsingError;
+
+            if (!digits)
+                return 0L;
+
+            if (decimalPlaces < 0)
+                decimalPlaces = 0;
+
+            tens -= decimalPlaces;
+
+            if (tens <= 0) {
+                absValue *= sign;
+
+                for (int i = 0; i < -tens; i++) {
+                    int truncatingDigit = (int) Math.abs(absValue % 10);
+
+                    if (truncatingDigit != 0) {
+                        throw new IORuntimeException("Can't parse flexible long without precision loss: " +
+                                "division of " + absValue + " by 10");
+                    }
+
+                    absValue /= 10;
+                }
+
+                return absValue;
+            } else {
+                for (int i = 0; i < tens; i++) {
+                    if (-absValue < -MAX_VALUE_DIVIDE_10) {
+                        throw new IORuntimeException("Can't parse flexible long as it goes beyond the range: " +
+                                "multiplication of " + absValue + " by 10");
+                    } else
+                        absValue *= 10;
+                }
+
+                return sign * absValue;
+            }
+        } finally {
+            final ByteStringParser bsp = (ByteStringParser) in;
+            bsp.lastDecimalPlaces(decimalPlaces);
+            bsp.lastNumberHadDigits(digits);
+        }
+    }
+
+
     public static double parseDouble(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IllegalStateException {
         long value = 0;
