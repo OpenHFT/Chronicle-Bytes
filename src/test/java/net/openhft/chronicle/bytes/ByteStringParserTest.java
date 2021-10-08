@@ -249,6 +249,12 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes.append("-16432620987").append(' ');
         assertEquals(-16432620987L, bytes.parseFlexibleLong());
 
+        bytes.append("27209782482844").append(' ');
+        assertEquals(27209782482844L, bytes.parseFlexibleLong());
+
+        bytes.append("-37218967980573232").append(' ');
+        assertEquals(-37218967980573232L, bytes.parseFlexibleLong());
+
         bytes.append(String.valueOf(Long.MAX_VALUE - 20)).append(' ');
         assertEquals(Long.MAX_VALUE - 20, bytes.parseFlexibleLong());
 
