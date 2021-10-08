@@ -175,16 +175,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     /**
      * Parses a long in regular or scientific format.
      * In case text corresponds to a valid long value, returns it without precision errors
-     * (unlike casted to long result of {@link #parseDouble()}).
-     * If resulting value is greater than Long.MAX_VALUE, returns Long.MAX_VALUE instead.
-     * If resulting value is less than Long.MIN_VALUE, returns Long.MIN_VALUE instead.
-     * If resulting value is fractional, rounds it to the closest long.
-     * NaN is treated as 0L.
+     * (unlike result of {@link #parseDouble()} casted to long).
      *
+     * @throws IORuntimeException if text parses to a fractional number or to a number outside of the long's range.
      * @return a long.
      */
     default long parseFlexibleLong()
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, IllegalStateException, IORuntimeException {
         return BytesInternal.parseFlexibleLong(this);
     }
 
