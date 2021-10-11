@@ -114,7 +114,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        return (length - VALUES) >>> SHIFT;
+        if (bytes == null)
+            return (length - VALUES) >>> SHIFT;
+        return bytes.readVolatileLong(offset + CAPACITY);
     }
 
     @Override
@@ -131,6 +133,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         throwExceptionIfClosedInSetter();
 
         bytes.writeMaxLong(offset + USED, usedAtLeast);
+    }
+
+    @Override
+    public void setUsed(long used) throws IllegalStateException, BufferUnderflowException {
+        throwExceptionIfClosedInSetter();
+
+        bytes.writeVolatileLong(offset + USED, used);
     }
 
     @Override

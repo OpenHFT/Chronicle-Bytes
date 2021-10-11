@@ -92,7 +92,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
     }
 
-    private void setUsed(long used)
+    public void setUsed(long used)
             throws IllegalStateException {
         try {
             bytes.append(VALUES + offset, used, DIGITS);
