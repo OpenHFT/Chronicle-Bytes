@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -39,6 +40,7 @@ public class NativeBytesOverflowTest extends BytesTestCommon {
         }
     }
 
+    @Ignore
     @Test(expected = BufferOverflowException.class)
     public void testExceedWriteLimitGuardedBytes() {
         Bytes<?> guardedNativeBytes = new GuardedNativeBytes(wrap(ByteBuffer.allocate(128)), 128);

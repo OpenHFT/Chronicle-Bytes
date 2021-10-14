@@ -21,6 +21,7 @@ import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -116,7 +117,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void serializeScalars() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -182,7 +183,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         assertEquals(mb2.toString(), mb4.toString());
     }
 
-    @Test
+    @Test @Ignore
     public void serializeNested() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -331,7 +332,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void serializeBytes()
             throws IOException {
         Bytes<?> bytes = new HexDumpBytes();
@@ -364,7 +365,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void serializeCollections() {
 //        assumeTrue(name.equals("Unguarded"));
         final Bytes<?> bytes = new HexDumpBytes();
@@ -407,7 +408,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void collectionsNotInitializedInConstructor() {
         final Bytes<?> bytes = new HexDumpBytes();
 
@@ -498,7 +499,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void testSpecificCollections() {
         final Bytes<?> bytes = new HexDumpBytes();
 
@@ -537,7 +538,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void nested() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -586,7 +587,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
         }
     }
 
-    @Test
+    @Test @Ignore
     public void nullArrays() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {
@@ -619,7 +620,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
 
     }
 
-    @Test
+    @Test @Ignore
     public void arrays() {
         final Bytes<?> bytes = new HexDumpBytes();
         try {

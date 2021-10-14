@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -108,7 +109,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bs.releaseLast();
     }
 
-    @Test
+    @Test @Ignore
     public void shouldHandleDifferentSizedStores() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(32);
         final BytesStore storeOfThirtyTwoBytes = bytes.bytesStore();
@@ -138,7 +139,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-    @Test
+    @Test @Ignore
     public void contentsEqual() {
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
                 .append(Bytes.from("Hello"))
