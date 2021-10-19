@@ -592,6 +592,21 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
+    // Avoid reading contents as it may be empty or point to unmapped region.
+    public int hashCode() {
+        return mappedFile.hashCode();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        CommonMappedBytes that = (CommonMappedBytes) o;
+        return mappedFile.equals(that.mappedFile);
+    }
+
+    @Override
     public void chunkCount(long[] chunkCount) {
         mappedFile.chunkCount(chunkCount);
     }
