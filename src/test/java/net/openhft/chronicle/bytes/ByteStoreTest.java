@@ -612,11 +612,11 @@ public class ByteStoreTest extends BytesTestCommon {
     @Test
     public void testOverflowReadUtf8()
             throws IORuntimeException {
-        final BytesStore bs = BytesStore.nativeStore(32);
+        final BytesStore<?, ?> bs = BytesStore.nativeStore(32);
         BytesInternal.writeStopBit(bs, 10, 30);
         try {
             bs.readUtf8(10, new StringBuilder());
-            throw new AssertionError("should throw BufferUnderflowException");
+            fail("should throw BufferUnderflowException");
         } catch (BufferUnderflowException e) {
             // expected
         } finally {
