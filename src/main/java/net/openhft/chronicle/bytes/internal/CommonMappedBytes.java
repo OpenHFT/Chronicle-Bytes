@@ -170,7 +170,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
         return BytesInternal.read8bit(this);
     }
-    
+
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
@@ -179,13 +179,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         // the rest can be lazily allocated.
         uncheckedWritePosition(writePosition() + bytesToSkip);
         return this;
-    }
-
-    @NotNull
-    private BufferOverflowException writeBufferOverflowException(final long offset) {
-        BufferOverflowException exception = new BufferOverflowException();
-        exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
-        return exception;
     }
 
     @Override
