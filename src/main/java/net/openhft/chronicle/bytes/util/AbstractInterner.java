@@ -30,9 +30,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * This cache only gaurentees it will provide a String which matches the decoded bytes.
+ * This cache only guarantees it will provide a String which matches the decoded bytes.
  * <p>
- * It doesn't guantee it will always return the same object,
+ * It doesn't guarantee it will always return the same object,
  * nor that different threads will return the same object,
  * though the contents should always be the same.
  * <p>
@@ -42,10 +42,10 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
-    @NotNull
     protected final InternerEntry<T>[] entries;
-    protected final int mask, shift;
-    protected boolean toggle = false;
+    protected final int mask;
+    protected final int shift;
+    protected boolean toggleFlag = false;
 
     public AbstractInterner(int capacity)
             throws IllegalArgumentException {
@@ -90,7 +90,7 @@ public abstract class AbstractInterner<T> {
         if (s2 != null && s2.bytes.length() == length && s2.bytes.equalBytes(cs, length))
             return s2.t;
         @NotNull T t = getValue(cs, length);
-        @NotNull final byte[] bytes = new byte[length];
+        final byte[] bytes = new byte[length];
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
         IOTools.unmonitor(bs);
         cs.read(cs.readPosition(), bytes, 0, length);
@@ -104,14 +104,14 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {
-        return toggle = !toggle;
+        return toggleFlag = !toggleFlag;
     }
 
     public int valueCount() {
         return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }
 
-    static class InternerEntry<T> {
+    private static final class InternerEntry<T> {
         final BytesStore bytes;
         final T t;
 
