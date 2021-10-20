@@ -45,7 +45,7 @@ public abstract class AbstractInterner<T> {
     protected final InternerEntry<T>[] entries;
     protected final int mask;
     protected final int shift;
-    protected boolean toggleFlag = false;
+    protected boolean toggle = false;
 
     public AbstractInterner(int capacity)
             throws IllegalArgumentException {
@@ -104,7 +104,7 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {
-        return toggleFlag = !toggleFlag;
+        return toggle = !toggle;
     }
 
     public int valueCount() {
