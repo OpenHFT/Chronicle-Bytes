@@ -71,11 +71,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         closeable.clearUsedByThread();
     }
 
-    @Override
-    protected void bytesStore(BytesStore bytesStore) {
-        super.bytesStore(bytesStore);
-    }
-
     public @NotNull CommonMappedBytes write(@NotNull final byte[] bytes,
                                             final int offset,
                                             final int length)
