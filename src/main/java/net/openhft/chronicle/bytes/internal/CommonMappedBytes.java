@@ -170,13 +170,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
         return BytesInternal.read8bit(this);
     }
-
-    private long checkSize(long adding) {
-        if (adding < 0 || adding > MAX_CAPACITY)
-            throw new IllegalArgumentException("Invalid size " + adding);
-        return adding;
-    }
-
+    
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
