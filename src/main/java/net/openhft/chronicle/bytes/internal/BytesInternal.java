@@ -623,7 +623,7 @@ enum BytesInternal {
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(count - 1, " was " + char2 + " " + char3);
+                        throw newUTFDataFormatRuntimeException(count - 1L, " was " + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
