@@ -35,7 +35,8 @@ public class BytesPool {
                 // ignored
             }
         } else {
-            bytesTL.set(bytes = createBytes());
+            bytes = createBytes();
+            bytesTL.set(bytes);
         }
         return bytes;
     }

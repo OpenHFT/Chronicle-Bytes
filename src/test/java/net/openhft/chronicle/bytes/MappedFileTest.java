@@ -193,9 +193,11 @@ public class MappedFileTest extends BytesTestCommon {
         try {
             final MappedFile mappedFile2 = MappedFile.mappedFile(file, 1024, 256, 256, false);
             mappedFile2.releaseLast();
+            assertTrue(mappedFile2.isClosed());
         } finally {
             mappedFile.releaseLast();
         }
+        assertTrue(mappedFile.isClosed());
     }
 
     @Test

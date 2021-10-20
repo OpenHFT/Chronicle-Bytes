@@ -30,17 +30,28 @@ public class Bytes4Test {
     public void bufferOverflow() {
         byte[] arr = new byte[4];
         final BytesStore bs = BytesStore.wrap(arr);
+
+        // Since writeInt can throw AssertionError we need to make it like this
+        boolean fail = false;
         try {
             bs.writeInt(-1000, 1);
-            fail("No address range check");
+            fail = true;
         } catch (AssertionError ignore) {
-
+            // Ignore
         }
+        if (fail)
+            fail("No address range check");
+
+        fail = false;
         try {
             bs.writeInt(4, 2);
-            fail("No address range check");
+            fail = true;
         } catch (AssertionError ignore) {
+            // Ignore
         }
+
+        if (fail)
+            fail("No address range check");
     }
 
     public static void main(String[] args) {

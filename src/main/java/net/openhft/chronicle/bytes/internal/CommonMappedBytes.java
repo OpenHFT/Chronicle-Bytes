@@ -44,8 +44,16 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     protected final MappedFile mappedFile;
     private final boolean backingFileIsReadOnly;
+    private final AbstractCloseable closeable = new AbstractCloseable() {
+        @Override
+        protected void performClose() throws IllegalStateException {
+            CommonMappedBytes.this.performClose();
+        }
+    };
+
     protected long lastActualSize = 0;
     private boolean initReleased;
+
 
     // assume the mapped file is reserved already.
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile)
@@ -76,6 +84,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         super.bytesStore(bytesStore);
     }
 
+    @Override
     public @NotNull CommonMappedBytes write(@NotNull final byte[] bytes,
                                             final int offset,
                                             final int length)
@@ -100,12 +109,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return this;
     }
 
-    private final AbstractCloseable closeable = new AbstractCloseable() {
-        @Override
-        protected void performClose() throws IllegalStateException {
-            CommonMappedBytes.this.performClose();
-        }
-    };
 
     @NotNull
     public CommonMappedBytes write(final long offsetInRDO, @NotNull final RandomDataInput bytes)
@@ -154,11 +157,13 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public long realCapacity() {
 
         try {
-            return lastActualSize = mappedFile.actualSize();
+            lastActualSize = mappedFile.actualSize();
+            return lastActualSize;
 
         } catch (Exception e) {
             Jvm.warn().on(getClass(), "Unable to obtain the real size for " + mappedFile.file(), e);
-            return lastActualSize = 0;
+            lastActualSize = 0;
+            return lastActualSize;
         }
     }
 
@@ -171,12 +176,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return BytesInternal.read8bit(this);
     }
 
-    private long checkSize(long adding) {
-        if (adding < 0 || adding > MAX_CAPACITY)
-            throw new IllegalArgumentException("Invalid size " + adding);
-        return adding;
-    }
-
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
@@ -185,13 +184,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         // the rest can be lazily allocated.
         uncheckedWritePosition(writePosition() + bytesToSkip);
         return this;
-    }
-
-    @NotNull
-    private BufferOverflowException writeBufferOverflowException(final long offset) {
-        BufferOverflowException exception = new BufferOverflowException();
-        exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
-        return exception;
     }
 
     @Override
@@ -348,7 +340,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         }
 
         if (Jvm.isJava9Plus()) {
-            // byte[] bytes = extractBytes((String) cs);
             final String str = (String) cs;
             long address = addressForWrite(pos);
             Memory memory = OS.memory();
@@ -357,7 +348,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
             {
                 for (; i < length; i++) {
                     char c = str.charAt(i + start);
-                    //byte c = bytes[i + start];
                     if (c > 127) {
                         writeSkip(i);
                         break non_ascii;
@@ -426,7 +416,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public boolean isClosed() {
-        return closeable != null && closeable.isClosed();
+        return closeable.isClosed();
     }
 
     @Override

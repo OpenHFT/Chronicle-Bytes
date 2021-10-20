@@ -85,7 +85,7 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static <ACS extends Appendable & CharSequence> void append(@NotNull ACS sb, String str) {
+    public static <C extends Appendable & CharSequence> void append(@NotNull C sb, String str) {
         try {
             sb.append(str);
         } catch (IOException e) {
@@ -227,7 +227,7 @@ public enum AppendableUtil {
         }
     }
 
-    public static <ACS extends Appendable & CharSequence> void append(ACS a, CharSequence cs, long start, long len)
+    public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, long start, long len)
             throws ArithmeticException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
             if (cs instanceof Bytes)

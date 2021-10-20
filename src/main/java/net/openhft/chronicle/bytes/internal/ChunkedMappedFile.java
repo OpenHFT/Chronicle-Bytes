@@ -50,7 +50,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class ChunkedMappedFile extends MappedFile {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
-    private static final long DEFAULT_CAPACITY = 128L << 40;
 
     @NotNull
     private final RandomAccessFile raf;
@@ -299,10 +298,12 @@ public class ChunkedMappedFile extends MappedFile {
         return overlapSize;
     }
 
+    @Override
     public NewChunkListener getNewChunkListener() {
         return newChunkListener;
     }
 
+    @Override
     public void setNewChunkListener(final NewChunkListener listener) {
         this.newChunkListener = listener;
     }

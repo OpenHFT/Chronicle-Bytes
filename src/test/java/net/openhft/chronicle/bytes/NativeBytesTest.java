@@ -111,7 +111,7 @@ public class NativeBytesTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @Test(expected = UTFDataFormatRuntimeException.class )
+    @Test
     public void testAppendCharArrayNonAsciiToShort() {
         Bytes<?> b = alloc.elasticBytes(4);
         try {
@@ -120,8 +120,9 @@ public class NativeBytesTest extends BytesTestCommon {
             assertEquals(Bytes.wrapForRead(bytes).toHexString(), b.toHexString());
 
             StringBuilder sb = new StringBuilder();
-            b.parseUtf8(sb, 1);
-            fail();
+            assertThrows(UTFDataFormatRuntimeException.class, () ->
+                    b.parseUtf8(sb, 1)
+            );
         } finally {
             b.releaseLast();
         }
@@ -141,7 +142,7 @@ public class NativeBytesTest extends BytesTestCommon {
         nativeBytes.releaseLast();
     }
 
-    @Test(expected = DecoratedBufferOverflowException.class)
+    @Test
     public void tryGrowBeyondByteBufferCapacity() {
         Assume.assumeFalse(alloc == HEAP);
         long maxMemory = Runtime.getRuntime().maxMemory();
@@ -153,10 +154,12 @@ public class NativeBytesTest extends BytesTestCommon {
 
         // Trigger growing beyond ByteBuffer
         bytes.writePosition(bytes.realCapacity() - 1);
-        bytes.writeInt(0);
+        assertThrows(DecoratedBufferOverflowException.class, () ->
+                bytes.writeInt(0)
+        );
     }
 
-    @Test(expected = BufferOverflowException.class)
+    @Test
     public void tryGrowBeyondCapacity() {
         final int maxCapacity = 1024;
         @NotNull Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(128, maxCapacity);
@@ -169,8 +172,9 @@ public class NativeBytesTest extends BytesTestCommon {
         bytes.write(new byte[256]);
         try {
             // Trigger growing beyond maxCapacity
-            bytes.write(new byte[maxCapacity]);
-            Assert.fail("should not get here");
+            assertThrows(BufferOverflowException.class, () ->
+                    bytes.write(new byte[maxCapacity])
+            );
         } finally {
             bytes.releaseLast();
         }

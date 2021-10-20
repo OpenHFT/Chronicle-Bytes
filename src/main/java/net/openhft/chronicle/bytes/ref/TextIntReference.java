@@ -55,7 +55,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }
     }
 
-    private <T extends Throwable> int withLock(@NotNull ThrowingIntSupplier<Exception> call)
+    private int withLock(@NotNull ThrowingIntSupplier<Exception> call)
             throws IllegalStateException {
         try {
             long alignedOffset = roundUpTo8ByteAlign(offset);
@@ -177,6 +177,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     @NotNull
+    @Override
     public String toString() {
         try {
             return "value: " + getValue();

@@ -33,7 +33,8 @@ import java.nio.BufferOverflowException;
 @SuppressWarnings("rawtypes")
 public interface Compression {
 
-    static <T> void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed) throws IllegalStateException, BufferOverflowException {
+    static void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed)
+            throws IllegalStateException, BufferOverflowException {
         switch (cs.charAt(0)) {
             case 'l':
                 if (StringUtils.isEqual("lzw", cs)) {

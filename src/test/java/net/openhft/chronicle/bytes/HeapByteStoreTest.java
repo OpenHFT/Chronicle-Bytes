@@ -22,8 +22,7 @@ import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.*;
 
 public class HeapByteStoreTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
@@ -44,8 +43,10 @@ public class HeapByteStoreTest extends BytesTestCommon {
     @Test
     public void testElasticBytesEnsuringCapacity() {
         Bytes<?> bytes = Bytes.elasticHeapByteBuffer();
+        long initialCapacity = bytes.realCapacity();
         bytes.clearAndPad(bytes.realCapacity() + 128);
         // ensure this succeeds even though we are above the real capacity - this should trigger resize
         bytes.prewriteInt(1);
+        assertTrue(bytes.realCapacity()> initialCapacity);
     }
 }

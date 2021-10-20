@@ -760,19 +760,19 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
+    public <C extends Appendable & CharSequence> boolean readUtf8(@NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.readUtf8(sb);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
+    public <C extends Appendable & CharSequence> long readUtf8(long offset, @NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         return base.readUtf8(offset, sb);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset, @NotNull ACS sb, int maxUtf8Len)
+    public <C extends Appendable & CharSequence> long readUtf8Limited(long offset, @NotNull C sb, int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException {
         return base.readUtf8Limited(offset, sb, maxUtf8Len);
     }
@@ -783,7 +783,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
-    public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
+    public <C extends Appendable & CharSequence> boolean readUTFΔ(@NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.readUtf8(sb);
 
@@ -797,7 +797,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
+    public <C extends Appendable & CharSequence> boolean read8bit(@NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.read8bit(sb);
 

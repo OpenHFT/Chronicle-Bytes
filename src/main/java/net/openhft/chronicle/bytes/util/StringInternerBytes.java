@@ -73,7 +73,8 @@ public class StringInternerBytes extends StringInterner {
 
             char[] chars = toCharArray(bytes, position, length);
             final int toPlace = s == null || (s2 != null && toggle()) ? h : h2;
-            return interner[toPlace] = StringUtils.newString(chars);
+            interner[toPlace] = StringUtils.newString(chars);
+            return interner[toPlace];
         } finally {
             bytes.readSkip(length);
         }

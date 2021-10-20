@@ -47,12 +47,14 @@ import java.nio.charset.StandardCharsets;
  * <p></p> Also {@code readLimit() == writePosition() && readPosition() <= safeLimit()}
  * <p></p>
  *
+ * @param <U> Underlying type
+ *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface Bytes<Underlying> extends
-        BytesStore<Bytes<Underlying>, Underlying>,
-        BytesIn<Underlying>,
-        BytesOut<Underlying> {
+public interface Bytes<U> extends
+        BytesStore<Bytes<U>, U>,
+        BytesIn<U>,
+        BytesOut<U> {
 
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF; // 8 EiB - 16
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;  // 2 GiB - 16
@@ -419,11 +421,11 @@ public interface Bytes<Underlying> extends
      * @return Bytes ready for reading.
      */
     @NotNull
-    static Bytes<?> from(@NotNull CharSequence text) {
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
         return from(text.toString());
     }
 
-    static Bytes<?> fromDirect(@NotNull CharSequence text) {
+    static Bytes<Void> fromDirect(@NotNull CharSequence text) {
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
 
@@ -713,6 +715,7 @@ public interface Bytes<Underlying> extends
                     long j = i + 1;
                     long end = j + targetCount - 1;
                     for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
+                        // Do nothing
                     }
 
                     if (j == end) {
@@ -736,12 +739,12 @@ public interface Bytes<Underlying> extends
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
-    default Bytes<Underlying> unchecked(boolean unchecked)
+    default Bytes<U> unchecked(boolean unchecked)
             throws IllegalStateException {
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
-            Bytes<Underlying> underlyingBytes = start() == 0 && bytesStore().isDirectMemory() ?
+            Bytes<U> underlyingBytes = start() == 0 && bytesStore().isDirectMemory() ?
                     new UncheckedNativeBytes<>(this) :
                     new UncheckedBytes<>(this);
             release(INIT);
@@ -783,7 +786,7 @@ public interface Bytes<Underlying> extends
      * @return a copy of this Bytes from position() to limit().
      */
     @Override
-    BytesStore<Bytes<Underlying>, Underlying> copy()
+    BytesStore<Bytes<U>, U> copy()
             throws IllegalStateException;
 
     @NotNull
@@ -811,8 +814,6 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default String toHexString(long offset, long maxLength) {
-//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
-//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         try {
@@ -855,7 +856,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     @Override
-    default Bytes<Underlying> bytesForRead()
+    default Bytes<U> bytesForRead()
             throws IllegalStateException {
         try {
             return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
@@ -882,7 +883,7 @@ public interface Bytes<Underlying> extends
      * @return this
      */
     @NotNull
-    Bytes<Underlying> compact()
+    Bytes<U> compact()
             throws IllegalStateException;
 
     /**
@@ -945,11 +946,12 @@ public interface Bytes<Underlying> extends
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
         int length = Maths.toUInt31(readStopBit());
         if (length == 0)
-            if (lenient())
+            if (lenient()) {
                 return BigInteger.ZERO;
-            else
+            } else {
                 throw new BufferUnderflowException();
-        @NotNull byte[] bytes = new byte[length];
+            }
+        byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
     }
@@ -995,7 +997,7 @@ public interface Bytes<Underlying> extends
 
     @Override
     @NotNull
-    Bytes<Underlying> clear()
+    Bytes<U> clear()
             throws IllegalStateException;
 
     @Override
@@ -1003,7 +1005,7 @@ public interface Bytes<Underlying> extends
         return bytesStore().readWrite();
     }
 
-    default void readWithLength(long length, @NotNull BytesOut<Underlying> bytesOut)
+    default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
