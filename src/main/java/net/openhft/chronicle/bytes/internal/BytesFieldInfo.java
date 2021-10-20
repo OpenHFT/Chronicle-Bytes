@@ -76,6 +76,7 @@ public class BytesFieldInfo {
                 }
             }
             if (matches) {
+                assert entry != null;
                 entry.end = position + size;
 
             } else if (!prefix.isEmpty()) {
