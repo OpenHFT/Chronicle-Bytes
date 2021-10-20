@@ -517,7 +517,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return BytesInternal.contentEqual(this, bytesStore);
+        return bytesStore != null && BytesInternal.contentEqual(this, bytesStore);
     }
 
     /**
@@ -529,7 +529,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean startsWith(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return BytesInternal.startsWith(this, bytesStore);
+        return bytesStore != null && BytesInternal.startsWith(this, bytesStore);
     }
 
     /**
