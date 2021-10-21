@@ -265,19 +265,51 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
     }
 
+    /**
+     * Copies whole byte[] into this. See {@link #write(long, byte[], int, int)}
+     */
     @NotNull
     default R write(long offsetInRDO, @NotNull byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
         return write(offsetInRDO, bytes, 0, bytes.length);
     }
 
+    /**
+     * Copy from byte[] into this.
+     * <p>
+     * Does not update cursors e.g. {@link #writePosition}
+     *
+     * @param writeOffset offset to write to
+     * @param bytes       copy from bytes
+     * @param readOffset  copy from offset
+     * @param length
+     * @return this
+     * @throws BufferOverflowException
+     * @throws IllegalStateException
+     */
     @NotNull
-    R write(long offsetInRDO, byte[] bytes, int offset, int length)
+    R write(long writeOffset, byte[] bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
-    void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
+    /**
+     * Copy from ByteBuffer into this.
+     * <p>
+     * Does not update cursors e.g. {@link #writePosition}
+     *
+     * @param writeOffset offset to write to
+     * @param bytes       copy from bytes
+     * @param readOffset  copy from offset
+     * @param length
+     * @return this
+     * @throws BufferOverflowException
+     * @throws IllegalStateException
+     */
+    void write(long writeOffset, ByteBuffer bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
+    /**
+     * Copies whole BytesStore into this - see {@link #write(long, RandomDataInput, long, long)}
+     */
     @NotNull
     default R write(long offsetInRDO, @NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
@@ -289,6 +321,17 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         }
     }
 
+    /**
+     * Copy from RandomDataInput into this. Does not bump {@link #writePosition} nor {@link RandomDataInput#readPosition()}
+     *
+     * @param writeOffset offset to write to
+     * @param bytes       copy from bytes
+     * @param readOffset  copy from offset
+     * @param length
+     * @return this
+     * @throws BufferOverflowException
+     * @throws IllegalStateException
+     */
     @NotNull
     R write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException;
