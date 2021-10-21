@@ -96,7 +96,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytes to wrap
      * @return BytesStore
      */
-    static BytesStore<?, byte[]> wrap(@NotNull byte[] bytes) {
+    static BytesStore<?, byte[]> wrap(byte[] bytes) {
         return HeapBytesStore.wrap(bytes);
     }
 

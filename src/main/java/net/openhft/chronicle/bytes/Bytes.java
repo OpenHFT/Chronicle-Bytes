@@ -419,11 +419,11 @@ public interface Bytes<Underlying> extends
      * @return Bytes ready for reading.
      */
     @NotNull
-    static Bytes<?> from(@NotNull CharSequence text) {
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
         return from(text.toString());
     }
 
-    static Bytes<?> fromDirect(@NotNull CharSequence text) {
+    static Bytes<Void> fromDirect(@NotNull CharSequence text) {
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
 

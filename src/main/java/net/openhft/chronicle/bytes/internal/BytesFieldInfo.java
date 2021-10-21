@@ -73,6 +73,8 @@ public class BytesFieldInfo {
                         assert !hasHeader || (ints == 0 && shorts == 0 && bytes == 0);
                         longs++;
                         break;
+                    default:
+                        throw new UnsupportedOperationException("Primitive types of size "+size+" not supported");
                 }
             }
             if (matches) {
