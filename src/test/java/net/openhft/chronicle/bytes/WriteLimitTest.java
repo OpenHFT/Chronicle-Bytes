@@ -62,15 +62,12 @@ public class WriteLimitTest {
             bytes.clear().writePosition(position).writeLimit(position + length);
             action.accept(bytes);
 
+            bytes.clear().writePosition(position).writeLimit(position + length - 1);
             try {
-                bytes.clear().writePosition(position).writeLimit(position + length - 1);
-                action.accept(bytes);
-
-                bytes.clear().writePosition(position).writeLimit(position + length - 1);
                 action.accept(bytes);
                 fail("position: " + position);
-            } catch (BufferOverflowException expected) {
-
+            } catch (BufferOverflowException ignored) {
+                // expected
             }
         }
         bytes.releaseLast();
