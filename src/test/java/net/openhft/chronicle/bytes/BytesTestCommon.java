@@ -18,9 +18,10 @@ import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesT
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
 public class BytesTestCommon {
+
+    private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
-    private Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
     @Before
     public void enableReferenceTracing() {
