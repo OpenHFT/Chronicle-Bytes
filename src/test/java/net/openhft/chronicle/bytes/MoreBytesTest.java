@@ -328,9 +328,10 @@ public class MoreBytesTest {
 
     @Test
     public void testDoesNotRequire3xCapacity() {
-        final String SYMBOL_STR = "LCOM1";
-        final Bytes SYMBOL = Bytes.allocateDirect(SYMBOL_STR.length());
-        SYMBOL.clear();
-        SYMBOL.append(SYMBOL_STR);
+        final String symbolStr = "LCOM1";
+        final Bytes<?> symbol = Bytes.allocateDirect(symbolStr.length());
+        symbol.clear();
+        symbol.append(symbolStr);
+        assertTrue(symbol.realCapacity() < 3 * symbolStr.length());
     }
 }
