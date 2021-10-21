@@ -44,6 +44,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     }
 
     @NotNull
+    @Override
     public String toString() {
         if (bytes == null) return "bytes is null";
         try {

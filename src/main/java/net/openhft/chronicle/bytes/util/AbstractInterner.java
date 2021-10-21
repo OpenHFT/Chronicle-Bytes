@@ -47,7 +47,7 @@ public abstract class AbstractInterner<T> {
     protected final int shift;
     protected boolean toggle = false;
 
-    public AbstractInterner(int capacity)
+    protected AbstractInterner(int capacity)
             throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
@@ -78,8 +78,7 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
-        // TODO This needs to be reviewd.
-//        UnsafeMemory.UNSAFE.loadFence();
+        // Todo: This needs to be reviewed: UnsafeMemory UNSAFE loadFence;
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
@@ -95,7 +94,7 @@ public abstract class AbstractInterner<T> {
         IOTools.unmonitor(bs);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
-//        UnsafeMemory.UNSAFE.storeFence();
+        // UnsafeMemory UNSAFE storeFence;
         return t;
     }
 
@@ -104,7 +103,8 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {
-        return toggle = !toggle;
+        toggle = !toggle;
+        return toggle;
     }
 
     public int valueCount() {

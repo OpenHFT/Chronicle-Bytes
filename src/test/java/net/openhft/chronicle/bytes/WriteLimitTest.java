@@ -56,7 +56,7 @@ public class WriteLimitTest {
 
     @Test
     public void writeLimit() {
-        Bytes bytes = allocator.elasticBytes(64);
+        Bytes<?> bytes = allocator.elasticBytes(64);
         for (int i = 0; i < 16; i++) {
             int position = (int) (bytes.realCapacity() - length - i);
             bytes.clear().writePosition(position).writeLimit(position + length);

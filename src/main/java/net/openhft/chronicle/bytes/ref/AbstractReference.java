@@ -37,7 +37,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     protected BytesStore<?, ?> bytes;
     protected long offset;
 
-    public AbstractReference() {
+    protected AbstractReference() {
         // assume thread safe.
         disableThreadSafetyCheck(true);
     }

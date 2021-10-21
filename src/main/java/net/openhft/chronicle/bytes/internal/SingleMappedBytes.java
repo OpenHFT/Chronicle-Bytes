@@ -59,6 +59,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
         }
     }
 
+    @Override
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
                                             final byte[] bytes,
                                             int offset,
@@ -96,6 +97,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     }
 
+    @Override
     public @NotNull SingleMappedBytes write(final long writeOffset,
                                             final RandomDataInput bytes,
                                             long readOffset,
@@ -214,7 +216,6 @@ public class SingleMappedBytes extends CommonMappedBytes {
         if (offset < 0 || offset > capacity())
             throw newBufferOverflowException(offset);
 
-//        super.writeCheckOffset(offset, adding);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 }

@@ -29,6 +29,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     @NotNull
+    @Override
     public String toString() {
         try {
             return bytes == null ? "bytes is null" : "value: " + getValue() + ", value2: " + getValue2();

@@ -71,7 +71,6 @@ public class SingleMappedFile extends MappedFile {
 
             resizeRafIfTooSmall(capacity);
             final long address = OS.map(fileChannel, mode, 0, capacity);
-//            System.out.println("Mapped "+Long.toUnsignedString(address, 16));
             final MappedBytesStore mbs2 = MAPPED_BYTES_STORE_FACTORY.create(this, this, 0, address, capacity, capacity);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -192,10 +191,12 @@ public class SingleMappedFile extends MappedFile {
         return 0;
     }
 
+    @Override
     public NewChunkListener getNewChunkListener() {
         return newChunkListener;
     }
 
+    @Override
     public void setNewChunkListener(final NewChunkListener listener) {
         this.newChunkListener = listener;
     }

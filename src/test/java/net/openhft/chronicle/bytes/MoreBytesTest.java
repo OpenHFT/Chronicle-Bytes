@@ -29,7 +29,7 @@ public class MoreBytesTest {
     @Test
     public void testOneRelease() {
         int count = 0;
-        for (@NotNull Bytes<?> b : new Bytes[]{
+        for (Bytes<?> b : new Bytes[]{
                 Bytes.allocateDirect(10),
                 Bytes.allocateDirect(new byte[5]),
                 Bytes.allocateElasticDirect(100),
@@ -56,7 +56,7 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendLongRandomPosition() {
-        final @NotNull byte[] bytes = "00000".getBytes(ISO_8859_1);
+        final byte[] bytes = "00000".getBytes(ISO_8859_1);
         final ByteBuffer bb = ByteBuffer.wrap(bytes);
         final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
@@ -69,7 +69,7 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendLongRandomPosition2() {
-        final @NotNull byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
+        final byte[] bytes = "WWWWW00000".getBytes(ISO_8859_1);
         final ByteBuffer bb = ByteBuffer.wrap(bytes);
         final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
@@ -85,7 +85,7 @@ public class MoreBytesTest {
     @Test
     public void testAppendLongRandomPositionShouldThrowBufferOverflowException() {
         try {
-            final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
+            final byte[] bytes = "000".getBytes(ISO_8859_1);
             final ByteBuffer bb = ByteBuffer.wrap(bytes);
             final Bytes<?> to = Bytes.wrapForWrite(bb);
             try {
@@ -100,25 +100,22 @@ public class MoreBytesTest {
 
     @Test(expected = IllegalArgumentException.class)
     public void testAppendLongRandomPositionShouldThrowIllegalArgumentException() {
+        final byte[] bytes = "000".getBytes(ISO_8859_1);
+        final ByteBuffer bb = ByteBuffer.wrap(bytes);
+        final Bytes<?> to = Bytes.wrapForWrite(bb);
         try {
-            final @NotNull byte[] bytes = "000".getBytes(ISO_8859_1);
-            final ByteBuffer bb = ByteBuffer.wrap(bytes);
-            final Bytes<?> to = Bytes.wrapForWrite(bb);
-            try {
-                to.append(0, 1000, 3);
-            } finally {
-                to.releaseLast();
-            }
-            fail("Should throw Exception");
+            to.append(0, 1000, 3);
         } catch (BufferOverflowException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } finally {
+            to.releaseLast();
         }
     }
 
     @Test
     public void testAppendDoubleRandomPosition() {
-        final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
             to.append(0, 3.14, 2, 6);
@@ -130,31 +127,28 @@ public class MoreBytesTest {
 
     @Test
     public void testAppendDoubleRandomPositionShouldThrowBufferOverflowException() {
+        final byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
-            final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
-            final Bytes<?> to = Bytes.wrapForWrite(bytes);
-            try {
-                to.append(0, 3.14, 2, 8);
-            } finally {
-                to.releaseLast();
-            }
+            to.append(0, 3.14, 2, 8);
             fail("Should throw Exception");
         } catch (BufferOverflowException ignore) {
             // Ignore
+        } finally {
+            to.releaseLast();
         }
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void testAppendDoubleRandomPositionShouldThrowIllegalArgumentException() {
 
-        final @NotNull byte[] bytes = "000000".getBytes(ISO_8859_1);
+        final byte[] bytes = "000000".getBytes(ISO_8859_1);
         final Bytes<?> to = Bytes.wrapForWrite(bytes);
         try {
             to.append(0, 33333.14, 2, 6);
         } finally {
             to.releaseLast();
         }
-
     }
 
     @Test
@@ -162,16 +156,20 @@ public class MoreBytesTest {
         int expected = 0;
         for (int i = 0x80; i <= 0xFF; i++)
             for (int j = 0x80; j <= 0xFF; j++) {
-                final @NotNull byte[] b = {(byte) i, (byte) j};
-                final @NotNull String s = new String(b, StandardCharsets.UTF_8);
+                final byte[] b = {(byte) i, (byte) j};
+                final String s = new String(b, StandardCharsets.UTF_8);
                 if (s.charAt(0) == 65533) {
                     final Bytes<?> bytes = Bytes.wrapForRead(b);
+                    // Use a flag so that there are just one method that can throw in the try-block
+                    boolean fail = false;
                     try {
                         bytes.parseUtf8(StopCharTesters.ALL);
-                        fail(Arrays.toString(b));
+                        fail = true;
                     } catch (UTFDataFormatRuntimeException e) {
                         expected++;
                     }
+                    if (fail)
+                        fail(Arrays.toString(b));
                 }
             }
         assertEquals(14464, expected);

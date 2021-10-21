@@ -47,6 +47,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     }
 
     @NotNull
+    @Override
     public String toString() {
         if (bytes == null)
             return "bytes is null";
