@@ -33,7 +33,10 @@ public class BytesFieldInfo {
         List<Field> fields = fields(aClass);
         String prefix0 = "";
         BFIEntry entry = null;
-        int longs = 0, ints = 0, shorts = 0, bytes = 0;
+        int longs = 0;
+        int ints = 0;
+        int shorts = 0;
+        int bytes = 0;
         boolean nonHeader = false;
         boolean hasHeader = false;
         for (int i = 0; i <= fields.size(); i++) {
@@ -115,7 +118,8 @@ public class BytesFieldInfo {
     }
 
     static class BFIEntry {
-        long start, end;
+        long start;
+        long end;
     }
 
     private static BytesFieldInfo init(Class<?> aClass) {

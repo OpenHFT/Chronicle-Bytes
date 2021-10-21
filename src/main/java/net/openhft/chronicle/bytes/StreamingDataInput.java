@@ -288,7 +288,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param sb to copy chars to
      * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
      */
-    default <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
+    default <C extends Appendable & CharSequence> boolean readUtf8(@NotNull C sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
         try {
             AppendableUtil.setLength(sb, 0);
@@ -360,7 +360,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     @Deprecated(/* remove in x.23 */)
-    default <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
+    default <C extends Appendable & CharSequence> boolean read8bit(@NotNull C sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalArgumentException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         if (readRemaining() <= 0)

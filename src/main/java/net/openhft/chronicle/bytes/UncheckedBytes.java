@@ -36,8 +36,8 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * Fast unchecked version of AbstractBytes
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class UncheckedBytes<Underlying>
-        extends AbstractBytes<Underlying> {
+public class UncheckedBytes<U>
+        extends AbstractBytes<U> {
     Bytes underlyingBytes;
 
     public UncheckedBytes(@NotNull Bytes underlyingBytes)
@@ -75,7 +75,7 @@ public class UncheckedBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> unchecked(boolean unchecked) {
+    public Bytes<U> unchecked(boolean unchecked) {
         return this;
     }
 
@@ -101,49 +101,49 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> readPosition(long position) {
+    public Bytes<U> readPosition(long position) {
         readPosition = position;
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> readLimit(long limit) {
+    public Bytes<U> readLimit(long limit) {
         uncheckedWritePosition(limit);
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writePosition(long position) {
+    public Bytes<U> writePosition(long position) {
         uncheckedWritePosition(position);
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> readSkip(long bytesToSkip) {
+    public Bytes<U> readSkip(long bytesToSkip) {
         readPosition += bytesToSkip;
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeSkip(long bytesToSkip) {
+    public Bytes<U> writeSkip(long bytesToSkip) {
         uncheckedWritePosition(writePosition() + bytesToSkip);
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeLimit(long limit) {
+    public Bytes<U> writeLimit(long limit) {
         writeLimit = limit;
         return this;
     }
 
     @NotNull
     @Override
-    public BytesStore<Bytes<Underlying>, Underlying> copy() {
+    public BytesStore<Bytes<U>, U> copy() {
         throw new UnsupportedOperationException("todo");
     }
 
@@ -175,7 +175,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
+    public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
@@ -188,7 +188,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<U> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (length == 8) {
             writeLong(bytes.readLong(offset));
@@ -206,7 +206,7 @@ public class UncheckedBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
+    public Bytes<U> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         if (cs instanceof RandomDataInput) {
             return write((RandomDataInput) cs);
@@ -236,7 +236,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(byte i8)
+    public Bytes<U> writeByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
         long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
@@ -245,7 +245,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeUtf8(String s)
+    public Bytes<U> writeUtf8(String s)
             throws BufferOverflowException, IllegalStateException {
         if (s == null) {
             BytesInternal.writeStopBitNeg1(this);
@@ -286,7 +286,7 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<U> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long wp = writePosition();
         int i;

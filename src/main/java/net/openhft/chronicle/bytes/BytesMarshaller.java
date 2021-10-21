@@ -73,7 +73,7 @@ public class BytesMarshaller<T> {
         out.indent(-1);
     }
 
-    static abstract class FieldAccess {
+    abstract static class FieldAccess {
         final Field field;
 
         FieldAccess(Field field) {

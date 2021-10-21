@@ -2476,7 +2476,8 @@ enum BytesInternal {
         long num = 0;
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
-        boolean digits = false, first = true;
+        boolean digits = false;
+        boolean first = true;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {

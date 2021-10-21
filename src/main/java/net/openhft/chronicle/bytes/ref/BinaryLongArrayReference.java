@@ -293,7 +293,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             sb.append(used);
             sb.append(", value: ");
             @NotNull String sep = "";
-            int i, max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
+            int i;
+            int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {
                 long valueAt = getValueAt(i);
                 sb.append(sep).append(valueAt);

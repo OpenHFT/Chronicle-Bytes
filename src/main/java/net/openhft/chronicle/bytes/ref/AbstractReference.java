@@ -65,9 +65,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return offset;
     }
 
-    @Override
-    public abstract long maxSize();
-
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {
         if (this.bytes != null) {

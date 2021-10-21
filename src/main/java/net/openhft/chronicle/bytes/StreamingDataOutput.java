@@ -209,7 +209,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writeStopBit(length);
         for (int i = 0; i < length; i++) {
             char c = s.charAt(i + start);
-            rawWriteByte((byte) Maths.toUInt8((int) c));
+            rawWriteByte((byte) Maths.toUInt8(c));
         }
         return (S) this;
     }

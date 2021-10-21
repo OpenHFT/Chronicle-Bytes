@@ -4,7 +4,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import org.jetbrains.annotations.NotNull;
 
-public class EnbeddedBytes<Underlying> extends VanillaBytes<Underlying> {
+public class EnbeddedBytes<U> extends VanillaBytes<U> {
     private EnbeddedBytes(@NotNull BytesStore<?, ?> bytesStore, long writePosition, long writeLimit) throws IllegalStateException, IllegalArgumentException {
         super(bytesStore, writePosition, writeLimit);
     }
