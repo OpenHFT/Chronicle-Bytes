@@ -1485,7 +1485,7 @@ enum BytesInternal {
             out.writeUnsignedByte(offset++, '.');
             while (decimalPlaces-- > digits)
                 out.writeUnsignedByte(offset++, '0');
-            out.write(offset++, numberBuffer, endIndex, digits);
+            out.write(offset, numberBuffer, endIndex, digits);
             return;
         } else {
             int numDigitsRequired = digits + 1;
@@ -1501,30 +1501,12 @@ enum BytesInternal {
         out.write(offset, numberBuffer, endIndex, decimalLength);
         offset += decimalLength;
         out.writeUnsignedByte(offset++, '.');
-        out.write(offset++, numberBuffer, endIndex + decimalLength, digits - decimalLength);
+        out.write(offset, numberBuffer, endIndex + decimalLength, digits - decimalLength);
     }
 
     private static void numberTooLarge(int digits)
             throws IllegalArgumentException {
         throw new IllegalArgumentException("Number too large for " + digits + "digits");
-    }
-
-    private static void appendInt0(@NotNull StreamingDataOutput out, int num)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
-        if (num < 10) {
-            out.rawWriteByte((byte) ('0' + num));
-
-        } else if (num < 100) {
-            out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
-
-        } else {
-            byte[] numberBuffer = NUMBER_BUFFER.get();
-            // Extract digits into the end of the numberBuffer
-            int endIndex = appendInt1(numberBuffer, num);
-
-            // Bulk copy the digits into the front of the buffer
-            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
-        }
     }
 
     private static void appendLong0(@NotNull StreamingDataOutput out, long num)
@@ -1957,7 +1939,6 @@ enum BytesInternal {
                         return;
                     }
                     chars[i] = (char) c;
-//            appendable.appendDouble((char) c);
                 }
             }
             StringUtils.setCount(appendable, i);
@@ -2432,7 +2413,6 @@ enum BytesInternal {
         }
         while (in.readRemaining() > 0) {
             b = in.rawReadByte();
-            // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
                 digits = true;
@@ -2459,13 +2439,10 @@ enum BytesInternal {
         long num = 0;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
-            // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = (num << 4) + b - '0';
-                // if (b >= 'A' && b <= 'F')
             } else if ((b - ('A' + Integer.MIN_VALUE)) < 6 + Integer.MIN_VALUE) {
                 num = (num << 4) + b - ('A' - 10);
-                // if (b >= 'a' && b <= 'f')
             } else if ((b - ('a' + Integer.MIN_VALUE)) < 6 + Integer.MIN_VALUE) {
                 num = (num << 4) + b - ('a' - 10);
             } else if (b == ']' || b == '}') {
@@ -2502,7 +2479,6 @@ enum BytesInternal {
         boolean digits = false, first = true;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
-            // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 10 + b - '0';
                 decimalPlaces++;
@@ -2535,7 +2511,6 @@ enum BytesInternal {
         long num = 0;
         while (in.readRemaining() > 0) {
             int b = in.readUnsignedByte();
-            // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE) {
                 num = num * 16 + b - '0';
             } else if ((b - ('A' + Integer.MIN_VALUE)) <= 6 + Integer.MIN_VALUE) {
@@ -2560,7 +2535,6 @@ enum BytesInternal {
         boolean negative = false;
         while (true) {
             int b = in.peekUnsignedByte(offset++);
-            // if (b >= '0' && b <= '9')
             if ((b - ('0' + Integer.MIN_VALUE)) <= 9 + Integer.MIN_VALUE)
                 num = num * 10 + b - '0';
             else if (b == '-')
