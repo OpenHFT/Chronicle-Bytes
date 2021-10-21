@@ -55,7 +55,7 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
             String s = "# " + getClass().getName() + "\n" + bytes.toHexString();
             bytes.releaseLast();
             return s;
-        } catch (Exception e) {
+        } catch (Throwable e) {
             return e.toString();
         }
     }

@@ -74,7 +74,7 @@ public class BytesFieldInfo {
                         longs++;
                         break;
                     default:
-                        throw new UnsupportedOperationException("Primitive types of size "+size+" not supported");
+                        throw new UnsupportedOperationException("Primitive types of size " + size + " not supported");
                 }
             }
             if (matches) {
@@ -99,11 +99,11 @@ public class BytesFieldInfo {
         assert ints < 256;
         assert shorts < 128;
         assert bytes < 256;
-        int description = (longs << 24) | (ints << 16) | (shorts << 8) | bytes;
+        int newDescription = (longs << 24) | (ints << 16) | (shorts << 8) | bytes;
         // ensure the header has an odd parity as a validity check
-        if (Integer.bitCount(description) % 2 == 0)
-            description |= 0x8000;
-        this.description = description;
+        if (Integer.bitCount(newDescription) % 2 == 0)
+            newDescription |= 0x8000;
+        this.description = newDescription;
     }
 
     private static int sizeOf(Class<?> type) {
@@ -153,7 +153,7 @@ public class BytesFieldInfo {
     }
 
     // internal only
-    public static List<Field> fields(Class clazz) {
+    public static List<Field> fields(Class<?> clazz) {
         List<Field> fields = new ArrayList<>();
         while (clazz != null && clazz != Object.class) {
             Collections.addAll(fields, clazz.getDeclaredFields());

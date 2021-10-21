@@ -482,7 +482,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
             readSkip(length);
-            MEMORY.copyMemory(src, address, length);
+            UnsafeMemory.copyMemory(src, address, length);
         } else {
             int i = 0;
             for (; i < length - 7; i += 8)

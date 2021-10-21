@@ -220,7 +220,7 @@ public class NativeBytes<Underlying>
             throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
-//            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
+            //  No resize
             return;
         }
 
@@ -248,7 +248,6 @@ public class NativeBytes<Underlying>
                     "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. " +
                     stack);
         }
-//        System.out.println("resize " + endOfBuffer + " to " + size);
         // native block of 128 KiB or more have an individual memory mapping so are more expensive.
         if (endOfBuffer >= 128 << 10)
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +

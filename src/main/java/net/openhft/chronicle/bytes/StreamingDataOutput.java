@@ -386,6 +386,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * @return capacity without resize or -1 if closed
      */
+    @Override
     long realCapacity();
 
     default boolean canWriteDirect(long count) {
@@ -477,7 +478,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         if (isDirectMemory()) {
             long destAddress = addressForWrite(writePosition());
             writeSkip(length); // blow up if there isn't that much space left
-            MEMORY.copyMemory(address, destAddress, length);
+            UnsafeMemory.copyMemory(address, destAddress, length);
         } else {
             int i = 0;
             for (; i < length - 7; i += 8)

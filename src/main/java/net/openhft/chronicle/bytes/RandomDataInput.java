@@ -363,6 +363,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return the actual capacity that can be potentially read.
      */
+    @Override
     long realCapacity();
 
     /**
