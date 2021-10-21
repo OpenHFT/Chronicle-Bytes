@@ -64,7 +64,14 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public
 enum BytesInternal {
+
     ; // none
+    private static final String INFINITY = "Infinity";
+    private static final String MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END = "malformed input: partial character at end";
+    private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
+    private static final String WAS = " was ";
+    private static final String CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS = "Can't parse flexible long without precision loss: ";
+
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     public static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     public static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
@@ -72,7 +79,7 @@ enum BytesInternal {
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final BytesPool BP = new BytesPool();
     public static final StringInternerBytes SI;
-    private static final byte[] Infinity = "Infinity".getBytes(ISO_8859_1);
+    private static final byte[] Infinity = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NaN = "NaN".getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
@@ -314,7 +321,7 @@ enum BytesInternal {
                     /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = input.readUnsignedByte(offset++);
                     if ((char2 & 0xC0) != 0x80)
                         throw newUTFDataFormatRuntimeException((offset - limit + utfLen), "was " + char2);
@@ -329,14 +336,14 @@ enum BytesInternal {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = input.readUnsignedByte(offset++);
                     int char3 = input.readUnsignedByte(offset++);
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + (offset - limit + utfLen - 1) +
-                                        " was " + char2 + " " + char3);
+                                MALFORMED_INPUT_AROUND_BYTE + (offset - limit + utfLen - 1) +
+                                        WAS + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -602,11 +609,11 @@ enum BytesInternal {
                     count += utf ? 2 : 1;
                     if (count > length)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = bytes.readUnsignedByte();
                     if ((char2 & 0xC0) != 0x80)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input around byte " + count + " was " + char2);
+                                MALFORMED_INPUT_AROUND_BYTE + count + WAS + char2);
                     int c2 = (char) (((c & 0x1F) << 6) |
                             (char2 & 0x3F));
                     appendable.append((char) c2);
@@ -618,12 +625,12 @@ enum BytesInternal {
                     count += utf ? 3 : 1;
                     if (count > length)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = bytes.readUnsignedByte();
                     int char3 = bytes.readUnsignedByte();
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(count - 1L, " was " + char2 + " " + char3);
+                        throw newUTFDataFormatRuntimeException(count - 1L, WAS + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -661,7 +668,7 @@ enum BytesInternal {
                     /* 110x xxxx 10xx xxxx */
                     if (offset == limit)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = input.readUnsignedByte(offset++);
                     if ((char2 & 0xC0) != 0x80)
                         throw newUTFDataFormatRuntimeException(offset - limit + utflen, "was " + char2);
@@ -675,12 +682,12 @@ enum BytesInternal {
                     /* 1110 xxxx 10xx xxxx 10xx xxxx */
                     if (offset + 2 > limit)
                         throw new UTFDataFormatRuntimeException(
-                                "malformed input: partial character at end");
+                                MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END);
                     int char2 = input.readUnsignedByte(offset++);
                     int char3 = input.readUnsignedByte(offset++);
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
-                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, " was " + char2 + " " + char3);
+                        throw newUTFDataFormatRuntimeException(offset - limit + utflen - 1, WAS + char2 + " " + char3);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -2020,11 +2027,11 @@ enum BytesInternal {
     }
 
     private static UTFDataFormatException newUTFDataFormatException(final long offset, final String suffix) {
-        return new UTFDataFormatException("malformed input around byte " + offset + " " + suffix);
+        return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
     private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(final long offset, final String suffix) {
-        return new UTFDataFormatRuntimeException("malformed input around byte " + offset + " " + suffix);
+        return new UTFDataFormatRuntimeException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
     private static void readUtf81(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
@@ -2087,7 +2094,7 @@ enum BytesInternal {
 
                     if (((char2 & 0xC0) != 0x80) || ((char3 & 0xC0) != 0x80))
                         throw new UTFDataFormatException(
-                                "malformed input around byte ");
+                                MALFORMED_INPUT_AROUND_BYTE);
                     int c3 = (char) (((c & 0x0F) << 12) |
                             ((char2 & 0x3F) << 6) |
                             (char3 & 0x3F));
@@ -2100,7 +2107,7 @@ enum BytesInternal {
                 default:
                     /* 10xx xxxx, 1111 xxxx */
                     throw new UTFDataFormatException(
-                            "malformed input around byte ");
+                            MALFORMED_INPUT_AROUND_BYTE);
             }
         }
     }
@@ -2213,11 +2220,13 @@ enum BytesInternal {
                     in.readSkip(-1);
                     throw new IORuntimeException("Expected flexible long, but got: I");
                 case '-':
-                    if (compareRest(in, "Infinity"))
+                    if (compareRest(in, INFINITY))
                         throw new IORuntimeException("Expected flexible long, but got: -Infinity");
                     sign = -1;
                     ch = in.rawReadByte();
                     break;
+                default:
+                    throw new UnsupportedOperationException("input of the char " + ch + " is not supported here.");
             }
 
             int tens = 0;
@@ -2229,7 +2238,7 @@ enum BytesInternal {
                         if (ch == '0')
                             tens++;
                         else if (parsingError == null) {
-                            parsingError = new IORuntimeException("Can't parse flexible long without precision loss: " +
+                            parsingError = new IORuntimeException(CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS +
                                     (sign * absValue) + " <- " + ((char) ch));
                         }
 
@@ -2237,7 +2246,7 @@ enum BytesInternal {
                         if (ch <= '7' || (sign < 0 && ch == '8'))
                             absValue = absValue * 10 + (ch - '0');
                         else if (parsingError == null) {
-                            parsingError = new IORuntimeException("Can't parse flexible long without precision loss: " +
+                            parsingError = new IORuntimeException(CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS +
                                     (sign * absValue) + " <- " + ((char) ch));
                         }
                     } else {
@@ -2279,7 +2288,7 @@ enum BytesInternal {
                     int truncatingDigit = (int) Math.abs(absValue % 10);
 
                     if (truncatingDigit != 0) {
-                        throw new IORuntimeException("Can't parse flexible long without precision loss: " +
+                        throw new IORuntimeException(CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS +
                                 "division of " + absValue + " by 10");
                     }
 
@@ -2333,11 +2342,13 @@ enum BytesInternal {
                     in.readSkip(-1);
                     return Double.NaN;
                 case '-':
-                    if (compareRest(in, "Infinity"))
+                    if (compareRest(in, INFINITY))
                         return Double.NEGATIVE_INFINITY;
                     negative = true;
                     ch = in.rawReadByte();
                     break;
+                default:
+                    throw new UnsupportedOperationException("input of the char " + ch + " is not supported here.");
             }
             int tens = 0;
             while (true) {
