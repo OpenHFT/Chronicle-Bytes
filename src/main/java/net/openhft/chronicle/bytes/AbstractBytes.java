@@ -200,6 +200,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
+    @Override
     public @NotNull AbstractBytes append(double d)
             throws BufferOverflowException, IllegalStateException {
         boolean fits = canWriteDirect(380);
@@ -310,9 +311,9 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
-        final long writePosition = writePosition();
-        writeCheckOffset(writePosition, bytesToSkip);
-        uncheckedWritePosition(writePosition + bytesToSkip);
+        final long writePos = writePosition();
+        writeCheckOffset(writePos, bytesToSkip);
+        uncheckedWritePosition(writePos + bytesToSkip);
         return this;
     }
 
@@ -362,6 +363,7 @@ public abstract class AbstractBytes<Underlying>
         }
     }
 
+    @Override
     public int readUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException {
         return readByte(offset) & 0xFF;
@@ -848,9 +850,6 @@ public abstract class AbstractBytes<Underlying>
         }
         long limit0 = readLimit();
         if (offset > limit0) {
-            // assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-            // offset +
-            // ",adding=" + adding;
             throw new DecoratedBufferOverflowException(
                     String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d", offset, limit0));
         }
@@ -939,7 +938,8 @@ public abstract class AbstractBytes<Underlying>
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException, IllegalStateException {
         prewriteCheckOffset(readPosition, subtracting);
-        return readPosition -= subtracting;
+        readPosition -= subtracting;
+        return readPosition;
     }
 
     @NotNull
@@ -1210,9 +1210,12 @@ public abstract class AbstractBytes<Underlying>
         return sum & 0xFF;
     }
 
-    static class ReportUnoptimised {
+    static final class ReportUnoptimised {
         static {
             Jvm.reportUnoptimised();
+        }
+
+        private ReportUnoptimised() {
         }
 
         static void reportOnce() {

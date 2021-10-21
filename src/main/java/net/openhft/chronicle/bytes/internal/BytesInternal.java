@@ -2226,7 +2226,7 @@ enum BytesInternal {
                     ch = in.rawReadByte();
                     break;
                 default:
-                    throw new UnsupportedOperationException("input of the char " + ch + " is not supported here.");
+                    // Do nothing
             }
 
             int tens = 0;
@@ -2348,7 +2348,7 @@ enum BytesInternal {
                     ch = in.rawReadByte();
                     break;
                 default:
-                    throw new UnsupportedOperationException("input of the char " + ch + " is not supported here.");
+                    // do nothing
             }
             int tens = 0;
             while (true) {

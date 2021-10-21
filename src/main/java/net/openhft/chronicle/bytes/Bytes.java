@@ -713,6 +713,7 @@ public interface Bytes<Underlying> extends
                     long j = i + 1;
                     long end = j + targetCount - 1;
                     for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
+                        // Do nothing
                     }
 
                     if (j == end) {
@@ -811,8 +812,6 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default String toHexString(long offset, long maxLength) {
-//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
-//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         try {
@@ -945,11 +944,12 @@ public interface Bytes<Underlying> extends
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
         int length = Maths.toUInt31(readStopBit());
         if (length == 0)
-            if (lenient())
+            if (lenient()) {
                 return BigInteger.ZERO;
-            else
+            } else {
                 throw new BufferUnderflowException();
-        @NotNull byte[] bytes = new byte[length];
+            }
+        byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
     }
