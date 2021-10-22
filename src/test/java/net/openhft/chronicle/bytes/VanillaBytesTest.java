@@ -20,20 +20,20 @@
 package net.openhft.chronicle.bytes;
 
 import org.jetbrains.annotations.NotNull;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@SuppressWarnings("rawtypes")
-public class VanillaBytesTest extends BytesTestCommon {
+final class VanillaBytesTest extends BytesTestCommon {
+
     @Test
-    public void testBytesForRead() {
-        @NotNull byte[] byteArr = new byte[128];
+    void testBytesForRead() {
+        byte[] byteArr = new byte[128];
         for (int i = 0; i < byteArr.length; i++)
             byteArr[i] = (byte) i;
-        Bytes bytes = Bytes.wrapForRead(byteArr);
+        Bytes<?> bytes = Bytes.wrapForRead(byteArr);
         bytes.readSkip(8);
-        @NotNull Bytes bytes2 = bytes.bytesForRead();
+        @NotNull Bytes<?> bytes2 = bytes.bytesForRead();
         assertEquals(128 - 8, bytes2.readRemaining());
         assertEquals(8, bytes2.readPosition());
         assertEquals(8, bytes2.readByte(bytes2.start()));
