@@ -309,6 +309,7 @@ public class UncheckedBytes<Underlying>
     @Override
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
-
+        // Todo: Optimize this
+        super.write(offsetInRDO, bytes, offset, length);
     }
 }
