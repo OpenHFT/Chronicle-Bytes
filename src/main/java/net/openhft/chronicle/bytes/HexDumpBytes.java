@@ -666,9 +666,9 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object)
+    public <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> clazz, T using)
             throws BufferUnderflowException, IllegalStateException {
-        return base.readMarshallableLength16(tClass, object);
+        return base.readMarshallableLength16(clazz, using);
     }
 
     @NotNull

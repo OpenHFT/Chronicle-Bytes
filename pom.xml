@@ -85,6 +85,14 @@
         </dependency>
 
         <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-params</artifactId>
+<!--            Todo: Remove version once in 3rd party BOM-->
+            <version>5.7.2</version>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
             <version>5.8.1</version>
@@ -136,7 +144,7 @@
                         <configuration>
                             <referenceVersion>2.22ea3</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <!--                            <binaryCompatibilityPercentageRequired>92</binaryCompatibilityPercentageRequired>-->
+                            <binaryCompatibilityPercentageRequired>96.8</binaryCompatibilityPercentageRequired>
                         </configuration>
                     </execution>
                 </executions>

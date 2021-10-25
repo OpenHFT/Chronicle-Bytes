@@ -209,16 +209,16 @@
         }
 
         @Override
-        public boolean isEqual(@Nullable String s)
+        public boolean isEqual(@Nullable String other)
                 throws IllegalStateException {
-            if (s == null || s.length() != readRemaining()) return false;
+            if (other == null || other.length() != readRemaining()) return false;
             ReportUnoptimised.reportOnce();
 
             long realLength = realReadRemaining();
             try {
                 if (Jvm.isJava9Plus()) {
-                    byte[] bytes = StringUtils.extractBytes(s);
-                    byte coder = StringUtils.getStringCoder(s);
+                    byte[] bytes = StringUtils.extractBytes(other);
+                    byte coder = StringUtils.getStringCoder(other);
                     if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
                         @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
                         long address = bs.addressForRead(readPosition);
@@ -228,7 +228,7 @@
                         return isEqual1(bytes, coder, bytesStore, readPosition);
                     }
                 } else {
-                    char[] chars = StringUtils.extractChars(s);
+                    char[] chars = StringUtils.extractChars(other);
                     if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
                         @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
                         long address = bs.addressForRead(readPosition);
