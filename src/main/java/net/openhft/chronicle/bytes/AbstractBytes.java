@@ -1033,6 +1033,11 @@ public abstract class AbstractBytes<Underlying>
         return totalToCopy;
     }
 
+    @Override
+    public long read(long offsetInRDI, byte[] bytes, int offset, int length) throws IllegalStateException {
+        return bytesStore.read(offsetInRDI, bytes, offset, length);
+    }
+
     @NotNull
     @Override
     public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
