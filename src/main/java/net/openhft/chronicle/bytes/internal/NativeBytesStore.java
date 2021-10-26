@@ -821,16 +821,7 @@ public class NativeBytesStore<Underlying>
     @Override
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
-        int i;
-        final long address = this.address + translate(offsetInRDI);
-        for (i = 0; i < len - 7; i += 8)
-            UnsafeMemory.unsafePutLong(bytes, i, memory.readLong(address + i));
-        if (i < len - 3) {
-            UnsafeMemory.unsafePutInt(bytes, i, memory.readInt(address + i));
-            i += 4;
-        }
-        for (; i < len; i++)
-            UnsafeMemory.unsafePutByte(bytes, i, memory.readByte(address + i));
+        memory.readBytes(this.address + translate(offsetInRDI), bytes, offset, len);
         return len;
     }
 
