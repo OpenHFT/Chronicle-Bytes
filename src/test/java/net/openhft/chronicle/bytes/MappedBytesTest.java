@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
@@ -230,6 +231,19 @@ public class MappedBytesTest extends BytesTestCommon {
             String actual = bytesR.toString();
             Assert.assertEquals(text.substring(shift), actual);
             from.releaseLast();
+        }
+    }
+
+    @Test
+    public void testWriteLarge8Bit() throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytes = MappedBytes.mappedBytes(tempFile1, 64 << 10)) {
+            try {
+                bytes.write8bit(Bytes.from(text + text));
+                fail();
+            } catch (DecoratedBufferUnderflowException ex) {
+                assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));
+            }
         }
     }
 

@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -38,7 +39,7 @@ import java.nio.BufferUnderflowException;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
@@ -240,7 +241,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                                    final boolean given)
             throws BufferUnderflowException, IllegalStateException {
         final long check = adding >= 0 ? offset : offset + adding;
-        //noinspection StatementWithEmptyBody
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(check, adding)) {
@@ -259,6 +259,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset, checkSize0(adding))) {
             acquireNextByteStore0(offset, false);
+            if (!this.bytesStore.inside(offset, checkSize0(adding)))
+                throw new DecoratedBufferUnderflowException(String.format("Acquired the next BytesStore, but still not room to add %d when realCapacity %d", adding, this.bytesStore.realCapacity()));
         }
     }
 
