@@ -9,7 +9,9 @@ endif::[]
 ifdef::badges[]
 image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
 image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
-[![Quality Gate Status](https://sonarqube.chronicle.software/api/project_badges/measure?project=net.openhft%3Achronicle-bytes&metric=alert_status)](https://sonarqube.chronicle.software/dashboard?id=net.openhft%3Achronicle-bytes)
+
+image:https://sonarqube.chronicle.software/api/project_badges/measure?project=net.openhft%3Achronicle-bytes&metric=alert_status
+
 endif::[]
 
 :css-signature: demo
