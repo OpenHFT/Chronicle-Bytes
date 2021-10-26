@@ -1016,4 +1016,17 @@ public class BytesTest extends BytesTestCommon {
             assertEquals(d, bytes.parseDouble(), err);
         }
     }
+
+    @Test
+    public void testReadWithOffset() {
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+        bytes.append("Hello");
+        int offset = 2;
+        int offsetInRDI = 1;
+        byte[] ba = new byte[bytes.length() + offset - offsetInRDI];
+        ba[0] = '0';
+        ba[1] = '1';
+        bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
+        assertEquals("01ello", new String(ba));
+    }
 }
