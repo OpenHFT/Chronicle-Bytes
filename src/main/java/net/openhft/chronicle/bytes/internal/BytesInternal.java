@@ -732,36 +732,36 @@ enum BytesInternal {
         }
     }
 
-    public static long writeUtf8(@NotNull RandomDataOutput out, long offset,
+    public static long writeUtf8(@NotNull RandomDataOutput out, long writeOffset,
                                  @Nullable CharSequence str)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         if (str == null) {
-            offset = writeStopBit(out, offset, -1);
+            writeOffset = writeStopBit(out, writeOffset, -1);
 
         } else {
             try {
                 int strLength = str.length();
                 if (strLength < 32) {
-                    long lenOffset = offset;
-                    offset = appendUtf8(out, offset + 1, str, 0, strLength);
-                    long utfLength = offset - lenOffset - 1;
+                    long lenOffset = writeOffset;
+                    writeOffset = appendUtf8(out, writeOffset + 1, str, 0, strLength);
+                    long utfLength = writeOffset - lenOffset - 1;
                     assert utfLength <= 127;
                     writeStopBit(out, lenOffset, utfLength);
                 } else {
                     long utfLength = AppendableUtil.findUtf8Length(str);
-                    offset = writeStopBit(out, offset, utfLength);
+                    writeOffset = writeStopBit(out, writeOffset, utfLength);
                     if (utfLength == strLength) {
-                        append8bit(offset, out, str, 0, strLength);
-                        offset += utfLength;
+                        append8bit(writeOffset, out, str, 0, strLength);
+                        writeOffset += utfLength;
                     } else {
-                        offset = appendUtf8(out, offset, str, 0, strLength);
+                        writeOffset = appendUtf8(out, writeOffset, str, 0, strLength);
                     }
                 }
             } catch (BufferUnderflowException | IllegalArgumentException e) {
                 throw new AssertionError(e);
             }
         }
-        return offset;
+        return writeOffset;
     }
 
     public static long writeUtf8(@NotNull RandomDataOutput out, long offset,

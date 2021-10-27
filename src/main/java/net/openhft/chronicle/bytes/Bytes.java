@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EnbeddedBytes;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -41,6 +42,7 @@ import java.nio.ReadOnlyBufferException;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
+import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -48,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * with 63-bit addressing capability (~8 EiB) and separate read and write cursors.
  * <p>
  * Java's built-in {@link ByteBuffer} can only handle 31-bits addresses and has only a single cursor.
- *
+ * <p>
  * A Bytes object can be for a fixed region of memory or an "elastic" buffer which can be resized on demand.
  * <p>
  * A Bytes is mutable and not thread-safe.
@@ -105,7 +107,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code initialCapacity} negative.
      */
     @NotNull
-    static Bytes<ByteBuffer> elasticByteBuffer(int initialCapacity) {
+    static Bytes<ByteBuffer> elasticByteBuffer(@NonNegative int initialCapacity) {
         return elasticByteBuffer(initialCapacity, MAX_HEAP_CAPACITY);
     }
 
@@ -122,8 +124,8 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code initialCapacity} or provided {@code maxCapacity} is negative.
      */
     @NotNull
-    static Bytes<ByteBuffer> elasticByteBuffer(final int initialCapacity,
-                                               final int maxCapacity) {
+    static Bytes<ByteBuffer> elasticByteBuffer(@NonNegative final int initialCapacity,
+                                               @NonNegative final int maxCapacity) {
         requireNonNegative(initialCapacity);
         requireNonNegative(maxCapacity);
 
@@ -149,7 +151,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
-    static Bytes<ByteBuffer> elasticHeapByteBuffer(int initialCapacity) {
+    static Bytes<ByteBuffer> elasticHeapByteBuffer(@NonNegative int initialCapacity) {
         requireNonNegative(initialCapacity);
         @NotNull BytesStore<?, ByteBuffer> bs = BytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
@@ -190,16 +192,15 @@ public interface Bytes<U> extends
      *     }
      * }</pre>
      *
-     * @param object who's fields are to be reflected
+     * @param object    who's fields are to be reflected
      * @param groupName of the field group
      * @return a new Bytes view of fields in the provided {@code object} in a {@link FieldGroup} effectively
-     *         turning the groups of fields into a memory segment
-     * @throws NullPointerException if the provided {@code object} or the provided {@code groupName} is {@code null}
-     *
+     * turning the groups of fields into a memory segment
+     * @throws IllegalArgumentException if the provided {@code object} or the provided {@code groupName} is {@code null}
      */
-    static <T> Bytes<T> forFieldGroup(final T object,
-                                      final String groupName) {
-        requireNonNull(object);
+    static <T> Bytes<T> forFieldGroup(@NotNull final T object,
+                                      @NotNull final String groupName) {
+        checkNonNull(object);
         requireNonNull(groupName);
         @NotNull BytesStore<?, T> bs = BytesStore.forFields(object, groupName, 1);
         try {
@@ -267,12 +268,12 @@ public interface Bytes<U> extends
      *
      * @param byteBuffer to wrap
      * @return a new Bytes wrapping the provided {@code byteBuffer}
-     * @throws NullPointerException    if the provided {@code byteBuffer} is {@code null}
+     * @throws IllegalArgumentException    if the provided {@code byteBuffer} is {@code null}
      * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
      */
     @NotNull
     static Bytes<ByteBuffer> wrapForRead(@NotNull final ByteBuffer byteBuffer) {
-        requireNonNull(byteBuffer);
+        checkNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             try {
@@ -339,12 +340,12 @@ public interface Bytes<U> extends
      *
      * @param byteBuffer to wrap
      * @return a new Bytes wrapping the provided {@code byteBuffer}
-     * @throws NullPointerException if the provided {@code byteBuffer} is {@code null}
+     * @throws IllegalArgumentException    if the provided {@code byteBuffer} is {@code null}
      * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
      */
     @NotNull
     static Bytes<ByteBuffer> wrapForWrite(@NotNull final ByteBuffer byteBuffer) {
-        requireNonNull(byteBuffer);
+        checkNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             try {
@@ -406,12 +407,12 @@ public interface Bytes<U> extends
      * }</pre>
      *
      * @param byteArray to wrap
-     * @return  a new Bytes wrapping the provided {@code byteArray}
-     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
+     * @return a new Bytes wrapping the provided {@code byteArray}
+     * @throws IllegalStateException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    static Bytes<byte[]> wrapForRead(byte[] byteArray) {
-        requireNonNull(byteArray);
+    static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
+        checkNonNull(byteArray);
         @NotNull BytesStore<?, byte[]> bs = BytesStore.wrap(byteArray);
         try {
             try {
@@ -471,12 +472,12 @@ public interface Bytes<U> extends
      *
      * @param byteArray to wrap
      * @return Creates and returns a new Bytes wrapping the provided {@code byteArray}
-     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
+     * @throws IllegalArgumentException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
-        requireNonNull(byteArray);
-        @NotNull BytesStore bs = BytesStore.wrap(byteArray);
+    static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
+        checkNonNull(byteArray);
+        final BytesStore bs = BytesStore.wrap(byteArray);
         try {
             try {
                 return bs.bytesForWrite();
@@ -497,10 +498,11 @@ public interface Bytes<U> extends
      *
      * @param text to convert
      * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @throws IllegalArgumentException if the provided {@code text} is {@code null}
      */
     @NotNull
     static Bytes<?> from(@NotNull CharSequence text) {
+        checkNonNull(text);
         return from(text.toString());
     }
 
@@ -513,9 +515,10 @@ public interface Bytes<U> extends
      *
      * @param text to convert
      * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @throws IllegalArgumentException if the provided {@code text} is {@code null}
      */
     static Bytes<?> fromDirect(@NotNull CharSequence text) {
+        checkNonNull(text);
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
 
@@ -528,7 +531,7 @@ public interface Bytes<U> extends
      *
      * @param text to convert
      * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @throws IllegalArgumentException if the provided {@code text} is {@code null}
      */
     @NotNull
     static Bytes<?> directFrom(@NotNull String text) {
@@ -553,7 +556,7 @@ public interface Bytes<U> extends
      *
      * @param text to convert
      * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @throws IllegalArgumentException if the provided {@code text} is {@code null}
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull String text) {
@@ -569,13 +572,14 @@ public interface Bytes<U> extends
      * Creates and returns a new fix sized wrapper for native (64-bit address)
      * memory with the provided {@code capacity}.
      * <p>
+     *
      * @param capacity the non-negative capacity given in bytes
      * @return a new fix sized wrapper for native (64-bit address)
      * memory with the provided {@code capacity}
      * @throws IllegalArgumentException if the provided {@code capacity} is negative.
      */
     @NotNull
-    static VanillaBytes<Void> allocateDirect(long capacity)
+    static VanillaBytes<Void> allocateDirect(@NonNegative long capacity)
             throws IllegalArgumentException {
         @NotNull BytesStore<?, Void> bs = BytesStore.nativeStoreWithFixedCapacity(requireNonNegative(capacity));
         try {
@@ -611,7 +615,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
      */
     @NotNull
-    static NativeBytes<Void> allocateElasticDirect(long initialCapacity)
+    static NativeBytes<Void> allocateElasticDirect(@NonNegative long initialCapacity)
             throws IllegalArgumentException {
         return NativeBytes.nativeBytes(requireNonNegative(initialCapacity));
     }
@@ -633,11 +637,11 @@ public interface Bytes<U> extends
      *
      * @param initialCapacity the initial capacity of the wrapper in bytes
      * @return a new elastic wrapper for on heap memory with the provided
-     *       {@code initialCapacity} which will be resized as required
+     * {@code initialCapacity} which will be resized as required
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
      */
     @NotNull
-    static OnHeapBytes allocateElasticOnHeap(int initialCapacity) {
+    static OnHeapBytes allocateElasticOnHeap(@NonNegative int initialCapacity) {
         requireNonNegative(initialCapacity);
         BytesStore<?, byte[]> wrap = BytesStore.wrap(new byte[initialCapacity]);
         try {
@@ -658,9 +662,9 @@ public interface Bytes<U> extends
      *
      * @param buffer the buffer to use
      * @return a String extracted from the provided {@code buffer }
-     *       staring from the provided {@code readPosition} to the
-     *       provided {@code readLimit}
-     * @throws NullPointerException if the provided {@code buffer} is {@code null}
+     * staring from the provided {@code readPosition} to the
+     * provided {@code readLimit}
+     * @throws IllegalArgumentException if the provided {@code buffer} is {@code null}
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer)
@@ -677,15 +681,13 @@ public interface Bytes<U> extends
      *
      * @param buffer the buffer to use
      * @param maxLen the maximum length from the buffer, used to create a new string
-     * @return       a string contain the text from the {@code readPosition} to the {@code readLimit} of the buffer
-     * @throws NullPointerException if the provided {@code buffer} is {@code null}
-     * @throws IllegalArgumentException if the provided {@code maxLen} is negative
+     * @return a string contain the text from the {@code readPosition} to the {@code readLimit} of the buffer
+     * @throws IllegalArgumentException if the provided {@code buffer} is {@code null} or if the provided {@code maxLen} is negative
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
                            final long maxLen) throws
             BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        requireNonNull(buffer);
         requireNonNegative(maxLen);
         if (buffer.refCount() < 1)
             // added because something is crashing the JVM
@@ -723,22 +725,21 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a String from the bytes of the provided {@code buffer} with the provided {@code length }
      * staring from the provided {@code offset}.
-     *
+     * <p>
      * The buffer is not modified by this call.
      *
      * @param buffer   the buffer to use
      * @param position the offset position to create the string from
      * @param length   the number of characters to include in the string
      * @return a String from the bytes of the provided {@code buffer} with the provided {@code length }
-     *         staring from the provided {@code offset}
-     * @throws NullPointerException if the provided {@code buffer} is {@code null}
-     * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
+     * staring from the provided {@code offset}
+     * @throws IllegalArgumentException if the provided {@code buffer} is {@code null} or
+     *                                  if the provided {@code position} or provided {@code length} is negative
      */
     @NotNull
     static String toString(@NotNull final Bytes buffer,
                            final long position,
                            final long length) {
-        requireNonNull(buffer);
         requireNonNegative(position);
         requireNonNegative(length);
         try {
@@ -776,7 +777,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code bytes} is {@code null}
      */
     @NotNull
-    static VanillaBytes allocateDirect(byte[] bytes)
+    static VanillaBytes allocateDirect(@NotNull byte[] bytes)
             throws IllegalArgumentException {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
@@ -797,24 +798,22 @@ public interface Bytes<U> extends
      * provided {@code other } starting at the provided {@code fromSourceOffset}, or -1 is returned if no such value exists.
      * <p>
      * If the provided {@code fromSourceOffset} is negative, it will be treated as zero.
-     *
+     * <p>
      * Code shared by String and StringBuffer to do searching. The
      * source is the character array being searched, and the other
      * is the string being searched for.
      *
-     * @param source    the read bytes being searched.
-     * @param other    the read bytes being searched for.
+     * @param source           the read bytes being searched.
+     * @param other            the read bytes being searched for.
      * @param fromSourceOffset the index to begin searching from,
      * @return the lowest value such that the contents of the provided {@code source } equals the contents of the
-     *         provided {@code other } starting at the provided {@code fromSourceOffset}, or -1 is returned if no such value exists
-     * @throws NullPointerException if the provided {@code source} or the provided {@code source} is {@code null}
+     * provided {@code other } starting at the provided {@code fromSourceOffset}, or -1 is returned if no such value exists
+     * @throws IllegalArgumentException if the provided {@code source} or the provided {@code source} is {@code null}
      */
     @Deprecated(/* suggest for removal in x.23 as this is supposed to be used only by other methods in this interface and can be internalised */)
     static int indexOf(final @NotNull BytesStore source,
                        final @NotNull BytesStore other,
                        int fromSourceOffset) throws IllegalStateException {
-        requireNonNull(source);
-        requireNonNull(other);
 
         long sourceOffset = source.readPosition();
         long otherOffset = other.readPosition();
@@ -932,7 +931,7 @@ public interface Bytes<U> extends
      * at most 1024 bytes.
      *
      * @return a new String representing the contents of this Bytes object in hexadecimal form encoding
-     *         at most 1024 bytes
+     * at most 1024 bytes
      */
     @NotNull
     default String toHexString() {
@@ -942,12 +941,12 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form encoding
      * at most the provided {@code maxLength } bytes.
-     *
+     * <p>
      * Displays the hex data of {@link Bytes} from the {@code readPosition} up to the specified length.
      *
      * @param maxLength limit the number of bytes to be dumped
      * @return a new String representing the contents of this Bytes object in hexadecimal form encoding
-     *         at most the provided {@code maxLength } bytes
+     * at most the provided {@code maxLength } bytes
      * @throws IllegalArgumentException if the provided {@code maxLength} is negative.
      */
     @NotNull
@@ -959,10 +958,10 @@ public interface Bytes<U> extends
      * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form
      * starting at the provided {@code offset} encoding at most the provided {@code maxLength } bytes.
      *
-     * @param offset the specified offset to start from
+     * @param offset    the specified offset to start from
      * @param maxLength limit the number of bytes to be encoded
      * @return a new String representing the contents of this Bytes object in hexadecimal form
-     *         starting at the provided {@code offset} encoding at most the provided {@code maxLength } bytes
+     * starting at the provided {@code offset} encoding at most the provided {@code maxLength } bytes
      * @throws IllegalArgumentException if the provided {@code maxLength}  or provided {@code maxLength} is negative.
      */
     @NotNull
@@ -995,7 +994,7 @@ public interface Bytes<U> extends
      *
      * @param desiredCapacity the capacity that you required
      * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space or if the
-     *         provided {@code desiredCapacity} is negative;
+     *                                  provided {@code desiredCapacity} is negative;
      */
     default void ensureCapacity(long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
@@ -1011,7 +1010,7 @@ public interface Bytes<U> extends
      * As a sub-section of a Bytes, it cannot be elastic.
      *
      * @return a new slice of the current Bytes whereby the start is moved to the readPosition and the
-     *         current limit determines the capacity
+     * current limit determines the capacity
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
@@ -1038,11 +1037,12 @@ public interface Bytes<U> extends
 
     /**
      * Returns if this Bytes object contents equals the provided {@code other}.
+     *
      * @param other to test for equality
      * @return if this Bytes object contents equals the provided {@code other}
      * @throws IllegalStateException if this Bytes object has been previously released
      */
-    default boolean isEqual(String other)
+    default boolean isEqual(@Nullable String other)
             throws IllegalStateException {
         return StringUtils.isEqual(this, other);
     }
@@ -1073,9 +1073,9 @@ public interface Bytes<U> extends
     /**
      * Copies bytes from this Bytes object to the provided {@code outputStream}.
      *
-     * @param outputStream  the specified OutputStream that this Bytes object is copied to
+     * @param outputStream the specified OutputStream that this Bytes object is copied to
      * @throws IllegalStateException if this Bytes object has been previously released
-     * @throws IOException if an I/O error occurs writing to the provided {@code outputStream}
+     * @throws IOException           if an I/O error occurs writing to the provided {@code outputStream}
      */
     @Override
     default void copyTo(@NotNull OutputStream outputStream)
@@ -1121,9 +1121,9 @@ public interface Bytes<U> extends
      * If this Byte object is empty, an object equal to {@link BigDecimal#ZERO} is returned.
      *
      * @return a new BigDecimal representing the contents of this Bytes object
-     * @throws ArithmeticException if the content of this Bytes object could not be successfully converted
+     * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
-     * @throws IllegalStateException if this Bytes object was previously released
+     * @throws IllegalStateException    if this Bytes object was previously released
      */
     @NotNull
     default BigDecimal readBigDecimal()
@@ -1136,9 +1136,9 @@ public interface Bytes<U> extends
      * if this Bytes object is empty.
      *
      * @return a new BigInteger representing the contents of this Bytes object
-     * @throws ArithmeticException if the content of this Bytes object could not be successfully converted
+     * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
-     * @throws IllegalStateException if this Bytes object was previously released
+     * @throws IllegalStateException    if this Bytes object was previously released
      */
     @NotNull
     default BigInteger readBigInteger()
@@ -1157,7 +1157,7 @@ public interface Bytes<U> extends
     /**
      * Returns the lowest index value for which the contents of this Bytes object equals the provided {@code source },
      * or -1 if no such index value exists.
-     *
+     * <p>
      * On other words, returns the index within this Bytes object of the first occurrence of the
      * provided {@code source}
      * <p>
@@ -1169,7 +1169,7 @@ public interface Bytes<U> extends
      *
      * @param source the sub-bytes to search for.
      * @return the lowest index value for which the contents of this Bytes object equals the provided {@code source },
-     *         or -1 if no such index value exists
+     * or -1 if no such index value exists
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
@@ -1179,7 +1179,7 @@ public interface Bytes<U> extends
     /**
      * Returns the lowest index value starting from the provided {@code fromIndex} for which the contents of this
      * Bytes object equals the provided {@code source }, or -1 if no such index value exists.
-     *
+     * <p>
      * On other words, returns the index within this Bytes object of the first occurrence of the
      * provided {@code source}
      * <p>
@@ -1189,10 +1189,10 @@ public interface Bytes<U> extends
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
-     * @param source the sub-bytes to search for.
+     * @param source    the sub-bytes to search for.
      * @param fromIndex to start searching from
      * @return the lowest index value for which the contents of this Bytes object equals the provided {@code source },
-     *         or -1 if no such index value exists
+     * or -1 if no such index value exists
      */
     default int indexOf(@NotNull BytesStore source, int fromIndex)
             throws IllegalStateException {
@@ -1215,18 +1215,17 @@ public interface Bytes<U> extends
      * <p>
      * The readLimit and readPosition is not affected by this operation.
      *
-     * @param length indicating the number of bytes to write
+     * @param length   indicating the number of bytes to write
      * @param bytesOut target to write the content of this Bytes object to
      * @throws BufferUnderflowException if the provided {@code length} is greater than the remaining bytes readable.
-     * @throws IORuntimeException if there is an error reading or writing data
-     * @throws BufferOverflowException if the provided {@code bytesOut} cannot hold the bytes to be written
-     * @throws IllegalStateException if this Bytes object or the provided {@code bytesOut} has been previously released.
+     * @throws IORuntimeException       if there is an error reading or writing data
+     * @throws BufferOverflowException  if the provided {@code bytesOut} cannot hold the bytes to be written
+     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released.
      * @throws IllegalArgumentException if the provided {@code length} is negative.
      */
     default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         requireNonNegative(length);
-        requireNonNull(bytesOut);
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -1250,18 +1249,17 @@ public interface Bytes<U> extends
      * <p>
      * The content of this Bytes object is assumed to have a 16-bit length indicator preceding the actual object.
      *
-     * @see #writeMarshallableLength16(WriteBytesMarshallable)
-     * 
      * @param clazz type to read
      * @param using to update
-     * @param <T> type of the provided using
+     * @param <T>   type of the provided using
      * @return An object that was read from this Bytes object
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient.
-     * @throws IllegalStateException if this Bytes object or the provided {@code bytesOut} has been previously released.
-     * @throws NullPointerException if the provided {@code clazz} is {@code null}
+     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released.
+     * @throws NullPointerException     if the provided {@code clazz} is {@code null}
+     * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
-    default <T extends ReadBytesMarshallable> T readMarshallableLength16(final Class<T> clazz,
-                                                                         final T using)
+    default <T extends ReadBytesMarshallable> T readMarshallableLength16(final @NotNull Class<T> clazz,
+                                                                         final @Nullable T using)
             throws BufferUnderflowException, IllegalStateException {
 
         final T object = (using == null)
@@ -1284,21 +1282,21 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Writes the content of the provided {@code marshallable} to this Bytes object converting from an object 
+     * Writes the content of the provided {@code marshallable} to this Bytes object converting from an object
      * to a number of bytes.
      * <p>
      * The content of this Bytes object will have a 16-bit length indicator preceding the actual object.
      *
-     * @see #readMarshallableLength16(Class, ReadBytesMarshallable) 
-     *
-     * @throws BufferOverflowException if the capacity of this Bytes object is insufficient.
-     * @throws IllegalStateException if this Bytes object or the provided {@code bytesOut} has been previously released
-     *                               or if the contents of this Bytes object cannot fit under 16-bit addressing
-     * @throws NullPointerException if the provided {@code marshallable} is {@code null}
+     * @throws BufferOverflowException  if the capacity of this Bytes object is insufficient.
+     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
+     *                                  or if the contents of this Bytes object cannot fit under 16-bit addressing
+     * @throws IllegalArgumentException if the provided {@code marshallable} is {@code null}
+     * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
-    default void writeMarshallableLength16(final WriteBytesMarshallable marshallable)
+    default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long position = writePosition();
+
         try {
             writeUnsignedShort(0);
             marshallable.writeMarshallable(this);
@@ -1313,15 +1311,17 @@ public interface Bytes<U> extends
 
     /**
      * Writes the contents of the provided `inputStream` to the contents of this Bytes object.
-     * @param inputStream to read from
      *
+     * @param inputStream to read from
      * @return this Bytes object
-     * @throws IOException if an I/O error occur on the inputStream
-     * @throws BufferOverflowException if this Bytes object lacks capacity to write the entire provided {@code inputStream }
-     * @throws IllegalStateException if this Bytes object or the provided {@code bytesOut} has been previously released
+     * @throws IOException              if an I/O error occur on the inputStream
+     * @throws BufferOverflowException  if this Bytes object lacks capacity to write the entire provided {@code inputStream }
+     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
+     * @throws IllegalArgumentException if the provided {@code InputStream} is {@code null}.
      */
-    default Bytes write(final InputStream inputStream)
+    default Bytes write(@NotNull final InputStream inputStream)
             throws IOException, BufferOverflowException, IllegalStateException {
+        checkNonNull(inputStream);
         for (; ; ) {
             int read;
             read = inputStream.read();

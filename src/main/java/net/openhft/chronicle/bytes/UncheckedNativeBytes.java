@@ -887,7 +887,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<Underlying> appendUtf8(@NotNull(exception = NullPointerException.class) char @NotNull(exception = NullPointerException.class) [] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
@@ -931,12 +931,12 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
         return bytesStore.write8bit(position, s, start, length);
     }
 
@@ -958,10 +958,10 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public @NotNull Bytes<Underlying> write8bit(final @NotNull String s, final int start, final int length) {
+    public @NotNull Bytes<Underlying> write8bit(final @NotNull String text, final int start, final int length) {
         final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
         final long position = writeOffsetPositionMoved(toWriteLength, 0);
-        bytesStore.write8bit(position, s, start, length);
+        bytesStore.write8bit(position, text, start, length);
         writePosition += toWriteLength;
         return this;
     }

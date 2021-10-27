@@ -169,7 +169,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length) {
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
         if (length != 0)
             throw new UnsupportedOperationException();
     }
@@ -289,12 +289,12 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
         throw new BufferOverflowException();
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
         throw new BufferOverflowException();
     }
 

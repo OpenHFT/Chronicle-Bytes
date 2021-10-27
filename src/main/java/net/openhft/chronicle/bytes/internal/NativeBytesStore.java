@@ -626,7 +626,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
         long addressForWrite = addressForWrite(position);
         final long length = bs.readRemaining();
 
@@ -645,7 +645,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.copy8bit(s, start, length, addressForWrite(position));
         return position + length;

@@ -27,6 +27,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
     /**
@@ -271,6 +273,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     @NotNull
     default R write(long offsetInRDO, @NotNull byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
+        checkNonNull(bytes);
         return write(offsetInRDO, bytes, 0, bytes.length);
     }
 
@@ -288,7 +291,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException
      */
     @NotNull
-    R write(long writeOffset, byte[] bytes, int readOffset, int length)
+    R write(long writeOffset, @NotNull byte[] bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -304,7 +307,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException
      * @throws IllegalStateException
      */
-    void write(long writeOffset, ByteBuffer bytes, int readOffset, int length)
+    void write(long writeOffset, @NotNull ByteBuffer bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -313,6 +316,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     @NotNull
     default R write(long offsetInRDO, @NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
+        checkNonNull(bytes);
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
 
@@ -333,7 +337,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException
      */
     @NotNull
-    R write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
+    R write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException;
 
     /**
@@ -380,38 +384,38 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Writes the given {@code cs} to this {@code RandomDataOutput} from the given {@code offset},
-     * in Utf8 format. Returns the offset after the written char sequence.
+     * Writes the provided {@code text} into this {@code RandomDataOutput} writing at the given {@code writeOffset},
+     * in Utf8 format. Returns the new write position after writing the provided {@code text}.
      *
-     * @param offset the offset to write char sequence from
-     * @param cs     the char sequence to write, could be {@code null}
-     * @return the offset after the char sequence written, in this {@code RandomDataOutput}
+     * @param writeOffset the writeOffset to write char sequence from
+     * @param text        the char sequence to write, could be {@code null}
+     * @return the writeOffset after the char sequence written, in this {@code RandomDataOutput}
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
-    default long writeUtf8(long offset, @Nullable CharSequence cs)
+    default long writeUtf8(long writeOffset, @Nullable CharSequence text)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
-        return BytesInternal.writeUtf8(this, offset, cs);
+        return BytesInternal.writeUtf8(this, writeOffset, text);
     }
 
     /**
-     * Writes the given {@code cs} to this {@code RandomDataOutput} from the given {@code offset},
+     * Writes the given {@code text} to this {@code RandomDataOutput} writing at the provided {@code writeOffset},
      * in Utf8 format, checking that the utf8 encoding size of the given char sequence is less or
-     * equal to the given {@code maxUtf8Len}, otherwise {@code IllegalArgumentException} is thrown,
-     * and no bytes of this {@code RandomDataOutput} are overwritten. Returns the offset after the
-     * written char sequence.
+     * equal to the provided {@code maxUtf8Len}, otherwise {@code IllegalArgumentException} is thrown,
+     * and no bytes of this {@code RandomDataOutput} are overwritten. Returns the new write position after
+     * writing the provided {@code text}
      *
-     * @param offset     the offset to write char sequence from
-     * @param cs         the char sequence to write, could be {@code null}
-     * @param maxUtf8Len the maximum allowed length (in Utf8 encoding) of the given char sequence
-     * @return the offset after the char sequence written, in this {@code RandomDataOutput}
+     * @param writeOffset  the writeOffset to write char sequence from
+     * @param text         the char sequence to write, could be {@code null}
+     * @param maxUtf8Len   the maximum allowed length (in Utf8 encoding) of the given char sequence
+     * @return the writeOffset after the char sequence written, in this {@code RandomDataOutput}
      * @throws IllegalArgumentException if the given char sequence size in Utf8 encoding exceeds
      *                                  maxUtf8Len
      * @see RandomDataInput#readUtf8Limited(long, Appendable, int)
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
-    default long writeUtf8Limited(long offset, @Nullable CharSequence cs, int maxUtf8Len)
+    default long writeUtf8Limited(long writeOffset, @Nullable CharSequence text, int maxUtf8Len)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
-        return BytesInternal.writeUtf8(this, offset, cs, maxUtf8Len);
+        return BytesInternal.writeUtf8(this, writeOffset, text, maxUtf8Len);
     }
 
     /**
@@ -421,8 +425,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param bs       to copy.
      * @return the offset after the char sequence written, in this {@code RandomDataOutput}
      */
-    long write8bit(long position, BytesStore bs);
+    long write8bit(long position, @NotNull BytesStore bs);
 
-    long write8bit(long position, String s, int start, int length);
+    long write8bit(long position, @NotNull String s, int start, int length);
 
 }

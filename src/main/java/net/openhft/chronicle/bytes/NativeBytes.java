@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
@@ -321,6 +322,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes bytes)
             throws IllegalStateException {
+        checkNonNull(bytes);
         ReportUnoptimised.reportOnce();
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());

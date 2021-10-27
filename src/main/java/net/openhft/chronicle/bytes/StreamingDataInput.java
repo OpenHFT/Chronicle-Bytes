@@ -106,7 +106,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
+    default void readWithLength0(long length, @NotNull(exception = NullPointerException.class) ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();
@@ -124,7 +124,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
+    default void readWithLength(long length, @NotNull(exception = NullPointerException.class) ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();

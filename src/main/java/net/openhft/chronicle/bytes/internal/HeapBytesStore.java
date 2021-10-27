@@ -280,7 +280,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);
         int i = 0;
@@ -292,7 +292,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
         try {
             throwExceptionIfReleased();
             position = BytesInternal.writeStopBit(this, position, length);

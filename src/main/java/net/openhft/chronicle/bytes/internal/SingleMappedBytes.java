@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+
 /**
  * Bytes to wrap memory mapped data.
  * <p>
@@ -60,10 +62,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
-                                            final byte[] bytes,
+                                            @NotNull final byte[] bytes,
                                             int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
+        checkNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -97,10 +100,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long writeOffset,
-                                            final RandomDataInput bytes,
+                                            @NotNull final RandomDataInput bytes,
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        checkNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = writeOffset;

@@ -32,6 +32,7 @@
     import java.nio.ByteBuffer;
 
     import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+    import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 
     /**
      * Simple Bytes implementation which is not Elastic.
@@ -276,6 +277,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+
             ensureCapacity(writePosition() + length);
             optimisedWrite(bytes, offset, length);
             return this;
@@ -410,6 +412,7 @@
         @Override
         public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+            checkNonNull(bytes);
             ensureCapacity(writePosition() + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {
@@ -603,7 +606,7 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+        public Bytes<Underlying> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
             long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
             ensureCapacity(writePosition() + actualUTF8Length);
