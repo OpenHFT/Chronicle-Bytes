@@ -30,9 +30,9 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * This cache only gaurentees it will provide a String which matches the decoded bytes.
+ * This cache only guarantees it will provide a String which matches the decoded bytes.
  * <p>
- * It doesn't guantee it will always return the same object,
+ * It doesn't guarantee it will always return the same object,
  * nor that different threads will return the same object,
  * though the contents should always be the same.
  * <p>
@@ -42,12 +42,12 @@ import java.util.stream.Stream;
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
-    @NotNull
     protected final InternerEntry<T>[] entries;
-    protected final int mask, shift;
+    protected final int mask;
+    protected final int shift;
     protected boolean toggle = false;
 
-    public AbstractInterner(int capacity)
+    protected AbstractInterner(int capacity)
             throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
@@ -78,8 +78,7 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
-        // TODO This needs to be reviewd.
-//        UnsafeMemory.UNSAFE.loadFence();
+        // Todo: This needs to be reviewed: UnsafeMemory UNSAFE loadFence;
         int hash = hash32(cs, length);
         int h = hash & mask;
         InternerEntry<T> s = entries[h];
@@ -90,12 +89,12 @@ public abstract class AbstractInterner<T> {
         if (s2 != null && s2.bytes.length() == length && s2.bytes.equalBytes(cs, length))
             return s2.t;
         @NotNull T t = getValue(cs, length);
-        @NotNull final byte[] bytes = new byte[length];
+        final byte[] bytes = new byte[length];
         @NotNull BytesStore bs = BytesStore.wrap(bytes);
         IOTools.unmonitor(bs);
         cs.read(cs.readPosition(), bytes, 0, length);
         entries[s == null || (s2 != null && toggle()) ? h : h2] = new InternerEntry<>(bs, t);
-//        UnsafeMemory.UNSAFE.storeFence();
+        // UnsafeMemory UNSAFE storeFence;
         return t;
     }
 
@@ -104,14 +103,15 @@ public abstract class AbstractInterner<T> {
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {
-        return toggle = !toggle;
+        toggle = !toggle;
+        return toggle;
     }
 
     public int valueCount() {
         return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }
 
-    static class InternerEntry<T> {
+    private static final class InternerEntry<T> {
         final BytesStore bytes;
         final T t;
 

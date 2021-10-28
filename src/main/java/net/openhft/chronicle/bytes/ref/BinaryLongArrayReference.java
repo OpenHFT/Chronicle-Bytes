@@ -73,6 +73,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         binaryLongArrayReferences = null;
     }
 
+    @Override
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {
         if (this.bytes != null) {
@@ -220,9 +221,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throw new IORuntimeException("Corrupt used value");
 
         bytes.readSkip(capacity << SHIFT);
-        long length = bytes.readPosition() - position;
+        long len = bytes.readPosition() - position;
         try {
-            bytesStore((Bytes) bytes, position, length);
+            bytesStore((Bytes) bytes, position, len);
         } catch (IllegalArgumentException | BufferOverflowException e) {
             throw new AssertionError(e);
         }
@@ -281,6 +282,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @NotNull
+    @Override
     public String toString() {
         if (bytes == null)
             return "not set";
@@ -291,7 +293,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             sb.append(used);
             sb.append(", value: ");
             @NotNull String sep = "";
-            int i, max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
+            int i;
+            int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
             for (i = 0; i < max; i++) {
                 long valueAt = getValueAt(i);
                 sb.append(sep).append(valueAt);
@@ -320,11 +323,11 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         throwExceptionIfClosedInSetter();
 
         BytesStore bytesStore = bytesStore();
-        long length = sizeInBytes(arrayLength);
+        long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
-            this.length = length;
+            this.length = len;
         } else {
-            assert this.length == length;
+            assert this.length == len;
         }
         return this;
     }

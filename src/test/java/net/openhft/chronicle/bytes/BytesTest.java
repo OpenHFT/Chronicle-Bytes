@@ -573,7 +573,7 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testMove2() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
@@ -581,7 +581,9 @@ public class BytesTest extends BytesTestCommon {
         b.move(3, 1, 3);
         assertEquals("0345456789", b.toString());
         postTest(b);
-        b.move(3, 5, 3);
+        assertThrows(IllegalStateException.class, () ->
+            b.move(3, 5, 3)
+        );
     }
 
     @Test
@@ -604,7 +606,7 @@ public class BytesTest extends BytesTestCommon {
         postTest(b);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testMove2B() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
@@ -613,7 +615,9 @@ public class BytesTest extends BytesTestCommon {
         assertEquals("Hlo o World", b.toString());
         postTest(b);
         BackgroundResourceReleaser.releasePendingResources();
-        b.bytesStore().move(3, 5, 3);
+        assertThrows(IllegalStateException.class, () ->
+            b.bytesStore().move(3, 5, 3)
+        );
     }
 
     @Test

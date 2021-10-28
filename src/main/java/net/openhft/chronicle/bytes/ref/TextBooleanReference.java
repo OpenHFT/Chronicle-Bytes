@@ -45,6 +45,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     }
 
     @NotNull
+    @Override
     public String toString() {
         try {
             return "value: " + getValue();

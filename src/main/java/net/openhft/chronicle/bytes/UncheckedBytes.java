@@ -51,10 +51,10 @@ public class UncheckedBytes<Underlying>
 
     public void setBytes(@NotNull Bytes bytes)
             throws IllegalStateException {
-        BytesStore underlyingBytes = bytes.bytesStore();
-        if (bytesStore != underlyingBytes) {
+        BytesStore underlying = bytes.bytesStore();
+        if (bytesStore != underlying) {
             bytesStore.release(this);
-            this.bytesStore(underlyingBytes);
+            this.bytesStore(underlying);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -169,7 +169,8 @@ public class UncheckedBytes<Underlying>
     @Override
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException {
-        return readPosition -= subtracting;
+        readPosition -= subtracting;
+        return readPosition;
     }
 
     @NotNull
@@ -186,6 +187,7 @@ public class UncheckedBytes<Underlying>
     }
 
     @NotNull
+    @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         if (length == 8) {

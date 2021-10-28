@@ -22,8 +22,8 @@ import static org.junit.Assert.*;
 @SuppressWarnings("rawtypes")
 public class MappedBytesTest extends BytesTestCommon {
 
-    final private String
-            smallText = "It's ten years since the iPhone was first unveiled and Apple has marked " +
+    private static final String
+            SMALL_TEXT = "It's ten years since the iPhone was first unveiled and Apple has marked " +
             "the occas" +
             "ion with a new iPhone that doesn't just jump one generation, it jumps several. " +
             "Apple has leapt straight from iPhone 7 (via the iPhone 8, reviewed here) all the way " +
@@ -39,7 +39,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     {
         for (int i = 0; i < 200; i++) {
-            largeTextBuilder.append(smallText);
+            largeTextBuilder.append(SMALL_TEXT);
         }
 
         text = largeTextBuilder.toString();
@@ -47,7 +47,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     @Test
     public void testMappedFileSafeLimitTooSmall()
-            throws IOException {
+            throws IOException  {
 
         final int arraySize = 40_000;
 
@@ -65,6 +65,9 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
@@ -88,6 +91,9 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
@@ -266,6 +272,7 @@ public class MappedBytesTest extends BytesTestCommon {
         bytes2.releaseLast();
         bytes.releaseLast();
 
+        assertTrue(bytes.isClosed());
     }
 
     @Test
@@ -307,6 +314,8 @@ public class MappedBytesTest extends BytesTestCommon {
         bytes2.releaseLast();
         bytes.releaseLast();
 
+        assertTrue(bytes.isClosed());
+
     }
 
     @Test
@@ -347,6 +356,8 @@ public class MappedBytesTest extends BytesTestCommon {
 
         bytes2.releaseLast();
         bytes.releaseLast();
+
+        assertTrue(bytes.isClosed());
 
     }
 

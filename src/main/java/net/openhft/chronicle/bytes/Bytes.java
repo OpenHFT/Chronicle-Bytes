@@ -47,6 +47,8 @@ import java.nio.charset.StandardCharsets;
  * <p></p> Also {@code readLimit() == writePosition() && readPosition() <= safeLimit()}
  * <p></p>
  *
+ * @param <Underlying> Underlying type
+ *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<Underlying> extends
@@ -419,11 +421,11 @@ public interface Bytes<Underlying> extends
      * @return Bytes ready for reading.
      */
     @NotNull
-    static Bytes<?> from(@NotNull CharSequence text) {
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
         return from(text.toString());
     }
 
-    static Bytes<?> fromDirect(@NotNull CharSequence text) {
+    static Bytes<Void> fromDirect(@NotNull CharSequence text) {
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
 
@@ -713,6 +715,7 @@ public interface Bytes<Underlying> extends
                     long j = i + 1;
                     long end = j + targetCount - 1;
                     for (long k = targetOffset + 1; j < end && source.readByte(j) == target.readByte(k); j++, k++) {
+                        // Do nothing
                     }
 
                     if (j == end) {
@@ -811,8 +814,6 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     default String toHexString(long offset, long maxLength) {
-//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
-//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         try {
@@ -945,11 +946,12 @@ public interface Bytes<Underlying> extends
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
         int length = Maths.toUInt31(readStopBit());
         if (length == 0)
-            if (lenient())
+            if (lenient()) {
                 return BigInteger.ZERO;
-            else
+            } else {
                 throw new BufferUnderflowException();
-        @NotNull byte[] bytes = new byte[length];
+            }
+        byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
     }

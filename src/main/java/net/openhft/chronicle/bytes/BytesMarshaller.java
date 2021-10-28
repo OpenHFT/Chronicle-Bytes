@@ -40,10 +40,11 @@ public class BytesMarshaller<T> {
     private final FieldAccess[] fields;
 
     public BytesMarshaller(@NotNull Class<T> tClass) {
-        @NotNull Map<String, Field> map = new LinkedHashMap<>();
+        final Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         fields = map.values().stream()
-                .map(FieldAccess::create).toArray(FieldAccess[]::new);
+                .map(FieldAccess::create)
+                .toArray(FieldAccess[]::new);
     }
 
     public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
@@ -72,7 +73,7 @@ public class BytesMarshaller<T> {
         out.indent(-1);
     }
 
-    static abstract class FieldAccess<T> {
+    abstract static class FieldAccess {
         final Field field;
 
         FieldAccess(Field field) {
@@ -168,7 +169,7 @@ public class BytesMarshaller<T> {
                 throws BufferUnderflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferOverflowException;
     }
 
-    static class ScalarFieldAccess extends FieldAccess<Object> {
+    static class ScalarFieldAccess extends FieldAccess {
         public ScalarFieldAccess(Field field) {
             super(field);
         }
@@ -197,7 +198,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static class BytesMarshallableFieldAccess extends FieldAccess<Object> {
+    static class BytesMarshallableFieldAccess extends FieldAccess {
         public BytesMarshallableFieldAccess(Field field) {
             super(field);
         }
@@ -219,8 +220,10 @@ public class BytesMarshaller<T> {
                 throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             try {
                 @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
-                if (!field.getType().isInstance(o2))
-                    field.set(o, o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType()));
+                if (!field.getType().isInstance(o2)) {
+                    o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType());
+                    field.set(o, o2);
+                }
 
                 o2.readMarshallable(read);
             } catch (IllegalArgumentException | IllegalAccessException e) {
@@ -229,7 +232,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static class BytesFieldAccess extends FieldAccess<Bytes> {
+    static class BytesFieldAccess extends FieldAccess {
         public BytesFieldAccess(Field field) {
             super(field);
         }
@@ -285,29 +288,6 @@ public class BytesMarshaller<T> {
             }
         }
     }
-
-/*
-    static class ArrayFieldAccess extends FieldAccess {
-        private final Class componentType;
-
-        public ArrayFieldAccess(@NotNull Field field) {
-            super(field);
-            componentType = field.getType().getComponentType();
-        }
-
-        @Override
-        protected void getValue(Object o, BytesOut write)
-throws IllegalStateException {
-            throw new UnsupportedOperationException("TODO");
-        }
-
-        @Override
-        protected void setValue(Object o, BytesIn read)
-throws IllegalStateException {
-            throw new UnsupportedOperationException("TODO");
-        }
-    }
-*/
 
     static class ObjectArrayFieldAccess extends FieldAccess {
         Class componentType;

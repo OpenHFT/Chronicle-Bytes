@@ -92,6 +92,7 @@ public enum PropertyReplacer {
             if (is != null)
                 return convertStreamToString(is);
         } catch (Exception ignored) {
+            // Ignore
         }
         return BytesUtil.readFile(fileName).toString();
     }

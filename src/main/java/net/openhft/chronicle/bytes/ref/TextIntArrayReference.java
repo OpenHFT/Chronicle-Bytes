@@ -148,11 +148,11 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     @Override
     public ByteableIntArrayValues capacity(long arrayLength) {
         BytesStore bytesStore = bytesStore();
-        long length = sizeInBytes(arrayLength);
+        long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
-            this.length = length;
+            this.length = len;
         } else {
-            assert this.length == length;
+            assert this.length == len;
         }
         return this;
     }
@@ -260,6 +260,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     }
 
     @NotNull
+    @Override
     public String toString() {
         if (bytes == null) {
             return "LongArrayTextReference{" +

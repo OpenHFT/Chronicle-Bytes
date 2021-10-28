@@ -36,12 +36,14 @@ import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
  * <p>
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
+ *
+ * @param <Underlying> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NativeBytes<Underlying>
         extends VanillaBytes<Underlying> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
-    private static boolean s_newGuarded = BYTES_GUARDED;
+    private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
 
     public NativeBytes(@NotNull final BytesStore store, final long capacity)
@@ -62,7 +64,7 @@ public class NativeBytes<Underlying>
      * @return will new NativeBytes be guarded.
      */
     public static boolean areNewGuarded() {
-        return s_newGuarded;
+        return newGuarded;
     }
 
     /**
@@ -74,7 +76,7 @@ public class NativeBytes<Underlying>
      * @param guarded turn on if true
      */
     public static boolean setNewGuarded(final boolean guarded) {
-        s_newGuarded = guarded;
+        newGuarded = guarded;
         return true;
     }
 
@@ -82,7 +84,7 @@ public class NativeBytes<Underlying>
      * For testing
      */
     public static void resetNewGuarded() {
-        s_newGuarded = BYTES_GUARDED;
+        newGuarded = BYTES_GUARDED;
     }
 
     @NotNull
@@ -130,7 +132,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity)
             throws IllegalStateException, IllegalArgumentException {
-        return s_newGuarded
+        return newGuarded
                 ? new GuardedNativeBytes(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
     }
@@ -220,7 +222,7 @@ public class NativeBytes<Underlying>
             throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
         if (endOfBuffer <= realCapacity) {
-//            System.out.println("no resize " + endOfBuffer + " < " + realCapacity);
+            //  No resize
             return;
         }
 
@@ -248,7 +250,6 @@ public class NativeBytes<Underlying>
                     "this bytes' underlyingObject() is ByteBuffer, NullPointerException is likely to be thrown. " +
                     stack);
         }
-//        System.out.println("resize " + endOfBuffer + " to " + size);
         // native block of 128 KiB or more have an individual memory mapping so are more expensive.
         if (endOfBuffer >= 128 << 10)
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +

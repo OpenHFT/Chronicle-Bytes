@@ -44,6 +44,8 @@ import static java.lang.Math.min;
  * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
+ * @param <B> BytesStore type
+ * @param <Underlying> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
@@ -96,7 +98,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @param bytes to wrap
      * @return BytesStore
      */
-    static BytesStore<?, byte[]> wrap(@NotNull byte[] bytes) {
+    static BytesStore<?, byte[]> wrap(byte[] bytes) {
         return HeapBytesStore.wrap(bytes);
     }
 
@@ -517,7 +519,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return BytesInternal.contentEqual(this, bytesStore);
+        return bytesStore != null && BytesInternal.contentEqual(this, bytesStore);
     }
 
     /**
@@ -529,7 +531,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default boolean startsWith(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return BytesInternal.startsWith(this, bytesStore);
+        return bytesStore != null && BytesInternal.startsWith(this, bytesStore);
     }
 
     /**

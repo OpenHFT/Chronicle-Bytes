@@ -363,6 +363,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return the actual capacity that can be potentially read.
      */
+    @Override
     long realCapacity();
 
     /**
@@ -506,8 +507,9 @@ public interface RandomDataInput extends RandomCommon {
      * @throws IllegalStateException    if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8Limited(
-            long offset, @NotNull ACS sb, int maxUtf8Len)
+    default <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset,
+                                                                         final @NotNull ACS sb,
+                                                                         final int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             IllegalStateException {
         AppendableUtil.setLength(sb, 0);
