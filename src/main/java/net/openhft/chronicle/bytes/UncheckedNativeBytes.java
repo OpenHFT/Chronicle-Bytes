@@ -63,9 +63,9 @@ public class UncheckedNativeBytes<Underlying>
         this.bytesStore = underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
-        writeLimit = underlyingBytes.writeLimit();
         readPosition = underlyingBytes.readPosition();
         capacity = bytesStore.realCapacity();
+        writeLimit = Math.min(capacity, underlyingBytes.writeLimit());
     }
 
     @Override

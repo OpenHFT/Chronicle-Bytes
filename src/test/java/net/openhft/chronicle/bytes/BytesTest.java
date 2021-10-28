@@ -59,10 +59,10 @@ public class BytesTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
+                {"Native Unchecked", NATIVE_UNCHECKED},
                 {"Native", NATIVE},
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
-                {"Native Unchecked", NATIVE_UNCHECKED},
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED}
         });
@@ -1008,10 +1008,10 @@ public class BytesTest extends BytesTestCommon {
         assertEquals(0x80, bytes.readUnsignedByte());
     }
 
-    //    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
+        assumeTrue(bytes.isElastic());
         assertEquals(bytes.capacity(), bytes.writeLimit());
     }
 

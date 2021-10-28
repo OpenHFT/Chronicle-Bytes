@@ -185,10 +185,9 @@ public class NativeBytes<Underlying>
             throws IllegalArgumentException, IllegalStateException {
         try {
             assert desiredCapacity >= 0;
-            final long wp = writePosition();
-            writeCheckOffset(wp, desiredCapacity - wp);
+            writeCheckOffset(desiredCapacity, 0);
         } catch (BufferOverflowException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + desiredCapacity + " limit: " + capacity());
+            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
             iae.printStackTrace();
             throw iae;
         }

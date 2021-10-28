@@ -47,6 +47,8 @@ public class UncheckedBytes<Underlying>
                 Math.min(underlyingBytes.writeLimit(), underlyingBytes.realCapacity()));
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
+        if (writeLimit > capacity())
+            writeLimit(capacity());
     }
 
     public void setBytes(@NotNull Bytes bytes)
