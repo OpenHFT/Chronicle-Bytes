@@ -38,7 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes
@@ -63,7 +63,7 @@ public class HexDumpBytes
         }
     }
 
-    HexDumpBytes(@NotNull BytesStore base, Bytes text) {
+    HexDumpBytes(@NotNull(exception = NullPointerException.class) BytesStore base, Bytes text) {
         try {
             this.base = Bytes.allocateElasticDirect(256);
             this.base.write(base);
@@ -73,7 +73,7 @@ public class HexDumpBytes
         }
     }
 
-    public static HexDumpBytes fromText(@NotNull Reader reader)
+    public static HexDumpBytes fromText(@NotNull(exception = NullPointerException.class) Reader reader)
             throws NumberFormatException {
         HexDumpBytes tb = new HexDumpBytes();
         Reader reader2 = new TextBytesReader(reader, tb.text);
@@ -90,12 +90,12 @@ public class HexDumpBytes
         return tb;
     }
 
-    public static HexDumpBytes fromText(@NotNull CharSequence text)
+    public static HexDumpBytes fromText(@NotNull(exception = NullPointerException.class) CharSequence text)
             throws NumberFormatException {
         return fromText(new StringReader(text.toString()));
     }
 
-    private static boolean startsWith(@NotNull CharSequence comment, char first) {
+    private static boolean startsWith(@NotNull(exception = NullPointerException.class) CharSequence comment, char first) {
         return comment.length() > 0 && comment.charAt(0) == first;
     }
 
@@ -474,33 +474,33 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length) {
-        checkNonNull(bytes);
+    public Bytes<Void> write(long offsetInRDO, @NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length) {
+        requireNonNull(bytes);
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
-        checkNonNull(bytes);
+    public void write(long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length) {
+        requireNonNull(bytes);
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes<Void> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length) {
-        checkNonNull(bytes);
+    public Bytes<Void> write(long writeOffset, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length) {
+        requireNonNull(bytes);
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long write8bit(long position, @NotNull BytesStore bs) {
-        checkNonNull(bs);
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
+        requireNonNull(bs);
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long write8bit(long position, @NotNull String s, int start, int length) {
-        checkNonNull(s);
+    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+        requireNonNull(s);
         throw new UnsupportedOperationException();
     }
 
@@ -667,13 +667,13 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void readWithLength(long length, @NotNull BytesOut<Void> bytesOut)
+    public void readWithLength(long length, @NotNull(exception = NullPointerException.class) BytesOut<Void> bytesOut)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
         base.readWithLength(length, bytesOut);
     }
 
     @Override
-    public <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> clazz, @Nullable T using)
+    public <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull(exception = NullPointerException.class) Class<T> clazz, @Nullable T using)
             throws BufferUnderflowException, IllegalStateException {
         return base.readMarshallableLength16(clazz, using);
     }
@@ -695,14 +695,14 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
+    public void readWithLength0(long length, @NotNull(exception = NullPointerException.class) ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         base.readWithLength0(length, bytesConsumer, sb, toBytes);
 
     }
 
     @Override
-    public void readWithLength(long length, @NotNull ThrowingConsumer<Bytes<Void>, IORuntimeException> bytesConsumer)
+    public void readWithLength(long length, @NotNull(exception = NullPointerException.class) ThrowingConsumer<Bytes<Void>, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         base.readWithLength(length, bytesConsumer);
 
@@ -767,19 +767,19 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull ACS sb)
+    public <ACS extends Appendable & CharSequence> boolean readUtf8(@NotNull(exception = NullPointerException.class) ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.readUtf8(sb);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
+    public <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull(exception = NullPointerException.class) ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         return base.readUtf8(offset, sb);
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset, @NotNull ACS sb, int maxUtf8Len)
+    public <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset, @NotNull(exception = NullPointerException.class) ACS sb, int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException {
         return base.readUtf8Limited(offset, sb, maxUtf8Len);
     }
@@ -790,63 +790,63 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
-    public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull ACS sb)
+    public <ACS extends Appendable & CharSequence> boolean readUTFΔ(@NotNull(exception = NullPointerException.class) ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.readUtf8(sb);
 
     }
 
     @Override
-    public boolean read8bit(@NotNull Bytes b)
+    public boolean read8bit(@NotNull(exception = NullPointerException.class) Bytes b)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
         return base.read8bit(b);
 
     }
 
     @Override
-    public <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull ACS sb)
+    public <ACS extends Appendable & CharSequence> boolean read8bit(@NotNull(exception = NullPointerException.class) ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.read8bit(sb);
 
     }
 
     @Override
-    public boolean read8bit(@NotNull StringBuilder sb)
+    public boolean read8bit(@NotNull(exception = NullPointerException.class) StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         return base.read8bit(sb);
 
     }
 
     @Override
-    public int read(@NotNull byte[] bytes)
+    public int read(@NotNull(exception = NullPointerException.class) byte[] bytes)
             throws IllegalStateException, BufferUnderflowException {
         return base.read(bytes);
 
     }
 
     @Override
-    public int read(@NotNull byte[] bytes, int off, int len)
+    public int read(@NotNull(exception = NullPointerException.class) byte[] bytes, int off, int len)
             throws IllegalStateException, BufferUnderflowException {
         return base.read(bytes, off, len);
 
     }
 
     @Override
-    public int read(@NotNull char[] bytes, int off, int len)
+    public int read(@NotNull(exception = NullPointerException.class) char[] bytes, int off, int len)
             throws IllegalStateException {
         return base.read(bytes, off, len);
 
     }
 
     @Override
-    public void read(@NotNull ByteBuffer buffer)
+    public void read(@NotNull(exception = NullPointerException.class) ByteBuffer buffer)
             throws IllegalStateException {
         base.read(buffer);
 
     }
 
     @Override
-    public void read(@NotNull Bytes bytes, int length)
+    public void read(@NotNull(exception = NullPointerException.class) Bytes bytes, int length)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
         base.read(bytes, length);
 
@@ -854,14 +854,14 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
+    public <E extends Enum<E>> E readEnum(@NotNull(exception = NullPointerException.class) Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         return base.readEnum(eClass);
 
     }
 
     @Override
-    public void readHistogram(@NotNull Histogram histogram)
+    public void readHistogram(@NotNull(exception = NullPointerException.class) Histogram histogram)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         base.readHistogram(histogram);
 
@@ -1103,7 +1103,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @Override
     @NotNull
-    public Bytes<Void> write(@NotNull byte[] bytes, int offset, int length)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1117,7 +1117,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @Override
     @NotNull
-    public Bytes<Void> writeSome(ByteBuffer buffer)
+    public Bytes<Void> writeSome(@NotNull(exception = NullPointerException.class) ByteBuffer buffer)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
@@ -1295,7 +1295,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void writeMarshallableLength16(@NotNull WriteBytesMarshallable marshallable)
+    public void writeMarshallableLength16(@NotNull(exception = NullPointerException.class) WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1306,7 +1306,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public Bytes write(@NotNull InputStream inputStream)
+    public Bytes write(@NotNull(exception = NullPointerException.class) InputStream inputStream)
             throws IOException, IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1376,7 +1376,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> writeUtf8(@Nullable CharSequence text)
+    public Bytes<Void> writeUtf8(@NotNull(exception = NullPointerException.class) CharSequence text)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
@@ -1407,6 +1407,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
+    @Deprecated(/* for removal in x.23, appears to be removed from other Bytes implementations */)
     public Bytes<Void> writeUTFΔ(CharSequence cs)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         long pos = base.writePosition();
@@ -1421,7 +1422,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@Nullable CharSequence text)
+    public Bytes<Void> write8bit(@NotNull(exception = NullPointerException.class) CharSequence text)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1435,7 +1436,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@NotNull CharSequence text, int start, int length)
+    public Bytes<Void> write8bit(@NotNull(exception = NullPointerException.class) CharSequence text, int start, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1449,7 +1450,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@NotNull String text, int start, int length)
+    public Bytes<Void> write8bit(@NotNull(exception = NullPointerException.class) String text, int start, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1463,7 +1464,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull CharSequence text)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) CharSequence text)
             throws BufferOverflowException, IllegalStateException, IndexOutOfBoundsException {
         long pos = base.writePosition();
         try {
@@ -1476,7 +1477,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull CharSequence text, int startText, int length)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) CharSequence text, int startText, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1489,7 +1490,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@Nullable String s)
+    public Bytes<Void> write8bit(@NotNull(exception = NullPointerException.class) String s)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1501,7 +1502,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
-    public Bytes<Void> write8bit(@Nullable BytesStore bs)
+    public Bytes<Void> write8bit(@NotNull(exception = NullPointerException.class) BytesStore bs)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
@@ -1594,7 +1595,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull RandomDataInput bytes)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes)
             throws IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1607,7 +1608,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) BytesStore bytes)
             throws IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1621,7 +1622,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> writeSome(@NotNull Bytes bytes)
+    public Bytes<Void> writeSome(@NotNull(exception = NullPointerException.class) Bytes bytes)
             throws IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1635,7 +1636,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
@@ -1649,7 +1650,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
@@ -1663,7 +1664,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull byte[] byteArray)
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) byte[] byteArray)
             throws BufferOverflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1690,7 +1691,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public <E extends Enum<E>> Bytes<Void> writeEnum(@NotNull E e)
+    public <E extends Enum<E>> Bytes<Void> writeEnum(@NotNull(exception = NullPointerException.class) E e)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1710,7 +1711,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void writeHistogram(@NotNull Histogram histogram)
+    public void writeHistogram(@NotNull(exception = NullPointerException.class) Histogram histogram)
             throws IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1721,7 +1722,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void writeBigDecimal(@NotNull BigDecimal bd)
+    public void writeBigDecimal(@NotNull(exception = NullPointerException.class) BigDecimal bd)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1732,7 +1733,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void writeBigInteger(@NotNull BigInteger bi)
+    public void writeBigInteger(@NotNull(exception = NullPointerException.class) BigInteger bi)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1743,7 +1744,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @Override
-    public void writeWithLength(@NotNull RandomDataInput bytes)
+    public void writeWithLength(@NotNull(exception = NullPointerException.class) RandomDataInput bytes)
             throws IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1763,7 +1764,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         }
 
         @Override
-        public int read(@NotNull char[] cbuf, int off, int len)
+        public int read(@NotNull(exception = NullPointerException.class) char[] cbuf, int off, int len)
                 throws IOException {
             int len2 = reader.read(cbuf, off, len);
             base.append(new String(cbuf, off, len)); // TODO Optimise

@@ -74,11 +74,12 @@ final class BytesJavaDocComplianceTest {
 /*
         try {
             final File file = File.createTempFile("mapped-file", "bin");
-            MappedBytes.singleMappedBytes(file, SIZE)
-                .write(0L, (byte[]) null, 0, 0);
+            MappedBytes.mappedBytes(file, SIZE)
+                .write8bit(0L, (BytesStore) null);
         } catch (IOException ioException) {
             Jvm.rethrow(ioException);
-        }*/
+        }
+*/
 
 /*        try {
             Bytes.allocateDirect(SIZE)
@@ -86,25 +87,37 @@ final class BytesJavaDocComplianceTest {
         } catch (Exception e) {
             throw new RuntimeException(e);
         }*/
+/*
+        Bytes.allocateElasticOnHeap(SIZE)
+                .write8bit(0L, (BytesStore) null);
 
-        /*Bytes.allocateDirect(SIZE)
-                .write(0L, (byte[]) null, 0, 0);*/
+        Bytes.allocateDirect(SIZE)
+                .writeSome((Bytes) null);*/
 
     }
 
+    // Todo: initialize a Map with capacity, start, stop etc. and then assert that they are not changed in any null/-1 operation
+
+    // Todo: Do some write operations so that we know we have content then try operations
+
+    // Todo: Create with NativeBytes.setNewGuarded
 
     @TestFactory
     Stream<DynamicTest> nonNullableOperators() {
         return provideBytesObjects()
                 .flatMap(arguments -> provideThrowsMullPointerExceptionOperations()
-                        .map(operation -> dynamicTest(arguments.get()[2].toString() + "->" + arguments.get()[0].getClass().getSimpleName() + "." + operation.name(), () -> {
-                                            @SuppressWarnings("unchecked") final Bytes<Object> bytes = (Bytes<Object>) arguments.get()[0];
-                                            assertThrows(IllegalArgumentException.class, () -> operation.accept(bytes));
-                                            if (Boolean.FALSE.equals(arguments.get()[2])) {
-                                                assertNeverWrittenTo(bytes);
+                        .map(operation -> {
+                                    final String name = arguments.get()[2].toString() + "->" + arguments.get()[0].getClass().getSimpleName() + "." + operation.name();
+                                    return dynamicTest(name, () -> {
+                                                @SuppressWarnings("unchecked") final Bytes<Object> bytes = (Bytes<Object>) arguments.get()[0];
+                                                // System.out.println(name);
+                                                assertThrows(NullPointerException.class, () -> operation.accept(bytes), name);
+                                                if (Boolean.FALSE.equals(arguments.get()[2])) {
+                                                    assertNeverWrittenTo(bytes);
+                                                }
                                             }
-                                        }
-                                )
+                                    );
+                                }
                         )
                 );
     }
@@ -141,7 +154,6 @@ final class BytesJavaDocComplianceTest {
     private static Stream<NamedConsumer<Bytes<Object>>> provideThrowsMullPointerExceptionOperations() {
         return Stream.of(
                 // Write operations with reference parameters
-                NamedConsumer.of(bytes -> bytes.write((CharSequence) null), "write(CharSequence)"),
                 NamedConsumer.ofThrowing(bytes -> bytes.write((InputStream) null), "write(InputStream)"),
                 NamedConsumer.of(bytes -> bytes.writeMarshallableLength16(null), "writeMarshallableLength16()"),
                 NamedConsumer.of(bytes -> bytes.write(0L, (byte[]) null, 0, 0), "write(long, byte[], int, int)"),
@@ -164,7 +176,7 @@ final class BytesJavaDocComplianceTest {
                 NamedConsumer.of(bytes -> bytes.write8bit(0L, (String) null, 0, 0), "write8bit(long, String, int, int)"),
                 NamedConsumer.of(bytes -> bytes.writeBigDecimal(null), "writeBigDecimal()"),
                 NamedConsumer.of(bytes -> bytes.writeBigInteger(null), "writeBigInteger()"),
-                NamedConsumer.of(bytes -> bytes.writeBigInteger(null), "writeBigInteger()"),
+                NamedConsumer.of(bytes -> bytes.writeHistogram(null), "writeHistogram()"),
                 NamedConsumer.of(bytes -> bytes.writeSome((Bytes<?>) null), "writeSome(Bytes)"),
                 NamedConsumer.of(bytes -> bytes.writeSome((ByteBuffer) null), "writeSome(ByteBuffer)"),
                 NamedConsumer.of(bytes -> bytes.writeEnum((MyEnum) null), "writeEnum()")

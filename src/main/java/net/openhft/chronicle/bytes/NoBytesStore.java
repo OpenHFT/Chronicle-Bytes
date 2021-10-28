@@ -27,8 +27,10 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
- * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStire with space)
+ * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {
@@ -163,6 +165,7 @@ public enum NoBytesStore implements BytesStore {
     @NotNull
     @Override
     public RandomDataOutput write(long offsetInRDO, byte[] bytes, int offset, int length) {
+        requireNonNull(bytes);
         if (length != 0)
             throw new UnsupportedOperationException();
         return this;
@@ -170,6 +173,7 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
+        requireNonNull(bytes);
         if (length != 0)
             throw new UnsupportedOperationException();
     }
@@ -177,6 +181,7 @@ public enum NoBytesStore implements BytesStore {
     @NotNull
     @Override
     public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
+        requireNonNull(bytes);
         if (length != 0)
             throw new UnsupportedOperationException();
         return this;
@@ -278,7 +283,8 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store) {
+    public long copyTo(@NotNull(exception = NullPointerException.class) BytesStore store) {
+        requireNonNull(store);
         // nothing to copy.
         return 0L;
     }
@@ -290,11 +296,13 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
+        requireNonNull(bs);
         throw new BufferOverflowException();
     }
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+        requireNonNull(s);
         throw new BufferOverflowException();
     }
 
@@ -319,7 +327,8 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore, long length) {
+        requireNonNull(bytesStore);
         return length == 0;
     }
 

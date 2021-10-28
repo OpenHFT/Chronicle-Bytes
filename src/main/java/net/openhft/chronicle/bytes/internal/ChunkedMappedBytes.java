@@ -33,7 +33,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -44,12 +44,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
-    public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
+    public ChunkedMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile)
             throws IllegalStateException {
         this(mappedFile, "");
     }
 
-    protected ChunkedMappedBytes(@NotNull final MappedFile mappedFile, final String name)
+    protected ChunkedMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);
     }
@@ -59,7 +59,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                                              int offset,
                                              final int length)
             throws IllegalStateException, BufferOverflowException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -97,11 +97,11 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull ChunkedMappedBytes write(final long writeOffset,
-                                             @NotNull final RandomDataInput bytes,
+                                             @NotNull(exception = NullPointerException.class) final RandomDataInput bytes,
                                              long readOffset,
                                              final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = writeOffset;
@@ -403,11 +403,11 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull final BytesStore bytes,
+    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) final BytesStore bytes,
                              final long offset,
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         if (length == 8) {
@@ -554,9 +554,9 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
+    public Bytes<Void> appendUtf8(@NotNull(exception = NullPointerException.class) char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        checkNonNull(chars);
+        requireNonNull(chars);
         throwExceptionIfClosed();
 
         if (writePosition() < 0 || writePosition() > capacity() - 1L + length)

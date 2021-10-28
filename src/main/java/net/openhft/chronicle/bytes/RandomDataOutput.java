@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
@@ -271,9 +272,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * Copies whole byte[] into this. See {@link #write(long, byte[], int, int)}
      */
     @NotNull
-    default R write(long offsetInRDO, @NotNull byte[] bytes)
+    default R write(long offsetInRDO, @NotNull(exception = NullPointerException.class) byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         return write(offsetInRDO, bytes, 0, bytes.length);
     }
 
@@ -291,7 +292,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException
      */
     @NotNull
-    R write(long writeOffset, @NotNull byte[] bytes, int readOffset, int length)
+    R write(long writeOffset, @NotNull(exception = NullPointerException.class) byte[] bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -307,16 +308,16 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException
      * @throws IllegalStateException
      */
-    void write(long writeOffset, @NotNull ByteBuffer bytes, int readOffset, int length)
+    void write(long writeOffset, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int readOffset, int length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
      * Copies whole BytesStore into this - see {@link #write(long, RandomDataInput, long, long)}
      */
     @NotNull
-    default R write(long offsetInRDO, @NotNull BytesStore bytes)
+    default R write(long offsetInRDO, @NotNull(exception = NullPointerException.class) BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         try {
             return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
 
@@ -337,7 +338,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException
      */
     @NotNull
-    R write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
+    R write(long writeOffset, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException;
 
     /**
@@ -425,8 +426,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param bs       to copy.
      * @return the offset after the char sequence written, in this {@code RandomDataOutput}
      */
-    long write8bit(long position, @NotNull BytesStore bs);
+    long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs);
 
-    long write8bit(long position, @NotNull String s, int start, int length);
+    long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length);
 
 }

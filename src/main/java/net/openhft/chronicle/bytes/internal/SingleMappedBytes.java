@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -43,12 +43,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 public class SingleMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
-    public SingleMappedBytes(@NotNull final MappedFile mappedFile)
+    public SingleMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile)
             throws IllegalStateException {
         this(mappedFile, "");
     }
 
-    protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
+    protected SingleMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);
 
@@ -62,11 +62,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
-                                            @NotNull final byte[] bytes,
+                                            @NotNull(exception = NullPointerException.class) final byte[] bytes,
                                             int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -100,11 +100,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long writeOffset,
-                                            @NotNull final RandomDataInput bytes,
+                                            @NotNull(exception = NullPointerException.class) final RandomDataInput bytes,
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = writeOffset;

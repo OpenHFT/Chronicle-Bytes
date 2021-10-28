@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
@@ -45,13 +45,13 @@ public class NativeBytes<Underlying>
     private static boolean s_newGuarded = BYTES_GUARDED;
     private long capacity;
 
-    public NativeBytes(@NotNull final BytesStore store, final long capacity)
+    public NativeBytes(@NotNull(exception = NullPointerException.class) final BytesStore store, final long capacity)
             throws IllegalStateException, IllegalArgumentException {
         super(store, 0, capacity);
         this.capacity = capacity;
     }
 
-    public NativeBytes(@NotNull final BytesStore store)
+    public NativeBytes(@NotNull(exception = NullPointerException.class) final BytesStore store)
             throws IllegalStateException, IllegalArgumentException {
         super(store, 0, store.capacity());
         capacity = store.capacity();
@@ -110,7 +110,7 @@ public class NativeBytes<Underlying>
         }
     }
 
-    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes bytes)
+    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull(exception = NullPointerException.class) final Bytes bytes)
             throws IllegalStateException {
         final long remaining = bytes.readRemaining();
 
@@ -129,14 +129,15 @@ public class NativeBytes<Underlying>
     }
 
     @NotNull
-    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity)
+    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull(exception = NullPointerException.class) final BytesStore<?, T> bs, long capacity)
             throws IllegalStateException, IllegalArgumentException {
+        requireNonNull(bs);
         return s_newGuarded
                 ? new GuardedNativeBytes(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
     }
 
-    protected static <T> long maxCapacityFor(@NotNull BytesStore<?, T> bs) {
+    protected static <T> long maxCapacityFor(@NotNull(exception = NullPointerException.class) BytesStore<?, T> bs) {
         return bs.underlyingObject() instanceof ByteBuffer
                 || bs.underlyingObject() instanceof byte[]
                 ? MAX_HEAP_CAPACITY
@@ -296,14 +297,15 @@ public class NativeBytes<Underlying>
     }
 
     @Override
-    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    protected void bytesStore(@NotNull(exception = NullPointerException.class) BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+    public void bytesStore(@NotNull(exception = NullPointerException.class) BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+        requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
         super.bytesStore(byteStore, offset, length);
@@ -320,9 +322,9 @@ public class NativeBytes<Underlying>
 
     @Override
     @NotNull
-    public NativeBytes writeSome(@NotNull final Bytes bytes)
+    public NativeBytes writeSome(@NotNull(exception = NullPointerException.class) final Bytes bytes)
             throws IllegalStateException {
-        checkNonNull(bytes);
+        requireNonNull(bytes);
         ReportUnoptimised.reportOnce();
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());

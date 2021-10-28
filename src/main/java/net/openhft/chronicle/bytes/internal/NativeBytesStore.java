@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<Underlying>
@@ -67,11 +68,11 @@ public class NativeBytesStore<Underlying>
         finalizer = null;
     }
 
-    private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
+    private NativeBytesStore(@NotNull(exception = NullPointerException.class) ByteBuffer bb, boolean elastic) {
         this(bb, elastic, Bytes.MAX_HEAP_CAPACITY);
     }
 
-    public NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic, int maximumLimit) {
+    public NativeBytesStore(@NotNull(exception = NullPointerException.class) ByteBuffer bb, boolean elastic, int maximumLimit) {
         this();
         init(bb, elastic);
         this.maximumLimit = elastic ? maximumLimit : Math.min(limit, maximumLimit);
@@ -107,7 +108,7 @@ public class NativeBytesStore<Underlying>
      * @return BytesStore
      */
     @NotNull
-    public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
+    public static NativeBytesStore<ByteBuffer> wrap(@NotNull(exception = NullPointerException.class) ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
     }
 
@@ -165,12 +166,12 @@ public class NativeBytesStore<Underlying>
     }
 
     @NotNull
-    public static NativeBytesStore from(@NotNull String text) {
+    public static NativeBytesStore from(@NotNull(exception = NullPointerException.class) String text) {
         return from(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     @NotNull
-    public static NativeBytesStore from(@NotNull byte[] bytes) {
+    public static NativeBytesStore from(@NotNull(exception = NullPointerException.class) byte[] bytes) {
         try {
             @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
             Bytes<byte[]> bytes2 = Bytes.wrapForRead(bytes);
@@ -193,7 +194,7 @@ public class NativeBytesStore<Underlying>
     }
 
     // Used in Chronicle Map
-    public void init(@NotNull ByteBuffer bb, boolean elastic) {
+    public void init(@NotNull(exception = NullPointerException.class) ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (Underlying) bb;
         setAddress(Jvm.address(bb));
@@ -515,13 +516,14 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
         return this;
     }
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
             throws IllegalStateException {
         if (bytes.isDirect()) {
             memoryCopyMemory(Jvm.address(bytes) + offset, address + translate(offsetInRDO), length);
@@ -534,7 +536,7 @@ public class NativeBytesStore<Underlying>
     @NotNull
     @Override
     public NativeBytesStore<Underlying> write(
-            long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
+            long writeOffset, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         if (bytes.isDirectMemory()) {
             memoryCopyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
@@ -544,7 +546,7 @@ public class NativeBytesStore<Underlying>
         return this;
     }
 
-    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+    public void write0(long offsetInRDO, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8) {
@@ -627,8 +629,8 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
-        long addressForWrite = addressForWrite(position);
         final long length = bs.readRemaining();
+        long addressForWrite = addressForWrite(position);
 
         addressForWrite = BytesUtil.writeStopBit(addressForWrite, length);
 
@@ -646,12 +648,14 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+        requireNonNull(s);
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.copy8bit(s, start, length, addressForWrite(position));
         return position + length;
     }
 
     private void copy8bit(byte[] arr, long readPosition, long addressForWrite, long readRemaining) {
+        requireNonNull(arr);
         int readOffset = Math.toIntExact(readPosition);
         int length = Math.toIntExact(readRemaining);
         MEMORY.copyMemory(arr, readOffset, addressForWrite, length);
@@ -696,6 +700,7 @@ public class NativeBytesStore<Underlying>
 
     public long appendUtf8(long pos, char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(chars);
         if (pos + length > realCapacity())
             throw new BufferOverflowException();
 
@@ -750,7 +755,7 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store)
+    public long copyTo(@NotNull(exception = NullPointerException.class) BytesStore store)
             throws IllegalStateException {
         if (store.isDirectMemory())
             return copyToDirect(store);
@@ -758,7 +763,7 @@ public class NativeBytesStore<Underlying>
             return super.copyTo(store);
     }
 
-    public long copyToDirect(@NotNull BytesStore store)
+    public long copyToDirect(@NotNull(exception = NullPointerException.class) BytesStore store)
             throws IllegalStateException {
         long toCopy = Math.min(limit, store.safeLimit());
         if (toCopy > 0) {
@@ -823,6 +828,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+        requireNonNull(bytes);
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
         int i;
         final long address = this.address + translate(offsetInRDI);

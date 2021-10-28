@@ -79,6 +79,9 @@ public class Bytes3Test extends BytesTestCommon {
     @Test
     public void byteOrder() {
         final Bytes<?> bytes = supplier.get();
+
+        System.out.println("Byte order for " + bytes.getClass().getSimpleName() + " is " + bytes.byteOrder());
+
         assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
     }
 

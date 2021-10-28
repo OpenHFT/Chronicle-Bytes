@@ -29,6 +29,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * BytesStore to wrap memory mapped data.
  * <p>
@@ -286,6 +288,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public MappedBytesStore write(long offsetInRDO, @NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         writeCheck.run();
         super.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -294,6 +297,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public void write(long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         writeCheck.run();
         super.write(offsetInRDO, bytes, offset, length);
     }
@@ -302,6 +306,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public MappedBytesStore write(long writeOffset, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         writeCheck.run();
         super.write(writeOffset, bytes, readOffset, length);
         return this;
@@ -310,6 +315,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public void write0(long offsetInRDO, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         writeCheck.run();
         super.write0(offsetInRDO, bytes, offset, length);
     }

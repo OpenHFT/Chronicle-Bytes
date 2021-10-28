@@ -54,19 +54,19 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull final String filename, final long capacity)
+    public static MappedBytes singleMappedBytes(@NotNull(exception = NullPointerException.class) final String filename, final long capacity)
             throws FileNotFoundException, IllegalStateException {
         return singleMappedBytes(new File(filename), capacity);
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull final File file, final long capacity)
+    public static MappedBytes singleMappedBytes(@NotNull(exception = NullPointerException.class) final File file, final long capacity)
             throws FileNotFoundException, IllegalStateException {
         return singleMappedBytes(file, capacity, true);
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull final File file, final long capacity, boolean readOnly)
+    public static MappedBytes singleMappedBytes(@NotNull(exception = NullPointerException.class) final File file, final long capacity, boolean readOnly)
             throws FileNotFoundException, IllegalStateException {
         final MappedFile rw = MappedFile.ofSingle(file, capacity, false);
         try {
@@ -77,19 +77,19 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final String filename, final long chunkSize)
+    public static MappedBytes mappedBytes(@NotNull(exception = NullPointerException.class) final String filename, final long chunkSize)
             throws FileNotFoundException, IllegalStateException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final File file, final long chunkSize)
+    public static MappedBytes mappedBytes(@NotNull(exception = NullPointerException.class) final File file, final long chunkSize)
             throws FileNotFoundException, IllegalStateException {
         return mappedBytes(file, chunkSize, OS.pageSize());
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final File file, final long chunkSize, final long overlapSize)
+    public static MappedBytes mappedBytes(@NotNull(exception = NullPointerException.class) final File file, final long chunkSize, final long overlapSize)
             throws FileNotFoundException, IllegalStateException {
         final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
         try {
@@ -100,7 +100,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final File file,
+    public static MappedBytes mappedBytes(@NotNull(exception = NullPointerException.class) final File file,
                                           final long chunkSize,
                                           final long overlapSize,
                                           final boolean readOnly)
@@ -115,13 +115,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final MappedFile rw)
+    public static MappedBytes mappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile rw)
             throws IllegalStateException {
         return rw.createBytesFor();
     }
 
     @NotNull
-    public static MappedBytes readOnly(@NotNull final File file)
+    public static MappedBytes readOnly(@NotNull(exception = NullPointerException.class) final File file)
             throws FileNotFoundException {
         MappedFile mappedFile = MappedFile.readOnly(file);
         try {

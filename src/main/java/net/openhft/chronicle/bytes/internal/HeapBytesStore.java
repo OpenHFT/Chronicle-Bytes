@@ -30,6 +30,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * Wrapper for Heap ByteBuffers and arrays.
  */
@@ -281,6 +283,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
+        requireNonNull(bs);
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);
         int i = 0;
@@ -293,6 +296,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+        requireNonNull(s);
         try {
             throwExceptionIfReleased();
             position = BytesInternal.writeStopBit(this, position, length);
@@ -471,6 +475,7 @@ public class HeapBytesStore<Underlying>
     public HeapBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
+        requireNonNull(bytes);
         try {
             memory.copyMemory(
                     bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
@@ -483,7 +488,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
         try {
             assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
@@ -504,8 +509,9 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public HeapBytesStore<Underlying> write(long writeOffset,
-                                            @NotNull RandomDataInput bytes, long readOffset, long length)
+                                            @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
+        requireNonNull(bytes);
         if (length == (int) length) {
             int length0 = (int) length;
 
@@ -525,8 +531,9 @@ public class HeapBytesStore<Underlying>
     }
 
     private void writeLongLength(long writeOffset,
-                                 @NotNull RandomDataInput bytes, long readOffset, long length)
+                                 @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
+        requireNonNull(bytes);
         long i;
         for (i = 0; i < length - 7; i += 8) {
             long x = bytes.readLong(readOffset + i);
