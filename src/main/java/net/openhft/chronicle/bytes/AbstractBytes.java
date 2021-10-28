@@ -276,7 +276,7 @@ public abstract class AbstractBytes<Underlying>
 
         if (position < readPosition())
             this.readPosition = position;
-
+        ensureCapacity(position);
         uncheckedWritePosition(position);
         return this;
     }
@@ -1018,6 +1018,29 @@ public abstract class AbstractBytes<Underlying>
         bytesStore.writeDouble(offset, d);
         bytesStore.writeInt(offset + 8, i);
         return this;
+    }
+
+    @Override
+    public int read(@NotNull byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
+        long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        final int totalToCopy = (int) Math.min(len, remaining);
+        int remainingToCopy = totalToCopy;
+        int currentOffset = off;
+        while (remainingToCopy > 0) {
+            int currentBatchSize = Math.min(remainingToCopy, safeCopySize());
+            long offsetInRDO = readOffsetPositionMoved(currentBatchSize);
+            bytesStore.read(offsetInRDO, bytes, currentOffset, currentBatchSize);
+            currentOffset += currentBatchSize;
+            remainingToCopy -= currentBatchSize;
+        }
+        return totalToCopy;
+    }
+
+    @Override
+    public long read(long offsetInRDI, byte[] bytes, int offset, int length) throws IllegalStateException {
+        return bytesStore.read(offsetInRDI, bytes, offset, length);
     }
 
     @NotNull

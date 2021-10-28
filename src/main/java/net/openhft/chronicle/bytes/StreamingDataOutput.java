@@ -347,6 +347,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Write all data or fail.
+     * <p>
+     * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
     default S write(@NotNull RandomDataInput bytes)
@@ -365,6 +367,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Writes all the the passed BytesStore or it fails.
      * If you want to read only as much as there is use read
+     * <p>
+     * Calling this method will update the cursors of this, but not the bytes we read from.
      *
      * @param bytes to write
      * @return this
@@ -393,6 +397,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return false;
     }
 
+    /**
+     * Write all data available from bytes argument, constrained by how much space available in this.
+     * <p>
+     * Calling this method will update the cursors of this, but not the bytes we read from.
+     */
     @NotNull
     default S writeSome(@NotNull Bytes bytes)
             throws IllegalStateException {
@@ -416,26 +425,35 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Write all data or fail.
+     * <p>
+     * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull RandomDataInput bytes, long offset, long length)
+    default S write(@NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        BytesInternal.writeFully(bytes, offset, length, this);
+        BytesInternal.writeFully(bytes, readOffset, length, this);
         return (S) this;
     }
 
     /**
      * Write all data or fail.
+     * <p>
+     * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull BytesStore bytes, long offset, long length)
+    default S write(@NotNull BytesStore bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         if (length + writePosition() > capacity())
             throw new DecoratedBufferOverflowException("Cannot write " + length + " bytes as position is " + writePosition() + " and capacity is " + capacity());
-        BytesInternal.writeFully(bytes, offset, length, this);
+        BytesInternal.writeFully(bytes, readOffset, length, this);
         return (S) this;
     }
 
+    /**
+     * Write all data or fail.
+     * <p>
+     * Calling this method will update the cursors of this.
+     */
     @NotNull
     default S write(@NotNull byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
@@ -449,6 +467,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     /**
      * Write all data or fail.
+     * <p>
+     * Calling this method will update the cursors of this.
      */
     @NotNull
     S write(byte[] bytes, int offset, int length)
@@ -489,6 +509,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
+    /**
+     * Write all data available from buffer, constrained by how much space available in this.
+     * <p>
+     * Calling this method will update the cursors of this.
+     */
     @NotNull
     S writeSome(ByteBuffer buffer)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException;

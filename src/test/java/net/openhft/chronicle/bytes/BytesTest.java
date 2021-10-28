@@ -44,6 +44,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
@@ -65,6 +66,21 @@ public class BytesTest extends BytesTestCommon {
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED}
         });
+    }
+
+    @Test
+    public void testElastic2() {
+        Bytes bytes = alloc1.elasticBytes(2);
+        assumeTrue(bytes.isElastic());
+
+        assertFalse(bytes.realCapacity() >= 1000);
+        try {
+            bytes.writePosition(1000);
+            assertTrue(bytes.realCapacity() >= 1000);
+            assertEquals(0L, bytes.readLong());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
@@ -1019,5 +1035,18 @@ public class BytesTest extends BytesTestCommon {
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
         }
+    }
+
+    @Test
+    public void testReadWithOffset() {
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+        bytes.append("Hello");
+        int offset = 2;
+        int offsetInRDI = 1;
+        byte[] ba = new byte[bytes.length() + offset - offsetInRDI];
+        ba[0] = '0';
+        ba[1] = '1';
+        bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
+        assertEquals("01ello", new String(ba));
     }
 }

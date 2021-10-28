@@ -9,6 +9,8 @@ import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -18,16 +20,19 @@ import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesT
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
 public class BytesTestCommon {
+
+    private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
-    private Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
 
     @Before
+    @BeforeEach
     public void enableReferenceTracing() {
         AbstractReferenceCounted.enableReferenceTracing();
     }
 
     @Before
+    @BeforeEach
     public void threadDump() {
         threadDump = new ThreadDump();
     }
@@ -37,6 +42,7 @@ public class BytesTestCommon {
     }
 
     @Before
+    @BeforeEach
     public void recordExceptions() {
         exceptions = Jvm.recordExceptions();
     }
@@ -63,6 +69,7 @@ public class BytesTestCommon {
     }
 
     @After
+    @AfterEach
     public void afterChecks() {
         CleaningThread.performCleanup(Thread.currentThread());
 

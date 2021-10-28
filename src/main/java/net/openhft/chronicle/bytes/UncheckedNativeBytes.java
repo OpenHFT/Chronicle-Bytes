@@ -65,7 +65,7 @@ public class UncheckedNativeBytes<Underlying>
         writePosition = underlyingBytes.writePosition();
         writeLimit = underlyingBytes.writeLimit();
         readPosition = underlyingBytes.readPosition();
-        capacity = bytesStore.capacity();
+        capacity = bytesStore.realCapacity();
     }
 
     @Override
