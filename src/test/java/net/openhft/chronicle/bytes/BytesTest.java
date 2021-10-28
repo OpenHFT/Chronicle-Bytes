@@ -71,7 +71,7 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testElastic2() {
         Bytes bytes = alloc1.elasticBytes(2);
-        assumeTrue(bytes.capacity() >= 1000);
+        assumeTrue(bytes.isElastic());
 
         assertFalse(bytes.realCapacity() >= 1000);
         try {
