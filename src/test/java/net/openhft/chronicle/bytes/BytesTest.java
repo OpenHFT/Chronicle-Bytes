@@ -44,6 +44,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
@@ -65,6 +66,21 @@ public class BytesTest extends BytesTestCommon {
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED}
         });
+    }
+
+    @Test
+    public void testElastic2() {
+        Bytes bytes = alloc1.elasticBytes(2);
+        assumeTrue(bytes.capacity() >= 1000);
+
+        assertFalse(bytes.realCapacity() >= 1000);
+        try {
+            bytes.writePosition(1000);
+            assertTrue(bytes.realCapacity() >= 1000);
+            assertEquals(0L, bytes.readLong());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test

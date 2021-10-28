@@ -270,7 +270,7 @@ public abstract class AbstractBytes<Underlying>
 
         if (position < readPosition())
             this.readPosition = position;
-
+        ensureCapacity(position);
         uncheckedWritePosition(position);
         return this;
     }
