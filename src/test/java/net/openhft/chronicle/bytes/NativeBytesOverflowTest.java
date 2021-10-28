@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -39,6 +40,18 @@ public class NativeBytesOverflowTest {
         try {
             bytes.writeLimit(2).writePosition(0);
             bytes.writeLong(10L);
+        } finally {
+            bytes.releaseLast();
+        }
+    }
+
+    @Test
+    public void testElastic2() {
+        Bytes bytes = Bytes.elasticByteBuffer(2);
+        try {
+            bytes.writePosition(1000);
+            bytes.readLong();
+            Assert.fail("should not be able to read a long from a Bytes which does not even have 8 bytes memory allocated");
         } finally {
             bytes.releaseLast();
         }
