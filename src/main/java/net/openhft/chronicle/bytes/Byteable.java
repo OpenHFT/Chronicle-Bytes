@@ -31,9 +31,9 @@ import java.nio.channels.FileLock;
  * A reference to off heap memory is a proxy for some memory which sits outside the heap.
  *
  * @param <B> Bytes type
- * @param <U> Underlying type
+ * @param <Underlying> Underlying type
  */
-public interface Byteable<B extends BytesStore<B, U>, U> {
+public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
     /**
      * This setter for a data type which points to an underlying ByteStore.
      *
@@ -41,11 +41,11 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @param offset     the offset within the ByteStore
      * @param length     the length in the ByteStore
      */
-    void bytesStore(BytesStore<B, U> bytesStore, long offset, long length)
+    void bytesStore(BytesStore<B, Underlying> bytesStore, long offset, long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
 
     @Nullable
-    BytesStore<B, U> bytesStore();
+    BytesStore<B, Underlying> bytesStore();
 
     /**
      * @return The offset within the BytesStore (not the address)

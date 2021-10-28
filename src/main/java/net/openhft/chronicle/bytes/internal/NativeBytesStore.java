@@ -37,8 +37,8 @@ import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
-public class NativeBytesStore<U>
-        extends AbstractBytesStore<NativeBytesStore<U>, U> {
+public class NativeBytesStore<Underlying>
+        extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Field BB_ADDRESS;
     private static final Field BB_CAPACITY;
@@ -62,7 +62,7 @@ public class NativeBytesStore<U>
     private SimpleCleaner cleaner;
     private boolean elastic;
     @Nullable
-    private U underlyingObject;
+    private Underlying underlyingObject;
 
     private NativeBytesStore() {
         finalizer = null;
@@ -196,7 +196,7 @@ public class NativeBytesStore<U>
     // Used in Chronicle Map
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
-        underlyingObject = (U) bb;
+        underlyingObject = (Underlying) bb;
         setAddress(Jvm.address(bb));
         this.limit = bb.capacity();
     }
@@ -236,7 +236,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public BytesStore<NativeBytesStore<U>, U> copy()
+    public BytesStore<NativeBytesStore<Underlying>, Underlying> copy()
             throws IllegalStateException {
         try {
             if (underlyingObject == null) {
@@ -260,7 +260,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public VanillaBytes<U> bytesForWrite()
+    public VanillaBytes<Underlying> bytesForWrite()
             throws IllegalStateException {
         try {
             return elastic
@@ -283,13 +283,13 @@ public class NativeBytesStore<U>
 
     @Nullable
     @Override
-    public U underlyingObject() {
+    public Underlying underlyingObject() {
         return underlyingObject;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> zeroOut(long start, long end) {
+    public NativeBytesStore<Underlying> zeroOut(long start, long end) {
         if (end <= start)
             return this;
         if (start < start())
@@ -412,7 +412,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeByte(long offset, byte i8)
+    public NativeBytesStore<Underlying> writeByte(long offset, byte i8)
             throws IllegalStateException {
         memory.writeByte(address + translate(offset), i8);
         return this;
@@ -420,7 +420,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeShort(long offset, short i16)
+    public NativeBytesStore<Underlying> writeShort(long offset, short i16)
             throws IllegalStateException {
         memory.writeShort(address + translate(offset), i16);
         return this;
@@ -428,7 +428,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeInt(long offset, int i32)
+    public NativeBytesStore<Underlying> writeInt(long offset, int i32)
             throws IllegalStateException {
         try {
             memory.writeInt(address + translate(offset), i32);
@@ -441,7 +441,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedInt(long offset, int i)
+    public NativeBytesStore<Underlying> writeOrderedInt(long offset, int i)
             throws IllegalStateException {
         memory.writeOrderedInt(address + translate(offset), i);
         return this;
@@ -449,7 +449,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeLong(long offset, long i64)
+    public NativeBytesStore<Underlying> writeLong(long offset, long i64)
             throws IllegalStateException {
         memory.writeLong(address + translate(offset), i64);
         return this;
@@ -457,7 +457,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedLong(long offset, long i)
+    public NativeBytesStore<Underlying> writeOrderedLong(long offset, long i)
             throws IllegalStateException {
         memory.writeOrderedLong(address + translate(offset), i);
         return this;
@@ -465,7 +465,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeFloat(long offset, float f)
+    public NativeBytesStore<Underlying> writeFloat(long offset, float f)
             throws IllegalStateException {
         memory.writeFloat(address + translate(offset), f);
         return this;
@@ -473,7 +473,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeDouble(long offset, double d)
+    public NativeBytesStore<Underlying> writeDouble(long offset, double d)
             throws IllegalStateException {
         memory.writeDouble(address + translate(offset), d);
         return this;
@@ -481,7 +481,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileByte(long offset, byte i8)
+    public NativeBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
             throws IllegalStateException {
         memory.writeVolatileByte(address + translate(offset), i8);
         return this;
@@ -489,7 +489,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileShort(long offset, short i16)
+    public NativeBytesStore<Underlying> writeVolatileShort(long offset, short i16)
             throws IllegalStateException {
         memory.writeVolatileShort(address + translate(offset), i16);
         return this;
@@ -497,7 +497,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileInt(long offset, int i32)
+    public NativeBytesStore<Underlying> writeVolatileInt(long offset, int i32)
             throws IllegalStateException {
         memory.writeVolatileInt(address + translate(offset), i32);
         return this;
@@ -505,7 +505,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileLong(long offset, long i64)
+    public NativeBytesStore<Underlying> writeVolatileLong(long offset, long i64)
             throws IllegalStateException {
         memory.writeVolatileLong(address + translate(offset), i64);
         return this;
@@ -513,7 +513,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> write(
+    public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws IllegalStateException {
         memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
@@ -534,7 +534,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> write(
+    public NativeBytesStore<Underlying> write(
             long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         if (bytes.isDirectMemory()) {

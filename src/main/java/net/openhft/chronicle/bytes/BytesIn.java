@@ -26,10 +26,10 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesIn<U> extends
+public interface BytesIn<Underlying> extends
         RandomDataInput,
-        StreamingDataInput<Bytes<U>>,
-        ByteStringParser<Bytes<U>> {
+        StreamingDataInput<Bytes<Underlying>>,
+        ByteStringParser<Bytes<Underlying>> {
     /**
      * Reads messages from this tails as methods.  It returns a BooleanSupplier which returns
      *

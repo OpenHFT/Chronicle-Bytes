@@ -47,14 +47,14 @@ import java.nio.charset.StandardCharsets;
  * <p></p> Also {@code readLimit() == writePosition() && readPosition() <= safeLimit()}
  * <p></p>
  *
- * @param <U> Underlying type
+ * @param <Underlying> Underlying type
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface Bytes<U> extends
-        BytesStore<Bytes<U>, U>,
-        BytesIn<U>,
-        BytesOut<U> {
+public interface Bytes<Underlying> extends
+        BytesStore<Bytes<Underlying>, Underlying>,
+        BytesIn<Underlying>,
+        BytesOut<Underlying> {
 
     long MAX_CAPACITY = Long.MAX_VALUE & ~0xF; // 8 EiB - 16
     int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;  // 2 GiB - 16
@@ -739,12 +739,12 @@ public interface Bytes<U> extends
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
-    default Bytes<U> unchecked(boolean unchecked)
+    default Bytes<Underlying> unchecked(boolean unchecked)
             throws IllegalStateException {
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
-            Bytes<U> underlyingBytes = start() == 0 && bytesStore().isDirectMemory() ?
+            Bytes<Underlying> underlyingBytes = start() == 0 && bytesStore().isDirectMemory() ?
                     new UncheckedNativeBytes<>(this) :
                     new UncheckedBytes<>(this);
             release(INIT);
@@ -786,7 +786,7 @@ public interface Bytes<U> extends
      * @return a copy of this Bytes from position() to limit().
      */
     @Override
-    BytesStore<Bytes<U>, U> copy()
+    BytesStore<Bytes<Underlying>, Underlying> copy()
             throws IllegalStateException;
 
     @NotNull
@@ -856,7 +856,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     @Override
-    default Bytes<U> bytesForRead()
+    default Bytes<Underlying> bytesForRead()
             throws IllegalStateException {
         try {
             return isClear() ? BytesStore.super.bytesForRead() : new SubBytes<>(this, readPosition(), readLimit() + start());
@@ -883,7 +883,7 @@ public interface Bytes<U> extends
      * @return this
      */
     @NotNull
-    Bytes<U> compact()
+    Bytes<Underlying> compact()
             throws IllegalStateException;
 
     /**
@@ -997,7 +997,7 @@ public interface Bytes<U> extends
 
     @Override
     @NotNull
-    Bytes<U> clear()
+    Bytes<Underlying> clear()
             throws IllegalStateException;
 
     @Override
@@ -1005,7 +1005,7 @@ public interface Bytes<U> extends
         return bytesStore().readWrite();
     }
 
-    default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
+    default void readWithLength(long length, @NotNull BytesOut<Underlying> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         if (length > readRemaining())
             throw new BufferUnderflowException();

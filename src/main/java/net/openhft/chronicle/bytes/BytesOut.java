@@ -27,11 +27,11 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesOut<U> extends
-        StreamingDataOutput<Bytes<U>>,
-        ByteStringAppender<Bytes<U>>,
-        BytesPrepender<Bytes<U>>,
-        BytesComment<BytesOut<U>> {
+public interface BytesOut<Underlying> extends
+        StreamingDataOutput<Bytes<Underlying>>,
+        ByteStringAppender<Bytes<Underlying>>,
+        BytesPrepender<Bytes<Underlying>>,
+        BytesComment<BytesOut<Underlying>> {
 
     /**
      * Proxy an interface so each message called is written to a file for replay.
