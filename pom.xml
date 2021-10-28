@@ -296,7 +296,7 @@
         <tag>ea</tag>
     </scm>
 
-    <profiles>
+<!--    <profiles>
         <profile>
             <id>sonar</id>
             <build>
@@ -326,6 +326,6 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>-->
 
 </project>
