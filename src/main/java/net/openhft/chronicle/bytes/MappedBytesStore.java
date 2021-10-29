@@ -104,7 +104,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     public boolean inside(long offset, long buffer) {
         // this is correct that it uses the maximumLimit, yes it is different than the method above.
-        return start <= offset && offset + buffer < limit;
+        return start <= offset && offset + buffer <= limit;
     }
 
     @Override
