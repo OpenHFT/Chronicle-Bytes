@@ -48,7 +48,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     @Test
     public void testMappedFileSafeLimitTooSmall()
-            throws IOException  {
+            throws IOException {
 
         final int arraySize = 40_000;
 
@@ -250,8 +250,8 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void testLargeWrites()
             throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
-                10, 64 << 10);
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"),
+                128 << 10, 64 << 10);
 
         byte[] largeBytes = new byte[500 << 10];
         bytes.writePosition(0);

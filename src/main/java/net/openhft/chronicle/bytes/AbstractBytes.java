@@ -682,8 +682,21 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        if (this.bytesStore.inside(offsetInRDO, length)) {
+            writeCheckOffset(offsetInRDO, length);
+            bytesStore.write(offsetInRDO, bytes, offset, length);
+        } else if (bytes.remaining() <= writeRemaining()) {
+            // bounds check
+            bytes.get(offset + length - 1);
+
+            int i = 0;
+            for (; i < length - 7; i += 8)
+                writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            for (; i < length; i++)
+                writeByte(offsetInRDO + i, bytes.get(offset + i));
+        } else {
+            throw new DecoratedBufferOverflowException("Unable to write " + length + " with " + writeRemaining() + " remaining");
+        }
     }
 
     @Override
