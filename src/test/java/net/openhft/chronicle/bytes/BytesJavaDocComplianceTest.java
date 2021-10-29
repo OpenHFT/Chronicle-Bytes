@@ -24,20 +24,23 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
-    static final Map<String, BytesInitialInfo> INITIAL_INFO = new LinkedHashMap<>();
+    private static final Map<String, BytesInitialInfo> INITIAL_INFO_MAP = new LinkedHashMap<>();
 
-    @BeforeAll
-    static void beforeAll() {
+    @BeforeEach
+    void beforeEach() {
         // Build a Map with info on the initial state allowing us asserting it did not change for
         // illegal operations.
-        provideBytesObjects()
-                .forEach(args -> {
-                    final Bytes<Object> bytes = bytes(args);
-                    INITIAL_INFO.put(createCommand(args), new BytesInitialInfo(bytes(args)));
-                    releaseAndAssertReleased(bytes);
-                });
-        // Make sure we have unique keys
-        assertEquals(provideBytesObjects().count(), INITIAL_INFO.size());
+        // This method is using @BeforeEach rather than @BeforeAll so that the base class test can run
+        if (INITIAL_INFO_MAP.isEmpty()) {
+            provideBytesObjects()
+                    .forEach(args -> {
+                        final Bytes<Object> bytes = bytes(args);
+                        INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes(args)));
+                        releaseAndAssertReleased(bytes);
+                    });
+            // Make sure we have unique keys
+            assertEquals(provideBytesObjects().count(), INITIAL_INFO_MAP.size());
+        }
     }
 
     @ParameterizedTest
@@ -95,17 +98,17 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     }
 
     @Test
-        // This test is for manual debug
-    void write() {
-/*
+    // This test is for manual debug
+    void manualTest() {
+
         try {
             final File file = File.createTempFile("mapped-file", "bin");
-            MappedBytes.mappedBytes(file, SIZE)
-                .write8bit(0L, (BytesStore) null);
+            final Bytes<?> bytes = MappedBytes.mappedBytes(file, SIZE);
+            bytes.releaseLast();
         } catch (IOException ioException) {
             Jvm.rethrow(ioException);
         }
-*/
+
 
 /*        try {
             Bytes.allocateDirect(SIZE)
@@ -402,7 +405,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     private void assertPropertiesNotChanged(String createCommand, Bytes<?> bytes) {
         // Make sure that there was no change to the target bytes
-        final BytesInitialInfo expectedInfo = INITIAL_INFO.get(createCommand);
+        final BytesInitialInfo expectedInfo = INITIAL_INFO_MAP.get(createCommand);
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
         assertEquals(expectedInfo, actualInfo, createCommand);
     }
