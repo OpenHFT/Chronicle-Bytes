@@ -35,6 +35,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * Fast unchecked version of AbstractBytes
  */
@@ -53,7 +55,7 @@ public class UncheckedNativeBytes<Underlying>
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
 
-    public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
+    public UncheckedNativeBytes(@NotNull(exception = NullPointerException.class) Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
         underlyingBytes.reserve(this);
@@ -226,8 +228,9 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
+    public Bytes<Underlying> write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -240,7 +243,7 @@ public class UncheckedNativeBytes<Underlying>
         return this;
     }
 
-    public long rawCopy(@NotNull RandomDataInput bytes, long offset, long length)
+    public long rawCopy(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
@@ -522,14 +525,16 @@ public class UncheckedNativeBytes<Underlying>
     @NotNull
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
     }
 
     @Override
-    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+    public void write(long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -537,7 +542,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     @NotNull
     public Bytes<Underlying> write(long writeOffset,
-                                   @NotNull RandomDataInput bytes, long readOffset, long length)
+                                   @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         writeCheckOffset(writeOffset, length);
         bytesStore.write(writeOffset, bytes, readOffset, length);
@@ -707,7 +712,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
+    public Bytes<Underlying> write(@NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException, ArrayIndexOutOfBoundsException {
         if (length + offset > bytes.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
@@ -721,7 +726,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> prewrite(@NotNull byte[] bytes)
+    public Bytes<Underlying> prewrite(@NotNull(exception = NullPointerException.class) byte[] bytes)
             throws IllegalStateException, BufferOverflowException {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length);
         bytesStore.write(offsetInRDO, bytes);
@@ -730,7 +735,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> prewrite(@NotNull BytesStore bytes)
+    public Bytes<Underlying> prewrite(@NotNull(exception = NullPointerException.class) BytesStore bytes)
             throws IllegalStateException, BufferOverflowException {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
         bytesStore.write(offsetInRDO, bytes);
@@ -739,7 +744,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeSome(@NotNull ByteBuffer buffer)
+    public Bytes<Underlying> writeSome(@NotNull(exception = NullPointerException.class) ByteBuffer buffer)
             throws IllegalStateException {
         bytesStore.write(writePosition, buffer, buffer.position(), buffer.limit());
         writePosition += buffer.remaining();
@@ -800,7 +805,7 @@ public class UncheckedNativeBytes<Underlying>
         }
     }
 
-    public boolean equalsBytes(@NotNull Bytes b2, long remaining)
+    public boolean equalsBytes(@NotNull(exception = NullPointerException.class) Bytes b2, long remaining)
             throws IllegalStateException {
         long i = 0;
         try {
@@ -860,7 +865,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
+    public Bytes<Underlying> append8bit(@NotNull(exception = NullPointerException.class) CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
@@ -887,7 +892,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(@NotNull(exception = NullPointerException.class) char @NotNull(exception = NullPointerException.class) [] chars, int offset, int length)
+    public Bytes<Underlying> appendUtf8(@NotNull(exception = NullPointerException.class) char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
@@ -919,7 +924,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull RandomDataInput bytes)
+    public Bytes<Underlying> write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes)
             throws IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
 
@@ -958,7 +963,8 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public @NotNull Bytes<Underlying> write8bit(final @NotNull String text, final int start, final int length) {
+    public @NotNull Bytes<Underlying> write8bit(final @NotNull(exception = NullPointerException.class) String text, final int start, final int length) {
+        requireNonNull(text);
         final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
         final long position = writeOffsetPositionMoved(toWriteLength, 0);
         bytesStore.write8bit(position, text, start, length);

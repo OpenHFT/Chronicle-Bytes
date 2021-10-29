@@ -36,7 +36,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     private static final String[] STRING_FOR_CODE = _stringForCode(GuardedNativeBytes.class);
 
-    public GuardedNativeBytes(@NotNull BytesStore store, long capacity)
+    public GuardedNativeBytes(@NotNull(exception = NullPointerException.class) BytesStore store, long capacity)
             throws IllegalStateException, IllegalArgumentException {
         super(store, capacity);
     }

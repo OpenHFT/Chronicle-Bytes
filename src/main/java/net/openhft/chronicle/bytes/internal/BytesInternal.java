@@ -2942,7 +2942,7 @@ enum BytesInternal {
             ints[i] = Maths.toUInt31(in.readStopBit());
     }
 
-    public static void writeHistogram(@NotNull StreamingDataOutput out, @NotNull Histogram histogram)
+    public static void writeHistogram(@NotNull(exception = NullPointerException.class) StreamingDataOutput out, @NotNull(exception = NullPointerException.class) Histogram histogram)
             throws BufferOverflowException, IllegalStateException {
         out.writeStopBit(histogram.powersOf2());
         out.writeStopBit(histogram.fractionBits());

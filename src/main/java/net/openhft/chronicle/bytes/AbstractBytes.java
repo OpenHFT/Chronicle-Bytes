@@ -35,7 +35,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings("rawtypes")

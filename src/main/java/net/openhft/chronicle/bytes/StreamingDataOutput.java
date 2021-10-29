@@ -39,7 +39,6 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
-import static net.openhft.chronicle.core.util.ObjectUtils.checkNonNull;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**

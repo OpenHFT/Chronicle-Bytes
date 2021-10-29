@@ -41,7 +41,7 @@
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
                 <type>pom</type>
-                <version>3.19.9</version>
+                <version>3.22.1</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -87,15 +87,14 @@
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-params</artifactId>
-<!--            Todo: Remove version once in 3rd party BOM-->
-            <version>5.7.2</version>
+            <!-- Todo: remove explicit version when 3rd party BOM 3.22.2 is released-->
+            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.junit.vintage</groupId>
             <artifactId>junit-vintage-engine</artifactId>
-            <version>5.8.1</version>
             <scope>test</scope>
         </dependency>
 

@@ -38,7 +38,7 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
      * @throws BufferUnderflowException if capacity is less than start
      * @throws IllegalArgumentException
      */
-    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity)
+    public SubBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore, long start, long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);
         this.start = start;
@@ -48,7 +48,7 @@ public class SubBytes<Underlying> extends VanillaBytes<Underlying> {
     }
 
     @Deprecated(/* to be removed in x.23 */)
-    public SubBytes(@NotNull BytesStore bytesStore)
+    public SubBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);
         this.start = 0;
