@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -33,7 +34,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 .forEach(args -> {
                     final Bytes<Object> bytes = bytes(args);
                     INITIAL_INFO.put(createCommand(args), new BytesInitialInfo(bytes(args)));
-                    bytes.releaseLast();
+                    releaseAndAssertReleased(bytes);
                 });
         // Make sure we have unique keys
         assertEquals(provideBytesObjects().count(), INITIAL_INFO.size());
@@ -44,6 +45,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         // Prints out the various Bytes classes tested on the logs. To be removed later
     void printTypesTested(final Bytes<?> bytes) {
         System.out.println(bytes.getClass().getName());
+        releaseAndAssertReleased(bytes);
     }
 
     @ParameterizedTest
@@ -51,6 +53,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         // Checks the Bytes::unchecked method
     void unchecked(final Bytes<?> bytes) {
         assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked());
+        releaseAndAssertReleased(bytes);
     }
 
     @ParameterizedTest
@@ -72,6 +75,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
         // Checks that bytes reflects this
         assertEquals(writeable, bytes.readWrite());
+        releaseAndAssertReleased(bytes);
     }
 
     @Test
@@ -315,6 +319,11 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 Jvm.rethrow(e);
             }
         }
+    }
+
+    private static void releaseAndAssertReleased(ReferenceCounted referenceCounted) {
+        referenceCounted.releaseLast();
+        assertEquals(0, referenceCounted.refCount());
     }
 
     private static Stream<Arguments> provideBytesObjects() {
