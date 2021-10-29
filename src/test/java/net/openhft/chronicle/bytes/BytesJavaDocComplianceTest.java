@@ -21,7 +21,7 @@ import static net.openhft.chronicle.bytes.BytesStore.wrap;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
-final class BytesJavaDocComplianceTest {
+final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     static final Map<String, BytesInitialInfo> INITIAL_INFO = new LinkedHashMap<>();
 
@@ -30,7 +30,11 @@ final class BytesJavaDocComplianceTest {
         // Build a Map with info on the initial state allowing us asserting it did not change for
         // illegal operations.
         provideBytesObjects()
-                .forEach(args -> INITIAL_INFO.put(createCommand(args), new BytesInitialInfo(bytes(args))));
+                .forEach(args -> {
+                    final Bytes<Object> bytes = bytes(args);
+                    INITIAL_INFO.put(createCommand(args), new BytesInitialInfo(bytes(args)));
+                    bytes.releaseLast();
+                });
         // Make sure we have unique keys
         assertEquals(provideBytesObjects().count(), INITIAL_INFO.size());
     }
