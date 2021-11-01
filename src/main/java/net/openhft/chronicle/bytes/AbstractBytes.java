@@ -207,6 +207,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
+    @Override
     public @NotNull AbstractBytes<Underlying> append(double d)
             throws BufferOverflowException, IllegalStateException {
         boolean fits = canWriteDirect(380);

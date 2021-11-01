@@ -79,7 +79,7 @@ enum BytesInternal {
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final BytesPool BP = new BytesPool();
     public static final StringInternerBytes SI;
-    private static final byte[] Infinity = INFINITY.getBytes(ISO_8859_1);
+    private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NaN = "NaN".getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
@@ -1674,7 +1674,7 @@ enum BytesInternal {
 
         } else if (exp == 2047) {
             if (mantissa == 0) {
-                out.write(Infinity);
+                out.write(INFINITY_BYTES);
 
             } else {
                 out.write(NaN);
