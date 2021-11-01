@@ -173,8 +173,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes view of fields in the provided {@code object} in a {@link FieldGroup} effectively
-     * turning the groups of fields into a memory segment.
+     * Creates and returns a new Bytes view of fields in the provided {@code object} in a {@link FieldGroup} named as
+     * the provided {@code groupName} effectively turning the groups of fields into a memory segment.
      * <p>
      * Here is an example of field groups:
      * <pre>{@code
@@ -185,8 +185,8 @@ public interface Bytes<U> extends
      *     }
      * }</pre>
      *
-     * @param object    who's fields are to be reflected
-     * @param groupName of the field group
+     * @param object    non-null object whose fields are to be reflected
+     * @param groupName of the field group, non-null
      * @return a new Bytes view of fields
      * @throws NullPointerException if the provided {@code object} or the provided {@code groupName} is {@code null}
      */
@@ -258,7 +258,7 @@ public interface Bytes<U> extends
      * }
      * }</pre>
      *
-     * @param byteBuffer to wrap
+     * @param byteBuffer to wrap, non-null
      * @return a new Bytes wrapping the provided {@code byteBuffer}
      * @throws NullPointerException    if the provided {@code byteBuffer} is {@code null}
      * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
@@ -330,7 +330,7 @@ public interface Bytes<U> extends
      * }
      * }</pre>
      *
-     * @param byteBuffer to wrap
+     * @param byteBuffer to wrap, non-null
      * @return a new Bytes wrapping the provided {@code byteBuffer}
      * @throws NullPointerException    if the provided {@code byteBuffer} is {@code null}
      * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
@@ -398,7 +398,7 @@ public interface Bytes<U> extends
      * }
      * }</pre>
      *
-     * @param byteArray to wrap
+     * @param byteArray to wrap, non-null
      * @return a new Bytes wrapping the provided {@code byteArray}
      * @throws IllegalStateException if the provided {@code byteArray} is {@code null}
      */
@@ -462,7 +462,7 @@ public interface Bytes<U> extends
      * }
      * }</pre>
      *
-     * @param byteArray to wrap
+     * @param byteArray to wrap, non-null
      * @return Creates and returns a new Bytes wrapping the provided {@code byteArray}
      * @throws NullPointerException if the provided {@code byteArray} is {@code null}
      */
@@ -482,13 +482,13 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes containing an ISO-8859-1 representation of the provided {@code text}.
+     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
      * <p>
      * The returned Bytes is ready for reading.
      * <p>
      * The returned Bytes is allocated on the heap.
      *
-     * @param text to convert
+     * @param text non-null text to convert
      * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
@@ -499,13 +499,13 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes containing an ISO-8859-1 representation of the provided {@code text}.
+     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
      * <p>
      * The returned Bytes is ready for reading.
      * <p>
      * The returned Bytes is allocated using native memory.
      *
-     * @param text to convert
+     * @param text non-null text to convert
      * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
@@ -515,13 +515,13 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes containing an ISO-8859-1 representation of the provided {@code text}.
+     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
      * <p>
      * The returned Bytes is ready for reading.
      * <p>
      * The returned Bytes is allocated using native memory.
      *
-     * @param text to convert
+     * @param text non-null text to convert
      * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
@@ -540,13 +540,13 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes containing an ISO-8859-1 representation of the provided {@code text}.
+     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
      * <p>
      * The returned Bytes is ready for reading.
      * <p>
      * The returned Bytes is allocated using native memory.
      *
-     * @param text to convert
+     * @param text non-null text to convert
      * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
@@ -648,7 +648,7 @@ public interface Bytes<U> extends
      * staring from the provided {@code readPosition} to the
      * provided {@code readLimit}. The buffer is not modified by this call.
      *
-     * @param buffer the buffer to use
+     * @param buffer the non-null buffer to use
      * @return a String extracted from the buffer
      * provided {@code readLimit}
      * @throws NullPointerException if the provided {@code buffer} is {@code null}
@@ -666,7 +666,7 @@ public interface Bytes<U> extends
      * If the length of the string between {@code readPosition} to {@code readLimit} is greater than the specified maximum length,
      * the "..." will be appended to the resulting string; in this case the length of the resulting string will be the specified maximum length+3.
      *
-     * @param buffer the buffer to use
+     * @param buffer the non-null buffer to use
      * @param maxLen the maximum length from the buffer, used to create a new string
      * @return a string extracted from the buffer
      * @throws NullPointerException if the provided {@code buffer} is {@code null} or if the provided {@code maxLen} is negative
@@ -715,7 +715,7 @@ public interface Bytes<U> extends
      * <p>
      * The buffer is not modified by this call.
      *
-     * @param buffer   the buffer to use
+     * @param buffer   the non-null buffer to use
      * @param position the offset position to create the string from
      * @param length   the number of characters to include in the string
      * @return a String extracted from the buffer
@@ -724,8 +724,9 @@ public interface Bytes<U> extends
      */
     @NotNull
     static String toString(@NotNull final Bytes buffer,
-                           final long position,
-                           final long length) {
+                           @NonNegative final long position,
+                           @NonNegative final long length) {
+        requireNonNull(buffer);
         requireNonNegative(position);
         requireNonNegative(length);
         try {
@@ -757,7 +758,7 @@ public interface Bytes<U> extends
      * Changes in the given {@code bytes} will not be affected by writes in
      * the returned wrapper or vice versa.
      *
-     * @param bytes array to copy
+     * @param bytes array to copy, the array reference must not be null
      * @return a new fix sized wrapper
      * @throws NullPointerException if the provided {@code bytes} is {@code null}
      */
@@ -788,8 +789,8 @@ public interface Bytes<U> extends
      * source is the character array being searched, and the other
      * is the string being searched for.
      *
-     * @param source           the read bytes being searched.
-     * @param other            the read bytes being searched for.
+     * @param source           the non-null read bytes being searched.
+     * @param other            the non-null read bytes being searched for.
      * @param fromSourceOffset the index to begin searching from,
      * @return index where contents equals or -1
      * @throws NullPointerException if the provided {@code source} or the provided {@code source} is {@code null}
@@ -979,7 +980,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space or if the
      *                                  provided {@code desiredCapacity} is negative;
      */
-    default void ensureCapacity(long desiredCapacity)
+    default void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         requireNonNegative(desiredCapacity);
         if (desiredCapacity > capacity())
@@ -1020,7 +1021,7 @@ public interface Bytes<U> extends
     /**
      * Returns if this Bytes object contents equals the provided {@code other}.
      *
-     * @param other to test for equality
+     * @param other to test for equality, nullable
      * @return if this Bytes object contents equals the provided {@code other}
      * @throws IllegalStateException if this Bytes object has been previously released
      */
@@ -1042,7 +1043,7 @@ public interface Bytes<U> extends
     /**
      * Copies bytes from this Bytes object to another provided {@code targetByteStore}.
      *
-     * @param targetByteStore the BytesStore to copy to
+     * @param targetByteStore the non-null BytesStore to copy to
      * @return the actual number of bytes copied
      * @throws NullPointerException if the provided {@code targetByteStore} is {@code null}
      */
@@ -1055,7 +1056,7 @@ public interface Bytes<U> extends
     /**
      * Copies bytes from this Bytes object to the provided {@code outputStream}.
      *
-     * @param outputStream the specified OutputStream that this Bytes object is copied to
+     * @param outputStream the specified non-null OutputStream that this Bytes object is copied to
      * @throws IllegalStateException if this Bytes object has been previously released
      * @throws IOException           if an I/O error occurs writing to the provided {@code outputStream}
      * @throws NullPointerException  if the provided {@code outputStream } is {@code null}
@@ -1080,9 +1081,9 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Will un-write a specified number of bytes from an offset from this Bytes.
+     * Will un-write a specified number of bytes from an offset from this Bytes object.
      * <p>
-     * Calling this method will update the cursors of this Bytes.
+     * Calling this method will update the cursors of this Bytes object.
      *
      * @param fromOffset the offset from the target bytes
      * @param count      the number of bytes to un-write
@@ -1150,7 +1151,7 @@ public interface Bytes<U> extends
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
-     * @param source the sub-bytes to search for.
+     * @param source the non-null sub-bytes to search for.
      * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source} is {@code null}
      */
@@ -1172,7 +1173,7 @@ public interface Bytes<U> extends
      * </pre></blockquote>
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
-     * @param source    the sub-bytes to search for.
+     * @param source    the non-null sub-bytes to search for.
      * @param fromIndex to start searching from
      * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source } is {@code null}
@@ -1199,7 +1200,7 @@ public interface Bytes<U> extends
      * The readLimit and readPosition is not affected by this operation.
      *
      * @param length   indicating the number of bytes to write
-     * @param bytesOut target to write the content of this Bytes object to
+     * @param bytesOut non-null target to write the content of this Bytes object to
      * @throws BufferUnderflowException if the provided {@code length} is greater than the remaining bytes readable.
      * @throws IORuntimeException       if there is an error reading or writing data
      * @throws BufferOverflowException  if the provided {@code bytesOut} cannot hold the bytes to be written
@@ -1233,8 +1234,8 @@ public interface Bytes<U> extends
      * <p>
      * The content of this Bytes object is assumed to have a 16-bit length indicator preceding the actual object.
      *
-     * @param clazz type to read
-     * @param using to update
+     * @param clazz non-null type to read
+     * @param using to update, nullable
      * @param <T>   type of the provided using
      * @return An object that was read from this Bytes object
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient.
@@ -1271,6 +1272,7 @@ public interface Bytes<U> extends
      * <p>
      * The content of this Bytes object will have a 16-bit length indicator preceding the actual object.
      *
+     * @param marshallable non-null object to write to this Bytes object
      * @throws BufferOverflowException  if the capacity of this Bytes object is insufficient.
      * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
      *                                  or if the contents of this Bytes object cannot fit under 16-bit addressing
@@ -1297,12 +1299,12 @@ public interface Bytes<U> extends
     /**
      * Writes the contents of the provided `inputStream` to the contents of this Bytes object.
      *
-     * @param inputStream to read from
+     * @param inputStream non-null to read from
      * @return this Bytes object
      * @throws IOException              if an I/O error occur on the inputStream
      * @throws BufferOverflowException  if this Bytes object lacks capacity to write the entire provided {@code inputStream }
      * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
-     * @throws NullPointerException if the provided {@code InputStream} is {@code null}.
+     * @throws NullPointerException     if the provided {@code InputStream} is {@code null}.
      */
     default Bytes write(@NotNull final InputStream inputStream)
             throws IOException, BufferOverflowException, IllegalStateException {
