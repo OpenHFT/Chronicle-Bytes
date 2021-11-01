@@ -66,10 +66,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface Bytes<U> extends
-        BytesStore<Bytes<U>, U>,
-        BytesIn<U>,
-        BytesOut<U> {
+public interface Bytes<Underlying> extends
+        BytesStore<Bytes<Underlying>, Underlying>,
+        BytesIn<Underlying>,
+        BytesOut<Underlying> {
 
     /**
      * The max capacity a Bytes can ever have.
@@ -528,7 +528,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     @NotNull
-    static Bytes<?> directFrom(@NotNull String text) {
+    static Bytes<byte[]> directFrom(@NotNull String text) {
         BytesStore from = BytesStore.from(text);
         try {
             try {
@@ -796,6 +796,7 @@ public interface Bytes<U> extends
      * @param fromSourceOffset the index to begin searching from,
      * @return index where contents equals or -1
      * @throws NullPointerException if the provided {@code source} or the provided {@code source} is {@code null}
+     * @deprecated for removal in x.23
      */
     @Deprecated(/* suggest for removal in x.23 as this is supposed to be used only by other methods in this interface and can be internalised */)
     static int indexOf(final @NotNull BytesStore source,
@@ -857,12 +858,12 @@ public interface Bytes<U> extends
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
-    default Bytes<U> unchecked(boolean unchecked)
+    default Bytes<Underlying> unchecked(boolean unchecked)
             throws IllegalStateException {
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
-            Bytes<U> underlyingBytes = start() == 0 && bytesStore().isDirectMemory()
+            Bytes<Underlying> underlyingBytes = start() == 0 && bytesStore().isDirectMemory()
                     ? new UncheckedNativeBytes<>(this)
                     : new UncheckedBytes<>(this);
             release(INIT);
@@ -913,7 +914,7 @@ public interface Bytes<U> extends
      * @return a copy of this Bytes object
      */
     @Override
-    BytesStore<Bytes<U>, U> copy()
+    BytesStore<Bytes<Underlying>, Underlying> copy()
             throws IllegalStateException;
 
     /**
@@ -999,7 +1000,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     @Override
-    default Bytes<U> bytesForRead()
+    default Bytes<Underlying> bytesForRead()
             throws IllegalStateException {
         try {
             return isClear()
@@ -1038,7 +1039,7 @@ public interface Bytes<U> extends
      * @throws IllegalStateException if this Bytes object has been previously released
      */
     @NotNull
-    Bytes<U> compact()
+    Bytes<Underlying> compact()
             throws IllegalStateException;
 
     /**
@@ -1129,12 +1130,13 @@ public interface Bytes<U> extends
     default BigInteger readBigInteger()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
         int length = Maths.toUInt31(readStopBit());
-        if (length == 0)
+        if (length == 0) {
             if (lenient()) {
                 return BigInteger.ZERO;
             } else {
                 throw new BufferUnderflowException();
             }
+        }
         byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);
@@ -1187,7 +1189,7 @@ public interface Bytes<U> extends
 
     @Override
     @NotNull
-    Bytes<U> clear()
+    Bytes<Underlying> clear()
             throws IllegalStateException;
 
     @Override
@@ -1210,7 +1212,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code length} is negative.
      * @throws NullPointerException     if the provided {@code bytesOut} is {@code null}.
      */
-    default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
+    default void readWithLength(long length, @NotNull BytesOut<Underlying> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         requireNonNegative(length);
         if (length > readRemaining())
