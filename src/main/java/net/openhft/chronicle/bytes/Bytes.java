@@ -88,8 +88,7 @@ public interface Bytes<U> extends
      * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
      * which will be resized as required.
      *
-     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
-     * which will be resized as required
+     * @return a new elastic wrapper
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer() {
@@ -101,8 +100,7 @@ public interface Bytes<U> extends
      * the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required
+     * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} negative.
      */
     @NotNull
@@ -117,9 +115,7 @@ public interface Bytes<U> extends
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
      * @param maxCapacity     the max capacity given in bytes equal or greater than initialCapacity
-     * @return a new elastic wrapper for a direct (off-heap) ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required up
-     * to the given {@code maxCapacity}
+     * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} or provided {@code maxCapacity} is negative.
      */
     @NotNull
@@ -145,8 +141,7 @@ public interface Bytes<U> extends
      * the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper for a heap ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required
+     * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
@@ -170,8 +165,7 @@ public interface Bytes<U> extends
      * Creates and returns a new elastic wrapper for a heap ByteBuffer with
      * the {@code initialCapacity} 128 bytes which will be resized as required.
      *
-     * @return a new elastic wrapper for a heap ByteBuffer with the {@code initialCapacity}
-     * 128 bytes which will be resized as required
+     * @return a new elastic wrapper
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer() {
@@ -193,8 +187,7 @@ public interface Bytes<U> extends
      *
      * @param object    who's fields are to be reflected
      * @param groupName of the field group
-     * @return a new Bytes view of fields in the provided {@code object} in a {@link FieldGroup} effectively
-     * turning the groups of fields into a memory segment
+     * @return a new Bytes view of fields
      * @throws NullPointerException if the provided {@code object} or the provided {@code groupName} is {@code null}
      */
     static <T> Bytes<T> forFieldGroup(@NotNull final T object,
@@ -496,7 +489,7 @@ public interface Bytes<U> extends
      * The returned Bytes is allocated on the heap.
      *
      * @param text to convert
-     * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
+     * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     @NotNull
@@ -513,7 +506,7 @@ public interface Bytes<U> extends
      * The returned Bytes is allocated using native memory.
      *
      * @param text to convert
-     * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
+     * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     static Bytes<?> fromDirect(@NotNull CharSequence text) {
@@ -529,7 +522,7 @@ public interface Bytes<U> extends
      * The returned Bytes is allocated using native memory.
      *
      * @param text to convert
-     * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
+     * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     @NotNull
@@ -554,7 +547,7 @@ public interface Bytes<U> extends
      * The returned Bytes is allocated using native memory.
      *
      * @param text to convert
-     * @return a new Bytes containing an ISO-8859-1 representation of the provided {@code text}
+     * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     @NotNull
@@ -573,8 +566,7 @@ public interface Bytes<U> extends
      * <p>
      *
      * @param capacity the non-negative capacity given in bytes
-     * @return a new fix sized wrapper for native (64-bit address)
-     * memory with the provided {@code capacity}
+     * @return a new fix sized wrapper
      * @throws IllegalArgumentException if the provided {@code capacity} is negative.
      */
     @NotNull
@@ -596,8 +588,7 @@ public interface Bytes<U> extends
      * Creates and returns a new elastic wrapper for native (64-bit address)
      * memory with zero initial capacity which will be resized as required.
      *
-     * @return a new elastic wrapper for native (64-bit address)
-     * memory with zero initial capacity which will be resized as required
+     * @return a new elastic wrapper
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
@@ -609,8 +600,7 @@ public interface Bytes<U> extends
      * memory with the given {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper for native (64-bit address)
-     * memory with the given {@code initialCapacity} which will be resized as required
+     * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
      */
     @NotNull
@@ -623,7 +613,7 @@ public interface Bytes<U> extends
      * Creates and returns a new elastic wrapper for on heap memory with the
      * {@code initialCapacity} 32 bytes which will be resized as required.
      *
-     * @return a new elastic wrapper for on heap memory
+     * @return a new elastic wrapper
      */
     @NotNull
     static OnHeapBytes allocateElasticOnHeap() {
@@ -635,8 +625,7 @@ public interface Bytes<U> extends
      * {@code initialCapacity} which will be resized as required.
      *
      * @param initialCapacity the initial capacity of the wrapper in bytes
-     * @return a new elastic wrapper for on heap memory with the provided
-     * {@code initialCapacity} which will be resized as required
+     * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
      */
     @NotNull
@@ -660,8 +649,7 @@ public interface Bytes<U> extends
      * provided {@code readLimit}. The buffer is not modified by this call.
      *
      * @param buffer the buffer to use
-     * @return a String extracted from the provided {@code buffer }
-     * staring from the provided {@code readPosition} to the
+     * @return a String extracted from the buffer
      * provided {@code readLimit}
      * @throws NullPointerException if the provided {@code buffer} is {@code null}
      */
@@ -680,7 +668,7 @@ public interface Bytes<U> extends
      *
      * @param buffer the buffer to use
      * @param maxLen the maximum length from the buffer, used to create a new string
-     * @return a string contain the text from the {@code readPosition} to the {@code readLimit} of the buffer
+     * @return a string extracted from the buffer
      * @throws NullPointerException if the provided {@code buffer} is {@code null} or if the provided {@code maxLen} is negative
      */
     @NotNull
@@ -730,8 +718,7 @@ public interface Bytes<U> extends
      * @param buffer   the buffer to use
      * @param position the offset position to create the string from
      * @param length   the number of characters to include in the string
-     * @return a String from the bytes of the provided {@code buffer} with the provided {@code length }
-     * staring from the provided {@code offset}
+     * @return a String extracted from the buffer
      * @throws NullPointerException if the provided {@code buffer} is {@code null} or
      * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
      */
@@ -771,8 +758,7 @@ public interface Bytes<U> extends
      * the returned wrapper or vice versa.
      *
      * @param bytes array to copy
-     * @return a new fix sized wrapper for native (64-bit address)
-     * memory with the contents copied from the given {@code bytes} array
+     * @return a new fix sized wrapper
      * @throws NullPointerException if the provided {@code bytes} is {@code null}
      */
     @NotNull
@@ -805,8 +791,7 @@ public interface Bytes<U> extends
      * @param source           the read bytes being searched.
      * @param other            the read bytes being searched for.
      * @param fromSourceOffset the index to begin searching from,
-     * @return the lowest value such that the contents of the provided {@code source } equals the contents of the
-     * provided {@code other } starting at the provided {@code fromSourceOffset}, or -1 is returned if no such value exists
+     * @return index where contents equals or -1
      * @throws NullPointerException if the provided {@code source} or the provided {@code source} is {@code null}
      */
     @Deprecated(/* suggest for removal in x.23 as this is supposed to be used only by other methods in this interface and can be internalised */)
@@ -864,7 +849,7 @@ public interface Bytes<U> extends
      * Note: this means that the result is no longer elastic, even if <code>this</code> is elastic.
      *
      * @param unchecked if true, minimal bounds checks will be performed
-     * @return a new Bytes which is optionally unchecked as indicated by the provided {@code unchecked}
+     * @return a new, potentially unchecked, Bytes
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
@@ -919,7 +904,9 @@ public interface Bytes<U> extends
     }
 
     /**
-     * @return a copy of this Bytes object from position() to limit().
+     * Creates and returns a new copy of this Bytes object from position() to limit().
+     *
+     * @return a copy of this Bytes object
      */
     @Override
     BytesStore<Bytes<U>, U> copy()
@@ -929,8 +916,7 @@ public interface Bytes<U> extends
      * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form encoding
      * at most 1024 bytes.
      *
-     * @return a new String representing the contents of this Bytes object in hexadecimal form encoding
-     * at most 1024 bytes
+     * @return a new hex String
      */
     @NotNull
     default String toHexString() {
@@ -944,8 +930,7 @@ public interface Bytes<U> extends
      * Displays the hex data of {@link Bytes} from the {@code readPosition} up to the specified length.
      *
      * @param maxLength limit the number of bytes to be dumped
-     * @return a new String representing the contents of this Bytes object in hexadecimal form encoding
-     * at most the provided {@code maxLength } bytes
+     * @return a new hex String
      * @throws IllegalArgumentException if the provided {@code maxLength} is negative.
      */
     @NotNull
@@ -959,8 +944,7 @@ public interface Bytes<U> extends
      *
      * @param offset    the specified offset to start from
      * @param maxLength limit the number of bytes to be encoded
-     * @return a new String representing the contents of this Bytes object in hexadecimal form
-     * starting at the provided {@code offset} encoding at most the provided {@code maxLength } bytes
+     * @return a new hex String
      * @throws IllegalArgumentException if the provided {@code maxLength}  or provided {@code maxLength} is negative.
      */
     @NotNull
@@ -1003,13 +987,12 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new slice of the current Bytes whereby the start is moved to the readPosition and the
+     * Creates and returns a new slice of this Bytes object whereby the start is moved to the readPosition and the
      * current limit determines the capacity.
      * <p>
      * As a sub-section of a Bytes, it cannot be elastic.
      *
-     * @return a new slice of the current Bytes whereby the start is moved to the readPosition and the
-     * current limit determines the capacity
+     * @return a new slice of this current Bytes object.
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
@@ -1026,9 +1009,9 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns the backing ByteStore this Bytes object wraps.
+     * Returns the backing ByteStore this Bytes object wraps, or null.
      *
-     * @return Returns the backing ByteStore this Bytes object wraps.
+     * @return the backing ByteStore
      */
     @Override
     @Nullable
@@ -1120,7 +1103,7 @@ public interface Bytes<U> extends
      * <p>
      * If this Byte object is empty, an object equal to {@link BigDecimal#ZERO} is returned.
      *
-     * @return a new BigDecimal representing the contents of this Bytes object
+     * @return a new BigDecimal
      * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
      * @throws IllegalStateException    if this Bytes object was previously released
@@ -1135,7 +1118,7 @@ public interface Bytes<U> extends
      * Creates and returns a new BigInteger representing the contents of this Bytes object or {@link BigInteger#ZERO}
      * if this Bytes object is empty.
      *
-     * @return a new BigInteger representing the contents of this Bytes object
+     * @return a new BigInteger
      * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
      * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
      * @throws IllegalStateException    if this Bytes object was previously released
@@ -1168,8 +1151,7 @@ public interface Bytes<U> extends
      * If no such value of <i>k</i> exists, then {@code -1} is returned.
      *
      * @param source the sub-bytes to search for.
-     * @return the lowest index value for which the contents of this Bytes object equals the provided {@code source },
-     * or -1 if no such index value exists
+     * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source} is {@code null}
      */
     default long indexOf(@NotNull Bytes source)
@@ -1192,8 +1174,7 @@ public interface Bytes<U> extends
      *
      * @param source    the sub-bytes to search for.
      * @param fromIndex to start searching from
-     * @return the lowest index value for which the contents of this Bytes object equals the provided {@code source },
-     * or -1 if no such index value exists
+     * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source } is {@code null}
      */
     default int indexOf(@NotNull BytesStore source, int fromIndex)
