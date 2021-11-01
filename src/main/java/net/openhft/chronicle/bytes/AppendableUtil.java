@@ -38,7 +38,7 @@ public enum AppendableUtil {
 
     private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
 
-    public static void setCharAt(@NotNull(exception = NullPointerException.class) Appendable sb, int index, char ch)
+    public static void setCharAt(@NotNull Appendable sb, int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setCharAt(index, ch);
@@ -52,12 +52,12 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void parseUtf8(@NotNull(exception = NullPointerException.class) BytesStore bs, StringBuilder sb, boolean utf, int length)
+    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }
 
-    public static void setLength(@NotNull(exception = NullPointerException.class) Appendable sb, int newLength)
+    public static void setLength(@NotNull Appendable sb, int newLength)
             throws IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         requireNonNull(sb);
         if (sb instanceof StringBuilder)
@@ -68,7 +68,7 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void append(@NotNull(exception = NullPointerException.class) Appendable sb, double value)
+    public static void append(@NotNull Appendable sb, double value)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
@@ -78,7 +78,7 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void append(@NotNull(exception = NullPointerException.class) Appendable sb, long value)
+    public static void append(@NotNull Appendable sb, long value)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
@@ -96,9 +96,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void read8bitAndAppend(@NotNull(exception = NullPointerException.class) StreamingDataInput bytes,
-                                         @NotNull(exception = NullPointerException.class) StringBuilder appendable,
-                                         @NotNull(exception = NullPointerException.class) StopCharsTester tester)
+    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
+                                         @NotNull StringBuilder appendable,
+                                         @NotNull StopCharsTester tester)
             throws IllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -110,9 +110,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void readUTFAndAppend(@NotNull(exception = NullPointerException.class) StreamingDataInput bytes,
-                                        @NotNull(exception = NullPointerException.class) Appendable appendable,
-                                        @NotNull(exception = NullPointerException.class) StopCharsTester tester)
+    public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
+                                        @NotNull Appendable appendable,
+                                        @NotNull StopCharsTester tester)
             throws BufferUnderflowException, IllegalStateException {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
@@ -121,9 +121,9 @@ public enum AppendableUtil {
         }
     }
 
-    public static void readUtf8AndAppend(@NotNull(exception = NullPointerException.class) StreamingDataInput bytes,
-                                         @NotNull(exception = NullPointerException.class) Appendable appendable,
-                                         @NotNull(exception = NullPointerException.class) StopCharsTester tester)
+    public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
+                                         @NotNull Appendable appendable,
+                                         @NotNull StopCharsTester tester)
             throws BufferUnderflowException, IOException, IllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -206,7 +206,7 @@ public enum AppendableUtil {
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
     }
 
-    public static void parse8bit_SB1(@NotNull(exception = NullPointerException.class) Bytes bytes, @NotNull StringBuilder sb, int length)
+    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int length)
             throws BufferUnderflowException, IllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
@@ -216,7 +216,7 @@ public enum AppendableUtil {
         bytes.readSkip(count);
     }
 
-    public static void parse8bit(@NotNull(exception = NullPointerException.class) StreamingDataInput bytes, Appendable appendable, int utflen)
+    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
             throws BufferUnderflowException, IOException, IllegalStateException {
         if (appendable instanceof StringBuilder) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
@@ -244,7 +244,7 @@ public enum AppendableUtil {
         }
     }
 
-    public static long findUtf8Length(@NotNull(exception = NullPointerException.class) CharSequence str)
+    public static long findUtf8Length(@NotNull CharSequence str)
             throws IndexOutOfBoundsException {
         int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
@@ -264,7 +264,7 @@ public enum AppendableUtil {
     }
 
     @Java9
-    public static long findUtf8Length(@NotNull(exception = NullPointerException.class) byte[] bytes, byte coder) {
+    public static long findUtf8Length(@NotNull byte[] bytes, byte coder) {
         long utflen;
 
         if (coder == 0) {
@@ -327,7 +327,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull(exception = NullPointerException.class) char[] chars, int offset, int length) {
+    public static long findUtf8Length(@NotNull char[] chars, int offset, int length) {
         requireNonNull(chars);
         long utflen = length;
         for (int i = offset, end = offset + length; i < end; i++) {
@@ -344,7 +344,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull(exception = NullPointerException.class) char[] chars) {
+    public static long findUtf8Length(@NotNull char[] chars) {
         return findUtf8Length(chars, 0, chars.length);
     }
 }

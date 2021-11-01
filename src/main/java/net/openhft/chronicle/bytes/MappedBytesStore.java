@@ -286,7 +286,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public MappedBytesStore write(long offsetInRDO, @NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
+    public MappedBytesStore write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length)
             throws IllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();
@@ -295,7 +295,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    public void write(long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws IllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();
@@ -304,7 +304,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public MappedBytesStore write(long writeOffset, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
+    public MappedBytesStore write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();
@@ -313,7 +313,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    public void write0(long offsetInRDO, @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
+    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
             throws IllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();

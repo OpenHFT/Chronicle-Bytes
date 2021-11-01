@@ -43,12 +43,12 @@
             implements Byteable<Bytes<Underlying>, Underlying>, Comparable<CharSequence> {
 
         @Deprecated(/* make protected in x.23, used in Chronicle-Map */)
-        public VanillaBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore)
+        public VanillaBytes(@NotNull BytesStore bytesStore)
                 throws IllegalStateException, IllegalArgumentException {
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
 
-        protected VanillaBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore, long writePosition, long writeLimit)
+        protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
                 throws IllegalStateException, IllegalArgumentException {
             super(bytesStore, writePosition, writeLimit);
         }
@@ -69,7 +69,7 @@
         }
 
         @Java9
-        private static boolean isEqual0(@NotNull(exception = NullPointerException.class) byte[] bytes, byte coder, @NotNull NativeBytesStore bs, long address) {
+        private static boolean isEqual0(@NotNull byte[] bytes, byte coder, @NotNull NativeBytesStore bs, long address) {
 
             @Nullable Memory memory = bs.memory;
 
@@ -97,7 +97,7 @@
             return true;
         }
 
-        private static boolean isEqual0(@NotNull(exception = NullPointerException.class) char[] chars, @NotNull NativeBytesStore bs, long address) {
+        private static boolean isEqual0(@NotNull char[] chars, @NotNull NativeBytesStore bs, long address) {
 
             @Nullable Memory memory = bs.memory;
             int i = 0;
@@ -119,7 +119,7 @@
             return true;
         }
 
-        private static boolean isEqual1(@NotNull(exception = NullPointerException.class) char[] chars, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(@NotNull char[] chars, @NotNull BytesStore bytesStore, long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < chars.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -130,7 +130,7 @@
         }
 
         @Java9
-        private static boolean isEqual1(@NotNull(exception = NullPointerException.class) byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(@NotNull byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < bytes.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -157,7 +157,7 @@
         }
 
         @Override
-        public void bytesStore(@NotNull(exception = NullPointerException.class) final BytesStore<Bytes<Underlying>, Underlying> byteStore,
+        public void bytesStore(@NotNull final BytesStore<Bytes<Underlying>, Underlying> byteStore,
                                final long offset,
                                final long length)
                 throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
@@ -278,7 +278,7 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
+        public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             ensureCapacity(writePosition() + length);
@@ -286,7 +286,7 @@
             return this;
         }
 
-        protected void optimisedWrite(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long offset, long length)
+        protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
@@ -305,7 +305,7 @@
             }
         }
 
-        public void write(long position, @NotNull(exception = NullPointerException.class) CharSequence str, int offset, int length)
+        public void write(long position, @NotNull CharSequence str, int offset, int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
             requireNonNull(str);
             ensureCapacity(writePosition() + length);
@@ -318,13 +318,13 @@
             }
         }
 
-        private char charAt(@NotNull(exception = NullPointerException.class) CharSequence str, int index) {
+        private char charAt(@NotNull CharSequence str, int index) {
             return str.charAt(index);
         }
 
         @Override
         @NotNull
-        public VanillaBytes append(@NotNull(exception = NullPointerException.class) CharSequence str, int start, int end)
+        public VanillaBytes append(@NotNull CharSequence str, int start, int end)
                 throws IndexOutOfBoundsException {
             assert end > start : "end=" + end + ",start=" + start;
             requireNonNull(str);
@@ -359,7 +359,7 @@
 
         @NotNull
         @Override
-        public VanillaBytes appendUtf8(@NotNull(exception = NullPointerException.class) CharSequence str)
+        public VanillaBytes appendUtf8(@NotNull CharSequence str)
                 throws BufferOverflowException {
             requireNonNull(str);
             ReportUnoptimised.reportOnce();
@@ -392,7 +392,7 @@
 
         @Override
         @NotNull
-        public Bytes<Underlying> append8bit(@NotNull(exception = NullPointerException.class) CharSequence cs)
+        public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
                 throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
             requireNonNull(cs);
             if (cs instanceof RandomDataInput)
@@ -405,7 +405,7 @@
 
         @Override
         @NotNull
-        public Bytes<Underlying> append8bit(@NotNull(exception = NullPointerException.class) BytesStore bs)
+        public Bytes<Underlying> append8bit(@NotNull BytesStore bs)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
             long remaining = bs.readLimit() - bs.readPosition();
             try {
@@ -417,7 +417,7 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> write(@NotNull(exception = NullPointerException.class) BytesStore bytes, long offset, long length)
+        public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             ensureCapacity(writePosition() + length);
@@ -442,7 +442,7 @@
 
         @Override
         @NotNull
-        public Bytes<Underlying> append8bit(@NotNull(exception = NullPointerException.class) String cs)
+        public Bytes<Underlying> append8bit(@NotNull String cs)
                 throws BufferOverflowException, IllegalStateException {
             requireNonNull(cs);
             if (isDirectMemory())
@@ -451,7 +451,7 @@
         }
 
         @NotNull
-        private Bytes<Underlying> append8bitNBS_S(@NotNull(exception = NullPointerException.class) String s)
+        private Bytes<Underlying> append8bitNBS_S(@NotNull String s)
                 throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.
@@ -499,7 +499,7 @@
             }
         }
 
-        private String toString2(@NotNull(exception = NullPointerException.class) NativeBytesStore bytesStore) {
+        private String toString2(@NotNull NativeBytesStore bytesStore) {
             @Nullable final Memory memory = bytesStore.memory;
             int length = (int)
                     Math.min(Bytes.MAX_HEAP_CAPACITY, realReadRemaining());
@@ -527,7 +527,7 @@
         }
 
         @NotNull
-        protected Bytes<Underlying> append8bit0(@NotNull(exception = NullPointerException.class) CharSequence cs)
+        protected Bytes<Underlying> append8bit0(@NotNull CharSequence cs)
                 throws BufferOverflowException, IllegalStateException {
             int length = cs.length();
             long offset = writeOffsetPositionMoved(length);
@@ -540,7 +540,7 @@
         }
 
         @Override
-        public boolean equalBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore, long length)
+        public boolean equalBytes(@NotNull BytesStore bytesStore, long length)
                 throws BufferUnderflowException, IllegalStateException {
             requireNonNull(bytesStore);
             ReportUnoptimised.reportOnce();
@@ -615,7 +615,7 @@
 
         @NotNull
         @Override
-        public Bytes<Underlying> appendUtf8(@NotNull(exception = NullPointerException.class) char @NotNull [] chars, int offset, int length)
+        public Bytes<Underlying> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
             long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
             ensureCapacity(writePosition() + actualUTF8Length);
@@ -639,7 +639,7 @@
         }
 
         @Override
-        public int read(@NotNull(exception = NullPointerException.class) byte[] bytes)
+        public int read(@NotNull byte[] bytes)
                 throws BufferUnderflowException, IllegalStateException {
             requireNonNull(bytes);
             ReportUnoptimised.reportOnce();
@@ -659,7 +659,7 @@
         }
 
         @Override
-        public int compareTo(@NotNull(exception = NullPointerException.class) CharSequence cs) {
+        public int compareTo(@NotNull CharSequence cs) {
             long len1 = readRemaining();
             int len2 = cs.length();
             long lim = Math.min(len1, len2);

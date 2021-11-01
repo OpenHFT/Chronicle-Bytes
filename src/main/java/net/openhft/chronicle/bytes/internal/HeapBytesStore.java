@@ -282,7 +282,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
+    public long write8bit(long position, @NotNull BytesStore bs) {
         requireNonNull(bs);
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);
@@ -295,7 +295,7 @@ public class HeapBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+    public long write8bit(long position, @NotNull String s, int start, int length) {
         requireNonNull(s);
         try {
             throwExceptionIfReleased();
@@ -488,7 +488,7 @@ public class HeapBytesStore<Underlying>
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull(exception = NullPointerException.class) ByteBuffer bytes, int offset, int length)
+            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
         try {
             assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
@@ -509,7 +509,7 @@ public class HeapBytesStore<Underlying>
     @NotNull
     @Override
     public HeapBytesStore<Underlying> write(long writeOffset,
-                                            @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
+                                            @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         requireNonNull(bytes);
         if (length == (int) length) {
@@ -531,7 +531,7 @@ public class HeapBytesStore<Underlying>
     }
 
     private void writeLongLength(long writeOffset,
-                                 @NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
+                                 @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         requireNonNull(bytes);
         long i;

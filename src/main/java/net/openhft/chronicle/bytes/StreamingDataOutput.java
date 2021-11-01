@@ -203,7 +203,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S write8bit(@NotNull(exception = NullPointerException.class) CharSequence text, int start, int length)
+    default S write8bit(@NotNull CharSequence text, int start, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         requireNonNull(text);
         if (text instanceof String)
@@ -218,7 +218,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    S write8bit(@NotNull(exception = NullPointerException.class) String text, int start, int length);
+    S write8bit(@NotNull String text, int start, int length);
 
     /**
      * Writes the provided {@code text} to this StreamingDataOutput at the current writePosition().
@@ -230,7 +230,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws IllegalArgumentException if the provided {@code text} is {@code null}.
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) CharSequence text)
+    default S write(@NotNull CharSequence text)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException {
         requireNonNull(text);
         if (text instanceof BytesStore) {
@@ -252,7 +252,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws IllegalArgumentException if the provided {@code startText} or the provided {@code length} is negative.
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) final CharSequence text,
+    default S write(@NotNull final CharSequence text,
                     final int startText,
                     final int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException {
@@ -382,7 +382,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws IllegalArgumentException if the provided {@code bytes} is {@code null}
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes)
+    default S write(@NotNull RandomDataInput bytes)
             throws BufferOverflowException, IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
         requireNonNull(bytes);
@@ -406,7 +406,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return this
      * @see StreamingDataInput#read(Bytes)
      */
-    default S write(@NotNull(exception = NullPointerException.class) BytesStore bytes)
+    default S write(@NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
         requireNonNull(bytes);
@@ -435,7 +435,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S writeSome(@NotNull(exception = NullPointerException.class) Bytes bytes)
+    default S writeSome(@NotNull Bytes bytes)
             throws IllegalStateException {
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());
@@ -461,7 +461,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) RandomDataInput bytes, long readOffset, long length)
+    default S write(@NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         BytesInternal.writeFully(bytes, readOffset, length, this);
         return (S) this;
@@ -473,7 +473,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) BytesStore bytes, long readOffset, long length)
+    default S write(@NotNull BytesStore bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNull(bytes);
         if (length + writePosition() > capacity())
@@ -489,7 +489,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws NullPointerException if the provided {@code byteArray } is {@code null}.
      */
     @NotNull
-    default S write(@NotNull(exception = NullPointerException.class) byte[] byteArray)
+    default S write(@NotNull byte[] byteArray)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(byteArray);
         try {
@@ -550,7 +550,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this.
      */
     @NotNull
-    S writeSome(@NotNull(exception = NullPointerException.class) ByteBuffer buffer)
+    S writeSome(@NotNull ByteBuffer buffer)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException;
 
     @NotNull
@@ -567,13 +567,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeOrderedLong(long i)
             throws BufferOverflowException, IllegalStateException;
 
-    default <E extends Enum<E>> S writeEnum(@NotNull(exception = NullPointerException.class) E e)
+    default <E extends Enum<E>> S writeEnum(@NotNull E e)
             throws BufferOverflowException, ArithmeticException, IllegalStateException {
         return write8bit(e.name());
     }
 
     @NotNull
-    default S appendUtf8(@NotNull(exception = NullPointerException.class) CharSequence cs)
+    default S appendUtf8(@NotNull CharSequence cs)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         return appendUtf8(cs, 0, cs.length());
     }
@@ -586,7 +586,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S appendUtf8(@NotNull(exception = NullPointerException.class) char[] chars, int offset, int length)
+    default S appendUtf8(@NotNull char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
         int i;
         ascii:
@@ -607,7 +607,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S appendUtf8(@NotNull(exception = NullPointerException.class) CharSequence cs, int offset, int length)
+    default S appendUtf8(@NotNull CharSequence cs, int offset, int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException {
         BytesInternal.appendUtf8(this, cs, offset, length);
         return (S) this;
@@ -616,7 +616,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     // length is number of characters (not bytes)
     @Java9
     @NotNull
-    default S appendUtf8(@NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length, byte coder)
+    default S appendUtf8(@NotNull byte[] bytes, int offset, int length, byte coder)
             throws BufferOverflowException, IllegalStateException {
         if (coder == JAVA9_STRING_CODER_LATIN) {
             for (int i = 0; i < length; i++) {
@@ -639,7 +639,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @Java9
     @NotNull
-    default S appendUtf8(@NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
+    default S appendUtf8(@NotNull byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
         for (int i = 0; i < length; i++) {
             int b = bytes[offset + i] & 0xFF; // unsigned byte
@@ -675,7 +675,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         return (S) this;
     }
 
-    default void copyFrom(@NotNull(exception = NullPointerException.class) InputStream input)
+    default void copyFrom(@NotNull InputStream input)
             throws IOException, BufferOverflowException, IllegalStateException {
         BytesInternal.copy(input, this);
     }
@@ -686,25 +686,25 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writePosition(position);
     }
 
-    default void writeHistogram(@NotNull(exception = NullPointerException.class) Histogram histogram)
+    default void writeHistogram(@NotNull Histogram histogram)
             throws BufferOverflowException, IllegalStateException {
         BytesInternal.writeHistogram(this, histogram);
     }
 
-    default void writeBigDecimal(@NotNull(exception = NullPointerException.class) BigDecimal bd)
+    default void writeBigDecimal(@NotNull BigDecimal bd)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         writeBigInteger(bd.unscaledValue());
         writeStopBit(bd.scale());
     }
 
-    default void writeBigInteger(@NotNull(exception = NullPointerException.class) BigInteger bi)
+    default void writeBigInteger(@NotNull BigInteger bi)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         byte[] bytes = bi.toByteArray();
         writeStopBit(bytes.length);
         write(bytes);
     }
 
-    default void writeWithLength(@NotNull(exception = NullPointerException.class) RandomDataInput bytes)
+    default void writeWithLength(@NotNull RandomDataInput bytes)
             throws BufferOverflowException, IllegalStateException {
         writeStopBit(bytes.readRemaining());
         write(bytes);

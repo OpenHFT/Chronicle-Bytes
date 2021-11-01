@@ -43,12 +43,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class SingleMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
-    public SingleMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile)
+    public SingleMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
         this(mappedFile, "");
     }
 
-    protected SingleMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile, final String name)
+    protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);
 
@@ -62,7 +62,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
-                                            @NotNull(exception = NullPointerException.class) final byte[] bytes,
+                                            @NotNull final byte[] bytes,
                                             int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
@@ -100,7 +100,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull SingleMappedBytes write(final long writeOffset,
-                                            @NotNull(exception = NullPointerException.class) final RandomDataInput bytes,
+                                            @NotNull final RandomDataInput bytes,
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {

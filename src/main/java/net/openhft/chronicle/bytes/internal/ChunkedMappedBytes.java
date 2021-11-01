@@ -44,12 +44,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
-    public ChunkedMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile)
+    public ChunkedMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
         this(mappedFile, "");
     }
 
-    protected ChunkedMappedBytes(@NotNull(exception = NullPointerException.class) final MappedFile mappedFile, final String name)
+    protected ChunkedMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);
     }
@@ -97,7 +97,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     public @NotNull ChunkedMappedBytes write(final long writeOffset,
-                                             @NotNull(exception = NullPointerException.class) final RandomDataInput bytes,
+                                             @NotNull final RandomDataInput bytes,
                                              long readOffset,
                                              final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
@@ -403,7 +403,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) final BytesStore bytes,
+    public Bytes<Void> write(@NotNull final BytesStore bytes,
                              final long offset,
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
@@ -554,7 +554,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(@NotNull(exception = NullPointerException.class) char[] chars, int offset, int length)
+    public Bytes<Void> appendUtf8(@NotNull char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         requireNonNull(chars);
         throwExceptionIfClosed();

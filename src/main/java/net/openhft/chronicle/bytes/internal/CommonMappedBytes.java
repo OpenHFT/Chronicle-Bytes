@@ -77,7 +77,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         super.bytesStore(bytesStore);
     }
 
-    public @NotNull CommonMappedBytes write(@NotNull(exception = NullPointerException.class) final byte[] bytes,
+    public @NotNull CommonMappedBytes write(@NotNull final byte[] bytes,
                                             final int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
@@ -91,7 +91,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public CommonMappedBytes write(@NotNull(exception = NullPointerException.class) final RandomDataInput bytes)
+    public CommonMappedBytes write(@NotNull final RandomDataInput bytes)
             throws IllegalStateException, BufferOverflowException {
         requireNonNull(bytes);
         throwExceptionIfClosed();
@@ -111,7 +111,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     };
 
     @NotNull
-    public CommonMappedBytes write(final long offsetInRDO, @NotNull(exception = NullPointerException.class) final RandomDataInput bytes)
+    public CommonMappedBytes write(final long offsetInRDO, @NotNull final RandomDataInput bytes)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         throwExceptionIfClosed();
@@ -243,7 +243,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     @NotNull
-    public Bytes<Void> write(@NotNull(exception = NullPointerException.class) final RandomDataInput bytes,
+    public Bytes<Void> write(@NotNull final RandomDataInput bytes,
                              final long offset,
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
@@ -261,7 +261,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> append8bit(@NotNull(exception = NullPointerException.class) CharSequence text, int start, int end)
+    public Bytes<Void> append8bit(@NotNull CharSequence text, int start, int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
             IndexOutOfBoundsException, IllegalStateException {
         requireNonNull(text);
@@ -278,7 +278,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     @NotNull
-    public CommonMappedBytes write8bit(@NotNull(exception = NullPointerException.class) CharSequence text, int start, int length)
+    public CommonMappedBytes write8bit(@NotNull CharSequence text, int start, int length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IndexOutOfBoundsException {
         requireNonNull(text);
         throwExceptionIfClosed();
@@ -298,7 +298,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @NotNull
-    private CommonMappedBytes append8bit0(@NotNull(exception = NullPointerException.class) String s, int start, int length)
+    private CommonMappedBytes append8bit0(@NotNull String s, int start, int length)
             throws BufferOverflowException, IllegalStateException {
 
         requireNonNull(s);
@@ -343,7 +343,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(@NotNull(exception = NullPointerException.class) CharSequence cs, int start, int length)
+    public Bytes<Void> appendUtf8(@NotNull CharSequence cs, int start, int length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IndexOutOfBoundsException {
         requireNonNull(cs);
         throwExceptionIfClosed();

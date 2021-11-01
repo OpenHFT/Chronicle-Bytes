@@ -305,7 +305,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    default int copyTo(@NotNull(exception = NullPointerException.class) byte[] bytes)
+    default int copyTo(@NotNull byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
@@ -321,7 +321,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @throws IllegalStateException if released
      */
-    default int copyTo(@NotNull(exception = NullPointerException.class) ByteBuffer bb)
+    default int copyTo(@NotNull ByteBuffer bb)
             throws BufferUnderflowException, IllegalStateException {
         int pos = bb.position();
         int len = (int) Math.min(bb.remaining(), readRemaining());
@@ -457,7 +457,7 @@ public interface RandomDataInput extends RandomCommon {
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      * @throws IllegalStateException    if released
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull(exception = NullPointerException.class) ACS sb)
+    default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
@@ -509,7 +509,7 @@ public interface RandomDataInput extends RandomCommon {
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     default <ACS extends Appendable & CharSequence> long readUtf8Limited(
-            long offset, @NotNull(exception = NullPointerException.class) ACS sb, int maxUtf8Len)
+            long offset, @NotNull ACS sb, int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             IllegalStateException {
         AppendableUtil.setLength(sb, 0);
@@ -586,7 +586,7 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.toByteArray(this);
     }
 
-    default long read(long offsetInRDI, @NotNull(exception = NullPointerException.class) byte[] bytes, int offset, int length)
+    default long read(long offsetInRDI, @NotNull byte[] bytes, int offset, int length)
             throws IllegalStateException {
         requireNonNull(bytes);
         try {

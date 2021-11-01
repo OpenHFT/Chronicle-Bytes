@@ -283,7 +283,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(@NotNull(exception = NullPointerException.class) BytesStore store) {
+    public long copyTo(@NotNull BytesStore store) {
         requireNonNull(store);
         // nothing to copy.
         return 0L;
@@ -295,13 +295,13 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long write8bit(long position, @NotNull(exception = NullPointerException.class) BytesStore bs) {
+    public long write8bit(long position, @NotNull BytesStore bs) {
         requireNonNull(bs);
         throw new BufferOverflowException();
     }
 
     @Override
-    public long write8bit(long position, @NotNull(exception = NullPointerException.class) String s, int start, int length) {
+    public long write8bit(long position, @NotNull String s, int start, int length) {
         requireNonNull(s);
         throw new BufferOverflowException();
     }
@@ -327,7 +327,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(@NotNull(exception = NullPointerException.class) BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
         requireNonNull(bytesStore);
         return length == 0;
     }
