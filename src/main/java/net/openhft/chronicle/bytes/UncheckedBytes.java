@@ -58,7 +58,7 @@ public class UncheckedBytes<Underlying>
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore(underlying);
+            this.bytesStore(underlyingBytes);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());

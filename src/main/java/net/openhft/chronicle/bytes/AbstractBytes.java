@@ -1040,6 +1040,7 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     public int read(@NotNull byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;

@@ -28,7 +28,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     @BeforeEach
     void beforeEach() {
-        // Build a Map with info on the initial state allowing us asserting it did not change for
+        // Builds a Map with info on the initial state allowing us asserting it did not change for
         // illegal operations.
         // This method is using @BeforeEach rather than @BeforeAll so that the base class test can run
         if (INITIAL_INFO_MAP.isEmpty()) {
@@ -37,6 +37,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                         final Bytes<Object> bytes = bytes(args);
                         INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes(args)));
                         releaseAndAssertReleased(bytes);
+                        Jvm.pause(100);
                     });
             // Make sure we have unique keys
             assertEquals(provideBytesObjects().count(), INITIAL_INFO_MAP.size());
@@ -102,13 +103,13 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     // This test is for manual debug
     void manualTest() {
 
-        try {
+/*        try {
             final File file = File.createTempFile("mapped-file", "bin");
             final Bytes<?> bytes = MappedBytes.mappedBytes(file, SIZE);
             bytes.releaseLast();
         } catch (IOException ioException) {
             Jvm.rethrow(ioException);
-        }
+        }*/
 
 
 /*        try {
@@ -118,12 +119,12 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
             throw new RuntimeException(e);
         }*/
 
-
 /*
-        Bytes.allocateDirect(SIZE).unchecked(true)
-                .read(0L, (byte[]) null, 1, 1);
+        Bytes<?> bytes = Bytes.allocateDirect(SIZE);
+        //bytes = bytes.unchecked(true);
+        bytes.read((byte[]) null, 1, 1);
+        releaseAndAssertReleased(bytes);
 */
-
 
 /*        Bytes.allocateDirect(SIZE)
                 .readObject(null);*/
