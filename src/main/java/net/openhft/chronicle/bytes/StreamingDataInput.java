@@ -37,9 +37,10 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * This data input has a a position() and a limit()
+ * This data input has a position() and a limit()
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
@@ -108,6 +109,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
+        requireNonNull(bytesConsumer);
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -126,6 +128,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
+        requireNonNull(bytesConsumer);
         if (length > readRemaining())
             throw new BufferUnderflowException();
         long limit0 = readLimit();
@@ -401,6 +404,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default int read(@NotNull byte[] bytes, int off, int len)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;
@@ -415,6 +419,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default int read(@NotNull char[] bytes, int off, int len)
             throws IllegalStateException {
+        requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;
@@ -426,6 +431,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     default void read(@NotNull ByteBuffer buffer)
             throws IllegalStateException {
+        requireNonNull(buffer);
         for (int i = (int) Math.min(readRemaining(), buffer.remaining()); i > 0; i--)
             buffer.put(readByte());
     }
@@ -437,13 +443,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param bytes to copy to.
      * @see StreamingDataOutput#write(BytesStore)
      */
-    default void read(Bytes bytes) {
+    default void read(@NotNull final Bytes bytes) {
         int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));
         read(bytes, length);
     }
 
     default void read(@NotNull Bytes bytes, int length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         int len2 = (int) Math.min(length, readRemaining());
         int i = 0;
         for (; i < len2 - 7; i += 8)
@@ -452,13 +459,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes.rawWriteByte(rawReadByte());
     }
 
-    default void unsafeReadObject(Object o, int length)
+    default void unsafeReadObject(@NotNull Object o, int length)
             throws BufferUnderflowException, IllegalStateException {
         unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
-    default void unsafeReadObject(Object o, int offset, int length)
+    default void unsafeReadObject(@NotNull Object o, int offset, int length)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(o);
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
@@ -515,7 +523,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param sb            buffer to copy into
      * @param encodedLength length of the UTF encoded data in bytes
      */
-    default void parseUtf8(Appendable sb, int encodedLength)
+    default void parseUtf8(@NotNull Appendable sb, int encodedLength)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         parseUtf8(sb, true, encodedLength);
     }
@@ -527,7 +535,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param utf    true if the length is the UTF-8 encoded length, false if the length is the length of chars
      * @param length to limit the read.
      */
-    default void parseUtf8(Appendable sb, boolean utf, int length)
+    default void parseUtf8(@NotNull Appendable sb, boolean utf, int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUtf8(this, sb, utf, length);
@@ -538,10 +546,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.parseHexLong(this);
     }
 
-    void copyTo(OutputStream out)
+    void copyTo(@NotNull OutputStream out)
             throws IOException, IllegalStateException;
 
-    long copyTo(BytesStore to)
+    long copyTo(@NotNull BytesStore to)
             throws IllegalStateException;
 
     default void readHistogram(@NotNull Histogram histogram)
@@ -549,7 +557,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         BytesInternal.readHistogram(this, histogram);
     }
 
-    default void readWithLength(Bytes bytes)
+    default void readWithLength(@NotNull Bytes bytes)
             throws ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalStateException {
         bytes.clear();
         int length = Maths.toUInt31(readStopBit());

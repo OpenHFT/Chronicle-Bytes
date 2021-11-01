@@ -35,6 +35,7 @@ import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<Underlying>
@@ -516,6 +517,7 @@ public class NativeBytesStore<Underlying>
     public NativeBytesStore<Underlying> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
         return this;
     }
@@ -627,9 +629,9 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
-        long addressForWrite = addressForWrite(position);
+    public long write8bit(long position, @NotNull BytesStore bs) {
         final long length = bs.readRemaining();
+        long addressForWrite = addressForWrite(position);
 
         addressForWrite = BytesUtil.writeStopBit(addressForWrite, length);
 
@@ -646,13 +648,15 @@ public class NativeBytesStore<Underlying>
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull String s, int start, int length) {
+        requireNonNull(s);
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.copy8bit(s, start, length, addressForWrite(position));
         return position + length;
     }
 
     private void copy8bit(byte[] arr, long readPosition, long addressForWrite, long readRemaining) {
+        requireNonNull(arr);
         int readOffset = Math.toIntExact(readPosition);
         int length = Math.toIntExact(readRemaining);
         MEMORY.copyMemory(arr, readOffset, addressForWrite, length);
@@ -697,6 +701,7 @@ public class NativeBytesStore<Underlying>
 
     public long appendUtf8(long pos, char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(chars);
         if (pos + length > realCapacity())
             throw new BufferOverflowException();
 
@@ -825,6 +830,7 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+        requireNonNull(bytes);
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
 
         memory.readBytes(this.address + translate(offsetInRDI), bytes, offset, len);

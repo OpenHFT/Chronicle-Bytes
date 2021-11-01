@@ -26,6 +26,7 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
      * Set the readPosition= writePosition = start, writeLimit = capacity
      *
      * @return this
+     * @throws IllegalStateException if this resource has been previously released
      */
     @NotNull
     S clear()

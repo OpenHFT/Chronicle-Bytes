@@ -27,6 +27,8 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
  * The thread safety of the underlying data depends on how the methods are used.
@@ -586,8 +588,9 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.toByteArray(this);
     }
 
-    default long read(long offsetInRDI, byte[] bytes, int offset, int length)
+    default long read(long offsetInRDI, @NotNull byte[] bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         try {
             int len = (int) Math.min(length, readLimit() - offsetInRDI);
             for (int i = 0; i < len; i++)

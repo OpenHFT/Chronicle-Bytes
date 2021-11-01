@@ -31,6 +31,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
@@ -132,6 +133,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity)
             throws IllegalStateException, IllegalArgumentException {
+        requireNonNull(bs);
         return newGuarded
                 ? new GuardedNativeBytes(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
@@ -295,7 +297,7 @@ public class NativeBytes<Underlying>
     }
 
     @Override
-    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
@@ -303,6 +305,7 @@ public class NativeBytes<Underlying>
 
     @Override
     public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+        requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
         super.bytesStore(byteStore, offset, length);
@@ -321,6 +324,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes bytes)
             throws IllegalStateException {
+        requireNonNull(bytes);
         ReportUnoptimised.reportOnce();
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());

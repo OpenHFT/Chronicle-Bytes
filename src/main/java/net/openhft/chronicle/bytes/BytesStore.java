@@ -728,9 +728,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Returns <code>true</code>.
+     * Returns if this ByteStore can be both read from and written to.
+     * <p>
+     * This is in contrast to a ByteStore than can only be read.
      *
-     * @return whether this BytesStore is writable.
+     * @return if this ByteStore can be both read from and written to
      */
     default boolean readWrite() {
         return true;
