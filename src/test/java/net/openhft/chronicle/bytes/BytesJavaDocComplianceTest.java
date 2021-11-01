@@ -1,7 +1,8 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
+import net.openhft.chronicle.bytes.internal.EnbeddedBytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -18,7 +19,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.bytes.BytesStore.wrap;
+import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
@@ -26,11 +27,13 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     private static final Map<String, BytesInitialInfo> INITIAL_INFO_MAP = new LinkedHashMap<>();
 
+    /**
+     * Builds a Map with info on the initial state allowing us asserting it did not change for
+     * illegal operations.
+     * This method is using @BeforeEach rather than @BeforeAll so that the base class test can run
+     */
     @BeforeEach
     void beforeEach() {
-        // Builds a Map with info on the initial state allowing us asserting it did not change for
-        // illegal operations.
-        // This method is using @BeforeEach rather than @BeforeAll so that the base class test can run
         if (INITIAL_INFO_MAP.isEmpty()) {
             provideBytesObjects()
                     .forEach(args -> {
@@ -44,27 +47,43 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         }
     }
 
+    /**
+     * Prints out the various Bytes classes tested on the logs. To be removed later
+     */
     @ParameterizedTest
-    @MethodSource("provideBytesObjects")
-        // Prints out the various Bytes classes tested on the logs. To be removed later
+    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void printTypesTested(final Bytes<?> bytes) {
         System.out.println(bytes.getClass().getName());
         releaseAndAssertReleased(bytes);
     }
 
+    /**
+     * Checks that ByteBuffers that are read only cannot be wrapped
+     */
+    @Test
+    void wrapForWriteCannotTakeReadOnlyByteBuffers() {
+        assertThrows(ReadOnlyBufferException.class, () ->
+                Bytes.wrapForWrite(ByteBuffer.allocate(10).asReadOnlyBuffer())
+        );
+    }
+
+    /**
+     * Checks the Bytes::unchecked method
+     */
     @ParameterizedTest
-    @MethodSource("provideBytesObjects")
-        // Checks the Bytes::unchecked method
+    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     @Disabled("Check why  SingleMappedFile Discarded without being released by [SingleMappedBytes@5 refCount=1 closed=false]")
     void unchecked(final Bytes<?> bytes) {
         assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked());
         releaseAndAssertReleased(bytes);
     }
 
+    /**
+     * Checks the Bytes::readWrite method.
+     */
     @ParameterizedTest
-    @MethodSource("provideBytesObjects")
+    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/239")
-        // Checks the Bytes::readWrite method
     void readWrite(final Bytes<?> bytes,
                    final boolean readWrite) {
 
@@ -83,8 +102,10 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         releaseAndAssertReleased(bytes);
     }
 
+    /**
+     * Checks that ByteBuffers that are read only cannot be wrapped.
+     */
     @Test
-        // Checks that ByteBuffers that are read only cannot be wrapped
     void wrapForReadCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
         assertThrows(ReadOnlyBufferException.class, () ->
@@ -101,69 +122,54 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         );
     }
 
-    // @Test
-    // This test is for manual debug
-    void manualTest() {
-
-/*        try {
-            final File file = File.createTempFile("mapped-file", "bin");
-            final Bytes<?> bytes = MappedBytes.mappedBytes(file, SIZE);
-            bytes.releaseLast();
-        } catch (IOException ioException) {
-            Jvm.rethrow(ioException);
-        }*/
-
-
-/*        try {
-            Bytes.allocateDirect(SIZE)
-                    .write((InputStream) null);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }*/
-
-/*
-        Bytes<?> bytes = Bytes.allocateDirect(SIZE);
-        //bytes = bytes.unchecked(true);
-        bytes.read((byte[]) null, 1, 1);
-        releaseAndAssertReleased(bytes);
-*/
-
-/*        Bytes.allocateDirect(SIZE)
-                .readObject(null);*/
-
-    }
-
     // Todo: Do some write operations so that we know we have content then try operations
 
+    /**
+     * Checks that methods with objet references that are annotated with @NotNull throw a NullPointerException when null is provided
+     * and that no modification of the Bytes object's internal state is made in such cases.
+     */
     @TestFactory
-        // Checks that methods with objet references that are annotated with @NotNull throw a NullPointerException when null is provided
-        // and that no modification of the Bytes object's internal state is made in such cases.
     Stream<DynamicTest> nonNullableOperators() {
-        return cartesianProductTest(BytesJavaDocComplianceTest::provideBytesObjects,
+        return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideThrowsMullPointerExceptionOperations,
                 (args, bytes, nc) -> {
                     final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();
+
                     assertThrows(NullPointerException.class, () -> nc.accept(bytes), name);
+
                     if (isReadWrite(args)) {
-                        assertNeverWrittenTo(bytes);
+                        if (!(ChunkedMappedBytes.class.isInstance(bytes))) {
+                            // Unfortunately, inspecting a ChunkedMappedBytes may change its actualSize(), so no check there
+
+                            if (EnbeddedBytes.class.isInstance(bytes)) {
+                                int foo = 1;
+                            }
+
+                            assertNeverWrittenTo(bytes);
+                        }
                     }
                     assertPropertiesNotChanged(createCommand(args), bytes);
                 }
         );
     }
 
+    /**
+     * Checks that methods with objet references that are annotated with @Nullable *does not* throw a NullPointerException when null is provided
+     * and that the Bytes object's internal state is indeed modified.
+     */
     @TestFactory
-        // Checks that methods with objet references that are annotated with @Nullable *does not* throw a NullPointerException when null is provided
-        // and that the Bytes object's internal state is indeed modified.
     Stream<DynamicTest> nullableOperators() {
-        return cartesianProductTest(BytesJavaDocComplianceTest::provideBytesObjects,
+        return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
                 BytesJavaDocComplianceTest::provideNullableOperations,
                 (args, bytes, nc) -> {
+                    // Any content from a previous operation is cleared
+                    bytes.clear();
+                    // System.out.println(bytes.getClass().getSimpleName() + " " + isReadWrite(args)+", writePosition()="+bytes.writePosition());
+
                     if (isReadWrite(args)) {
                         assertDoesNotThrow(() -> nc.accept(bytes));
                         // Make sure something was written
-                        assertNotEquals(0, bytes.readByte(0));
-                        assertNotEquals(0L, bytes.writePosition());
+                        assertNotEquals(0, bytes.readShort(0));
                     } else {
                         assertPropertiesNotChanged(createCommand(args), bytes);
                     }
@@ -300,7 +306,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
     }
 
-
     @FunctionalInterface
     private interface ThrowingConsumer<T, X extends Exception> {
         void accept(T t) throws X;
@@ -325,85 +330,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
             } catch (Exception e) {
                 Jvm.rethrow(e);
             }
-        }
-    }
-
-    private static void releaseAndAssertReleased(ReferenceCounted referenceCounted) {
-        referenceCounted.releaseLast();
-        assertEquals(0, referenceCounted.refCount());
-    }
-
-    private static Stream<Arguments> provideBytesObjects() {
-        final ByteBuffer heapByteBuffer = ByteBuffer.allocate(SIZE);
-        final ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(SIZE);
-
-        try {
-            final File file = File.createTempFile("mapped-file", "bin");
-            final File fileRo = File.createTempFile("mapped-file-ro", "bin");
-            final File singleFile = File.createTempFile("single-mapped-file", "bin");
-            final File singleFileRo = File.createTempFile("single-mapped-file-ro", "bin");
-            final MassiveFieldHolder holder = new MassiveFieldHolder();
-            return Stream.of(
-                    Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)"),
-                    Arguments.of(Bytes.allocateElasticOnHeap(SIZE), true, "Bytes.allocateElasticOnHeap(SIZE)"),
-                    Arguments.of(wipe(Bytes.allocateElasticDirect()), true, "Bytes.allocateElasticDirect()"),
-                    Arguments.of(Bytes.wrapForWrite(heapByteBuffer), true, "Bytes.wrapForWrite(heapByteBuffer)"),
-                    Arguments.of(Bytes.wrapForWrite(directByteBuffer), true, "Bytes.wrapForWrite(directByteBuffer)"),
-                    Arguments.of(MappedBytes.mappedBytes(file, SIZE), true, "MappedBytes.mappedBytes(file, SIZE)"),
-                    Arguments.of(MappedBytes.mappedBytes(fileRo, SIZE, 0, true), false, "MappedBytes.mappedBytes(fileRo, SIZE, 0, true)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFile, SIZE), true, "MappedBytes.singleMappedBytes(singleFile, SIZE)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, SIZE, true)"),
-                    Arguments.of(Bytes.forFieldGroup(holder, "b"), true, "Bytes.forFieldGroup(holder, \"b\")"),
-                    Arguments.of(new UncheckedBytes<>(Bytes.allocateDirect(SIZE)), true, "new UncheckedBytes<>(Bytes.allocateDirect(SIZE))"),
-                    Arguments.of(new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE])), true, "new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE]))"),
-                    Arguments.of(new HexDumpBytes(), true, "new HexDumpBytes()"),
-                    Arguments.of(Bytes.allocateDirect(SIZE).unchecked(true), true, "Bytes.allocateDirect(SIZE).unchecked(true)"),
-                    Arguments.of(Bytes.allocateElasticOnHeap(SIZE).unchecked(true), true, "Bytes.allocateElasticOnHeap(SIZE).unchecked(true)"),
-                    Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
-            );
-        } catch (IOException ioException) {
-            throw new AssertionError("Unable to create Bytes", ioException);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Bytes<Object> bytes(Arguments arguments) {
-        return ((Bytes<Object>) arguments.get()[0]);
-    }
-
-    private static boolean isReadWrite(Arguments arguments) {
-        return Boolean.FALSE.equals(arguments.get()[2]);
-    }
-
-    private static String createCommand(Arguments arguments) {
-        return arguments.get()[2].toString();
-    }
-
-    private static final class MassiveFieldHolder {
-
-        @FieldGroup("b")
-        long a0, a1, a2, a3, a4, a5, a6, a7;
-        long b0, b1, b2, b3, b4, b5, b6, b7;
-        //final byte[] bytes = new byte[SIZE];
-
-        static {
-            // Fields above must match
-            assert SIZE == Long.BYTES * 8 * 2;
-        }
-
-    }
-
-    private static <B extends Bytes<U>, U> B wipe(B bytes) {
-        for (int i = 0; i < SIZE; i++) {
-            bytes.writeByte((byte) 0);
-        }
-        return bytes;
-    }
-
-    private void assertNeverWrittenTo(final Bytes<Object> bytes) {
-        assertTrue(bytes.isClear());
-        for (int i = 0; i < SIZE; i++) {
-            assertEquals(0, bytes.readByte(i));
         }
     }
 
@@ -476,5 +402,53 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         }
     }
 
+
+    /**
+     * This test is for manual debug
+     */
+    @Test
+    void manualTest() {
+
+        // try {
+        //   final File file = create(File.createTempFile("mapped-file", "bin"), SIZE);
+        //    final Bytes<?> bytes = MappedBytes.mappedBytes(file, SIZE);
+        //   bytes.realCapacity();
+        //   System.out.println("bytes.realCapacity() = " + bytes.realCapacity());
+        //    try {
+        //       bytes.write((InputStream) null);
+        //   } catch (Exception e) {
+        //       //ignore
+        //   }
+        //   System.out.println("bytes.realCapacity() = " + bytes.realCapacity());
+        //   bytes.releaseLast();
+        //} catch (IOException ioException) {
+        //   Jvm.rethrow(ioException);
+        //}
+
+        //try {
+        //   Bytes.allocateDirect(SIZE)
+        //            .write((InputStream) null);
+        //} catch (Exception e) {
+        //    throw new RuntimeException(e);
+        // }
+
+        // Bytes<?> bytes = Bytes.allocateDirect(SIZE);
+        // bytes.writeUtf8(1, (CharSequence) null);
+        // releaseAndAssertReleased(bytes);
+
+
+        // Bytes.allocateDirect(SIZE)
+        //        .readObject(null);
+
+        // MassiveFieldHolder holder = new MassiveFieldHolder();
+        // Bytes<MassiveFieldHolder> bytes = Bytes.forFieldGroup(holder, "b");
+        // try {
+//            bytes.write((InputStream) null);
+//        } catch (Exception e) {
+//            throw new RuntimeException(e);
+//        }
+//        releaseAndAssertReleased(bytes);
+
+    }
 
 }
