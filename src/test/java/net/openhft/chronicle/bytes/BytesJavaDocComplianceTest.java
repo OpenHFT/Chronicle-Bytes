@@ -38,7 +38,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
             provideBytesObjects()
                     .forEach(args -> {
                         final Bytes<Object> bytes = bytes(args);
-                        INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes(args)));
+                        INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes));
                         releaseAndAssertReleased(bytes);
                         Jvm.pause(100);
                     });
@@ -110,15 +110,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
         assertThrows(ReadOnlyBufferException.class, () ->
                 Bytes.wrapForRead(bb)
-        );
-    }
-
-    @Test
-        // Checks that ByteBuffers that are read only cannot be wrapped
-    void wrapForWriteCannotTakeReadOnlyByteBuffers() {
-        final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
-        assertThrows(ReadOnlyBufferException.class, () ->
-                Bytes.wrapForWrite(bb)
         );
     }
 
