@@ -55,10 +55,10 @@ public class UncheckedBytes<Underlying>
     public void setBytes(@NotNull Bytes bytes)
             throws IllegalStateException {
         requireNonNull(bytes);
-        BytesStore underlyingBytes = bytes.bytesStore();
-        if (bytesStore != underlyingBytes) {
+        final BytesStore underlying = bytes.bytesStore();
+        if (bytesStore != underlying) {
             bytesStore.release(this);
-            this.bytesStore(underlyingBytes);
+            this.bytesStore(underlying);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -318,10 +318,4 @@ public class UncheckedBytes<Underlying>
         return this;
     }
 
-    @Override
-    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
-            throws BufferOverflowException {
-        // Todo: Optimize this
-        super.write(offsetInRDO, bytes, offset, length);
-    }
 }

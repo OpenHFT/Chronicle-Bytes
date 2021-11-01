@@ -303,7 +303,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param bytes       copy from bytes
      * @param readOffset  copy from offset
      * @param length
-     * @return this
      * @throws BufferOverflowException
      * @throws IllegalStateException
      */

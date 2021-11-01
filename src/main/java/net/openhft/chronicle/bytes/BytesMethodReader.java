@@ -44,9 +44,9 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         for (int i = 0; i < count; i++) {
             array[0][i] = (BytesMarshallable) ObjectUtils.newInstance(parameterTypes[i]);
         }
-        Consumer<BytesIn> reader = in -> {
+        Consumer<BytesIn> reader = bytesIn -> {
             try {
-                array[0] = (BytesMarshallable[]) encoder.decode(array[0], in);
+                array[0] = (BytesMarshallable[]) encoder.decode(array[0], bytesIn);
                 method.invoke(object, array[0]);
             } catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException | IllegalArgumentException | IllegalStateException e) {
                 Jvm.warn().on(getClass(), "Exception calling " + method + " " + Arrays.toString(array[0]), e);
