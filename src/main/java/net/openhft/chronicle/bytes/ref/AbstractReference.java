@@ -37,7 +37,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     protected BytesStore<?, ?> bytes;
     protected long offset;
 
-    public AbstractReference() {
+    protected AbstractReference() {
         // assume thread safe.
         disableThreadSafetyCheck(true);
     }
@@ -64,9 +64,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     public long offset() {
         return offset;
     }
-
-    @Override
-    public abstract long maxSize();
 
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {

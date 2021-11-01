@@ -98,7 +98,7 @@ public interface BinaryWireCode {
 
     String[] STRING_FOR_CODE = _stringForCode(BinaryWireCode.class);
 
-    static String[] _stringForCode(Class clazz) {
+    static String[] _stringForCode(Class<?> clazz) {
         String[] stringForCode = new String[256];
         try {
             for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -113,10 +113,11 @@ public interface BinaryWireCode {
                 stringForCode[i] = "STRING_" + i;
             for (int i = 0; i < stringForCode.length; i++) {
                 if (stringForCode[i] == null)
-                    if (i <= ' ' || i >= 127)
+                    if (i <= ' ' || i >= 127) {
                         stringForCode[i] = "Unknown_0x" + Integer.toHexString(i).toUpperCase();
-                    else
+                    } else {
                         stringForCode[i] = "Unknown_" + (char) i;
+                    }
             }
         } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new AssertionError(e);

@@ -62,6 +62,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * object that has been released, might result in an {@link IllegalStateException} being thrown.
  *
  * @see BytesStore
+ * @param <Underlying> Underlying type
+ *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<U> extends
@@ -493,7 +495,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
     @NotNull
-    static Bytes<?> from(@NotNull CharSequence text) {
+    static Bytes<byte[]> from(@NotNull CharSequence text) {
         requireNonNull(text);
         return from(text.toString());
     }
@@ -509,7 +511,7 @@ public interface Bytes<U> extends
      * @return a new Bytes containing text
      * @throws NullPointerException if the provided {@code text} is {@code null}
      */
-    static Bytes<?> fromDirect(@NotNull CharSequence text) {
+    static Bytes<Void> fromDirect(@NotNull CharSequence text) {
         requireNonNull(text);
         return NativeBytes.nativeBytes(text.length()).append(text);
     }
@@ -829,6 +831,7 @@ public interface Bytes<U> extends
                     long j = i + 1;
                     long end = j + otherCount - 1;
                     for (long k = otherOffset + 1; j < end && source.readByte(j) == other.readByte(k); j++, k++) {
+                        // Do nothing
                     }
 
                     if (j == end) {
@@ -952,8 +955,6 @@ public interface Bytes<U> extends
     default String toHexString(long offset, long maxLength) {
         requireNonNegative(offset);
         requireNonNegative(maxLength);
-//        if (Jvm.isDebug() && Jvm.stackTraceEndsWith("Bytes", 3))
-//            return "Not Available";
 
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         try {
@@ -1129,10 +1130,11 @@ public interface Bytes<U> extends
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
         int length = Maths.toUInt31(readStopBit());
         if (length == 0)
-            if (lenient())
+            if (lenient()) {
                 return BigInteger.ZERO;
-            else
+            } else {
                 throw new BufferUnderflowException();
+            }
         byte[] bytes = new byte[length];
         read(bytes);
         return new BigInteger(bytes);

@@ -61,6 +61,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
         }
     }
 
+    @Override
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
                                             @NotNull final byte[] bytes,
                                             int offset,
@@ -99,6 +100,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     }
 
+    @Override
     public @NotNull SingleMappedBytes write(final long writeOffset,
                                             @NotNull final RandomDataInput bytes,
                                             long readOffset,
@@ -162,12 +164,6 @@ public class SingleMappedBytes extends CommonMappedBytes {
         }
     }
 
-    private long checkSize(long adding) {
-        if (adding < 0 || adding > MAX_CAPACITY)
-            throw new IllegalArgumentException("Invalid size " + adding);
-        return adding;
-    }
-
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
@@ -179,7 +175,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     @NotNull
-    private BufferOverflowException writeBufferOverflowException(final long offset) {
+    private BufferOverflowException newBufferOverflowException(final long offset) {
         BufferOverflowException exception = new BufferOverflowException();
         exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
         return exception;
@@ -222,9 +218,8 @@ public class SingleMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (offset < 0 || offset > capacity())
-            throw writeBufferOverflowException(offset);
+            throw newBufferOverflowException(offset);
 
-//        super.writeCheckOffset(offset, adding);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 }

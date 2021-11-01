@@ -48,6 +48,8 @@ public class UncheckedBytes<Underlying>
                 Math.min(underlyingBytes.writeLimit(), underlyingBytes.realCapacity()));
         this.underlyingBytes = underlyingBytes;
         readPosition(underlyingBytes.readPosition());
+        if (writeLimit > capacity())
+            writeLimit(capacity());
     }
 
     public void setBytes(@NotNull Bytes bytes)
@@ -56,7 +58,7 @@ public class UncheckedBytes<Underlying>
         BytesStore underlyingBytes = bytes.bytesStore();
         if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore(underlyingBytes);
+            this.bytesStore(underlying);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -171,7 +173,8 @@ public class UncheckedBytes<Underlying>
     @Override
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException {
-        return readPosition -= subtracting;
+        readPosition -= subtracting;
+        return readPosition;
     }
 
     @NotNull
@@ -189,6 +192,7 @@ public class UncheckedBytes<Underlying>
     }
 
     @NotNull
+    @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         requireNonNull(bytes);
@@ -317,6 +321,7 @@ public class UncheckedBytes<Underlying>
     @Override
     public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
-
+        // Todo: Optimize this
+        super.write(offsetInRDO, bytes, offset, length);
     }
 }

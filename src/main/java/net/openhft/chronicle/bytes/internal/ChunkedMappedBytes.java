@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -40,7 +41,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
@@ -54,6 +55,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         super(mappedFile, name);
     }
 
+    @Override
     public @NotNull ChunkedMappedBytes write(final long offsetInRDO,
                                              final byte[] bytes,
                                              int offset,
@@ -96,6 +98,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     }
 
+    @Override
     public @NotNull ChunkedMappedBytes write(final long writeOffset,
                                              @NotNull final RandomDataInput bytes,
                                              long readOffset,
@@ -242,7 +245,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                                    final boolean given)
             throws BufferUnderflowException, IllegalStateException {
         final long check = adding >= 0 ? offset : offset + adding;
-        //noinspection StatementWithEmptyBody
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(check, adding)) {
@@ -257,15 +259,16 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         throwExceptionIfClosed();
         if (offset < 0 || offset > mappedFile.capacity() - adding)
-            throw writeBufferOverflowException(offset);
+            throw writeBufferOverflowException0(offset);
         BytesStore bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, checkSize(adding))) {
+        if (!bytesStore.inside(offset, checkSize0(adding))) {
             acquireNextByteStore0(offset, false);
+            if (!this.bytesStore.inside(offset, checkSize0(adding)))
+                throw new DecoratedBufferUnderflowException(String.format("Acquired the next BytesStore, but still not room to add %d when realCapacity %d", adding, this.bytesStore.realCapacity()));
         }
-//        super.writeCheckOffset(offset, adding);
     }
 
-    private long checkSize(long adding) {
+    private long checkSize0(long adding) {
         if (adding < 0 || adding > MAX_CAPACITY)
             throw new IllegalArgumentException("Invalid size " + adding);
         return adding;
@@ -277,7 +280,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         BytesStore bytesStore = this.bytesStore;
-        if (!bytesStore.inside(writePosition(), checkSize(desiredCapacity))) {
+        if (!bytesStore.inside(writePosition(), checkSize0(desiredCapacity))) {
             acquireNextByteStore0(writePosition(), false);
         }
     }
@@ -293,7 +296,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @NotNull
-    private BufferOverflowException writeBufferOverflowException(final long offset) {
+    private BufferOverflowException writeBufferOverflowException0(final long offset) {
         BufferOverflowException exception = new BufferOverflowException();
         exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
         return exception;
@@ -385,7 +388,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         final long oldPosition = writePosition();
         if (writePosition() < 0 || writePosition() > capacity() - 1)
-            throw writeBufferOverflowException(writePosition());
+            throw writeBufferOverflowException0(writePosition());
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(writePosition(), 1)) {
             // already determined we need it
@@ -560,7 +563,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (writePosition() < 0 || writePosition() > capacity() - 1L + length)
-            throw writeBufferOverflowException(writePosition());
+            throw writeBufferOverflowException0(writePosition());
         int i;
         ascii:
         {
@@ -593,7 +596,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
 
         if (offset < 0 || offset > mappedFile.capacity() - 8L)
-            throw writeBufferOverflowException(offset);
+            throw writeBufferOverflowException0(offset);
         // this is correct that it uses the maximumLimit, yes it is different from the method above.
         BytesStore bytesStore = this.bytesStore;
         if (bytesStore.start() > offset || offset + 8L > bytesStore.safeLimit()) {

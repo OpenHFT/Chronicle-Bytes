@@ -47,11 +47,11 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
         MethodEncoder info = methodToIdMap.computeIfAbsent(method, methodToId);
         if (info == null) {
             Jvm.warn().on(getClass(), "Unknown method " + method + " ignored");
-            return null;
+        } else {
+            out.comment(method.getName());
+            out.writeStopBit(info.messageId());
+            info.encode(args, out);
         }
-        out.comment(method.getName());
-        out.writeStopBit(info.messageId());
-        info.encode(args, out);
         return null;
     }
 }

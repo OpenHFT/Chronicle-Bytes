@@ -26,13 +26,15 @@
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.22ea9-SNAPSHOT</version>
+    <version>2.22ea11-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
 
     <properties>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
+        <sonar.organization>openhft</sonar.organization>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
 
     <dependencyManagement>
@@ -101,6 +103,12 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>affinity</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-simple</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -302,7 +310,7 @@
         <tag>ea</tag>
     </scm>
 
-    <profiles>
+<!--    <profiles>
         <profile>
             <id>sonar</id>
             <build>
@@ -310,7 +318,6 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
-                        <version>0.8.6</version>
                         <executions>
                             <execution>
                                 <goals>
@@ -329,11 +336,10 @@
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
-                        <version>3.8.0.2131</version>
                     </plugin>
                 </plugins>
             </build>
         </profile>
-    </profiles>
+    </profiles>-->
 
 </project>

@@ -21,13 +21,13 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
     public void assignTwo()
             throws InterruptedException {
         assumeTrue(OS.isLinux() && !Jvm.isArm());
-        BlockingQueue t0started = new LinkedBlockingQueue();
-        BlockingQueue t1started = new LinkedBlockingQueue();
-        BlockingQueue t2started = new LinkedBlockingQueue();
-        BlockingQueue testDone = new LinkedBlockingQueue();
+        final BlockingQueue<String> t0started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> t1started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> t2started = new LinkedBlockingQueue<>();
+        final BlockingQueue<String> testDone = new LinkedBlockingQueue<>();
 
-        Bytes bytes = Bytes.allocateDirect(64);
-        BinaryIntArrayReference iav = new BinaryIntArrayReference(2);
+        final Bytes<?> bytes = Bytes.allocateDirect(64);
+        final BinaryIntArrayReference iav = new BinaryIntArrayReference(2);
         // write the template
         iav.writeMarshallable(bytes);
         // bind to the template
@@ -72,9 +72,8 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
         t1started.poll(1, TimeUnit.SECONDS);
         try {
             int id = ta.getId();
-            System.out.println("id=" + id);
             fail();
-        } catch (IllegalStateException e) {
+        } catch (IllegalStateException ignore) {
             // expected
         }
         t2started.put("");

@@ -29,6 +29,9 @@ import java.nio.channels.FileLock;
  * This Interface allows a reference to off heap memory to be reassigned.
  * <p></p>
  * A reference to off heap memory is a proxy for some memory which sits outside the heap.
+ *
+ * @param <B> Bytes type
+ * @param <Underlying> Underlying type
  */
 public interface Byteable<B extends BytesStore<B, Underlying>, Underlying> {
     /**

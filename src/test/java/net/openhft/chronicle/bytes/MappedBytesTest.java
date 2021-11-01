@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
@@ -22,8 +23,8 @@ import static org.junit.Assert.*;
 @SuppressWarnings("rawtypes")
 public class MappedBytesTest extends BytesTestCommon {
 
-    final private String
-            smallText = "It's ten years since the iPhone was first unveiled and Apple has marked " +
+    private static final String
+            SMALL_TEXT = "It's ten years since the iPhone was first unveiled and Apple has marked " +
             "the occas" +
             "ion with a new iPhone that doesn't just jump one generation, it jumps several. " +
             "Apple has leapt straight from iPhone 7 (via the iPhone 8, reviewed here) all the way " +
@@ -39,7 +40,7 @@ public class MappedBytesTest extends BytesTestCommon {
 
     {
         for (int i = 0; i < 200; i++) {
-            largeTextBuilder.append(smallText);
+            largeTextBuilder.append(SMALL_TEXT);
         }
 
         text = largeTextBuilder.toString();
@@ -65,6 +66,9 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
@@ -88,6 +92,9 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
         }
     }
 
@@ -228,10 +235,23 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
+    public void testWriteLarge8Bit() throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytes = MappedBytes.mappedBytes(tempFile1, 64 << 10)) {
+            try {
+                bytes.write8bit(Bytes.from(text + text));
+                fail();
+            } catch (DecoratedBufferUnderflowException ex) {
+                assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));
+            }
+        }
+    }
+
+    @Test
     public void testLargeWrites()
             throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
-                10, 64 << 10);
+        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"),
+                128 << 10, 64 << 10);
 
         byte[] largeBytes = new byte[500 << 10];
         bytes.writePosition(0);
@@ -266,6 +286,7 @@ public class MappedBytesTest extends BytesTestCommon {
         bytes2.releaseLast();
         bytes.releaseLast();
 
+        assertTrue(bytes.isClosed());
     }
 
     @Test
@@ -307,6 +328,8 @@ public class MappedBytesTest extends BytesTestCommon {
         bytes2.releaseLast();
         bytes.releaseLast();
 
+        assertTrue(bytes.isClosed());
+
     }
 
     @Test
@@ -347,6 +370,8 @@ public class MappedBytesTest extends BytesTestCommon {
 
         bytes2.releaseLast();
         bytes.releaseLast();
+
+        assertTrue(bytes.isClosed());
 
     }
 

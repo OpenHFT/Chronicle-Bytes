@@ -36,7 +36,6 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
 
     private static final int LAST_TIME = 128;
 
-    private final MappedFile file;
     @SuppressWarnings("rawtypes")
     private final Bytes bytes;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
@@ -44,7 +43,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
     MappedUniqueTimeProvider() {
         try {
             String user = System.getProperty("user.name", "unknown");
-            file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
+            MappedFile file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
             IOTools.unmonitor(file);
             ReferenceOwner mumtp = ReferenceOwner.temporary("mumtp");
             bytes = file.acquireBytesForWrite(mumtp, 0);
@@ -97,9 +96,8 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
             long time0 = bytes.readVolatileLong(LAST_TIME);
             long timeNanos5 = time0 >>> 5;
 
-            if (time5 > timeNanos5)
-                if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                    return time;
+            if (time5 > timeNanos5 && bytes.compareAndSwapLong(LAST_TIME, time0, time))
+                return time;
 
             while (true) {
                 time0 = bytes.readVolatileLong(LAST_TIME);

@@ -44,6 +44,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings({"rawtypes"})
 @RunWith(Parameterized.class)
@@ -58,13 +59,28 @@ public class BytesTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
+                {"Native Unchecked", NATIVE_UNCHECKED},
                 {"Native", NATIVE},
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
-                {"Native Unchecked", NATIVE_UNCHECKED},
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED}
         });
+    }
+
+    @Test
+    public void testElastic2() {
+        Bytes bytes = alloc1.elasticBytes(2);
+        assumeTrue(bytes.isElastic());
+
+        assertFalse(bytes.realCapacity() >= 1000);
+        try {
+            bytes.writePosition(1000);
+            assertTrue(bytes.realCapacity() >= 1000);
+            assertEquals(0L, bytes.readLong());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test
@@ -557,7 +573,7 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testMove2() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
@@ -565,7 +581,9 @@ public class BytesTest extends BytesTestCommon {
         b.move(3, 1, 3);
         assertEquals("0345456789", b.toString());
         postTest(b);
-        b.move(3, 5, 3);
+        assertThrows(IllegalStateException.class, () ->
+            b.move(3, 5, 3)
+        );
     }
 
     @Test
@@ -588,7 +606,7 @@ public class BytesTest extends BytesTestCommon {
         postTest(b);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test
     public void testMove2B() {
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
@@ -597,7 +615,9 @@ public class BytesTest extends BytesTestCommon {
         assertEquals("Hlo o World", b.toString());
         postTest(b);
         BackgroundResourceReleaser.releasePendingResources();
-        b.bytesStore().move(3, 5, 3);
+        assertThrows(IllegalStateException.class, () ->
+            b.bytesStore().move(3, 5, 3)
+        );
     }
 
     @Test
@@ -988,10 +1008,10 @@ public class BytesTest extends BytesTestCommon {
         assertEquals(0x80, bytes.readUnsignedByte());
     }
 
-    //    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/185")
     @Test
     public void capacityVsWriteLimitInvariant() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
+        assumeTrue(bytes.isElastic());
         assertEquals(bytes.capacity(), bytes.writeLimit());
     }
 
@@ -1015,5 +1035,18 @@ public class BytesTest extends BytesTestCommon {
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
         }
+    }
+
+    @Test
+    public void testReadWithOffset() {
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+        bytes.append("Hello");
+        int offset = 2;
+        int offsetInRDI = 1;
+        byte[] ba = new byte[bytes.length() + offset - offsetInRDI];
+        ba[0] = '0';
+        ba[1] = '1';
+        bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
+        assertEquals("01ello", new String(ba));
     }
 }

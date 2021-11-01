@@ -36,6 +36,8 @@
 
     /**
      * Simple Bytes implementation which is not Elastic.
+     *
+     * @param <Underlying> Underlying type
      */
     @SuppressWarnings({"rawtypes", "unchecked"})
     public class VanillaBytes<Underlying>
@@ -460,8 +462,10 @@
             final long address = bytesStore.address + bytesStore.translate(offset);
             @Nullable final Memory memory = bytesStore.memory;
 
-            if (memory == null)
+            if (memory == null) {
                 bytesStore.throwExceptionIfReleased();
+                throw new NullPointerException("byteStore.memory is null.");
+            }
 
             if (Jvm.isJava9Plus()) {
                 final byte[] chars = StringUtils.extractBytes(s);
@@ -488,6 +492,7 @@
             return this;
         }
 
+        @Override
         @NotNull
         public String toString() {
             try {

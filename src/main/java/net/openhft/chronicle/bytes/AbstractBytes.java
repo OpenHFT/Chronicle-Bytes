@@ -35,8 +35,13 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+/**
+ * Abstract representation of Bytes.
+ *
+ * @param <Underlying> Underlying type
+ */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<Underlying>
         extends AbstractReferenceCounted
@@ -272,7 +277,7 @@ public abstract class AbstractBytes<Underlying>
 
         if (position < readPosition())
             this.readPosition = position;
-
+        ensureCapacity(position);
         uncheckedWritePosition(position);
         return this;
     }
@@ -312,9 +317,9 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public Bytes<Underlying> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
-        final long writePosition = writePosition();
-        writeCheckOffset(writePosition, bytesToSkip);
-        uncheckedWritePosition(writePosition + bytesToSkip);
+        final long writePos = writePosition();
+        writeCheckOffset(writePos, bytesToSkip);
+        uncheckedWritePosition(writePos + bytesToSkip);
         return this;
     }
 
@@ -364,6 +369,7 @@ public abstract class AbstractBytes<Underlying>
         }
     }
 
+    @Override
     public int readUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException {
         return readByte(offset) & 0xFF;
@@ -679,8 +685,21 @@ public abstract class AbstractBytes<Underlying>
     public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
-        writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        if (this.bytesStore.inside(offsetInRDO, length)) {
+            writeCheckOffset(offsetInRDO, length);
+            bytesStore.write(offsetInRDO, bytes, offset, length);
+        } else if (bytes.remaining() <= writeRemaining()) {
+            // bounds check
+            bytes.get(offset + length - 1);
+
+            int i = 0;
+            for (; i < length - 7; i += 8)
+                writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            for (; i < length; i++)
+                writeByte(offsetInRDO + i, bytes.get(offset + i));
+        } else {
+            throw new DecoratedBufferOverflowException("Unable to write " + length + " with " + writeRemaining() + " remaining");
+        }
     }
 
     @Override
@@ -854,9 +873,6 @@ public abstract class AbstractBytes<Underlying>
         }
         long limit0 = readLimit();
         if (offset > limit0) {
-            // assert false : "can't read bytes past the limit : limit=" + limit0 + ",offset=" +
-            // offset +
-            // ",adding=" + adding;
             throw new DecoratedBufferOverflowException(
                     String.format("prewriteCheckOffset0 failed. Offset: %d > readLimit: %d", offset, limit0));
         }
@@ -945,7 +961,8 @@ public abstract class AbstractBytes<Underlying>
     protected long prewriteOffsetPositionMoved(long subtracting)
             throws BufferOverflowException, IllegalStateException {
         prewriteCheckOffset(readPosition, subtracting);
-        return readPosition -= subtracting;
+        readPosition -= subtracting;
+        return readPosition;
     }
 
     @NotNull
@@ -1019,6 +1036,29 @@ public abstract class AbstractBytes<Underlying>
         bytesStore.writeDouble(offset, d);
         bytesStore.writeInt(offset + 8, i);
         return this;
+    }
+
+    @Override
+    public int read(@NotNull byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
+        long remaining = readRemaining();
+        if (remaining <= 0)
+            return -1;
+        final int totalToCopy = (int) Math.min(len, remaining);
+        int remainingToCopy = totalToCopy;
+        int currentOffset = off;
+        while (remainingToCopy > 0) {
+            int currentBatchSize = Math.min(remainingToCopy, safeCopySize());
+            long offsetInRDO = readOffsetPositionMoved(currentBatchSize);
+            bytesStore.read(offsetInRDO, bytes, currentOffset, currentBatchSize);
+            currentOffset += currentBatchSize;
+            remainingToCopy -= currentBatchSize;
+        }
+        return totalToCopy;
+    }
+
+    @Override
+    public long read(long offsetInRDI, byte[] bytes, int offset, int length) throws IllegalStateException {
+        return bytesStore.read(offsetInRDI, bytes, offset, length);
     }
 
     @NotNull
@@ -1216,9 +1256,12 @@ public abstract class AbstractBytes<Underlying>
         return sum & 0xFF;
     }
 
-    static class ReportUnoptimised {
+    static final class ReportUnoptimised {
         static {
             Jvm.reportUnoptimised();
+        }
+
+        private ReportUnoptimised() {
         }
 
         static void reportOnce() {

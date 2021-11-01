@@ -34,6 +34,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
+ *
+ * @param <Underlying> Underlying type
  */
 @SuppressWarnings("restriction")
 public class HeapBytesStore<Underlying>
@@ -76,7 +78,7 @@ public class HeapBytesStore<Underlying>
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(o.getClass());
         final long start = lookup.startOf(groupName);
         final long length = lookup.lengthOf(groupName);
-        return new HeapBytesStore<T>(o, start + padding, length - padding);
+        return new HeapBytesStore<>(o, start + padding, length - padding);
     }
 
     // Used by Chronicle-Map.

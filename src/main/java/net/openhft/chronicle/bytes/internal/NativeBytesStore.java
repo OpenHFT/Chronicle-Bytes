@@ -41,9 +41,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class NativeBytesStore<Underlying>
         extends AbstractBytesStore<NativeBytesStore<Underlying>, Underlying> {
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
-    private static final Field BB_ADDRESS, BB_CAPACITY, BB_ATT;
+    private static final Field BB_ADDRESS;
+    private static final Field BB_CAPACITY;
+    private static final Field BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
-    //    static MappedBytes last;
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -214,9 +215,9 @@ public class NativeBytesStore<Underlying>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, IllegalStateException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
-        long address = this.address;
-        if (address == 0) throwException(null);
-        memoryCopyMemory(address + from, address + to, length);
+        long addr = this.address;
+        if (addr == 0) throwException(null);
+        memoryCopyMemory(addr + from, addr + to, length);
     }
 
     private void memoryCopyMemory(long fromAddress, long toAddress, long length)
@@ -298,23 +299,23 @@ public class NativeBytesStore<Underlying>
             end = capacity();
 
         // don't dirty cache lines unnecessarily
-        long address = this.address + translate(start);
+        long addr = this.address + translate(start);
         long size = end - start;
         // align the start
-        while ((address & 0x7) != 0 && size > 0) {
-            if (memory.readByte(address, 0) != 0)
-                memory.writeByte(address, (byte) 0);
-            address++;
+        while ((addr & 0x7) != 0 && size > 0) {
+            if (memory.readByte(addr, 0) != 0)
+                memory.writeByte(addr, (byte) 0);
+            addr++;
             size--;
         }
         long i = 0;
         for (; i < size - 7; i += 8)
-            if (memory.readLong(address + i, 0) != 0)
-                memory.writeLong(address + i, 0);
+            if (memory.readLong(addr + i, 0) != 0)
+                memory.writeLong(addr + i, 0);
 
         for (; i < size; i++)
-            if (memory.readByte(address + i, 0) != 0)
-                memory.writeByte(address + i, (byte) 0);
+            if (memory.readByte(addr + i, 0) != 0)
+                memory.writeByte(addr + i, (byte) 0);
         return this;
     }
 
@@ -375,9 +376,9 @@ public class NativeBytesStore<Underlying>
 
     @Override
     public long readLong(long offset) {
-        long address = this.address;
-        assert address != 0;
-        return memory.readLong(address + translate(offset));
+        long addr = this.address;
+        assert addr != 0;
+        return memory.readLong(addr + translate(offset));
     }
 
     @Override
@@ -593,9 +594,9 @@ public class NativeBytesStore<Underlying>
             cleaner.clean();
 
         } else if (underlyingObject instanceof ByteBuffer) {
-            ByteBuffer underlyingObject = (ByteBuffer) this.underlyingObject;
-            if (underlyingObject.isDirect())
-                CLEANER_SERVICE.clean(underlyingObject);
+            ByteBuffer underlying = (ByteBuffer) this.underlyingObject;
+            if (underlying.isDirect())
+                CLEANER_SERVICE.clean(underlying);
         }
     }
 
@@ -622,9 +623,9 @@ public class NativeBytesStore<Underlying>
     void write8bit(long position, char[] chars, int offset, int length)
             throws IllegalStateException {
         long addr = address + translate(position);
-        @Nullable Memory memory = this.memory;
+        @Nullable Memory mem = this.memory;
         for (int i = 0; i < length; i++)
-            memory.writeByte(addr + i, (byte) chars[offset + i]);
+            mem.writeByte(addr + i, (byte) chars[offset + i]);
     }
 
     @Override
@@ -667,9 +668,9 @@ public class NativeBytesStore<Underlying>
 
     public void read8bit(long position, char[] chars, int length) {
         long addr = address + translate(position);
-        Memory memory = this.memory;
+        Memory mem = this.memory;
         for (int i = 0; i < length; i++)
-            chars[i] = (char) (memory.readByte(addr + i) & 0xFF);
+            chars[i] = (char) (mem.readByte(addr + i) & 0xFF);
     }
 
     @Override
@@ -704,9 +705,9 @@ public class NativeBytesStore<Underlying>
         if (pos + length > realCapacity())
             throw new BufferOverflowException();
 
-        long address = this.address + translate(0);
-        @Nullable Memory memory = this.memory;
-        if (memory == null) throw new NullPointerException();
+        long addr = this.address + translate(0);
+        @Nullable Memory mem = this.memory;
+        if (mem == null) throw new NullPointerException();
         int i;
         ascii:
         {
@@ -719,14 +720,14 @@ public class NativeBytesStore<Underlying>
                 if ((c0 | c1 | c2 | c3) > 0x007F)
                     break ascii;
                 final int value = (c0) | (c1 << 8) | (c2 << 16) | (c3 << 24);
-                UnsafeMemory.unsafePutInt(address + pos, value);
+                UnsafeMemory.unsafePutInt(addr + pos, value);
                 pos += 4;
             }
             for (; i < length; i++) {
                 char c = chars[offset + i];
                 if (c > 0x007F)
                     break ascii;
-                UnsafeMemory.unsafePutByte(address + pos++, (byte) c);
+                UnsafeMemory.unsafePutByte(addr + pos++, (byte) c);
             }
 
             return pos;
@@ -799,24 +800,25 @@ public class NativeBytesStore<Underlying>
         return byteCheckSum(start(), readLimit());
     }
 
+    @Override
     public int byteCheckSum(long position, long limit) {
-        @Nullable Memory memory = this.memory;
-        assert memory != null;
+        @Nullable Memory mem = this.memory;
+        assert mem != null;
         int b = 0;
         long ptr = address + position;
         long end = address + limit;
         for (; ptr < end - 7; ptr += 8) {
-            b += memory.readByte(ptr)
-                    + memory.readByte(ptr + 1)
-                    + memory.readByte(ptr + 2)
-                    + memory.readByte(ptr + 3)
-                    + memory.readByte(ptr + 4)
-                    + memory.readByte(ptr + 5)
-                    + memory.readByte(ptr + 6)
-                    + memory.readByte(ptr + 7);
+            b += mem.readByte(ptr)
+                    + mem.readByte(ptr + 1)
+                    + mem.readByte(ptr + 2)
+                    + mem.readByte(ptr + 3)
+                    + mem.readByte(ptr + 4)
+                    + mem.readByte(ptr + 5)
+                    + mem.readByte(ptr + 6)
+                    + mem.readByte(ptr + 7);
         }
         for (; ptr < end; ptr++) {
-            b += memory.readByte(ptr);
+            b += mem.readByte(ptr);
         }
         return b & 0xFF;
     }
@@ -830,39 +832,20 @@ public class NativeBytesStore<Underlying>
     public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
         requireNonNull(bytes);
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
-        int i;
-        final long address = this.address + translate(offsetInRDI);
-        for (i = 0; i < len - 7; i += 8)
-            UnsafeMemory.unsafePutLong(bytes, i, memory.readLong(address + i));
-        if (i < len - 3) {
-            UnsafeMemory.unsafePutInt(bytes, i, memory.readInt(address + i));
-            i += 4;
-        }
-        for (; i < len; i++)
-            UnsafeMemory.unsafePutByte(bytes, i, memory.readByte(address + i));
+
+        memory.readBytes(this.address + translate(offsetInRDI), bytes, offset, len);
         return len;
     }
 
     @Override
     public int peekUnsignedByte(long offset) {
-        final long address = this.address;
-        @Nullable final Memory memory = this.memory;
+        final long addr = this.address;
+        @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
-//        assert translate >= 0;
-        final long address2 = address + translate;
-//        last.writeLong(8, Thread.currentThread().getId());
-//        last.writeLong(0, offset);
-//        last.writeLong(16, translate);
-//        last.writeLong(32, maximumLimit);
-//        last.writeLong(48, addressForRead);
-//        last.writeLong(64, address2);
-//        last.writeBoolean(80, memory != null);
-//        last.writeVolatileByte(88, (byte) 1);
-        int ret = translate >= limit ? -1 :
-                memory.readByte(address2) & 0xFF;
-//        last.writeVolatileByte(88, (byte) 0xFF);
-//        last.writeLong(24, Thread.currentThread().getId());
-        return ret;
+        final long address2 = addr + translate;
+        return translate >= limit
+                ? -1
+                : mem.readByte(address2) & 0xFF;
     }
 
     @Override
@@ -903,7 +886,7 @@ public class NativeBytesStore<Underlying>
         return MEMORY.isEqual(addressForRead(start), s, (int) length);
     }
 
-    static class Deallocator implements Runnable {
+    static final class Deallocator implements Runnable {
 
         private final long size;
         private volatile long address;
@@ -916,7 +899,6 @@ public class NativeBytesStore<Underlying>
 
         @Override
         public void run() {
-            //     System.out.println("Release " + Long.toHexString(addressForRead));
             if (address == 0)
                 return;
             long addressToFree = address;
@@ -925,7 +907,7 @@ public class NativeBytesStore<Underlying>
         }
     }
 
-    private class Finalizer {
+    private final class Finalizer {
         @Override
         protected void finalize()
                 throws Throwable {

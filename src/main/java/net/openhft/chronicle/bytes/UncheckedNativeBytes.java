@@ -39,6 +39,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Fast unchecked version of AbstractBytes
+ *
+ * @param <Underlying> Underlying type
+ *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<Underlying>
@@ -62,9 +65,9 @@ public class UncheckedNativeBytes<Underlying>
         this.bytesStore = underlyingBytes.bytesStore();
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
-        writeLimit = underlyingBytes.writeLimit();
         readPosition = underlyingBytes.readPosition();
-        capacity = bytesStore.capacity();
+        capacity = bytesStore.realCapacity();
+        writeLimit = Math.min(capacity, underlyingBytes.writeLimit());
     }
 
     @Override
@@ -223,7 +226,8 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     protected long prewriteOffsetPositionMoved(long substracting) {
-        return readPosition -= substracting;
+        readPosition -= substracting;
+        return readPosition;
     }
 
     @NotNull
@@ -551,7 +555,7 @@ public class UncheckedNativeBytes<Underlying>
 
     void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException {
-//        assert writeCheckOffset0(offset, adding);
+
     }
 
     @Override
@@ -859,8 +863,8 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public int byteCheckSum()
             throws IORuntimeException {
-        @Nullable NativeBytesStore bytesStore = (NativeBytesStore) bytesStore();
-        return bytesStore.byteCheckSum(readPosition(), readLimit());
+        @Nullable NativeBytesStore nativeBytesStore = (NativeBytesStore) bytesStore();
+        return nativeBytesStore.byteCheckSum(readPosition(), readLimit());
     }
 
     @Override
