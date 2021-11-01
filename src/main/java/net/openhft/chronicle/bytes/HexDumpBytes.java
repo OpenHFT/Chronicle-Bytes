@@ -1376,7 +1376,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> writeUtf8(@NotNull CharSequence text)
+    public Bytes<Void> writeUtf8(@Nullable CharSequence text)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         long pos = base.writePosition();
         try {
@@ -1422,7 +1422,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@NotNull CharSequence text)
+    public Bytes<Void> write8bit(@Nullable CharSequence text)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1490,7 +1490,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
 
     @NotNull
     @Override
-    public Bytes<Void> write8bit(@NotNull String s)
+    public Bytes<Void> write8bit(@Nullable String s)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         long pos = base.writePosition();
         try {
@@ -1502,7 +1502,7 @@ base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
-    public Bytes<Void> write8bit(@NotNull BytesStore bs)
+    public Bytes<Void> write8bit(@Nullable BytesStore bs)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         long pos = base.writePosition();
         try {
