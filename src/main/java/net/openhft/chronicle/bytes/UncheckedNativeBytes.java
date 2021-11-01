@@ -35,6 +35,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * Fast unchecked version of AbstractBytes
  *
@@ -232,6 +234,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -526,6 +529,7 @@ public class UncheckedNativeBytes<Underlying>
     @NotNull
     public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
         return this;
@@ -534,6 +538,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         writeCheckOffset(offsetInRDO, length);
         bytesStore.write(offsetInRDO, bytes, offset, length);
     }
@@ -891,7 +896,7 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<Underlying> appendUtf8(@NotNull char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
@@ -935,12 +940,12 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull BytesStore bs) {
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull String s, int start, int length) {
         return bytesStore.write8bit(position, s, start, length);
     }
 
@@ -962,10 +967,11 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     @Override
-    public @NotNull Bytes<Underlying> write8bit(final @NotNull String s, final int start, final int length) {
+    public @NotNull Bytes<Underlying> write8bit(final @NotNull String text, final int start, final int length) {
+        requireNonNull(text);
         final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
         final long position = writeOffsetPositionMoved(toWriteLength, 0);
-        bytesStore.write8bit(position, s, start, length);
+        bytesStore.write8bit(position, text, start, length);
         writePosition += toWriteLength;
         return this;
     }

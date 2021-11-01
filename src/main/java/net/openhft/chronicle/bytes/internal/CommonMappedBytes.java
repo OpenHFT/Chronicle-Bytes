@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
 /**
@@ -89,6 +90,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
                                             final int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         write(writePosition(), bytes, offset, length);
@@ -100,6 +102,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public CommonMappedBytes write(@NotNull final RandomDataInput bytes)
             throws IllegalStateException, BufferOverflowException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         assert bytes != this : "you should not write to yourself !";
@@ -113,6 +116,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     public CommonMappedBytes write(final long offsetInRDO, @NotNull final RandomDataInput bytes)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         try {
@@ -235,6 +239,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
                              final long offset,
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         if (bytes instanceof BytesStore)
@@ -248,44 +253,47 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end)
+    public Bytes<Void> append8bit(@NotNull CharSequence text, int start, int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
             IndexOutOfBoundsException, IllegalStateException {
+        requireNonNull(text);
         throwExceptionIfClosed();
 
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
-        if (!(cs instanceof String) || pos + (end - start) * 3 + 5 >= safeLimit()) {
-            return super.append8bit(cs, start, end);
+        if (!(text instanceof String) || pos + (end - start) * 3 + 5 >= safeLimit()) {
+            return super.append8bit(text, start, end);
         }
-        return append8bit0((String) cs, start, end - start);
+        return append8bit0((String) text, start, end - start);
     }
 
     @Override
     @NotNull
-    public CommonMappedBytes write8bit(@NotNull CharSequence s, int start, int length)
+    public CommonMappedBytes write8bit(@NotNull CharSequence text, int start, int length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IndexOutOfBoundsException {
+        requireNonNull(text);
         throwExceptionIfClosed();
 
-        ObjectUtils.requireNonNull(s);
+        ObjectUtils.requireNonNull(text);
 
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
-        if (!(s instanceof String) || pos + length * 3L + 5 >= safeLimit()) {
-            super.write8bit(s, start, length);
+        if (!(text instanceof String) || pos + length * 3L + 5 >= safeLimit()) {
+            super.write8bit(text, start, length);
             return this;
         }
 
         writeStopBit(length);
-        return append8bit0((String) s, start, length);
+        return append8bit0((String) text, start, length);
     }
 
     @NotNull
     private CommonMappedBytes append8bit0(@NotNull String s, int start, int length)
             throws BufferOverflowException, IllegalStateException {
 
+        requireNonNull(s);
         ensureCapacity(writePosition + length);
         long address = addressForWritePosition();
         Memory memory = ((MappedBytesStore) bytesStore()).memory;
@@ -329,6 +337,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public Bytes<Void> appendUtf8(@NotNull CharSequence cs, int start, int length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IndexOutOfBoundsException {
+        requireNonNull(cs);
         throwExceptionIfClosed();
 
         // check the start.
@@ -431,44 +440,44 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> writeUtf8(CharSequence str)
+    public Bytes<Void> writeUtf8(@Nullable CharSequence text)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (str instanceof String) {
-            writeUtf8((String) str);
+        if (text instanceof String) {
+            writeUtf8((String) text);
             return this;
         }
-        if (str == null) {
+        if (text == null) {
             BytesInternal.writeStopBitNeg1(this);
 
         } else {
-            long utfLength = AppendableUtil.findUtf8Length(str);
+            long utfLength = AppendableUtil.findUtf8Length(text);
             this.writeStopBit(utfLength);
-            BytesInternal.appendUtf8(this, str, 0, str.length());
+            BytesInternal.appendUtf8(this, text, 0, text.length());
         }
         return this;
     }
 
     @Override
-    public @NotNull Bytes<Void> writeUtf8(String str)
+    public @NotNull Bytes<Void> writeUtf8(@Nullable String text)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
-        if (str == null) {
+        if (text == null) {
             BytesInternal.writeStopBitNeg1(this);
             return this;
         }
 
         try {
             if (Jvm.isJava9Plus()) {
-                byte[] strBytes = extractBytes(str);
-                byte coder = getStringCoder(str);
+                byte[] strBytes = extractBytes(text);
+                byte coder = getStringCoder(text);
                 long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
                 writeStopBit(utfLength);
-                appendUtf8(strBytes, 0, str.length(), coder);
+                appendUtf8(strBytes, 0, text.length(), coder);
             } else {
-                char[] chars = extractChars(str);
+                char[] chars = extractChars(text);
                 long utfLength = AppendableUtil.findUtf8Length(chars);
                 writeStopBit(utfLength);
                 appendUtf8(chars, 0, chars.length);
@@ -585,6 +594,5 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public void chunkCount(long[] chunkCount) {
         mappedFile.chunkCount(chunkCount);
     }
-
 
 }

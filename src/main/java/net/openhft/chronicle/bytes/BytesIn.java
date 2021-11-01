@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -37,7 +38,7 @@ public interface BytesIn<Underlying> extends
      * @return a reader which will read one Excerpt at a time
      */
     @NotNull
-    default MethodReader bytesMethodReader(Object... objects) {
+    default MethodReader bytesMethodReader(@NotNull Object... objects) {
         return new BytesMethodReaderBuilder(this).build(objects);
     }
 
@@ -46,10 +47,10 @@ public interface BytesIn<Underlying> extends
         return new BytesMethodReaderBuilder(this);
     }
 
-    <T extends ReadBytesMarshallable> T readMarshallableLength16(Class<T> tClass, T object)
+    <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
             throws BufferUnderflowException, IllegalStateException;
 
-    default <T> T readObject(Class<T> componentType0)
+    default <T> T readObject(@NotNull Class<T> componentType0)
             throws BufferUnderflowException, IllegalArgumentException, IllegalStateException, ArithmeticException, BufferOverflowException {
         Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {

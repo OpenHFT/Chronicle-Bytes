@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -53,10 +54,11 @@ public class UncheckedBytes<Underlying>
 
     public void setBytes(@NotNull Bytes bytes)
             throws IllegalStateException {
-        BytesStore underlying = bytes.bytesStore();
-        if (bytesStore != underlying) {
+        requireNonNull(bytes);
+        BytesStore underlyingBytes = bytes.bytesStore();
+        if (bytesStore != underlyingBytes) {
             bytesStore.release(this);
-            this.bytesStore(underlying);
+            this.bytesStore(underlyingBytes);
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -179,6 +181,7 @@ public class UncheckedBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
+        requireNonNull(bytes);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -192,6 +195,7 @@ public class UncheckedBytes<Underlying>
     @Override
     public Bytes<Underlying> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
+        requireNonNull(bytes);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (bytes.underlyingObject() == null
@@ -210,6 +214,7 @@ public class UncheckedBytes<Underlying>
     @NotNull
     public Bytes<Underlying> append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        requireNonNull(cs);
         if (cs instanceof RandomDataInput) {
             return write((RandomDataInput) cs);
         }
@@ -226,6 +231,7 @@ public class UncheckedBytes<Underlying>
 
     long rawCopy(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        requireNonNull(bytes);
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {
             writeCheckOffset(writePosition(), len);
@@ -247,22 +253,22 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeUtf8(String s)
+    public Bytes<Underlying> writeUtf8(@Nullable String text)
             throws BufferOverflowException, IllegalStateException {
-        if (s == null) {
+        if (text == null) {
             BytesInternal.writeStopBitNeg1(this);
             return this;
         }
 
         try {
             if (Jvm.isJava9Plus()) {
-                byte[] strBytes = extractBytes(s);
-                byte coder = StringUtils.getStringCoder(s);
+                byte[] strBytes = extractBytes(text);
+                byte coder = StringUtils.getStringCoder(text);
                 long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
                 writeStopBit(utfLength);
-                appendUtf8(strBytes, 0, s.length(), coder);
+                appendUtf8(strBytes, 0, text.length(), coder);
             } else {
-                char[] chars = extractChars(s);
+                char[] chars = extractChars(text);
                 long utfLength = AppendableUtil.findUtf8Length(chars);
                 writeStopBit(utfLength);
                 if (utfLength == chars.length)
@@ -276,8 +282,9 @@ public class UncheckedBytes<Underlying>
         return this;
     }
 
-    void append8bit(char[] chars)
+    void append8bit(@NotNull char[] chars)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        requireNonNull(chars);
         long wp = writePosition();
         for (int i = 0; i < chars.length; i++) {
             char c = chars[i];
@@ -288,8 +295,9 @@ public class UncheckedBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<Underlying> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        requireNonNull(chars);
         long wp = writePosition();
         int i;
         ascii:
@@ -311,7 +319,7 @@ public class UncheckedBytes<Underlying>
     }
 
     @Override
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException {
         // Todo: Optimize this
         super.write(offsetInRDO, bytes, offset, length);

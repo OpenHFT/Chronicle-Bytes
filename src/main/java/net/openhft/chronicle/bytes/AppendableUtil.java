@@ -30,6 +30,8 @@ import java.io.UTFDataFormatException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 @SuppressWarnings("rawtypes")
 public enum AppendableUtil {
     ; // none
@@ -57,6 +59,7 @@ public enum AppendableUtil {
 
     public static void setLength(@NotNull Appendable sb, int newLength)
             throws IllegalArgumentException, IllegalStateException, BufferUnderflowException {
+        requireNonNull(sb);
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
         else if (sb instanceof Bytes)
@@ -325,6 +328,7 @@ public enum AppendableUtil {
     }
 
     public static long findUtf8Length(@NotNull char[] chars, int offset, int length) {
+        requireNonNull(chars);
         long utflen = length;
         for (int i = offset, end = offset + length; i < end; i++) {
             char c = chars[i];

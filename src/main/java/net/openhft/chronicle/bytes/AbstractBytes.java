@@ -35,6 +35,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * Abstract representation of Bytes.
  *
@@ -205,8 +207,7 @@ public abstract class AbstractBytes<Underlying>
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
-    @Override
-    public @NotNull AbstractBytes append(double d)
+    public @NotNull AbstractBytes<Underlying> append(double d)
             throws BufferOverflowException, IllegalStateException {
         boolean fits = canWriteDirect(380);
         double ad = Math.abs(d);
@@ -652,7 +653,7 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> write(@NotNull RandomDataInput bytes)
+    public Bytes<Underlying> write(@NotNull final RandomDataInput bytes)
             throws IllegalStateException, BufferOverflowException {
         assert bytes != this : "you should not write to yourself !";
 
@@ -665,8 +666,9 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
+    public Bytes<Underlying> write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
@@ -680,8 +682,9 @@ public abstract class AbstractBytes<Underlying>
     }
 
     @Override
-    public void write(long offsetInRDO, ByteBuffer bytes, int offset, int length)
+    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         if (this.bytesStore.inside(offsetInRDO, length)) {
             writeCheckOffset(offsetInRDO, length);
             bytesStore.write(offsetInRDO, bytes, offset, length);
@@ -701,9 +704,10 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> write(long writeOffset, RandomDataInput bytes, long readOffset, long length)
+    public Bytes<Underlying> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
 
+        requireNonNull(bytes);
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
@@ -717,10 +721,11 @@ public abstract class AbstractBytes<Underlying>
     }
 
     @Override
-    public @NotNull Bytes<Underlying> write8bit(@NotNull String s, int start, int length) throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+    public @NotNull Bytes<Underlying> write8bit(@NotNull String text, int start, int length) throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+        requireNonNull(text); // This needs to be checked or else the JVM might crash
         final long toWriteLength = UnsafeMemory.INSTANCE.stopBitLength(length) + (long) length;
         final long position = writeOffsetPositionMoved(toWriteLength, 0);
-        bytesStore.write8bit(position, s, start, length);
+        bytesStore.write8bit(position, text, start, length);
         uncheckedWritePosition(writePosition() + toWriteLength);
         return this;
     }
@@ -739,12 +744,12 @@ public abstract class AbstractBytes<Underlying>
     }
 
     @Override
-    public long write8bit(long position, BytesStore bs) {
+    public long write8bit(long position, @NotNull BytesStore bs) {
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
-    public long write8bit(long position, String s, int start, int length) {
+    public long write8bit(long position, @NotNull String s, int start, int length) {
         return bytesStore.write8bit(position, s, start, length);
     }
 
@@ -1035,6 +1040,7 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     public int read(@NotNull byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)
             return -1;

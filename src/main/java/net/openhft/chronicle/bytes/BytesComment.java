@@ -28,7 +28,7 @@ public interface BytesComment<B extends BytesComment<B>> {
     }
 
     /**
-     * Add comment as approriate for the toHexString format
+     * Add comment as appropriate for the toHexString format
      *
      * @param comment to add (or ignore)
      * @return this
