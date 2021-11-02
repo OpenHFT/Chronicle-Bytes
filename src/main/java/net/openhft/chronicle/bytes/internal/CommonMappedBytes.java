@@ -577,6 +577,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public String toString() {
+        throwExceptionIfClosed();
         if (!TRACE)
             return super.toString();
         return getClass().getSimpleName() + "{" + "\n" +

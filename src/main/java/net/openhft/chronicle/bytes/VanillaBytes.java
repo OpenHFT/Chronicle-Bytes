@@ -495,6 +495,7 @@
         @Override
         @NotNull
         public String toString() {
+            throwExceptionIfReleased();
             try {
                 return bytesStore instanceof NativeBytesStore
                         ? toString2((NativeBytesStore) bytesStore)

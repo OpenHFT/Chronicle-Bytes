@@ -1166,6 +1166,7 @@ public abstract class AbstractBytes<Underlying>
     @NotNull
     @Override
     public String toString() {
+        throwExceptionIfReleased();
         try {
             return BytesInternal.toString(this);
         } catch (Exception e) {

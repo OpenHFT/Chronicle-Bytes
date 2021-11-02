@@ -1,16 +1,16 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.releaseAndAssertReleased;
-import static net.openhft.chronicle.bytes.BytesFactoryUtil.wipe;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Not ready yet")
 final class BytesReleaseInvariantTest extends BytesTestCommon {
 
     private static final int SIZE = 128;
@@ -78,11 +78,18 @@ final class BytesReleaseInvariantTest extends BytesTestCommon {
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void toString(final Bytes<?> bytes) {
+    void toString(final Bytes<?> bytes, boolean readWrite, String createCommand) {
+        final String expected;
+        if (readWrite) {
+            expected = "The quick brown fox jumped over the usual suspect.";
+            bytes.append(expected);
+        } else {
+            expected = "";
+        }
+        String toString = bytes.toString();
+        assertEquals(expected, toString);
         releaseAndAssertReleased(bytes);
-        assertDoesNotThrow(() -> {
-            String toString = bytes.toString();
-        }, bytes.getClass().getName());
+        assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
     }
 
     @Test
@@ -95,9 +102,20 @@ final class BytesReleaseInvariantTest extends BytesTestCommon {
 
     @Test
     void manualTest() {
-        Bytes<?> bytes = wipe(Bytes.allocateElasticDirect());
+/*        provideBytesObjects()
+                .map(BytesFactoryUtil::bytes)
+                .filter(bytes -> bytes.getClass().getSimpleName().contains("Unchecked"))
+                .forEach(bytes -> {
+                    bytes.append("Arne");
+                    releaseAndAssertReleased(bytes);
+                    bytes.toString();
+                });*/
+
+        Bytes<?> bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
+        bytes.append("Arne");
         releaseAndAssertReleased(bytes);
         bytes.toString();
+
     }
 
 }

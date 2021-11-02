@@ -829,6 +829,7 @@ public class UncheckedNativeBytes<Underlying>
     @NotNull
     @Override
     public String toString() {
+        throwExceptionIfReleased();
         return BytesInternal.toString(this);
     }
 

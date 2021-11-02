@@ -73,7 +73,7 @@ final class BytesFactoryUtil {
 
     static <B extends Bytes<U>, U> B wipe(B bytes) {
         for (int i = 0; i < SIZE; i++) {
-            bytes.writeByte((byte) 0);
+            bytes.writeByte(i, (byte) 0);
         }
         return bytes;
     }
