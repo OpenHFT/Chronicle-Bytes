@@ -13,6 +13,7 @@ import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -33,15 +34,17 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     @BeforeEach
     void beforeEach() {
         if (INITIAL_INFO_MAP.isEmpty()) {
+            AtomicInteger count = new AtomicInteger(0);
             provideBytesObjects()
                     .forEach(args -> {
+                        count.incrementAndGet();
                         final Bytes<Object> bytes = bytes(args);
                         INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes));
                         releaseAndAssertReleased(bytes);
                         Jvm.pause(100);
                     });
             // Make sure we have unique keys
-            assertEquals(provideBytesObjects().count(), INITIAL_INFO_MAP.size());
+            assertEquals(count.get(), INITIAL_INFO_MAP.size());
         }
     }
 
