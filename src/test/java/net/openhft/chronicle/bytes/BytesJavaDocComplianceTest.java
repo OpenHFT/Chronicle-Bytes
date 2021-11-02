@@ -8,13 +8,12 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.File;
-import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -35,15 +34,17 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     @BeforeEach
     void beforeEach() {
         if (INITIAL_INFO_MAP.isEmpty()) {
+            AtomicInteger count = new AtomicInteger(0);
             provideBytesObjects()
                     .forEach(args -> {
+                        count.incrementAndGet();
                         final Bytes<Object> bytes = bytes(args);
-                        INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes(args)));
+                        INITIAL_INFO_MAP.put(createCommand(args), new BytesInitialInfo(bytes));
                         releaseAndAssertReleased(bytes);
                         Jvm.pause(100);
                     });
             // Make sure we have unique keys
-            assertEquals(provideBytesObjects().count(), INITIAL_INFO_MAP.size());
+            assertEquals(count.get(), INITIAL_INFO_MAP.size());
         }
     }
 
@@ -55,16 +56,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     void printTypesTested(final Bytes<?> bytes) {
         System.out.println(bytes.getClass().getName());
         releaseAndAssertReleased(bytes);
-    }
-
-    /**
-     * Checks that ByteBuffers that are read only cannot be wrapped
-     */
-    @Test
-    void wrapForWriteCannotTakeReadOnlyByteBuffers() {
-        assertThrows(ReadOnlyBufferException.class, () ->
-                Bytes.wrapForWrite(ByteBuffer.allocate(10).asReadOnlyBuffer())
-        );
     }
 
     /**
@@ -113,14 +104,17 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         );
     }
 
+    /**
+     * Checks that ByteBuffers that are read only cannot be wrapped
+     */
     @Test
-        // Checks that ByteBuffers that are read only cannot be wrapped
     void wrapForWriteCannotTakeReadOnlyByteBuffers() {
         final ByteBuffer bb = ByteBuffer.allocate(10).asReadOnlyBuffer();
         assertThrows(ReadOnlyBufferException.class, () ->
                 Bytes.wrapForWrite(bb)
         );
     }
+
 
     // Todo: Do some write operations so that we know we have content then try operations
 
@@ -406,7 +400,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     /**
      * This test is for manual debug
      */
-    @Test
+    // @Test
     void manualTest() {
 
         // try {
