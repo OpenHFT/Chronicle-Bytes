@@ -25,6 +25,11 @@ public class BytesTestCommon {
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
 
+    public BytesTestCommon() {
+        // This warning message can be raised by any test
+        expectException("Bytes::hashCode/Bytes::equals");
+    }
+
     @Before
     @BeforeEach
     public void enableReferenceTracing() {

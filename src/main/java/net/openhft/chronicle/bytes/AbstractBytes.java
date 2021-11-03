@@ -18,8 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsMigrationUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -47,6 +47,10 @@ public abstract class AbstractBytes<Underlying>
         extends AbstractReferenceCounted
         implements Bytes<Underlying> {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
+
+    // Todo: Change the default behaviour to false in a future release
+    static final boolean CONTENT_DEPENDENT_HASHCODE_AND_EQUALS = Jvm.getBoolean("bytes.hashcodeandequals.content", true);
+
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -59,6 +63,7 @@ public abstract class AbstractBytes<Underlying>
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
+    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     AbstractBytes(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
@@ -1145,30 +1150,18 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     public int hashCode() {
-        throwExceptionIfReleased();
-        return BytesStoreHash.hash32(this);
+        return HashCodeEqualsMigrationUtil.hashCode(this, contentDependentHashcodeAndEquals);
     }
 
     @Override
     public boolean equals(Object obj) {
-        throwExceptionIfReleased();
-        if (!(obj instanceof BytesStore)) {
-            return false;
-        }
-        @NotNull BytesStore bs = (BytesStore) obj;
-        long remaining = readRemaining();
-        try {
-            return (bs.readRemaining() == remaining) &&
-                    BytesInternal.contentEqual(this, bs);
-        } catch (IllegalStateException e) {
-            return false;
-        }
+        return HashCodeEqualsMigrationUtil.equals(this, obj, contentDependentHashcodeAndEquals);
     }
 
     @NotNull
     @Override
     public String toString() {
-        // Reserving prevents access to this Bytes object if released by another thread
+        // Reserving prevents illegal access to this Bytes object if released by another thread
         reserve(this);
         try {
             return BytesInternal.toString(this);
@@ -1262,6 +1255,11 @@ public abstract class AbstractBytes<Underlying>
             sum += readByte(i);
         }
         return sum & 0xFF;
+    }
+
+    // Only used for testing
+    void contentDependentHashcodeAndEquals(boolean val) {
+        this.contentDependentHashcodeAndEquals = val;
     }
 
     static final class ReportUnoptimised {
