@@ -1,57 +1,42 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
-import static net.openhft.chronicle.bytes.BytesFactoryUtil.releaseAndAssertReleased;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class BytesReleaseInvariantTest extends BytesTestCommon {
 
-    private static final int SIZE = 128;
-
     /**
-     * Checks a released Bytes handles toString safely
+     * Checks a released Bytes handles "equals()" safely
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void equals(final Bytes<?> bytes) {
-        releaseAndAssertReleased(bytes);
-        assertDoesNotThrow(() -> {
+    void equals(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
+        if (readWrite) {
             bytes.writeChar('A');
-            final Bytes<?> other = Bytes.from("A");
-            try {
-                final boolean equals = bytes.equals(other);
-            } finally {
-                other.releaseLast();
-            }
-        }, bytes.getClass().getName());
+        }
+        releaseAndAssertReleased(bytes);
+        final Bytes<?> other = Bytes.from("A");
+        try {
+            assertThrows(ClosedIllegalStateException.class, () -> bytes.equals(other), createCommand);
+        } finally {
+            other.releaseLast();
+        }
     }
 
     /**
-     * Checks a released Bytes handles toString safely
+     * Checks a released Bytes handles "hashCode()" safely
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void hashcode(final Bytes<?> bytes) {
+    void hashcode(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         releaseAndAssertReleased(bytes);
-        assertDoesNotThrow(() -> {
-            bytes.writeChar('A');
-            final Bytes<?> other = Bytes.from("A");
-            final int expected = other.hashCode();
-            try {
-
-                final int actutal = bytes.hashCode();
-                assertEquals(expected, actutal);
-            } finally {
-                other.releaseLast();
-            }
-        }, bytes.getClass().getName());
+        assertThrows(ClosedIllegalStateException.class, bytes::hashCode, createCommand);
     }
 
     // Todo: Release in a separate thread.
@@ -61,9 +46,9 @@ final class BytesReleaseInvariantTest extends BytesTestCommon {
         // There should exist no combination of method invocation that can make the JVM crash.
 
         char bullet = 'A';
-        for (String validity :"of,of valid".split(",")) {
-            for (String threadConfinement:"across threads,within the same thread".split(",")) {
-                for (String problem:"make the JVM crash,put the object in an illegal state".split(",")) {
+        for (String validity : "of,of valid".split(",")) {
+            for (String threadConfinement : "across threads,within the same thread".split(",")) {
+                for (String problem : "make the JVM crash,put the object in an illegal state".split(",")) {
                     for (String unless : ",unless documented".split(",")) {
                         System.out.format("%c) There should exist no combination %s method invocations %s that can %s %s%n",
                                 bullet++, validity, threadConfinement, problem, unless);
@@ -74,11 +59,11 @@ final class BytesReleaseInvariantTest extends BytesTestCommon {
     }
 
     /**
-     * Checks a released Bytes handles toString safely
+     * Checks a released Bytes handles "toString()" safely
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void toString(final Bytes<?> bytes, boolean readWrite, String createCommand) {
+    void toString(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         final String expected;
         if (readWrite) {
             expected = "The quick brown fox jumped over the usual suspect.";
@@ -86,21 +71,13 @@ final class BytesReleaseInvariantTest extends BytesTestCommon {
         } else {
             expected = "";
         }
-        String toString = bytes.toString();
+        final String toString = bytes.toString();
         assertEquals(expected, toString);
         releaseAndAssertReleased(bytes);
         assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
     }
 
-    @Test
-    void stringBuilderTest() {
-        StringBuilder sb = new StringBuilder("A");
-        System.out.println("sb.hashCode() = " + sb.hashCode());
-        System.out.println("System.identityHashCode(sb) = " + System.identityHashCode(sb));
-        System.out.println("sb = " + sb);
-    }
-
-    @Test
+    //@Test
     void manualTest() {
 /*        provideBytesObjects()
                 .map(BytesFactoryUtil::bytes)

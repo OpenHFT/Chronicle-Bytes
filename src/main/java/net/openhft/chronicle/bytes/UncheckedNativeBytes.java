@@ -794,11 +794,13 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     public int hashCode() {
+        throwExceptionIfReleased();
         return BytesStoreHash.hash32(this);
     }
 
     @Override
     public boolean equals(Object obj) {
+        throwExceptionIfReleased();
         if (!(obj instanceof Bytes)) return false;
         @NotNull Bytes b2 = (Bytes) obj;
         long remaining = readRemaining();

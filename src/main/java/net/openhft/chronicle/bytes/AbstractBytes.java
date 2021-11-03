@@ -1145,11 +1145,13 @@ public abstract class AbstractBytes<Underlying>
 
     @Override
     public int hashCode() {
+        throwExceptionIfReleased();
         return BytesStoreHash.hash32(this);
     }
 
     @Override
     public boolean equals(Object obj) {
+        throwExceptionIfReleased();
         if (!(obj instanceof BytesStore)) {
             return false;
         }
