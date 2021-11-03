@@ -35,8 +35,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * Abstract representation of Bytes.
  *
@@ -1168,11 +1168,14 @@ public abstract class AbstractBytes<Underlying>
     @NotNull
     @Override
     public String toString() {
-        throwExceptionIfReleased();
+        // Reserving prevents access to this Bytes object if released by another thread
+        reserve(this);
         try {
             return BytesInternal.toString(this);
         } catch (Exception e) {
             return e.toString();
+        } finally {
+            release(this);
         }
     }
 
