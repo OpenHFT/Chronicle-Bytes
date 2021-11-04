@@ -111,38 +111,6 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
     }
 
-    /**
-     * Checks a released Bytes handles some other operations correctly
-     */
-    @TestFactory
-    Stream<DynamicTest> toHexString() {
-        return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
-                BytesReleaseInvariantObjectTest::provideToOperations,
-                (args, bytes, nc) -> {
-                    if (bytes.refCount() > 0) {
-                        // If not released, write some content and release
-                        if (isReadWrite(args)) {
-                            bytes.append("John");
-                        }
-                        bytes.releaseLast();
-                    }
-                    assertThrows(ClosedIllegalStateException.class, () -> nc.accept(bytes), createCommand(args));
-                }
-        );
-    }
-
-    private static Stream<NamedConsumer<Bytes<Object>>> provideToOperations() {
-        return Stream.of(
-                NamedConsumer.of(Bytes::toHexString, "toHexString()"),
-                NamedConsumer.of(bytes -> bytes.toHexString(10), "bytes.toHexString(int)"),
-                NamedConsumer.of(bytes -> bytes.toHexString(1, 10), "bytes.toHexString(int, int)"),
-                NamedConsumer.of(RandomDataInput::toByteArray, "bytes.toByteArray()"),
-                NamedConsumer.of(BytesStore::toDebugString, "toDebugString()"),
-                NamedConsumer.of(bytes -> bytes.toDebugString(10), "toDebugString(10)"),
-                NamedConsumer.of(BytesStore::to8bitString, "to8bitString")
-        );
-    }
-
     //@Test
     void manualTest() {
 /*        provideBytesObjects()
