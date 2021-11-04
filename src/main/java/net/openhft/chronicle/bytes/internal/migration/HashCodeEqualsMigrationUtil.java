@@ -59,7 +59,7 @@ public final class HashCodeEqualsMigrationUtil {
     private static final class Warner {
 
         private static final String MSG =
-                "**********" +
+                "********** " +
                         "The behaviour of Bytes::hashCode/Bytes::equals will/has change(d) " +
                         "to Object::hashCode/Object::equals in a future/recent version. " +
                         "Make sure to update your application if it depends on the old behaviour where " +

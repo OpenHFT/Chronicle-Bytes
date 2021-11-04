@@ -15,7 +15,10 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
@@ -24,11 +27,6 @@ public class BytesTestCommon {
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
-
-    public BytesTestCommon() {
-        // This warning message can be raised by any test
-        expectException("Bytes::hashCode/Bytes::equals");
-    }
 
     @Before
     @BeforeEach
@@ -66,6 +64,12 @@ public class BytesTestCommon {
                 Slf4jExceptionHandler.WARN.on(getClass(), "No error for " + expectedException.getValue());
         }
         expectedExceptions.clear();
+
+        exceptions.keySet()
+                .stream().filter(ek -> ek.message.contains("Object::hashCode/Object::equals"))
+                .collect(toList())
+                .forEach(exceptions::remove);
+
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();

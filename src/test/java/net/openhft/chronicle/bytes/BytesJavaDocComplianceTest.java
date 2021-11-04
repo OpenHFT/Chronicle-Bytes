@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.internal.EnbeddedBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.InputStream;
@@ -14,13 +13,10 @@ import java.nio.ReadOnlyBufferException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.*;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
@@ -171,22 +167,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         );
     }
 
-    private Stream<DynamicTest> cartesianProductTest(Supplier<Stream<Arguments>> bytesObjectSupplier,
-                                                     Supplier<Stream<NamedConsumer<Bytes<Object>>>> operationsSupplier,
-                                                     TriConsumer<Arguments, Bytes<Object>, NamedConsumer<Bytes<Object>>> test) {
-        return bytesObjectSupplier.get()
-                .flatMap(arguments -> Stream.concat(
-                        operationsSupplier.get()
-                                .map(operation -> dynamicTest(createCommand(arguments) + "." + operation.name(), () -> {
-                                                    @SuppressWarnings("unchecked") final Bytes<Object> bytes = (Bytes<Object>) arguments.get()[0];
-                                                    test.accept(arguments, bytes, operation);
-                                                }
-                                        )
-                                ),
-                        Stream.of(dynamicTest("releaseLast", () -> bytes(arguments).releaseLast()))
-                ));
-    }
-
     private static Stream<NamedConsumer<Bytes<Object>>> provideThrowsMullPointerExceptionOperations() {
 
         // In some of the operations, we could use 1 as a parameter meaning some optimized versions (like unchecked)
@@ -258,74 +238,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     }
 
     enum MyEnum {INSTANCE}
-
-    private static final int SIZE = 128;
-
-    private interface HasName {
-        String name();
-    }
-
-    @FunctionalInterface
-    private interface TriConsumer<T, U, V> {
-        void accept(T t, U u, V v);
-    }
-
-    private static class NamedConsumer<T> implements HasName, Consumer<T> {
-
-        private final Consumer<T> consumer;
-        private final String name;
-
-        private NamedConsumer(Consumer<T> consumer, String name) {
-            this.consumer = consumer;
-            this.name = name;
-        }
-
-        @Override
-        public void accept(T t) {
-            consumer.accept(t);
-        }
-
-        @Override
-        public String name() {
-            return name;
-        }
-
-        static <T> NamedConsumer<T> of(Consumer<T> consumer, String name) {
-            return new NamedConsumer<>(consumer, name);
-        }
-
-        static <T> NamedConsumer<T> ofThrowing(ThrowingConsumer<T, ?> consumer, String name) {
-            return new NamedConsumer<>(wrapThrowing(consumer), name);
-        }
-
-    }
-
-    @FunctionalInterface
-    private interface ThrowingConsumer<T, X extends Exception> {
-        void accept(T t) throws X;
-    }
-
-    private static <T> Consumer<T> wrapThrowing(ThrowingConsumer<T, ?> consumer) {
-        return new ThrowingConsumerWrapper<>(consumer);
-    }
-
-    private static final class ThrowingConsumerWrapper<T> implements Consumer<T> {
-
-        private final ThrowingConsumer<T, ?> delegate;
-
-        public ThrowingConsumerWrapper(ThrowingConsumer<T, ?> delegate) {
-            this.delegate = delegate;
-        }
-
-        @Override
-        public void accept(T t) {
-            try {
-                delegate.accept(t);
-            } catch (Exception e) {
-                Jvm.rethrow(e);
-            }
-        }
-    }
 
     private void assertPropertiesNotChanged(String createCommand, Bytes<?> bytes) {
         // Make sure that there was no change to the target bytes

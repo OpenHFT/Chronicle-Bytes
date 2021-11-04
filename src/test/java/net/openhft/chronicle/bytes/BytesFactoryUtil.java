@@ -1,6 +1,8 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ReferenceCounted;
+import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.params.provider.Arguments;
 
 import java.io.File;
@@ -9,11 +11,14 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesFactoryUtil {
 
@@ -119,5 +124,91 @@ final class BytesFactoryUtil {
             throw new RuntimeException(e);
         }
     }
+
+    static Stream<DynamicTest> cartesianProductTest(Supplier<Stream<Arguments>> bytesObjectSupplier,
+                                                     Supplier<Stream<NamedConsumer<Bytes<Object>>>> operationsSupplier,
+                                                     TriConsumer<Arguments, Bytes<Object>, NamedConsumer<Bytes<Object>>> test) {
+        return bytesObjectSupplier.get()
+                .flatMap(arguments -> Stream.concat(
+                        operationsSupplier.get()
+                                .map(operation -> dynamicTest(createCommand(arguments) + "." + operation.name(), () -> {
+                                                    @SuppressWarnings("unchecked") final Bytes<Object> bytes = (Bytes<Object>) arguments.get()[0];
+                                                    test.accept(arguments, bytes, operation);
+                                                }
+                                        )
+                                ),
+                        Stream.of(dynamicTest("releaseLast if not released", () -> {
+                            if (bytes(arguments).refCount() > 0)
+                                bytes(arguments).releaseLast();
+                        }))
+                ));
+    }
+
+     interface HasName {
+        String name();
+    }
+
+    @FunctionalInterface
+    interface TriConsumer<T, U, V> {
+        void accept(T t, U u, V v);
+    }
+
+    static class NamedConsumer<T> implements HasName, Consumer<T> {
+
+        private final Consumer<T> consumer;
+        private final String name;
+
+        NamedConsumer(Consumer<T> consumer, String name) {
+            this.consumer = consumer;
+            this.name = name;
+        }
+
+        @Override
+        public void accept(T t) {
+            consumer.accept(t);
+        }
+
+        @Override
+        public String name() {
+            return name;
+        }
+
+        static <T> NamedConsumer<T> of(Consumer<T> consumer, String name) {
+            return new NamedConsumer<>(consumer, name);
+        }
+
+        static <T> NamedConsumer<T> ofThrowing(ThrowingConsumer<T, ?> consumer, String name) {
+            return new NamedConsumer<>(wrapThrowing(consumer), name);
+        }
+
+    }
+
+    @FunctionalInterface
+    interface ThrowingConsumer<T, X extends Exception> {
+        void accept(T t) throws X;
+    }
+
+    static <T> Consumer<T> wrapThrowing(ThrowingConsumer<T, ?> consumer) {
+        return new ThrowingConsumerWrapper<>(consumer);
+    }
+
+    private static final class ThrowingConsumerWrapper<T> implements Consumer<T> {
+
+        private final ThrowingConsumer<T, ?> delegate;
+
+        public ThrowingConsumerWrapper(ThrowingConsumer<T, ?> delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void accept(T t) {
+            try {
+                delegate.accept(t);
+            } catch (Exception e) {
+                Jvm.rethrow(e);
+            }
+        }
+    }
+
 
 }
