@@ -1,7 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
-import net.openhft.chronicle.bytes.internal.EnbeddedBytes;
+import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -135,7 +135,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                         if (!(ChunkedMappedBytes.class.isInstance(bytes))) {
                             // Unfortunately, inspecting a ChunkedMappedBytes may change its actualSize(), so no check there
 
-                            if (EnbeddedBytes.class.isInstance(bytes)) {
+                            if (EmbeddedBytes.class.isInstance(bytes)) {
                                 int foo = 1;
                             }
 
