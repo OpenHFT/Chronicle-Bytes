@@ -320,7 +320,14 @@
                         <artifactId>jacoco-maven-plugin</artifactId>
                         <configuration>
                             <excludes>
-                                <exclude>**/*.jar</exclude>
+                                <!--<exclude>META-INF/**</exclude>-->
+<!--                                <exclude>chronicle-bytes-2.22ea3.jar</exclude>-->
+                                <exclude>*.jar</exclude>
+<!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
+                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
+                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
+                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
+                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
                             </excludes>
                         </configuration>
                         <executions>
