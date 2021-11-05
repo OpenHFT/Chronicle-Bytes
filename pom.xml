@@ -310,7 +310,7 @@
         <tag>ea</tag>
     </scm>
 
-<!--    <profiles>
+    <profiles>
         <profile>
             <id>sonar</id>
             <build>
@@ -318,6 +318,11 @@
                     <plugin>
                         <groupId>org.jacoco</groupId>
                         <artifactId>jacoco-maven-plugin</artifactId>
+                        <configuration>
+                            <excludes>
+                                <exclude>**/*.jar</exclude>
+                            </excludes>
+                        </configuration>
                         <executions>
                             <execution>
                                 <goals>
@@ -340,6 +345,6 @@
                 </plugins>
             </build>
         </profile>
-    </profiles>-->
+    </profiles>
 
 </project>
