@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.EnbeddedBytes;
+import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -198,7 +198,7 @@ public interface Bytes<Underlying> extends
         requireNonNull(groupName);
         @NotNull BytesStore<?, T> bs = BytesStore.forFields(object, groupName, 1);
         try {
-            final EnbeddedBytes<T> bytes = EnbeddedBytes.wrap(bs);
+            final EmbeddedBytes<T> bytes = EmbeddedBytes.wrap(bs);
             return bytes.writeLimit(bs.writeLimit());
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
