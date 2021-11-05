@@ -956,7 +956,6 @@ public interface Bytes<Underlying> extends
     default String toHexString(long offset, long maxLength) {
         requireNonNegative(offset);
         requireNonNegative(maxLength);
-
         long maxLength2 = Math.min(maxLength, readLimit() - offset);
         try {
             @NotNull String ret = BytesInternal.toHexString(this, offset, maxLength2);

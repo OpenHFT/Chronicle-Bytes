@@ -38,6 +38,7 @@ import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
+import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -54,6 +55,7 @@ public class HexDumpBytes
     private long startOfLine = 0;
     private int indent = 0;
     private int numberWrap = 16;
+    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     public HexDumpBytes() {
         try {
@@ -147,12 +149,22 @@ public class HexDumpBytes
 
     @Override
     public int hashCode() {
-        return base.hashCode();
+        if (contentDependentHashcodeAndEquals) {
+            return base.hashCode();
+        } else {
+            // We must use `this` and not the delegate
+            return System.identityHashCode(this);
+        }
     }
 
     @Override
     public boolean equals(Object obj) {
-        return base.equals(obj);
+        if (contentDependentHashcodeAndEquals) {
+            return base.equals(obj);
+        } else {
+            // We must use `this` and not the delegate
+            return (this == obj);
+        }
     }
 
     @Override
@@ -649,7 +661,7 @@ public class HexDumpBytes
 
     @Override
     public void lastNumberHadDigits(boolean lastNumberHadDigits) {
-base.lastNumberHadDigits(lastNumberHadDigits);
+        base.lastNumberHadDigits(lastNumberHadDigits);
     }
 
     @NotNull
@@ -1752,6 +1764,12 @@ base.lastNumberHadDigits(lastNumberHadDigits);
         } finally {
             copyToText(pos);
         }
+    }
+
+    // Only used for testing
+    void contentDependentHashcodeAndEquals(boolean val) {
+        this.contentDependentHashcodeAndEquals = val;
+        base.contentDependentHashcodeAndEquals(val);
     }
 
     private static class TextBytesReader extends Reader {
