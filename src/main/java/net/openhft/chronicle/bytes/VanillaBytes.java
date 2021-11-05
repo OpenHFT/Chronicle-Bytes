@@ -495,12 +495,16 @@
         @Override
         @NotNull
         public String toString() {
+            // Reserving prevents access to this Bytes object if released by another thread
+            reserve(this);
             try {
                 return bytesStore instanceof NativeBytesStore
                         ? toString2((NativeBytesStore) bytesStore)
                         : toString0();
             } catch (IllegalStateException e) {
                 throw Jvm.rethrow(e);
+            } finally {
+                release(this);
             }
         }
 

@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsMigrationUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -35,6 +36,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -57,6 +59,7 @@ public class UncheckedNativeBytes<Underlying>
     protected long writeLimit;
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
+    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
@@ -794,41 +797,18 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     public int hashCode() {
-        return BytesStoreHash.hash32(this);
+        return HashCodeEqualsMigrationUtil.hashCode(this, contentDependentHashcodeAndEquals);
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (!(obj instanceof Bytes)) return false;
-        @NotNull Bytes b2 = (Bytes) obj;
-        long remaining = readRemaining();
-        try {
-            return b2.readRemaining() == remaining && equalsBytes(b2, remaining);
-        } catch (IllegalStateException e) {
-            return false;
-        }
-    }
-
-    public boolean equalsBytes(@NotNull Bytes b2, long remaining)
-            throws IllegalStateException {
-        long i = 0;
-        try {
-            for (; i < remaining - 7; i += 8)
-                if (readLong(readPosition() + i) != b2.readLong(b2.readPosition() + i))
-                    return false;
-            for (; i < remaining; i++)
-                if (readByte(readPosition() + i) != b2.readByte(b2.readPosition() + i))
-                    return false;
-
-        } catch (BufferUnderflowException e) {
-            throw Jvm.rethrow(e);
-        }
-        return true;
+        return HashCodeEqualsMigrationUtil.equals(this, obj, contentDependentHashcodeAndEquals);
     }
 
     @NotNull
     @Override
     public String toString() {
+        throwExceptionIfReleased();
         return BytesInternal.toString(this);
     }
 
@@ -975,4 +955,10 @@ public class UncheckedNativeBytes<Underlying>
         writePosition += toWriteLength;
         return this;
     }
+
+    // Only used for testing
+    void contentDependentHashcodeAndEquals(boolean val) {
+        this.contentDependentHashcodeAndEquals = val;
+    }
+
 }
