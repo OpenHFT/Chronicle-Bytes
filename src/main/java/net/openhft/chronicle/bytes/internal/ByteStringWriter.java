@@ -25,6 +25,8 @@ import org.jetbrains.annotations.NotNull;
 import java.io.IOException;
 import java.io.Writer;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 /**
  * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
  */
@@ -33,6 +35,7 @@ public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 
     public ByteStringWriter(ByteStringAppender out) {
+        throwExceptionIfReleased(out);
         this.out = out;
     }
 

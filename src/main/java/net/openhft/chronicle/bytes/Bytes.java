@@ -41,6 +41,7 @@ import java.nio.ByteBuffer;
 import java.nio.ReadOnlyBufferException;
 import java.nio.charset.StandardCharsets;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -181,7 +182,7 @@ public interface Bytes<Underlying> extends
      * Here is an example of field groups:
      * <pre>{@code
      *     static class Padding extends Parent {
-     *         @FieldGroup("p")
+     *         {@literal @}FieldGroup("p")
      *         // 128 bytes
      *         transient long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15;
      *     }
@@ -802,7 +803,8 @@ public interface Bytes<Underlying> extends
     static int indexOf(final @NotNull BytesStore source,
                        final @NotNull BytesStore other,
                        int fromSourceOffset) throws IllegalStateException {
-
+        throwExceptionIfReleased(source);
+        throwExceptionIfReleased(other);
         long sourceOffset = source.readPosition();
         long otherOffset = other.readPosition();
         long sourceCount = source.readRemaining();
@@ -860,6 +862,7 @@ public interface Bytes<Underlying> extends
     @NotNull
     default Bytes<Underlying> unchecked(boolean unchecked)
             throws IllegalStateException {
+        throwExceptionIfReleased(this);
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
@@ -956,13 +959,10 @@ public interface Bytes<Underlying> extends
     default String toHexString(long offset, long maxLength) {
         requireNonNegative(offset);
         requireNonNegative(maxLength);
-        long maxLength2 = Math.min(maxLength, readLimit() - offset);
-        try {
-            @NotNull String ret = BytesInternal.toHexString(this, offset, maxLength2);
-            return maxLength2 < readLimit() - offset ? ret + "... truncated" : ret;
-        } catch (BufferUnderflowException | IllegalStateException e) {
-            return e.toString();
-        }
+
+        final long maxLength2 = Math.min(maxLength, readLimit() - offset);
+        final String ret = BytesInternal.toHexString(this, offset, maxLength2);
+        return maxLength2 < readLimit() - offset ? ret + "... truncated" : ret;
     }
 
     /**
@@ -1113,6 +1113,7 @@ public interface Bytes<Underlying> extends
     @NotNull
     default BigDecimal readBigDecimal()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
+        throwExceptionIfReleased(this);
         return new BigDecimal(readBigInteger(), Maths.toUInt31(readStopBit()));
     }
 
@@ -1128,6 +1129,7 @@ public interface Bytes<Underlying> extends
     @NotNull
     default BigInteger readBigInteger()
             throws ArithmeticException, BufferUnderflowException, IllegalStateException {
+        throwExceptionIfReleased(this);
         int length = Maths.toUInt31(readStopBit());
         if (length == 0) {
             if (lenient()) {

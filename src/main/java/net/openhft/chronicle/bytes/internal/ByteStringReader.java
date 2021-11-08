@@ -24,6 +24,8 @@ import java.io.IOException;
 import java.io.Reader;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 /**
  * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
  */
@@ -32,6 +34,7 @@ public class ByteStringReader extends Reader {
     private final ByteStringParser in;
 
     public ByteStringReader(ByteStringParser in) {
+        throwExceptionIfReleased(in);
         this.in = in;
     }
 

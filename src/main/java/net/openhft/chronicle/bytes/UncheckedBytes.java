@@ -79,6 +79,7 @@ public class UncheckedBytes<Underlying>
     @Override
     @NotNull
     public Bytes<Underlying> unchecked(boolean unchecked) {
+        throwExceptionIfReleased();
         return this;
     }
 
@@ -147,6 +148,7 @@ public class UncheckedBytes<Underlying>
     @NotNull
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
+        throwExceptionIfReleased();
         throw new UnsupportedOperationException("todo");
     }
 
