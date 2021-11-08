@@ -45,10 +45,10 @@ import static java.lang.Math.min;
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
  * @param <B> BytesStore type
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
+public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
@@ -188,7 +188,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a copy of this BytesStore.
      */
-    BytesStore<B, Underlying> copy()
+    BytesStore<B, U> copy()
             throws IllegalStateException;
 
     /**
@@ -201,10 +201,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForRead()
+    default Bytes<U> bytesForRead()
             throws IllegalStateException {
         try {
-            Bytes<Underlying> ret = bytesForWrite();
+            Bytes<U> ret = bytesForWrite();
             ret.readLimit(writeLimit());
             ret.writeLimit(realCapacity());
             ret.readPosition(start());
@@ -224,7 +224,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForWrite()
+    default Bytes<U> bytesForWrite()
             throws IllegalStateException {
         try {
             return new VanillaBytes<>(this, writePosition(), writeLimit());
@@ -264,7 +264,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return the underlying object being wrapped, if there is one, or null if not.
      */
     @Nullable
-    Underlying underlyingObject();
+    U underlyingObject();
 
     /**
      * Returns if a specified offset is inside this BytesStore limits.

@@ -62,14 +62,14 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * object that has been released, might result in an {@link IllegalStateException} being thrown.
  *
  * @see BytesStore
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface Bytes<Underlying> extends
-        BytesStore<Bytes<Underlying>, Underlying>,
-        BytesIn<Underlying>,
-        BytesOut<Underlying> {
+public interface Bytes<U> extends
+        BytesStore<Bytes<U>, U>,
+        BytesIn<U>,
+        BytesOut<U> {
 
     /**
      * The max capacity a Bytes can ever have.
@@ -858,12 +858,12 @@ public interface Bytes<Underlying> extends
      * @throws IllegalStateException if the underlying BytesStore has been released
      */
     @NotNull
-    default Bytes<Underlying> unchecked(boolean unchecked)
+    default Bytes<U> unchecked(boolean unchecked)
             throws IllegalStateException {
         if (unchecked) {
             if (isElastic())
                 BytesUtil.WarnUncheckedElasticBytes.warn();
-            Bytes<Underlying> underlyingBytes = start() == 0 && bytesStore().isDirectMemory()
+            Bytes<U> underlyingBytes = start() == 0 && bytesStore().isDirectMemory()
                     ? new UncheckedNativeBytes<>(this)
                     : new UncheckedBytes<>(this);
             release(INIT);
@@ -914,7 +914,7 @@ public interface Bytes<Underlying> extends
      * @return a copy of this Bytes object
      */
     @Override
-    BytesStore<Bytes<Underlying>, Underlying> copy()
+    BytesStore<Bytes<U>, U> copy()
             throws IllegalStateException;
 
     /**
@@ -999,7 +999,7 @@ public interface Bytes<Underlying> extends
      */
     @NotNull
     @Override
-    default Bytes<Underlying> bytesForRead()
+    default Bytes<U> bytesForRead()
             throws IllegalStateException {
         try {
             return isClear()
@@ -1038,7 +1038,7 @@ public interface Bytes<Underlying> extends
      * @throws IllegalStateException if this Bytes object has been previously released
      */
     @NotNull
-    Bytes<Underlying> compact()
+    Bytes<U> compact()
             throws IllegalStateException;
 
     /**
@@ -1188,7 +1188,7 @@ public interface Bytes<Underlying> extends
 
     @Override
     @NotNull
-    Bytes<Underlying> clear()
+    Bytes<U> clear()
             throws IllegalStateException;
 
     @Override
@@ -1211,7 +1211,7 @@ public interface Bytes<Underlying> extends
      * @throws IllegalArgumentException if the provided {@code length} is negative.
      * @throws NullPointerException     if the provided {@code bytesOut} is {@code null}.
      */
-    default void readWithLength(long length, @NotNull BytesOut<Underlying> bytesOut)
+    default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         requireNonNegative(length);
         if (length > readRemaining())
