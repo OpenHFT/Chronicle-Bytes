@@ -139,10 +139,16 @@ enum BytesInternal {
         }
     }
 
-    public static boolean contentEqual(@Nullable BytesStore a, @Nullable BytesStore b)
-            throws IllegalStateException {
+    public static boolean contentEqual(@Nullable final BytesStore a,
+                                       @Nullable final BytesStore b) throws IllegalStateException {
         if (a == null) return b == null;
-        if (b == null) return false;
+        if (b == null) {
+            // The contract stipulates that if either ByteStores are closed then we throw an Exception
+            throwExceptionIfReleased(a);
+            return false;
+        }
+        throwExceptionIfReleased(a);
+        throwExceptionIfReleased(b);
         long readRemaining = a.readRemaining();
         if (readRemaining != b.readRemaining())
             return false;
