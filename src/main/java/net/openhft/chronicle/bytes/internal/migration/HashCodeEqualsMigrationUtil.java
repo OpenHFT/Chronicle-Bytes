@@ -65,6 +65,7 @@ public final class HashCodeEqualsMigrationUtil {
 
         static {
 //            Jvm.warn().on(Warner.class, MSG, new StackTrace());
+            System.err.println(MSG);
         }
 
         private Warner() {
