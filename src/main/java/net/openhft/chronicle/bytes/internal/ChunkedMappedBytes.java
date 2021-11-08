@@ -24,9 +24,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -545,14 +543,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         long address = mbs.address + mbs.translate(readPosition);
         @Nullable Memory memory = mbs.memory;
 
-        // are we inside a cache line?
-        if ((address & 63) <= 60) {
-            ObjectUtils.requireNonNull(memory);
-            UnsafeMemory.unsafeLoadFence();
-            return UnsafeMemory.unsafeGetInt(address);
-        } else {
-            return memory.readVolatileInt(address);
-        }
+        return memory.readVolatileInt(address);
     }
 
     @NotNull
