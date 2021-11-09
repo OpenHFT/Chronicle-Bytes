@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,6 +33,8 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -54,17 +57,19 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public @NotNull ChunkedMappedBytes write(final long offsetInRDO,
-                                             final byte[] bytes,
-                                             int offset,
-                                             final int length)
-            throws IllegalStateException, BufferOverflowException {
-        requireNonNull(bytes);
+    public @NotNull ChunkedMappedBytes write(@NonNegative final long offsetInRDO,
+                                             final byte[] byteArray,
+                                             @NonNegative int offset,
+                                             @NonNegative final int length) throws IllegalStateException, BufferOverflowException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
-        if ((length + offset) > bytes.length)
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+        if ((length + offset) > byteArray.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " + "length=" + length + ", offset=" + offset);
 
         if (length > writeRemaining())
             throw new DecoratedBufferOverflowException(
@@ -79,11 +84,11 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             long safeCopySize = copySize(wp);
 
             if (safeCopySize + mappedFile.overlapSize() >= remaining) {
-                bytesStore.write(wp, bytes, offset, remaining);
+                bytesStore.write(wp, byteArray, offset, remaining);
                 return this;
             }
 
-            bytesStore.write(wp, bytes, offset, (int) safeCopySize);
+            bytesStore.write(wp, byteArray, offset, (int) safeCopySize);
 
             offset += safeCopySize;
             wp += safeCopySize;

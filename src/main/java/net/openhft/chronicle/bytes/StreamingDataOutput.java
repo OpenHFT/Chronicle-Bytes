@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -502,13 +503,17 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Write all data or fail.
+     * Writes all data from the provided {@code byteArray} into this Bytes object.
      * <p>
-     * Calling this method will update the cursors of this.
+     * Invoking this method will update the cursors of this Bytes object.
+     *
+     * @throws IllegalArgumentException if the provided {@code offset} or {@code length} is negative
+     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    S write(byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException;
+    S write(final byte[] byteArray,
+            @NonNegative final int offset,
+            @NonNegative final int length) throws BufferOverflowException, IllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     default S unsafeWriteObject(Object o, int length)
             throws BufferOverflowException, IllegalStateException {

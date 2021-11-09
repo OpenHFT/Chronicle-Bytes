@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -29,6 +30,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -286,11 +288,13 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @NotNull
     @Override
-    public MappedBytesStore write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length)
-            throws IllegalStateException {
-        requireNonNull(bytes);
+    public MappedBytesStore write(@NonNegative final long offsetInRDO,
+                                  final byte[] byteArray,
+                                  @NonNegative final int offset,
+                                  @NonNegative final int length) throws IllegalStateException {
+        // Parameter invariants are checked in the super method
         writeCheck.run();
-        super.write(offsetInRDO, bytes, offset, length);
+        super.write(offsetInRDO, byteArray, offset, length);
         return this;
     }
 

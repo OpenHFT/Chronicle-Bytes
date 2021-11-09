@@ -32,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
@@ -88,15 +89,17 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
-    public @NotNull CommonMappedBytes write(@NotNull final byte[] bytes,
+    public @NotNull CommonMappedBytes write(@NotNull final byte[] byteArray,
                                             final int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
-        requireNonNull(bytes);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
-        write(writePosition(), bytes, offset, length);
-        uncheckedWritePosition(writePosition() + Math.min(length, bytes.length - offset));
+        write(writePosition(), byteArray, offset, length);
+        uncheckedWritePosition(writePosition() + Math.min(length, byteArray.length - offset));
         return this;
     }
 

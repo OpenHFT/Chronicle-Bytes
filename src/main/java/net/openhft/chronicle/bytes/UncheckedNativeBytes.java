@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -38,6 +39,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -533,11 +535,13 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     @NotNull
-    public Bytes<Underlying> write(long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException {
-        requireNonNull(bytes);
+    public Bytes<Underlying> write(@NonNegative final long offsetInRDO,
+                                   final byte[] byteArray,
+                                   @NonNegative final int offset,
+                                   @NonNegative int length) throws BufferOverflowException, IllegalStateException {
+        requireNonNull(byteArray);
         writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;
     }
 
@@ -722,15 +726,18 @@ public class UncheckedNativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> write(@NotNull byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException, ArrayIndexOutOfBoundsException {
-        if (length + offset > bytes.length)
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
+    public Bytes<Underlying> write(final byte[] byteArray,
+                                   @NonNegative final int offset,
+                                   @NonNegative final int length) throws BufferOverflowException, IllegalStateException, ArrayIndexOutOfBoundsException {
+        requireNonNegative(offset);
+        requireNonNegative(length);
+        if (length + offset > byteArray.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " +
                     "length=" + length + ", offset=" + offset);
         if (length > writeRemaining())
             throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;
     }
 

@@ -24,12 +24,15 @@ import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -474,13 +477,17 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(
-            long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException {
-        requireNonNull(bytes);
+    public HeapBytesStore<Underlying> write(@NonNegative final long offsetInRDO,
+                                            byte[] byteArray,
+                                            @NonNegative final int offset,
+                                            @NonNegative final int length) throws BufferOverflowException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         try {
             memory.copyMemory(
-                    bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+                    byteArray, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();

@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -35,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
@@ -515,11 +517,15 @@ public class NativeBytesStore<Underlying>
 
     @NotNull
     @Override
-    public NativeBytesStore<Underlying> write(
-            long offsetInRDO, byte[] bytes, int offset, int length)
-            throws IllegalStateException {
-        requireNonNull(bytes);
-        memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
+    public NativeBytesStore<Underlying> write(@NonNegative final long offsetInRDO,
+                                              byte[] byteArray,
+                                              @NonNegative final int offset,
+                                              @NonNegative final  int length) throws IllegalStateException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
+        memory.copyMemory(byteArray, offset, address + translate(offsetInRDO), length);
         return this;
     }
 
