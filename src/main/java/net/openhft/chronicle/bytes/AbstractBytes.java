@@ -30,6 +30,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -1258,6 +1259,7 @@ public abstract class AbstractBytes<Underlying>
     }
 
     // Only used for testing
+    @TestOnly
     void contentDependentHashcodeAndEquals(boolean val) {
         this.contentDependentHashcodeAndEquals = val;
     }

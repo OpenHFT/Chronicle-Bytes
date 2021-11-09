@@ -31,6 +31,7 @@ import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -95,6 +96,7 @@ public class UncheckedNativeBytes<Underlying>
     @Override
     @NotNull
     public Bytes<Underlying> unchecked(boolean unchecked) {
+        throwExceptionIfReleased();
         return this;
     }
 
@@ -202,6 +204,7 @@ public class UncheckedNativeBytes<Underlying>
     @NotNull
     @Override
     public BytesStore<Bytes<Underlying>, Underlying> copy() {
+        throwExceptionIfReleased();
         throw new UnsupportedOperationException("todo");
     }
 
@@ -957,6 +960,7 @@ public class UncheckedNativeBytes<Underlying>
     }
 
     // Only used for testing
+    @TestOnly
     void contentDependentHashcodeAndEquals(boolean val) {
         this.contentDependentHashcodeAndEquals = val;
     }

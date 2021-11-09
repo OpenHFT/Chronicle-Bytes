@@ -37,7 +37,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -701,6 +701,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default void writeBigInteger(@NotNull BigInteger bi)
             throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         byte[] bytes = bi.toByteArray();
+        throwExceptionIfReleased(this);
         writeStopBit(bytes.length);
         write(bytes);
     }
