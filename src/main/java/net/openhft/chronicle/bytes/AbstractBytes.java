@@ -36,6 +36,7 @@ import org.jetbrains.annotations.TestOnly;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -701,8 +702,13 @@ public abstract class AbstractBytes<Underlying>
             bytes.get(offset + length - 1);
 
             int i = 0;
-            for (; i < length - 7; i += 8)
-                writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            if (bytes.order() == ByteOrder.nativeOrder()) {
+                for (; i < length - 7; i += 8)
+                    writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            } else {
+                for (; i < length - 7; i += 8)
+                    writeLong(offsetInRDO + i, Long.reverseBytes(bytes.getLong(offset + i)));
+            }
             for (; i < length; i++)
                 writeByte(offsetInRDO + i, bytes.get(offset + i));
         } else {
