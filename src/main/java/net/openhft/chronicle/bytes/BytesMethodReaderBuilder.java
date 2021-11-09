@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 @SuppressWarnings("rawtypes")
 public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn in;
@@ -27,6 +29,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private MethodEncoderLookup methodEncoderLookup = MethodEncoderLookup.BY_ANNOTATION;
 
     public BytesMethodReaderBuilder(BytesIn in) {
+        throwExceptionIfReleased(in);
         this.in = in;
     }
 

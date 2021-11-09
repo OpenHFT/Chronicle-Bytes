@@ -24,9 +24,15 @@ import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertRefer
 
 public class BytesTestCommon {
 
+    private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
+
+    public BytesTestCommon() {
+        // Todo: remove this. See https://github.com/OpenHFT/Chronicle-Bytes/issues/268
+        ignoreException("Object::hashCode/Object::equals");
+    }
 
     @Before
     @BeforeEach
@@ -50,6 +56,14 @@ public class BytesTestCommon {
         exceptions = Jvm.recordExceptions();
     }
 
+    public void ignoreException(String message) {
+        ignoreException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
+    }
+
+    public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+        ignoredExceptions.put(predicate, description);
+    }
+
     public void expectException(String message) {
         expectException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
     }
@@ -65,10 +79,11 @@ public class BytesTestCommon {
         }
         expectedExceptions.clear();
 
-        exceptions.keySet()
-                .stream().filter(ek -> ek.message.contains("Object::hashCode/Object::equals"))
-                .collect(toList())
-                .forEach(exceptions::remove);
+        for (Map.Entry<Predicate<ExceptionKey>, String> ignoredException : ignoredExceptions.entrySet()) {
+            if (!exceptions.keySet().removeIf(ignoredException.getKey()))
+                Slf4jExceptionHandler.DEBUG.on(getClass(), "Ignored " + ignoredException.getValue());
+        }
+        ignoredExceptions.clear();
 
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);

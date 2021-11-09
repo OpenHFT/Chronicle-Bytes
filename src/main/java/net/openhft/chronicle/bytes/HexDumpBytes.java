@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.TestOnly;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -39,6 +40,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -138,6 +140,7 @@ public class HexDumpBytes
     @NotNull
     @Override
     public String toHexString() {
+        throwExceptionIfReleased(this);
         try {
             if (lineLength() > 0)
                 newLine();
@@ -234,6 +237,7 @@ public class HexDumpBytes
 
     @Override
     public BytesStore copy() {
+        throwExceptionIfReleased(this);
         return new HexDumpBytes(base, text);
     }
 
@@ -1767,6 +1771,7 @@ public class HexDumpBytes
     }
 
     // Only used for testing
+    @TestOnly
     void contentDependentHashcodeAndEquals(boolean val) {
         this.contentDependentHashcodeAndEquals = val;
         base.contentDependentHashcodeAndEquals(val);

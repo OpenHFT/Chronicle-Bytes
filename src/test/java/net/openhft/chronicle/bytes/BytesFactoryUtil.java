@@ -211,4 +211,65 @@ final class BytesFactoryUtil {
     }
 
 
+    static final class BytesInitialInfo {
+        private final long readPosition;
+        private final long writePosition;
+        private final long writeLimit;
+        private final long capacity;
+        private final long realCapacity;
+        //
+        private final boolean directMemory;
+        private final boolean elastic;
+
+        public BytesInitialInfo(Bytes<?> bytes) {
+            this.readPosition = bytes.readPosition();
+            this.writePosition = bytes.writePosition();
+            this.writeLimit = bytes.writeLimit();
+            this.capacity = bytes.capacity();
+            this.realCapacity = bytes.realCapacity();
+            this.directMemory = bytes.isDirectMemory();
+            this.elastic = bytes.isElastic();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            BytesInitialInfo that = (BytesInitialInfo) o;
+
+            if (readPosition != that.readPosition) return false;
+            if (writePosition != that.writePosition) return false;
+            if (writeLimit != that.writeLimit) return false;
+            if (capacity != that.capacity) return false;
+            if (realCapacity != that.realCapacity) return false;
+            if (directMemory != that.directMemory) return false;
+            return elastic == that.elastic;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = (int) (readPosition ^ (readPosition >>> 32));
+            result = 31 * result + (int) (writePosition ^ (writePosition >>> 32));
+            result = 31 * result + (int) (writeLimit ^ (writeLimit >>> 32));
+            result = 31 * result + (int) (capacity ^ (capacity >>> 32));
+            result = 31 * result + (int) (realCapacity ^ (realCapacity >>> 32));
+            result = 31 * result + (directMemory ? 1 : 0);
+            result = 31 * result + (elastic ? 1 : 0);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "BytesInitialInfo{" +
+                    "readPosition=" + readPosition +
+                    ", writePosition=" + writePosition +
+                    ", writeLimit=" + writeLimit +
+                    ", capacity=" + capacity +
+                    ", realCapacity=" + realCapacity +
+                    ", directMemory=" + directMemory +
+                    ", elastic=" + elastic +
+                    '}';
+        }
+    }
 }

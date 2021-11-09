@@ -27,6 +27,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -307,6 +308,8 @@ public interface RandomDataInput extends RandomCommon {
      */
     default int copyTo(@NotNull byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
+        throwExceptionIfReleased(this);
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
             bytes[i] = readByte(start() + i);
@@ -323,6 +326,8 @@ public interface RandomDataInput extends RandomCommon {
      */
     default int copyTo(@NotNull ByteBuffer bb)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bb);
+        throwExceptionIfReleased(this);
         int pos = bb.position();
         int len = (int) Math.min(bb.remaining(), readRemaining());
         int i;
@@ -603,6 +608,7 @@ public interface RandomDataInput extends RandomCommon {
 
     default ByteBuffer toTemporaryDirectByteBuffer()
             throws IllegalArgumentException, ArithmeticException, IllegalStateException {
+        throwExceptionIfReleased(this);
         int len = Maths.toUInt31(readRemaining());
         try {
             ByteBuffer bb = ByteBuffer.allocateDirect(len);

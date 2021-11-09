@@ -205,6 +205,7 @@
         @Override
         public Bytes<Underlying> bytesForRead()
                 throws IllegalStateException {
+            throwExceptionIfReleased();
             try {
                 return isClear()
                         ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
@@ -258,6 +259,7 @@
         @Override
         public BytesStore<Bytes<Underlying>, Underlying> copy()
                 throws IllegalStateException {
+            throwExceptionIfReleased();
             ReportUnoptimised.reportOnce();
 
             if (bytesStore.underlyingObject() instanceof ByteBuffer) {
@@ -642,6 +644,7 @@
         @Override
         public ByteBuffer toTemporaryDirectByteBuffer()
                 throws IllegalArgumentException, ArithmeticException, IllegalStateException {
+            throwExceptionIfReleased();
             if (isClear())
                 return bytesStore.toTemporaryDirectByteBuffer();
             return super.toTemporaryDirectByteBuffer();
