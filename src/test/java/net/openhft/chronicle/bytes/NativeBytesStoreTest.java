@@ -266,7 +266,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         final Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
         try {
             dst.writePosition(src.copyTo(dst));
-            assertTrue(BytesInternal.contentEqual(src, dst));
+            assertEquals(src.toString(), dst.toString());
         } finally {
             src.releaseLast();
             dst.releaseLast();
