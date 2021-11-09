@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -149,6 +150,29 @@ public enum BytesUtil {
         try (OutputStream os = new FileOutputStream(file)) {
             os.write(bytes.underlyingObject());
         }
+    }
+
+    /**
+     * Returns if the provided nullable BytesStore arguments are equal to each other.
+     *
+     * Consequently, if both arguments are {@code null}, {@code true}
+     * is returned and if exactly one argument is {@code null}, {@code
+     * false} is returned. Otherwise, equality is determined by comparing the content
+     * of the two provided arguments.
+     * <p>
+     * Bytes::equals will eventually be the same as Object::equals and so this
+     * method can provide a bridge between the old behaviour and the new behaviour.
+     *
+     * @param a a ByteStore
+     * @param b a ByteStore to be compared with {@code a} for equality
+     * @return if the arguments are equal to each other
+     * @throws ClosedIllegalStateException if either of the provided parameters are released
+     *
+     * @see Object#equals(Object)
+     */
+    public static boolean contentEqual(@Nullable final BytesStore a,
+                                       @Nullable final BytesStore b) {
+        return BytesInternal.contentEqual(a, b);
     }
 
     public static boolean bytesEqual(

@@ -217,7 +217,6 @@ final class BytesFactoryUtil {
         private final long writeLimit;
         private final long capacity;
         private final long realCapacity;
-        //
         private final boolean directMemory;
         private final boolean elastic;
 
