@@ -18,11 +18,9 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsMigrationUtil;
-import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -37,7 +35,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -60,7 +57,6 @@ public class UncheckedNativeBytes<Underlying>
     protected long writeLimit;
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
-    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     public UncheckedNativeBytes(@NotNull Bytes<Underlying> underlyingBytes)
             throws IllegalStateException {
@@ -800,12 +796,12 @@ public class UncheckedNativeBytes<Underlying>
 
     @Override
     public int hashCode() {
-        return HashCodeEqualsMigrationUtil.hashCode(this, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.hashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsMigrationUtil.equals(this, obj, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.equals(this, obj);
     }
 
     @NotNull
@@ -957,12 +953,6 @@ public class UncheckedNativeBytes<Underlying>
         bytesStore.write8bit(position, text, start, length);
         writePosition += toWriteLength;
         return this;
-    }
-
-    // Only used for testing
-    @TestOnly
-    void contentDependentHashcodeAndEquals(boolean val) {
-        this.contentDependentHashcodeAndEquals = val;
     }
 
 }
