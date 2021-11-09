@@ -4,8 +4,6 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.StackTrace;
 
 public final class HashCodeEqualsMigrationUtil {
 
@@ -66,13 +64,15 @@ public final class HashCodeEqualsMigrationUtil {
                         "the contents of the Bytes object affected the outcome of these methods.";
 
         static {
-            Jvm.warn().on(Warner.class, MSG, new StackTrace());
+//            Jvm.warn().on(Warner.class, MSG, new StackTrace());
+            System.err.println(MSG);
         }
 
         private Warner() {
         }
 
         public static void warnOnce() {
+//            assert false;
             // Everything is made in the static block above as the
             // class is first used
         }

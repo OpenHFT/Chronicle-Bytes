@@ -658,6 +658,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                     return;
                 if (compareAndSwapLong(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
@@ -679,6 +680,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                     return;
                 if (compareAndSwapInt(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);

@@ -32,6 +32,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**

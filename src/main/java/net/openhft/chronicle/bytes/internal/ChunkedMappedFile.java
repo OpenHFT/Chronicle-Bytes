@@ -144,7 +144,6 @@ public class ChunkedMappedFile extends MappedFile {
         if (position < 0)
             throw new IOException("Attempt to access a negative position: " + position);
         final int chunk = (int) (position / chunkSize);
-        Jvm.safepoint();
 
         final MappedBytesStore mbs;
         synchronized (stores) {
