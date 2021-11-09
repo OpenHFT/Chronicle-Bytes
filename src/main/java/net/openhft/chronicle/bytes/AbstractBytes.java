@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -1163,13 +1164,14 @@ public abstract class AbstractBytes<Underlying>
     @Override
     public String toString() {
         // Reserving prevents illegal access to this Bytes object if released by another thread
-        reserve(this);
+        final ReferenceOwner toStringOwner = ReferenceOwner.temporary("toString");
+        reserve(toStringOwner);
         try {
             return BytesInternal.toString(this);
         } catch (Exception e) {
             return e.toString();
         } finally {
-            release(this);
+            release(toStringOwner);
         }
     }
 
