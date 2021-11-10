@@ -1049,4 +1049,20 @@ public class BytesTest extends BytesTestCommon {
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
         assertEquals("01ello", new String(ba));
     }
+
+    @Test
+    public void writeSkipNegative() {
+        @NotNull Bytes a = alloc1.elasticBytes(16);
+        try {
+            String hello = "hello";
+            a.append(hello);
+            assertEquals(hello, a.toString());
+            a.writeSkip(-hello.length());
+            assertEquals("", a.toString());
+            if (!a.unchecked())
+                assertThrows(BufferOverflowException.class, () -> a.writeSkip(-1));
+        } finally {
+            postTest(a);
+        }
+    }
 }

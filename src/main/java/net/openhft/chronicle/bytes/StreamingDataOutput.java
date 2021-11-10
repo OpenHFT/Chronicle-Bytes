@@ -61,7 +61,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Skip a number of bytes by moving the writePosition. Must be less than or equal to the writeLimit.
      *
-     * @param bytesToSkip bytes to skip.
+     * @param bytesToSkip bytes to skip. This can be negative.
      * @return this
      * @throws BufferOverflowException if the offset is outside the limits of the Bytes
      */
