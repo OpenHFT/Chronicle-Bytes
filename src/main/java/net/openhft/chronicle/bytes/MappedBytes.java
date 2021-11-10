@@ -470,9 +470,9 @@ public class MappedBytes extends AbstractBytes<Void> implements Closeable, Manag
             throws BufferOverflowException, IllegalStateException {
 
         throwExceptionIfClosed();
-        if (offset < 0 || offset > mappedFile.capacity() - adding)
+        if (offset + adding < start() || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException(offset);
-        if (bytesStore == null || !bytesStore.inside(offset, checkSize(adding))) {
+        if (bytesStore == null || (adding > 0 && !bytesStore.inside(offset, checkSize(adding)))) {
             acquireNextByteStore0(offset, false);
         }
 //        super.writeCheckOffset(offset, adding);

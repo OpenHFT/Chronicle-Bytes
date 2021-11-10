@@ -57,7 +57,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalStateException {
-        if (offset >= bytesStore.start()) {
+        if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             long writeEnd = offset + adding;
             if (writeEnd > writeLimit)
                 throwBeyondWriteLimit(adding, writeEnd);

@@ -459,7 +459,7 @@ public interface Bytes<Underlying> extends
     /**
      * Converts text to bytes using ISO-8859-1 encoding and returns a Bytes ready for reading.
      * <p>
-     * Note: this returns a heap Bytes
+     * The returned Bytes is allocated on the heap.
      *
      * @param text to convert
      * @return Bytes ready for reading.
