@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.annotations.TestOnly;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,9 +39,6 @@ import java.nio.ByteBuffer;
 import java.util.Scanner;
 import java.util.regex.Pattern;
 
-import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
-import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
-import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -62,7 +58,6 @@ public class HexDumpBytes
     private long startOfLine = 0;
     private int indent = 0;
     private int numberWrap = 16;
-    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     public HexDumpBytes() {
         try {
@@ -157,22 +152,12 @@ public class HexDumpBytes
 
     @Override
     public int hashCode() {
-        if (contentDependentHashcodeAndEquals) {
-            return base.hashCode();
-        } else {
-            // We must use `this` and not the delegate
-            return System.identityHashCode(this);
-        }
+        return base.hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        if (contentDependentHashcodeAndEquals) {
-            return base.equals(obj);
-        } else {
-            // We must use `this` and not the delegate
-            return (this == obj);
-        }
+        return base.equals(obj);
     }
 
     @Override
@@ -1779,13 +1764,6 @@ public class HexDumpBytes
         } finally {
             copyToText(pos);
         }
-    }
-
-    // Only used for testing
-    @TestOnly
-    void contentDependentHashcodeAndEquals(boolean val) {
-        this.contentDependentHashcodeAndEquals = val;
-        base.contentDependentHashcodeAndEquals(val);
     }
 
     private static class TextBytesReader extends Reader {

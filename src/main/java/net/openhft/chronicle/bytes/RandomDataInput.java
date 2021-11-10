@@ -457,13 +457,13 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the offset in this {@code RandomDataInput} to read char sequence from
      * @param sb     the buffer to read char sequence into (truncated first)
-     * @param <ACS>  buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param <T>    buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      * @throws IllegalStateException    if released
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
+    default <T extends Appendable & CharSequence> long readUtf8(long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
@@ -508,15 +508,15 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
      * @param sb         the buffer to read char sequence into (truncated first)
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
-     * @param <ACS>      buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param <T>        buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @throws IllegalStateException    if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset,
-                                                                         final @NotNull ACS sb,
-                                                                         final int maxUtf8Len)
+    default <T extends Appendable & CharSequence> long readUtf8Limited(long offset,
+                                                                       final @NotNull T sb,
+                                                                       final int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             IllegalStateException {
         AppendableUtil.setLength(sb, 0);
