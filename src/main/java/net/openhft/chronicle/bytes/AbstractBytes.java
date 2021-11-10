@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsMigrationUtil;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -34,6 +35,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -48,9 +50,6 @@ public abstract class AbstractBytes<U>
         implements Bytes<U> {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
-    // Todo: Change the default behaviour to false in a future release
-    static final boolean CONTENT_DEPENDENT_HASHCODE_AND_EQUALS = Jvm.getBoolean("bytes.hashcodeandequals.content", true);
-
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -63,7 +62,6 @@ public abstract class AbstractBytes<U>
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
-    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException {
@@ -699,8 +697,13 @@ public abstract class AbstractBytes<U>
             bytes.get(offset + length - 1);
 
             int i = 0;
-            for (; i < length - 7; i += 8)
-                writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            if (bytes.order() == ByteOrder.nativeOrder()) {
+                for (; i < length - 7; i += 8)
+                    writeLong(offsetInRDO + i, bytes.getLong(offset + i));
+            } else {
+                for (; i < length - 7; i += 8)
+                    writeLong(offsetInRDO + i, Long.reverseBytes(bytes.getLong(offset + i)));
+            }
             for (; i < length; i++)
                 writeByte(offsetInRDO + i, bytes.get(offset + i));
         } else {
@@ -1150,25 +1153,26 @@ public abstract class AbstractBytes<U>
 
     @Override
     public int hashCode() {
-        return HashCodeEqualsMigrationUtil.hashCode(this, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.hashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsMigrationUtil.equals(this, obj, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.equals(this, obj);
     }
 
     @NotNull
     @Override
     public String toString() {
         // Reserving prevents illegal access to this Bytes object if released by another thread
-        reserve(this);
+        final ReferenceOwner toStringOwner = ReferenceOwner.temporary("toString");
+        reserve(toStringOwner);
         try {
             return BytesInternal.toString(this);
         } catch (Exception e) {
             return e.toString();
         } finally {
-            release(this);
+            release(toStringOwner);
         }
     }
 
@@ -1255,11 +1259,6 @@ public abstract class AbstractBytes<U>
             sum += readByte(i);
         }
         return sum & 0xFF;
-    }
-
-    // Only used for testing
-    void contentDependentHashcodeAndEquals(boolean val) {
-        this.contentDependentHashcodeAndEquals = val;
     }
 
     static final class ReportUnoptimised {

@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -265,7 +266,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         final Bytes<ByteBuffer> dst = Bytes.elasticByteBuffer();
         try {
             dst.writePosition(src.copyTo(dst));
-            assertEquals(src, dst);
+            assertEquals(src.toString(), dst.toString());
         } finally {
             src.releaseLast();
             dst.releaseLast();

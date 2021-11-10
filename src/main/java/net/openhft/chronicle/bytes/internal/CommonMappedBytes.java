@@ -51,6 +51,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
             CommonMappedBytes.this.performClose();
         }
     };
+    private final long capacity;
 
     protected long lastActualSize = 0;
     private boolean initReleased;
@@ -72,6 +73,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         this.backingFileIsReadOnly = !mappedFile.file().canWrite();
         assert !mappedFile.isClosed();
         clear();
+        capacity = mappedFile.capacity();
     }
 
     @Override
@@ -140,12 +142,12 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public long capacity() {
-        return mappedFile.capacity();
+        return capacity;
     }
 
     @Override
     public Bytes<Void> readLimitToCapacity() {
-        uncheckedWritePosition(mappedFile.capacity());
+        uncheckedWritePosition(capacity);
         return this;
     }
 
@@ -223,7 +225,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         long start = 0L;
         readPosition = start;
         uncheckedWritePosition(start);
-        writeLimit = mappedFile.capacity();
+        writeLimit = capacity;
         return this;
     }
 

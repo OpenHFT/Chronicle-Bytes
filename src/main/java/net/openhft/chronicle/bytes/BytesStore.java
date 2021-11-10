@@ -39,6 +39,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static java.lang.Math.min;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
@@ -307,6 +309,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     default long copyTo(@NotNull BytesStore store)
             throws IllegalStateException {
+        requireNonNull(store);
+        throwExceptionIfReleased(this);
+        throwExceptionIfReleased(store);
         long readPos = readPosition();
         long writePos = store.writePosition();
         long copy = min(readRemaining(), store.capacity());
@@ -653,6 +658,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                     return;
                 if (compareAndSwapLong(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
@@ -674,6 +680,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                     return;
                 if (compareAndSwapInt(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);

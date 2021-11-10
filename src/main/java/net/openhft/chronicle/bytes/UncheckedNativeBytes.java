@@ -20,7 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsMigrationUtil;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -34,7 +34,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.bytes.AbstractBytes.CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -57,7 +56,6 @@ public class UncheckedNativeBytes<U>
     protected long writeLimit;
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
-    private boolean contentDependentHashcodeAndEquals = CONTENT_DEPENDENT_HASHCODE_AND_EQUALS;
 
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
@@ -93,6 +91,7 @@ public class UncheckedNativeBytes<U>
     @Override
     @NotNull
     public Bytes<U> unchecked(boolean unchecked) {
+        throwExceptionIfReleased();
         return this;
     }
 
@@ -200,6 +199,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public BytesStore<Bytes<U>, U> copy() {
+        throwExceptionIfReleased();
         throw new UnsupportedOperationException("todo");
     }
 
@@ -795,12 +795,12 @@ public class UncheckedNativeBytes<U>
 
     @Override
     public int hashCode() {
-        return HashCodeEqualsMigrationUtil.hashCode(this, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.hashCode(this);
     }
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsMigrationUtil.equals(this, obj, contentDependentHashcodeAndEquals);
+        return HashCodeEqualsUtil.equals(this, obj);
     }
 
     @NotNull
@@ -952,11 +952,6 @@ public class UncheckedNativeBytes<U>
         bytesStore.write8bit(position, text, start, length);
         writePosition += toWriteLength;
         return this;
-    }
-
-    // Only used for testing
-    void contentDependentHashcodeAndEquals(boolean val) {
-        this.contentDependentHashcodeAndEquals = val;
     }
 
 }

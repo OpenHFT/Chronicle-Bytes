@@ -222,4 +222,14 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
+
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes) throws BufferOverflowException, IllegalStateException {
+        assert bytes != this : "you should not write to yourself !";
+
+        long length = bytes.readRemaining();
+        bytesStore.write(writePosition, bytes);
+        writeSkip(length);
+        return this;
+    }
 }
