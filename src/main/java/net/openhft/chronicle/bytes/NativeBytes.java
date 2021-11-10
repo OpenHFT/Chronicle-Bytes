@@ -40,11 +40,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  *
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NativeBytes<Underlying>
-        extends VanillaBytes<Underlying> {
+public class NativeBytes<U>
+        extends VanillaBytes<U> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
@@ -282,7 +282,7 @@ public class NativeBytes<Underlying>
         }
 
         throwExceptionIfReleased();
-        @Nullable final BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
+        @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         this.bytesStore(store);
         try {
@@ -300,14 +300,14 @@ public class NativeBytes<Underlying>
     }
 
     @Override
-    protected void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
@@ -371,7 +371,7 @@ public class NativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(final byte i8)
+    public Bytes<U> writeByte(final byte i8)
             throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
@@ -380,7 +380,7 @@ public class NativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeLong(final long i64)
+    public Bytes<U> writeLong(final long i64)
             throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(8L, 8L);
         bytesStore.writeLong(offset, i64);

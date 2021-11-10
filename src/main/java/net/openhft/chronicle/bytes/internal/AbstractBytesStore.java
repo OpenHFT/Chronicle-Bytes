@@ -28,12 +28,12 @@ import java.nio.BufferUnderflowException;
 /**
  * Abstract BytesStore
  * @param <B> ByteStore type
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 
-public abstract class AbstractBytesStore<B extends BytesStore<B, Underlying>, Underlying>
+public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         extends AbstractReferenceCounted
-        implements BytesStore<B, Underlying> {
+        implements BytesStore<B, U> {
 
     protected AbstractBytesStore() {
     }

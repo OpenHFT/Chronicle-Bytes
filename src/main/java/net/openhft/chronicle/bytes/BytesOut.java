@@ -30,11 +30,11 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesOut<Underlying> extends
-        StreamingDataOutput<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>>,
-        BytesPrepender<Bytes<Underlying>>,
-        BytesComment<BytesOut<Underlying>> {
+public interface BytesOut<U> extends
+        StreamingDataOutput<Bytes<U>>,
+        ByteStringAppender<Bytes<U>>,
+        BytesPrepender<Bytes<U>>,
+        BytesComment<BytesOut<U>> {
 
     /**
      * Proxy an interface so each message called is written to a file for replay.
