@@ -547,7 +547,7 @@ public interface Bytes<Underlying> extends
      * <p>
      * The returned Bytes is ready for reading.
      * <p>
-     * The returned Bytes is allocated using native memory.
+     * The returned Bytes is allocated on the heap.
      *
      * @param text non-null text to convert
      * @return a new Bytes containing text

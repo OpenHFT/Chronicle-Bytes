@@ -12,6 +12,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
@@ -138,6 +139,23 @@ public class MappedBytesTest extends BytesTestCommon {
             bytesR.readLimit(wp);
 
             Assert.assertEquals(text, bytesR.toString());
+            from.releaseLast();
+        }
+    }
+
+    @Test
+    public void testWriteReadWriteSkipBytes()
+            throws IOException {
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, 64 << 10, 16 << 10)) {
+
+            String hello = "hello";
+            Bytes<?> from = Bytes.from(hello);
+            bytesW.write(from);
+            bytesW.writeSkip(-hello.length());
+            Assert.assertEquals(0, bytesW.writePosition());
+            assertThrows(BufferOverflowException.class, () -> bytesW.writeSkip(-1));
+
             from.releaseLast();
         }
     }

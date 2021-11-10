@@ -256,10 +256,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws BufferOverflowException, IllegalStateException {
 
         throwExceptionIfClosed();
-        if (offset < 0 || offset > mappedFile.capacity() - adding)
+        if (offset + adding < start() || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException0(offset);
         BytesStore bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, checkSize0(adding))) {
+        if (adding > 0 && !bytesStore.inside(offset, checkSize0(adding))) {
             acquireNextByteStore0(offset, false);
             if (!this.bytesStore.inside(offset, checkSize0(adding)))
                 throw new DecoratedBufferUnderflowException(String.format("Acquired the next BytesStore, but still not room to add %d when realCapacity %d", adding, this.bytesStore.realCapacity()));
