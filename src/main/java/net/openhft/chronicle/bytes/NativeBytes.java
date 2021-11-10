@@ -157,7 +157,7 @@ public class NativeBytes<U>
     @Override
     protected void writeCheckOffset(final long offset, final long adding)
             throws BufferOverflowException, IllegalStateException {
-        if (offset >= bytesStore.start()) {
+        if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
             if (writeEnd <= bytesStore.safeLimit()) {
                 return; // do nothing.

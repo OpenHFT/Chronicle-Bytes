@@ -771,7 +771,7 @@ public abstract class AbstractBytes<U>
 
     private void writeCheckOffset0(long offset, long adding)
             throws DecoratedBufferOverflowException {
-        if (offset < start()) {
+        if (offset < start() || offset + adding < start()) {
             throw newBOELower(offset);
         }
         if ((offset + adding) > writeLimit()) {

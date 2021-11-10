@@ -59,6 +59,7 @@ public class Bytes2Test extends BytesTestCommon {
             from.write("Hello World");
 
             to.writeSome(from);
+            assertEquals("Hello ", to.toString());
             assertEquals("World", from.toString());
         } finally {
             from.releaseLast();
