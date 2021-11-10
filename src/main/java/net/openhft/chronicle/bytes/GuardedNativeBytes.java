@@ -25,7 +25,7 @@ import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.BinaryWireCode.*;
 
-public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
+public class GuardedNativeBytes<U> extends NativeBytes<U> {
     static final byte BYTE_T = (byte) INT8;
     static final byte SHORT_T = (byte) INT16;
     static final byte INT_T = (byte) INT32;
@@ -43,20 +43,20 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(byte i8)
+    public Bytes<U> writeByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(BYTE_T);
         return super.writeByte(i8);
     }
 
     @Override
-    public Bytes<Underlying> rawWriteByte(byte i8)
+    public Bytes<U> rawWriteByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
         return super.writeByte(i8);
     }
 
     @Override
-    public Bytes<Underlying> rawWriteInt(int i)
+    public Bytes<U> rawWriteInt(int i)
             throws BufferOverflowException, IllegalStateException {
         return super.writeInt(i);
     }
@@ -85,7 +85,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeShort(short i16)
+    public Bytes<U> writeShort(short i16)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(SHORT_T);
         return super.writeShort(i16);
@@ -100,7 +100,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeStopBit(char x)
+    public Bytes<U> writeStopBit(char x)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(STOP_T);
         return super.writeStopBit(x);
@@ -108,7 +108,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeStopBit(long x)
+    public Bytes<U> writeStopBit(long x)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(STOP_T);
         return super.writeStopBit(x);
@@ -130,7 +130,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeInt(int i)
+    public Bytes<U> writeInt(int i)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(INT_T);
         return super.writeInt(i);
@@ -160,7 +160,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeFloat(float f)
+    public Bytes<U> writeFloat(float f)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(FLOAT_T);
         return super.writeFloat(f);
@@ -175,7 +175,7 @@ public class GuardedNativeBytes<Underlying> extends NativeBytes<Underlying> {
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeDouble(double d)
+    public Bytes<U> writeDouble(double d)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(DOUBLE_T);
         return super.writeDouble(d);

@@ -35,23 +35,23 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * Wrapper for Heap ByteBuffers and arrays.
  *
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 @SuppressWarnings("restriction")
-public class HeapBytesStore<Underlying>
-        extends AbstractBytesStore<HeapBytesStore<Underlying>, Underlying> {
+public class HeapBytesStore<U>
+        extends AbstractBytesStore<HeapBytesStore<U>, U> {
     @NotNull
     private final Object realUnderlyingObject;
     private final int dataOffset;
     private final long capacity;
     @NotNull
-    private final Underlying underlyingObject;
+    private final U underlyingObject;
     private UnsafeMemory memory = UnsafeMemory.MEMORY;
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         super(false);
         //noinspection unchecked
-        this.underlyingObject = (Underlying) byteBuffer;
+        this.underlyingObject = (U) byteBuffer;
         this.realUnderlyingObject = byteBuffer.array();
         this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
         this.capacity = byteBuffer.capacity();
@@ -60,7 +60,7 @@ public class HeapBytesStore<Underlying>
     private HeapBytesStore(@NotNull byte @NotNull [] byteArray) {
         super(false);
         //noinspection unchecked
-        this.underlyingObject = (Underlying) byteArray;
+        this.underlyingObject = (U) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
         this.capacity = byteArray.length;
@@ -68,7 +68,7 @@ public class HeapBytesStore<Underlying>
 
     private HeapBytesStore(Object object, long start, long length) {
         super(false);
-        this.underlyingObject = (Underlying) object;
+        this.underlyingObject = (U) object;
         this.realUnderlyingObject = object;
         this.dataOffset = Math.toIntExact(start);
         this.capacity = length;
@@ -119,7 +119,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public BytesStore<HeapBytesStore<Underlying>, Underlying> copy() {
+    public BytesStore<HeapBytesStore<U>, U> copy() {
         throw new UnsupportedOperationException("todo");
     }
 
@@ -135,7 +135,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public Underlying underlyingObject() {
+    public U underlyingObject() {
         return underlyingObject;
     }
 
@@ -312,7 +312,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeByte(long offset, byte b)
+    public HeapBytesStore<U> writeByte(long offset, byte b)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -326,7 +326,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeShort(long offset, short i16)
+    public HeapBytesStore<U> writeShort(long offset, short i16)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -340,7 +340,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeInt(long offset, int i32)
+    public HeapBytesStore<U> writeInt(long offset, int i32)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -354,7 +354,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeOrderedInt(long offset, int i32)
+    public HeapBytesStore<U> writeOrderedInt(long offset, int i32)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -368,7 +368,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeLong(long offset, long i64)
+    public HeapBytesStore<U> writeLong(long offset, long i64)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -382,7 +382,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeOrderedLong(long offset, long i)
+    public HeapBytesStore<U> writeOrderedLong(long offset, long i)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -396,7 +396,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeFloat(long offset, float f)
+    public HeapBytesStore<U> writeFloat(long offset, float f)
             throws BufferOverflowException {
         try {
             memory.writeFloat(realUnderlyingObject, dataOffset + offset, f);
@@ -409,7 +409,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeDouble(long offset, double d)
+    public HeapBytesStore<U> writeDouble(long offset, double d)
             throws BufferOverflowException {
         try {
             memory.writeDouble(realUnderlyingObject, dataOffset + offset, d);
@@ -422,7 +422,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileByte(long offset, byte i8)
+    public HeapBytesStore<U> writeVolatileByte(long offset, byte i8)
             throws BufferOverflowException {
         try {
             memory.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
@@ -435,7 +435,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileShort(long offset, short i16)
+    public HeapBytesStore<U> writeVolatileShort(long offset, short i16)
             throws BufferOverflowException {
         try {
             memory.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
@@ -448,7 +448,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileInt(long offset, int i32)
+    public HeapBytesStore<U> writeVolatileInt(long offset, int i32)
             throws BufferOverflowException {
         try {
             memory.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
@@ -461,7 +461,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> writeVolatileLong(long offset, long i64)
+    public HeapBytesStore<U> writeVolatileLong(long offset, long i64)
             throws BufferOverflowException {
         try {
             memory.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
@@ -474,7 +474,7 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(
+    public HeapBytesStore<U> write(
             long offsetInRDO, byte[] bytes, int offset, int length)
             throws BufferOverflowException {
         requireNonNull(bytes);
@@ -510,8 +510,8 @@ public class HeapBytesStore<Underlying>
 
     @NotNull
     @Override
-    public HeapBytesStore<Underlying> write(long writeOffset,
-                                            @NotNull RandomDataInput bytes, long readOffset, long length)
+    public HeapBytesStore<U> write(long writeOffset,
+                                   @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         requireNonNull(bytes);
         if (length == (int) length) {
