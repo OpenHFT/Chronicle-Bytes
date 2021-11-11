@@ -1,5 +1,19 @@
-= Chronicle Bytes
-Chronicle Software
+
+= Chronicle-Bytes
+
+// GitHub customization
+ifdef::env-github[]
+:badges:
+endif::[]
+
+// Badges
+ifdef::badges[]
+image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg["Maven Central",link="https://maven-badges.herokuapp.com/maven-central/>net.openhft/chronicle-bytes"]
+image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
+image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Bytes&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Bytes"]
+
+endif::[]
+
 :css-signature: demo
 :toc: macro
 :toclevels: 2
