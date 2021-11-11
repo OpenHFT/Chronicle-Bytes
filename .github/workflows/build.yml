@@ -2,10 +2,6 @@ name: Build
 on:
   push:
     branches:
-<<<<<<< HEAD
-      - ea
-=======
->>>>>>> develop
       - develop
   pull_request:
     types: [opened, synchronize, reopened]
