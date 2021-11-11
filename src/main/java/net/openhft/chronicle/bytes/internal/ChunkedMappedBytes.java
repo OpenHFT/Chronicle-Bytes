@@ -24,15 +24,15 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
+
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -59,6 +59,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                                              int offset,
                                              final int length)
             throws IllegalStateException, BufferOverflowException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -97,10 +98,11 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @Override
     public @NotNull ChunkedMappedBytes write(final long writeOffset,
-                                             final RandomDataInput bytes,
+                                             @NotNull final RandomDataInput bytes,
                                              long readOffset,
                                              final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = writeOffset;
@@ -254,10 +256,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws BufferOverflowException, IllegalStateException {
 
         throwExceptionIfClosed();
-        if (offset < 0 || offset > mappedFile.capacity() - adding)
+        if (offset + adding < start() || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException0(offset);
         BytesStore bytesStore = this.bytesStore;
-        if (!bytesStore.inside(offset, checkSize0(adding))) {
+        if (adding > 0 && !bytesStore.inside(offset, checkSize0(adding))) {
             acquireNextByteStore0(offset, false);
             if (!this.bytesStore.inside(offset, checkSize0(adding)))
                 throw new DecoratedBufferUnderflowException(String.format("Acquired the next BytesStore, but still not room to add %d when realCapacity %d", adding, this.bytesStore.realCapacity()));
@@ -406,6 +408,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                              final long offset,
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         if (length == 8) {
@@ -540,20 +543,14 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         long address = mbs.address + mbs.translate(readPosition);
         @Nullable Memory memory = mbs.memory;
 
-        // are we inside a cache line?
-        if ((address & 63) <= 60) {
-            ObjectUtils.requireNonNull(memory);
-            UnsafeMemory.unsafeLoadFence();
-            return UnsafeMemory.unsafeGetInt(address);
-        } else {
-            return memory.readVolatileInt(address);
-        }
+        return memory.readVolatileInt(address);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<Void> appendUtf8(@NotNull char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        requireNonNull(chars);
         throwExceptionIfClosed();
 
         if (writePosition() < 0 || writePosition() > capacity() - 1L + length)

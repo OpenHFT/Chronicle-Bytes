@@ -32,6 +32,8 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * Bytes to wrap memory mapped data.
  * <p>
@@ -61,10 +63,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     @Override
     public @NotNull SingleMappedBytes write(final long offsetInRDO,
-                                            final byte[] bytes,
+                                            @NotNull final byte[] bytes,
                                             int offset,
                                             final int length)
             throws IllegalStateException, BufferOverflowException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
@@ -99,10 +102,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     @Override
     public @NotNull SingleMappedBytes write(final long writeOffset,
-                                            final RandomDataInput bytes,
+                                            @NotNull final RandomDataInput bytes,
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
         throwExceptionIfClosed();
 
         long wp = writeOffset;
@@ -217,5 +221,15 @@ public class SingleMappedBytes extends CommonMappedBytes {
             throw newBufferOverflowException(offset);
 
         return bytesStore.compareAndSwapLong(offset, expected, value);
+    }
+
+    @Override
+    public Bytes<Void> write(@NotNull BytesStore bytes) throws BufferOverflowException, IllegalStateException {
+        assert bytes != this : "you should not write to yourself !";
+
+        long length = bytes.readRemaining();
+        bytesStore.write(writePosition, bytes);
+        writeSkip(length);
+        return this;
     }
 }

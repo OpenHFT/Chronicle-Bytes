@@ -19,6 +19,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -26,12 +27,14 @@ import java.lang.reflect.Proxy;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesOut<Underlying> extends
-        StreamingDataOutput<Bytes<Underlying>>,
-        ByteStringAppender<Bytes<Underlying>>,
-        BytesPrepender<Bytes<Underlying>>,
-        BytesComment<BytesOut<Underlying>> {
+public interface BytesOut<U> extends
+        StreamingDataOutput<Bytes<U>>,
+        ByteStringAppender<Bytes<U>>,
+        BytesPrepender<Bytes<U>>,
+        BytesComment<BytesOut<U>> {
 
     /**
      * Proxy an interface so each message called is written to a file for replay.
@@ -40,10 +43,13 @@ public interface BytesOut<Underlying> extends
      * @param additional any additional interfaces
      * @return a proxy which implements the primary interface (additional interfaces have to be
      * cast)
+     * @throws NullPointerException if the provided {@code tClass} is {@code null}
+     * @throws ClosedIllegalStateException if this BytesOut has been previously released
      */
     @NotNull
     default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional)
             throws IllegalArgumentException {
+        throwExceptionIfReleased(this);
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
         //noinspection unchecked

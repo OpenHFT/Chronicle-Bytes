@@ -27,6 +27,9 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+
 /**
  * This allows random access to the underling bytes.  This instance can be used across threads as it is stateless.
  * The thread safety of the underlying data depends on how the methods are used.
@@ -305,6 +308,8 @@ public interface RandomDataInput extends RandomCommon {
      */
     default int copyTo(@NotNull byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bytes);
+        throwExceptionIfReleased(this);
         int len = (int) Math.min(bytes.length, readRemaining());
         for (int i = 0; i < len; i++)
             bytes[i] = readByte(start() + i);
@@ -321,6 +326,8 @@ public interface RandomDataInput extends RandomCommon {
      */
     default int copyTo(@NotNull ByteBuffer bb)
             throws BufferUnderflowException, IllegalStateException {
+        requireNonNull(bb);
+        throwExceptionIfReleased(this);
         int pos = bb.position();
         int len = (int) Math.min(bb.remaining(), readRemaining());
         int i;
@@ -450,13 +457,13 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset the offset in this {@code RandomDataInput} to read char sequence from
      * @param sb     the buffer to read char sequence into (truncated first)
-     * @param <ACS>  buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param <T>    buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      * @throws IllegalStateException    if released
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8(long offset, @NotNull ACS sb)
+    default <T extends Appendable & CharSequence> long readUtf8(long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         // TODO insert some bounds check here
@@ -501,15 +508,15 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
      * @param sb         the buffer to read char sequence into (truncated first)
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
-     * @param <ACS>      buffer type, must be {@code StringBuilder} or {@code Bytes}
+     * @param <T>        buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
      * @throws IllegalStateException    if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
-    default <ACS extends Appendable & CharSequence> long readUtf8Limited(long offset,
-                                                                         final @NotNull ACS sb,
-                                                                         final int maxUtf8Len)
+    default <T extends Appendable & CharSequence> long readUtf8Limited(long offset,
+                                                                       final @NotNull T sb,
+                                                                       final int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException,
             IllegalStateException {
         AppendableUtil.setLength(sb, 0);
@@ -586,8 +593,9 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.toByteArray(this);
     }
 
-    default long read(long offsetInRDI, byte[] bytes, int offset, int length)
+    default long read(long offsetInRDI, @NotNull byte[] bytes, int offset, int length)
             throws IllegalStateException {
+        requireNonNull(bytes);
         try {
             int len = (int) Math.min(length, readLimit() - offsetInRDI);
             for (int i = 0; i < len; i++)
@@ -600,6 +608,7 @@ public interface RandomDataInput extends RandomCommon {
 
     default ByteBuffer toTemporaryDirectByteBuffer()
             throws IllegalArgumentException, ArithmeticException, IllegalStateException {
+        throwExceptionIfReleased(this);
         int len = Maths.toUInt31(readRemaining());
         try {
             ByteBuffer bb = ByteBuffer.allocateDirect(len);

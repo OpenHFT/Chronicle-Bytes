@@ -39,16 +39,18 @@ import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
 import static java.lang.Math.min;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
  * @param <B> BytesStore type
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
+public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
@@ -188,7 +190,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     /**
      * @return a copy of this BytesStore.
      */
-    BytesStore<B, Underlying> copy()
+    BytesStore<B, U> copy()
             throws IllegalStateException;
 
     /**
@@ -201,10 +203,10 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForRead()
+    default Bytes<U> bytesForRead()
             throws IllegalStateException {
         try {
-            Bytes<Underlying> ret = bytesForWrite();
+            Bytes<U> ret = bytesForWrite();
             ret.readLimit(writeLimit());
             ret.writeLimit(realCapacity());
             ret.readPosition(start());
@@ -224,7 +226,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     @Override
     @NotNull
-    default Bytes<Underlying> bytesForWrite()
+    default Bytes<U> bytesForWrite()
             throws IllegalStateException {
         try {
             return new VanillaBytes<>(this, writePosition(), writeLimit());
@@ -264,7 +266,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      * @return the underlying object being wrapped, if there is one, or null if not.
      */
     @Nullable
-    Underlying underlyingObject();
+    U underlyingObject();
 
     /**
      * Returns if a specified offset is inside this BytesStore limits.
@@ -307,6 +309,9 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
      */
     default long copyTo(@NotNull BytesStore store)
             throws IllegalStateException {
+        requireNonNull(store);
+        throwExceptionIfReleased(this);
+        throwExceptionIfReleased(store);
         long readPos = readPosition();
         long writePos = store.writePosition();
         long copy = min(readRemaining(), store.capacity());
@@ -653,6 +658,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                     return;
                 if (compareAndSwapLong(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
@@ -674,6 +680,7 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
                     return;
                 if (compareAndSwapInt(offset, v, atLeast))
                     return;
+                Jvm.nanoPause();
             }
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
@@ -728,9 +735,11 @@ public interface BytesStore<B extends BytesStore<B, Underlying>, Underlying>
     }
 
     /**
-     * Returns <code>true</code>.
+     * Returns if this ByteStore can be both read from and written to.
+     * <p>
+     * This is in contrast to a ByteStore than can only be read.
      *
-     * @return whether this BytesStore is writable.
+     * @return if this ByteStore can be both read from and written to
      */
     default boolean readWrite() {
         return true;

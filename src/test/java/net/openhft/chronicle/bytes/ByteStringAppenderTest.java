@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -29,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
@@ -61,7 +63,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         assertEquals(hello, hello1);
         VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
         Bytes one = ObjectUtils.convertTo(Bytes.class, 1);
-        assertEquals(bytes.append(1), one);
+        assertTrue(BytesInternal.contentEqual(bytes.append(1), one));
         one.releaseLast();
         hello1.releaseLast();
         hello.releaseLast();

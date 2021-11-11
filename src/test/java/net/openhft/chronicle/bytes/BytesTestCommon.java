@@ -15,15 +15,24 @@ import org.junit.jupiter.api.BeforeEach;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Collectors.toSet;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
 public class BytesTestCommon {
 
+    private final Map<Predicate<ExceptionKey>, String> ignoredExceptions = new LinkedHashMap<>();
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
+
+    public BytesTestCommon() {
+        // Todo: remove this. See https://github.com/OpenHFT/Chronicle-Bytes/issues/268
+        ignoreException("Object::hashCode/Object::equals");
+    }
 
     @Before
     @BeforeEach
@@ -47,6 +56,14 @@ public class BytesTestCommon {
         exceptions = Jvm.recordExceptions();
     }
 
+    public void ignoreException(String message) {
+        ignoreException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
+    }
+
+    public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
+        ignoredExceptions.put(predicate, description);
+    }
+
     public void expectException(String message) {
         expectException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
     }
@@ -61,6 +78,13 @@ public class BytesTestCommon {
                 Slf4jExceptionHandler.WARN.on(getClass(), "No error for " + expectedException.getValue());
         }
         expectedExceptions.clear();
+
+        for (Map.Entry<Predicate<ExceptionKey>, String> ignoredException : ignoredExceptions.entrySet()) {
+            if (!exceptions.keySet().removeIf(ignoredException.getKey()))
+                Slf4jExceptionHandler.DEBUG.on(getClass(), "Ignored " + ignoredException.getValue());
+        }
+        ignoredExceptions.clear();
+
         if (Jvm.hasException(exceptions)) {
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();

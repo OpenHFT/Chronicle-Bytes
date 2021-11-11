@@ -19,7 +19,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
      *
      * @param bytesStore the specified BytesStore to wrap
      * @param elastic    if <code>true</code> this OnHeapBytes is elastic
-     * @throws IllegalStateException if bytesStore has been released
+     * @throws IllegalStateException    if bytesStore has been released
      * @throws IllegalArgumentException
      */
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
@@ -57,7 +57,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     @Override
     protected void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException, IllegalStateException {
-        if (offset >= bytesStore.start()) {
+        if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             long writeEnd = offset + adding;
             if (writeEnd > writeLimit)
                 throwBeyondWriteLimit(adding, writeEnd);
@@ -106,9 +106,9 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        BytesStore store;
+        BytesStore<Bytes<byte[]>, byte[]> store;
         try {
-            store = BytesStore.wrap(new byte[size]);
+            store = (BytesStore<Bytes<byte[]>, byte[]>) BytesStore.wrap(new byte[size]);
             store.reserveTransfer(INIT, this);
         } catch (IllegalStateException e) {
             BufferOverflowException boe = new BufferOverflowException();

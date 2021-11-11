@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
@@ -31,17 +32,19 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
  * <p>
  * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  *
- * @param <Underlying> Underlying type
+ * @param <U> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class NativeBytes<Underlying>
-        extends VanillaBytes<Underlying> {
+public class NativeBytes<U>
+        extends VanillaBytes<U> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
@@ -113,6 +116,7 @@ public class NativeBytes<Underlying>
 
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes bytes)
             throws IllegalStateException {
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         final long remaining = bytes.readRemaining();
 
         try {
@@ -132,6 +136,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity)
             throws IllegalStateException, IllegalArgumentException {
+        requireNonNull(bs);
         return newGuarded
                 ? new GuardedNativeBytes(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
@@ -152,7 +157,7 @@ public class NativeBytes<Underlying>
     @Override
     protected void writeCheckOffset(final long offset, final long adding)
             throws BufferOverflowException, IllegalStateException {
-        if (offset >= bytesStore.start()) {
+        if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
             if (writeEnd <= bytesStore.safeLimit()) {
                 return; // do nothing.
@@ -277,7 +282,7 @@ public class NativeBytes<Underlying>
         }
 
         throwExceptionIfReleased();
-        @Nullable final BytesStore<Bytes<Underlying>, Underlying> tempStore = this.bytesStore;
+        @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         this.bytesStore(store);
         try {
@@ -295,14 +300,15 @@ public class NativeBytes<Underlying>
     }
 
     @Override
-    protected void bytesStore(BytesStore<Bytes<Underlying>, Underlying> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<Underlying>, Underlying> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+        requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
         super.bytesStore(byteStore, offset, length);
@@ -321,6 +327,7 @@ public class NativeBytes<Underlying>
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes bytes)
             throws IllegalStateException {
+        requireNonNull(bytes);
         ReportUnoptimised.reportOnce();
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());
@@ -364,7 +371,7 @@ public class NativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeByte(final byte i8)
+    public Bytes<U> writeByte(final byte i8)
             throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(1, 1);
         bytesStore.writeByte(offset, i8);
@@ -373,7 +380,7 @@ public class NativeBytes<Underlying>
 
     @NotNull
     @Override
-    public Bytes<Underlying> writeLong(final long i64)
+    public Bytes<U> writeLong(final long i64)
             throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(8L, 8L);
         bytesStore.writeLong(offset, i64);
