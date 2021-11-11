@@ -121,7 +121,7 @@ final class BytesFactoryUtil {
             Files.write(file.toPath(), new byte[byteSize], StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
             return file;
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Unable to create: " + file.getAbsolutePath(), e);
         }
     }
 
