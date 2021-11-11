@@ -1,3 +1,4 @@
+
 = Chronicle-Bytes
 
 // GitHub customization
@@ -15,13 +16,21 @@ endif::[]
 
 :css-signature: demo
 :toc: macro
-:toc-placement!:
-:icons:
-:source-highlighter: highlight
+:toclevels: 2
+:icons: font
 
-== Chronicle-Bytes
+image:https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes/badge.svg[caption="",link=https://maven-badges.herokuapp.com/maven-central/net.openhft/chronicle-bytes]
+image:https://javadoc.io/badge2/net.openhft/chronicle-bytes/javadoc.svg[link="https://www.javadoc.io/doc/net.openhft/chronicle-bytes/latest/index.html"]
+//image:https://javadoc-badge.appspot.com/net.openhft/chronicle-bytes.svg?label=javadoc[JavaDoc, link=https://www.javadoc.io/doc/net.openhft/chronicle-bytes]
+image:https://img.shields.io/github/license/OpenHFT/Chronicle-Bytes[GitHub]
+image:https://img.shields.io/badge/release%20notes-subscribe-brightgreen[link="https://chronicle.software/release-notes/"]
+image:https://sonarcloud.io/api/project_badges/measure?project=OpenHFT_Chronicle-Bytes&metric=alert_status[link="https://sonarcloud.io/dashboard?id=OpenHFT_Chronicle-Bytes"]
+
+image::images/Bytes_line.png[width=20%]
 
 toc::[]
+
+== About
 
 Chronicle Bytes contains all the low level memory access wrappers. It is built on Chronicle Core's direct memory and OS system call access.
 
