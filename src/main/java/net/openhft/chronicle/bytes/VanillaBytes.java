@@ -409,7 +409,7 @@
                 return write((RandomDataInput) cs);
 
             if (isDirectMemory() && cs instanceof String)
-                return append8bitNBS_S((String) cs);
+                return append8bitNBSS((String) cs);
             return append8bit0(cs);
         }
 
@@ -458,12 +458,12 @@
                 throws BufferOverflowException, IllegalStateException {
             requireNonNull(cs);
             if (isDirectMemory())
-                return append8bitNBS_S(cs);
+                return append8bitNBSS(cs);
             return append8bit0(cs);
         }
 
         @NotNull
-        private Bytes<U> append8bitNBS_S(@NotNull String s)
+        private Bytes<U> append8bitNBSS(@NotNull String s)
                 throws BufferOverflowException, IllegalStateException {
             int length = s.length();
             long offset = writeOffsetPositionMoved(length); // can re-assign the byteStore if not large enough.

@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.Histogram;
-import net.openhft.chronicle.core.util.Longs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
