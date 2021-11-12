@@ -110,9 +110,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        requireNonNull(bytes);
-        throwExceptionIfClosed();
-
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         long wp = writeOffset;
 
         if (length > writeRemaining())

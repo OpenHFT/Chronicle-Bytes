@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -36,6 +37,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -139,7 +141,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writePosition(long position) {
-        writePosition = position;
+        writePosition = requireNonNegative(position);
         return this;
     }
 
@@ -194,7 +196,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLimit(long limit) {
-        writeLimit = limit;
+        writeLimit = requireNonNegative(limit);
         return this;
     }
 
@@ -237,7 +239,9 @@ public class UncheckedNativeBytes<U>
     @Override
     public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
-        requireNonNull(bytes);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 

@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeText;
@@ -57,6 +58,7 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.*;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
@@ -784,10 +786,12 @@ enum BytesInternal {
         }
     }
 
-    public static long writeUtf8(@NotNull RandomDataOutput out, long writeOffset,
+    public static long writeUtf8(@NotNull RandomDataOutput out,
+                                 long writeOffset,
                                  @Nullable CharSequence str)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         throwExceptionIfReleased(out);
+        requireNonNegative(writeOffset);
         if (str == null) {
             writeOffset = writeStopBit(out, writeOffset, -1);
 
@@ -817,9 +821,11 @@ enum BytesInternal {
         return writeOffset;
     }
 
-    public static long writeUtf8(@NotNull RandomDataOutput out, long offset,
-                                 @Nullable CharSequence str, int maxUtf8Len)
-            throws BufferOverflowException, IllegalStateException, ArithmeticException {
+    public static long writeUtf8(@NotNull final RandomDataOutput out,
+                                 @NonNegative long offset,
+                                 @Nullable final CharSequence str,
+                                 @NonNegative int maxUtf8Len) throws BufferOverflowException, IllegalStateException, ArithmeticException {
+        requireNonNegative(offset);
         throwExceptionIfReleased(out);
         if (str == null) {
             offset = writeStopBit(out, offset, -1);

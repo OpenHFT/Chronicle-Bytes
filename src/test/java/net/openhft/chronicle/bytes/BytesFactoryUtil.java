@@ -58,6 +58,7 @@ final class BytesFactoryUtil {
                     Arguments.of(Bytes.allocateDirect(SIZE).unchecked(true), true, "Bytes.allocateDirect(SIZE).unchecked(true)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE).unchecked(true), true, "Bytes.allocateElasticOnHeap(SIZE).unchecked(true)"),
                     Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
+
             );
         } catch (IOException ioException) {
             throw new AssertionError("Unable to create Bytes", ioException);
@@ -116,6 +117,7 @@ final class BytesFactoryUtil {
             throw new RuntimeException(e);
         }
     }
+
     static File create(final File file, int byteSize) {
         try {
             Files.write(file.toPath(), new byte[byteSize], StandardOpenOption.TRUNCATE_EXISTING, StandardOpenOption.WRITE);
@@ -126,8 +128,8 @@ final class BytesFactoryUtil {
     }
 
     static Stream<DynamicTest> cartesianProductTest(Supplier<Stream<Arguments>> bytesObjectSupplier,
-                                                     Supplier<Stream<NamedConsumer<Bytes<Object>>>> operationsSupplier,
-                                                     TriConsumer<Arguments, Bytes<Object>, NamedConsumer<Bytes<Object>>> test) {
+                                                    Supplier<Stream<NamedConsumer<Bytes<Object>>>> operationsSupplier,
+                                                    TriConsumer<Arguments, Bytes<Object>, NamedConsumer<Bytes<Object>>> test) {
         return bytesObjectSupplier.get()
                 .flatMap(arguments -> Stream.concat(
                         operationsSupplier.get()
@@ -137,14 +139,14 @@ final class BytesFactoryUtil {
                                                 }
                                         )
                                 ),
-                        Stream.of(dynamicTest("releaseLast if not released", () -> {
+                        Stream.of(dynamicTest("---" + createCommand(arguments) + ".releaseLast() if not released (" + bytes(arguments).getClass().getSimpleName() + ")", () -> {
                             if (bytes(arguments).refCount() > 0)
                                 bytes(arguments).releaseLast();
                         }))
                 ));
     }
 
-     interface HasName {
+    interface HasName {
         String name();
     }
 

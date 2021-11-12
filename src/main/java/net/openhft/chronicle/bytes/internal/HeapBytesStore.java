@@ -301,7 +301,10 @@ public class HeapBytesStore<U>
 
     @Override
     public long write8bit(long position, @NotNull String s, int start, int length) {
+        requireNonNegative(position);
         requireNonNull(s);
+        requireNonNegative(start);
+        requireNonNegative(length);
         try {
             throwExceptionIfReleased();
             position = BytesInternal.writeStopBit(this, position, length);
@@ -520,7 +523,11 @@ public class HeapBytesStore<U>
     public HeapBytesStore<U> write(long writeOffset,
                                    @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         if (length == (int) length) {
             int length0 = (int) length;
 
@@ -563,6 +570,7 @@ public class HeapBytesStore<U>
     @Override
     public long addressForWrite(long offset)
             throws UnsupportedOperationException {
+        requireNonNegative(offset);
         throw new UnsupportedOperationException();
     }
 

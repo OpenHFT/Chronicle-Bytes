@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.Histogram;
+import net.openhft.chronicle.core.util.Longs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -40,6 +41,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -478,6 +480,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write(@NotNull BytesStore bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNull(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+
         if (length + writePosition() > capacity())
             throw new DecoratedBufferOverflowException("Cannot write " + length + " bytes as position is " + writePosition() + " and capacity is " + capacity());
         BytesInternal.writeFully(bytes, readOffset, length, this);
@@ -688,6 +693,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     default void writePositionRemaining(long position, long length)
             throws BufferOverflowException {
+        requireNonNegative(position);
+        requireNonNegative(length);
         writeLimit(position + length);
         writePosition(position);
     }

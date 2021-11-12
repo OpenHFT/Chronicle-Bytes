@@ -32,6 +32,7 @@
     import java.nio.ByteBuffer;
 
     import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
+    import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
     import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
     /**
@@ -285,6 +286,8 @@
         public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
+            requireNonNegative(offset);
+            requireNonNegative(length);
             ensureCapacity(writePosition() + length);
             optimisedWrite(bytes, offset, length);
             return this;
@@ -311,7 +314,10 @@
 
         public void write(long position, @NotNull CharSequence str, int offset, int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+            requireNonNegative(position);
             requireNonNull(str);
+            requireNonNegative(offset);
+            requireNonNegative(length);
             ensureCapacity(writePosition() + length);
             if (offset + length > str.length())
                 throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
@@ -424,6 +430,8 @@
         public Bytes<U> write(@NotNull BytesStore bytes, long offset, long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
+            requireNonNegative(offset);
+            requireNonNegative(length);
             ensureCapacity(writePosition() + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {

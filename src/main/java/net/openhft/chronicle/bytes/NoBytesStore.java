@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IOTools;
@@ -190,7 +191,10 @@ public enum NoBytesStore implements BytesStore {
     @NotNull
     @Override
     public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
         if (length != 0)
             throw new UnsupportedOperationException();
         return this;

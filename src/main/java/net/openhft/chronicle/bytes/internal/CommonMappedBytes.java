@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -33,6 +34,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
@@ -121,6 +123,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     public CommonMappedBytes write(final long offsetInRDO, @NotNull final RandomDataInput bytes)
             throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offsetInRDO);
         requireNonNull(bytes);
         throwExceptionIfClosed();
 
@@ -207,7 +210,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public Bytes<Void> writePosition(final long position)
             throws BufferOverflowException {
 //        throwExceptionIfClosed();
-
         if (position > writeLimit)
             throw new BufferOverflowException();
         if (position < 0L)
@@ -245,6 +247,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
         if (bytes instanceof BytesStore)

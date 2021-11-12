@@ -26,6 +26,7 @@ import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.Longs;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -107,7 +108,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                                              long readOffset,
                                              final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
         long wp = writeOffset;
@@ -199,7 +203,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public long addressForRead(final long offset)
             throws BufferUnderflowException, IllegalStateException {
 //        throwExceptionIfClosed();
-
+        requireNonNegative(offset);
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset))
@@ -233,6 +237,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public long addressForWrite(final long offset)
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException {
+        requireNonNegative(offset);
 //        throwExceptionIfClosed();
 
 
@@ -414,6 +419,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                              final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
         if (length == 8) {

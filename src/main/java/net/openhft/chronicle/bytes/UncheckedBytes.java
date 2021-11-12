@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -29,6 +30,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static java.util.Objects.requireNonNull;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 
@@ -196,7 +198,9 @@ public class UncheckedBytes<U>
     @Override
     public Bytes<U> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
-        requireNonNull(bytes);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
         } else if (bytes.underlyingObject() == null
