@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -29,6 +30,7 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
      * Checks that methods throws IllegalArgumentException if negative parameters are provided for @NonNegative
      */
     @TestFactory
+    @Disabled("Apparently, some of these tests still writes outside memory confinements and may crash the test process")
     Stream<DynamicTest> negativeParameters() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
