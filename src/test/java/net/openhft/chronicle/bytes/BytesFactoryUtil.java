@@ -70,6 +70,9 @@ final class BytesFactoryUtil {
                     // Avoids java.io.IOException: Not enough storage is available to process this command
                     .filter(arguments -> !(OS.isWindows() && !isReadWrite(arguments)));
         } catch (IOException ioException) {
+            System.out.flush();
+            System.err.flush();
+            ioException.printStackTrace();
             throw new AssertionError("Unable to create Bytes", ioException);
         }
     }
