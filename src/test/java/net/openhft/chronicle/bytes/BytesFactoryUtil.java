@@ -12,6 +12,7 @@ import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
 import java.util.Objects;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -22,6 +23,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesFactoryUtil {
+
+    private static final AtomicInteger CNT = new AtomicInteger();
 
     private BytesFactoryUtil() {
     }
@@ -34,11 +37,15 @@ final class BytesFactoryUtil {
         final ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(SIZE);
 
         try {
-            final File file = create(File.createTempFile("mapped-file", "bin"), SIZE);
-            final File fileRo = create(File.createTempFile("mapped-file-ro", "bin"), SIZE);
-            final File singleFile = create(File.createTempFile("single-mapped-file", "bin"), SIZE);
-            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro", "bin"), SIZE);
-            final MassiveFieldHolder holder = new MassiveFieldHolder();
+            final File file = create(File.createTempFile("mapped-file" + CNT.getAndIncrement(), "bin"), SIZE);
+            file.deleteOnExit();
+            final File fileRo = create(File.createTempFile("mapped-file-ro" + CNT.getAndIncrement(), "bin"), SIZE);
+            fileRo.deleteOnExit();
+            final File singleFile = create(File.createTempFile("single-mapped-file" + CNT.getAndIncrement(), "bin"), SIZE);
+            singleFile.deleteOnExit();
+            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), SIZE);
+            singleFileRo.deleteOnExit();
+            //final MassiveFieldHolder holder = new MassiveFieldHolder();
             return Stream.of(
                     Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE), true, "Bytes.allocateElasticOnHeap(SIZE)"),
@@ -59,7 +66,7 @@ final class BytesFactoryUtil {
                     Arguments.of(Bytes.allocateDirect(SIZE).unchecked(true), true, "Bytes.allocateDirect(SIZE).unchecked(true)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE).unchecked(true), true, "Bytes.allocateElasticOnHeap(SIZE).unchecked(true)"),
                     Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
-            ).filter(Objects::nonNull);
+            );
         } catch (IOException ioException) {
             throw new AssertionError("Unable to create Bytes", ioException);
         }
