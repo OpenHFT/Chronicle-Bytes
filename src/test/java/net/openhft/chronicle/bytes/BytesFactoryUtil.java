@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -11,7 +12,6 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -66,7 +66,9 @@ final class BytesFactoryUtil {
                     Arguments.of(Bytes.allocateDirect(SIZE).unchecked(true), true, "Bytes.allocateDirect(SIZE).unchecked(true)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE).unchecked(true), true, "Bytes.allocateElasticOnHeap(SIZE).unchecked(true)"),
                     Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
-            );
+            )
+                    // Avoids java.io.IOException: Not enough storage is available to process this command
+                    .filter(arguments -> !(OS.isWindows() && !isReadWrite(arguments)));
         } catch (IOException ioException) {
             throw new AssertionError("Unable to create Bytes", ioException);
         }
