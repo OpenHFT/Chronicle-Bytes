@@ -49,14 +49,24 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toString(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         final String expected;
-        if (readWrite) {
-            expected = "The quick brown fox jumped over the usual suspect.";
-            bytes.append(expected);
-        } else {
-            expected = "";
+        System.out.println("Using " + createCommand + " -> " + bytes.getClass().getName());
+        System.out.flush();
+        System.err.flush();
+        try {
+            if (readWrite) {
+                expected = "The quick brown fox jumped over the usual suspect.";
+                bytes.append(expected);
+            } else {
+                expected = "";
+            }
+            final String toString = bytes.toString();
+            assertEquals(expected, toString);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.flush();
+            System.err.flush();
+            fail(e);
         }
-        final String toString = bytes.toString();
-        assertEquals(expected, toString);
         releaseAndAssertReleased(bytes);
         assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
     }
