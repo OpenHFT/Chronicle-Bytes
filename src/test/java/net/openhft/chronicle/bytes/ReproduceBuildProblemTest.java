@@ -42,6 +42,7 @@ final class ReproduceBuildProblemTest extends BytesTestCommon {
 
     }
 
+    @Test
     void reproduce2() {
         final ByteBuffer heapByteBuffer = ByteBuffer.allocate(SIZE);
         final ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(SIZE);
@@ -55,7 +56,7 @@ final class ReproduceBuildProblemTest extends BytesTestCommon {
             singleFile.deleteOnExit();
             final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), SIZE);
             singleFileRo.deleteOnExit();
-    
+
             Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)");
             Arguments.of(Bytes.allocateElasticOnHeap(SIZE), true, "Bytes.allocateElasticOnHeap(SIZE)");
             Arguments.of(wipe(Bytes.allocateElasticDirect()), true, "Bytes.allocateElasticDirect()");
