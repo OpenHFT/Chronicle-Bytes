@@ -6,7 +6,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Issue281Test {
     public static void bufferToBytes(Bytes<?> bytes, ByteBuffer dataBuffer, int index) {
@@ -27,11 +27,11 @@ public class Issue281Test {
         }
         buffer.order(ByteOrder.LITTLE_ENDIAN);
         bufferToBytes(retVal, buffer, 0); // this calls bufferToBytes below
-        assertEquals(data, retVal);
+        assertTrue(data.contentEquals(retVal));
 
         retVal.clear();
         buffer.order(ByteOrder.BIG_ENDIAN);
         bufferToBytes(retVal, buffer, 0); // this calls bufferToBytes below
-        assertEquals(data, retVal);
+        assertTrue(data.contentEquals(retVal));
     }
 }

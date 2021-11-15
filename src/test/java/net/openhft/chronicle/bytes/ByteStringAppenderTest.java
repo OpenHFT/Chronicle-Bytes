@@ -59,7 +59,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     public void testConvertTo() {
         Bytes<?> hello = Bytes.from("hello");
         Bytes hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
-        assertEquals(hello, hello1);
+        assertTrue(hello.contentEquals(hello1));
         VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
         Bytes one = ObjectUtils.convertTo(Bytes.class, 1);
         assertTrue(bytes.append(1).contentEquals(one));

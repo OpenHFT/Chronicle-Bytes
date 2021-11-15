@@ -804,12 +804,12 @@ public class BytesTest extends BytesTestCommon {
             a.append(hello);
             b.append(hello);
 
-            assertEquals(a, b);
+            assertTrue(a.contentEquals(b));
             assertEquals(a.bytesStore(), b.bytesStore());
 
             assertEquals(hello, b.toString());
 
-            assertEquals(a, b);
+            assertTrue(a.contentEquals(b));
             assertEquals(a.bytesStore(), b.bytesStore());
         } finally {
             postTest(a);

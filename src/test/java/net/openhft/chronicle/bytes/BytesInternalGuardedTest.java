@@ -154,9 +154,9 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         assertEquals("Hello", actual2);
         String actual3 = c.toString();
         assertEquals("Hello\0\0\0\0\0\0\0\0\0\0", actual3);
-        assertEquals(a, b);
-        assertEquals(b, c);
-        assertEquals(c, a);
+        assertTrue(a.contentEquals(b));
+        assertTrue(b.contentEquals(c));
+        assertTrue(c.contentEquals(a));
         a.releaseLast();
         b.releaseLast();
         c.releaseLast();
