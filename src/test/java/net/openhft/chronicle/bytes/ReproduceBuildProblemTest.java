@@ -54,7 +54,8 @@ final class ReproduceBuildProblemTest extends BytesTestCommon {
             fileRo.deleteOnExit();
             final File singleFile = create(File.createTempFile("single-mapped-file" + CNT.getAndIncrement(), "bin"), SIZE);
             singleFile.deleteOnExit();
-            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), SIZE);
+            // Must be filled to the CHUNK_SIZE
+            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE);
             singleFileRo.deleteOnExit();
 
             Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)");
