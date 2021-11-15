@@ -7,7 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.releaseAndAssertReleased;
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.wipe;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
 
@@ -49,24 +50,15 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toString(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         final String expected;
-        System.out.println("Using " + createCommand + " -> " + bytes.getClass().getName());
-        System.out.flush();
-        System.err.flush();
-        try {
-            if (readWrite) {
-                expected = "The quick brown fox jumped over the usual suspect.";
-                bytes.append(expected);
-            } else {
-                expected = "";
-            }
-            final String toString = bytes.toString();
-            assertEquals(expected, toString);
-        } catch (Exception e) {
-            e.printStackTrace();
-            System.out.flush();
-            System.err.flush();
-            fail(e);
+
+        if (readWrite) {
+            expected = "The quick brown fox jumped over the usual suspect.";
+            bytes.append(expected);
+        } else {
+            expected = "";
         }
+        final String toString = bytes.toString();
+        assertEquals(expected, toString);
         releaseAndAssertReleased(bytes);
         assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
     }
