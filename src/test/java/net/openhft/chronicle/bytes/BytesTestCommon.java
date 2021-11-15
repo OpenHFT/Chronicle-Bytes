@@ -7,7 +7,6 @@ import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,8 +16,6 @@ import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.Collectors.toSet;
 import static net.openhft.chronicle.core.io.AbstractCloseable.waitForCloseablesToClose;
 import static net.openhft.chronicle.core.io.AbstractReferenceCounted.assertReferencesReleased;
 
@@ -30,8 +27,6 @@ public class BytesTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
 
     public BytesTestCommon() {
-        // Todo: remove this. See https://github.com/OpenHFT/Chronicle-Bytes/issues/268
-        ignoreException("Object::hashCode/Object::equals");
     }
 
     @Before
@@ -86,9 +81,10 @@ public class BytesTestCommon {
         ignoredExceptions.clear();
 
         if (Jvm.hasException(exceptions)) {
+            final String msg = exceptions.size() + " exceptions were detected: " + exceptions.keySet().stream().map(ek -> ek.message).collect(Collectors.joining(", "));
             Jvm.dumpException(exceptions);
             Jvm.resetExceptionHandlers();
-            Assert.fail();
+            throw new AssertionError(msg);
         }
     }
 
