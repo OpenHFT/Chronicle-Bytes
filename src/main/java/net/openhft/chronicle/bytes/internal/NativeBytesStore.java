@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
@@ -687,11 +688,7 @@ public class NativeBytesStore<U>
 
     @Override
     public boolean equals(Object obj) {
-        try {
-            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-        } catch (IllegalStateException e) {
-            return false;
-        }
+        return HashCodeEqualsUtil.contentEquals(this, obj);
     }
 
     public void setAddress(long address) {

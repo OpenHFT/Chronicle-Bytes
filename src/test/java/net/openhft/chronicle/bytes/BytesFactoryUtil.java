@@ -11,6 +11,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -26,7 +27,7 @@ final class BytesFactoryUtil {
     }
 
     static final int SIZE = 128;
-    static final int CHUNK_SIZE = 1024;
+    static final int CHUNK_SIZE = 64 << 10;
 
     static Stream<Arguments> provideBytesObjects() {
         final ByteBuffer heapByteBuffer = ByteBuffer.allocate(SIZE);
@@ -58,7 +59,7 @@ final class BytesFactoryUtil {
                     Arguments.of(Bytes.allocateDirect(SIZE).unchecked(true), true, "Bytes.allocateDirect(SIZE).unchecked(true)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE).unchecked(true), true, "Bytes.allocateElasticOnHeap(SIZE).unchecked(true)"),
                     Arguments.of(new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE)), SIZE), true, "new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(SIZE))")
-            );
+            ).filter(Objects::nonNull);
         } catch (IOException ioException) {
             throw new AssertionError("Unable to create Bytes", ioException);
         }

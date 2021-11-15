@@ -800,7 +800,7 @@ public class UncheckedNativeBytes<U>
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.equals(this, obj);
+        return HashCodeEqualsUtil.contentEquals(this, obj);
     }
 
     @NotNull

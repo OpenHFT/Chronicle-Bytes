@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.RandomDataInput;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -578,11 +579,7 @@ public class HeapBytesStore<U>
     @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
-        try {
-            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-        } catch (IllegalStateException e) {
-            return false;
-        }
+        return HashCodeEqualsUtil.contentEquals(this, obj);
     }
 
     @Override

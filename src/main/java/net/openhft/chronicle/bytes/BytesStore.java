@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
@@ -524,7 +525,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return bytesStore != null && BytesInternal.contentEqual(this, bytesStore);
+        return HashCodeEqualsUtil.contentEquals(this, bytesStore);
     }
 
     /**

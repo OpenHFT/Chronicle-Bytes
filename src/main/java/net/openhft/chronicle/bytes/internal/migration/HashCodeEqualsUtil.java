@@ -1,6 +1,5 @@
 package net.openhft.chronicle.bytes.internal.migration;
 
-import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
@@ -11,8 +10,8 @@ public final class HashCodeEqualsUtil {
     private HashCodeEqualsUtil() {
     }
 
-    public static boolean equals(final Bytes<?> bytes,
-                                 final Object other) {
+    public static boolean contentEquals(final BytesStore<?, ?> bytes,
+                                        final Object other) {
 
         if (bytes == other) {
             return true;
@@ -24,7 +23,7 @@ public final class HashCodeEqualsUtil {
 
         // Now we know that we have two different objects so we may
         // use the same owner for them both
-        final ReferenceOwner owner = ReferenceOwner.temporary("equals");
+        final ReferenceOwner owner = ReferenceOwner.temporary("contentEquals");
         bytes.reserve(owner);
         try {
             otherByteStore.reserve(owner);
@@ -44,7 +43,7 @@ public final class HashCodeEqualsUtil {
         }
     }
 
-    public static int hashCode(final Bytes<?> bytes) {
+    public static int hashCode(final BytesStore<?, ?> bytes) {
         // Reserving prevents illegal access to this Bytes object if released by another thread
         final ReferenceOwner owner = ReferenceOwner.temporary("hashCode");
         bytes.reserve(owner);

@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -165,14 +164,15 @@ public enum BytesUtil {
      *
      * @param a a ByteStore
      * @param b a ByteStore to be compared with {@code a} for equality
-     * @return if the arguments are equal to each other
-     * @throws ClosedIllegalStateException if either of the provided parameters are released
+     * @return if the arguments are equal to each other, or false if either are released.
+     * @deprecated Use BytesStore.contentEquals(ByteStore)
      *
      * @see Object#equals(Object)
      */
+    @Deprecated(/*TODO remove in x.23*/)
     public static boolean contentEqual(@Nullable final BytesStore a,
                                        @Nullable final BytesStore b) {
-        return BytesInternal.contentEqual(a, b);
+        return a == b || (a != null && a.contentEquals(b));
     }
 
     public static boolean bytesEqual(

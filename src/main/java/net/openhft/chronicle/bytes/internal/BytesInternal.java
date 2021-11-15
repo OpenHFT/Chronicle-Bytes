@@ -53,7 +53,6 @@ import java.util.TimeZone;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
-import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.*;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
@@ -109,7 +108,7 @@ enum BytesInternal {
         int bLength = (int) b.realReadRemaining();
         // assume a >= b
         if (aLength < bLength)
-            return contentEqual(b, a);
+            return contentEqualInt(b, a);
 
         long aPos = a.readPosition();
         long bPos = b.readPosition();
@@ -160,7 +159,7 @@ enum BytesInternal {
     private static boolean contentEqualsLong(@NotNull BytesStore a, @NotNull BytesStore b) {
         // assume a >= b
         if (a.realCapacity() < b.realCapacity())
-            return contentEqual(b, a);
+            return contentEqualsLong(b, a);
         long aPos = a.readPosition();
         long bPos = b.readPosition();
         long aLength = a.realReadRemaining();
@@ -2819,19 +2818,21 @@ enum BytesInternal {
             return false;
 
         long i = 0;
+        long rp1 = b1.readPosition();
+        long rp2 = b2.readPosition();
         for (; i < readRemaining - 7 &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 8) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 8); i += 8) {
-            long l1 = bs1.readLong(b1.readPosition() + i);
-            long l2 = bs2.readLong(b2.readPosition() + i);
+                canReadBytesAt(bs1, rp1 + i, 8) &&
+                canReadBytesAt(bs2, rp2 + i, 8); i += 8) {
+            long l1 = bs1.readLong(rp1 + i);
+            long l2 = bs2.readLong(rp2 + i);
             if (l1 != l2)
                 return false;
         }
         for (; i < readRemaining &&
-                canReadBytesAt(bs1, b1.readPosition() + i, 1) &&
-                canReadBytesAt(bs2, b2.readPosition() + i, 1); i++) {
-            byte i1 = bs1.readByte(b1.readPosition() + i);
-            byte i2 = bs2.readByte(b2.readPosition() + i);
+                canReadBytesAt(bs1, rp1 + i, 1) &&
+                canReadBytesAt(bs2, rp2 + i, 1); i++) {
+            byte i1 = bs1.readByte(rp1 + i);
+            byte i2 = bs2.readByte(rp2 + i);
             if (i1 != i2)
                 return false;
         }
