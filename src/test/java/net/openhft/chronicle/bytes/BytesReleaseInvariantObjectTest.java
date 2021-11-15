@@ -7,7 +7,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.releaseAndAssertReleased;
 import static net.openhft.chronicle.bytes.BytesFactoryUtil.wipe;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
 
@@ -49,6 +50,7 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
     void toString(final Bytes<?> bytes, final boolean readWrite, final String createCommand) {
         final String expected;
+
         if (readWrite) {
             expected = "The quick brown fox jumped over the usual suspect.";
             bytes.append(expected);
