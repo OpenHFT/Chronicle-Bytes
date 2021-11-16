@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -32,6 +33,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -62,17 +64,19 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public @NotNull SingleMappedBytes write(final long offsetInRDO,
-                                            @NotNull final byte[] bytes,
-                                            int offset,
-                                            final int length)
-            throws IllegalStateException, BufferOverflowException {
-        requireNonNull(bytes);
+    public @NotNull SingleMappedBytes write(@NonNegative final long offsetInRDO,
+                                            final byte[] byteArray,
+                                            @NonNegative int offset,
+                                            @NonNegative final int length) throws IllegalStateException, BufferOverflowException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throwExceptionIfClosed();
 
         long wp = offsetInRDO;
-        if ((length + offset) > bytes.length)
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+        if ((length + offset) > byteArray.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " + "length=" + length + ", offset=" + offset);
 
         if (length > writeRemaining())
             throw new DecoratedBufferOverflowException(
@@ -85,11 +89,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
             long safeCopySize = copySize(wp);
 
             if (safeCopySize + mappedFile.overlapSize() >= remaining) {
-                bytesStore.write(wp, bytes, offset, remaining);
+                bytesStore.write(wp, byteArray, offset, remaining);
                 return this;
             }
 
-            bytesStore.write(wp, bytes, offset, (int) safeCopySize);
+            bytesStore.write(wp, byteArray, offset, (int) safeCopySize);
 
             offset += safeCopySize;
             wp += safeCopySize;
@@ -106,9 +110,11 @@ public class SingleMappedBytes extends CommonMappedBytes {
                                             long readOffset,
                                             final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        requireNonNull(bytes);
-        throwExceptionIfClosed();
-
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         long wp = writeOffset;
 
         if (length > writeRemaining())

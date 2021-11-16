@@ -21,9 +21,11 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -36,6 +38,8 @@ import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
@@ -516,11 +520,15 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> write(
-            long offsetInRDO, byte[] bytes, int offset, int length)
-            throws IllegalStateException {
-        requireNonNull(bytes);
-        memory.copyMemory(bytes, offset, address + translate(offsetInRDO), length);
+    public NativeBytesStore<U> write(@NonNegative final long offsetInRDO,
+                                     final byte[] byteArray,
+                                     @NonNegative final int offset,
+                                     @NonNegative final  int length) throws IllegalStateException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        Longs.requireNonNegative(offset);
+        Longs.requireNonNegative(length);
+        memory.copyMemory(byteArray, offset, address + translate(offsetInRDO), length);
         return this;
     }
 
@@ -541,6 +549,11 @@ public class NativeBytesStore<U>
     public NativeBytesStore<U> write(
             long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         if (bytes.isDirectMemory()) {
             memoryCopyMemory(bytes.addressForRead(readOffset), addressForWrite(writeOffset), length);
         } else {
@@ -632,6 +645,7 @@ public class NativeBytesStore<U>
 
     @Override
     public long write8bit(long position, @NotNull BytesStore bs) {
+        requireNonNegative(position);
         final long length = bs.readRemaining();
         long addressForWrite = addressForWrite(position);
 
@@ -651,7 +665,10 @@ public class NativeBytesStore<U>
 
     @Override
     public long write8bit(long position, @NotNull String s, int start, int length) {
+        requireNonNegative(position);
         requireNonNull(s);
+        requireNonNegative(start);
+        requireNonNegative(length);
         position = BytesUtil.writeStopBit(this, position, length);
         MEMORY.copy8bit(s, start, length, addressForWrite(position));
         return position + length;

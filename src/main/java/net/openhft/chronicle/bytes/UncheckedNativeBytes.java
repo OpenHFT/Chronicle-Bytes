@@ -20,10 +20,12 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -34,6 +36,8 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -137,7 +141,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writePosition(long position) {
-        writePosition = position;
+        writePosition = requireNonNegative(position);
         return this;
     }
 
@@ -192,7 +196,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLimit(long limit) {
-        writeLimit = limit;
+        writeLimit = requireNonNegative(limit);
         return this;
     }
 
@@ -235,7 +239,9 @@ public class UncheckedNativeBytes<U>
     @Override
     public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
-        requireNonNull(bytes);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         if (length == 8) {
             writeLong(bytes.readLong(offset));
 
@@ -528,11 +534,13 @@ public class UncheckedNativeBytes<U>
 
     @Override
     @NotNull
-    public Bytes<U> write(long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException {
-        requireNonNull(bytes);
+    public Bytes<U> write(@NonNegative final long offsetInRDO,
+                          final byte[] byteArray,
+                          @NonNegative final int offset,
+                          @NonNegative int length) throws BufferOverflowException, IllegalStateException {
+        requireNonNull(byteArray);
         writeCheckOffset(offsetInRDO, length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;
     }
 
@@ -717,15 +725,18 @@ public class UncheckedNativeBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException, ArrayIndexOutOfBoundsException {
-        if (length + offset > bytes.length)
-            throw new ArrayIndexOutOfBoundsException("bytes.length=" + bytes.length + ", " +
+    public Bytes<U> write(final byte[] byteArray,
+                          @NonNegative final int offset,
+                          @NonNegative final int length) throws BufferOverflowException, IllegalStateException, ArrayIndexOutOfBoundsException {
+        requireNonNegative(offset);
+        requireNonNegative(length);
+        if (length + offset > byteArray.length)
+            throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " +
                     "length=" + length + ", offset=" + offset);
         if (length > writeRemaining())
             throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
-        bytesStore.write(offsetInRDO, bytes, offset, length);
+        bytesStore.write(offsetInRDO, byteArray, offset, length);
         return this;
     }
 

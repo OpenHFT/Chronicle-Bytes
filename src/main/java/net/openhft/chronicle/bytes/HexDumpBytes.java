@@ -18,6 +18,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Histogram;
@@ -39,6 +41,8 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -273,12 +277,14 @@ public class HexDumpBytes
     @Override
     public long addressForRead(long offset)
             throws UnsupportedOperationException, IllegalStateException, BufferUnderflowException {
+        requireNonNegative(offset);
         return base.addressForRead(offset);
     }
 
     @Override
     public long addressForWrite(long offset)
             throws UnsupportedOperationException {
+        requireNonNegative(offset);
         throw new UnsupportedOperationException();
     }
 
@@ -477,8 +483,14 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length) {
-        requireNonNull(bytes);
+    public Bytes<Void> write(@NonNegative final long offsetInRDO,
+                             final byte[] byteArray,
+                             @NonNegative final int offset,
+                             @NonNegative final int length) {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         throw new UnsupportedOperationException();
     }
 
@@ -491,7 +503,10 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length) {
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
         throw new UnsupportedOperationException();
     }
 
@@ -881,6 +896,7 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writePosition(long position)
             throws BufferOverflowException {
+        requireNonNegative(position);
         base.writePosition(position & 0xFFFFFFFFL);
         text.writePosition(position >>> 32);
         return this;
@@ -1106,11 +1122,11 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> write(@NotNull byte[] bytes, int offset, int length)
+    public Bytes<Void> write(@NotNull byte[] byteArray, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long pos = base.writePosition();
         try {
-            base.write(bytes, offset, length);
+            base.write(byteArray, offset, length);
             return this;
 
         } finally {
@@ -1641,6 +1657,9 @@ public class HexDumpBytes
     @Override
     public Bytes<Void> write(@NotNull RandomDataInput bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+        throwExceptionIfReleased(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         long pos = base.writePosition();
         try {
             base.write(bytes, offset, length);
@@ -1655,6 +1674,9 @@ public class HexDumpBytes
     @Override
     public Bytes<Void> write(@NotNull BytesStore bytes, long offset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
+        throwExceptionIfReleased(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         long pos = base.writePosition();
         try {
             base.write(bytes, offset, length);
@@ -1709,6 +1731,8 @@ public class HexDumpBytes
     @Override
     public void writePositionRemaining(long position, long length)
             throws BufferOverflowException {
+        requireNonNegative(position);
+        requireNonNegative(length);
         writePosition(position);
         writeLimit(base.writePosition() + length);
     }

@@ -19,11 +19,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -37,6 +39,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -670,14 +674,19 @@ public abstract class AbstractBytes<U>
 
     @Override
     @NotNull
-    public Bytes<U> write(long offsetInRDO, @NotNull byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException {
-        requireNonNull(bytes);
+    public Bytes<U> write(@NonNegative long offsetInRDO,
+                          final byte[] byteArray,
+                          @NonNegative int offset,
+                          @NonNegative final int length) throws BufferOverflowException, IllegalStateException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
             writeCheckOffset(offsetInRDO, copy);
-            bytesStore.write(offsetInRDO, bytes, offset, copy);
+            bytesStore.write(offsetInRDO, byteArray, offset, copy);
             offsetInRDO += copy;
             offset += copy;
             remaining -= copy;
@@ -716,7 +725,11 @@ public abstract class AbstractBytes<U>
     public Bytes<U> write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
 
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         long remaining = length;
         while (remaining > 0) {
             int copy = (int) Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
@@ -1073,11 +1086,13 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
-
-        if ((length + offset) > bytes.length) {
-            throw new DecoratedBufferOverflowException("bytes.length=" + bytes.length + ", " + "length=" + length + ", offset=" + offset);
+    public Bytes<U> write(final byte[] byteArray,
+                          @NonNegative final int offset,
+                          @NonNegative final int length) throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
+        requireNonNegative(offset);
+        requireNonNegative(length);
+        if ((length + offset) > byteArray.length) {
+            throw new DecoratedBufferOverflowException("bytes.length=" + byteArray.length + ", " + "length=" + length + ", offset=" + offset);
         }
         if (length > writeRemaining()) {
             throw new DecoratedBufferOverflowException(
@@ -1085,11 +1100,12 @@ public abstract class AbstractBytes<U>
         }
         ensureCapacity(writePosition() + length);
         int remaining = length;
+        int pos = offset;
         while (remaining > 0) {
             int copy = Math.min(remaining, safeCopySize()); // copy 64 KB at a time.
             long offsetInRDO = writeOffsetPositionMoved(copy);
-            bytesStore.write(offsetInRDO, bytes, offset, copy);
-            offset += copy;
+            bytesStore.write(offsetInRDO, byteArray, pos, copy);
+            pos += copy;
             remaining -= copy;
         }
         return this;

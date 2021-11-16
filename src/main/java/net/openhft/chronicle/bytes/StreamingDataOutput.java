@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.Java9;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.Histogram;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -39,6 +40,7 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -477,6 +479,9 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write(@NotNull BytesStore bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNull(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+
         if (length + writePosition() > capacity())
             throw new DecoratedBufferOverflowException("Cannot write " + length + " bytes as position is " + writePosition() + " and capacity is " + capacity());
         BytesInternal.writeFully(bytes, readOffset, length, this);
@@ -502,13 +507,17 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Write all data or fail.
+     * Writes all data from the provided {@code byteArray} into this Bytes object.
      * <p>
-     * Calling this method will update the cursors of this.
+     * Invoking this method will update the cursors of this Bytes object.
+     *
+     * @throws IllegalArgumentException if the provided {@code offset} or {@code length} is negative
+     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    S write(byte[] bytes, int offset, int length)
-            throws BufferOverflowException, IllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException;
+    S write(final byte[] byteArray,
+            @NonNegative final int offset,
+            @NonNegative final int length) throws BufferOverflowException, IllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
     default S unsafeWriteObject(Object o, int length)
             throws BufferOverflowException, IllegalStateException {
@@ -683,6 +692,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     default void writePositionRemaining(long position, long length)
             throws BufferOverflowException {
+        requireNonNegative(position);
+        requireNonNegative(length);
         writeLimit(position + length);
         writePosition(position);
     }

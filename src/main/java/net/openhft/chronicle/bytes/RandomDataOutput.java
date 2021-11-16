@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -278,21 +279,26 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     }
 
     /**
-     * Copy from byte[] into this.
+     * Copies the provided {@code byteArray} to this Bytes object starting at {@code writeOffset} taking
+     * content starting at {@code readOffset} but copying at most {@code length} bytes.
      * <p>
      * Does not update cursors e.g. {@link #writePosition}
      *
-     * @param writeOffset offset to write to
-     * @param bytes       copy from bytes
-     * @param readOffset  copy from offset
-     * @param length
+     * @param writeOffset non-negative offset to write to
+     * @param byteArray   non-null copy from byteArray
+     * @param readOffset  non-negative copy from offset
+     * @param length      non-negative length to copy
      * @return this
-     * @throws BufferOverflowException
-     * @throws IllegalStateException
+     * @throws BufferOverflowException  if this Bytes object cannot accommodate all the bytes to copy.
+     * @throws IllegalStateException    if this Bytes object has been previously released
+     * @throws IllegalArgumentException if the provided {@code writeOffset}, {@code readOffset } or {@code length} is negative
+     * @throws NullPointerException     if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    R write(long writeOffset, @NotNull byte[] bytes, int readOffset, int length)
-            throws BufferOverflowException, IllegalStateException;
+    R write(@NonNegative long writeOffset,
+            byte[] byteArray,
+            @NonNegative int readOffset,
+            @NonNegative int length) throws BufferOverflowException, IllegalStateException;
 
     /**
      * Copy from ByteBuffer into this.
@@ -403,9 +409,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * and no bytes of this {@code RandomDataOutput} are overwritten. Returns the new write position after
      * writing the provided {@code text}
      *
-     * @param writeOffset  the writeOffset to write char sequence from
-     * @param text         the char sequence to write, could be {@code null}
-     * @param maxUtf8Len   the maximum allowed length (in Utf8 encoding) of the given char sequence
+     * @param writeOffset the writeOffset to write char sequence from
+     * @param text        the char sequence to write, could be {@code null}
+     * @param maxUtf8Len  the maximum allowed length (in Utf8 encoding) of the given char sequence
      * @return the writeOffset after the char sequence written, in this {@code RandomDataOutput}
      * @throws IllegalArgumentException if the given char sequence size in Utf8 encoding exceeds
      *                                  maxUtf8Len

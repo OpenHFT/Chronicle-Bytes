@@ -25,12 +25,15 @@ import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -299,7 +302,10 @@ public class HeapBytesStore<U>
 
     @Override
     public long write8bit(long position, @NotNull String s, int start, int length) {
+        requireNonNegative(position);
         requireNonNull(s);
+        requireNonNegative(start);
+        requireNonNegative(length);
         try {
             throwExceptionIfReleased();
             position = BytesInternal.writeStopBit(this, position, length);
@@ -475,13 +481,17 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> write(
-            long offsetInRDO, byte[] bytes, int offset, int length)
-            throws BufferOverflowException {
-        requireNonNull(bytes);
+    public HeapBytesStore<U> write(@NonNegative final long offsetInRDO,
+                                    final byte[] byteArray,
+                                    @NonNegative final int offset,
+                                    @NonNegative final int length) throws BufferOverflowException {
+        requireNonNegative(offsetInRDO);
+        requireNonNull(byteArray);
+        requireNonNegative(offset);
+        requireNonNegative(length);
         try {
             memory.copyMemory(
-                    bytes, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+                    byteArray, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
@@ -514,7 +524,11 @@ public class HeapBytesStore<U>
     public HeapBytesStore<U> write(long writeOffset,
                                    @NotNull RandomDataInput bytes, long readOffset, long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
-        requireNonNull(bytes);
+        requireNonNegative(writeOffset);
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        requireNonNegative(readOffset);
+        requireNonNegative(length);
+        throwExceptionIfReleased();
         if (length == (int) length) {
             int length0 = (int) length;
 
@@ -557,6 +571,7 @@ public class HeapBytesStore<U>
     @Override
     public long addressForWrite(long offset)
             throws UnsupportedOperationException {
+        requireNonNegative(offset);
         throw new UnsupportedOperationException();
     }
 
