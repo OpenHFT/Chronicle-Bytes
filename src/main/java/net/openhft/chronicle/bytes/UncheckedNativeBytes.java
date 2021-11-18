@@ -44,7 +44,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Fast unchecked version of AbstractBytes
  *
  * @param <U> Underlying type
- *
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
@@ -811,7 +810,7 @@ public class UncheckedNativeBytes<U>
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     @NotNull

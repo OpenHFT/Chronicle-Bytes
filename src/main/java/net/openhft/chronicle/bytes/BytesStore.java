@@ -525,7 +525,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return HashCodeEqualsUtil.contentEquals(this, bytesStore);
+        return BytesInternal.contentEqual(this, bytesStore);
     }
 
     /**

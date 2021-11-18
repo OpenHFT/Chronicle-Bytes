@@ -135,10 +135,11 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> clearAndPad(long length)
             throws BufferOverflowException {
-        if ((start() + length) > capacity()) {
-            throw newBOERange(start(), length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
+        final long start = start();
+        if ((start + length) > capacity()) {
+            throw newBOERange(start, length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
         }
-        long l = start() + length;
+        long l = start + length;
         readPosition = l;
         uncheckedWritePosition(l);
         writeLimit = capacity();
@@ -784,7 +785,8 @@ public abstract class AbstractBytes<U>
 
     private void writeCheckOffset0(long offset, long adding)
             throws DecoratedBufferOverflowException {
-        if (offset < start() || offset + adding < start()) {
+        final long start = start();
+        if (offset < start || offset + adding < start) {
             throw newBOELower(offset);
         }
         if ((offset + adding) > writeLimit()) {
@@ -811,6 +813,11 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public byte uncheckedReadByte(long offset) {
+        return bytesStore.readByte(offset);
+    }
+
+    @Override
     public int peekUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException {
         return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
@@ -824,6 +831,11 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public short uncheckedReadShort(long offset) throws BufferUnderflowException, IllegalStateException {
+        return bytesStore.readShort(offset);
+    }
+
+    @Override
     public int readInt(long offset)
             throws BufferUnderflowException, IllegalStateException {
         readCheckOffset(offset, 4, true);
@@ -831,9 +843,19 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public int uncheckedReadInt(long offset) throws BufferUnderflowException, IllegalStateException {
+        return bytesStore.readInt(offset);
+    }
+
+    @Override
     public long readLong(long offset)
             throws BufferUnderflowException, IllegalStateException {
         readCheckOffset(offset, 8, true);
+        return bytesStore.readLong(offset);
+    }
+
+    @Override
+    public long uncheckedReadLong(long offset) {
         return bytesStore.readLong(offset);
     }
 
@@ -1174,7 +1196,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     @NotNull

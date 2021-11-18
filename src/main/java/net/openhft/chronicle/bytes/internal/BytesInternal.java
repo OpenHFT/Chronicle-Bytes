@@ -104,33 +104,45 @@ enum BytesInternal {
     /**
      * Optimise for the common case where the length is 31-bit.
      */
-    static boolean contentEqualInt(BytesStore a, BytesStore b)
-            throws IllegalStateException {
-        int aLength = (int) a.realReadRemaining();
-        int bLength = (int) b.realReadRemaining();
-        // assume a >= b
+    static boolean contentEqualInt(final BytesStore<?, ?> a,
+                                   final BytesStore<?, ?> b) throws IllegalStateException {
+        final int aLength = (int) a.realReadRemaining();
+        final int bLength = (int) b.realReadRemaining();
+        // Make sure a >= b
         if (aLength < bLength)
-            return contentEqualInt(b, a);
+            return contentEqualInt(b, a, bLength, aLength);
+        else
+            return contentEqualInt(a, b, aLength, bLength);
+    }
 
-        long aPos = a.readPosition();
-        long bPos = b.readPosition();
+    /**
+     * a >= b here and we also know it is safe to read bLength
+     */
+    static boolean contentEqualInt(final BytesStore<?, ?> a,
+                                   final BytesStore<?, ?> b,
+                                   final int aLength,
+                                   final int bLength) throws IllegalStateException {
+
+        final long aPos = a.readPosition();
+        final long bPos = b.readPosition();
+
         try {
             int i;
             for (i = 0; i < bLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                if (a.uncheckedReadLong(aPos + i) != b.uncheckedReadLong(bPos + i))
                     return false;
             }
             for (; i < bLength; i++) {
-                if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                if (a.uncheckedReadByte(aPos + i) != b.uncheckedReadByte(bPos + i))
                     return false;
             }
             // check for zeros
             for (; i < aLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != 0L)
+                if (a.uncheckedReadLong(aPos + i) != 0L)
                     return false;
             }
             for (; i < aLength; i++) {
-                if (a.readByte(aPos + i) != 0)
+                if (a.uncheckedReadByte(aPos + i) != 0)
                     return false;
             }
 
@@ -150,8 +162,9 @@ enum BytesInternal {
         }
         throwExceptionIfReleased(a);
         throwExceptionIfReleased(b);
-        long readRemaining = a.readRemaining();
+        final long readRemaining = a.readRemaining();
         if (readRemaining != b.readRemaining())
+            // The size is different so, we know that a and b cannot be equal
             return false;
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
@@ -159,33 +172,44 @@ enum BytesInternal {
     }
 
     private static boolean contentEqualsLong(@NotNull BytesStore a, @NotNull BytesStore b) {
-        // assume a >= b
+        final long aLength = a.realReadRemaining();
+        final long bLength = b.realReadRemaining();
+        // Make sure a >= b
         if (a.realCapacity() < b.realCapacity())
-            return contentEqualsLong(b, a);
+            return contentEqualsLong(b, a, bLength, aLength);
+        else
+            return contentEqualsLong(a, b, aLength, bLength);
+    }
+
+    /**
+     * a >= b here and we also know it is safe to read bLength
+     */
+    private static boolean contentEqualsLong(@NotNull BytesStore a,
+                                             @NotNull BytesStore b,
+                                             long aLength,
+                                             long bLength) {
+        // assume a >= b
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        long aLength = a.realReadRemaining();
-        long bLength = b.realReadRemaining();
         try {
             long i;
             for (i = 0; i < bLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                if (a.uncheckedReadLong(aPos + i) != b.uncheckedReadLong(bPos + i))
                     return false;
             }
             for (; i < bLength; i++) {
-                if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                if (a.uncheckedReadByte(aPos + i) != b.uncheckedReadByte(bPos + i))
                     return false;
             }
             // check for zeros
             for (; i < aLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != 0L)
+                if (a.uncheckedReadLong(aPos + i) != 0L)
                     return false;
             }
             for (; i < aLength; i++) {
-                if (a.readByte(aPos + i) != 0)
+                if (a.uncheckedReadByte(aPos + i) != 0)
                     return false;
             }
-
             return true;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
