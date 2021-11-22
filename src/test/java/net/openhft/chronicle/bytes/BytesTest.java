@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
+import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
@@ -66,6 +68,19 @@ public class BytesTest extends BytesTestCommon {
                 {"Heap Unchecked", HEAP_UNCHECKED},
                 {"Heap Embedded", HEAP_EMBEDDED}
         });
+    }
+
+    @Test
+    public void emptyHash() {
+        Bytes bytes = alloc1.elasticBytes(2);
+        try {
+            final long actual1 = OptimisedBytesStoreHash.INSTANCE.applyAsLong(bytes);
+            assertEquals(Long.MIN_VALUE, actual1);
+            final long actual2 = VanillaBytesStoreHash.INSTANCE.applyAsLong(bytes);
+            assertEquals(Long.MIN_VALUE, actual2);
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test

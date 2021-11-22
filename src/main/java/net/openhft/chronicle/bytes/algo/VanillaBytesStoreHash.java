@@ -59,6 +59,8 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     public long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException {
         long start = bytes.readPosition();
         if (length <= 8) {
+            if (length == 0)
+                return Long.MIN_VALUE;
             long l = bytes.readIncompleteLong(start);
             return agitate(l * K0 + (l >> 32) * K1);
         }
