@@ -2994,17 +2994,31 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
     }
 
-    public static void writeFully(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+    public static void writeFully(@NotNull final RandomDataInput bytes,
+                                  @NonNegative final long offset,
+                                  @NonNegative final long length,
+                                  @NotNull final StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
-        for (; i < length - 7; i += 8)
-            sdo.rawWriteLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            sdo.rawWriteInt(bytes.readInt(offset + i));
-            i += 4;
+        if (bytes instanceof HasUncheckedRandomData) {
+            final UncheckedRandomDataInput uBytes = ((HasUncheckedRandomData) bytes).acquireUncheckedInput();
+            for (; i < length - 7; i += 8)
+                sdo.rawWriteLong(uBytes.readLong(offset + i));
+            if (i < length - 3) {
+                sdo.rawWriteInt(uBytes.readInt(offset + i));
+                i += 4;
+            }
+            for (; i < length; i++)
+                sdo.rawWriteByte(uBytes.readByte(offset + i));
+        } else {
+            for (; i < length - 7; i += 8)
+                sdo.rawWriteLong(bytes.readLong(offset + i));
+            if (i < length - 3) {
+                sdo.rawWriteInt(bytes.readInt(offset + i));
+                i += 4;
+            }
+            for (; i < length; i++)
+                sdo.rawWriteByte(bytes.readByte(offset + i));
         }
-        for (; i < length; i++)
-            sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
     public static void copyMemory(long from, long to, int length) {
