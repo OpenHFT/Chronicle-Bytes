@@ -18,9 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -48,8 +46,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U> {
+        implements Bytes<U>, HasUncheckedRandomData {
     protected final long capacity;
+    private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     private final Bytes<U> underlyingBytes;
     @NotNull
@@ -962,6 +961,34 @@ public class UncheckedNativeBytes<U>
         bytesStore.write8bit(position, text, start, length);
         writePosition += toWriteLength;
         return this;
+    }
+
+    @Override
+    public UncheckedRandomDataInput acquireUncheckedInput() {
+        return uncheckedRandomDataInput;
+    }
+
+    private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
+
+        @Override
+        public byte readByte(long offset) {
+            return bytesStore.readByte(offset);
+        }
+
+        @Override
+        public short readShort(long offset) {
+            return bytesStore.readShort(offset);
+        }
+
+        @Override
+        public int readInt(long offset) {
+            return bytesStore.readInt(offset);
+        }
+
+        @Override
+        public long readLong(long offset) {
+            return bytesStore.readLong(offset);
+        }
     }
 
 }

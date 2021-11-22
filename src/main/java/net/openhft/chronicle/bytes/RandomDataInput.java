@@ -81,20 +81,6 @@ public interface RandomDataInput extends RandomCommon {
     byte readByte(long offset)
             throws BufferUnderflowException, IllegalStateException;
 
-    /**
-     * Read a byte at an offset possibly not checking memory bounds.
-     * <p>
-     * Memory bounds must be checked before invoking this method or else the result
-     * is undefined and may lead to JVM crashes.
-     *
-     * @param offset to read
-     * @return the long
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
-     */
-    default byte uncheckedReadByte(long offset) {
-        return readByte(offset);
-    }
 
     /**
      * Read an unsigned byte at an offset
@@ -130,22 +116,6 @@ public interface RandomDataInput extends RandomCommon {
      */
     short readShort(long offset)
             throws BufferUnderflowException, IllegalStateException;
-
-    /**
-     * Read a short at an offset possibly not checking memory bounds.
-     * <p>
-     * Memory bounds must be checked before invoking this method or else the result
-     * is undefined and may lead to JVM crashes.
-     *
-     * @param offset to read
-     * @return the short
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
-     */
-    default short uncheckedReadShort(long offset)
-            throws BufferUnderflowException, IllegalStateException {
-        return readShort(offset);
-    }
 
     /**
      * Read an unsigned short at an offset
@@ -185,22 +155,6 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * Read an int at an offset possibly not checking memory bounds.
-     * <p>
-     * Memory bounds must be checked before invoking this method or else the result
-     * is undefined and may lead to JVM crashes.
-     *
-     * @param offset to read
-     * @return the int
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
-     */
-    default int uncheckedReadInt(long offset)
-            throws BufferUnderflowException, IllegalStateException {
-        return readInt(offset);
-    }
-
-    /**
      * Read an unsigned int at an offset
      *
      * @param offset to read
@@ -223,21 +177,6 @@ public interface RandomDataInput extends RandomCommon {
      */
     long readLong(long offset)
             throws BufferUnderflowException, IllegalStateException;
-
-    /**
-     * Read a long at an offset possibly not checking memory bounds.
-     * <p>
-     * Memory bounds must be checked before invoking this method or else the result
-     * is undefined and may lead to JVM crashes.
-     *
-     * @param offset to read
-     * @return the long
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
-     */
-    default long uncheckedReadLong(long offset) {
-        return readLong(offset);
-    }
 
     /**
      * Read a float at an offset

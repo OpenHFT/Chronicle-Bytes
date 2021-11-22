@@ -19,7 +19,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HasUncheckedRandomData;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
@@ -51,12 +53,13 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U> {
+        implements Bytes<U>, HasUncheckedRandomData {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // used for debugging
     @UsedViaReflection
     private final String name;
+    private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
@@ -813,11 +816,6 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public byte uncheckedReadByte(long offset) {
-        return bytesStore.readByte(offset);
-    }
-
-    @Override
     public int peekUnsignedByte(long offset)
             throws BufferUnderflowException, IllegalStateException {
         return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
@@ -831,11 +829,6 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public short uncheckedReadShort(long offset) throws BufferUnderflowException, IllegalStateException {
-        return bytesStore.readShort(offset);
-    }
-
-    @Override
     public int readInt(long offset)
             throws BufferUnderflowException, IllegalStateException {
         readCheckOffset(offset, 4, true);
@@ -843,19 +836,9 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public int uncheckedReadInt(long offset) throws BufferUnderflowException, IllegalStateException {
-        return bytesStore.readInt(offset);
-    }
-
-    @Override
     public long readLong(long offset)
             throws BufferUnderflowException, IllegalStateException {
         readCheckOffset(offset, 8, true);
-        return bytesStore.readLong(offset);
-    }
-
-    @Override
-    public long uncheckedReadLong(long offset) {
         return bytesStore.readLong(offset);
     }
 
@@ -1288,6 +1271,34 @@ public abstract class AbstractBytes<U>
         if (end < Integer.MAX_VALUE && isDirectMemory())
             return byteCheckSum((int) start, (int) end);
         return Bytes.super.byteCheckSum(start, end);
+    }
+
+    @Override
+    public UncheckedRandomDataInput acquireUncheckedInput() {
+        return uncheckedRandomDataInput;
+    }
+
+    private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
+
+        @Override
+        public byte readByte(long offset) {
+            return bytesStore.readByte(offset);
+        }
+
+        @Override
+        public short readShort(long offset) {
+            return bytesStore.readShort(offset);
+        }
+
+        @Override
+        public int readInt(long offset) {
+            return bytesStore.readInt(offset);
+        }
+
+        @Override
+        public long readLong(long offset) {
+            return bytesStore.readLong(offset);
+        }
     }
 
     public int byteCheckSum(int start, int end)

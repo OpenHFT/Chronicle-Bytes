@@ -12,7 +12,9 @@ public final class HashCodeEqualsUtil {
     private HashCodeEqualsUtil() {
     }
 
-    public static boolean contentEquals2(final BytesStore<?, ?> bytes,
+    // Comparing and reserving at the same time
+    // Declared private at the moment so not public
+    private static boolean contentEquals(final BytesStore<?, ?> bytes,
                                         final Object other) {
 
         if (bytes == other) {
