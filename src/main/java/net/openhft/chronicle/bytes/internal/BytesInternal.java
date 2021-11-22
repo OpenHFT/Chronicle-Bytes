@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.pool.BytesPool;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
@@ -2999,7 +3000,12 @@ enum BytesInternal {
                                   @NonNegative final long length,
                                   @NotNull final StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
+
         if (bytes instanceof HasUncheckedRandomData) {
+            // Do boundary checking outside the inner loop
+            if (length + offset > bytes.capacity()) {
+                throw new DecoratedBufferOverflowException("Cannot read " + length + " bytes as offset is " + offset + " and capacity is " + bytes.capacity());
+            }
             final UncheckedRandomDataInput uBytes = ((HasUncheckedRandomData) bytes).acquireUncheckedInput();
             for (; i < length - 7; i += 8)
                 sdo.rawWriteLong(uBytes.readLong(offset + i));
