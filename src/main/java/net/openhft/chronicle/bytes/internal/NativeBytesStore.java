@@ -702,11 +702,6 @@ public class NativeBytesStore<U>
         return l;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-    }
-
     public void setAddress(long address) {
         if ((address & ~0x3FFF) == 0)
             throw new AssertionError("Invalid addressForRead " + Long.toHexString(address));

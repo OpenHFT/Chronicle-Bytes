@@ -590,12 +590,6 @@ public class HeapBytesStore<U>
         throw new UnsupportedOperationException("todo");
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-    }
-
     @Override
     public boolean sharedMemory() {
         return false;
