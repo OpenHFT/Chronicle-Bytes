@@ -47,7 +47,8 @@ import java.nio.channels.FileLock;
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-    protected final String internalizedToken;
+    // The canonical path is pre-pended with static and random data to prevent unrelated synchronization on internalized Strings
+    protected final String canonicalPath;
     @NotNull
     private final File file;
     private final boolean readOnly;
@@ -57,7 +58,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                          final boolean readOnly)
             throws IORuntimeException {
         this.file = file;
-        this.internalizedToken = CanonicalPathUtil.of(file);
+        this.canonicalPath = CanonicalPathUtil.of(file);
         this.readOnly = readOnly;
     }
 
