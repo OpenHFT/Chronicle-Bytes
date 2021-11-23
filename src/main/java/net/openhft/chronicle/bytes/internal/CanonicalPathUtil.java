@@ -22,7 +22,8 @@ public final class CanonicalPathUtil {
      */
     public static String of(@NotNull final File file) {
         try {
-            return SUFFIX + "::" + file.getCanonicalPath().intern();
+            return (SUFFIX + "::" + file.getCanonicalPath())
+                    .intern();
         } catch (IOException ioe) {
             throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
         }
