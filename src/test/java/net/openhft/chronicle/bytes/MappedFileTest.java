@@ -42,7 +42,11 @@ public class MappedFileTest extends BytesTestCommon {
 
     @Test
     public void testWarmup() {
-        MappedFile.warmup();
+        try {
+            MappedFile.warmup();
+        } catch (Throwable t) {
+            fail(t.getMessage());
+        }
     }
 
     @Test

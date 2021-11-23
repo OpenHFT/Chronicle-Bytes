@@ -33,6 +33,7 @@ import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
 import static net.openhft.chronicle.bytes.MappedBytes.singleMappedBytes;
 import static net.openhft.chronicle.bytes.MappedFile.mappedFile;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class MappedMemoryTest extends BytesTestCommon {
 
@@ -134,8 +135,11 @@ public class MappedMemoryTest extends BytesTestCommon {
                     }
                     bytes.releaseLast(test);
 
+                    Jvm.perf().on(getClass(), "With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
+                } catch (Throwable throwable) {
+                    // Performance test so just make sure the test ran
+                    fail(throwable.getMessage());
                 }
-                Jvm.debug().on(getClass(), "With NativeBytes,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
                 deleteIfPossible(tempFile);
             }

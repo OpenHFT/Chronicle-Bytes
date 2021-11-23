@@ -22,7 +22,11 @@ public class Bytes4Test {
         BytesStore bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();
-        bs.writeUtf8(14, "this is a another text it should over write the other");
+        try {
+            bs.writeUtf8(14, "this is a another text it should over write the other");
+        } catch (Throwable throwable) {
+            fail(throwable.getMessage());
+        }
     }
 
     @Test
