@@ -594,4 +594,18 @@ public class HeapBytesStore<U>
     public boolean sharedMemory() {
         return false;
     }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
 }

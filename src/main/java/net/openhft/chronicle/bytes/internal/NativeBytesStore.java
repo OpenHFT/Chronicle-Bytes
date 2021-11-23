@@ -895,6 +895,20 @@ public class NativeBytesStore<U>
         return MEMORY.isEqual(addressForRead(start), s, (int) length);
     }
 
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
+    }
+
     static final class Deallocator implements Runnable {
 
         private final long size;
