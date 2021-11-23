@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
@@ -523,7 +522,7 @@ public class NativeBytesStore<U>
     public NativeBytesStore<U> write(@NonNegative final long offsetInRDO,
                                      final byte[] byteArray,
                                      @NonNegative final int offset,
-                                     @NonNegative final  int length) throws IllegalStateException {
+                                     @NonNegative final int length) throws IllegalStateException {
         requireNonNegative(offsetInRDO);
         requireNonNull(byteArray);
         Longs.requireNonNegative(offset);
@@ -705,7 +704,7 @@ public class NativeBytesStore<U>
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     public void setAddress(long address) {

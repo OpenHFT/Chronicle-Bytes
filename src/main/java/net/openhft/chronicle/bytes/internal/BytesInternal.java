@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.pool.BytesPool;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
 import net.openhft.chronicle.core.Jvm;
@@ -57,6 +58,7 @@ import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
+import static net.openhft.chronicle.core.util.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
@@ -101,19 +103,60 @@ enum BytesInternal {
         }
     }
 
-    /**
-     * Optimise for the common case where the length is 31-bit.
-     */
-    static boolean contentEqualInt(BytesStore a, BytesStore b)
-            throws IllegalStateException {
-        int aLength = (int) a.realReadRemaining();
-        int bLength = (int) b.realReadRemaining();
-        // assume a >= b
-        if (aLength < bLength)
-            return contentEqualInt(b, a);
+    public static boolean contentEqual(@Nullable final BytesStore a,
+                                       @Nullable final BytesStore b) throws IllegalStateException {
+        if (a == null) return b == null;
+        if (b == null) {
+            // The contract stipulates that if either ByteStores are closed then we throw an Exception
+            throwExceptionIfReleased(a);
+            return false;
+        }
+        throwExceptionIfReleased(a);
+        throwExceptionIfReleased(b);
+        final long readRemaining = a.readRemaining();
+        if (readRemaining != b.readRemaining())
+            // The size is different so, we know that a and b cannot be equal
+            return false;
+        return readRemaining <= Integer.MAX_VALUE
+                ? contentEqualInt(a, b)
+                : contentEqualsLong(a, b);
+    }
 
-        long aPos = a.readPosition();
-        long bPos = b.readPosition();
+
+    // Optimise for the common case where the length is 31-bit.
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
+    boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
+                            @NotNull final BytesStore<?, ?> b) throws IllegalStateException {
+
+        final int aLength = (int) a.realReadRemaining();
+        final int bLength = (int) b.realReadRemaining();
+        if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
+            // Make sure a >= b
+            if (aLength < bLength)
+                return contentEqualIntUnchecked((U) b, (U) a, bLength, aLength);
+            else
+                return contentEqualIntUnchecked((U) a, (U) b, aLength, bLength);
+        } else {
+            // Make sure a >= b
+            if (aLength < bLength)
+                return contentEqualInt(b, a, bLength, aLength);
+            else
+                return contentEqualInt(a, b, aLength, bLength);
+        }
+    }
+
+
+
+
+    // a >= b here and we also know it is safe to read bLength
+    static boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
+                                   @NotNull final BytesStore<?, ?> b,
+                                   @NonNegative final int aLength,
+                                   @NonNegative final int bLength) throws IllegalStateException {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
+        final long aPos = a.readPosition();
+        final long bPos = b.readPosition();
+
         try {
             int i;
             for (i = 0; i < bLength - 7; i += 8) {
@@ -140,32 +183,73 @@ enum BytesInternal {
         }
     }
 
-    public static boolean contentEqual(@Nullable final BytesStore a,
-                                       @Nullable final BytesStore b) throws IllegalStateException {
-        if (a == null) return b == null;
-        if (b == null) {
-            // The contract stipulates that if either ByteStores are closed then we throw an Exception
-            throwExceptionIfReleased(a);
-            return false;
+    // a >= b here and we also know it is safe to read bLength
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
+    boolean contentEqualIntUnchecked(@NotNull final U a,
+                                     @NotNull final U b,
+                                     @NonNegative final int aLength,
+                                     @NonNegative final int bLength) throws IllegalStateException {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
+        final UncheckedRandomDataInput ua = a.acquireUncheckedInput();
+        final UncheckedRandomDataInput ub = b.acquireUncheckedInput();
+        final long aPos = a.readPosition();
+        final long bPos = b.readPosition();
+
+        try {
+            int i;
+            for (i = 0; i < bLength - 7; i += 8) {
+                if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
+                    return false;
+            }
+            for (; i < bLength; i++) {
+                if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
+                    return false;
+            }
+            // check for zeros
+            for (; i < aLength - 7; i += 8) {
+                if (ua.readLong(aPos + i) != 0L)
+                    return false;
+            }
+            for (; i < aLength; i++) {
+                if (ua.readByte(aPos + i) != 0)
+                    return false;
+            }
+            return true;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
         }
-        throwExceptionIfReleased(a);
-        throwExceptionIfReleased(b);
-        long readRemaining = a.readRemaining();
-        if (readRemaining != b.readRemaining())
-            return false;
-        return readRemaining <= Integer.MAX_VALUE
-                ? contentEqualInt(a, b)
-                : contentEqualsLong(a, b);
     }
 
-    private static boolean contentEqualsLong(@NotNull BytesStore a, @NotNull BytesStore b) {
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
+    boolean contentEqualsLong(@NotNull final BytesStore a,
+                              @NotNull final BytesStore b) {
+        final long aLength = a.realReadRemaining();
+        final long bLength = b.realReadRemaining();
+        if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
+            // Make sure a >= b
+            if (a.realCapacity() < b.realCapacity())
+                return contentEqualsLongUnchecked((U) b, (U) a, bLength, aLength);
+            else
+                return contentEqualsLongUnchecked((U) a, (U) b, aLength, bLength);
+        } else {
+            // Make sure a >= b
+            if (a.realCapacity() < b.realCapacity())
+                return contentEqualsLong(b, a, bLength, aLength);
+            else
+                return contentEqualsLong(a, b, aLength, bLength);
+        }
+    }
+
+
+    // a >= b here and we also know it is safe to read bLength
+    private static boolean contentEqualsLong(@NotNull final BytesStore a,
+                                             @NotNull final BytesStore b,
+                                             @NonNegative final long aLength,
+                                             @NonNegative final long bLength) {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
         // assume a >= b
-        if (a.realCapacity() < b.realCapacity())
-            return contentEqualsLong(b, a);
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        long aLength = a.realReadRemaining();
-        long bLength = b.realReadRemaining();
         try {
             long i;
             for (i = 0; i < bLength - 7; i += 8) {
@@ -185,7 +269,46 @@ enum BytesInternal {
                 if (a.readByte(aPos + i) != 0)
                     return false;
             }
+            return true;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
 
+
+    // a >= b here and we also know it is safe to read bLength
+    private static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
+    boolean contentEqualsLongUnchecked(@NotNull final U a,
+                                       @NotNull final U b,
+                                       @NonNegative final long aLength,
+                                       @NonNegative final long bLength) {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
+
+        final UncheckedRandomDataInput ua = a.acquireUncheckedInput();
+        final UncheckedRandomDataInput ub = b.acquireUncheckedInput();
+
+        // assume a >= b
+        long aPos = a.readPosition();
+        long bPos = b.readPosition();
+        try {
+            long i;
+            for (i = 0; i < bLength - 7; i += 8) {
+                if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
+                    return false;
+            }
+            for (; i < bLength; i++) {
+                if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
+                    return false;
+            }
+            // check for zeros
+            for (; i < aLength - 7; i += 8) {
+                if (ua.readLong(aPos + i) != 0L)
+                    return false;
+            }
+            for (; i < aLength; i++) {
+                if (ua.readByte(aPos + i) != 0)
+                    return false;
+            }
             return true;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
@@ -2871,17 +2994,36 @@ enum BytesInternal {
         return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
     }
 
-    public static void writeFully(@NotNull RandomDataInput bytes, long offset, long length, @NotNull StreamingDataOutput sdo)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+    public static void writeFully(@NotNull final RandomDataInput bytes,
+                                  @NonNegative final long offset,
+                                  @NonNegative final long length,
+                                  @NotNull final StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
-        for (; i < length - 7; i += 8)
-            sdo.rawWriteLong(bytes.readLong(offset + i));
-        if (i < length - 3) {
-            sdo.rawWriteInt(bytes.readInt(offset + i));
-            i += 4;
+
+        if (bytes instanceof HasUncheckedRandomDataInput) {
+            // Do boundary checking outside the inner loop
+            if (length + offset > bytes.capacity()) {
+                throw new DecoratedBufferOverflowException("Cannot read " + length + " bytes as offset is " + offset + " and capacity is " + bytes.capacity());
+            }
+            final UncheckedRandomDataInput uBytes = ((HasUncheckedRandomDataInput) bytes).acquireUncheckedInput();
+            for (; i < length - 7; i += 8)
+                sdo.rawWriteLong(uBytes.readLong(offset + i));
+            if (i < length - 3) {
+                sdo.rawWriteInt(uBytes.readInt(offset + i));
+                i += 4;
+            }
+            for (; i < length; i++)
+                sdo.rawWriteByte(uBytes.readByte(offset + i));
+        } else {
+            for (; i < length - 7; i += 8)
+                sdo.rawWriteLong(bytes.readLong(offset + i));
+            if (i < length - 3) {
+                sdo.rawWriteInt(bytes.readInt(offset + i));
+                i += 4;
+            }
+            for (; i < length; i++)
+                sdo.rawWriteByte(bytes.readByte(offset + i));
         }
-        for (; i < length; i++)
-            sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
     public static void copyMemory(long from, long to, int length) {
