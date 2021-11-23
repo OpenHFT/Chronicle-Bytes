@@ -125,7 +125,7 @@ public class SingleMappedFile extends MappedFile {
 
             // Ensure exclusivity for any and all MappedFile objects handling
             // the same canonical file.
-            synchronized (canonicalPath) {
+            synchronized (internalizedToken) {
                 size = fileChannel.size();
                 if (size < minSize) {
                     final long beginNs = System.nanoTime();

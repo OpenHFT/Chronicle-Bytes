@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.CanonicalPathUtil;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedFile;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
@@ -46,7 +47,7 @@ import java.nio.channels.FileLock;
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-    protected final String canonicalPath;
+    protected final String internalizedToken;
     @NotNull
     private final File file;
     private final boolean readOnly;
@@ -56,11 +57,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                          final boolean readOnly)
             throws IORuntimeException {
         this.file = file;
-        try {
-            this.canonicalPath = file.getCanonicalPath().intern();
-        } catch (IOException ioe) {
-            throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
-        }
+        this.internalizedToken = CanonicalPathUtil.of(file);
         this.readOnly = readOnly;
     }
 
