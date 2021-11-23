@@ -300,17 +300,6 @@
                 </configuration>
             </plugin>
 
-
-            <plugin>
-                <groupId>com.github.ferstl</groupId>
-                <artifactId>depgraph-maven-plugin</artifactId>
-                <version>3.3.0</version>
-                <configuration>
-                    <scope>compile</scope>
-                </configuration>
-            </plugin>
-
-
         </plugins>
     </build>
 
