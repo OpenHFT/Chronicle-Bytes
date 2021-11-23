@@ -913,7 +913,7 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new copy of this Bytes object from position() to limit().
+     * Creates and returns a new copy of this Bytes object from {@link #readPosition()} to {@link #readLimit()}.
      *
      * @return a copy of this Bytes object
      */

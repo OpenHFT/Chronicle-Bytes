@@ -301,7 +301,7 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * Read a byte[] from memory.
+     * Read a byte[] from memory from {@link #readPosition()} to {@link #readLimit()}.
      *
      * @return the length actually read.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
@@ -312,8 +312,11 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNull(bytes);
         throwExceptionIfReleased(this);
         int len = (int) Math.min(bytes.length, readRemaining());
+        long readPosition = readPosition();
+
         for (int i = 0; i < len; i++)
-            bytes[i] = readByte(start() + i);
+            bytes[i] = readByte(readPosition + i);
+
         return len;
     }
 
