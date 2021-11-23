@@ -46,7 +46,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U>, HasUncheckedRandomData {
+        implements Bytes<U>, HasUncheckedRandomDataInput {
     protected final long capacity;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
@@ -964,7 +964,7 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
-    public UncheckedRandomDataInput acquireUncheckedInput() {
+    public @NotNull UncheckedRandomDataInput acquireUncheckedInput() {
         return uncheckedRandomDataInput;
     }
 

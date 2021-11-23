@@ -58,6 +58,7 @@ import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
+import static net.openhft.chronicle.core.util.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
@@ -121,14 +122,38 @@ enum BytesInternal {
                 : contentEqualsLong(a, b);
     }
 
-    /**
-     * a >= b here and we also know it is safe to read bLength
-     */
+
+    // Optimise for the common case where the length is 31-bit.
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
+    boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
+                            @NotNull final BytesStore<?, ?> b) throws IllegalStateException {
+
+        final int aLength = (int) a.realReadRemaining();
+        final int bLength = (int) b.realReadRemaining();
+        if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
+            // Make sure a >= b
+            if (aLength < bLength)
+                return contentEqualIntUnchecked((U) b, (U) a, bLength, aLength);
+            else
+                return contentEqualIntUnchecked((U) a, (U) b, aLength, bLength);
+        } else {
+            // Make sure a >= b
+            if (aLength < bLength)
+                return contentEqualInt(b, a, bLength, aLength);
+            else
+                return contentEqualInt(a, b, aLength, bLength);
+        }
+    }
+
+
+
+
+    // a >= b here and we also know it is safe to read bLength
     static boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
                                    @NotNull final BytesStore<?, ?> b,
                                    @NonNegative final int aLength,
                                    @NonNegative final int bLength) throws IllegalStateException {
-
+        assert SKIP_ASSERTIONS || aLength >= bLength;
         final long aPos = a.readPosition();
         final long bPos = b.readPosition();
 
@@ -158,39 +183,13 @@ enum BytesInternal {
         }
     }
 
-    /**
-     * Optimise for the common case where the length is 31-bit.
-     */
-    static <U extends BytesStore<?, ?> & HasUncheckedRandomData>
-    boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
-                            @NotNull final BytesStore<?, ?> b) throws IllegalStateException {
-
-        final int aLength = (int) a.realReadRemaining();
-        final int bLength = (int) b.realReadRemaining();
-        if (a instanceof HasUncheckedRandomData && b instanceof HasUncheckedRandomData) {
-            // Make sure a >= b
-            if (aLength < bLength)
-                return contentEqualIntUnchecked((U) b, (U) a, bLength, aLength);
-            else
-                return contentEqualIntUnchecked((U) a, (U) b, aLength, bLength);
-        } else {
-            // Make sure a >= b
-            if (aLength < bLength)
-                return contentEqualInt(b, a, bLength, aLength);
-            else
-                return contentEqualInt(a, b, aLength, bLength);
-        }
-    }
-
-    /**
-     * a >= b here and we also know it is safe to read bLength
-     */
-    static <U extends BytesStore<?, ?> & HasUncheckedRandomData>
+    // a >= b here and we also know it is safe to read bLength
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualIntUnchecked(@NotNull final U a,
                                      @NotNull final U b,
                                      @NonNegative final int aLength,
                                      @NonNegative final int bLength) throws IllegalStateException {
-
+        assert SKIP_ASSERTIONS || aLength >= bLength;
         final UncheckedRandomDataInput ua = a.acquireUncheckedInput();
         final UncheckedRandomDataInput ub = b.acquireUncheckedInput();
         final long aPos = a.readPosition();
@@ -221,12 +220,12 @@ enum BytesInternal {
         }
     }
 
-    static <U extends BytesStore<?, ?> & HasUncheckedRandomData>
+    static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualsLong(@NotNull final BytesStore a,
                               @NotNull final BytesStore b) {
         final long aLength = a.realReadRemaining();
         final long bLength = b.realReadRemaining();
-        if (a instanceof HasUncheckedRandomData && b instanceof HasUncheckedRandomData) {
+        if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
             // Make sure a >= b
             if (a.realCapacity() < b.realCapacity())
                 return contentEqualsLongUnchecked((U) b, (U) a, bLength, aLength);
@@ -241,13 +240,13 @@ enum BytesInternal {
         }
     }
 
-    /**
-     * a >= b here and we also know it is safe to read bLength
-     */
+
+    // a >= b here and we also know it is safe to read bLength
     private static boolean contentEqualsLong(@NotNull final BytesStore a,
                                              @NotNull final BytesStore b,
                                              @NonNegative final long aLength,
                                              @NonNegative final long bLength) {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
         // assume a >= b
         long aPos = a.readPosition();
         long bPos = b.readPosition();
@@ -276,14 +275,14 @@ enum BytesInternal {
         }
     }
 
-    /**
-     * a >= b here and we also know it is safe to read bLength
-     */
-    private static <U extends BytesStore<?, ?> & HasUncheckedRandomData>
+
+    // a >= b here and we also know it is safe to read bLength
+    private static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualsLongUnchecked(@NotNull final U a,
                                        @NotNull final U b,
                                        @NonNegative final long aLength,
                                        @NonNegative final long bLength) {
+        assert SKIP_ASSERTIONS || aLength >= bLength;
 
         final UncheckedRandomDataInput ua = a.acquireUncheckedInput();
         final UncheckedRandomDataInput ub = b.acquireUncheckedInput();
@@ -3001,12 +3000,12 @@ enum BytesInternal {
                                   @NotNull final StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
 
-        if (bytes instanceof HasUncheckedRandomData) {
+        if (bytes instanceof HasUncheckedRandomDataInput) {
             // Do boundary checking outside the inner loop
             if (length + offset > bytes.capacity()) {
                 throw new DecoratedBufferOverflowException("Cannot read " + length + " bytes as offset is " + offset + " and capacity is " + bytes.capacity());
             }
-            final UncheckedRandomDataInput uBytes = ((HasUncheckedRandomData) bytes).acquireUncheckedInput();
+            final UncheckedRandomDataInput uBytes = ((HasUncheckedRandomDataInput) bytes).acquireUncheckedInput();
             for (; i < length - 7; i += 8)
                 sdo.rawWriteLong(uBytes.readLong(offset + i));
             if (i < length - 3) {

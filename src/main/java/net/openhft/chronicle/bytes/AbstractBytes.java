@@ -19,7 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomData;
+import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
@@ -53,7 +53,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U>, HasUncheckedRandomData {
+        implements Bytes<U>, HasUncheckedRandomDataInput {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // used for debugging
@@ -1274,7 +1274,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public UncheckedRandomDataInput acquireUncheckedInput() {
+    public @NotNull UncheckedRandomDataInput acquireUncheckedInput() {
         return uncheckedRandomDataInput;
     }
 
