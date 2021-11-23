@@ -3150,11 +3150,7 @@ enum BytesInternal {
         } catch (BufferUnderflowException | BufferOverflowException | IllegalStateException e) {
             throw new AssertionError(e);
         } finally {
-            try {
-                in.releaseLast();
-            } catch (IllegalStateException e) {
-                throw new AssertionError(e);
-            }
+            in.releaseLast();
         }
     }
 

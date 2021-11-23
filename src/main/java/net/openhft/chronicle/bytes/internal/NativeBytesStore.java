@@ -702,11 +702,6 @@ public class NativeBytesStore<U>
         return l;
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-    }
-
     public void setAddress(long address) {
         if ((address & ~0x3FFF) == 0)
             throw new AssertionError("Invalid addressForRead " + Long.toHexString(address));
@@ -898,6 +893,20 @@ public class NativeBytesStore<U>
         if (s == null || s.length() != length)
             return false;
         return MEMORY.isEqual(addressForRead(start), s, (int) length);
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 
     static final class Deallocator implements Runnable {

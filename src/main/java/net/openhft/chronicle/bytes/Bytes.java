@@ -62,9 +62,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Generally, a Bytes object is a resource that is ReferenceCounted and certain operations invoked on a Bytes
  * object that has been released, might result in an {@link IllegalStateException} being thrown.
  *
- * @see BytesStore
  * @param <U> Underlying type
- *
+ * @see BytesStore
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<U> extends
@@ -146,6 +145,7 @@ public interface Bytes<U> extends
      * @param initialCapacity the initial non-negative capacity given in bytes
      * @return a new elastic wrapper
      * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
+     * @throws IllegalStateException    if the underlying resource has already been freed.
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(@NonNegative int initialCapacity) {
@@ -156,11 +156,7 @@ public interface Bytes<U> extends
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
         } finally {
-            try {
-                bs.release(INIT);
-            } catch (IllegalStateException ise) {
-                throw new AssertionError(ise);
-            }
+            bs.release(INIT);
         }
     }
 
@@ -191,7 +187,8 @@ public interface Bytes<U> extends
      * @param object    non-null object whose fields are to be reflected
      * @param groupName of the field group, non-null
      * @return a new Bytes view of fields
-     * @throws NullPointerException if the provided {@code object} or the provided {@code groupName} is {@code null}
+     * @throws NullPointerException  if the provided {@code object} or the provided {@code groupName} is {@code null}
+     * @throws IllegalStateException if the underlying resource has already been freed.
      */
     static <T> Bytes<T> forFieldGroup(@NotNull final T object,
                                       @NotNull final String groupName) {
@@ -204,11 +201,7 @@ public interface Bytes<U> extends
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
         } finally {
-            try {
-                bs.release(INIT);
-            } catch (IllegalStateException ise) {
-                throw new AssertionError(ise);
-            }
+            bs.release(INIT);
         }
     }
 
@@ -722,7 +715,7 @@ public interface Bytes<U> extends
      * @param position the offset position to create the string from
      * @param length   the number of characters to include in the string
      * @return a String extracted from the buffer
-     * @throws NullPointerException if the provided {@code buffer} is {@code null} or
+     * @throws NullPointerException     if the provided {@code buffer} is {@code null} or
      * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
      */
     @NotNull
@@ -1279,10 +1272,10 @@ public interface Bytes<U> extends
      * The content of this Bytes object will have a 16-bit length indicator preceding the actual object.
      *
      * @param marshallable non-null object to write to this Bytes object
-     * @throws BufferOverflowException  if the capacity of this Bytes object is insufficient.
-     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
-     *                                  or if the contents of this Bytes object cannot fit under 16-bit addressing
-     * @throws NullPointerException     if the provided {@code marshallable} is {@code null}
+     * @throws BufferOverflowException if the capacity of this Bytes object is insufficient.
+     * @throws IllegalStateException   if this Bytes object or the provided {@code bytesOut} has been previously released
+     *                                 or if the contents of this Bytes object cannot fit under 16-bit addressing
+     * @throws NullPointerException    if the provided {@code marshallable} is {@code null}
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
@@ -1307,10 +1300,10 @@ public interface Bytes<U> extends
      *
      * @param inputStream non-null to read from
      * @return this Bytes object
-     * @throws IOException              if an I/O error occur on the inputStream
-     * @throws BufferOverflowException  if this Bytes object lacks capacity to write the entire provided {@code inputStream }
-     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released
-     * @throws NullPointerException     if the provided {@code InputStream} is {@code null}.
+     * @throws IOException             if an I/O error occur on the inputStream
+     * @throws BufferOverflowException if this Bytes object lacks capacity to write the entire provided {@code inputStream }
+     * @throws IllegalStateException   if this Bytes object or the provided {@code bytesOut} has been previously released
+     * @throws NullPointerException    if the provided {@code InputStream} is {@code null}.
      */
     default Bytes write(@NotNull final InputStream inputStream)
             throws IOException, BufferOverflowException, IllegalStateException {
