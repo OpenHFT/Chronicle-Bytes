@@ -19,7 +19,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
@@ -523,7 +522,7 @@ public class NativeBytesStore<U>
     public NativeBytesStore<U> write(@NonNegative final long offsetInRDO,
                                      final byte[] byteArray,
                                      @NonNegative final int offset,
-                                     @NonNegative final  int length) throws IllegalStateException {
+                                     @NonNegative final int length) throws IllegalStateException {
         requireNonNegative(offsetInRDO);
         requireNonNull(byteArray);
         Longs.requireNonNegative(offset);
@@ -701,11 +700,6 @@ public class NativeBytesStore<U>
             l |= (long) (b & 0xFF) << (i * 8);
         }
         return l;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
     }
 
     public void setAddress(long address) {
@@ -899,6 +893,20 @@ public class NativeBytesStore<U>
         if (s == null || s.length() != length)
             return false;
         return MEMORY.isEqual(addressForRead(start), s, (int) length);
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 
     static final class Deallocator implements Runnable {

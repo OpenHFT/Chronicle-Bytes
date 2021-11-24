@@ -5,12 +5,16 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 public final class HashCodeEqualsUtil {
 
     private HashCodeEqualsUtil() {
     }
 
-    public static boolean contentEquals(final BytesStore<?, ?> bytes,
+    // Comparing and reserving at the same time
+    // Declared private at the moment so not public
+    private static boolean contentEquals(final BytesStore<?, ?> bytes,
                                         final Object other) {
 
         if (bytes == other) {

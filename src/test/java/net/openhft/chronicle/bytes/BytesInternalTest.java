@@ -18,7 +18,6 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
 public class BytesInternalTest {
-
     @Test
     public void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
@@ -325,6 +324,24 @@ public class BytesInternalTest {
             assertTrue(from.lastNumberHadDigits());
             from.releaseLast();
         }
+    }
+
+    @Test
+    public void testCopyAfterSkip() {
+        final Bytes<byte[]> src = Bytes.from("hello again");
+
+        src.readSkip(7);
+        assertEquals(src.copy(), src);
+    }
+
+    @Test
+    public void testCopyToArrayAfterSkip() {
+        final Bytes<byte[]> src = Bytes.from("hello again");
+        src.readSkip(7);
+
+        final byte[] buffer = new byte[100];
+        final int copiedLen = src.copyTo(buffer);
+        assertEquals(new String(buffer, 0, copiedLen), src.toString());
     }
 
     private int checkParse(int different, String s) {

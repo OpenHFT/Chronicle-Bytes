@@ -19,7 +19,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
@@ -51,12 +53,13 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("rawtypes")
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U> {
+        implements Bytes<U>, HasUncheckedRandomDataInput {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // used for debugging
     @UsedViaReflection
     private final String name;
+    private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
@@ -135,10 +138,11 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> clearAndPad(long length)
             throws BufferOverflowException {
-        if ((start() + length) > capacity()) {
-            throw newBOERange(start(), length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
+        final long start = start();
+        if ((start + length) > capacity()) {
+            throw newBOERange(start, length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
         }
-        long l = start() + length;
+        long l = start + length;
         readPosition = l;
         uncheckedWritePosition(l);
         writeLimit = capacity();
@@ -784,7 +788,8 @@ public abstract class AbstractBytes<U>
 
     private void writeCheckOffset0(long offset, long adding)
             throws DecoratedBufferOverflowException {
-        if (offset < start() || offset + adding < start()) {
+        final long start = start();
+        if (offset < start || offset + adding < start) {
             throw newBOELower(offset);
         }
         if ((offset + adding) > writeLimit()) {
@@ -1174,7 +1179,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     @NotNull
@@ -1266,6 +1271,34 @@ public abstract class AbstractBytes<U>
         if (end < Integer.MAX_VALUE && isDirectMemory())
             return byteCheckSum((int) start, (int) end);
         return Bytes.super.byteCheckSum(start, end);
+    }
+
+    @Override
+    public @NotNull UncheckedRandomDataInput acquireUncheckedInput() {
+        return uncheckedRandomDataInput;
+    }
+
+    private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
+
+        @Override
+        public byte readByte(long offset) {
+            return bytesStore.readByte(offset);
+        }
+
+        @Override
+        public short readShort(long offset) {
+            return bytesStore.readShort(offset);
+        }
+
+        @Override
+        public int readInt(long offset) {
+            return bytesStore.readInt(offset);
+        }
+
+        @Override
+        public long readLong(long offset) {
+            return bytesStore.readLong(offset);
+        }
     }
 
     public int byteCheckSum(int start, int end)

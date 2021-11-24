@@ -21,7 +21,6 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.RandomDataInput;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -482,9 +481,9 @@ public class HeapBytesStore<U>
     @NotNull
     @Override
     public HeapBytesStore<U> write(@NonNegative final long offsetInRDO,
-                                    final byte[] byteArray,
-                                    @NonNegative final int offset,
-                                    @NonNegative final int length) throws BufferOverflowException {
+                                   final byte[] byteArray,
+                                   @NonNegative final int offset,
+                                   @NonNegative final int length) throws BufferOverflowException {
         requireNonNegative(offsetInRDO);
         requireNonNull(byteArray);
         requireNonNegative(offset);
@@ -591,14 +590,22 @@ public class HeapBytesStore<U>
         throw new UnsupportedOperationException("todo");
     }
 
-    @SuppressWarnings("rawtypes")
-    @Override
-    public boolean equals(Object obj) {
-        return HashCodeEqualsUtil.contentEquals(this, obj);
-    }
-
     @Override
     public boolean sharedMemory() {
         return false;
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public int hashCode() {
+        return super.hashCode();
+    }
+
+    // Explicitly overrides because this class adds properties which triggers static analyzing warnings unless
+    // this method is overridden
+    @Override
+    public boolean equals(Object obj) {
+        return super.equals(obj);
     }
 }

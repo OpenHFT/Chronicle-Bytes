@@ -118,10 +118,11 @@ public class NativeBytes<U>
             throws IllegalStateException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         final long remaining = bytes.readRemaining();
+        final long position = bytes.readPosition();
 
         try {
             final NativeBytes<Void> bytes2 = Bytes.allocateElasticDirect(remaining);
-            bytes2.write(bytes, 0, remaining);
+            bytes2.write(bytes, position, remaining);
             return bytes2;
         } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {
             throw new AssertionError(e);

@@ -81,6 +81,7 @@ public interface RandomDataInput extends RandomCommon {
     byte readByte(long offset)
             throws BufferUnderflowException, IllegalStateException;
 
+
     /**
      * Read an unsigned byte at an offset
      *
@@ -300,7 +301,7 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * Read a byte[] from memory.
+     * Read a byte[] from memory from {@link #readPosition()} to {@link #readLimit()}.
      *
      * @return the length actually read.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
@@ -311,8 +312,11 @@ public interface RandomDataInput extends RandomCommon {
         requireNonNull(bytes);
         throwExceptionIfReleased(this);
         int len = (int) Math.min(bytes.length, readRemaining());
+        long readPosition = readPosition();
+
         for (int i = 0; i < len; i++)
-            bytes[i] = readByte(start() + i);
+            bytes[i] = readByte(readPosition + i);
+
         return len;
     }
 
@@ -344,7 +348,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset to read from
      * @return the long which might be padded.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     default long readIncompleteLong(long offset)
             throws IllegalStateException {
@@ -434,7 +438,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param start  of bytes
      * @param length of bytes
      * @return ByteStore copy.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -460,8 +464,8 @@ public interface RandomDataInput extends RandomCommon {
      * @param <T>    buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
+     * @throws IllegalStateException if released
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
-     * @throws IllegalStateException    if released
      */
     default <T extends Appendable & CharSequence> long readUtf8(long offset, @NotNull T sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
@@ -511,7 +515,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param <T>        buffer type, must be {@code StringBuilder} or {@code Bytes}
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     default <T extends Appendable & CharSequence> long readUtf8Limited(long offset,
@@ -560,7 +564,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param offset     the offset in this {@code RandomDataInput} to read char sequence from
      * @param maxUtf8Len the maximum allowed length of the char sequence in Utf8 encoding
      * @return the char sequence was read
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      * @see RandomDataOutput#writeUtf8Limited(long, CharSequence, int)
      */
     @Nullable
@@ -579,8 +583,8 @@ public interface RandomDataInput extends RandomCommon {
      *               is written
      * @param other  the second char sequence to compare
      * @return {@code true} if two char sequences are equal
-     * @throws IllegalStateException    if released
-     * @throws IORuntimeException if the contents are not a valid string.
+     * @throws IllegalStateException if released
+     * @throws IORuntimeException    if the contents are not a valid string.
      */
     default boolean compareUtf8(long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {

@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
@@ -525,7 +524,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     default boolean contentEquals(@Nullable BytesStore bytesStore)
             throws IllegalStateException {
-        return HashCodeEqualsUtil.contentEquals(this, bytesStore);
+        return BytesInternal.contentEqual(this, bytesStore);
     }
 
     /**
@@ -697,7 +696,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
             throws IllegalStateException {
-        long readPos = outBytes.readPosition();
+        final long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
             BytesStore inBytes;
@@ -721,12 +720,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         } catch (@NotNull Exception e) {
             throw new IllegalStateException(e);
         } finally {
-            try {
-                outBytes.readPosition(readPos);
-            } catch (BufferUnderflowException e) {
-                //noinspection ThrowFromFinallyBlock
-                throw new IllegalStateException(e);
-            }
+            // This would never fail as readPos is final and was valid from the beginning.
+            outBytes.readPosition(readPos);
         }
     }
 
