@@ -19,7 +19,10 @@ public final class ReferenceCountedUtil {
      */
     public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) {
         if (referenceCounted.refCount() <= 0) {
-            throw new ClosedIllegalStateException("Released");
+            // Rather than throwing a new ClosedIllegalStateException, we invoke releaseLast() that
+            // will provide much more tracing information.
+            // Once the ref count reaches zero, this is guaranteed to throw an exception
+            referenceCounted.releaseLast();
         }
     }
 
