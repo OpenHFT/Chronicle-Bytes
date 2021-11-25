@@ -1,17 +1,17 @@
 package net.openhft.chronicle.bytes;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class Bytes4Test {
+class Bytes4Test {
 
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
+    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     @Test
-    public void segFault() {
+    void segFault() {
         {
             byte[] arr = new byte[4];
             BytesStore bs = BytesStore.wrap(arr);
@@ -22,6 +22,9 @@ public class Bytes4Test {
         BytesStore bs = BytesStore.from("this is a test          ");
         bs.append(14, 16, 12);
         bs.isClear();
+
+        assertThrows(RuntimeException.class, () -> bs.writeUtf8(14, "this is a another text it should over write the other"));
+
         try {
             bs.writeUtf8(14, "this is a another text it should over write the other");
         } catch (Throwable throwable) {
@@ -30,8 +33,8 @@ public class Bytes4Test {
     }
 
     @Test
-    @Ignore("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
-    public void bufferOverflow() {
+    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/187")
+    void bufferOverflow() {
         byte[] arr = new byte[4];
         final BytesStore bs = BytesStore.wrap(arr);
 

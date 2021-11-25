@@ -34,19 +34,16 @@ import java.nio.BufferUnderflowException;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class MappedFileTest extends BytesTestCommon {
 
     @Rule
     public final TemporaryFolder tmpDir = new TemporaryFolder();
 
-    @Test
-    public void testWarmup() {
-        try {
-            MappedFile.warmup();
-        } catch (Throwable t) {
-            fail(t.getMessage());
-        }
+    @org.junit.jupiter.api.Test
+    void testWarmup() {
+        assertDoesNotThrow(MappedFile::warmup);
     }
 
     @Test
