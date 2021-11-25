@@ -23,7 +23,7 @@ public class BytesInternalTest {
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
-        @NotNull byte[] bytes2 = new byte[128];
+        byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
         bytes.write(bytes2);
 
@@ -46,7 +46,7 @@ public class BytesInternalTest {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
-        @NotNull byte[] bytes2 = new byte[length];
+        byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
 
@@ -154,7 +154,7 @@ public class BytesInternalTest {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
-        @NotNull byte[] bytes2 = new byte[length];
+        byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
 
@@ -180,7 +180,7 @@ public class BytesInternalTest {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
-        @NotNull byte[] bytes2 = new byte[length];
+        byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
 
@@ -208,7 +208,7 @@ public class BytesInternalTest {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
-        @NotNull byte[] bytes2 = new byte[length];
+        byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
         bytes.write(bytes2);
 
@@ -470,7 +470,16 @@ public class BytesInternalTest {
                 assertTrue(time1 < time2);
                 assertTrue(time1 < time3 * 0.9);
             }
+
+
 */
+            // This is a performance test so just assert it ran
+            assertTrue(time1 > 0);
+            assertTrue(time2 > 0);
+            assertTrue(time3 > 0);
+            assertTrue(time4 > 0);
+            assertTrue(time5 > 0);
+            assertTrue(time6 > 0);
             Thread.yield();
         }
     }

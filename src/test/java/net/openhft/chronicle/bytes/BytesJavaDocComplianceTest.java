@@ -45,16 +45,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     }
 
     /**
-     * Prints out the various Bytes classes tested on the logs. To be removed later
-     */
-    @ParameterizedTest
-    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void printTypesTested(final Bytes<?> bytes) {
-        System.out.println(bytes.getClass().getName());
-        releaseAndAssertReleased(bytes);
-    }
-
-    /**
      * Checks the Bytes::unchecked method
      */
     @ParameterizedTest

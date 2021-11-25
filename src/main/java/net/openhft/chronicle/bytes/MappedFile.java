@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.CanonicalPathUtil;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedFile;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
@@ -46,7 +47,7 @@ import java.nio.channels.FileLock;
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-    protected final String canonicalPath;
+    private final String internalizedToken;
     @NotNull
     private final File file;
     private final boolean readOnly;
@@ -56,11 +57,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                          final boolean readOnly)
             throws IORuntimeException {
         this.file = file;
-        try {
-            this.canonicalPath = file.getCanonicalPath().intern();
-        } catch (IOException ioe) {
-            throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
-        }
+        this.internalizedToken = CanonicalPathUtil.of(file);
         this.readOnly = readOnly;
     }
 
@@ -297,6 +294,20 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     protected boolean threadSafetyCheck(boolean isUsed) {
         // component is thread safe
         return true;
+    }
+
+    /**
+     * Returns an internalized String that represents a token based on the
+     * underlying file's canonical path and some other factors including a
+     * per JVM random string.
+     * <p>
+     * The canonical path is pre-pended with static and random data to reduce the probability of
+     * unrelated synchronization on internalized Strings
+     *
+     * @return internalized token
+     */
+    protected String internalizedToken() {
+        return internalizedToken;
     }
 
     /**
