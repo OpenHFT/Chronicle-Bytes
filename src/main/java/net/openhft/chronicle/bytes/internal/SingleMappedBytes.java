@@ -78,9 +78,9 @@ public class SingleMappedBytes extends CommonMappedBytes {
         if ((length + offset) > byteArray.length)
             throw new ArrayIndexOutOfBoundsException("bytes.length=" + byteArray.length + ", " + "length=" + length + ", offset=" + offset);
 
-        if (length > writeRemaining())
+        if (offsetInRDO + length > writeLimit)
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+                    String.format("write failed. offset: %d + length: %d > writeLimit: %d", offsetInRDO, length, writeLimit));
 
         int remaining = length;
 
@@ -117,9 +117,9 @@ public class SingleMappedBytes extends CommonMappedBytes {
         throwExceptionIfReleased();
         long wp = writeOffset;
 
-        if (length > writeRemaining())
+        if (writeOffset + length > writeLimit)
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. Length: %d > writeRemaining: %d", length, writeRemaining()));
+                    String.format("write failed. offset: %d + length: %d > writeLimit: %d", writeOffset, length, writeLimit));
 
         long remaining = length;
 
