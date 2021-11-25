@@ -10,7 +10,7 @@ import java.security.SecureRandom;
 public final class CanonicalPathUtil {
 
     // This is unlikely to collide with other internalized strings and is seldom the same across JVMs
-    private static final String SUFFIX = CanonicalPathUtil.class.getName() + Math.abs(new SecureRandom().nextInt(1 << 30));
+    private static final String PREFIX = CanonicalPathUtil.class.getName() + Math.abs(new SecureRandom().nextInt(1 << 30)) + "::";
 
     private CanonicalPathUtil() {}
 
@@ -22,7 +22,7 @@ public final class CanonicalPathUtil {
      */
     public static String of(@NotNull final File file) {
         try {
-            return (SUFFIX + "::" + file.getCanonicalPath())
+            return (PREFIX + file.getCanonicalPath())
                     .intern();
         } catch (IOException ioe) {
             throw new IORuntimeException("Unable to obtain the canonical path for " + file.getAbsolutePath(), ioe);
