@@ -47,8 +47,7 @@ import java.nio.channels.FileLock;
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
-    // The canonical path is pre-pended with static and random data to prevent unrelated synchronization on internalized Strings
-    protected final String internalizedToken;
+    private final String internalizedToken;
     @NotNull
     private final File file;
     private final boolean readOnly;
@@ -295,6 +294,20 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     protected boolean threadSafetyCheck(boolean isUsed) {
         // component is thread safe
         return true;
+    }
+
+    /**
+     * Returns an internalized String that represents a token based on the
+     * underlying file's canonical path and some other factors including a
+     * per JVM random string.
+     * <p>
+     * The canonical path is pre-pended with static and random data to reduce the probability of
+     * unrelated synchronization on internalized Strings
+     *
+     * @return internalized token
+     */
+    protected String internalizedToken() {
+        return internalizedToken;
     }
 
     /**
