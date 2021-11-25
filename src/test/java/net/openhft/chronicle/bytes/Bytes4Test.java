@@ -24,12 +24,6 @@ class Bytes4Test {
         bs.isClear();
 
         assertThrows(RuntimeException.class, () -> bs.writeUtf8(14, "this is a another text it should over write the other"));
-
-        try {
-            bs.writeUtf8(14, "this is a another text it should over write the other");
-        } catch (Throwable throwable) {
-            fail(throwable.getMessage());
-        }
     }
 
     @Test
