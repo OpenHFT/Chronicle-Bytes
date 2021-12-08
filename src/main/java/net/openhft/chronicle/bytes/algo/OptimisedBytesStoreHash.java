@@ -265,7 +265,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     public long applyAsLong(@NotNull BytesStore store, long remaining) throws IllegalStateException, BufferUnderflowException {
         if (remaining <= 16) {
             if (remaining == 0) {
-                return Long.MIN_VALUE;
+                return 0;
             } else if (remaining < 8) {
                 return applyAsLong1to7(store, (int) remaining);
             } else if (remaining == 8) {

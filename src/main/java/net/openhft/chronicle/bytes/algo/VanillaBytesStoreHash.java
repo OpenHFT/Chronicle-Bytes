@@ -60,7 +60,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         long start = bytes.readPosition();
         if (length <= 8) {
             if (length == 0)
-                return Long.MIN_VALUE;
+                return 0;
             long l = bytes.readIncompleteLong(start);
             return agitate(l * K0 + (l >> 32) * K1);
         }

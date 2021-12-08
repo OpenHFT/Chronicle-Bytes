@@ -75,9 +75,9 @@ public class BytesTest extends BytesTestCommon {
         Bytes bytes = alloc1.elasticBytes(2);
         try {
             final long actual1 = OptimisedBytesStoreHash.INSTANCE.applyAsLong(bytes);
-            assertEquals(Long.MIN_VALUE, actual1);
+            assertEquals(0, actual1);
             final long actual2 = VanillaBytesStoreHash.INSTANCE.applyAsLong(bytes);
-            assertEquals(Long.MIN_VALUE, actual2);
+            assertEquals(0, actual2);
         } finally {
             bytes.releaseLast();
         }
