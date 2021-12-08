@@ -471,8 +471,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         if (readRemaining() < length)
             throw new BufferUnderflowException();
         if (isDirectMemory()) {
-            MEMORY.copyMemory(addressForRead(readPosition()), o, offset, length);
-            readSkip(length);
+            final long src = addressForRead(readPosition());
+            readSkip(length); // blow up here first
+            MEMORY.copyMemory(src, o, offset, length);
             return;
         }
         int i = 0;

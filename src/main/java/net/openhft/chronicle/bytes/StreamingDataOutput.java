@@ -227,8 +227,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      *
      * @param text to write
      * @return this StreamingDataOutput
-     * @throws BufferOverflowException if the provided {@code text} cannot be accommodated.
-     * @throws IllegalStateException if this StreamingDataOutput has been previously released.
+     * @throws BufferOverflowException  if the provided {@code text} cannot be accommodated.
+     * @throws IllegalStateException    if this StreamingDataOutput has been previously released.
      * @throws IllegalArgumentException if the provided {@code text} is {@code null}.
      */
     @NotNull
@@ -244,13 +244,13 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Writes the provided {@code text} to this StreamingDataOutput at the current writePosition()
      *
-     * @param text to write
+     * @param text      to write
      * @param startText offset from where text should be copied from
-     * @param length number of characters to write.
+     * @param length    number of characters to write.
      * @return this StreamingDataOutput
-     * @throws BufferOverflowException if the provided {@code text} cannot be accommodated.
-     * @throws IllegalStateException if this StreamingDataOutput has been previously released.
-     * @throws NullPointerException if the provided {@code text} is {@code null}.
+     * @throws BufferOverflowException  if the provided {@code text} cannot be accommodated.
+     * @throws IllegalStateException    if this StreamingDataOutput has been previously released.
+     * @throws NullPointerException     if the provided {@code text} is {@code null}.
      * @throws IllegalArgumentException if the provided {@code startText} or the provided {@code length} is negative.
      */
     @NotNull
@@ -381,6 +381,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Write all data or fail.
      * <p>
      * Calling this method will update the cursors of this, but not the bytes we read from.
+     *
      * @throws IllegalArgumentException if the provided {@code bytes} is {@code null}
      */
     @NotNull
@@ -492,6 +493,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Write all data or fail.
      * <p>
      * Calling this method will update the cursors of this.
+     *
      * @throws NullPointerException if the provided {@code byteArray } is {@code null}.
      */
     @NotNull
@@ -512,7 +514,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Invoking this method will update the cursors of this Bytes object.
      *
      * @throws IllegalArgumentException if the provided {@code offset} or {@code length} is negative
-     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
+     * @throws NullPointerException     if the provided {@code byteArray} is {@code null}
      */
     @NotNull
     S write(final byte[] byteArray,
@@ -526,6 +528,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     default S unsafeWriteObject(Object o, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
+        if (this.isDirectMemory()) {
+            final long dest = addressForWrite(writePosition());
+            writeSkip(length); // blow up here if this isn't going to work
+            UnsafeMemory.MEMORY.copyMemory(o, offset, dest, length);
+            return (S) this;
+        }
         int i = 0;
         for (; i < length - 7; i += 8)
             writeLong(UnsafeMemory.unsafeGetLong(o, (long) offset + i));
