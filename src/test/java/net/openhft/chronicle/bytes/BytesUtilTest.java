@@ -49,6 +49,10 @@ public class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.isTriviallyCopyable(C.class, start, 4));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A.class));
+
+        assertEquals(start, BytesUtil.triviallyCopyableStart(A.class));
+        assertEquals(20, BytesUtil.triviallyCopyableLength(A.class));
+
         assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start + 4, 8));

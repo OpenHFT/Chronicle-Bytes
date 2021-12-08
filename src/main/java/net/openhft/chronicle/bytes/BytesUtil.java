@@ -110,6 +110,27 @@ public enum BytesUtil {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
+    /**
+     * Return the first byte of trivially copyable fields.
+     *
+     * @param clazz to examine
+     * @return the first byte copyable
+     */
+    public static int triviallyCopyableStart(Class clazz) {
+        return triviallyCopyableRange(clazz)[0];
+    }
+
+    /**
+     * Return the length of trivially copyable fields, note references are ignored as they are not trivially copyable.
+     *
+     * @param clazz to examine
+     * @return the length of data
+     */
+    public static int triviallyCopyableLength(Class clazz) {
+        final int[] startEnd = triviallyCopyableRange(clazz);
+        return startEnd[1] - startEnd[0];
+    }
+
     private static int sizeOf(Class<?> type) {
         return Memory.sizeOf(type);
     }
@@ -153,7 +174,7 @@ public enum BytesUtil {
 
     /**
      * Returns if the provided nullable BytesStore arguments are equal to each other.
-     *
+     * <p>
      * Consequently, if both arguments are {@code null}, {@code true}
      * is returned and if exactly one argument is {@code null}, {@code
      * false} is returned. Otherwise, equality is determined by comparing the content
@@ -165,9 +186,8 @@ public enum BytesUtil {
      * @param a a ByteStore
      * @param b a ByteStore to be compared with {@code a} for equality
      * @return if the arguments are equal to each other, or false if either are released.
-     * @deprecated Use BytesStore.contentEquals(ByteStore)
-     *
      * @see Object#equals(Object)
+     * @deprecated Use BytesStore.contentEquals(ByteStore)
      */
     @Deprecated(/*TODO remove in x.23*/)
     public static boolean contentEqual(@Nullable final BytesStore a,
