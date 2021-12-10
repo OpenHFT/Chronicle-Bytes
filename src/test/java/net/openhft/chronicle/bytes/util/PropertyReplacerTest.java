@@ -19,10 +19,13 @@ package net.openhft.chronicle.bytes.util;
 
 import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.*;
 
 public class PropertyReplacerTest {
     @Test
@@ -30,12 +33,9 @@ public class PropertyReplacerTest {
         try {
             PropertyReplacer.replaceTokensWithProperties("plainText ${missingPropertyToReplace}");
         } catch (IllegalArgumentException e) {
-            assertEquals("System property is missing: [property=missingPropertyToReplace, " +
-                    "expression=plainText ${missingPropertyToReplace}]", e.getMessage());
-
+            assertTrue(e.getMessage().startsWith("Property is missing: [property=missingPropertyToReplace, expression=plainText ${missingPropertyToReplace}, properties="));
             return;
         }
-
         fail("Exception is expected");
     }
 
@@ -80,4 +80,67 @@ public class PropertyReplacerTest {
         res = PropertyReplacer.replaceTokensWithProperties("plainKey: ${ \t\t\nmyFancyProperty \r\f}", props);
         assertEquals("plainKey: myFancyValue", res);
     }
+
+    @Test
+    public void groupsIncomplete() {
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups("${a");
+        assertEquals(emptyList(), groups);
+    }
+
+    @Test
+    public void groups() {
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups("${a}");
+        assertEquals(singletonList(new PropertyReplacer.Group(0, 3, 2, 2, "a")), groups);
+    }
+
+    @Test
+    public void groupsWithSpacesAtTheEnd() {
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups("${a}   ");
+        assertEquals(singletonList(new PropertyReplacer.Group(0, 3, 2, 2, "a")), groups);
+    }
+
+    @Test
+    public void groups2() {
+        final String s = "plainText ${missingPropertyToReplace}";
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups(s);
+        assertEquals(singletonList(new PropertyReplacer.Group(
+                        s.indexOf('$'),
+                        s.lastIndexOf('}'),
+                        s.indexOf('{') + 1,
+                        s.lastIndexOf('}') - 1,
+                        "missingPropertyToReplace"
+                )
+        ), groups);
+    }
+
+    @Test
+    public void groups3() {
+        final String s = "a ${ b }";
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups(s);
+        assertEquals(singletonList(new PropertyReplacer.Group(
+                s.indexOf('$'),
+                s.lastIndexOf('}'),
+                5,
+                5,
+                "b")
+        ), groups);
+    }
+
+    @Test
+    public void groupsSeveral() {
+        final String s = "a ${b} ${c}";
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups(s);
+        assertEquals(Arrays.asList(
+                new PropertyReplacer.Group(s.indexOf('$'), s.indexOf('}'), s.indexOf('b'), s.indexOf('b'), "b"),
+                new PropertyReplacer.Group(s.lastIndexOf('$'), s.lastIndexOf('}'), s.indexOf('c'), s.indexOf('c'), "c")
+        ), groups);
+    }
+
+    @Test
+    public void groupsNo() {
+        final String s = "plainText ${     missingPropertyToReplace";
+        final List<PropertyReplacer.Group> groups = PropertyReplacer.groups(s);
+        assertEquals(emptyList(), groups);
+    }
+
 }
