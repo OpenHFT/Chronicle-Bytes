@@ -83,7 +83,7 @@ public class ChunkedMappedFile extends MappedFile {
         try {
             Jvm.setExceptionHandlers(Slf4jExceptionHandler.ERROR, null, null);
 
-            @NotNull final File file = File.createTempFile("delete_warming_up", "me");
+            final File file = File.createTempFile("delete_warming_up", "me", new File("/scratch_area"));
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;
