@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.security.action.GetPropertyAction;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,6 +39,7 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -83,7 +85,9 @@ public class ChunkedMappedFile extends MappedFile {
         try {
             Jvm.setExceptionHandlers(Slf4jExceptionHandler.ERROR, null, null);
 
-            final File file = File.createTempFile("delete_warming_up", "me", new File("/scratch_area"));
+            final Path path = Files.createTempDirectory("warmup");
+
+            final File file = File.createTempFile("delete_warming_up", "me", path.toFile());
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;

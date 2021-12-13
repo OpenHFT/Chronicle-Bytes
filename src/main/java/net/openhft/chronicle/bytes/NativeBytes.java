@@ -194,6 +194,7 @@ public class NativeBytes<U>
             writeCheckOffset(desiredCapacity, 0);
         } catch (BufferOverflowException e) {
             IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
+            Jvm.error().on(NativeBytes.class, iae);
             throw iae;
         }
     }
