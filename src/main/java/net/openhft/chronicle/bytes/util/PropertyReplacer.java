@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
 import java.util.Scanner;
-import java.util.regex.Pattern;
 
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -127,6 +126,8 @@ public enum PropertyReplacer {
                     }
                     break;
                 }
+                default:
+                    // Do nothing
             }
         }
         if (parsing && state == ScanState.CONSUMING_SPACES_AFTER)
