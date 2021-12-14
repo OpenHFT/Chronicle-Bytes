@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
 public enum PropertyReplacer {
     ; // none
 
-    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{\\s*([^}]*?)\\s*\\}");
+    private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{\\s*+([^}\\s]*+)\\s*+}");
 
     public static String replaceTokensWithProperties(String expression) throws IllegalArgumentException {
 
