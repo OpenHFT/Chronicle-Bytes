@@ -67,8 +67,10 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                         long now = tp.currentTimeNanos();
                         if (!Jvm.isArm()) {
                             final long delay = now - (start + runTimeUS * 1000L);
-                            if (delay > 0)
+                            if (delay > 0) {
+                                System.getProperties().list(System.out);
                                 fail("Overran by " + delay + " ns");
+                            }
                         }
                         // check the times are different after shifting by 5 bits.
                         assertTrue((now >>> 5) > (last >>> 5));
