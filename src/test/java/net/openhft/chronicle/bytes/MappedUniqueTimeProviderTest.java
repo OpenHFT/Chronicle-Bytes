@@ -24,6 +24,58 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         }
     }
 
+    static volatile long blackHole;
+
+    @Test
+    public void currentTimeMillisPerf() {
+        long start = System.currentTimeMillis();
+        int count = 0;
+        do {
+            for (int i = 0; i < 1000; i++)
+                blackHole = System.currentTimeMillis();
+            count += 1000;
+        } while (System.currentTimeMillis() < start + 500);
+        System.out.println("currentTimeMillisPerf count/sec: " + count * 2);
+    }
+
+    @Test
+    public void nanoTimePerf() {
+        long start = System.currentTimeMillis();
+        int count = 0;
+        do {
+            for (int i = 0; i < 1000; i++)
+                blackHole = System.nanoTime();
+            count += 1000;
+        } while (System.currentTimeMillis() < start + 500);
+        System.out.println("nanoTimePerf count/sec: " + count * 2);
+    }
+
+    @Test
+    public void currentTimeMicrosPerf() {
+        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        long start = System.currentTimeMillis();
+        int count = 0;
+        do {
+            for (int i = 0; i < 1000; i++)
+                blackHole = tp.currentTimeMicros();
+            count += 1000;
+        } while (System.currentTimeMillis() < start + 500);
+        System.out.println("currentTimeMicrosPerf count/sec: " + count * 2);
+    }
+
+    @Test
+    public void currentTimeNanosPerf() {
+        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        long start = System.currentTimeMillis();
+        int count = 0;
+        do {
+            for (int i = 0; i < 1000; i++)
+                blackHole = tp.currentTimeNanos();
+            count += 1000;
+        } while (System.currentTimeMillis() < start + 500);
+        System.out.println("currentTimeNanosPerf count/sec: " + count * 2);
+    }
+
     @Test
     public void currentTimeNanos() {
         assumeTrue(null == System.getProperty("sonar.projectName"));
