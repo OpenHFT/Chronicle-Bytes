@@ -3,15 +3,12 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
-@Ignore("flaky test - https://github.com/OpenHFT/Chronicle-Bytes/issues/211")
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
@@ -61,8 +58,11 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                     long last = start;
                     for (int j = 0; j < runTimeUS; j += stride) {
                         long now = tp.currentTimeNanos();
-                        if (!Jvm.isArm())
-                            assertTrue(now < start + runTimeUS * 1000L);
+                        if (!Jvm.isArm()) {
+                            final long delay = now - (start + runTimeUS * 1000L);
+                            if (delay > 0)
+                                fail("Overran by " + delay + " ns");
+                        }
                         // check the times are different after shifting by 5 bits.
                         assertTrue((now >>> 5) > (last >>> 5));
                         last = now;
