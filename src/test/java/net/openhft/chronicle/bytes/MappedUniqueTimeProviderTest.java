@@ -130,6 +130,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                 });
         long time0 = System.nanoTime() - start0;
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
-        assertTrue(Jvm.isArm() || time0 < runTimeUS * 1000L);
+        assertTrue(Jvm.isArm() || Jvm.isCodeCoverage()
+                || time0 < runTimeUS * 1000L);
     }
 }
