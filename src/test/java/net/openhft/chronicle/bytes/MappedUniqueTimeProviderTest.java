@@ -123,7 +123,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
                         long now = tp.currentTimeNanos();
                         if (!Jvm.isArm()) {
                             final long delay = now - (start + runTimeUS * 1000L);
-                            if (delay > 128_000) { // very slow in Sonar
+                            if (delay > 150_000) { // very slow in Sonar
                                 fail("Overran by " + delay + " ns.");
                             }
                         }
