@@ -119,7 +119,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
         if (writeOffset + length > writeLimit)
             throw new DecoratedBufferOverflowException(
-                    String.format("write failed. offset: %d + length: %d > writeLimit: %d", writeOffset, length, writeLimit));
+                    String.format("write failed. End of write: %d + %d > writeLimit: %d", writeOffset, length, writeLimit));
 
         long remaining = length;
 

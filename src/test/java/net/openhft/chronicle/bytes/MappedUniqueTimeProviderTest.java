@@ -8,7 +8,6 @@ import org.junit.Test;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -82,8 +81,6 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanos() {
-        assumeTrue(null == System.getProperty("sonar.projectName"));
-
         TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
         long start = tp.currentTimeNanos();
         long last = start;
@@ -107,8 +104,6 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void concurrentTimeNanos() {
-        assumeTrue(null == System.getProperty("sonar.projectName"));
-
         long start0 = System.nanoTime();
         final int runTimeUS = 5_000_000;
         final int threads = Jvm.isArm() ? 4 : 16;
