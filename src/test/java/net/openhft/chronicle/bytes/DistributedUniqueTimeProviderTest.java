@@ -13,7 +13,7 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.Assume.assumeNoException;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -21,14 +21,14 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeClass
     public static void checks() {
-        final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
-        file.delete();
-        file.deleteOnExit();
         try {
+            final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
+            file.delete();
+            file.deleteOnExit();
             try (FileOutputStream fos = new FileOutputStream(file)) {
             }
         } catch (IOException ioe) {
-            assumeTrue(ioe.getMessage(), false);
+            assumeNoException(ioe.getMessage(), ioe);
         }
     }
 
