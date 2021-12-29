@@ -3,7 +3,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
-import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
@@ -19,8 +19,8 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     static volatile long blackHole;
 
-    @Before
-    public void checks() {
+    @BeforeClass
+    public static void checks() {
         final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
         file.delete();
         file.deleteOnExit();

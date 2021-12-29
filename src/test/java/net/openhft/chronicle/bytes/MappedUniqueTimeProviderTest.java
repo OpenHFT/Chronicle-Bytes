@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.stream.IntStream;
@@ -11,6 +12,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+
+    @BeforeClass
+    public static void checks() {
+        DistributedUniqueTimeProviderTest.checks();
+    }
 
     @Test
     public void currentTimeMicros() {
