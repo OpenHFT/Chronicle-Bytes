@@ -90,7 +90,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
                         long last = 0;
                         for (int j = 0; j < runTimeUS; j += stride) {
                             long now = tp.currentTimeNanos();
-                            assertEquals(i, now % 100);
+                            assertEquals(i, now % DistributedUniqueTimeProvider.HOST_IDS);
                             assertTrue(now > last);
                             last = now;
                         }

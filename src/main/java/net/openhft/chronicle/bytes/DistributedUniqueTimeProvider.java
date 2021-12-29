@@ -37,7 +37,10 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
     public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
     private static final int LAST_TIME = 128;
-    private static final int HOST_IDS = 100;
+    // package local for use in tests
+    static final int HOST_IDS = 100;
+    private static final int NANOS_PER_MICRO = 1000;
+
     @SuppressWarnings("rawtypes")
     private final Bytes bytes;
     private final MappedFile file;
@@ -95,14 +98,14 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         long timeus = provider.currentTimeMicros() / HOST_IDS;
         while (true) {
             long time0 = bytes.readVolatileLong(LAST_TIME);
-            long time0us = time0 / (HOST_IDS * 1000);
+            long time0us = time0 / (HOST_IDS * NANOS_PER_MICRO);
             long time;
             if (time0us >= timeus)
-                time = (time0us + 1) * (HOST_IDS * 1000);
+                time = (time0us + 1) * (HOST_IDS * NANOS_PER_MICRO);
             else
-                time = timeus * (HOST_IDS * 1000);
+                time = timeus * (HOST_IDS * NANOS_PER_MICRO);
             if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                return time / 1000 + hostId;
+                return time / NANOS_PER_MICRO + hostId;
             Jvm.nanoPause();
         }
     }
