@@ -25,16 +25,16 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
 
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
+import java.io.File;
 
 /**
  * Timestamps are unique across threads/processes on a single machine.
  */
-public enum MappedUniqueTimeProvider implements TimeProvider {
+public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     INSTANCE;
 
     private static final int LAST_TIME = 128;
+    private static final int NANOS_PER_MICRO = 1000;
 
     @SuppressWarnings("rawtypes")
     private final Bytes bytes;
@@ -43,11 +43,12 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
     MappedUniqueTimeProvider() {
         try {
             String user = System.getProperty("user.name", "unknown");
-            MappedFile file = MappedFile.mappedFile(OS.TMP + "/.time-stamp." + user + ".dat", OS.pageSize(), 0);
+            String timeStampDir = System.getProperty("timestamp.dir", OS.TMP);
+            final File timeStampPath = new File(timeStampDir, ".time-stamp." + user + ".dat");
+            MappedFile file = MappedFile.ofSingle(timeStampPath, OS.pageSize(), false);
+            bytes = file.acquireBytesForWrite(this, 0);
+            bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             IOTools.unmonitor(file);
-            ReferenceOwner mumtp = ReferenceOwner.temporary("mumtp");
-            bytes = file.acquireBytesForWrite(mumtp, 0);
-            bytes.append8bit("&TSF\nTime stamp file uses for sharing a unique id\n");
             IOTools.unmonitor(bytes);
         } catch (Exception ioe) {
             throw new IORuntimeException(ioe);
@@ -59,6 +60,9 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
         return this;
     }
 
+    /**
+     * @return Ordinary millisecond timestamp
+     */
     @Override
     public long currentTimeMillis() {
         return provider.currentTimeMillis();
@@ -68,46 +72,38 @@ public enum MappedUniqueTimeProvider implements TimeProvider {
     public long currentTimeMicros()
             throws IllegalStateException {
         long timeus = provider.currentTimeMicros();
-        try {
-            while (true) {
-                long time0 = bytes.readVolatileLong(LAST_TIME);
-                long time0us = time0 / 1000;
-                long time;
-                if (time0us >= timeus)
-                    time = (time0us + 1) * 1000;
-                else
-                    time = timeus * 1000;
-                if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                    return time / 1_000;
-                Jvm.nanoPause();
-            }
-        } catch (BufferUnderflowException | BufferOverflowException e) {
-            throw new AssertionError(e);
+        while (true) {
+            long time0 = bytes.readVolatileLong(LAST_TIME);
+            long time0us = time0 / NANOS_PER_MICRO;
+            long time;
+            if (time0us >= timeus)
+                time = (time0us + 1) * NANOS_PER_MICRO;
+            else
+                time = timeus * NANOS_PER_MICRO;
+            if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
+                return time / NANOS_PER_MICRO;
+            Jvm.nanoPause();
         }
     }
 
     @Override
     public long currentTimeNanos()
             throws IllegalStateException {
-        try {
-            long time = provider.currentTimeNanos();
-            long time5 = time >>> 5;
+        long time = provider.currentTimeNanos();
+        long time5 = time >>> 5;
 
-            long time0 = bytes.readVolatileLong(LAST_TIME);
-            long timeNanos5 = time0 >>> 5;
+        long time0 = bytes.readVolatileLong(LAST_TIME);
+        long timeNanos5 = time0 >>> 5;
 
-            if (time5 > timeNanos5 && bytes.compareAndSwapLong(LAST_TIME, time0, time))
-                return time;
+        if (time5 > timeNanos5 && bytes.compareAndSwapLong(LAST_TIME, time0, time))
+            return time;
 
-            while (true) {
-                time0 = bytes.readVolatileLong(LAST_TIME);
-                long next = (time0 + 0x20) & ~0x1f;
-                if (bytes.compareAndSwapLong(LAST_TIME, time0, next))
-                    return next;
-                Jvm.nanoPause();
-            }
-        } catch (BufferUnderflowException | BufferOverflowException e) {
-            throw new AssertionError(e);
+        while (true) {
+            time0 = bytes.readVolatileLong(LAST_TIME);
+            long next = (time0 + 0x20) & ~0x1f;
+            if (bytes.compareAndSwapLong(LAST_TIME, time0, next))
+                return next;
+            Jvm.nanoPause();
         }
     }
 }
