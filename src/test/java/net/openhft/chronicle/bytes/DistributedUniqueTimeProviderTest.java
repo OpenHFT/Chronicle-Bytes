@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.BeforeClass;
@@ -8,7 +9,6 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -22,12 +22,13 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     @BeforeClass
     public static void checks() {
         try {
+            System.setProperty("timestamp.dir", OS.getTarget());
             final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
             file.delete();
             file.deleteOnExit();
             try (FileOutputStream fos = new FileOutputStream(file)) {
             }
-        } catch (IOException ioe) {
+        } catch (Throwable ioe) {
             assumeNoException(ioe.getMessage(), ioe);
         }
     }
