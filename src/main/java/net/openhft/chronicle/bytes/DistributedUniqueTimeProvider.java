@@ -28,7 +28,7 @@ import net.openhft.chronicle.core.time.TimeProvider;
 import java.io.File;
 
 /**
- * Timestamps while are unique across systems using a predefined hostId
+ * Timestamps are unique across systems using a predefined hostId
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
     private static final String USE_NAME = System.getProperty("user.name", "unknown");
@@ -52,7 +52,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         try {
             file = MappedFile.ofSingle(new File(TIME_STAMP_PATH), OS.pageSize(), false);
             bytes = file.acquireBytesForWrite(this, 0);
-            bytes.append8bit("&TSF\nTime stamp file uses for sharing a unique id\n");
+            bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             if (unmonitor) {
                 IOTools.unmonitor(file);
                 IOTools.unmonitor(bytes);
