@@ -37,8 +37,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
     public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
     private static final int LAST_TIME = 128;
-    // package local for use in tests
-    static final int HOST_IDS = 100;
+    private static final int HOST_IDS = 100;
     private static final int NANOS_PER_MICRO = 1000;
 
     @SuppressWarnings("rawtypes")
@@ -111,6 +110,33 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
+     * Extract the timestamp in nanoseconds from the timestampWithHostId
+     *
+     * @param timestampWithHostId to extract from
+     * @return the timestamp
+     */
+    public static long timestampFor(long timestampWithHostId) {
+        return timestampWithHostId - timestampWithHostId % HOST_IDS;
+    }
+
+    /**
+     * Extract the hostId from the timestampWithHostId
+     *
+     * @param timestampWithHostId to extract from
+     * @return the hostId
+     */
+    public static long hostIdFor(long timestampWithHostId) {
+        return timestampWithHostId % HOST_IDS;
+    }
+
+    @Override
+    protected void performClose() {
+        super.performClose();
+        bytes.release(this);
+        file.releaseLast();
+    }
+
+    /**
      * Return a unique, monotonically increasing nanosecond timestamp where the lowest two digits of the nanoseconds is the hostId.
      *
      * @return the timestamps with hostId as a long
@@ -120,7 +146,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     public long currentTimeNanos() throws IllegalStateException {
         long time = provider.currentTimeNanos();
         long time0 = bytes.readVolatileLong(LAST_TIME);
-        long timeN = time - time % HOST_IDS + hostId;
+        long timeN = timestampFor(time) + hostId;
 
         if (timeN > time0 && bytes.compareAndSwapLong(LAST_TIME, time0, timeN))
             return timeN;
@@ -131,19 +157,12 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private long currentTimeNanosLoop() {
         while (true) {
             long time0 = bytes.readVolatileLong(LAST_TIME);
-            long next = time0 - time0 % HOST_IDS + hostId;
+            long next = timestampFor(time0) + hostId;
             if (next <= time0)
                 next += HOST_IDS;
             if (bytes.compareAndSwapLong(LAST_TIME, time0, next))
                 return next;
             Jvm.nanoPause();
         }
-    }
-
-    @Override
-    protected void performClose() {
-        super.performClose();
-        bytes.release(this);
-        file.releaseLast();
     }
 }

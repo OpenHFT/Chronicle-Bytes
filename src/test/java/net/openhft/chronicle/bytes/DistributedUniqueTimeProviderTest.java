@@ -90,7 +90,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
                         long last = 0;
                         for (int j = 0; j < runTimeUS; j += stride) {
                             long now = tp.currentTimeNanos();
-                            assertEquals(i, now % DistributedUniqueTimeProvider.HOST_IDS);
+                            assertEquals(i, DistributedUniqueTimeProvider.hostIdFor(now));
                             assertTrue(now > last);
                             last = now;
                         }
@@ -98,6 +98,18 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
                 });
         long time0 = System.nanoTime() - start0;
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
-        assertTrue(Jvm.isArm() || time0 < runTimeUS * 1000L);
+        assertTrue(Jvm.isArm() || Jvm.isCodeCoverage()
+                || time0 < runTimeUS * 1000L);
+    }
+
+    @Test
+    public void testMonotonicallyIncreasing() {
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        long last = 0;
+        for (int i = 0; i < 10_000; i++) {
+            long now = DistributedUniqueTimeProvider.timestampFor(tp.currentTimeNanos());
+            assertTrue(now > last);
+            last = now;
+        }
     }
 }
