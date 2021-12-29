@@ -6,6 +6,7 @@ import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.stream.IntStream;
@@ -20,6 +21,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Before
     public void checks() {
+        new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH).deleteOnExit();
         try {
             try (FileOutputStream fos = new FileOutputStream(DistributedUniqueTimeProvider.TIME_STAMP_PATH)) {
             }
