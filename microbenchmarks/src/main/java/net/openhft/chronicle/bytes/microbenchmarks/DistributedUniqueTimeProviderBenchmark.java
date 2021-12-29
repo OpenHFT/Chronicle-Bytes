@@ -8,6 +8,7 @@ import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 import org.openjdk.jmh.runner.options.TimeValue;
 
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 @State(Scope.Benchmark)
@@ -36,10 +37,19 @@ public class DistributedUniqueTimeProviderBenchmark {
         timeProvider.close();
     }
 
+/*
     @Benchmark
     @BenchmarkMode(Mode.AverageTime)
     @OutputTimeUnit(TimeUnit.NANOSECONDS)
     public long currentTimeNanos() {
         return timeProvider.currentTimeNanos();
+    }
+*/
+
+    @Benchmark
+    @BenchmarkMode(Mode.AverageTime)
+    @OutputTimeUnit(TimeUnit.NANOSECONDS)
+    public UUID randomUUID() {
+        return UUID.randomUUID();
     }
 }

@@ -33,7 +33,7 @@ import java.io.File;
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
     private static final String USE_NAME = System.getProperty("user.name", "unknown");
     private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
-    private static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.pathSeparator + ".time-stamp." + USE_NAME + ".dat");
+    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.pathSeparator + ".time-stamp." + USE_NAME + ".dat");
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
     public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
     private static final int LAST_TIME = 128;

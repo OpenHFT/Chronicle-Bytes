@@ -1,13 +1,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -20,7 +20,12 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Before
     public void checks() {
-        assumeTrue(new File(OS.TMP).canWrite());
+        try {
+            try (FileOutputStream fos = new FileOutputStream(DistributedUniqueTimeProvider.TIME_STAMP_PATH)) {
+            }
+        } catch (IOException ioe) {
+            assumeTrue(ioe.getMessage(), false);
+        }
     }
 
     @Test
