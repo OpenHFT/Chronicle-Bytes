@@ -21,9 +21,11 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Before
     public void checks() {
-        new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH).deleteOnExit();
+        final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
+        file.delete();
+        file.deleteOnExit();
         try {
-            try (FileOutputStream fos = new FileOutputStream(DistributedUniqueTimeProvider.TIME_STAMP_PATH)) {
+            try (FileOutputStream fos = new FileOutputStream(file)) {
             }
         } catch (IOException ioe) {
             assumeTrue(ioe.getMessage(), false);
