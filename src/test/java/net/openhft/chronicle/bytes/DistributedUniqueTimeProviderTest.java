@@ -56,7 +56,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeMicrosPerf count/sec: " + count * 2);
-        assertTrue(count > 230_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 128_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
@@ -70,7 +70,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeNanosPerf count/sec: " + count * 2);
-        assertTrue(count > 320_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 202_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
