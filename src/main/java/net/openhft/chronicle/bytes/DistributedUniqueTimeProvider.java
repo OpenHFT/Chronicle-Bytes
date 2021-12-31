@@ -35,7 +35,12 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
     static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.pathSeparator + ".time-stamp." + USE_NAME + ".dat");
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
+
+    /*
+     * Instance you can use for generating timestamps with the default hostId embedded
+     */
     public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
+
     private static final int LAST_TIME = 128;
     private static final int HOST_IDS = 100;
     private static final int NANOS_PER_MICRO = 1000;
