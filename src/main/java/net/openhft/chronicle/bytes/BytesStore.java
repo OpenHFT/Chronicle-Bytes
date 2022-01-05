@@ -407,9 +407,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @Override
     default BytesStore subSequence(int start, int end) {
         if (start < 0 || end > length() || end < start)
-            throw new IllegalArgumentException("start " + start + ", end " + end + ", length " + length());
+            throw new IndexOutOfBoundsException("start " + start + ", end " + end + ", length " + length());
 
-        return subBytes(readPosition() + start, end - start);
+        return subBytes(readPosition() + start, (long) end - start);
     }
 
     /**
