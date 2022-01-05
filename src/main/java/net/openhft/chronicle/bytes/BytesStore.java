@@ -397,11 +397,10 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * This method is inherited from CharSequence.
+     * {@inheritDoc}
      *
-     * @return {@link BytesStore} of (end - start) length
-     * containing chars from #charAt(start) to #charAt(end - 1), inclusive.
-     * Memory storage type (heap or native) is preserved.
+     * <br>
+     * This method constructs a new {@link BytesStore}, memory storage type (heap or native) is preserved.
      */
     @NotNull
     @Override
