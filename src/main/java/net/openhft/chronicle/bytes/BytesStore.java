@@ -397,12 +397,16 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Not supported.
+     * This method is inherited from CharSequence.
+     *
+     * @return  {@link BytesStore} of (end - start) length
+     * containing chars from #charAt(start) to #charAt(end - 1), inclusive.
+     * Memory storage type (heap or native) is preserved.
      */
     @NotNull
     @Override
     default CharSequence subSequence(int start, int end) {
-        throw new UnsupportedOperationException("todo");
+        return subBytes(readPosition() + start, end - start);
     }
 
     /**
