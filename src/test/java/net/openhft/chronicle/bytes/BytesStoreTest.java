@@ -72,5 +72,8 @@ public class BytesStoreTest extends BytesTestCommon {
 
         assertEquals('l', hello.charAt(2));
         assertEquals('o', hello.charAt(3));
+
+        CharSequence emptySubsequence = hello.subSequence(3, 3);
+        assertEquals("", emptySubsequence.toString());
     }
 }

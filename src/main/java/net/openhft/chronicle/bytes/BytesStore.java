@@ -406,6 +406,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @NotNull
     @Override
     default CharSequence subSequence(int start, int end) {
+        if (start < 0 || end > length() || end < start)
+            throw new IllegalArgumentException("start " + start + ", end " + end + ", length " + length());
+
         return subBytes(readPosition() + start, end - start);
     }
 
