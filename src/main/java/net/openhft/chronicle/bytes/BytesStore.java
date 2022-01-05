@@ -397,12 +397,18 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * Not supported.
+     * {@inheritDoc}
+     *
+     * <br>
+     * This method constructs a new {@link BytesStore}, memory storage type (heap or native) is preserved.
      */
     @NotNull
     @Override
-    default CharSequence subSequence(int start, int end) {
-        throw new UnsupportedOperationException("todo");
+    default BytesStore subSequence(int start, int end) {
+        if (start < 0 || end > length() || end < start)
+            throw new IndexOutOfBoundsException("start " + start + ", end " + end + ", length " + length());
+
+        return subBytes(readPosition() + start, (long) end - start);
     }
 
     /**
