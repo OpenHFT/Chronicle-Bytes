@@ -404,7 +404,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     @NotNull
     @Override
-    default BytesStore subSequence(int start, int end) {
+    default CharSequence subSequence(int start, int end) {
         if (start < 0 || end > length() || end < start)
             throw new IndexOutOfBoundsException("start " + start + ", end " + end + ", length " + length());
 
