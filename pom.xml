@@ -353,6 +353,37 @@
                 </plugins>
             </build>
         </profile>
+        <profile>
+            <id>run-benchmarks</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <pom>microbenchmarks/pom.xml</pom>
+                            <goals>clean,integration-test</goals>
+                            <profiles>
+                                <profile>run-benchmarks</profile>
+                            </profiles>
+                            <properties>
+                                <bytes.version>${project.version}</bytes.version>
+                                <skip.binary>true</skip.binary>
+                            </properties>
+                            <streamLogs>true</streamLogs>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
     </profiles>
 
 </project>
