@@ -406,7 +406,10 @@ public abstract class AbstractBytes<U>
             return bytesStore.readByte(offset);
 
         } catch (BufferUnderflowException e) {
-            return 0;
+            if (lenient) {
+                return 0;
+            }
+            throw e;
         }
     }
 
