@@ -214,10 +214,13 @@ public class PrimitiveTest extends BytesTestCommon {
             bytes.append('3').append('\n');
             bytes.append(4.1f).append('\n');
             bytes.append(5.2).append('\n');
+            bytes.append(Double.NEGATIVE_INFINITY).append('\n');
             bytes.append(6.2999999, 3).append('\n');
+            bytes.append(Double.NaN).append('\n');
 
             final String expected = "00000000 54 0a 31 0a 32 0a 33 0a  34 2e 31 0a 35 2e 32 0a T·1·2·3· 4.1·5.2·\n" +
-                    "00000010 36 2e 33 30 30 0a                                6.300·           \n";
+                    "00000010 2d 49 6e 66 69 6e 69 74  79 0a 36 2e 33 30 30 0a -Infinit y·6.300·\n" +
+                    "00000020 4e 61 4e 0a                                      NaN·             \n";
 
             final String actual = bytes.toHexString();
 
@@ -229,7 +232,9 @@ public class PrimitiveTest extends BytesTestCommon {
             final String ch = bytes.parseUtf8(StopCharTesters.SPACE_STOP);
             final float f32 = bytes.parseFloat();
             final double f64 = bytes.parseDouble();
+            final double f64i = bytes.parseDouble();
             final double f64b = bytes.parseDouble();
+            final double f64n = bytes.parseDouble();
 
             assertTrue(flag);
             assertEquals(1, s32);
@@ -237,7 +242,9 @@ public class PrimitiveTest extends BytesTestCommon {
             assertEquals("3", ch);
             assertEquals(4.1, f32, 1e-6);
             assertEquals(5.2, f64, 0.0);
+            assertEquals(Double.NEGATIVE_INFINITY, f64i, 0.5e-4);
             assertEquals(6.2999999, f64b, 0.5e-4);
+            assertEquals(Double.NaN, f64n, 0.5e-4);
         } finally {
             bytes.releaseLast();
         }
