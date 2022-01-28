@@ -73,7 +73,6 @@ enum BytesInternal {
 
     ; // none
     private static final String INFINITY = "Infinity";
-    private static final String NAN = "NaN";
     private static final String MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END = "malformed input: partial character at end";
     private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
     private static final String WAS = " was ";
@@ -87,7 +86,7 @@ enum BytesInternal {
     private static final BytesPool BP = new BytesPool();
     public static final StringInternerBytes SI;
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
-    private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
+    private static final byte[] NaN = "NaN".getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
@@ -1872,7 +1871,7 @@ enum BytesInternal {
                 out.write(INFINITY_BYTES);
 
             } else {
-                out.write(NAN_BYTES);
+                out.write(NaN);
             }
             return;
 
@@ -2523,39 +2522,36 @@ enum BytesInternal {
         boolean negative = false;
         int decimalPlaces = Integer.MIN_VALUE;
         boolean digits = false;
-        int ch = ' ';
-        while (in.readRemaining() > 0) {
-            ch = in.peekUnsignedByte() & 0xFF;
-            if (ch != ' ')
-                break;
-            else
-                in.readSkip(1);
-        }
+        int ch;
+        do {
+            ch = in.rawReadByte() & 0xFF;
+        } while (ch == ' ' && in.readRemaining() > 0);
 
         try {
             switch (ch) {
                 case 'N':
-                    if (compareRest(in, NAN))
+                    if (compareRest(in, "aN"))
                         return Double.NaN;
+                    in.readSkip(-1);
 
                     return Double.NaN;
                 case 'I':
-                    if (compareRest(in, INFINITY))
+                    //noinspection SpellCheckingInspection
+                    if (compareRest(in, "nfinity"))
                         return Double.POSITIVE_INFINITY;
-
+                    in.readSkip(-1);
                     return Double.NaN;
                 case '-':
-                    negative = true;
-                    in.readSkip(1);
                     if (compareRest(in, INFINITY))
                         return Double.NEGATIVE_INFINITY;
+                    negative = true;
+                    ch = in.rawReadByte();
                     break;
                 default:
                     // do nothing
             }
             int tens = 0;
-            while (in.readRemaining() > 0) {
-                ch = in.readUnsignedByte() & 0xFF;
+            while (true) {
                 if (ch >= '0' && ch <= '9') {
                     while (value >= MAX_VALUE_DIVIDE_10) {
                         value >>>= 1;
@@ -2574,8 +2570,10 @@ enum BytesInternal {
 
                 } else {
                     break;
-
                 }
+                if (in.readRemaining() == 0)
+                    break;
+                ch = in.rawReadByte();
             }
             if (!digits)
                 return -0.0;
