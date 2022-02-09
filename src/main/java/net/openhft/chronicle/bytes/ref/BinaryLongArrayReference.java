@@ -53,6 +53,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     public BinaryLongArrayReference(long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
+        disableThreadSafetyCheck(true);
     }
 
     public static void startCollecting() {
