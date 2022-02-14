@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
 import static org.junit.Assert.assertTrue;
 
-public class NativeBytesOverflowTest {
+public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testExceedWriteLimitNativeWriteBytes() {

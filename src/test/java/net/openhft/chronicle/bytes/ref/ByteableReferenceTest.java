@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.junit.Test;
@@ -15,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
-public class ByteableReferenceTest {
+public class ByteableReferenceTest extends BytesTestCommon {
 
     private final AbstractReference byteable;
 

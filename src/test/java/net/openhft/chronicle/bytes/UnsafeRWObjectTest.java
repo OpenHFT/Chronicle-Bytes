@@ -8,7 +8,7 @@ import java.util.Arrays;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeTrue;
 
-public class UnsafeRWObjectTest {
+public class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
     public void shortObject() {
         assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());

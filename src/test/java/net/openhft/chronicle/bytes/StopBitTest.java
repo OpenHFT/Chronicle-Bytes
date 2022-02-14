@@ -8,7 +8,7 @@ import java.nio.ByteBuffer;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-public class StopBitTest {
+public class StopBitTest extends BytesTestCommon {
 
     @Test
     public void testStopBit() {

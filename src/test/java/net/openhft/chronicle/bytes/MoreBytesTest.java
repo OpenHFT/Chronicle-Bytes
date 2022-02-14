@@ -18,7 +18,7 @@ import java.util.Arrays;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.*;
 
-public class MoreBytesTest {
+public class MoreBytesTest extends BytesTestCommon {
 
     private static void testIndexOf(@NotNull final String sourceStr, @NotNull final String subStr) {
         final Bytes<?> source = Bytes.wrapForRead(sourceStr.getBytes(StandardCharsets.ISO_8859_1));

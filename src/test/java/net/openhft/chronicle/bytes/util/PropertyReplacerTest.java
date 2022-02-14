@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.util;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 
 import java.util.Properties;
@@ -24,7 +25,7 @@ import java.util.Properties;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class PropertyReplacerTest {
+public class PropertyReplacerTest extends BytesTestCommon {
     @Test
     public void testSystemPropertyMissing() {
         try {

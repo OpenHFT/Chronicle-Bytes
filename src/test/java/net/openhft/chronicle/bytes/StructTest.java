@@ -13,9 +13,8 @@ import java.util.stream.Stream;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertSame;
 
-public class StructTest {
+public class StructTest extends BytesTestCommon {
 
     /**
      * Common base for structs to take care of initialisation and other boilerplating

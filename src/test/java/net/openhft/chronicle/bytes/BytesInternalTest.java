@@ -17,7 +17,7 @@ import static net.openhft.chronicle.bytes.BytesInternalTest.Nested.LENGTH;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class BytesInternalTest {
+public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
