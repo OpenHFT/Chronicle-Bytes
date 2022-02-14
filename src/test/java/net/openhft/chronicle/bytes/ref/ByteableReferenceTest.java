@@ -11,6 +11,7 @@ import org.junit.runners.Parameterized;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
@@ -18,22 +19,22 @@ import static org.junit.Assert.assertEquals;
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest extends BytesTestCommon {
 
-    private final AbstractReference byteable;
+    private final Supplier<AbstractReference> byteableCtor;
 
-    public ByteableReferenceTest(final String className, final AbstractReference byteable) {
-        this.byteable = byteable;
+    public ByteableReferenceTest(final String className, final Supplier<AbstractReference> byteableCtor) {
+        this.byteableCtor = byteableCtor;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static List<Object[]> testData() {
         List<Object[]> objects = Arrays.asList(
-                datum(new BinaryLongReference()),
-                datum(new BinaryTwoLongReference()),
-                datum(new BinaryBooleanReference()),
-                datum(new BinaryIntReference()),
-                datum(new TextBooleanReference()),
-                datum(new TextIntReference()),
-                datum(new TextLongReference())
+                datum(BinaryLongReference::new),
+                datum(BinaryTwoLongReference::new),
+                datum(BinaryBooleanReference::new),
+                datum(BinaryIntReference::new),
+                datum(TextBooleanReference::new),
+                datum(TextIntReference::new),
+                datum(TextLongReference::new)
                 /*,
                 unhelpful implementations below this point
                 datum(new TextLongArrayReference()),
@@ -45,7 +46,7 @@ public class ByteableReferenceTest extends BytesTestCommon {
         return objects;
     }
 
-    private static Object[] datum(final Byteable reference) {
+    private static Object[] datum(final Supplier<Byteable> reference) {
         return new Object[]{reference.getClass().getSimpleName(), reference};
     }
 
@@ -55,7 +56,7 @@ public class ByteableReferenceTest extends BytesTestCommon {
         try {
             firstStore.writeLong(0, 17);
             final BytesStore secondStore = BytesStore.nativeStore(64);
-            try {
+            try (AbstractReference byteable = byteableCtor.get()) {
                 secondStore.writeLong(0, 17);
                 final long startCount = firstStore.refCount();
                 byteable.bytesStore(firstStore, 0, byteable.maxSize());
@@ -65,7 +66,6 @@ public class ByteableReferenceTest extends BytesTestCommon {
                 byteable.bytesStore(secondStore, 0, byteable.maxSize());
 
                 assertEquals(startCount, firstStore.refCount());
-                byteable.close();
             } finally {
                 secondStore.releaseLast();
             }
