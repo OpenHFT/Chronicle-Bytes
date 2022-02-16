@@ -58,17 +58,14 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         hostId(hostId);
         try {
             file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
+            if (unmonitor) IOTools.unmonitor(file);
             bytes = file.acquireBytesForWrite(this, 0);
+            if (unmonitor) IOTools.unmonitor(bytes);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
+            if (unmonitor) IOTools.unmonitor(values);
             values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8 + 16);
             deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
-            if (unmonitor) {
-                IOTools.unmonitor(file);
-                IOTools.unmonitor(bytes);
-                IOTools.unmonitor(values);
-            }
-
         } catch (Throwable ioe) {
             throw new IORuntimeException(ioe);
         }
