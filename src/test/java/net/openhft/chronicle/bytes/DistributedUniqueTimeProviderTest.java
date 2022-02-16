@@ -1,26 +1,41 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assume.assumeNoException;
 
-public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
+
+    static volatile long blackHole;
 
     @BeforeClass
     public static void checks() {
-        DistributedUniqueTimeProviderTest.checks();
+        try {
+            System.setProperty("timestamp.dir", OS.getTarget());
+            final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
+            file.delete();
+            file.deleteOnExit();
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+            }
+        } catch (Throwable ioe) {
+            assumeNoException(ioe.getMessage(), ioe);
+        }
     }
 
     @Test
     public void currentTimeMicros() {
-        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
         long last = 0;
         for (int i = 0; i < 100_000; i++) {
             long time = tp.currentTimeMicros();
@@ -30,37 +45,9 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         }
     }
 
-    static volatile long blackHole;
-
-    @Test
-    public void currentTimeMillisPerf() {
-        long start = System.currentTimeMillis();
-        int count = 0;
-        do {
-            for (int i = 0; i < 1000; i++)
-                blackHole = System.currentTimeMillis();
-            count += 1000;
-        } while (System.currentTimeMillis() < start + 500);
-        System.out.println("currentTimeMillisPerf count/sec: " + count * 2);
-        assertTrue(count > 1_000_000 / 2); // half the speed of Rasberry Pi
-    }
-
-    @Test
-    public void nanoTimePerf() {
-        long start = System.currentTimeMillis();
-        int count = 0;
-        do {
-            for (int i = 0; i < 1000; i++)
-                blackHole = System.nanoTime();
-            count += 1000;
-        } while (System.currentTimeMillis() < start + 500);
-        System.out.println("nanoTimePerf count/sec: " + count * 2);
-        assertTrue(count > 800_000 / 2); // half the speed of Rasberry Pi
-    }
-
     @Test
     public void currentTimeMicrosPerf() {
-        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -69,12 +56,12 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeMicrosPerf count/sec: " + count * 2);
-        assertTrue(count > 230_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 128_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
     public void currentTimeNanosPerf() {
-        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -83,12 +70,12 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
             count += 1000;
         } while (System.currentTimeMillis() < start + 500);
         System.out.println("currentTimeNanosPerf count/sec: " + count * 2);
-        assertTrue(count > 320_000 / 2); // half the speed of Rasberry Pi
+        assertTrue(count > 202_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
     public void currentTimeNanos() {
-        TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
         long start = tp.currentTimeNanos();
         long last = start;
         int count = 0;
@@ -118,26 +105,30 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
         IntStream.range(0, threads)
                 .parallel()
                 .forEach(i -> {
-                    TimeProvider tp = MappedUniqueTimeProvider.INSTANCE;
-                    long start = tp.currentTimeNanos();
-                    long last = start;
-                    for (int j = 0; j < runTimeUS; j += stride) {
-                        long now = tp.currentTimeNanos();
-/*                        if (!Jvm.isArm()) {
-                            final long delay = now - (start + runTimeUS * 1000L);
-                            if (delay > 150_000) { // very slow in Sonar
-                                fail("Overran by " + delay + " ns.");
-                            }
-                        }*/
-                        // check the times are different after shifting by 5 bits.
-                        assertTrue((now >>> 5) > (last >>> 5));
-                        last = now;
+                    try (DistributedUniqueTimeProvider tp = DistributedUniqueTimeProvider.forHostId(i)) {
+                        long last = 0;
+                        for (int j = 0; j < runTimeUS; j += stride) {
+                            long now = tp.currentTimeNanos();
+                            assertEquals(i, DistributedUniqueTimeProvider.hostIdFor(now));
+                            assertTrue(now > last);
+                            last = now;
+                        }
                     }
                 });
         long time0 = System.nanoTime() - start0;
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
-        assertTrue("Jvm.isCodeCoverage() = " + Jvm.isCodeCoverage(),
-                Jvm.isArm() || Jvm.isCodeCoverage()
-                        || time0 < runTimeUS * 1000L);
+        assertTrue(Jvm.isArm() || Jvm.isCodeCoverage()
+                || time0 < runTimeUS * 1000L);
+    }
+
+    @Test
+    public void testMonotonicallyIncreasing() {
+        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        long last = 0;
+        for (int i = 0; i < 10_000; i++) {
+            long now = DistributedUniqueTimeProvider.timestampFor(tp.currentTimeNanos());
+            assertTrue(now > last);
+            last = now;
+        }
     }
 }

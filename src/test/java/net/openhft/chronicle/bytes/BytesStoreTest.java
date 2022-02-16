@@ -23,4 +23,57 @@ public class BytesStoreTest extends BytesTestCommon {
         Bytes ell = Bytes.from("Hello").subBytes(1, 3).bytesForRead();
         assertEquals("ell", ell.toString());
     }
+
+    @Test
+    public void testSubSequenceOnHeap() {
+        final Bytes<?> bytes = Bytes.allocateElasticOnHeap();
+
+        bytes.append("Hello");
+
+        testSubSequence(bytes);
+    }
+
+    @Test
+    public void testSubSequenceDirect() {
+        final Bytes<?> bytes = Bytes.allocateElasticDirect();
+
+        bytes.append("Hello");
+
+        testSubSequence(bytes);
+
+        bytes.releaseLast();
+    }
+
+    private void testSubSequence(Bytes<?> hello) {
+        CharSequence helloSubsequence = hello.subSequence(0, 5);
+        assertEquals("Hello", helloSubsequence.toString());
+
+        CharSequence hellSubsequence = hello.subSequence(0, 4);
+        assertEquals("Hell", hellSubsequence.toString());
+
+        CharSequence ellSubsequence = hello.subSequence(1, 4);
+        assertEquals("ell", ellSubsequence.toString());
+
+        CharSequence elSubsequence = hello.subSequence(1, 3);
+        assertEquals("el", elSubsequence.toString());
+
+        hello.readPosition(1);
+
+        assertEquals("ello", hello.toString());
+
+        CharSequence elloSubsequence = hello.subSequence(0, 4);
+        assertEquals("ello", elloSubsequence.toString());
+
+        CharSequence llSubsequence = hello.subSequence(1, 3);
+        assertEquals("ll", llSubsequence.toString());
+
+        CharSequence loSubsequence = hello.subSequence(2, 4);
+        assertEquals("lo", loSubsequence.toString());
+
+        assertEquals('l', hello.charAt(2));
+        assertEquals('o', hello.charAt(3));
+
+        CharSequence emptySubsequence = hello.subSequence(3, 3);
+        assertEquals("", emptySubsequence.toString());
+    }
 }

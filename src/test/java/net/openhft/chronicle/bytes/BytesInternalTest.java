@@ -10,6 +10,7 @@ import org.junit.Test;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.Arrays;
+import java.util.Locale;
 import java.util.Random;
 
 import static java.nio.charset.StandardCharsets.US_ASCII;
@@ -17,7 +18,7 @@ import static net.openhft.chronicle.bytes.BytesInternalTest.Nested.LENGTH;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
-public class BytesInternalTest {
+public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
@@ -364,7 +365,7 @@ public class BytesInternalTest {
         int max = 10_000;
         for (int i = 0; i < max; i++) {
             double num = random.nextDouble();
-            String s = String.format("%.9f", num);
+            String s = String.format(Locale.UK, "%.9f", num);
             different = checkParse(different, s);
         }
         Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);

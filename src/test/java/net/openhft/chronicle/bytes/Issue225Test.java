@@ -4,7 +4,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class Issue225Test {
+public class Issue225Test extends BytesTestCommon {
     @Test
     public void testTrailingZeros() {
         for (int i = 1000; i < 10_000; i++) {

@@ -5,9 +5,10 @@ import org.junit.jupiter.api.Test;
 
 import java.nio.ByteBuffer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
-class Bytes4Test {
+class Bytes4Test extends BytesTestCommon {
 
     @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/186")
     @Test

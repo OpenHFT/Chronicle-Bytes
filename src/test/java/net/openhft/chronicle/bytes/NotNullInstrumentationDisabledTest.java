@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.fail;
 
-class NotNullInstrumentationDisabledTest {
+class NotNullInstrumentationDisabledTest extends BytesTestCommon {
 
     @Test
     void assertNotNullInstrumentation() {

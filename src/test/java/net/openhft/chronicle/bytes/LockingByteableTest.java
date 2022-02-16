@@ -12,12 +12,13 @@ import java.nio.channels.OverlappingFileLockException;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
-public class LockingByteableTest {
+public class LockingByteableTest extends BytesTestCommon {
     @Test(expected = UnsupportedOperationException.class)
     public void notLockable() throws IOException {
-        BinaryLongReference blr = new BinaryLongReference();
-        blr.bytesStore(Bytes.from("Hello World"), 0, 8);
-        blr.lock(false);
+        try (BinaryLongReference blr = new BinaryLongReference()) {
+            blr.bytesStore(Bytes.from("Hello World"), 0, 8);
+            blr.lock(false);
+        }
     }
 
     @Test

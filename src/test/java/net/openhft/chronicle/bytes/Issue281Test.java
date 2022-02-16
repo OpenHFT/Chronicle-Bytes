@@ -8,7 +8,7 @@ import java.nio.charset.StandardCharsets;
 
 import static org.junit.Assert.assertTrue;
 
-public class Issue281Test {
+public class Issue281Test extends BytesTestCommon {
     public static void bufferToBytes(Bytes<?> bytes, ByteBuffer dataBuffer, int index) {
         int length = dataBuffer.get(index); // length prefix (offset)
         bytes.write(0, dataBuffer, index + 1, length);

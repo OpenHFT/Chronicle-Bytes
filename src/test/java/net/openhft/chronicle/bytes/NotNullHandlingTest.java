@@ -9,7 +9,7 @@ import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class NotNullHandlingTest {
+class NotNullHandlingTest extends BytesTestCommon {
 
     @Test
     void fooMostCorrect() {

@@ -27,7 +27,6 @@ import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.security.action.GetPropertyAction;
 
 import java.io.File;
 import java.io.IOException;

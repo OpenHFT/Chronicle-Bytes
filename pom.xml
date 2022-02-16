@@ -21,12 +21,12 @@
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.28</version>
+        <version>1.1.30</version>
         <relativePath />
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.22ea16-SNAPSHOT</version>
+    <version>2.22ea18-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
@@ -42,8 +42,8 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
+                <version>3.22.3</version>
                 <type>pom</type>
-                <version>3.22.1</version>
                 <scope>import</scope>
             </dependency>
             <dependency>
@@ -141,7 +141,6 @@
             <plugin>
                 <groupId>net.openhft</groupId>
                 <artifactId>binary-compatibility-enforcer-plugin</artifactId>
-                <version>1.0.9</version>
                 <executions>
                     <execution>
                         <phase>verify</phase>
@@ -349,6 +348,37 @@
                     <plugin>
                         <groupId>org.sonarsource.scanner.maven</groupId>
                         <artifactId>sonar-maven-plugin</artifactId>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+        <profile>
+            <id>run-benchmarks</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <artifactId>maven-invoker-plugin</artifactId>
+                        <version>3.2.2</version>
+                        <executions>
+                            <execution>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>run</goal>
+                                </goals>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <pom>microbenchmarks/pom.xml</pom>
+                            <goals>clean,integration-test</goals>
+                            <profiles>
+                                <profile>run-benchmarks</profile>
+                            </profiles>
+                            <properties>
+                                <bytes.version>${project.version}</bytes.version>
+                                <skip.binary>true</skip.binary>
+                            </properties>
+                            <streamLogs>true</streamLogs>
+                        </configuration>
                     </plugin>
                 </plugins>
             </build>

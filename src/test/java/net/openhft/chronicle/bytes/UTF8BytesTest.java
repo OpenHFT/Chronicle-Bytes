@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import static org.junit.Assert.assertEquals;
 
-public class UTF8BytesTest {
+public class UTF8BytesTest extends BytesTestCommon {
 
     private static final String MESSAGE = "awésome-message-1";
 

@@ -7,7 +7,7 @@ import java.text.DecimalFormat;
 import static net.openhft.chronicle.bytes.UnsafeTextBytesTest.testAppendDouble;
 import static org.junit.Assert.assertEquals;
 
-public class Issue128Test {
+public class Issue128Test extends BytesTestCommon {
     private static final DecimalFormat DF;
 
     static {

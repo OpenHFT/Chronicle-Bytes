@@ -1,15 +1,17 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-class ReferenceCountedUtilTest {
+class ReferenceCountedUtilTest extends BytesTestCommon {
 
     @Test
     void throwExceptionIfReleased() {
