@@ -16,7 +16,7 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeClass
     public static void checks() throws IOException {
-        DistributedUniqueTimeProviderTest.checks();
+            DistributedUniqueTimeProviderTest.checks();
     }
 
     @Test
