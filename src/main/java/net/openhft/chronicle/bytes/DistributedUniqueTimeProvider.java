@@ -69,7 +69,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
                 IOTools.unmonitor(values);
             }
 
-        } catch (Exception ioe) {
+        } catch (Throwable ioe) {
             throw new IORuntimeException(ioe);
         }
     }
