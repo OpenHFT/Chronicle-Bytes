@@ -6,6 +6,7 @@ import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
@@ -14,8 +15,8 @@ import static org.junit.Assert.assertTrue;
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeClass
-    public static void checks() {
-        DistributedUniqueTimeProviderTest.checks();
+    public static void checks() throws IOException {
+            DistributedUniqueTimeProviderTest.checks();
     }
 
     @Test

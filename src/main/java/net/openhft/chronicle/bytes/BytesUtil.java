@@ -20,10 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.core.ClassLocal;
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -48,6 +45,9 @@ public enum BytesUtil {
     ; // none
     private static final int[] NO_INTS = {};
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
+    private static final String USER_NAME = System.getProperty("user.name", "unknown");
+    private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
+    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.separator + ".time-stamp." + USER_NAME + ".dat");
 
     /**
      * Is the whole class trivially copyable

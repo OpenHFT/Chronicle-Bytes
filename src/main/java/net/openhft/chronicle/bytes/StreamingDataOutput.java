@@ -274,8 +274,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         try {
             if (s == null)
                 BytesInternal.writeStopBitNeg1(this);
-            else
-                write8bit(s, 0, (int) Math.min(writeRemaining(), s.length()));
+            else {
+                long rem = writeRemaining();
+                if (rem < 0)
+                    throw new IllegalStateException("rem: "+rem);
+                write8bit(s, 0, s.length());
+            }
             return (S) this;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);

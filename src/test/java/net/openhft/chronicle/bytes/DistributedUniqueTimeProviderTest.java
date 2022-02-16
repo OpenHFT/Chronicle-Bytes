@@ -9,27 +9,29 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeNoException;
+import static org.junit.Assume.assumeFalse;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     static volatile long blackHole;
 
     @BeforeClass
-    public static void checks() {
+    public static void checks() throws IOException {
         try {
             System.setProperty("timestamp.dir", OS.getTarget());
-            final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
+            final File file = new File(BytesUtil.TIME_STAMP_PATH);
             file.delete();
             file.deleteOnExit();
             try (FileOutputStream fos = new FileOutputStream(file)) {
             }
-        } catch (Throwable ioe) {
-            assumeNoException(ioe.getMessage(), ioe);
+        } catch (IOException ioe) {
+            assumeFalse(OS.isWindows());
+            throw ioe;
         }
     }
 

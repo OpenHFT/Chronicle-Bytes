@@ -17,13 +17,16 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
+import net.openhft.chronicle.core.values.LongArrayValues;
 
 import java.io.File;
 
@@ -31,9 +34,6 @@ import java.io.File;
  * Timestamps are unique across systems using a predefined hostId
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
-    private static final String USE_NAME = System.getProperty("user.name", "unknown");
-    private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
-    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.separator + ".time-stamp." + USE_NAME + ".dat");
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
 
     /*
@@ -42,27 +42,31 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
 
     private static final int LAST_TIME = 128;
-    private static final int HOST_IDS = 100;
+    private static final int DEDUPLICATOR = 192;
+    static final int HOST_IDS = 100;
     private static final int NANOS_PER_MICRO = 1000;
 
     @SuppressWarnings("rawtypes")
     private final Bytes bytes;
     private final MappedFile file;
+    private final BinaryLongArrayReference values;
+    private final VanillaDistributedUniqueTimeDeduplicator deduplicator;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
     private int hostId;
 
     private DistributedUniqueTimeProvider(int hostId, boolean unmonitor) {
         hostId(hostId);
         try {
-            file = MappedFile.ofSingle(new File(TIME_STAMP_PATH), OS.pageSize(), false);
+            file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
+            if (unmonitor) IOTools.unmonitor(file);
             bytes = file.acquireBytesForWrite(this, 0);
+            if (unmonitor) IOTools.unmonitor(bytes);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
-            if (unmonitor) {
-                IOTools.unmonitor(file);
-                IOTools.unmonitor(bytes);
-            }
-
-        } catch (Exception ioe) {
+            values = new BinaryLongArrayReference(HOST_IDS);
+            if (unmonitor) IOTools.unmonitor(values);
+            values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8 + 16);
+            deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
+        } catch (Throwable ioe) {
             throw new IORuntimeException(ioe);
         }
     }
@@ -137,6 +141,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     @Override
     protected void performClose() {
         super.performClose();
+        values.close();
         bytes.release(this);
         file.releaseLast();
     }
@@ -170,4 +175,38 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             Jvm.nanoPause();
         }
     }
+
+    /**
+     * A deduplicator to help recognise duplicate timestamps for a hostId
+     */
+    public DistributedUniqueTimeDeduplicator deduplicator() {
+        return deduplicator;
+    }
+
+    static class VanillaDistributedUniqueTimeDeduplicator implements ReferenceOwner, DistributedUniqueTimeDeduplicator {
+        private final LongArrayValues values;
+
+        private VanillaDistributedUniqueTimeDeduplicator(LongArrayValues values) {
+            this.values = values;
+        }
+
+        @Override
+        public int compareByHostId(long timestampHostId) {
+            int hostId = (int) DistributedUniqueTimeProvider.hostIdFor(timestampHostId);
+            long prev = values.getValueAt(hostId);
+            return Long.compare(timestampHostId, prev);
+        }
+
+        @Override
+        public int compareAndRetainNewer(long timestampHostId) {
+            int hostId = (int) DistributedUniqueTimeProvider.hostIdFor(timestampHostId);
+            for (; ; ) {
+                long prev = values.getValueAt(hostId);
+                int ret = Long.compare(timestampHostId, prev);
+                if (ret <= 0 || values.compareAndSet(hostId, prev, timestampHostId))
+                    return ret;
+            }
+        }
+    }
+
 }

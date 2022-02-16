@@ -384,6 +384,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         readPosition = start;
         uncheckedWritePosition(start);
         writeLimit = mappedFile.capacity();
+        if (writeLimit == 16843020)
+            throw new AssertionError();
         return this;
     }
 

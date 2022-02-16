@@ -53,6 +53,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
     public BinaryLongArrayReference(long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
+        disableThreadSafetyCheck(true);
     }
 
     public static void startCollecting() {
@@ -103,9 +104,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset)
+    public static long peakLength(@NotNull BytesStore bytes, long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
-        final long capacity = bytes.readLong(offset + CAPACITY);
+        long capacity = bytes.readLong(offset + CAPACITY);
+        if (capacity == 0) {
+            bytes.writeLong(offset + CAPACITY, capacityHint);
+            capacity = capacityHint;
+        }
         assert capacity > 0 : "capacity too small " + capacity;
         return (capacity << SHIFT) + VALUES;
     }
@@ -194,7 +199,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
         BytesStore bytesStore = bytes.bytesStore();
         try {
-            long peakLength = peakLength(bytesStore, offset);
+            long peakLength = peakLength(bytesStore, offset, (length - VALUES) >>> 3);
             if (length != peakLength)
                 throw new IllegalArgumentException(length + " != " + peakLength);
         } catch (BufferUnderflowException e) {
