@@ -23,7 +23,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     public static void checks() {
         try {
             System.setProperty("timestamp.dir", OS.getTarget());
-            final File file = new File(DistributedUniqueTimeProvider.TIME_STAMP_PATH);
+            final File file = new File(BytesUtil.TIME_STAMP_PATH);
             file.delete();
             file.deleteOnExit();
             try (FileOutputStream fos = new FileOutputStream(file)) {

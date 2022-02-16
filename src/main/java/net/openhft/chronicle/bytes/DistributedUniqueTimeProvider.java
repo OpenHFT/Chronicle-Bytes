@@ -34,9 +34,6 @@ import java.io.File;
  * Timestamps are unique across systems using a predefined hostId
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
-    private static final String USE_NAME = System.getProperty("user.name", "unknown");
-    private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
-    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.separator + ".time-stamp." + USE_NAME + ".dat");
     private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
 
     /*
@@ -60,7 +57,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private DistributedUniqueTimeProvider(int hostId, boolean unmonitor) {
         hostId(hostId);
         try {
-            file = MappedFile.ofSingle(new File(TIME_STAMP_PATH), OS.pageSize(), false);
+            file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
             bytes = file.acquireBytesForWrite(this, 0);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
