@@ -47,7 +47,12 @@ public enum BytesUtil {
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
     private static final String USER_NAME = System.getProperty("user.name", "unknown");
     private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
-    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", TIME_STAMP_DIR + File.separator + ".time-stamp." + USER_NAME + ".dat");
+    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
+
+    static {
+        System.out.println("TIME_STAMP_DIR = " + TIME_STAMP_DIR);
+        System.out.println("TIME_STAMP_PATH = " + TIME_STAMP_PATH);
+    }
 
     /**
      * Is the whole class trivially copyable
