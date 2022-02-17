@@ -25,10 +25,15 @@ public class BytesTestCommon {
     private final Map<Predicate<ExceptionKey>, String> expectedExceptions = new LinkedHashMap<>();
     protected ThreadDump threadDump;
     protected Map<ExceptionKey, Integer> exceptions;
+    protected boolean finishedNormally;
 
     public BytesTestCommon() {
         // Allocation of 0 chunk in D:\BuildAgent\work\9605994e6a194885\single-mapped-file21723892241386086929bin took 0.509 ms.
         ignoreException("Allocation of ");
+    }
+
+    static boolean contains(String text, String message) {
+        return text != null && text.contains(message);
     }
 
     @Before
@@ -53,16 +58,21 @@ public class BytesTestCommon {
         exceptions = Jvm.recordExceptions();
     }
 
+    @Before
+    public void assumeFinishedNormally() {
+        finishedNormally = true;
+    }
+
     public void ignoreException(String message) {
-        ignoreException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
+        ignoreException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
+    }
+
+    public void expectException(String message) {
+        expectException(k -> contains(k.message, message) || (k.throwable != null && contains(k.throwable.getMessage(), message)), message);
     }
 
     public void ignoreException(Predicate<ExceptionKey> predicate, String description) {
         ignoredExceptions.put(predicate, description);
-    }
-
-    public void expectException(String message) {
-        expectException(k -> k.message.contains(message) || (k.throwable != null && k.throwable.getMessage().contains(message)), message);
     }
 
     public void expectException(Predicate<ExceptionKey> predicate, String description) {
@@ -72,7 +82,7 @@ public class BytesTestCommon {
     public void checkExceptions() {
         for (Map.Entry<Predicate<ExceptionKey>, String> expectedException : expectedExceptions.entrySet()) {
             if (!exceptions.keySet().removeIf(expectedException.getKey()))
-                Slf4jExceptionHandler.WARN.on(getClass(), "No error for " + expectedException.getValue());
+                throw new AssertionError("No error for " + expectedException.getValue());
         }
         expectedExceptions.clear();
 
@@ -99,8 +109,10 @@ public class BytesTestCommon {
         System.gc();
         waitForCloseablesToClose(100);
 
-        assertReferencesReleased();
-        checkThreadDump();
-        checkExceptions();
+        if (finishedNormally) {
+            assertReferencesReleased();
+            checkThreadDump();
+            checkExceptions();
+        }
     }
 }

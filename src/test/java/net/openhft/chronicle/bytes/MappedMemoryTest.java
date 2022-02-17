@@ -42,23 +42,20 @@ public class MappedMemoryTest extends BytesTestCommon {
 
     private static void deleteIfPossible(@NotNull final File file) {
         if (!file.delete()) {
+            // needed for the recordExceptions() check to expect this warning.
             Jvm.warn().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
         }
     }
 
-    @Override
-    public void recordExceptions() {
-        super.recordExceptions();
-
-        // TODO: make sure released
-        if (OS.isWindows())
-            expectException("Unable to delete");
-    }
 
     // on i7-3970X ~ 3.3 ns
     @Test
     public void testRawMemoryMapped()
             throws IOException {
+
+        if (OS.isWindows())
+            expectException("Unable to delete");
+
         final ReferenceOwner test = ReferenceOwner.temporary("test");
         for (int t = 0; t < 5; t++) {
             final File tempFile = File.createTempFile("chronicle", "q");
@@ -91,6 +88,8 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void withMappedNativeBytesTest()
             throws IOException {
+        if (OS.isWindows())
+            expectException("Unable to delete");
 
         for (int t = 0; t < 3; t++) {
             final File tempFile = File.createTempFile("chronicle", "q");
@@ -115,6 +114,8 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void withRawNativeBytesTess()
             throws IOException {
+        if (OS.isWindows())
+            expectException("Unable to delete");
         final ReferenceOwner test = ReferenceOwner.temporary("test");
 
         for (int t = 0; t < 3; t++) {
@@ -189,6 +190,8 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTestSingle()
             throws IOException, IORuntimeException {
+        if (OS.isWindows())
+            expectException("Unable to delete");
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;

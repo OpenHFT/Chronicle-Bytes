@@ -37,7 +37,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeMicros() {
-        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long last = 0;
         for (int i = 0; i < 100_000; i++) {
             long time = tp.currentTimeMicros();
@@ -49,7 +49,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeMicrosPerf() {
-        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -63,7 +63,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanosPerf() {
-        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long start = System.currentTimeMillis();
         int count = 0;
         do {
@@ -77,7 +77,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanos() {
-        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long start = tp.currentTimeNanos();
         long last = start;
         int count = 0;
@@ -100,6 +100,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void concurrentTimeNanos() {
+        finishedNormally = false;
         long start0 = System.nanoTime();
         final int runTimeUS = 5_000_000;
         final int threads = Jvm.isArm() ? 4 : 16;
@@ -121,11 +122,12 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         System.out.printf("Time: %,d ms%n", time0 / 1_000_000);
         assertTrue(Jvm.isArm() || Jvm.isCodeCoverage()
                 || time0 < runTimeUS * 1000L);
+        finishedNormally = true;
     }
 
     @Test
     public void testMonotonicallyIncreasing() {
-        TimeProvider tp = DistributedUniqueTimeProvider.INSTANCE;
+        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long last = 0;
         for (int i = 0; i < 10_000; i++) {
             long now = DistributedUniqueTimeProvider.timestampFor(tp.currentTimeNanos());

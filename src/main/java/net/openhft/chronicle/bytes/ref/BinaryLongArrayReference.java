@@ -104,6 +104,13 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    public static long peakLength(@NotNull BytesStore bytes, long offset)
+            throws BufferUnderflowException, IllegalStateException {
+        long capacity = bytes.readLong(offset + CAPACITY);
+        assert capacity > 0 : "capacity too small " + capacity;
+        return (capacity << SHIFT) + VALUES;
+    }
+
     public static long peakLength(@NotNull BytesStore bytes, long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);

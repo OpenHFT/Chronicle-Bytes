@@ -20,10 +20,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.SimpleCloseable;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
 import net.openhft.chronicle.core.values.LongArrayValues;
@@ -34,25 +31,11 @@ import java.io.File;
  * Timestamps are unique across systems using a predefined hostId
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
-    private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
-
-    /*
-     * Instance you can use for generating timestamps with the default hostId embedded
-     */
-    public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
 
     private static final int LAST_TIME = 128;
     private static final int DEDUPLICATOR = 192;
     static final int HOST_IDS = 100;
     private static final int NANOS_PER_MICRO = 1000;
-
-    @SuppressWarnings("rawtypes")
-    private final Bytes bytes;
-    private final MappedFile file;
-    private final BinaryLongArrayReference values;
-    private final VanillaDistributedUniqueTimeDeduplicator deduplicator;
-    private TimeProvider provider = SystemTimeProvider.INSTANCE;
-    private int hostId;
 
     private DistributedUniqueTimeProvider(int hostId, boolean unmonitor) {
         hostId(hostId);
@@ -66,9 +49,30 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             if (unmonitor) IOTools.unmonitor(values);
             values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8 + 16);
             deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
-        } catch (Throwable ioe) {
+
+        } catch (Exception ioe) {
             throw new IORuntimeException(ioe);
         }
+    }
+
+    public static DistributedUniqueTimeProvider instance() {
+        return DistributedUniqueTimeProviderHolder.INSTANCE;
+    }
+
+    @SuppressWarnings("rawtypes")
+    private final Bytes bytes;
+    private final MappedFile file;
+    private final BinaryLongArrayReference values;
+    private final VanillaDistributedUniqueTimeDeduplicator deduplicator;
+    private TimeProvider provider = SystemTimeProvider.INSTANCE;
+    private int hostId;
+
+    @Override
+    protected void performClose() {
+        super.performClose();
+        Closeable.closeQuietly(values);
+        bytes.release(this);
+        file.releaseLast();
     }
 
     public static DistributedUniqueTimeProvider forHostId(int hostId) {
@@ -138,12 +142,13 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         return timestampWithHostId % HOST_IDS;
     }
 
-    @Override
-    protected void performClose() {
-        super.performClose();
-        values.close();
-        bytes.release(this);
-        file.releaseLast();
+    static class DistributedUniqueTimeProviderHolder {
+
+        private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
+        /*
+         * Instance you can use for generating timestamps with the default hostId embedded
+         */
+        public static final DistributedUniqueTimeProvider INSTANCE = new DistributedUniqueTimeProvider(DEFAULT_HOST_ID, true);
     }
 
     /**
