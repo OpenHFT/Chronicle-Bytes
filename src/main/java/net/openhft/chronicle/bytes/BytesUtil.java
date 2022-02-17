@@ -49,11 +49,6 @@ public enum BytesUtil {
     private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
     static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
-    static {
-        System.out.println("TIME_STAMP_DIR = " + TIME_STAMP_DIR);
-        System.out.println("TIME_STAMP_PATH = " + TIME_STAMP_PATH);
-    }
-
     /**
      * Is the whole class trivially copyable
      *
