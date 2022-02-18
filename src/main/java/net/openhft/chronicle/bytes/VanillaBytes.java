@@ -59,7 +59,7 @@
         /**
          * Return a VanillaBytes which can have it's bytesStore() replaced as needed.
          *
-         * @return a non elastic bytes with noByteStore()
+         * @return a non-elastic bytes with noByteStore()
          */
         @NotNull
         public static VanillaBytes<Void> vanillaBytes() {
