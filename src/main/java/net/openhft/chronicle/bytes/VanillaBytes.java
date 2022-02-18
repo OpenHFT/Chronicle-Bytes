@@ -408,8 +408,9 @@
             if (cs instanceof RandomDataInput)
                 return write((RandomDataInput) cs);
 
-            if (isDirectMemory() && cs instanceof String)
+            if (isDirectMemory() && cs instanceof String && this.bytesStore instanceof NativeBytesStore)
                 return append8bitNBSS((String) cs);
+
             return append8bit0(cs);
         }
 
