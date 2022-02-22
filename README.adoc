@@ -24,7 +24,7 @@ Chronicle Bytes has a similar purpose to Java NIO's ByteBuffer with some extensi
 
 The API supports.
 
-- 64-bit sizes
+- 63-bit sizes
 - UTF-8 and ISO-8859-1 encoded strings.
 - thread safe off heap memory operations.
 - deterministic release of resources via reference counting.
@@ -35,45 +35,59 @@ The API supports.
 === Data types supported
 
 |===
-| operation	| Indexed or streaming	| binary	| text
-| read/write binary primitives	| both	| float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong	| double, int, long, char, double with precision
-| read/write text	| both	| 8-bit/UTF-8 string with length or limit	| 8-bit/UTF-8 string
-| read/write other	| streaming	| histogram, named enum	| bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
-| data driven tests	| from files	| no	| yes
-| CAS	| indexed	| int, long	|
-| volatile read/write	| indexed	| byte, short, int, long, float, double	|
-| peek	| both	| unsigned byte	|
-| stop bit compression	| streaming	| int,long, double, float, char	|
-| search	| from start	| indexOf string, findByte	|
-| addAndGet	| indexed	| float, double, int, long	|
-| copy	| from start	| write, copy	|
-| hash	| from start	| byteSum, fastHash	|
-| bytes marshallable	| streaming	| nested data structures, expected types only.	|
+| operation    | Indexed or streaming    | binary    | text
+| read/write binary primitives    | both    | float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong    | double, int, long, char, double with precision
+| read/write text    | both    | 8-bit/UTF-8 string with length or limit    | 8-bit/UTF-8 string
+| read/write other    | streaming    | histogram, named enum    | bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
+| data driven tests    | from files    | no    | yes
+| CAS    | indexed    | int, long    |
+| volatile read/write    | indexed    | byte, short, int, long, float, double    |
+| peek    | both    | unsigned byte    |
+| stop bit compression    | streaming    | int,long, double, float, char    |
+| search    | from start    | indexOf string, findByte    |
+| addAndGet    | indexed    | float, double, int, long    |
+| copy    | from start    | write, copy    |
+| hash    | from start    | byteSum, fastHash    |
+| bytes marshallable    | streaming    | nested data structures, expected types only.    |
 |===
 
 === Data types explained
 
 |===
-| operation	|  explained |
-| read/write binary primitives	|  to read an write primitive data stuctures stored in a binary from |
-| read/write text	| to read an write text data |
-| read/write other	| to read an write other data |
-| data driven tests	| https://en.wikipedia.org/wiki/Data-driven_testing |
-| CAS	| an atomic instruction used in multithreading to achieve synchronization. It compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value. |
-| volatile read/write	|  http://tutorials.jenkov.com/java-concurrency/volatile.html |
-| peek	|  peek is an operation which returns the value of the bytes without effecting its read position |
-| stop bit compression	|  https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding |
-| search	|  is any algorithm which solves the search problem, namely, to retrieve information stored within some data structure |
-| addAndGet	| atomically adds the given value to the current value. |
-| copy	| to transfer data from one structure to another |
-| hash	|  https://en.wikipedia.org/wiki/Hash_function 	|
-| bytes marshallable	|  a serialization funciton	|
+| operation    |  explained |
+| read/write binary primitives    |  to read an write primitive data stuctures stored in a binary from |
+| read/write text    | to read an write text data |
+| read/write other    | to read an write other data |
+| data driven tests    | https://en.wikipedia.org/wiki/Data-driven_testing |
+| CAS    | an atomic instruction used in multithreading to achieve synchronization. It compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value. |
+| volatile read/write    |  http://tutorials.jenkov.com/java-concurrency/volatile.html |
+| peek    |  peek is an operation which returns the value of the bytes without effecting its read position |
+| stop bit compression    |  https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding |
+| search    |  is any algorithm which solves the search problem, namely, to retrieve information stored within some data structure |
+| addAndGet    | atomically adds the given value to the current value. |
+| copy    | to transfer data from one structure to another |
+| hash    |  https://en.wikipedia.org/wiki/Hash_function    |
+| bytes marshallable    |  a serialization function    |
 |===
 
 === Creating Bytes
 
+.Bytes which wraps an on heap byte[]
+[source,Java]
+----
+Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
+byte[] = bytes.underlyingObject();
+----
+
+.Bytes which wraps an on heap byte[] pre-sized
+[source,Java]
+----
+Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
+byte[] = bytes.underlyingObject();
+----
+
 .Bytes which wraps an on heap ByteBuffer
-[source, Java]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 ByteBuffer bb = bytes.underlyingObject();
@@ -84,6 +98,8 @@ ByteBuffer bb = bytes.underlyingObject();
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
 ByteBuffer bb = bytes.underlyingObject();
+
+bytes.releaseLast(); // when it can be freed.
 ----
 
 .Bytes which wraps some native memory
@@ -91,6 +107,7 @@ ByteBuffer bb = bytes.underlyingObject();
 ----
 Bytes bytes = Bytes.allocateElasticDirect(64);
 long address = bytes.address
+
 bytes.releaseLast(); // when it can be freed.
 ----
 
@@ -99,6 +116,7 @@ bytes.releaseLast(); // when it can be freed.
 ----
 Bytes bytes = Bytes.allocateElasticDirect();
 // use the bytes
+
 bytes.releaseLast(); // when it can be freed.
 ----
 
@@ -107,12 +125,13 @@ bytes.releaseLast(); // when it can be freed.
 A Bytes buffer provides the following cursors.
 
 - start: The smallest index in the buffer which is '0L'.
-- capacity: The largest possible capacity for the buffer which is usually 2147483632 (it can be more)
-for a Bytes buffer.
-- realCapacity: The current capacity of the buffer. Bytes are extended when it is required.
+- capacity: The largest possible capacity for the buffer which is usually 2147483632 (it can be more) for a Bytes buffer.
+- realCapacity: The current capacity of the buffer.
+Bytes are extended when it is required.
 - readLimit: The largest index that can be read from.
 - writeLimit: The largest index that can be written to.
-- readPosition: The index to read from. This index should be always smaller than writePosition.
+- readPosition: The index to read from.
+This index should be always smaller than writePosition.
 - writePosition: The index to write to.
 
 [#img-Bytes]
@@ -188,7 +207,7 @@ realCapacity of the Bytes.
 ----
 //Create a Bytes with initial capacity 14 and write into it "This is an example" that
 //needs 18 bytes.
-Bytes<ByteBuffer> bb = Bytes.elasticByteBuffer(14);
+Bytes<byte[]> bb = Bytes.allocateElasticOnHeap(14);
 bb.write("This is an example");
 ----
 The realCapacity of bb extends to 4096. Now, the cursors of bb Bytes are:
