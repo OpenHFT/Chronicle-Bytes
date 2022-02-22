@@ -1300,6 +1300,10 @@ enum BytesInternal {
             @NotNull StringBuilder sb = new StringBuilder(len);
             long readPosition = bytes.readPosition();
             long readLimit = bytes.readLimit();
+            if (bytes instanceof HexDumpBytes) {
+                readPosition = (int) readPosition;
+                readLimit = (int) readLimit;
+            }
             sb.append("[")
                     .append("pos: ").append(readPosition)
                     .append(", rlim: ").append(readLimit)
@@ -1319,7 +1323,7 @@ enum BytesInternal {
                 } catch (@NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
                     // ignore
                 }
-                toString(bytes, sb, start, readPosition, bytes.writePosition(), end);
+                toString(bytes, sb, start, readPosition, readLimit, end);
                 if (end < bytes.readLimit())
                     sb.append("...");
             } catch (Exception e) {
@@ -2465,6 +2469,7 @@ enum BytesInternal {
 
                 } else {
                     break;
+
                 }
                 if (in.readRemaining() == 0)
                     break;
