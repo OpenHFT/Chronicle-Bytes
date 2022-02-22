@@ -533,8 +533,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S unsafeWriteObject(Object o, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
         if (this.isDirectMemory()) {
-            final long dest = addressForWrite(writePosition());
             writeSkip(length); // blow up here if this isn't going to work
+            final long dest = addressForWrite(writePosition() - length);
             UnsafeMemory.MEMORY.copyMemory(o, offset, dest, length);
             return (S) this;
         }
@@ -553,8 +553,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     default S unsafeWrite(long address, int length) {
         if (isDirectMemory()) {
-            long destAddress = addressForWrite(writePosition());
             writeSkip(length); // blow up if there isn't that much space left
+            long destAddress = addressForWrite(writePosition() - length);
             UnsafeMemory.copyMemory(address, destAddress, length);
         } else {
             int i = 0;
