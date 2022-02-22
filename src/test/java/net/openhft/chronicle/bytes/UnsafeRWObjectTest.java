@@ -32,6 +32,8 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         assertEquals(bb1.l5, bb2.l5);
         assertEquals(bb1.l6, bb2.l6);
         assertEquals(bb1.l7, bb2.l7);
+
+        directElastic.releaseLast();
     }
 
     @Test
