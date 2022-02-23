@@ -10,6 +10,33 @@ import static org.junit.Assume.assumeTrue;
 
 public class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
+    public void longObjectElasticBuffer() {
+        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
+        assertEquals("[16, 80]", Arrays.toString(BytesUtil.triviallyCopyableRange(BB.class)));
+
+        Bytes<?> directElastic = Bytes.allocateElasticDirect(32);
+
+        BB bb1 = new BB(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L);
+
+        directElastic.unsafeWriteObject(bb1, 16, 8 * 8);
+
+        BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
+
+        directElastic.unsafeReadObject(bb2, 16, 8 * 8);
+
+        assertEquals(bb1.l0, bb2.l0);
+        assertEquals(bb1.l1, bb2.l1);
+        assertEquals(bb1.l2, bb2.l2);
+        assertEquals(bb1.l3, bb2.l3);
+        assertEquals(bb1.l4, bb2.l4);
+        assertEquals(bb1.l5, bb2.l5);
+        assertEquals(bb1.l6, bb2.l6);
+        assertEquals(bb1.l7, bb2.l7);
+
+        directElastic.releaseLast();
+    }
+
+    @Test
     public void shortObject() {
         assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
         assertEquals("[12, 32]",
