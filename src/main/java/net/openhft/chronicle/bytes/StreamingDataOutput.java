@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.Histogram;
@@ -48,6 +49,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>The use of this instance is single threaded, though the use of the data
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
+@DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     int JAVA9_STRING_CODER_LATIN = 0;
     int JAVA9_STRING_CODER_UTF16 = 1;
