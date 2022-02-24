@@ -392,37 +392,4 @@ public class NativeBytes<U>
     public long readRemaining() {
         return writePosition() - readPosition;
     }
-
-    @Deprecated(/* to be removed in x.23 */)
-    public static final class NativeSubBytes extends SubBytes {
-        private final NativeBytesStore nativeBytesStore;
-
-        public NativeSubBytes(@NotNull final BytesStore bytesStore,
-                              final long start,
-                              final long capacity)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException {
-            super(bytesStore, start, capacity);
-            nativeBytesStore = (NativeBytesStore) this.bytesStore;
-        }
-
-        @Override
-        public long read(final long offsetInRDI,
-                         @NotNull final byte[] bytes,
-                         final int offset,
-                         final int length) {
-
-            final int len = (int) Math.min(length, readLimit() - offsetInRDI);
-            int i;
-            final long address = nativeBytesStore.address + nativeBytesStore.translate(offsetInRDI);
-            for (i = 0; i < len - 7; i += 8)
-                UnsafeMemory.unsafePutLong(bytes, i, nativeBytesStore.memory.readLong(address + i));
-            if (i < len - 3) {
-                UnsafeMemory.unsafePutInt(bytes, i, nativeBytesStore.memory.readInt(address + i));
-                i += 4;
-            }
-            for (; i < len; i++)
-                UnsafeMemory.unsafePutByte(bytes, i, nativeBytesStore.memory.readByte(address + i));
-            return len;
-        }
-    }
 }

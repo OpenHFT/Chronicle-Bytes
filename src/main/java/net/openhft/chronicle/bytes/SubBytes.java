@@ -47,16 +47,6 @@ public class SubBytes<U> extends VanillaBytes<U> {
         readLimit(writeLimit());
     }
 
-    @Deprecated(/* to be removed in x.23 */)
-    public SubBytes(@NotNull BytesStore bytesStore)
-            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
-        super(bytesStore);
-        this.start = 0;
-        this.capacity = bytesStore.capacity();
-        clear();
-        readLimit(writeLimit());
-    }
-
     @Override
     public long capacity() {
         return capacity;

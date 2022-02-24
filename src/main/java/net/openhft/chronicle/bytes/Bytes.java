@@ -776,73 +776,6 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns the lowest value such that the contents of the provided {@code source } equals the contents of the
-     * provided {@code other } starting at the provided {@code fromSourceOffset}, or -1 is returned if no such value exists.
-     * <p>
-     * If the provided {@code fromSourceOffset} is negative, it will be treated as zero.
-     * <p>
-     * Code shared by String and StringBuffer to do searching. The
-     * source is the character array being searched, and the other
-     * is the string being searched for.
-     *
-     * @param source           the non-null read bytes being searched.
-     * @param other            the non-null read bytes being searched for.
-     * @param fromSourceOffset the index to begin searching from,
-     * @return index where contents equals or -1
-     * @throws NullPointerException if the provided {@code source} or the provided {@code source} is {@code null}
-     * @deprecated for removal in x.23
-     */
-    @Deprecated(/* suggest for removal in x.23 as this is supposed to be used only by other methods in this interface and can be internalised */)
-    static int indexOf(final @NotNull BytesStore source,
-                       final @NotNull BytesStore other,
-                       int fromSourceOffset) throws IllegalStateException {
-        throwExceptionIfReleased(source);
-        throwExceptionIfReleased(other);
-        long sourceOffset = source.readPosition();
-        long otherOffset = other.readPosition();
-        long sourceCount = source.readRemaining();
-        long otherCount = other.readRemaining();
-
-        if (fromSourceOffset >= sourceCount) {
-            return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
-        }
-        if (fromSourceOffset < 0) {
-            fromSourceOffset = 0;
-        }
-        if (otherCount == 0) {
-            return fromSourceOffset;
-        }
-        try {
-            byte firstByte = other.readByte(otherOffset);
-            long max = sourceOffset + (sourceCount - otherCount);
-
-            for (long i = sourceOffset + fromSourceOffset; i <= max; i++) {
-                /* Look for first character. */
-                if (source.readByte(i) != firstByte) {
-                    while (++i <= max && source.readByte(i) != firstByte) ;
-                }
-
-                /* Found first character, now look at the rest of v2 */
-                if (i <= max) {
-                    long j = i + 1;
-                    long end = j + otherCount - 1;
-                    for (long k = otherOffset + 1; j < end && source.readByte(j) == other.readByte(k); j++, k++) {
-                        // Do nothing
-                    }
-
-                    if (j == end) {
-                        /* Found whole string. */
-                        return Math.toIntExact(i - sourceOffset);
-                    }
-                }
-            }
-            return -1;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
-    }
-
-    /**
      * Creates and returns a new Bytes which is optionally unchecked as indicated by the provided {@code unchecked}.
      * <p>
      * This allows bounds checks to be turned off.
@@ -1156,7 +1089,47 @@ public interface Bytes<U> extends
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
-        return indexOf(this, source, 0);
+        throwExceptionIfReleased(this);
+        throwExceptionIfReleased(source);
+        long sourceOffset = readPosition();
+        long otherOffset = source.readPosition();
+        long sourceCount = readRemaining();
+        long otherCount = source.readRemaining();
+
+        if (sourceCount <= 0) {
+            return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
+        }
+        if (otherCount == 0) {
+            return 0;
+        }
+        try {
+            byte firstByte = source.readByte(otherOffset);
+            long max = sourceOffset + (sourceCount - otherCount);
+
+            for (long i = sourceOffset; i <= max; i++) {
+                /* Look for first character. */
+                if (readByte(i) != firstByte) {
+                    while (++i <= max && readByte(i) != firstByte) ;
+                }
+
+                /* Found first character, now look at the rest of v2 */
+                if (i <= max) {
+                    long j = i + 1;
+                    long end = j + otherCount - 1;
+                    for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
+                        // Do nothing
+                    }
+
+                    if (j == end) {
+                        /* Found whole string. */
+                        return Math.toIntExact(i - sourceOffset);
+                    }
+                }
+            }
+            return -1;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /**
@@ -1179,7 +1152,50 @@ public interface Bytes<U> extends
      */
     default int indexOf(@NotNull BytesStore source, int fromIndex)
             throws IllegalStateException {
-        return indexOf(this, source, fromIndex);
+        throwExceptionIfReleased(this);
+        throwExceptionIfReleased(source);
+        long sourceOffset = readPosition();
+        long otherOffset = source.readPosition();
+        long sourceCount = readRemaining();
+        long otherCount = source.readRemaining();
+
+        if (fromIndex < 0) {
+            fromIndex = 0;
+        }
+        if (fromIndex >= sourceCount) {
+            return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
+        }
+        if (otherCount == 0) {
+            return fromIndex;
+        }
+        try {
+            byte firstByte = source.readByte(otherOffset);
+            long max = sourceOffset + (sourceCount - otherCount);
+
+            for (long i = sourceOffset + fromIndex; i <= max; i++) {
+                /* Look for first character. */
+                if (readByte(i) != firstByte) {
+                    while (++i <= max && readByte(i) != firstByte) ;
+                }
+
+                /* Found first character, now look at the rest of v2 */
+                if (i <= max) {
+                    long j = i + 1;
+                    long end = j + otherCount - 1;
+                    for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
+                        // Do nothing
+                    }
+
+                    if (j == end) {
+                        /* Found whole string. */
+                        return Math.toIntExact(i - sourceOffset);
+                    }
+                }
+            }
+            return -1;
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     @Override

@@ -81,22 +81,6 @@ public enum PropertyReplacer {
         return result.toString();
     }
 
-    // use IOTools.readFile(Class, String) as this is needed for Java 11.
-    @Deprecated(/* to be removed in x.23 */)
-    @NotNull
-    public static String fileAsString(String fileName)
-            throws IOException {
-        try {
-            Class<PropertyReplacer> propertyReplacerClass = PropertyReplacer.class;
-            InputStream is = propertyReplacerClass.getResourceAsStream(fileName);
-            if (is != null)
-                return convertStreamToString(is);
-        } catch (Exception ignored) {
-            // Ignore
-        }
-        return BytesUtil.readFile(fileName).toString();
-    }
-
     @NotNull
     private static String convertStreamToString(@NotNull java.io.InputStream is) {
         java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
