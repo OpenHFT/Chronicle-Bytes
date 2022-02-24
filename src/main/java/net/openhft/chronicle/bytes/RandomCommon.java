@@ -66,6 +66,17 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Typically this calculates the difference however for HexDumpBytes it's not as simple.
+     *
+     * @param startPosition to compare against
+     * @return the length from the startPosition
+     */
+
+    default long lengthWritten(long startPosition) {
+        return writePosition() - startPosition;
+    }
+
+    /**
      * @return How many more bytes can we read.
      */
     default long readRemaining() {

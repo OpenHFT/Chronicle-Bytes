@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -141,7 +140,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 enc.writeByte((byte) 0);
                 generate(bytes, t);
                 bytes.cipher(encCipher, enc);
-                final long len = enc.writePosition() - pos - 1;
+                final long len = enc.lengthWritten(pos) - 1;
                 assertEquals(0, len % 16);
                 enc.writeUnsignedByte(pos, Maths.toUInt8(len));
 //                System.out.println(len);

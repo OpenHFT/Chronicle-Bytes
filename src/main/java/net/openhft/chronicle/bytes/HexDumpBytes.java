@@ -261,6 +261,8 @@ public class HexDumpBytes
             throws IllegalStateException {
         base.clear();
         text.clear();
+        comment.clear();
+        startOfLine = 0;
         return this;
     }
 
@@ -944,6 +946,11 @@ public class HexDumpBytes
     @Override
     public long writePosition() {
         return base.writePosition() | (text.writePosition() << 32);
+    }
+
+    @Override
+    public long lengthWritten(long startPosition) {
+        return base.writePosition() - (startPosition & 0xFFFFFFFFL);
     }
 
     private void copyToText(long pos)

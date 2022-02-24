@@ -1286,7 +1286,7 @@ public interface Bytes<U> extends
         try {
             writeUnsignedShort(0);
             marshallable.writeMarshallable(this);
-            long length = writePosition() - position - 2;
+            long length = lengthWritten(position) - 2;
             if (length >= 1 << 16)
                 throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
             writeUnsignedShort(position, (int) length);
