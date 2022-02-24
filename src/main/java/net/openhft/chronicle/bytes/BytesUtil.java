@@ -172,29 +172,6 @@ public enum BytesUtil {
         }
     }
 
-    /**
-     * Returns if the provided nullable BytesStore arguments are equal to each other.
-     * <p>
-     * Consequently, if both arguments are {@code null}, {@code true}
-     * is returned and if exactly one argument is {@code null}, {@code
-     * false} is returned. Otherwise, equality is determined by comparing the content
-     * of the two provided arguments.
-     * <p>
-     * Bytes::equals will eventually be the same as Object::equals and so this
-     * method can provide a bridge between the old behaviour and the new behaviour.
-     *
-     * @param a a ByteStore
-     * @param b a ByteStore to be compared with {@code a} for equality
-     * @return if the arguments are equal to each other, or false if either are released.
-     * @see Object#equals(Object)
-     * @deprecated Use BytesStore.contentEquals(ByteStore)
-     */
-    @Deprecated(/*TODO remove in x.23*/)
-    public static boolean contentEqual(@Nullable final BytesStore a,
-                                       @Nullable final BytesStore b) {
-        return a == b || (a != null && a.contentEquals(b));
-    }
-
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
@@ -345,12 +322,6 @@ public enum BytesUtil {
         sw.append(s).append("\n");
         t.printStackTrace(new PrintWriter(sw));
         return sw.toString();
-    }
-
-    // calls the BackgroundResourceReleaser and AbstractCloseable.assertCloseableClose first.
-    @Deprecated(/*to be removed in x.23*/)
-    public static void checkRegisteredBytes() {
-        AbstractReferenceCounted.assertReferencesReleased();
     }
 
     public static boolean byteToBoolean(byte b) {

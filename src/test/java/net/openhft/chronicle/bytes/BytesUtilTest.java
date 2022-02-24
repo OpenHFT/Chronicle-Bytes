@@ -89,25 +89,10 @@ public class BytesUtilTest extends BytesTestCommon {
     }
 
     @Test
-    public void contentsEqualNullNull() {
-        assertTrue(BytesUtil.contentEqual(null, null));
-    }
-
-    @Test
     public void contentsEqualBytesNull() {
         final Bytes<?> bytes = Bytes.from("A");
         try {
-            assertFalse(BytesUtil.contentEqual(bytes, null));
-        } finally {
-            bytes.releaseLast();
-        }
-    }
-
-    @Test
-    public void contentsEqualNullBytes() {
-        final Bytes<?> bytes = Bytes.from("A");
-        try {
-            assertFalse(BytesUtil.contentEqual(null, bytes));
+            assertFalse(bytes.contentEquals(null));
         } finally {
             bytes.releaseLast();
         }
@@ -118,7 +103,7 @@ public class BytesUtilTest extends BytesTestCommon {
         final Bytes<?> a = Bytes.from("A");
         final Bytes<?> b = Bytes.from("A");
         try {
-            assertTrue(BytesUtil.contentEqual(a, b));
+            assertTrue(a.contentEquals(b));
         } finally {
             a.releaseLast();
             b.releaseLast();

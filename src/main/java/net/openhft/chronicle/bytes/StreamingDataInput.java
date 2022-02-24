@@ -362,24 +362,6 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
-    @Deprecated(/* remove in x.23 */)
-    default <C extends Appendable & CharSequence> boolean read8bit(@NotNull C sb)
-            throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalArgumentException, IllegalStateException {
-        AppendableUtil.setLength(sb, 0);
-        if (readRemaining() <= 0)
-            return true;
-        long len0 = BytesInternal.readStopBit(this);
-        if (len0 == -1)
-            return false;
-        int len = Maths.toUInt31(len0);
-        try {
-            AppendableUtil.parse8bit(this, sb, len);
-        } catch (IOException e) {
-            throw new IORuntimeException(e);
-        }
-        return true;
-    }
-
     default boolean read8bit(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);

@@ -779,13 +779,6 @@ public class HexDumpBytes
     }
 
     @Nullable
-    public String readUTFΔ()
-            throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return BytesInternal.readUtf8(base);
-
-    }
-
-    @Nullable
     @Override
     public String read8bit()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -827,13 +820,6 @@ public class HexDumpBytes
     public boolean read8bit(@NotNull Bytes b)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
         return base.read8bit(b);
-
-    }
-
-    @Override
-    public <C extends Appendable & CharSequence> boolean read8bit(@NotNull C sb)
-            throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return base.read8bit(sb);
 
     }
 
@@ -1434,20 +1420,6 @@ public class HexDumpBytes
 
         } catch (BufferUnderflowException | IllegalArgumentException e) {
             throw new AssertionError(e);
-        } finally {
-            copyToText(pos);
-        }
-    }
-
-    @NotNull
-    @Deprecated(/* for removal in x.23, appears to be removed from other Bytes implementations */)
-    public Bytes<Void> writeUTFΔ(CharSequence cs)
-            throws BufferOverflowException, IllegalStateException, IllegalArgumentException, BufferUnderflowException {
-        long pos = base.writePosition();
-        try {
-            base.writeUtf8(cs);
-            return this;
-
         } finally {
             copyToText(pos);
         }

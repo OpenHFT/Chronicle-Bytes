@@ -73,12 +73,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     S writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException;
 
-    @Deprecated(/* to be removed in x.23*/)
-    default S alignBy(int width)
-            throws BufferOverflowException, IllegalStateException {
-        return writeSkip((-writePosition()) & (width - 1));
-    }
-
     /**
      * obtain the writePosition skipping any padding needed for a header.
      *
