@@ -23,5 +23,7 @@ public interface MethodReaderBuilder {
 
     MethodReaderBuilder warnMissing(boolean warnMissing);
 
+    MethodReaderBuilder metaDataHandler(Object... components);
+
     MethodReader build(Object... components);
 }

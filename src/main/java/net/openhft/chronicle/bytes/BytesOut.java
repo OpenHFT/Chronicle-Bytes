@@ -54,7 +54,7 @@ public interface BytesOut<U> extends
 
         //noinspection unchecked
         return (T) Proxy.newProxyInstance(tClass.getClassLoader(), interfaces,
-                new BinaryBytesMethodWriterInvocationHandler(MethodEncoderLookup.BY_ANNOTATION, this));
+                new BinaryBytesMethodWriterInvocationHandler(tClass, MethodEncoderLookup.BY_ANNOTATION, this));
     }
 
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)

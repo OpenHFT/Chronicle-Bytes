@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Function;
@@ -35,8 +34,8 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
     private final Map<Method, MethodEncoder> methodToIdMap = new LinkedHashMap<>();
 
     @SuppressWarnings("rawtypes")
-    public BinaryBytesMethodWriterInvocationHandler(Function<Method, MethodEncoder> methodToId, BytesOut out) {
-        super(HashMap::new);
+    public BinaryBytesMethodWriterInvocationHandler(Class tClass, Function<Method, MethodEncoder> methodToId, BytesOut out) {
+        super(tClass);
         this.methodToId = methodToId;
         this.out = out;
     }

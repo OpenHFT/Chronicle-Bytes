@@ -70,6 +70,11 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
         throw new UnsupportedOperationException();
     }
 
+    @Override
+    public MethodReaderBuilder metaDataHandler(Object... components) {
+        throw new UnsupportedOperationException();
+    }
+
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet, methodEncoderLookup, objects);
     }
