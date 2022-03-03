@@ -49,9 +49,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class HexDumpBytes
         implements Bytes<Void> {
 
+    public static final long MASK = 0xFFFFFFFFL;
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
-
     private final NativeBytes<Void> base;
     private final Bytes<byte[]> text = Bytes.allocateElasticOnHeap(1024);
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
@@ -299,8 +299,8 @@ public class HexDumpBytes
     @Override
     public boolean compareAndSwapInt(long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException {
-        if (base.compareAndSwapInt(offset & 0xFFFFFFFFL, expected, value)) {
-            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+        if (base.compareAndSwapInt(offset & MASK, expected, value)) {
+            copyToText(offset & MASK, offset >>> 32, 4);
             return true;
         }
         return false;
@@ -309,7 +309,7 @@ public class HexDumpBytes
     @Override
     public void testAndSetInt(long offset, int expected, int value)
             throws IllegalStateException, BufferOverflowException {
-        long off = offset & 0xFFFFFFFFL;
+        long off = offset & MASK;
         base.testAndSetInt(off, expected, value);
         copyToText(off, offset >>> 32, 4);
     }
@@ -317,8 +317,8 @@ public class HexDumpBytes
     @Override
     public boolean compareAndSwapLong(long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException {
-        if (base.compareAndSwapLong(offset & 0xFFFFFFFFL, expected, value)) {
-            copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
+        if (base.compareAndSwapLong(offset & MASK, expected, value)) {
+            copyToText(offset & MASK, offset >>> 32, 8);
             return true;
         }
         return false;
@@ -382,8 +382,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeByte(long offset, byte i8)
             throws BufferOverflowException, IllegalStateException {
-        base.writeByte(offset & 0xFFFFFFFFL, i8);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 1);
+        base.writeByte(offset & MASK, i8);
+        copyToText(offset & MASK, offset >>> 32, 1);
         return this;
     }
 
@@ -391,8 +391,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeShort(long offset, short i)
             throws BufferOverflowException, IllegalStateException {
-        base.writeShort(offset & 0xFFFFFFFFL, i);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 2);
+        base.writeShort(offset & MASK, i);
+        copyToText(offset & MASK, offset >>> 32, 2);
         return this;
     }
 
@@ -400,8 +400,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeInt24(long offset, int i)
             throws BufferOverflowException, IllegalStateException {
-        base.writeInt24(offset & 0xFFFFFFFFL, i);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 3);
+        base.writeInt24(offset & MASK, i);
+        copyToText(offset & MASK, offset >>> 32, 3);
         return this;
     }
 
@@ -416,8 +416,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeOrderedInt(long offset, int i)
             throws BufferOverflowException, IllegalStateException {
-        base.writeOrderedInt(offset & 0xFFFFFFFFL, i);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+        base.writeOrderedInt(offset & MASK, i);
+        copyToText(offset & MASK, offset >>> 32, 4);
         return this;
     }
 
@@ -432,8 +432,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeOrderedLong(long offset, long i)
             throws BufferOverflowException, IllegalStateException {
-        base.writeOrderedLong(offset & 0xFFFFFFFFL, i);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
+        base.writeOrderedLong(offset & MASK, i);
+        copyToText(offset & MASK, offset >>> 32, 8);
         return this;
     }
 
@@ -441,8 +441,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeFloat(long offset, float d)
             throws BufferOverflowException, IllegalStateException {
-        base.writeFloat(offset & 0xFFFFFFFFL, d);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 4);
+        base.writeFloat(offset & MASK, d);
+        copyToText(offset & MASK, offset >>> 32, 4);
         return this;
     }
 
@@ -450,8 +450,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> writeDouble(long offset, double d)
             throws BufferOverflowException, IllegalStateException {
-        base.writeDouble(offset & 0xFFFFFFFFL, d);
-        copyToText(offset & 0xFFFFFFFFL, offset >>> 32, 8);
+        base.writeDouble(offset & MASK, d);
+        copyToText(offset & MASK, offset >>> 32, 8);
         return this;
     }
 
@@ -530,10 +530,16 @@ public class HexDumpBytes
     }
 
     @Override
+    public @NotNull Bytes<Void> zeroOut(long start, long end) throws IllegalStateException {
+        return base.zeroOut(start & MASK, end & MASK);
+    }
+
+    @Override
     @NotNull
     public Bytes<Void> readPosition(long position)
             throws BufferUnderflowException, IllegalStateException {
-        base.readPosition(position);
+        base.readPosition(position & MASK);
+        text.readPosition(position >>> 32);
         return this;
     }
 
@@ -541,7 +547,8 @@ public class HexDumpBytes
     @NotNull
     public Bytes<Void> readLimit(long limit)
             throws BufferUnderflowException {
-        base.readLimit(limit);
+        base.readLimit(limit & MASK);
+        text.readPosition(limit >>> 32);
         return this;
     }
 
@@ -899,7 +906,7 @@ public class HexDumpBytes
     public Bytes<Void> writePosition(long position)
             throws BufferOverflowException {
         requireNonNegative(position);
-        base.writePosition(position & 0xFFFFFFFFL);
+        base.writePosition(position & MASK);
         text.writePosition(position >>> 32);
         return this;
     }
@@ -950,7 +957,7 @@ public class HexDumpBytes
 
     @Override
     public long lengthWritten(long startPosition) {
-        return base.writePosition() - (startPosition & 0xFFFFFFFFL);
+        return base.writePosition() - (startPosition & MASK);
     }
 
     private void copyToText(long pos)
