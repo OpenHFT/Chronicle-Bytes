@@ -633,7 +633,7 @@ public class BytesMarshallableTest extends BytesTestCommon {
             bma.doubles = new double[]{0x1.23456789ABCDEp0};
             bma.writeMarshallable(bytes);
             final String expected = NativeBytes.areNewGuarded() ?
-                    "   a6 05 00 00 00 a4 48 a4 65 a4 6c a4 6c a4 6f    # bytes\n" +
+                    "   a6 05 00 00 00 48 65 6c 6c 6f                   # bytes\n" +
                             "   a6 01 00 00 00 a6 78 56 34 12                   # ints\n" +
                             "   a6 01 00 00 00 90 b4 a2 91 3f                   # floats\n" +
                             "   a6 01 00 00 00 a7 ef cd ab 89 67 45 23 01       # longs\n" +

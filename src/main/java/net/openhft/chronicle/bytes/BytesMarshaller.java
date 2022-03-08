@@ -564,8 +564,7 @@ public class BytesMarshaller<T> {
                     write.writeInt(~0);
                 } else {
                     write.writeInt(array.length);
-                    for (int i = 0; i < array.length; i++)
-                        write.writeByte(array[i]);
+                    write.write(array);
                 }
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
@@ -585,8 +584,7 @@ public class BytesMarshaller<T> {
                         array = new byte[len];
                         field.set(o, array);
                     }
-                    for (int i = 0; i < len; i++)
-                        array[i] = read.readByte();
+                    read.read(array);
                 }
             } catch (IllegalAccessException e) {
                 throw new AssertionError(e);
