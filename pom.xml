@@ -148,9 +148,9 @@
                             <goal>enforcer</goal>
                         </goals>
                         <configuration>
-                            <referenceVersion>2.22ea3</referenceVersion>
+                            <referenceVersion>2.23ea0</referenceVersion>
                             <artifactsURI>https://teamcity.chronicle.software/repository/download</artifactsURI>
-                            <binaryCompatibilityPercentageRequired>81.2</binaryCompatibilityPercentageRequired>
+                            <binaryCompatibilityPercentageRequired>100.0</binaryCompatibilityPercentageRequired>
                         </configuration>
                     </execution>
                 </executions>
