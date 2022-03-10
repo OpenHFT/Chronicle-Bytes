@@ -92,12 +92,12 @@ enum BytesInternal {
     private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
-    private static final int MAX_STRING_LEN = Integer.getInteger("bytes.max-string-len", 128 * 1024);
+    private static final int MAX_STRING_LEN = Jvm.getInteger("bytes.max-string-len", 128 * 1024);
     private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
     static {
         try {
-            SI = new StringInternerBytes(Integer.getInteger("wire.string-interner.size", 4096));
+            SI = new StringInternerBytes(Jvm.getInteger("wire.string-interner.size", 4096));
             ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
         } catch (Exception e) {
             throw new AssertionError(e);

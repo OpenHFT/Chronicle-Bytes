@@ -42,8 +42,8 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
 
     MappedUniqueTimeProvider() {
         try {
-            String user = System.getProperty("user.name", "unknown");
-            String timeStampDir = System.getProperty("timestamp.dir", OS.TMP);
+            String user = Jvm.getProperty("user.name", "unknown");
+            String timeStampDir = Jvm.getProperty("timestamp.dir", OS.TMP);
             final File timeStampPath = new File(timeStampDir, ".time-stamp." + user + ".dat");
             MappedFile file = MappedFile.ofSingle(timeStampPath, OS.pageSize(), false);
             bytes = file.acquireBytesForWrite(this, 0);

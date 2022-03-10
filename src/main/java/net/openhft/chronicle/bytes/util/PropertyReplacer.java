@@ -17,11 +17,9 @@
  */
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Jvm;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -41,7 +39,7 @@ public enum PropertyReplacer {
             String property = matcher.group(1);
 
             //look up property and replace
-            String p = System.getProperty(property);
+            String p = Jvm.getProperty(property);
 
             if (p == null) {
                 throw new IllegalArgumentException(String.format("System property is missing: " +
