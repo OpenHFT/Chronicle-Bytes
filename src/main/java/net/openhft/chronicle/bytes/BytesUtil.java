@@ -21,7 +21,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.*;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -45,9 +44,9 @@ public enum BytesUtil {
     ; // none
     private static final int[] NO_INTS = {};
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
-    private static final String USER_NAME = System.getProperty("user.name", "unknown");
-    private static final String TIME_STAMP_DIR = System.getProperty("timestamp.dir", OS.TMP);
-    static final String TIME_STAMP_PATH = System.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
+    private static final String USER_NAME = Jvm.getProperty("user.name", "unknown");
+    private static final String TIME_STAMP_DIR = Jvm.getProperty("timestamp.dir", OS.TMP);
+    static final String TIME_STAMP_PATH = Jvm.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
     /**
      * Is the whole class trivially copyable

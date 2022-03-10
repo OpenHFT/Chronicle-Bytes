@@ -144,7 +144,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
 
     static class DistributedUniqueTimeProviderHolder {
 
-        private static final Integer DEFAULT_HOST_ID = Integer.getInteger("hostId", 0);
+        private static final Integer DEFAULT_HOST_ID = Jvm.getInteger("hostId", 0);
         /*
          * Instance you can use for generating timestamps with the default hostId embedded
          */
