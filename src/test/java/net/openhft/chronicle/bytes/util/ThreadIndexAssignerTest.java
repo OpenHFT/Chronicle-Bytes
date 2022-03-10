@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.bytes.ref.BinaryIntArrayReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -15,6 +16,7 @@ import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadIndexAssignerTest extends BytesTestCommon {
     @Test
@@ -26,10 +28,15 @@ public class ThreadIndexAssignerTest extends BytesTestCommon {
         final BlockingQueue<String> t2started = new LinkedBlockingQueue<>();
         final BlockingQueue<String> testDone = new LinkedBlockingQueue<>();
 
-        final Bytes<?> bytes = Bytes.allocateDirect(64);
+        final Bytes<?> bytes = new HexDumpBytes();
         final BinaryIntArrayReference iav = new BinaryIntArrayReference(2);
         // write the template
         iav.writeMarshallable(bytes);
+        assertEquals("" +
+                "                                                # BinaryIntArrayReference\n" +
+                "02 00 00 00 00 00 00 00                         # capacity\n" +
+                "00 00 00 00 00 00 00 00                         # used\n" +
+                "00 00 00 00 00 00 00 00                         # values\n", bytes.toHexString());
         // bind to the template
         iav.readMarshallable(bytes);
         ThreadIndexAssigner ta = new ThreadIndexAssigner(iav) {

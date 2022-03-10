@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesMarshallable;
-import net.openhft.chronicle.bytes.BytesTestCommon;
-import net.openhft.chronicle.bytes.NativeBytes;
+import net.openhft.chronicle.bytes.*;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -52,19 +49,25 @@ public class BinaryLongArrayReferenceTest extends BytesTestCommon {
     @Test
     public void marshallable() {
         assumeFalse(NativeBytes.areNewGuarded());
-        final Bytes<?> bytes = Bytes.allocateElasticDirect(256);
+        final Bytes<?> bytes = new HexDumpBytes();
         try {
             final LongArrays la = new LongArrays(4, 8);
             la.writeMarshallable(bytes);
 
             final String expected =
-                    "00000000 04 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "00000010 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "........\n" +
-                            "00000030 08 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "00000040 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
-                            "........\n" +
-                            "00000070 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n";
+                    "                                                # first\n" +
+                            "                                                # BinaryLongArrayReference\n" +
+                            "   04 00 00 00 00 00 00 00                         # capacity\n" +
+                            "   00 00 00 00 00 00 00 00                         # used\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # second\n" +
+                            "                                                # BinaryLongArrayReference\n" +
+                            "   08 00 00 00 00 00 00 00                         # capacity\n" +
+                            "   00 00 00 00 00 00 00 00                         # used\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 # values\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n" +
+                            "   00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00\n";
 
             final String actual = bytes.toHexString();
 

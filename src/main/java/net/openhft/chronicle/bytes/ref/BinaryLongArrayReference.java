@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.IdentityHashMap;
 import java.util.Set;
 
+import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
 /**
@@ -213,6 +214,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throw new DecoratedBufferOverflowException(e.toString());
         }
 
+        if (bytes instanceof HexDumpBytes) {
+            offset &= MASK;
+        }
         assert (offset & 7) == 0 : "offset=" + offset;
         super.bytesStore(bytesStore, (offset + 7) & ~7, length);
         this.length = length;
@@ -244,11 +248,20 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @Override
     public void writeMarshallable(BytesOut bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
+        boolean retainsComments = bytes.retainsComments();
+        if (retainsComments)
+            bytes.comment("BinaryLongArrayReference");
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
+            if (retainsComments)
+                bytes.comment("capacity");
             bytes.writeLong(capacity);
+            if (retainsComments)
+                bytes.comment("used");
             bytes.writeLong(0);
+            if (retainsComments)
+                bytes.comment("values");
             bytes.writeSkip(capacity << SHIFT);
         } else {
             try {
