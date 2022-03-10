@@ -61,12 +61,13 @@ public class BytesTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Native", NATIVE},
-                {"Heap", HEAP},
-                {"Heap ByteBuffer", BYTE_BUFFER},
-                {"Heap Unchecked", HEAP_UNCHECKED},
-                {"Heap Embedded", HEAP_EMBEDDED}
+//                {"Native Unchecked", NATIVE_UNCHECKED},
+//                {"Native", NATIVE},
+//                {"Heap", HEAP},
+//                {"Heap ByteBuffer", BYTE_BUFFER},
+//                {"Heap Unchecked", HEAP_UNCHECKED},
+//                {"Heap Embedded", HEAP_EMBEDDED},
+                {"Hex Dump", HEX_DUMP}
         });
     }
 
@@ -85,6 +86,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testElastic2() {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes bytes = alloc1.elasticBytes(2);
         assumeTrue(bytes.isElastic());
 
@@ -100,6 +102,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void throwExceptionIfReleased() {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes bytes = alloc1.elasticBytes(16);
         ((AbstractReferenceCounted) bytes).throwExceptionIfReleased();
         postTest(bytes);
@@ -208,6 +211,7 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void toHexString() {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
+        assumeFalse(alloc1 == HEX_DUMP);
 
         Bytes bytes = alloc1.elasticBytes(1020);
         try {
@@ -233,6 +237,7 @@ public class BytesTest extends BytesTestCommon {
     public void fromHexString() {
         assumeFalse(NativeBytes.areNewGuarded());
         assumeFalse(alloc1 == HEAP_EMBEDDED);
+        assumeFalse(alloc1 == HEX_DUMP);
 
         Bytes bytes = alloc1.elasticBytes(260);
         try {
@@ -281,6 +286,7 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testStopBitDouble()
             throws IORuntimeException {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes b = alloc1.elasticBytes(1);
         try {
             testSBD(b, -0.0, "00000000 40                                               @         " +
@@ -324,6 +330,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testPartialWriteArray() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull byte[] array = "Hello World".getBytes(ISO_8859_1);
         Bytes to = alloc1.fixedBytes(6);
         try {
@@ -335,6 +342,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testPartialWriteBB() {
+        assumeFalse(alloc1 == HEX_DUMP);
         ByteBuffer bb = ByteBuffer.wrap("Hello World".getBytes(ISO_8859_1));
         Bytes to = alloc1.fixedBytes(6);
 
@@ -345,6 +353,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testCompact() {
+        assumeFalse(alloc1 == HEX_DUMP);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes from = alloc1.elasticBytes(1);
         try {
@@ -383,16 +392,17 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testUnwrite()
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
+        assumeFalse(alloc1 == HEX_DUMP);
         assumeFalse(NativeBytes.areNewGuarded());
         Bytes bytes = alloc1.elasticBytes(1);
         try {
             for (int i = 0; i < 26; i++) {
                 bytes.writeUnsignedByte('A' + i);
             }
-            assertEquals(26, bytes.writePosition());
+            assertEquals(26, (int) bytes.writePosition());
             assertEquals("ABCDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
             bytes.unwrite(1, 1);
-            assertEquals(25, bytes.writePosition());
+            assertEquals(25, (int) bytes.writePosition());
             assertEquals("ACDEFGHIJKLMNOPQRSTUVWXYZ", bytes.toString());
         } finally {
             postTest(bytes);
@@ -402,6 +412,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException()
             throws BufferOverflowException, IllegalStateException {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(4);
         try {
             if (bytes.unchecked())
@@ -415,6 +426,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException()
             throws IllegalStateException, BufferOverflowException {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(1);
 
         try {
@@ -428,6 +440,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsBufferOverflowException() {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(4);
         try {
             bytes.writeInt(-1, 1);
@@ -438,6 +451,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
+        assumeFalse(alloc1 == HEX_DUMP);
         Bytes<ByteBuffer> bytes = alloc1.fixedBytes(1);
         try {
             bytes.writeInt(-1, 1);
@@ -552,6 +566,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendBase() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
         for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
             for (int base : new int[]{10, 16}) {
@@ -565,6 +580,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendBase16() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
         for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
             String s = Long.toHexString(value).toLowerCase();
@@ -576,6 +592,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testMove() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.append("Hello World");
@@ -590,6 +607,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testMove2() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
         b.append("0123456789");
@@ -603,6 +621,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testMoveForward() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
         b.append("0123456789abcdefg");
@@ -613,6 +632,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testMoveBackward() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
 
         b.append("0123456789abcdefg");
@@ -708,6 +728,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void readVolatile() {
+        assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes b = alloc1.elasticBytes(16);
         try {
             b.writeVolatileByte(0, (byte) 1);

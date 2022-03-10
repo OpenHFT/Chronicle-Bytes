@@ -17,7 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -53,7 +53,7 @@ public class HexDumpBytes
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final Pattern HEX_PATTERN = Pattern.compile("[0-9a-fA-F]{1,2}");
     private final NativeBytes<Void> base;
-    private final Bytes<byte[]> text = Bytes.allocateElasticOnHeap(1024);
+    private final Bytes<byte[]> text;
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
@@ -63,15 +63,18 @@ public class HexDumpBytes
     public HexDumpBytes() {
         try {
             base = Bytes.allocateElasticDirect(256);
+            text = Bytes.allocateElasticOnHeap(1024);
         } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }
     }
 
-    HexDumpBytes(@NotNull BytesStore base, Bytes text) {
+    HexDumpBytes(@NotNull NativeBytes<Void> base, @NotNull BytesStore text) {
         try {
-            this.base = Bytes.allocateElasticDirect(256);
+            final long size = base.readRemaining();
+            this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
             this.base.write(base);
+            this.text = Bytes.allocateElasticOnHeap((int) text.readRemaining());
             this.text.write(text);
         } catch (BufferOverflowException | IllegalStateException | IllegalArgumentException e) {
             throw new AssertionError(e);

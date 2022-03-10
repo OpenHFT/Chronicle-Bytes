@@ -107,6 +107,22 @@ public enum Allocator {
             Padding padding = new Padding();
             return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
         }
+    },
+    HEX_DUMP {
+        @Override
+        @NotNull Bytes<?> elasticBytes(int capacity) {
+            return new HexDumpBytes();
+        }
+
+        @Override
+        @NotNull ByteBuffer byteBuffer(int capacity) {
+            throw new IllegalArgumentException();
+        }
+
+        @Override
+        Bytes fixedBytes(int capacity) {
+            return new HexDumpBytes();
+        }
     };
 
     @NotNull

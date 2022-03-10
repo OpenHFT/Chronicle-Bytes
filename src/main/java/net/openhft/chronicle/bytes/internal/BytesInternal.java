@@ -1406,14 +1406,15 @@ enum BytesInternal {
             if (start < bytes.start()) start = bytes.start();
             long realCapacity = bytes.realCapacity();
             if (end > realCapacity) end = realCapacity;
-            if (readPosition >= start && bytes instanceof Bytes) {
+            boolean showStartEnd = bytes instanceof Bytes && writePosition < end;
+            if (readPosition >= start && showStartEnd) {
                 long last = Math.min(readPosition, end);
                 toString(bytes, sb, start, last);
                 sb.append('\u01C1');
             }
             toString(bytes, sb, Math.max(readPosition, start), Math.min(writePosition, end));
             if (writePosition <= end) {
-                if (bytes instanceof Bytes)
+                if (showStartEnd)
                     sb.append('\u2021');
                 toString(bytes, sb, writePosition, end);
             }
