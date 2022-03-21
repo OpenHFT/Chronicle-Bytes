@@ -20,8 +20,15 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.bytes.MappedBytesStore;
+import net.openhft.chronicle.bytes.MappedFile;
+import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
 
 import static org.junit.Assert.*;
 
@@ -53,5 +60,21 @@ public class BinaryLongReferenceTest extends BytesTestCommon {
             assertEquals(20L, nbs.readVolatileLong(16));
         }
         nbs.releaseLast();
+    }
+
+    @Test
+    public void testCanAssignByteStoreWithExistingOffsetNotInRange() throws IOException {
+        final File tempFile = IOTools.createTempFile("testCanAssignByteStoreWithExistingOffsetNotInRange");
+        final ReferenceOwner referenceOwner = ReferenceOwner.temporary("test");
+        try (final MappedFile mappedFile = MappedFile.mappedFile(tempFile, 4096)) {
+            MappedBytesStore bytes = mappedFile.acquireByteStore(referenceOwner, 8192);
+            try (final BinaryLongReference blr = new BinaryLongReference()) {
+                blr.bytesStore(bytes, 8192, 8);
+                blr.setValue(1234);
+                assertEquals(1234, blr.getValue());
+            } finally {
+                bytes.release(referenceOwner);
+            }
+        }
     }
 }
