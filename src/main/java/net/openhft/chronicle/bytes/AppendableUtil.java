@@ -244,21 +244,16 @@ public enum AppendableUtil {
         }
     }
 
-    public static long findUtf8Length(@NotNull CharSequence str)
+    public static long findUtf8Length(@NotNull final CharSequence str)
             throws IndexOutOfBoundsException {
-        int strlen = str.length();
+        final int strlen = str.length();
         long utflen = strlen;/* use charAt instead of copying String to char array */
         for (int i = 0; i < strlen; i++) {
-            char c = str.charAt(i);
+            final char c = str.charAt(i);
             if (c <= 0x007F) {
                 continue;
             }
-            if (c <= 0x07FF) {
-                utflen++;
-
-            } else {
-                utflen += 2;
-            }
+            utflen += (c <= 0x07FF) ? 1 : 2;
         }
         return utflen;
     }
