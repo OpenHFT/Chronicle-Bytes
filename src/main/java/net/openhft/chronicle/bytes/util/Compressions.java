@@ -33,7 +33,6 @@ import java.util.zip.*;
 @SuppressWarnings("rawtypes")
 public enum Compressions implements Compression {
     Binary {
-        @NotNull
         @Override
         public byte[] compress(byte[] bytes) {
             return bytes;
