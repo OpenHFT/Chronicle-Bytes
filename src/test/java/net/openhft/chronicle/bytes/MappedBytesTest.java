@@ -518,6 +518,10 @@ public class MappedBytesTest extends BytesTestCommon {
             original.writeInt(54, 12345678);
 //            System.out.println("Original(54): " + original.readInt(54));
 //            System.out.println("PBS(4): " + pbs.readInt(4));
+
+            assertEquals(12345678, original.readInt(54));
+            assertEquals(4321, original.readInt(50));
+
         }
     }
 
