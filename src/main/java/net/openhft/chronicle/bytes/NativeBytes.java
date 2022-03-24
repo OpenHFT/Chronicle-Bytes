@@ -260,6 +260,11 @@ public class NativeBytes<U>
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
+        resizeHelper(size, isByteBufferBacked);
+    }
+
+    private void resizeHelper(final long size,
+                              final boolean isByteBufferBacked) {
         final BytesStore store;
         int position = 0;
         try {
