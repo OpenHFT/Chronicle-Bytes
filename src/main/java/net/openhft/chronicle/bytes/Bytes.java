@@ -1087,14 +1087,14 @@ public interface Bytes<U> extends
      * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source} is {@code null}
      */
-    default long indexOf(@NotNull Bytes source)
+    default long indexOf(@NotNull final Bytes source)
             throws IllegalStateException {
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
-        long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
+        final long sourceOffset = readPosition();
+        final long otherOffset = source.readPosition();
+        final long sourceCount = readRemaining();
+        final long otherCount = source.readRemaining();
 
         if (sourceCount <= 0) {
             return Math.toIntExact(otherCount == 0 ? sourceCount : -1);
@@ -1103,8 +1103,8 @@ public interface Bytes<U> extends
             return 0;
         }
         try {
-            byte firstByte = source.readByte(otherOffset);
-            long max = sourceOffset + (sourceCount - otherCount);
+            final byte firstByte = source.readByte(otherOffset);
+            final long max = sourceOffset + (sourceCount - otherCount);
 
             for (long i = sourceOffset; i <= max; i++) {
                 /* Look for first character. */
@@ -1115,7 +1115,7 @@ public interface Bytes<U> extends
                 /* Found first character, now look at the rest of v2 */
                 if (i <= max) {
                     long j = i + 1;
-                    long end = j + otherCount - 1;
+                    final long end = j + otherCount - 1;
                     for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
                         // Do nothing
                     }
@@ -1150,14 +1150,14 @@ public interface Bytes<U> extends
      * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source } is {@code null}
      */
-    default int indexOf(@NotNull BytesStore source, int fromIndex)
-            throws IllegalStateException {
+    default int indexOf(@NotNull final BytesStore source,
+                        int fromIndex) throws IllegalStateException {
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
-        long sourceOffset = readPosition();
-        long otherOffset = source.readPosition();
-        long sourceCount = readRemaining();
-        long otherCount = source.readRemaining();
+        final long sourceOffset = readPosition();
+        final long otherOffset = source.readPosition();
+        final long sourceCount = readRemaining();
+        final long otherCount = source.readRemaining();
 
         if (fromIndex < 0) {
             fromIndex = 0;
@@ -1169,8 +1169,8 @@ public interface Bytes<U> extends
             return fromIndex;
         }
         try {
-            byte firstByte = source.readByte(otherOffset);
-            long max = sourceOffset + (sourceCount - otherCount);
+            final byte firstByte = source.readByte(otherOffset);
+            final long max = sourceOffset + (sourceCount - otherCount);
 
             for (long i = sourceOffset + fromIndex; i <= max; i++) {
                 /* Look for first character. */
@@ -1181,7 +1181,7 @@ public interface Bytes<U> extends
                 /* Found first character, now look at the rest of v2 */
                 if (i <= max) {
                     long j = i + 1;
-                    long end = j + otherCount - 1;
+                    final long end = j + otherCount - 1;
                     for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
                         // Do nothing
                     }
