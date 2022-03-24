@@ -642,7 +642,7 @@ enum BytesInternal {
             final long readPosition = bytes.readPosition();
             sb.ensureCapacity(utflen);
 
-            final int count = calculateCount(bytes, sb, utflen, count, readPosition);
+            final int count = calculateCount(bytes, sb, utflen, readPosition);
 
             bytes.readSkip(count);
             setCount(sb, count);
