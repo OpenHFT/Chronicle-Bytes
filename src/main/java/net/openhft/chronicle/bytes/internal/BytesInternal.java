@@ -444,8 +444,11 @@ enum BytesInternal {
         return utfLen == other.length();
     }
 
-    private static boolean compareUtf82(
-            @NotNull RandomDataInput input, long offset, int charI, long utfLen, @NotNull CharSequence other)
+    private static boolean compareUtf82(@NotNull final RandomDataInput input,
+                                        long offset,
+                                        int charI,
+                                        final long utfLen,
+                                        @NotNull final CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
@@ -623,42 +626,28 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen)
-            throws UTFDataFormatRuntimeException, BufferUnderflowException {
+    public static void parseUtf8_SB1(@NotNull final Bytes bytes,
+                                     @NotNull final StringBuilder sb,
+                                     final boolean utf,
+                                     final int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
         try {
             assert utf;
-            int count = 0;
+
             if (utflen > bytes.readRemaining()) {
                 @NotNull final BufferUnderflowException bue = new BufferUnderflowException();
                 bue.initCause(new IllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
                 throw bue;
             }
-            long readPosition = bytes.readPosition();
+            final long readPosition = bytes.readPosition();
             sb.ensureCapacity(utflen);
 
-            if (Jvm.isJava9Plus()) {
-                sb.setLength(utflen);
-                while (count < utflen) {
-                    byte c = bytes.readByte(readPosition + count);
-                    if (c < 0)
-                        break;
-                    sb.setCharAt(count++, (char) c); // This is not as fast as it could be.
-                }
-            } else {
-                char[] chars = extractChars(sb);
-                while (count < utflen) {
-                    int c = bytes.readByte(readPosition + count);
-                    if (c < 0)
-                        break;
-                    chars[count++] = (char) c;
-                }
-            }
+            final int count = calculateCount(bytes, sb, utflen, count, readPosition);
+
             bytes.readSkip(count);
             setCount(sb, count);
             if (count < utflen) {
-
-                long rp0 = bytes.readPosition();
+                final long rp0 = bytes.readPosition();
                 try {
                     parseUtf82(bytes, sb, utf, utflen, count);
                 } catch (UTFDataFormatRuntimeException e) {
@@ -667,9 +656,30 @@ enum BytesInternal {
                 }
             }
         } catch (IOException | IllegalStateException e) {
-
             throw Jvm.rethrow(e);
         }
+    }
+
+    private static int calculateCount(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen, long readPosition) {
+        int count = 0;
+        if (Jvm.isJava9Plus()) {
+            sb.setLength(utflen);
+            while (count < utflen) {
+                byte c = bytes.readByte(readPosition + count);
+                if (c < 0)
+                    break;
+                sb.setCharAt(count++, (char) c); // This is not as fast as it could be.
+            }
+        } else {
+            final char[] chars = extractChars(sb);
+            while (count < utflen) {
+                int c = bytes.readByte(readPosition + count);
+                if (c < 0)
+                    break;
+                chars[count++] = (char) c;
+            }
+        }
+        return count;
     }
 
     public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, long offset,
