@@ -659,7 +659,7 @@
         }
 
         @Override
-        public int read(@NotNull byte[] bytes)
+        public int read(byte[] bytes)
                 throws BufferUnderflowException, IllegalStateException {
             requireNonNull(bytes);
             ReportUnoptimised.reportOnce();
