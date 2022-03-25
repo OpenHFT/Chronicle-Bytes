@@ -86,7 +86,7 @@ public class HeapBytesStore<U>
 
     // Used by Chronicle-Map.
     @NotNull
-    public static HeapBytesStore<byte[]> wrap(@NotNull byte[] byteArray) {
+    public static HeapBytesStore<byte[]> wrap(byte[] byteArray) {
         return new HeapBytesStore<>(byteArray);
     }
 

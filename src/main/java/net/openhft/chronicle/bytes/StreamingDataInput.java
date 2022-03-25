@@ -379,12 +379,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default int read(@NotNull byte[] bytes)
+    default int read(byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
         return read(bytes, 0, bytes.length);
     }
 
-    default int read(@NotNull byte[] bytes, int off, int len)
+    default int read(byte[] bytes, int off, int len)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();
@@ -399,7 +399,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
-    default int read(@NotNull char[] bytes, int off, int len)
+    default int read(char[] bytes, int off, int len)
             throws IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();

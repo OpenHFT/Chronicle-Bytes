@@ -561,7 +561,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(@NotNull char[] chars, int offset, int length)
+    public Bytes<Void> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         requireNonNull(chars);
         throwExceptionIfClosed();
