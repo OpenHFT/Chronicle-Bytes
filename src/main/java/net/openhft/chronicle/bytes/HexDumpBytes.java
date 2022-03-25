@@ -962,13 +962,13 @@ public class HexDumpBytes
                 appendOffset(pos);
                 startOfLine = text.writePosition();
             }
-            performCopyToText(pos);
+            copyToText0(pos);
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
     }
 
-    private void performCopyToText(long pos) {
+    private void copyToText0(long pos) {
         final long end = base.writePosition();
         if (pos < end) {
             doIndent();
