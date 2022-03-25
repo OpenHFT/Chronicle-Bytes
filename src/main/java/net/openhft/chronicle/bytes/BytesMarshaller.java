@@ -334,9 +334,10 @@ public class BytesMarshaller<T> {
                         field.set(o, null);
                     return;
                 }
-                if (c == null)
-                    field.set(o, c = (Object[]) Array.newInstance(field.getType().getComponentType(), length));
-                else if (c.length != length)
+                if (c == null) {
+                    c = (Object[]) Array.newInstance(field.getType().getComponentType(), length)
+                    field.set(o, c);
+                } else if (c.length != length)
                     field.set(o, c = Arrays.copyOf(c, length));
                 for (int i = 0; i < length; i++) {
                     Object o2 = c[i];
