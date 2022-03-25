@@ -308,7 +308,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    default int copyTo(@NotNull byte[] bytes)
+    default int copyTo(byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         throwExceptionIfReleased(this);
@@ -592,13 +592,12 @@ public interface RandomDataInput extends RandomCommon {
         return BytesInternal.compareUtf8(this, offset, other);
     }
 
-    @NotNull
     default byte[] toByteArray()
             throws IllegalStateException {
         return BytesInternal.toByteArray(this);
     }
 
-    default long read(long offsetInRDI, @NotNull byte[] bytes, int offset, int length)
+    default long read(long offsetInRDI, byte[] bytes, int offset, int length)
             throws IllegalStateException {
         requireNonNull(bytes);
         try {

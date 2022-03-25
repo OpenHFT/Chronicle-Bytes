@@ -495,9 +495,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this.
      *
      * @throws NullPointerException if the provided {@code byteArray } is {@code null}.
+     * @param byteArray to write
      */
     @NotNull
-    default S write(@NotNull byte[] byteArray)
+    default S write(final byte[] byteArray)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(byteArray);
         try {
@@ -604,7 +605,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S appendUtf8(@NotNull char[] chars, int offset, int length)
+    default S appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
         int i;
         ascii:
@@ -634,7 +635,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     // length is number of characters (not bytes)
     @Java9
     @NotNull
-    default S appendUtf8(@NotNull byte[] bytes, int offset, int length, byte coder)
+    default S appendUtf8(final byte[] bytes, int offset, int length, byte coder)
             throws BufferOverflowException, IllegalStateException {
         if (coder == JAVA9_STRING_CODER_LATIN) {
             for (int i = 0; i < length; i++) {
@@ -657,7 +658,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @Java9
     @NotNull
-    default S appendUtf8(@NotNull byte[] bytes, int offset, int length)
+    default S appendUtf8(final byte[] bytes, int offset, int length)
             throws BufferOverflowException, IllegalStateException {
         for (int i = 0; i < length; i++) {
             int b = bytes[offset + i] & 0xFF; // unsigned byte

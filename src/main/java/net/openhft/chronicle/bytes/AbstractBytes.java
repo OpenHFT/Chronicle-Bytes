@@ -919,7 +919,7 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> prewrite(@NotNull byte[] bytes)
+    public Bytes<U> prewrite(final byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
         long offset = prewriteOffsetPositionMoved(bytes.length);
         bytesStore.write(offset, bytes);
@@ -1069,7 +1069,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public int read(@NotNull byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
+    public int read(byte[] bytes, int off, int len) throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)

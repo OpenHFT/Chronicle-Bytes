@@ -834,21 +834,21 @@ public class HexDumpBytes
     }
 
     @Override
-    public int read(@NotNull byte[] bytes)
+    public int read(byte[] bytes)
             throws IllegalStateException, BufferUnderflowException {
         return base.read(bytes);
 
     }
 
     @Override
-    public int read(@NotNull byte[] bytes, int off, int len)
+    public int read(byte[] bytes, int off, int len)
             throws IllegalStateException, BufferUnderflowException {
         return base.read(bytes, off, len);
 
     }
 
     @Override
-    public int read(@NotNull char[] bytes, int off, int len)
+    public int read(char[] bytes, int off, int len)
             throws IllegalStateException {
         return base.read(bytes, off, len);
 
@@ -884,7 +884,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public void readWithLength(Bytes bytes)
+    public void readWithLength(@NotNull Bytes bytes)
             throws ArithmeticException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
         base.readWithLength(bytes);
 
@@ -1125,7 +1125,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> write(@NotNull byte[] byteArray, int offset, int length)
+    public Bytes<Void> write(byte[] byteArray, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1678,7 +1678,7 @@ public class HexDumpBytes
 
     @NotNull
     @Override
-    public Bytes<Void> write(@NotNull byte[] byteArray)
+    public Bytes<Void> write(byte[] byteArray)
             throws BufferOverflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1780,7 +1780,7 @@ public class HexDumpBytes
         }
 
         @Override
-        public int read(@NotNull char[] cbuf, int off, int len)
+        public int read(char[] cbuf, int off, int len)
                 throws IOException {
             int len2 = reader.read(cbuf, off, len);
             base.append(new String(cbuf, off, len)); // TODO Optimise
