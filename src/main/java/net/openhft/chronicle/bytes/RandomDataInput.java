@@ -301,7 +301,8 @@ public interface RandomDataInput extends RandomCommon {
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * Read a byte[] from memory from {@link #readPosition()} to {@link #readLimit()}.
+     * Read a byte[] from memory from {@link RandomCommon#readPosition()}
+     * to {@link RandomCommon#readLimit()}.
      *
      * @return the length actually read.
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
