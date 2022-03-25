@@ -48,7 +48,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
+@SuppressWarnings({"restriction"})
 public class ChunkedMappedFile extends MappedFile {
     static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
 
@@ -92,16 +92,7 @@ public class ChunkedMappedFile extends MappedFile {
             final int chunks = 64;
             final int compileThreshold = Jvm.compileThreshold();
             for (int j = 0; j <= compileThreshold; j += chunks) {
-                try {
-                    try (@NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, "rw")) {
-                        try (final ChunkedMappedFile mappedFile = new ChunkedMappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false)) {
-                            warmup0(mapAlignment, chunks, mappedFile);
-                        }
-                    }
-                    Thread.yield();
-                } catch (IOException e) {
-                    errorsDuringWarmup.add(e);
-                }
+                warmupChunks(errorsDuringWarmup, file, mapAlignment, chunks);
             }
             Thread.yield();
             Files.delete(file.toPath());
@@ -112,6 +103,22 @@ public class ChunkedMappedFile extends MappedFile {
             Jvm.resetExceptionHandlers();
             if (!errorsDuringWarmup.isEmpty())
                 Jvm.warn().on(ChunkedMappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
+        }
+    }
+
+    private static void warmupChunks(List<IOException> errorsDuringWarmup,
+                                     File file,
+                                     long mapAlignment,
+                                     int chunks) {
+        try {
+            try (@NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, "rw")) {
+                try (final ChunkedMappedFile mappedFile = new ChunkedMappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false)) {
+                    warmup0(mapAlignment, chunks, mappedFile);
+                }
+            }
+            Thread.yield();
+        } catch (IOException e) {
+            errorsDuringWarmup.add(e);
         }
     }
 
@@ -180,7 +187,7 @@ public class ChunkedMappedFile extends MappedFile {
             }
             // *** THIS CAN TAKE A LONG TIME IF A RESIZE HAS TO OCCUR ***
             // let double check it to make sure no other thread change it in the meantime.
-            //resizeRafIfTooSmall(chunk);
+            // resizeRafIfTooSmall ( chunk )
 
             final long mappedSize = chunkSize + overlapSize;
             final MapMode mode = readOnly() ? MapMode.READ_ONLY : MapMode.READ_WRITE;
