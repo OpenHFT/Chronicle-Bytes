@@ -175,7 +175,7 @@ public class BytesMarshaller<T> {
                 throws BufferUnderflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferOverflowException;
     }
 
-    static final class ScalarFieldAccess extends FieldAccess {
+    static class ScalarFieldAccess extends FieldAccess {
         public ScalarFieldAccess(Field field) {
             super(field);
         }
@@ -204,7 +204,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class BytesMarshallableFieldAccess extends FieldAccess {
+    static class BytesMarshallableFieldAccess extends FieldAccess {
         public BytesMarshallableFieldAccess(Field field) {
             super(field);
         }
@@ -238,7 +238,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class BytesFieldAccess extends FieldAccess {
+    static class BytesFieldAccess extends FieldAccess {
         public BytesFieldAccess(Field field) {
             super(field);
         }
@@ -295,7 +295,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class ObjectArrayFieldAccess extends FieldAccess {
+    static class ObjectArrayFieldAccess extends FieldAccess {
         Class componentType;
 
         public ObjectArrayFieldAccess(Field field) {
@@ -352,7 +352,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class CollectionFieldAccess extends FieldAccess {
+    static class CollectionFieldAccess extends FieldAccess {
         final Supplier<Collection> collectionSupplier;
         @NotNull
         private final Class componentType;
@@ -430,7 +430,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class MapFieldAccess extends FieldAccess {
+    static class MapFieldAccess extends FieldAccess {
         final Supplier<Map> collectionSupplier;
         private final Class<?> type;
         @NotNull
@@ -505,7 +505,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class BooleanFieldAccess extends FieldAccess {
+    static class BooleanFieldAccess extends FieldAccess {
         public BooleanFieldAccess(Field field) {
             super(field);
         }
@@ -531,7 +531,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class ByteFieldAccess extends FieldAccess {
+    static class ByteFieldAccess extends FieldAccess {
         public ByteFieldAccess(Field field) {
             super(field);
         }
@@ -557,7 +557,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class ByteArrayFieldAccess extends FieldAccess {
+    static class ByteArrayFieldAccess extends FieldAccess {
         public ByteArrayFieldAccess(Field field) {
             super(field);
         }
@@ -599,7 +599,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class CharFieldAccess extends FieldAccess {
+    static class CharFieldAccess extends FieldAccess {
         public CharFieldAccess(Field field) {
             super(field);
         }
@@ -629,7 +629,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class ShortFieldAccess extends FieldAccess {
+    static class ShortFieldAccess extends FieldAccess {
         public ShortFieldAccess(Field field) {
             super(field);
         }
@@ -655,7 +655,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class IntegerFieldAccess extends FieldAccess {
+    static class IntegerFieldAccess extends FieldAccess {
         public IntegerFieldAccess(Field field) {
             super(field);
         }
@@ -681,7 +681,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class IntArrayFieldAccess extends FieldAccess {
+    static class IntArrayFieldAccess extends FieldAccess {
         public IntArrayFieldAccess(Field field) {
             super(field);
         }
@@ -726,7 +726,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class FloatFieldAccess extends FieldAccess {
+    static class FloatFieldAccess extends FieldAccess {
         public FloatFieldAccess(Field field) {
             super(field);
         }
@@ -752,7 +752,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class FloatArrayFieldAccess extends FieldAccess {
+    static class FloatArrayFieldAccess extends FieldAccess {
         public FloatArrayFieldAccess(Field field) {
             super(field);
         }
@@ -797,7 +797,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class LongFieldAccess extends FieldAccess {
+    static class LongFieldAccess extends FieldAccess {
         public LongFieldAccess(Field field) {
             super(field);
         }
@@ -823,7 +823,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class LongArrayFieldAccess extends FieldAccess {
+    static class LongArrayFieldAccess extends FieldAccess {
         public LongArrayFieldAccess(Field field) {
             super(field);
         }
@@ -868,7 +868,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class DoubleFieldAccess extends FieldAccess {
+    static class DoubleFieldAccess extends FieldAccess {
         public DoubleFieldAccess(Field field) {
             super(field);
         }
@@ -894,7 +894,7 @@ public class BytesMarshaller<T> {
         }
     }
 
-    static final class DoubleArrayFieldAccess extends FieldAccess {
+    static class DoubleArrayFieldAccess extends FieldAccess {
         public DoubleArrayFieldAccess(Field field) {
             super(field);
         }
