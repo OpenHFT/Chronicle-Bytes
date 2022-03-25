@@ -839,7 +839,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new copy of this Bytes object from {@link #readPosition()} to {@link #readLimit()}.
+     * Creates and returns a new copy of this Bytes object from {@link RandomCommon#readPosition()}
+     * to {@link RandomCommon#readLimit()}.
      *
      * @return a copy of this Bytes object
      */
