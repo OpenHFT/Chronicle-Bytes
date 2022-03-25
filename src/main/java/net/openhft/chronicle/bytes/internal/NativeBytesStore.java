@@ -57,7 +57,6 @@ public class NativeBytesStore<U>
         BB_ATT = Jvm.getField(directBB, "att");
     }
 
-    private final Finalizer finalizer;
     public long address;
     // on release, set this to null.
     public Memory memory = OS.memory();
@@ -70,7 +69,6 @@ public class NativeBytesStore<U>
     private U underlyingObject;
 
     private NativeBytesStore() {
-        finalizer = null;
     }
 
     private NativeBytesStore(@NotNull ByteBuffer bb, boolean elastic) {
@@ -102,10 +100,10 @@ public class NativeBytesStore<U>
         this.cleaner = deallocator == null ? null : new SimpleCleaner(deallocator);
         underlyingObject = null;
         this.elastic = elastic;
-        if (cleaner == null) {
-            finalizer = null;
-        } else {
-            finalizer = new Finalizer();
+        if (cleaner != null) {
+            // Since a Finalizer object holds an implicit reference to `this` we
+            // do not have to hold a reference to it here.
+            new Finalizer();
         }
     }
 
