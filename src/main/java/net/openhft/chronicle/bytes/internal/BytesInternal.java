@@ -147,8 +147,6 @@ enum BytesInternal {
     }
 
 
-
-
     // a >= b here and we also know it is safe to read bLength
     static boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
                                    @NotNull final BytesStore<?, ?> b,
@@ -443,11 +441,8 @@ enum BytesInternal {
         return utfLen == other.length();
     }
 
-    private static boolean compareUtf82(@NotNull final RandomDataInput input,
-                                        long offset,
-                                        int charI,
-                                        final long utfLen,
-                                        @NotNull final CharSequence other)
+    private static boolean compareUtf82(
+            @NotNull RandomDataInput input, long offset, int charI, long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
@@ -625,10 +620,8 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull final Bytes bytes,
-                                     @NotNull final StringBuilder sb,
-                                     final boolean utf,
-                                     final int utflen) throws UTFDataFormatRuntimeException, BufferUnderflowException {
+    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen)
+            throws UTFDataFormatRuntimeException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
         try {
             assert utf;
@@ -638,10 +631,10 @@ enum BytesInternal {
                 bue.initCause(new IllegalStateException("utflen: " + utflen + ", readRemaining: " + bytes.readRemaining()));
                 throw bue;
             }
-            final long readPosition = bytes.readPosition();
+            long readPosition = bytes.readPosition();
             sb.ensureCapacity(utflen);
 
-            final int count = calculateCount(bytes, sb, utflen, readPosition);
+            int count = calculateCount(bytes, sb, utflen, readPosition);
 
             bytes.readSkip(count);
             setCount(sb, count);
@@ -2926,9 +2919,7 @@ enum BytesInternal {
         b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@NotNull final BytesStore b1,
-                                        @NotNull final BytesStore b2,
-                                        final long readRemaining)
+    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
             throws BufferUnderflowException, IllegalStateException {
 
         if (b1.readRemaining() < readRemaining)
@@ -2956,8 +2947,7 @@ enum BytesInternal {
         return true;
     }
 
-    public static void appendDateMillis(@NotNull final ByteStringAppender b,
-                                        final long timeInMS)
+    public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS)
             throws BufferOverflowException, IllegalStateException {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {

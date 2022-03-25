@@ -39,7 +39,7 @@ public class BytesMarshaller<T> {
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
 
-    public BytesMarshaller(@NotNull final Class<T> tClass) {
+    public BytesMarshaller(@NotNull Class<T> tClass) {
         final Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
         fields = map.values().stream()
@@ -47,8 +47,7 @@ public class BytesMarshaller<T> {
                 .toArray(FieldAccess[]::new);
     }
 
-    public static void getAllField(@NotNull final Class clazz,
-                                   @NotNull final Map<String, Field> map) {
+    public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class)
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -77,7 +76,7 @@ public class BytesMarshaller<T> {
     abstract static class FieldAccess {
         final Field field;
 
-        FieldAccess(@NotNull final Field field) {
+        FieldAccess(@NotNull Field field) {
             this.field = field;
         }
 

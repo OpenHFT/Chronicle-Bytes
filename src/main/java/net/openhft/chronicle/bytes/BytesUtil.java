@@ -54,12 +54,12 @@ public enum BytesUtil {
      * @param clazz to check
      * @return true if the whole class is trivially copyable
      */
-    public static boolean isTriviallyCopyable(@NotNull final Class<?> clazz) {
+    public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
         final int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         return ints[1] > 0;
     }
 
-    static int[] isTriviallyCopyable0(@NotNull final Class<?> clazz) {
+    static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (Jvm.isAzulZing())
             throw new UnsupportedOperationException();
         if (clazz.isArray()) {
@@ -68,7 +68,7 @@ public enum BytesUtil {
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
         }
-        final List<Field> fields = BytesFieldInfo.fields(clazz);
+        List<Field> fields = BytesFieldInfo.fields(clazz);
         return calculateMinMax(fields);
     }
 
@@ -79,9 +79,9 @@ public enum BytesUtil {
             final FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
             if (fieldGroup != null && FieldGroup.HEADER.equals(fieldGroup.value()))
                 continue;
-            final int start = (int) MEMORY.objectFieldOffset(field);
-            final int size = sizeOf(field.getType());
-            final int end = start + size;
+            int start = (int) MEMORY.objectFieldOffset(field);
+            int size = sizeOf(field.getType());
+            int end = start + size;
             boolean nonTrivial = !field.getType().isPrimitive();
             if (nonTrivial) {
                 if (max > 0)

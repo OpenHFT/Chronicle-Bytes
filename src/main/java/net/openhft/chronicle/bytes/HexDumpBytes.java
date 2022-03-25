@@ -69,8 +69,7 @@ public class HexDumpBytes
         }
     }
 
-    HexDumpBytes(@NotNull final NativeBytes<Void> base,
-                 @NotNull final BytesStore text) {
+    HexDumpBytes(@NotNull NativeBytes<Void> base, @NotNull BytesStore text) {
         try {
             final long size = base.readRemaining();
             this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
@@ -82,10 +81,10 @@ public class HexDumpBytes
         }
     }
 
-    public static HexDumpBytes fromText(@NotNull final Reader reader)
+    public static HexDumpBytes fromText(@NotNull Reader reader)
             throws NumberFormatException {
-        final HexDumpBytes tb = new HexDumpBytes();
-        final Reader reader2 = new TextBytesReader(reader, tb.text);
+        HexDumpBytes tb = new HexDumpBytes();
+        Reader reader2 = new TextBytesReader(reader, tb.text);
         try (Scanner sc = new Scanner(reader2)) {
             while (sc.hasNext()) {
                 if (sc.hasNext(HEX_PATTERN))
@@ -99,17 +98,16 @@ public class HexDumpBytes
         return tb;
     }
 
-    public static HexDumpBytes fromText(@NotNull final CharSequence text)
+    public static HexDumpBytes fromText(@NotNull CharSequence text)
             throws NumberFormatException {
         return fromText(new StringReader(text.toString()));
     }
 
-    private static boolean startsWith(@NotNull final CharSequence comment,
-                                      final char first) {
+    private static boolean startsWith(@NotNull CharSequence comment, final char first) {
         return comment.length() > 0 && comment.charAt(0) == first;
     }
 
-    public HexDumpBytes offsetFormat(final OffsetFormat offsetFormat) {
+    public HexDumpBytes offsetFormat(OffsetFormat offsetFormat) {
         this.offsetFormat = offsetFormat;
         return this;
     }
@@ -118,7 +116,7 @@ public class HexDumpBytes
         return numberWrap;
     }
 
-    public HexDumpBytes numberWrap(final int numberWrap) {
+    public HexDumpBytes numberWrap(int numberWrap) {
         this.numberWrap = numberWrap;
         return this;
     }
@@ -178,7 +176,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public Bytes<Void> comment(@NotNull final CharSequence comment)
+    public Bytes<Void> comment(@NotNull CharSequence comment)
             throws IllegalStateException {
         if (this.comment.readRemaining() > 0)
             newLine();
@@ -712,31 +710,27 @@ public class HexDumpBytes
 
     @NotNull
     @Override
-    public Bytes<Void> readPositionUnlimited(final long position)
+    public Bytes<Void> readPositionUnlimited(long position)
             throws BufferUnderflowException, IllegalStateException {
         return base.readPositionUnlimited(position);
     }
 
     @NotNull
     @Override
-    public Bytes<Void> readPositionRemaining(final long position,
-                                             final long remaining)
+    public Bytes<Void> readPositionRemaining(long position, long remaining)
             throws BufferUnderflowException, IllegalStateException {
         return base.readPositionRemaining(position, remaining);
     }
 
     @Override
-    public void readWithLength0(final long length,
-                                @NotNull final ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer,
-                                final StringBuilder sb,
-                                final BytesOut toBytes)
+    public void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer,
+                                StringBuilder sb, BytesOut toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         base.readWithLength0(length, bytesConsumer, sb, toBytes);
     }
 
     @Override
-    public void readWithLength(final long length,
-                               @NotNull final ThrowingConsumer<Bytes<Void>, IORuntimeException> bytesConsumer)
+    public void readWithLength(long length, @NotNull ThrowingConsumer<Bytes<Void>, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         base.readWithLength(length, bytesConsumer);
     }
@@ -799,40 +793,37 @@ public class HexDumpBytes
     }
 
     @Override
-    public <C extends Appendable & CharSequence> long readUtf8(final long offset,
-                                                               @NotNull final C sb)
+    public <C extends Appendable & CharSequence> long readUtf8(long offset, @NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         return base.readUtf8(offset, sb);
     }
 
     @Override
-    public <C extends Appendable & CharSequence> long readUtf8Limited(final long offset,
-                                                                      @NotNull final C sb,
-                                                                      final int maxUtf8Len)
+    public <C extends Appendable & CharSequence> long readUtf8Limited(long offset, @NotNull C sb, int maxUtf8Len)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException {
         return base.readUtf8Limited(offset, sb, maxUtf8Len);
     }
 
     @Override
-    public @Nullable String readUtf8Limited(final long offset,
-                                            final int maxUtf8Len) throws BufferUnderflowException, IORuntimeException, IllegalArgumentException, IllegalStateException {
+    public @Nullable String readUtf8Limited(long offset, int maxUtf8Len)
+            throws BufferUnderflowException, IORuntimeException, IllegalArgumentException, IllegalStateException {
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
-    public <C extends Appendable & CharSequence> boolean readUTFΔ(@NotNull final C sb)
+    public <C extends Appendable & CharSequence> boolean readUTFΔ(@NotNull C sb)
             throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
         return base.readUtf8(sb);
     }
 
     @Override
-    public boolean read8bit(@NotNull final Bytes<?> b)
+    public boolean read8bit(@NotNull Bytes<?> b)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
         return base.read8bit(b);
 
     }
 
     @Override
-    public boolean read8bit(@NotNull final StringBuilder sb)
+    public boolean read8bit(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         return base.read8bit(sb);
 
@@ -846,29 +837,25 @@ public class HexDumpBytes
     }
 
     @Override
-    public int read(final byte[] bytes,
-                    final int off,
-                    final int len)
+    public int read(byte[] bytes, int off, int len)
             throws IllegalStateException, BufferUnderflowException {
         return base.read(bytes, off, len);
     }
 
     @Override
-    public int read(final char[] bytes,
-                    final int off,
-                    final int len) throws IllegalStateException {
+    public int read(char[] bytes, int off, int len)
+            throws IllegalStateException {
         return base.read(bytes, off, len);
     }
 
     @Override
-    public void read(@NotNull final ByteBuffer buffer)
+    public void read(@NotNull ByteBuffer buffer)
             throws IllegalStateException {
         base.read(buffer);
     }
 
     @Override
-    public void read(final @NotNull Bytes<?> bytes,
-                     final int length)
+    public void read(@NotNull Bytes<?> bytes, int length)
             throws BufferUnderflowException, IllegalStateException, BufferOverflowException {
         base.read(bytes, length);
 
@@ -876,21 +863,21 @@ public class HexDumpBytes
 
     @NotNull
     @Override
-    public <E extends Enum<E>> E readEnum(@NotNull final Class<E> eClass)
+    public <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         return base.readEnum(eClass);
 
     }
 
     @Override
-    public void readHistogram(@NotNull final Histogram histogram)
+    public void readHistogram(@NotNull Histogram histogram)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         base.readHistogram(histogram);
 
     }
 
     @Override
-    public void readWithLength(final @NotNull Bytes<?> bytes)
+    public void readWithLength(@NotNull Bytes<?> bytes)
             throws ArithmeticException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
         base.readWithLength(bytes);
 
@@ -898,7 +885,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> writePosition(final long position)
+    public Bytes<Void> writePosition(long position)
             throws BufferOverflowException {
         requireNonNegative(position);
         base.writePosition(position & MASK);
@@ -908,7 +895,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> writeLimit(final long limit)
+    public Bytes<Void> writeLimit(long limit)
             throws BufferOverflowException {
         base.writeLimit(limit);
         return this;
@@ -916,7 +903,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> writeSkip(final long bytesToSkip)
+    public Bytes<Void> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -929,7 +916,7 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes<Void> writeByte(final byte i8)
+    public Bytes<Void> writeByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -951,11 +938,11 @@ public class HexDumpBytes
     }
 
     @Override
-    public long lengthWritten(final long startPosition) {
+    public long lengthWritten(long startPosition) {
         return base.writePosition() - (startPosition & MASK);
     }
 
-    private void copyToText(final long pos)
+    private void copyToText(long pos)
             throws IllegalStateException {
         try {
             if (lineLength() == 0 && offsetFormat != null) {

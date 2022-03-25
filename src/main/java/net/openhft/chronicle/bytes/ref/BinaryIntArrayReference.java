@@ -286,10 +286,10 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         if (bytes == null) {
             return "not set";
         }
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("used: ");
         try {
-            final long used = getUsed();
+            long used = getUsed();
             sb.append(used);
             sb.append(", value: ");
             appendContents(sb, used);
@@ -299,8 +299,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         }
     }
 
-    private void appendContents(@NotNull final StringBuilder sb,
-                                final long used) {
+    private void appendContents(@NotNull StringBuilder sb, long used) {
         String sep = "";
         try {
             int i;

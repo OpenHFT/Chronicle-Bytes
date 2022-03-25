@@ -337,7 +337,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean read8bit(@NotNull final Bytes<?> b)
+    default boolean read8bit(@NotNull Bytes<?> b)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         b.clear();
         if (readRemaining() <= 0)
@@ -379,14 +379,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default int read(final byte[] bytes)
+    default int read(byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
         return read(bytes, 0, bytes.length);
     }
 
-    default int read(final byte[] bytes,
-                     final int off,
-                     final int len) throws BufferUnderflowException, IllegalStateException {
+    default int read(byte[] bytes, int off, int len)
+            throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();
         if (remaining <= 0)
@@ -400,9 +399,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
-    default int read(final char[] bytes,
-                     final int off,
-                     final int len)
+    default int read(char[] bytes, int off, int len)
             throws IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();

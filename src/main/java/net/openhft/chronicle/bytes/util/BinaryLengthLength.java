@@ -15,16 +15,14 @@ public enum BinaryLengthLength {
         @Override
         public long initialise(@NotNull final BytesOut<?> bytes) {
             bytes.writeUnsignedByte(code());
-            final long pos = bytes.writePosition();
+            long pos = bytes.writePosition();
             bytes.writeByte((byte) 0);
             return pos;
         }
 
         @Override
-        public void writeLength(@NotNull final Bytes<?> bytes,
-                                final long positionReturnedFromInitialise,
-                                final long end) {
-            final long length = (end - positionReturnedFromInitialise - 1) & MASK;
+        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
+            long length = (end - positionReturnedFromInitialise - 1) & MASK;
             if (length >= 1 << 8)
                 throw invalidLength(length);
             bytes.writeByte(positionReturnedFromInitialise, (byte) length);
@@ -46,9 +44,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public void writeLength(@NotNull final Bytes<?> bytes,
-                                final long positionReturnedFromInitialise,
-                                final long end) {
+        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
             final long length = (end - positionReturnedFromInitialise - 2) & MASK;
             if (length >= 1 << 16)
                 throw invalidLength(length);
@@ -63,7 +59,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public long initialise(@NotNull final BytesOut<?> bytes) {
+        public long initialise(@NotNull BytesOut<?> bytes) {
             bytes.writeUnsignedByte(code());
             final long pos = bytes.writePosition();
             bytes.writeInt(0);
@@ -71,9 +67,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public void writeLength(@NotNull final Bytes<?> bytes,
-                                final long positionReturnedFromInitialise,
-                                final long end) {
+        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
             final long length = (end - positionReturnedFromInitialise - 4) & MASK;
             if (length >= 1L << 31)
                 throw invalidLength(length);

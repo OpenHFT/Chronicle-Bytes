@@ -183,8 +183,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
 
         if (text instanceof BytesStore) {
-            final long offset = ((BytesStore<?, ?>) text).readPosition();
-            final long readRemaining = Math.min(writeRemaining(), ((BytesStore<?, ?>) text).readLimit() - offset);
+            long offset = ((BytesStore<?, ?>) text).readPosition();
+            long readRemaining = Math.min(writeRemaining(), ((BytesStore<?, ?>) text).readLimit() - offset);
             writeStopBit(readRemaining);
             try {
                 write((BytesStore<?, ?>) text, offset, readRemaining);
@@ -409,7 +409,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return this
      * @see StreamingDataInput#read(Bytes)
      */
-    default S write(@NotNull final BytesStore<?, ?> bytes)
+    default S write(@NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
         requireNonNull(bytes);

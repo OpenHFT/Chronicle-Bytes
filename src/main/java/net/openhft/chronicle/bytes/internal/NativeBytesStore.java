@@ -104,10 +104,10 @@ public class NativeBytesStore<U>
         this.cleaner = deallocator == null ? null : new SimpleCleaner(deallocator);
         underlyingObject = null;
         this.elastic = elastic;
-        if (cleaner != null) {
-            finalizer = new Finalizer();
+        if (cleaner == null) {
+            finalizer = null;
         } else {
-            finalizer =  null;
+            finalizer = new Finalizer();
         }
     }
 

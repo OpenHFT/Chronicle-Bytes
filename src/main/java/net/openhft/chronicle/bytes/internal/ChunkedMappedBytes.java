@@ -246,7 +246,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws BufferUnderflowException, IllegalStateException {
         final long check = adding >= 0 ? offset : offset + adding;
 
-        final BytesStore bytesStore = this.bytesStore;
+        BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(check, adding)) {
             acquireNextByteStore0(offset, false);
         }
@@ -260,7 +260,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         throwExceptionIfClosed();
         if (offset + adding < start() || offset > mappedFile.capacity() - adding)
             throw writeBufferOverflowException0(offset);
-        final BytesStore bytesStore = this.bytesStore;
+        BytesStore bytesStore = this.bytesStore;
         if (adding > 0 && !bytesStore.inside(offset, checkSize0(adding))) {
             acquireNextByteStore0(offset, false);
             if (!this.bytesStore.inside(offset, checkSize0(adding)))
@@ -279,7 +279,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        final BytesStore<?, ?> bytesStore = this.bytesStore;
+        BytesStore<?, ?> bytesStore = this.bytesStore;
         if (!bytesStore.inside(writePosition(), checkSize0(desiredCapacity))) {
             acquireNextByteStore0(writePosition(), false);
         }
