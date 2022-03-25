@@ -68,7 +68,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final File file,
                                                 final long capacity,
-                                                final boolean readOnly) throws FileNotFoundException, IllegalStateException {
+                                                final boolean readOnly)
+            throws FileNotFoundException, IllegalStateException {
         final MappedFile rw = MappedFile.ofSingle(file, capacity, readOnly);
         try {
             return new SingleMappedBytes(rw);
