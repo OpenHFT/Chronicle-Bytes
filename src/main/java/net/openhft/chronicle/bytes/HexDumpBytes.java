@@ -983,14 +983,19 @@ public class HexDumpBytes
                 }
                 pos++;
                 final long wp = text.writePosition();
-                if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
+                if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ') {
                     text.append(' ');
-                try {
-                    text.appendBase16(value, 2);
-                } catch (IllegalArgumentException | BufferOverflowException e) {
-                    throw new AssertionError(e);
                 }
+                appendBase16(value);
             } while (pos < end);
+        }
+    }
+
+    private void appendBase16(int value) {
+        try {
+            text.appendBase16(value, 2);
+        } catch (IllegalArgumentException | BufferOverflowException e) {
+            throw new AssertionError(e);
         }
     }
 
