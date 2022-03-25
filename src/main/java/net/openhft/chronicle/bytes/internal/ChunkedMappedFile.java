@@ -187,7 +187,7 @@ public class ChunkedMappedFile extends MappedFile {
             }
             // *** THIS CAN TAKE A LONG TIME IF A RESIZE HAS TO OCCUR ***
             // let double check it to make sure no other thread change it in the meantime.
-            // resizeRafIfTooSmall ( chunk )
+            // resize Raf If TooS mall
 
             final long mappedSize = chunkSize + overlapSize;
             final MapMode mode = readOnly() ? MapMode.READ_ONLY : MapMode.READ_WRITE;

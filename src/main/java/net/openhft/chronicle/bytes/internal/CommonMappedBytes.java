@@ -177,7 +177,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public String read8bit()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        // throwExceptionIfClosed
 
         return BytesInternal.read8bit(this);
     }
@@ -194,7 +193,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public long start() {
-        // throwExceptionIfClosed
         return 0L;
     }
 

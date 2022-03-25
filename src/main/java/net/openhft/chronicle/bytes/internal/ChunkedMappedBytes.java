@@ -153,7 +153,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readPositionRemaining(final long position, final long remaining)
             throws BufferUnderflowException, IllegalStateException {
-        // throwExceptionIfClosed
 
         final long limit = position + remaining;
         acquireNextByteStore(position, true);
@@ -177,7 +176,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readPosition(final long position)
             throws BufferUnderflowException, IllegalStateException {
-        // throwExceptionIfClosed
 
         if (bytesStore.inside(position)) {
             return super.readPosition(position);
@@ -201,7 +199,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public long addressForRead(final long offset)
             throws BufferUnderflowException, IllegalStateException {
-        // throwExceptionIfClosed
         requireNonNegative(offset);
 
         BytesStore bytesStore = this.bytesStore;
@@ -224,7 +221,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public long addressForRead(final long offset, final int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
-        // throwExceptionIfClosed
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset, buffer))
@@ -236,7 +232,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public long addressForWrite(final long offset)
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException {
         requireNonNegative(offset);
-        // throwExceptionIfClosed
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset))
@@ -362,7 +357,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public Bytes<Void> readSkip(final long bytesToSkip)
             throws BufferUnderflowException, IllegalStateException {
         // called often so skip this check for performance
-        // throwExceptionIfClosed
 
         if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
