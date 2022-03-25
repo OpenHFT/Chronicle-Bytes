@@ -883,7 +883,7 @@ public class UncheckedNativeBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> appendUtf8(@NotNull char[] chars, int offset, int length)
+    public Bytes<U> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);

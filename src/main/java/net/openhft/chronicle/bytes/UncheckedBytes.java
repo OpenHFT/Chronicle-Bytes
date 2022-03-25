@@ -300,7 +300,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
+    public Bytes<U> appendUtf8(char[] chars, int offset, int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         requireNonNull(chars);
         long wp = writePosition();

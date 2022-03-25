@@ -259,7 +259,7 @@ public enum AppendableUtil {
     }
 
     @Java9
-    public static long findUtf8Length(@NotNull byte[] bytes, byte coder) {
+    public static long findUtf8Length(byte[] bytes, byte coder) {
         long utflen;
 
         if (coder == 0) {
@@ -296,7 +296,7 @@ public enum AppendableUtil {
     }
 
     @Java9
-    public static long findUtf8Length(@NotNull byte[] chars) {
+    public static long findUtf8Length(byte[] chars) {
         long utflen = 0; /* use charAt instead of copying String to char array */
         int strlen = chars.length;
         for (int i = 0; i < strlen; i++) {
@@ -322,7 +322,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull char[] chars, int offset, int length) {
+    public static long findUtf8Length(char[] chars, int offset, int length) {
         requireNonNull(chars);
         long utflen = length;
         for (int i = offset, end = offset + length; i < end; i++) {
@@ -339,7 +339,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(@NotNull char[] chars) {
+    public static long findUtf8Length(char[] chars) {
         return findUtf8Length(chars, 0, chars.length);
     }
 }

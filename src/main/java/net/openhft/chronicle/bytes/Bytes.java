@@ -399,7 +399,7 @@ public interface Bytes<U> extends
      * @throws IllegalStateException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    static Bytes<byte[]> wrapForRead(@NotNull byte[] byteArray) {
+    static Bytes<byte[]> wrapForRead(byte[] byteArray) {
         requireNonNull(byteArray);
         @NotNull BytesStore<?, byte[]> bs = BytesStore.wrap(byteArray);
         try {
@@ -463,7 +463,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code byteArray} is {@code null}
      */
     @NotNull
-    static Bytes<byte[]> wrapForWrite(@NotNull byte[] byteArray) {
+    static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
         requireNonNull(byteArray);
         final BytesStore bs = BytesStore.wrap(byteArray);
         try {
@@ -759,7 +759,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code bytes} is {@code null}
      */
     @NotNull
-    static VanillaBytes allocateDirect(@NotNull byte[] bytes)
+    static VanillaBytes allocateDirect(byte[] bytes)
             throws IllegalArgumentException {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
@@ -839,7 +839,8 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new copy of this Bytes object from {@link #readPosition()} to {@link #readLimit()}.
+     * Creates and returns a new copy of this Bytes object from {@link RandomCommon#readPosition()}
+     * to {@link RandomCommon#readLimit()}.
      *
      * @return a copy of this Bytes object
      */

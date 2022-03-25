@@ -1359,7 +1359,7 @@ enum BytesInternal {
         final long pos = bytes.readPosition();
         throwExceptionIfReleased(bytes);
         int len = (int) Math.min(Integer.MAX_VALUE, bytes.readRemaining());
-        @NotNull char[] chars = new char[len];
+        char[] chars = new char[len];
         if (bytes instanceof VanillaBytes) {
             try {
                 ((VanillaBytes) bytes).read8Bit(chars, len);
@@ -2827,7 +2827,7 @@ enum BytesInternal {
             return "";
 
         int width = 16;
-        @NotNull int[] lastLine = new int[width];
+        int[] lastLine = new int[width];
         @NotNull String sep = "";
         long position = bytes.readPosition();
         long limit = bytes.readLimit();

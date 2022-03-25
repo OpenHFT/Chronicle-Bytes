@@ -71,7 +71,7 @@
         }
 
         @Java9
-        private static boolean isEqual0(@NotNull byte[] bytes, byte coder, @NotNull NativeBytesStore bs, long address) {
+        private static boolean isEqual0(byte[] bytes, byte coder, @NotNull NativeBytesStore bs, long address) {
 
             @Nullable Memory memory = bs.memory;
 
@@ -99,7 +99,7 @@
             return true;
         }
 
-        private static boolean isEqual0(@NotNull char[] chars, @NotNull NativeBytesStore bs, long address) {
+        private static boolean isEqual0(char[] chars, @NotNull NativeBytesStore bs, long address) {
 
             @Nullable Memory memory = bs.memory;
             int i = 0;
@@ -121,7 +121,7 @@
             return true;
         }
 
-        private static boolean isEqual1(@NotNull char[] chars, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(char[] chars, @NotNull BytesStore bytesStore, long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < chars.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -132,7 +132,7 @@
         }
 
         @Java9
-        private static boolean isEqual1(@NotNull byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < bytes.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -634,7 +634,7 @@
 
         @NotNull
         @Override
-        public Bytes<U> appendUtf8(@NotNull char @NotNull [] chars, int offset, int length)
+        public Bytes<U> appendUtf8(char[] chars, int offset, int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
             long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
             ensureCapacity(writePosition() + actualUTF8Length);
