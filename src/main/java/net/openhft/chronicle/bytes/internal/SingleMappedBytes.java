@@ -41,7 +41,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public class SingleMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.
@@ -151,7 +151,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readPositionRemaining(final long position, final long remaining)
             throws BufferUnderflowException, IllegalStateException {
-//        throwExceptionIfClosed();
+        //  throwExceptionIfClosed
 
         final long limit = position + remaining;
 
@@ -203,7 +203,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     public int peekVolatileInt()
             throws IllegalStateException {
 
-        @Nullable MappedBytesStore bytesStore = (MappedBytesStore) (BytesStore) this.bytesStore;
+        @Nullable final MappedBytesStore bytesStore = (MappedBytesStore) (BytesStore<?, Void>) this.bytesStore;
         long address = bytesStore.address + bytesStore.translate(readPosition);
         @Nullable Memory memory = bytesStore.memory;
 
@@ -230,7 +230,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes) throws BufferOverflowException, IllegalStateException {
+    public Bytes<Void> write(@NotNull BytesStore<?, ?> bytes) throws BufferOverflowException, IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
 
         long length = bytes.readRemaining();

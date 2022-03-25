@@ -48,7 +48,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Position based access.  Once data has been read, the position() moves.
  * <p>The use of this instance is single threaded, though the use of the data
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     int JAVA9_STRING_CODER_LATIN = 0;
@@ -183,11 +183,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
 
         if (text instanceof BytesStore) {
-            final long offset = ((BytesStore) text).readPosition();
-            final long readRemaining = Math.min(writeRemaining(), ((BytesStore) text).readLimit() - offset);
+            final long offset = ((BytesStore<?, ?>) text).readPosition();
+            final long readRemaining = Math.min(writeRemaining(), ((BytesStore<?, ?>) text).readLimit() - offset);
             writeStopBit(readRemaining);
             try {
-                write((BytesStore) text, offset, readRemaining);
+                write((BytesStore<?, ?>) text, offset, readRemaining);
             } catch (BufferUnderflowException | IllegalArgumentException e) {
                 throw new AssertionError(e);
             }
@@ -232,7 +232,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException {
         requireNonNull(text);
         if (text instanceof BytesStore) {
-            return write((BytesStore) text);
+            return write((BytesStore<?, ?>) text);
         }
         return write(text, 0, text.length());
     }
@@ -409,7 +409,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return this
      * @see StreamingDataInput#read(Bytes)
      */
-    default S write(@NotNull BytesStore bytes)
+    default S write(@NotNull final BytesStore<?, ?> bytes)
             throws BufferOverflowException, IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
         requireNonNull(bytes);

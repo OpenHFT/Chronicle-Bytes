@@ -1630,7 +1630,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public Bytes<Void> write(@NotNull BytesStore bytes)
+    public Bytes<Void> write(@NotNull BytesStore<?, ?> bytes)
             throws IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
