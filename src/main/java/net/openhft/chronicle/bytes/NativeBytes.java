@@ -18,7 +18,6 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.*;
@@ -270,11 +269,7 @@ public class NativeBytes<U>
         try {
             if (isByteBufferBacked && size <= MAX_HEAP_CAPACITY) {
                 position = ((ByteBuffer) bytesStore.underlyingObject()).position();
-                try {
-                    store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-                } catch (ArithmeticException e) {
-                    throw new AssertionError(e);
-                }
+                store = allocate(size);
             } else {
                 store = BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
                 if (referenceCounted.unmonitored())
@@ -303,6 +298,17 @@ public class NativeBytes<U>
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
+    }
+
+    @NotNull
+    private BytesStore allocate(long size) {
+        final BytesStore store;
+        try {
+            store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
+        } catch (ArithmeticException e) {
+            throw new AssertionError(e);
+        }
+        return store;
     }
 
     @Override
