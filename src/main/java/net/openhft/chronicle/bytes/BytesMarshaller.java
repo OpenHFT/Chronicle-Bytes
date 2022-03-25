@@ -335,7 +335,7 @@ public class BytesMarshaller<T> {
                     return;
                 }
                 if (c == null) {
-                    c = (Object[]) Array.newInstance(field.getType().getComponentType(), length)
+                    c = (Object[]) Array.newInstance(field.getType().getComponentType(), length);
                     field.set(o, c);
                 } else if (c.length != length)
                     field.set(o, c = Arrays.copyOf(c, length));

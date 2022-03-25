@@ -2961,7 +2961,7 @@ enum BytesInternal {
             throws BufferOverflowException, IllegalStateException {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
-            dateCache = new DateCache()
+            dateCache = new DateCache();
             dateCacheTL.set(dateCache);
         }
         final long date = timeInMS / 86400000;

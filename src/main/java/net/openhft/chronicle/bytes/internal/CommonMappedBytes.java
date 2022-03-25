@@ -42,7 +42,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"unchecked"})
 public abstract class CommonMappedBytes extends MappedBytes {
 
     protected final MappedFile mappedFile;
@@ -82,11 +82,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public void clearUsedByThread() {
         super.clearUsedByThread();
         closeable.clearUsedByThread();
-    }
-
-    @Override
-    protected void bytesStore(BytesStore bytesStore) {
-        super.bytesStore(bytesStore);
     }
 
     @Override
@@ -182,7 +177,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public String read8bit()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-//        throwExceptionIfClosed();
+        // throwExceptionIfClosed
 
         return BytesInternal.read8bit(this);
     }
@@ -199,8 +194,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public long start() {
-//        throwExceptionIfClosed();
-
+        // throwExceptionIfClosed
         return 0L;
     }
 
@@ -208,7 +202,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public Bytes<Void> writePosition(final long position)
             throws BufferOverflowException {
-//        throwExceptionIfClosed();
+        //  throwExceptionIfClosed
         if (position > writeLimit)
             throw new BufferOverflowException();
         if (position < 0L)
@@ -223,7 +217,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public Bytes<Void> clear()
             throws IllegalStateException {
-        // typically only used at the start of an operation so reject if closed.
+        // Typically, only used at the start of an operation so reject if closed.
         throwExceptionIfClosed();
 
         long start = 0L;
@@ -251,7 +245,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         throwExceptionIfClosed();
 
         if (bytes instanceof BytesStore)
-            write((BytesStore) bytes, offset, length);
+            write(bytes, offset, length);
         else if (length == 8)
             writeLong(bytes.readLong(offset));
         else if (length > 0)

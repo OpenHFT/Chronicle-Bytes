@@ -332,7 +332,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         try {
             newBS = mappedFile.acquireByteStore(this, offset, oldBS);
             if (newBS != oldBS) {
-                this.bytesStore(newBS);
+                this.bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) newBS);
                 if (oldBS != null)
                     oldBS.release(this);
                 if (lastActualSize < newBS.maximumLimit)

@@ -55,7 +55,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
         super(mappedFile, name);
 
         try {
-            bytesStore(mappedFile.acquireByteStore(this, 0));
+            bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) mappedFile.acquireByteStore(this, 0));
             assert this.bytesStore.reservedBy(this);
 
         } catch (@NotNull IOException e) {
