@@ -191,7 +191,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         return deduplicator;
     }
 
-    static class VanillaDistributedUniqueTimeDeduplicator implements ReferenceOwner, DistributedUniqueTimeDeduplicator {
+    static final class VanillaDistributedUniqueTimeDeduplicator implements ReferenceOwner, DistributedUniqueTimeDeduplicator {
         private final LongArrayValues values;
 
         private VanillaDistributedUniqueTimeDeduplicator(LongArrayValues values) {

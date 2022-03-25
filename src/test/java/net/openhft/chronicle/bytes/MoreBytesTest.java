@@ -260,7 +260,7 @@ public class MoreBytesTest extends BytesTestCommon {
 
     @Test
     public void testIndexOfLastChar() {
-        testIndexOf(" some", "e";
+        testIndexOf(" some", "e");
     }
 
     @Test
