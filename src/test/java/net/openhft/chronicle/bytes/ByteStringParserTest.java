@@ -301,6 +301,11 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes.append(String.valueOf(Long.MIN_VALUE + 3)).append(".0").append(' ');
         assertEquals(Long.MIN_VALUE + 3, bytes.parseFlexibleLong());
 
+    }
+
+    @Test
+    public void testFlexibleLong2() {
+
         bytes.append(String.valueOf(Long.MAX_VALUE)).append(".0").append(' ');
         assertEquals(Long.MAX_VALUE, bytes.parseFlexibleLong());
 
@@ -367,6 +372,14 @@ public class ByteStringParserTest extends BytesTestCommon {
         bytes.append("1e-2").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
 
+        bytes.append("0.9").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+    }
+
+    @Test
+    public void testFlexibleLong3() {
+  
         bytes.append("0.9").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
 
