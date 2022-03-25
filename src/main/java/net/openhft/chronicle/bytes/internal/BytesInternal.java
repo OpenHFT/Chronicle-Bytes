@@ -345,7 +345,6 @@ enum BytesInternal {
             }
             if (i < length) {
                 return a.readByte(aPos + i) == b.readByte(bPos + i);
-//            i ++;
             }
             return true;
         } catch (BufferUnderflowException e) {
@@ -648,15 +647,19 @@ enum BytesInternal {
             setCount(sb, count);
             if (count < utflen) {
                 final long rp0 = bytes.readPosition();
-                try {
-                    parseUtf82(bytes, sb, utf, utflen, count);
-                } catch (UTFDataFormatRuntimeException e) {
-                    long rp = Math.max(rp0 - 128, 0);
-                    throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200), e);
-                }
+                parseUtf82Guarded(bytes, sb, utf, utflen, count, rp0);
             }
         } catch (IOException | IllegalStateException e) {
             throw Jvm.rethrow(e);
+        }
+    }
+
+    private static void parseUtf82Guarded(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen, int count, long rp0) throws IOException {
+        try {
+            parseUtf82(bytes, sb, utf, utflen, count);
+        } catch (UTFDataFormatRuntimeException e) {
+            long rp = Math.max(rp0 - 128, 0);
+            throw new UTFDataFormatRuntimeException(Long.toHexString(rp0) + "\n" + bytes.toHexString(rp, 200), e);
         }
     }
 
@@ -1320,29 +1323,37 @@ enum BytesInternal {
                     .append(", wlim: ").append(asSize(bytes.writeLimit()))
                     .append(", cap: ").append(asSize(bytes.capacity()))
                     .append(" ] ");
-            try {
-                long start = Math.max(bytes.start(), readPosition - 64);
-                long end = Math.min(readLimit + 64, start + maxLength);
-                // should never try to read past the end of the buffer
-                end = Math.min(end, bytes.realCapacity());
-                try {
-                    for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
-                        if (bytes.readLong(end - 8) != 0)
-                            break;
-                    }
-                } catch (@NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
-                    // ignore
-                }
-                toString(bytes, sb, start, readPosition, readLimit, end);
-                if (end < bytes.readLimit())
-                    sb.append("...");
-            } catch (Exception e) {
-                sb.append(' ').append(e);
-            }
+            appendContent(bytes, maxLength, sb, readPosition, readLimit);
             return sb.toString();
 
         } finally {
             bytes.release(toDebugString);
+        }
+    }
+
+    private static void appendContent(@NotNull final RandomDataInput bytes,
+                                      final long maxLength,
+                                      @NotNull final StringBuilder sb,
+                                      final long readPosition,
+                                      final long readLimit) {
+        try {
+            final long start = Math.max(bytes.start(), readPosition - 64);
+            long end = Math.min(readLimit + 64, start + maxLength);
+            // should never try to read past the end of the buffer
+            end = Math.min(end, bytes.realCapacity());
+            try {
+                for (; end >= start + 16 && end >= readLimit + 16; end -= 8) {
+                    if (bytes.readLong(end - 8) != 0)
+                        break;
+                }
+            } catch (@NotNull UnsupportedOperationException | BufferUnderflowException ignored) {
+                // ignore
+            }
+            toString(bytes, sb, start, readPosition, readLimit, end);
+            if (end < bytes.readLimit())
+                sb.append("...");
+        } catch (Exception e) {
+            sb.append(' ').append(e);
         }
     }
 
@@ -1747,47 +1758,6 @@ enum BytesInternal {
                 throw new AssertionError(e);
             }
         }
-    }
-
-    private static int appendInt1(byte[] numberBuffer, int num) {
-        numberBuffer[19] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 19;
-        numberBuffer[18] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 18;
-        numberBuffer[17] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 17;
-        numberBuffer[16] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 16;
-        numberBuffer[15] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 15;
-        numberBuffer[14] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 14;
-        numberBuffer[13] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 13;
-        numberBuffer[12] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 12;
-        numberBuffer[11] = (byte) (num % 10L + '0');
-        num /= 10;
-        if (num <= 0)
-            return 11;
-        numberBuffer[10] = (byte) (num % 10L + '0');
-        return 10;
     }
 
     private static int appendLong1(byte[] numberBuffer, long num) {
@@ -2619,8 +2589,8 @@ enum BytesInternal {
                 return false;
             }
         }
-        int ch;
-        if (Character.isLetterOrDigit(ch = in.readUnsignedByte())) {
+        int ch = in.readUnsignedByte();
+        if (Character.isLetterOrDigit(ch)) {
             in.readPosition(position);
             return false;
         }
@@ -2956,43 +2926,45 @@ enum BytesInternal {
         b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
+    public static boolean equalBytesAny(@NotNull final BytesStore b1,
+                                        @NotNull final BytesStore b2,
+                                        final long readRemaining)
             throws BufferUnderflowException, IllegalStateException {
-        @Nullable BytesStore bs1 = b1;// OS.isWindows() ? b1 : b1.bytesStore();
-        @Nullable BytesStore bs2 = b2; //OS.isWindows() ? b2 : b2.bytesStore();
 
-        if (bs1.readRemaining() < readRemaining)
+        if (b1.readRemaining() < readRemaining)
             return false;
 
         long i = 0;
         long rp1 = b1.readPosition();
         long rp2 = b2.readPosition();
         for (; i < readRemaining - 7 &&
-                canReadBytesAt(bs1, rp1 + i, 8) &&
-                canReadBytesAt(bs2, rp2 + i, 8); i += 8) {
-            long l1 = bs1.readLong(rp1 + i);
-            long l2 = bs2.readLong(rp2 + i);
+                canReadBytesAt(b1, rp1 + i, 8) &&
+                canReadBytesAt(b2, rp2 + i, 8); i += 8) {
+            long l1 = b1.readLong(rp1 + i);
+            long l2 = b2.readLong(rp2 + i);
             if (l1 != l2)
                 return false;
         }
         for (; i < readRemaining &&
-                canReadBytesAt(bs1, rp1 + i, 1) &&
-                canReadBytesAt(bs2, rp2 + i, 1); i++) {
-            byte i1 = bs1.readByte(rp1 + i);
-            byte i2 = bs2.readByte(rp2 + i);
+                canReadBytesAt(b1, rp1 + i, 1) &&
+                canReadBytesAt(b2, rp2 + i, 1); i++) {
+            byte i1 = b1.readByte(rp1 + i);
+            byte i2 = b2.readByte(rp2 + i);
             if (i1 != i2)
                 return false;
         }
         return true;
     }
 
-    public static void appendDateMillis(@NotNull ByteStringAppender b, long timeInMS)
+    public static void appendDateMillis(@NotNull final ByteStringAppender b,
+                                        final long timeInMS)
             throws BufferOverflowException, IllegalStateException {
         DateCache dateCache = dateCacheTL.get();
         if (dateCache == null) {
-            dateCacheTL.set(dateCache = new DateCache());
+            dateCache = new DateCache()
+            dateCacheTL.set(dateCache);
         }
-        long date = timeInMS / 86400000;
+        final long date = timeInMS / 86400000;
         if (dateCache.lastDay != date) {
             dateCache.lastDateStr = dateCache.dateFormat.format(new Date(timeInMS)).getBytes(ISO_8859_1);
             dateCache.lastDay = date;
