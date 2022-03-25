@@ -118,13 +118,11 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void parseDoubleScientificNegative() {
+
         String strDouble = "6.1E-4";
         double expected = 6.1E-4;
         int expectedDp = 5; //0.00061 needs dp 5
-        Bytes<?> from = Bytes.from(strDouble);
-        assertEquals(expected, from.parseDouble(), 0.0);
-        assertEquals(expectedDp, from.lastDecimalPlaces());
-        from.releaseLast();
+        parseDoubleScientific(strDouble, expected, expectedDp);
     }
 
     @Test
@@ -132,10 +130,7 @@ public class BytesInternalTest extends BytesTestCommon {
         String strDouble = "6.123E-4";
         double expected = 6.123E-4;
         int expectedDp = 7; //0.0006123 needs dp 7
-        Bytes<?> from = Bytes.from(strDouble);
-        assertEquals(expected, from.parseDouble(), 0.0);
-        assertEquals(expectedDp, from.lastDecimalPlaces());  //Last dp should be 7.
-        from.releaseLast();
+        parseDoubleScientific(strDouble, expected, expectedDp);
     }
 
     @Test
@@ -143,10 +138,19 @@ public class BytesInternalTest extends BytesTestCommon {
         String strDouble = "6.12345E4";
         double expected = 6.12345E4;
         int expectedDp = 1; //6.12345 x 10^4 = 61234.5 needs 1
-        Bytes<?> from = Bytes.from(strDouble);
-        assertEquals(expected, from.parseDouble(), 0.0);
-        assertEquals(expectedDp, from.lastDecimalPlaces());
-        from.releaseLast();
+        parseDoubleScientific(strDouble, expected, expectedDp);
+    }
+
+    private void parseDoubleScientific(final String strDouble,
+                                       final double expected,
+                                       final int expectedDp) {
+        final Bytes<?> from = Bytes.from(strDouble);
+        try {
+            assertEquals(expected, from.parseDouble(), 0.0);
+            assertEquals(expectedDp, from.lastDecimalPlaces());
+        } finally {
+            from.releaseLast();
+        }
     }
 
     @Test
