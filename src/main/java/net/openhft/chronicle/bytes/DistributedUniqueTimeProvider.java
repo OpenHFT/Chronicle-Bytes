@@ -142,7 +142,10 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         return timestampWithHostId % HOST_IDS;
     }
 
-    static class DistributedUniqueTimeProviderHolder {
+    static final class DistributedUniqueTimeProviderHolder {
+
+        private DistributedUniqueTimeProviderHolder() {
+        }
 
         private static final Integer DEFAULT_HOST_ID = Jvm.getInteger("hostId", 0);
         /*

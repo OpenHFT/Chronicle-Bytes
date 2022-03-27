@@ -18,10 +18,12 @@
 
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
-import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -32,7 +34,6 @@ import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
 import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
-import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -260,16 +261,17 @@ public class NativeBytes<U>
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
+        resizeHelper(size, isByteBufferBacked);
+    }
+
+    private void resizeHelper(final long size,
+                              final boolean isByteBufferBacked) {
         final BytesStore store;
         int position = 0;
         try {
             if (isByteBufferBacked && size <= MAX_HEAP_CAPACITY) {
                 position = ((ByteBuffer) bytesStore.underlyingObject()).position();
-                try {
-                    store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-                } catch (ArithmeticException e) {
-                    throw new AssertionError(e);
-                }
+                store = allocate(size);
             } else {
                 store = BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
                 if (referenceCounted.unmonitored())
@@ -298,6 +300,17 @@ public class NativeBytes<U>
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
+    }
+
+    @NotNull
+    private BytesStore allocate(long size) {
+        final BytesStore store;
+        try {
+            store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
+        } catch (ArithmeticException e) {
+            throw new AssertionError(e);
+        }
+        return store;
     }
 
     @Override

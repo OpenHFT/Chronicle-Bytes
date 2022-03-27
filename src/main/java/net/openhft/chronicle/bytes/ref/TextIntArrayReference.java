@@ -127,7 +127,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
                     if (getUsed() < usedAtLeast) {
                         setUsed(usedAtLeast);
                     }
-                    return;
+                    break;
                 } finally {
                     bytes.writeInt(LOCK_OFFSET + offset, FALS);
                 }

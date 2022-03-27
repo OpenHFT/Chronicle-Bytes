@@ -112,12 +112,13 @@ public interface BinaryWireCode {
             for (int i = STRING_0; i <= STRING_31; i++)
                 stringForCode[i] = "STRING_" + i;
             for (int i = 0; i < stringForCode.length; i++) {
-                if (stringForCode[i] == null)
+                if (stringForCode[i] == null) {
                     if (i <= ' ' || i >= 127) {
                         stringForCode[i] = "Unknown_0x" + Integer.toHexString(i).toUpperCase();
                     } else {
                         stringForCode[i] = "Unknown_" + (char) i;
                     }
+                }
             }
         } catch (IllegalAccessException | IllegalArgumentException e) {
             throw new AssertionError(e);

@@ -283,32 +283,37 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null)
+        if (bytes == null) {
             return "not set";
-        @NotNull StringBuilder sb = new StringBuilder();
+        }
+        StringBuilder sb = new StringBuilder();
         sb.append("used: ");
         try {
             long used = getUsed();
             sb.append(used);
             sb.append(", value: ");
-            @NotNull String sep = "";
-            try {
-                int i;
-                int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
-                for (i = 0; i < max; i++) {
-                    long valueAt = getValueAt(i);
-                    sb.append(sep).append(valueAt);
-                    sep = ", ";
-                }
-                if (i < getCapacity())
-                    sb.append(" ...");
-
-            } catch (BufferUnderflowException e) {
-                sb.append(" ").append(e);
-            }
+            appendContents(sb, used);
             return sb.toString();
         } catch (IllegalStateException | BufferUnderflowException e) {
             throw new AssertionError(e);
+        }
+    }
+
+    private void appendContents(@NotNull StringBuilder sb, long used) {
+        String sep = "";
+        try {
+            int i;
+            int max = (int) Math.min(used, Math.min(getCapacity(), MAX_TO_STRING));
+            for (i = 0; i < max; i++) {
+                long valueAt = getValueAt(i);
+                sb.append(sep).append(valueAt);
+                sep = ", ";
+            }
+            if (i < getCapacity())
+                sb.append(" ...");
+
+        } catch (BufferUnderflowException e) {
+            sb.append(" ").append(e);
         }
     }
 

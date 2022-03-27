@@ -562,7 +562,7 @@ public class UncheckedNativeBytes<U>
 
     void writeCheckOffset(long offset, long adding)
             throws BufferOverflowException {
-
+        // Do nothing
     }
 
     @Override

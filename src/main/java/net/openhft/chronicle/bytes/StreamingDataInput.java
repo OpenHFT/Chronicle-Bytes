@@ -337,7 +337,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean read8bit(@NotNull Bytes b)
+    default boolean read8bit(@NotNull Bytes<?> b)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         b.clear();
         if (readRemaining() <= 0)
@@ -430,7 +430,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         read(bytes, length);
     }
 
-    default void read(@NotNull Bytes bytes, int length)
+    default void read(@NotNull final Bytes<?> bytes,
+                      final int length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         int len2 = (int) Math.min(length, readRemaining());
@@ -540,7 +541,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         BytesInternal.readHistogram(this, histogram);
     }
 
-    default void readWithLength(@NotNull Bytes bytes)
+    default void readWithLength(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalStateException {
         bytes.clear();
         int length = Maths.toUInt31(readStopBit());

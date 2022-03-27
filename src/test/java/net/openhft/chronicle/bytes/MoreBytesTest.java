@@ -225,58 +225,42 @@ public class MoreBytesTest extends BytesTestCommon {
 
     @Test
     public void testIndexOfAtEnd() {
-        final String sourceStr = "A string of some data";
-        final String subStr = "ta";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("A string of some data", "ta");
     }
 
     @Test
     public void testIndexOfEmptySubStr() {
-        final String sourceStr = "A string of some data";
-        final String subStr = "";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("A string of some data", "");
     }
 
     @Test
     public void testIndexOfEmptySubStrAndSource() {
-        final String sourceStr = "";
-        final String subStr = "";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("", "");
     }
 
     @Test
     public void testIndexOfEmptySource() {
-        final String sourceStr = "";
-        final String subStr = "some";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("", "some");
     }
 
     @Test
     public void testIndexOfExactMatch() {
-        final String sourceStr = "some";
-        final String subStr = "some";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("some", "some");
     }
 
     @Test
     public void testIndexOfIncorrectExactMatch() {
-        final String sourceStr = "some";
-        final String subStr = " some";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf("some", " some");
     }
 
     @Test
     public void testIndexOfExactMatchAtChar1() {
-        final String sourceStr = " some";
-        final String subStr = "some";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf(" some", "some");
     }
 
     @Test
     public void testIndexOfLastChar() {
-        final String sourceStr = " some";
-        final String subStr = "e";
-        testIndexOf(sourceStr, subStr);
+        testIndexOf(" some", "e");
     }
 
     @Test

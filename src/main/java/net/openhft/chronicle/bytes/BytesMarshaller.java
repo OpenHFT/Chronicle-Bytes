@@ -76,13 +76,13 @@ public class BytesMarshaller<T> {
     abstract static class FieldAccess {
         final Field field;
 
-        FieldAccess(Field field) {
+        FieldAccess(@NotNull Field field) {
             this.field = field;
         }
 
         @NotNull
-        public static Object create(@NotNull Field field) {
-            Class<?> type = field.getType();
+        public static Object create(@NotNull final Field field) {
+            final Class<?> type = field.getType();
             switch (type.getName()) {
                 case "boolean":
                     return new BooleanFieldAccess(field);
@@ -101,32 +101,37 @@ public class BytesMarshaller<T> {
                 case "double":
                     return new DoubleFieldAccess(field);
                 default:
-                    if (type.isArray()) {
-                        if (type.getComponentType().isPrimitive()) {
-                            if (type == byte[].class)
-                                return new ByteArrayFieldAccess(field);
-                            if (type == int[].class)
-                                return new IntArrayFieldAccess(field);
-                            if (type == float[].class)
-                                return new FloatArrayFieldAccess(field);
-                            if (type == long[].class)
-                                return new LongArrayFieldAccess(field);
-                            if (type == double[].class)
-                                return new DoubleArrayFieldAccess(field);
-                            throw new UnsupportedOperationException("TODO " + field.getType());
-                        }
-                        return new ObjectArrayFieldAccess(field);
-                    }
-                    if (Collection.class.isAssignableFrom(type))
-                        return new CollectionFieldAccess(field);
-                    if (Map.class.isAssignableFrom(type))
-                        return new MapFieldAccess(field);
-                    if (BytesStore.class.isAssignableFrom(type))
-                        return new BytesFieldAccess(field);
-                    if (BytesMarshallable.class.isAssignableFrom(type))
-                        return new BytesMarshallableFieldAccess(field);
-                    return new ScalarFieldAccess(field);
+                    return nonPrimitiveFieldAccess(field, type);
             }
+        }
+
+        static Object nonPrimitiveFieldAccess(@NotNull final Field field,
+                                              @NotNull final Class<?> type) {
+            if (type.isArray()) {
+                if (type.getComponentType().isPrimitive()) {
+                    if (type == byte[].class)
+                        return new ByteArrayFieldAccess(field);
+                    if (type == int[].class)
+                        return new IntArrayFieldAccess(field);
+                    if (type == float[].class)
+                        return new FloatArrayFieldAccess(field);
+                    if (type == long[].class)
+                        return new LongArrayFieldAccess(field);
+                    if (type == double[].class)
+                        return new DoubleArrayFieldAccess(field);
+                    throw new UnsupportedOperationException("TODO " + field.getType());
+                }
+                return new ObjectArrayFieldAccess(field);
+            }
+            if (Collection.class.isAssignableFrom(type))
+                return new CollectionFieldAccess(field);
+            if (Map.class.isAssignableFrom(type))
+                return new MapFieldAccess(field);
+            if (BytesStore.class.isAssignableFrom(type))
+                return new BytesFieldAccess(field);
+            if (BytesMarshallable.class.isAssignableFrom(type))
+                return new BytesMarshallableFieldAccess(field);
+            return new ScalarFieldAccess(field);
         }
 
         @NotNull
@@ -328,9 +333,10 @@ public class BytesMarshaller<T> {
                         field.set(o, null);
                     return;
                 }
-                if (c == null)
-                    field.set(o, c = (Object[]) Array.newInstance(field.getType().getComponentType(), length));
-                else if (c.length != length)
+                if (c == null) {
+                    c = (Object[]) Array.newInstance(field.getType().getComponentType(), length);
+                    field.set(o, c);
+                } else if (c.length != length)
                     field.set(o, c = Arrays.copyOf(c, length));
                 for (int i = 0; i < length; i++) {
                     Object o2 = c[i];

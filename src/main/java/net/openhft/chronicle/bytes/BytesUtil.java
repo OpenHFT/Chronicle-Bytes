@@ -54,12 +54,12 @@ public enum BytesUtil {
      * @param clazz to check
      * @return true if the whole class is trivially copyable
      */
-    public static boolean isTriviallyCopyable(Class clazz) {
-        int[] ints = TRIVIALLY_COPYABLE.get(clazz);
+    public static boolean isTriviallyCopyable(@NotNull Class<?> clazz) {
+        final int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         return ints[1] > 0;
     }
 
-    static int[] isTriviallyCopyable0(Class clazz) {
+    static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (Jvm.isAzulZing())
             throw new UnsupportedOperationException();
         if (clazz.isArray()) {
@@ -69,6 +69,10 @@ public enum BytesUtil {
             return NO_INTS;
         }
         List<Field> fields = BytesFieldInfo.fields(clazz);
+        return calculateMinMax(fields);
+    }
+
+    private static int[] calculateMinMax(final List<Field> fields) {
         int min = 0;
         int max = 0;
         for (Field field : fields) {

@@ -615,7 +615,7 @@ public class BytesTest extends BytesTestCommon {
         assertEquals("0345456789", b.toString());
         postTest(b);
         assertThrows(IllegalStateException.class, () ->
-            b.move(3, 5, 3)
+                b.move(3, 5, 3)
         );
     }
 
@@ -650,8 +650,10 @@ public class BytesTest extends BytesTestCommon {
         assertEquals("Hlo o World", b.toString());
         postTest(b);
         BackgroundResourceReleaser.releasePendingResources();
+        final BytesStore<?, ?> bs = b.bytesStore();
+        assertNotNull(bs);
         assertThrows(IllegalStateException.class, () ->
-            b.bytesStore().move(3, 5, 3)
+                bs.move(3, 5, 3)
         );
     }
 

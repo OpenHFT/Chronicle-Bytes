@@ -57,6 +57,8 @@ public class NativeBytesStore<U>
         BB_ATT = Jvm.getField(directBB, "att");
     }
 
+    // Even though not referenced, this field needs to stay
+    // TODO: Rework using a non-finalizer solution
     private final Finalizer finalizer;
     public long address;
     // on release, set this to null.

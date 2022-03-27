@@ -153,7 +153,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readPositionRemaining(final long position, final long remaining)
             throws BufferUnderflowException, IllegalStateException {
-//        throwExceptionIfClosed();
 
         final long limit = position + remaining;
         acquireNextByteStore(position, true);
@@ -177,7 +176,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readPosition(final long position)
             throws BufferUnderflowException, IllegalStateException {
-//        throwExceptionIfClosed();
 
         if (bytesStore.inside(position)) {
             return super.readPosition(position);
@@ -201,7 +199,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public long addressForRead(final long offset)
             throws BufferUnderflowException, IllegalStateException {
-//        throwExceptionIfClosed();
         requireNonNegative(offset);
 
         BytesStore bytesStore = this.bytesStore;
@@ -224,8 +221,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public long addressForRead(final long offset, final int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
-//        throwExceptionIfClosed();
-
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset, buffer))
@@ -237,8 +232,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public long addressForWrite(final long offset)
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException {
         requireNonNegative(offset);
-//        throwExceptionIfClosed();
-
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset))
@@ -286,7 +279,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
-        BytesStore bytesStore = this.bytesStore;
+        BytesStore<?, ?> bytesStore = this.bytesStore;
         if (!bytesStore.inside(writePosition(), checkSize0(desiredCapacity))) {
             acquireNextByteStore0(writePosition(), false);
         }
@@ -334,7 +327,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         try {
             newBS = mappedFile.acquireByteStore(this, offset, oldBS);
             if (newBS != oldBS) {
-                this.bytesStore(newBS);
+                this.bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) newBS);
                 if (oldBS != null)
                     oldBS.release(this);
                 if (lastActualSize < newBS.maximumLimit)
@@ -364,7 +357,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     public Bytes<Void> readSkip(final long bytesToSkip)
             throws BufferUnderflowException, IllegalStateException {
         // called often so skip this check for performance
-        // throwExceptionIfClosed();
 
         if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
@@ -380,9 +372,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> clear()
             throws IllegalStateException {
-        long start = 0L;
-        readPosition = start;
-        uncheckedWritePosition(start);
+        readPosition = 0L;
+        uncheckedWritePosition(0L);
         writeLimit = mappedFile.capacity();
         if (writeLimit == 16843020)
             throw new AssertionError();

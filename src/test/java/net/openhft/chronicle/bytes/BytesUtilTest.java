@@ -52,6 +52,14 @@ public class BytesUtilTest extends BytesTestCommon {
 
         assertEquals(start, BytesUtil.triviallyCopyableStart(A.class));
         assertEquals(20, BytesUtil.triviallyCopyableLength(A.class));
+    }
+
+    @Test
+    public void triviallyCopyableB() {
+        assumeTrue(Jvm.is64bit());
+        assumeFalse(Jvm.isAzulZing());
+
+        int start = Jvm.objectHeaderSize();
 
         assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
@@ -69,7 +77,7 @@ public class BytesUtilTest extends BytesTestCommon {
         assertFalse(BytesUtil.isTriviallyCopyable(A2.class, start + 12, 4 + 2 * 8));
 
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class));
-        // however by copying a region that is safe.
+        // However, by copying a region that is safe.
         assertEquals("[" + start + ", " + (start + size) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A3.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start, 4 + 2 * 8 + 2 * 2));
         assertTrue(BytesUtil.isTriviallyCopyable(A3.class, start + 4, 8));

@@ -256,22 +256,43 @@ public class MappedBytesTest extends BytesTestCommon {
     public void testWriteLarge8Bit() throws IOException {
         File tempFile1 = File.createTempFile("mapped", "bytes");
         try (MappedBytes bytes = MappedBytes.mappedBytes(tempFile1, 64 << 10)) {
-            try {
-                bytes.write8bit(Bytes.from(text + text));
-                fail();
-            } catch (DecoratedBufferUnderflowException ex) {
-                assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));
-            }
+            testWrite8Bit(bytes);
         }
     }
 
-    @Test
-    public void testLargeWrites()
-            throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"),
-                128 << 10, 64 << 10);
+    private void testWrite8Bit(final MappedBytes bytes) {
+        try {
+            bytes.write8bit(Bytes.from(text + text));
+            fail();
+        } catch (DecoratedBufferUnderflowException ex) {
+            assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));
+        }
+    }
 
-        byte[] largeBytes = new byte[500 << 10];
+
+    @Test
+    public void testLargeWrites() throws IOException {
+        testLargeWrites(128 << 10, 64 << 10, 500 << 10);
+    }
+
+    @Test
+    public void testLargeWrites3() throws IOException {
+        testLargeWrites(47 << 10, 21 << 10, 513 << 10);
+    }
+
+    @Test
+    public void testLargeWrites2() throws IOException {
+        testLargeWrites(128 << 10, 128 << 10, 128 << 10);
+    }
+
+    public void testLargeWrites(final long chunkSize,
+                                final long overlapSize,
+                                final int arraySize)
+            throws IOException {
+        final MappedBytes bytes = MappedBytes
+                .mappedBytes(File.createTempFile("mapped", "bytes"), chunkSize, overlapSize);
+
+        final byte[] largeBytes = new byte[arraySize];
         bytes.writePosition(0);
         bytes.write(largeBytes);
         bytes.writePosition(0);
@@ -307,91 +328,6 @@ public class MappedBytesTest extends BytesTestCommon {
         assertTrue(bytes.isClosed());
     }
 
-    @Test
-    public void testLargeWrites3()
-            throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 47 <<
-                10, 21 << 10);
-
-        byte[] largeBytes = new byte[513 << 10];
-        bytes.writePosition(0);
-        bytes.write(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes);
-        bytes.writePosition(0);
-        bytes.write(largeBytes, 64, largeBytes.length - 64);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes, 64, largeBytes.length - 64);
-
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes));
-        bytes.writePosition(0);
-        Bytes<byte[]> bytes1 = Bytes.wrapForRead(largeBytes);
-        bytes.write(64, bytes1);
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
-
-        Bytes bytes2 = Bytes.allocateDirect(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(bytes2);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2);
-        bytes.writePosition(0);
-        bytes.write(bytes2, 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
-
-        bytes2.releaseLast();
-        bytes.releaseLast();
-
-        assertTrue(bytes.isClosed());
-
-    }
-
-    @Test
-    public void testLargeWrites2()
-            throws IOException {
-        MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 128 <<
-                10, 128 << 10);
-
-        byte[] largeBytes = new byte[500 << 10];
-        bytes.writePosition(0);
-        bytes.write(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes);
-        bytes.writePosition(0);
-        bytes.write(largeBytes, 64, largeBytes.length - 64);
-        bytes.writePosition(0);
-        bytes.write(64, largeBytes, 64, largeBytes.length - 64);
-
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes));
-        bytes.writePosition(0);
-        Bytes<byte[]> bytes1 = Bytes.wrapForRead(largeBytes);
-        bytes.write(64, bytes1);
-        bytes.writePosition(0);
-        bytes.write(Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
-
-        Bytes bytes2 = Bytes.allocateDirect(largeBytes);
-        bytes.writePosition(0);
-        bytes.write(bytes2);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2);
-        bytes.writePosition(0);
-        bytes.write(bytes2, 64L, largeBytes.length - 64L);
-        bytes.writePosition(0);
-        bytes.write(64, bytes2, 64L, largeBytes.length - 64L);
-
-        bytes2.releaseLast();
-        bytes.releaseLast();
-
-        assertTrue(bytes.isClosed());
-
-    }
 
     @Test
     public void shouldNotBeReadOnly()
@@ -518,6 +454,10 @@ public class MappedBytesTest extends BytesTestCommon {
             original.writeInt(54, 12345678);
 //            System.out.println("Original(54): " + original.readInt(54));
 //            System.out.println("PBS(4): " + pbs.readInt(4));
+
+            assertEquals(12345678, original.readInt(54));
+            assertEquals(4321, original.readInt(50));
+
         }
     }
 

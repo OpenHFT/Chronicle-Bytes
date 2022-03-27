@@ -253,12 +253,7 @@ public enum AppendableUtil {
             if (c <= 0x007F) {
                 continue;
             }
-            if (c <= 0x07FF) {
-                utflen++;
-
-            } else {
-                utflen += 2;
-            }
+            utflen += (c <= 0x07FF) ? 1 : 2;
         }
         return utflen;
     }
