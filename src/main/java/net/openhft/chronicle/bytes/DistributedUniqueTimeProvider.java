@@ -47,7 +47,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
             if (unmonitor) IOTools.unmonitor(values);
-            values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8 + 16);
+            values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8L + 16L);
             deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
 
         } catch (Exception ioe) {

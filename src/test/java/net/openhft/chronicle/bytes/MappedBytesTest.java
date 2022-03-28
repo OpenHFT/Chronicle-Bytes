@@ -261,8 +261,9 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     private void testWrite8Bit(final MappedBytes bytes) {
+        final Bytes<?> bytes2 = Bytes.from(text + text);
         try {
-            bytes.write8bit(Bytes.from(text + text));
+            bytes.write8bit(bytes2);
             fail();
         } catch (DecoratedBufferUnderflowException ex) {
             assertTrue(ex.getMessage().startsWith("Acquired the next BytesStore"));

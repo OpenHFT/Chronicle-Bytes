@@ -45,7 +45,7 @@ public class MappedFileTest extends BytesTestCommon {
         try {
             MappedFile.warmup();
         } catch (Throwable t) {
-            throw new AssertionError(t);
+            fail(t.getMessage());
         }
     }
 
@@ -82,7 +82,7 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void testReferenceCounts()
             throws IOException {
-/*        assumeFalse(Jvm.isMacArm());*/
+        /*        assumeFalse(Jvm.isMacArm());*/
 
         final File tmp = IOTools.createTempFile("testReferenceCounts");
         final int chunkSize;

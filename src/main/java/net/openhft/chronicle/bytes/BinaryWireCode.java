@@ -30,7 +30,6 @@ public interface BinaryWireCode {
     // sequence of length 0 - 2^32-1
     int BYTES_LENGTH32 = 0x82;
     // sequence of length 0 - 255
-//        public static final int BYTES_LENGTH64 = 0x83;
 
     int FIELD_ANCHOR = 0x87;
     int ANCHOR = 0x88;
@@ -38,8 +37,6 @@ public interface BinaryWireCode {
 
     // an array of unsigned bytes
     int U8_ARRAY = 0x8A;
-    //        public static final int U16_ARRAY = 0x8B;
-//        public static final int I32_ARRAY = 0x8C;
     int I64_ARRAY = 0x8D;
     int PADDING32 = 0x8E;
     int PADDING = 0x8F;
@@ -64,10 +61,6 @@ public interface BinaryWireCode {
     int INT64 = 0xA7;
     int SET_LOW_INT8 = 0xA8;
     int SET_LOW_INT16 = 0xA9;
-    //    public static final int FIXED_5 = 0xAA;
-//    public static final int FIXED_4 = 0xAB;
-//    public static final int FIXED_3 = 0xAC;
-//    public static final int FIXED_2 = 0xAD;
     int STOP_BIT = 0xAE;
     int INT64_0x = 0xAF;
 
