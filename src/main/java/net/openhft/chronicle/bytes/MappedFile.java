@@ -283,6 +283,11 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     public abstract RandomAccessFile raf();
 
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated as per https://github.com/OpenHFT/Chronicle-Bytes/issues/348
+     */
     @Deprecated
     @Override
     protected void finalize()
