@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -30,7 +31,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
         super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
-    public void set(long address, long capacity) {
+    public void set(long address, @NonNegative long capacity) {
         setAddress(address);
         this.limit = maximumLimit = capacity;
     }
@@ -46,11 +47,13 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
         }
     }
 
+    @NonNegative
     @Override
     public long safeLimit() {
         return limit;
     }
 
+    @NonNegative
     @Override
     public long start() {
         return 0;

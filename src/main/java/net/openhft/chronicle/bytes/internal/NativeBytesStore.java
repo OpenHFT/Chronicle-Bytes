@@ -91,12 +91,12 @@ public class NativeBytesStore<U>
     }
 
     public NativeBytesStore(
-            long address, long limit, @Nullable Runnable deallocator, boolean elastic) {
+            long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic) {
         this(address, limit, deallocator, elastic, false);
     }
 
     protected NativeBytesStore(
-            long address, long limit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
+            long address, @NonNegative long limit, @Nullable Runnable deallocator, boolean elastic, boolean monitored) {
         super(monitored);
         setAddress(address);
         this.limit = limit;
@@ -131,13 +131,13 @@ public class NativeBytesStore<U>
      * @param capacity of the buffer.
      */
     @NotNull
-    public static NativeBytesStore<Void> nativeStore(long capacity)
+    public static NativeBytesStore<Void> nativeStore(@NonNegative long capacity)
             throws IllegalArgumentException {
         return of(capacity, true, true);
     }
 
     @NotNull
-    private static NativeBytesStore<Void> of(long capacity, boolean zeroOut, boolean elastic)
+    private static NativeBytesStore<Void> of(@NonNegative long capacity, boolean zeroOut, boolean elastic)
             throws IllegalArgumentException {
         if (capacity <= 0)
             return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
@@ -152,13 +152,13 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
-    public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(long capacity)
+    public static NativeBytesStore<Void> nativeStoreWithFixedCapacity(@NonNegative long capacity)
             throws IllegalArgumentException {
         return of(capacity, true, false);
     }
 
     @NotNull
-    public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(long capacity)
+    public static NativeBytesStore<Void> lazyNativeBytesStoreWithFixedCapacity(@NonNegative long capacity)
             throws IllegalArgumentException {
         return of(capacity, false, false);
     }
@@ -169,7 +169,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
-    public static NativeBytesStore<ByteBuffer> elasticByteBuffer(int size, long maxSize) {
+    public static NativeBytesStore<ByteBuffer> elasticByteBuffer(@NonNegative int size, @NonNegative long maxSize) {
         return new NativeBytesStore<>(ByteBuffer.allocateDirect(size), true, Math.toIntExact(maxSize));
     }
 
@@ -179,7 +179,7 @@ public class NativeBytesStore<U>
     }
 
     @NotNull
-    public static NativeBytesStore from(@NotNull byte[] bytes) {
+    public static NativeBytesStore from(byte[] bytes) {
         try {
             @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
             Bytes<byte[]> bytes2 = Bytes.wrapForRead(bytes);
@@ -197,7 +197,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public boolean canReadDirect(long length) {
+    public boolean canReadDirect(@NonNegative long length) {
         return limit >= length;
     }
 
@@ -219,7 +219,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public void move(long from, long to, long length)
+    public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
         long addr = this.address;
@@ -227,7 +227,7 @@ public class NativeBytesStore<U>
         memoryCopyMemory(addr + from, addr + to, length);
     }
 
-    private void memoryCopyMemory(long fromAddress, long toAddress, long length)
+    private void memoryCopyMemory(long fromAddress, long toAddress, @NonNegative long length)
             throws IllegalStateException {
         try {
             memory.copyMemory(fromAddress, toAddress, length);
@@ -280,12 +280,12 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long realCapacity() {
+    public @NonNegative long realCapacity() {
         return limit;
     }
 
     @Override
-    public long capacity() {
+    public @NonNegative long capacity() {
         return maximumLimit;
     }
 
@@ -297,7 +297,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> zeroOut(long start, long end) {
+    public NativeBytesStore<U> zeroOut(@NonNegative long start, @NonNegative long end) {
         if (end <= start)
             return this;
         if (start < start())
@@ -327,100 +327,100 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value)
+    public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
             throws IllegalStateException {
         return memory.compareAndSwapInt(address + translate(offset), expected, value);
     }
 
     @Override
-    public void testAndSetInt(long offset, int expected, int value)
+    public void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws IllegalStateException {
         memory.testAndSetInt(address + translate(offset), offset, expected, value);
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value)
+    public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws IllegalStateException {
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
     @Override
-    public long addAndGetLong(long offset, long adding)
+    public long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException {
         return memory.addLong(address + translate(offset), adding);
     }
 
     @Override
-    public int addAndGetInt(long offset, int adding)
+    public int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException {
         return memory.addInt(address + translate(offset), adding);
     }
 
-    public long translate(long offset) {
+    public long translate(@NonNegative long offset) {
         return offset;
     }
 
     @Override
-    public byte readByte(long offset) {
+    public byte readByte(@NonNegative long offset) {
         return memory.readByte(address + translate(offset));
     }
 
     @Override
-    public int readUnsignedByte(long offset)
+    public int readUnsignedByte(@NonNegative long offset)
             throws BufferUnderflowException {
         return readByte(offset) & 0xFF;
     }
 
     @Override
-    public short readShort(long offset) {
+    public short readShort(@NonNegative long offset) {
         return memory.readShort(address + translate(offset));
     }
 
     @Override
-    public int readInt(long offset) {
+    public int readInt(@NonNegative long offset) {
         return memory.readInt(address + translate(offset));
     }
 
     @Override
-    public long readLong(long offset) {
+    public long readLong(@NonNegative long offset) {
         long addr = this.address;
         assert addr != 0;
         return memory.readLong(addr + translate(offset));
     }
 
     @Override
-    public float readFloat(long offset) {
+    public float readFloat(@NonNegative long offset) {
         return memory.readFloat(address + translate(offset));
     }
 
     @Override
-    public double readDouble(long offset) {
+    public double readDouble(@NonNegative long offset) {
         return memory.readDouble(address + translate(offset));
     }
 
     @Override
-    public byte readVolatileByte(long offset) {
+    public byte readVolatileByte(@NonNegative long offset) {
         return memory.readVolatileByte(address + translate(offset));
     }
 
     @Override
-    public short readVolatileShort(long offset) {
+    public short readVolatileShort(@NonNegative long offset) {
         return memory.readVolatileShort(address + translate(offset));
     }
 
     @Override
-    public int readVolatileInt(long offset) {
+    public int readVolatileInt(@NonNegative long offset) {
         return memory.readVolatileInt(address + translate(offset));
     }
 
     @Override
-    public long readVolatileLong(long offset) {
+    public long readVolatileLong(@NonNegative long offset) {
         return memory.readVolatileLong(address + translate(offset));
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeByte(long offset, byte i8)
+    public NativeBytesStore<U> writeByte(@NonNegative long offset, byte i8)
             throws IllegalStateException {
         memory.writeByte(address + translate(offset), i8);
         return this;
@@ -428,7 +428,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeShort(long offset, short i16)
+    public NativeBytesStore<U> writeShort(@NonNegative long offset, short i16)
             throws IllegalStateException {
         memory.writeShort(address + translate(offset), i16);
         return this;
@@ -436,7 +436,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeInt(long offset, int i32)
+    public NativeBytesStore<U> writeInt(@NonNegative long offset, int i32)
             throws IllegalStateException {
         try {
             memory.writeInt(address + translate(offset), i32);
@@ -449,7 +449,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedInt(long offset, int i)
+    public NativeBytesStore<U> writeOrderedInt(@NonNegative long offset, int i)
             throws IllegalStateException {
         memory.writeOrderedInt(address + translate(offset), i);
         return this;
@@ -457,7 +457,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeLong(long offset, long i64)
+    public NativeBytesStore<U> writeLong(@NonNegative long offset, long i64)
             throws IllegalStateException {
         memory.writeLong(address + translate(offset), i64);
         return this;
@@ -465,7 +465,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedLong(long offset, long i)
+    public NativeBytesStore<U> writeOrderedLong(@NonNegative long offset, long i)
             throws IllegalStateException {
         memory.writeOrderedLong(address + translate(offset), i);
         return this;
@@ -473,7 +473,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeFloat(long offset, float f)
+    public NativeBytesStore<U> writeFloat(@NonNegative long offset, float f)
             throws IllegalStateException {
         memory.writeFloat(address + translate(offset), f);
         return this;
@@ -481,7 +481,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeDouble(long offset, double d)
+    public NativeBytesStore<U> writeDouble(@NonNegative long offset, double d)
             throws IllegalStateException {
         memory.writeDouble(address + translate(offset), d);
         return this;
@@ -489,7 +489,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileByte(long offset, byte i8)
+    public NativeBytesStore<U> writeVolatileByte(@NonNegative long offset, byte i8)
             throws IllegalStateException {
         memory.writeVolatileByte(address + translate(offset), i8);
         return this;
@@ -497,7 +497,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileShort(long offset, short i16)
+    public NativeBytesStore<U> writeVolatileShort(@NonNegative long offset, short i16)
             throws IllegalStateException {
         memory.writeVolatileShort(address + translate(offset), i16);
         return this;
@@ -505,7 +505,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileInt(long offset, int i32)
+    public NativeBytesStore<U> writeVolatileInt(@NonNegative long offset, int i32)
             throws IllegalStateException {
         memory.writeVolatileInt(address + translate(offset), i32);
         return this;
@@ -513,7 +513,7 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileLong(long offset, long i64)
+    public NativeBytesStore<U> writeVolatileLong(@NonNegative long offset, long i64)
             throws IllegalStateException {
         memory.writeVolatileLong(address + translate(offset), i64);
         return this;
@@ -535,7 +535,7 @@ public class NativeBytesStore<U>
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
             throws IllegalStateException {
         if (bytes.isDirect()) {
             memoryCopyMemory(Jvm.address(bytes) + offset, address + translate(offsetInRDO), length);
@@ -548,7 +548,7 @@ public class NativeBytesStore<U>
     @NotNull
     @Override
     public NativeBytesStore<U> write(
-            long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
+            @NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
@@ -563,7 +563,7 @@ public class NativeBytesStore<U>
         return this;
     }
 
-    public void write0(long offsetInRDO, @NotNull RandomDataInput bytes, long offset, long length)
+    public void write0(@NonNegative long offsetInRDO, @NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8) {
@@ -575,7 +575,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long addressForRead(long offset)
+    public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
         if (offset < start() || offset > realCapacity())
             throw new BufferUnderflowException();
@@ -583,7 +583,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long addressForWrite(long offset)
+    public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
         if (offset < start() || offset > realCapacity())
             throw new BufferOverflowException();
@@ -623,20 +623,20 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public void nativeRead(long position, long address, long size)
+    public void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, IllegalStateException {
         // TODO add bounds checking.
         memoryCopyMemory(addressForRead(position), address, size);
     }
 
     @Override
-    public void nativeWrite(long address, long position, long size)
+    public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException {
         // TODO add bounds checking.
         memoryCopyMemory(address, addressForWrite(position), size);
     }
 
-    void write8bit(long position, char[] chars, int offset, int length)
+    void write8bit(@NonNegative long position, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws IllegalStateException {
         long addr = address + translate(position);
         @Nullable Memory mem = this.memory;
@@ -645,7 +645,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long write8bit(long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
         requireNonNegative(position);
         final long length = bs.readRemaining();
         long addressForWrite = addressForWrite(position);
@@ -665,7 +665,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long write8bit(long position, @NotNull String s, int start, int length) {
+    public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNegative(position);
         requireNonNull(s);
         requireNonNegative(start);
@@ -675,18 +675,18 @@ public class NativeBytesStore<U>
         return position + length;
     }
 
-    private void copy8bit(byte[] arr, long readPosition, long addressForWrite, long readRemaining) {
+    private void copy8bit(byte[] arr, @NonNegative long readPosition, long addressForWrite, @NonNegative long readRemaining) {
         requireNonNull(arr);
         int readOffset = Math.toIntExact(readPosition);
         int length = Math.toIntExact(readRemaining);
         MEMORY.copyMemory(arr, readOffset, addressForWrite, length);
     }
 
-    private void copy8bit(long addressForRead, long addressForWrite, long length) {
+    private void copy8bit(long addressForRead, long addressForWrite, @NonNegative long length) {
         OS.memory().copyMemory(addressForRead, addressForWrite, length);
     }
 
-    public void read8bit(long position, char[] chars, int length) {
+    public void read8bit(@NonNegative long position, char[] chars, @NonNegative int length) {
         long addr = address + translate(position);
         Memory mem = this.memory;
         for (int i = 0; i < length; i++)
@@ -694,7 +694,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long readIncompleteLong(long offset) {
+    public long readIncompleteLong(@NonNegative long offset) {
         int remaining = (int) Math.min(8, readRemaining() - offset);
         long l = 0;
         for (int i = 0; i < remaining; i++) {
@@ -710,7 +710,7 @@ public class NativeBytesStore<U>
         this.address = address;
     }
 
-    public long appendUtf8(long pos, char[] chars, int offset, int length)
+    public long appendUtf8(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(chars);
         if (pos + length > realCapacity())
@@ -746,7 +746,7 @@ public class NativeBytesStore<U>
         return appendUtf8a(pos, chars, offset, length, i);
     }
 
-    private long appendUtf8a(long pos, char[] chars, int offset, int length, int i)
+    private long appendUtf8a(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length, int i)
             throws IllegalStateException {
         for (; i < length; i++) {
             char c = chars[offset + i];
@@ -812,7 +812,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public int byteCheckSum(long position, long limit) {
+    public int byteCheckSum(@NonNegative long position, @NonNegative long limit) {
         @Nullable Memory mem = this.memory;
         assert mem != null;
         int b = 0;
@@ -840,7 +840,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long read(long offsetInRDI, byte[] bytes, int offset, int length) {
+    public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) {
         requireNonNull(bytes);
         int len = (int) Math.min(length, readLimit() - offsetInRDI);
 
@@ -849,7 +849,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public int peekUnsignedByte(long offset) {
+    public int peekUnsignedByte(@NonNegative long offset) {
         final long addr = this.address;
         @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
@@ -860,7 +860,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public int fastHash(long offset, int length)
+    public int fastHash(@NonNegative long offset, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         long ret;
         switch (length) {
@@ -891,7 +891,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public boolean isEqual(long start, long length, String s) {
+    public boolean isEqual(@NonNegative long start, @NonNegative long length, String s) {
         if (s == null || s.length() != length)
             return false;
         return MEMORY.isEqual(addressForRead(start), s, (int) length);
@@ -916,7 +916,7 @@ public class NativeBytesStore<U>
         private final long size;
         private volatile long address;
 
-        Deallocator(long address, long size) {
+        Deallocator(long address, @NonNegative long size) {
             assert address != 0;
             this.address = address;
             this.size = size;

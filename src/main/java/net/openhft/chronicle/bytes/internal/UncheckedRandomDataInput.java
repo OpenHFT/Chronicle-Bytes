@@ -1,5 +1,7 @@
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
+
 import java.nio.BufferUnderflowException;
 
 public interface UncheckedRandomDataInput {
@@ -15,7 +17,7 @@ public interface UncheckedRandomDataInput {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    byte readByte(long offset);
+    byte readByte(@NonNegative long offset);
 
     /**
      * Read a short at an offset possibly not checking memory bounds.
@@ -28,7 +30,7 @@ public interface UncheckedRandomDataInput {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    short readShort(long offset);
+    short readShort(@NonNegative long offset);
 
     /**
      * Read an int at an offset possibly not checking memory bounds.
@@ -41,7 +43,7 @@ public interface UncheckedRandomDataInput {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    int readInt(long offset);
+    int readInt(@NonNegative long offset);
 
     /**
      * Read a long at an offset possibly not checking memory bounds.
@@ -54,6 +56,6 @@ public interface UncheckedRandomDataInput {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
-    long readLong(long offset);
+    long readLong(@NonNegative long offset);
 
 }

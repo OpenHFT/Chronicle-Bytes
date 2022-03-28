@@ -25,6 +25,7 @@ import net.openhft.chronicle.bytes.internal.SingleMappedFile;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractCloseableReferenceCounted;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -62,7 +63,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     static void logNewChunk(final String filename,
-                            final int chunk,
+                            @NonNegative final int chunk,
                             final long delayMicros) {
         if (delayMicros < 100 || !Jvm.isDebugEnabled(MappedFile.class))
             return;
@@ -78,8 +79,8 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     @NotNull
     public static MappedFile of(@NotNull final File file,
-                                final long chunkSize,
-                                final long overlapSize,
+                                @NonNegative final long chunkSize,
+                                @NonNegative final long overlapSize,
                                 final boolean readOnly)
             throws FileNotFoundException {
 
@@ -90,7 +91,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     @NotNull
     public static MappedFile ofSingle(@NotNull final File file,
-                                      final long capacity,
+                                      @NonNegative final long capacity,
                                       final boolean readOnly)
             throws FileNotFoundException {
 
@@ -99,37 +100,37 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull final File file, final long chunkSize)
+    public static MappedFile mappedFile(@NotNull final File file, @NonNegative final long chunkSize)
             throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
 
     @NotNull
-    public static MappedFile mappedFile(@NotNull final String filename, final long chunkSize)
+    public static MappedFile mappedFile(@NotNull final String filename, @NonNegative final long chunkSize)
             throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final String filename,
-                                        final long chunkSize,
-                                        final long overlapSize)
+                                        @NonNegative final long chunkSize,
+                                        @NonNegative final long overlapSize)
             throws FileNotFoundException {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
-                                        final long chunkSize,
-                                        final long overlapSize)
+                                        @NonNegative final long chunkSize,
+                                        @NonNegative final long overlapSize)
             throws FileNotFoundException {
         return mappedFile(file, chunkSize, overlapSize, false);
     }
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
-                                        final long chunkSize,
-                                        final long overlapSize,
+                                        @NonNegative final long chunkSize,
+                                        @NonNegative final long overlapSize,
                                         final boolean readOnly)
             throws FileNotFoundException {
         return MappedFile.of(file, chunkSize, overlapSize, readOnly);
@@ -150,9 +151,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
-                                        final long capacity,
-                                        final long chunkSize,
-                                        final long overlapSize,
+                                        @NonNegative final long capacity,
+                                        @NonNegative final long chunkSize,
+                                        @NonNegative final long overlapSize,
                                         final boolean readOnly)
             throws IOException {
         final RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
@@ -181,7 +182,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
-            final long position)
+            @NonNegative final long position)
             throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(owner, position, null, MappedBytesStore::new);
     }
@@ -189,7 +190,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
-            final long position,
+            @NonNegative final long position,
             BytesStore oldByteStore)
             throws IOException, IllegalStateException {
         try {
@@ -202,7 +203,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     public abstract MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
-            final long position,
+            @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
@@ -213,7 +214,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
     @NotNull
-    public Bytes acquireBytesForRead(ReferenceOwner owner, final long position)
+    public Bytes acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
             throws IOException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
@@ -225,7 +226,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForRead(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
 
@@ -234,7 +235,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @NotNull
-    public Bytes acquireBytesForWrite(ReferenceOwner owner, final long position)
+    public Bytes acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosed();
 
@@ -246,7 +247,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return bytes;
     }
 
-    public void acquireBytesForWrite(ReferenceOwner owner, final long position, @NotNull final VanillaBytes bytes)
+    public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
 
@@ -319,12 +320,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * Calls lock on the underlying file channel
      */
-    public abstract FileLock lock(long position, long size, boolean shared) throws IOException;
+    public abstract FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException;
 
     /**
      * Calls tryLock on the underlying file channel
      */
-    public abstract FileLock tryLock(long position, long size, boolean shared) throws IOException;
+    public abstract FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException;
 
     public abstract long chunkCount();
 

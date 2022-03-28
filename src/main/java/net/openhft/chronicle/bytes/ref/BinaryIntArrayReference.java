@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
@@ -74,7 +75,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         binaryIntArrayReferences = null;
     }
 
-    public static void write(@NotNull Bytes bytes, long capacity)
+    public static void write(@NotNull Bytes bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
@@ -85,7 +86,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static void lazyWrite(@NotNull Bytes bytes, long capacity)
+    public static void lazyWrite(@NotNull Bytes bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
@@ -94,7 +95,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset)
+    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         final long capacity = bytes.readLong(offset + CAPACITY);
         assert capacity > 0 : "capacity too small " + capacity;
@@ -136,7 +137,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public int getValueAt(long index)
+    public int getValueAt(@NonNegative long index)
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
@@ -144,7 +145,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public void setValueAt(long index, int value)
+    public void setValueAt(@NonNegative long index, int value)
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
@@ -152,7 +153,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public int getVolatileValueAt(long index)
+    public int getVolatileValueAt(@NonNegative long index)
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
@@ -160,7 +161,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public void bindValueAt(long index, @NotNull IntValue value)
+    public void bindValueAt(@NonNegative long index, @NotNull IntValue value)
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
@@ -168,7 +169,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public void setOrderedValueAt(long index, int value)
+    public void setOrderedValueAt(@NonNegative long index, int value)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
@@ -176,7 +177,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length)
+    public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
@@ -318,7 +319,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public long sizeInBytes(long capacity)
+    public long sizeInBytes(@NonNegative long capacity)
             throws IllegalStateException {
         throwExceptionIfClosed();
 
@@ -341,7 +342,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     @Override
-    public boolean compareAndSet(long index, int expected, int value)
+    public boolean compareAndSet(@NonNegative long index, int expected, int value)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 

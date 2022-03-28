@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.UnsafeCloseable;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     private BytesStore bytes;
 
     @NotNull
-    public static LongReference create(BytesStore bytesStore, long offset, int size)
+    public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
@@ -39,7 +40,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore bytes, long offset, long length)
+    public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 

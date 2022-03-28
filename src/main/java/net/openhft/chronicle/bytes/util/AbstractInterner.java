@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
@@ -47,7 +48,7 @@ public abstract class AbstractInterner<T> {
     protected final int shift;
     protected boolean toggle = false;
 
-    protected AbstractInterner(int capacity)
+    protected AbstractInterner(@NonNegative int capacity)
             throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
@@ -55,7 +56,7 @@ public abstract class AbstractInterner<T> {
         mask = n - 1;
     }
 
-    private static int hash32(@NotNull BytesStore bs, int length) throws IllegalStateException, BufferUnderflowException {
+    private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
 
@@ -69,12 +70,12 @@ public abstract class AbstractInterner<T> {
         return intern(cs, (int) cs.readRemaining());
     }
 
-    public T intern(@NotNull Bytes cs, int length)
+    public T intern(@NotNull Bytes cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, length);
     }
 
-    public T intern(@NotNull BytesStore cs, int length)
+    public T intern(@NotNull BytesStore cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
             return getValue(cs, length);
@@ -99,7 +100,7 @@ public abstract class AbstractInterner<T> {
     }
 
     @NotNull
-    protected abstract T getValue(BytesStore bs, int length)
+    protected abstract T getValue(BytesStore bs, @NonNegative int length)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
     protected boolean toggle() {

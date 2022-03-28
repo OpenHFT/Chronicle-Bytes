@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.ByteStringAppender;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -57,7 +58,7 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(@NotNull String str, int off, int len)
+    public void write(@NotNull String str, @NonNegative int off, @NonNegative int len)
             throws IOException {
         out.append(str, off, off + len);
     }
@@ -72,7 +73,7 @@ public class ByteStringWriter extends Writer {
 
     @NotNull
     @Override
-    public Writer append(@NotNull CharSequence csq, int start, int end) {
+    public Writer append(@NotNull CharSequence csq, @NonNegative int start, @NonNegative int end) {
         out.append(csq, start, end);
         return this;
     }
@@ -99,7 +100,7 @@ public class ByteStringWriter extends Writer {
     }
 
     @Override
-    public void write(char[] cbuf, int off, int len)
+    public void write(char[] cbuf, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
             for (int i = 0; i < len; i++)

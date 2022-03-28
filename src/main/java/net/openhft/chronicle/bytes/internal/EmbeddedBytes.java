@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 public class EmbeddedBytes<U> extends VanillaBytes<U> {
@@ -20,13 +21,13 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
     }
 
     @Override
-    protected void uncheckedWritePosition(long writePosition) {
+    protected void uncheckedWritePosition(@NonNegative long writePosition) {
         super.uncheckedWritePosition(writePosition);
         bytesStore.writeUnsignedByte(bytesStore.start() - 1, (int) writePosition);
     }
 
     @Override
-    public long writePosition() {
+    public @NonNegative long writePosition() {
         return bytesStore.readUnsignedByte(bytesStore.start() - 1);
     }
 }

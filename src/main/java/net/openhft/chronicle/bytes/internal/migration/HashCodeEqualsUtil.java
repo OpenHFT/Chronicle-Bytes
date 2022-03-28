@@ -3,13 +3,14 @@ package net.openhft.chronicle.bytes.internal.migration;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.jetbrains.annotations.NotNull;
 
 public final class HashCodeEqualsUtil {
 
     private HashCodeEqualsUtil() {
     }
 
-    public static int hashCode(final BytesStore<?, ?> bytes) {
+    public static int hashCode(final @NotNull BytesStore<?, ?> bytes) {
         // Reserving prevents illegal access to this Bytes object if released by another thread
         final ReferenceOwner owner = ReferenceOwner.temporary("hashCode");
         bytes.reserve(owner);

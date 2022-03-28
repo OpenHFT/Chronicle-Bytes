@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.ThrowingLongSupplier;
 import org.jetbrains.annotations.NotNull;
 
@@ -44,7 +45,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int DIGITS = 20;
 
     @SuppressWarnings("rawtypes")
-    public static void write(@NotNull Bytes bytes, long value)
+    public static void write(@NotNull Bytes bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);
@@ -76,7 +77,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+    public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         if (length != template.length)
             throw new IllegalArgumentException();

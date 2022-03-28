@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.AppendableUtil;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.UTFDataFormatRuntimeException;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +31,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
 
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
-    public UTF8StringInterner(int capacity)
+    public UTF8StringInterner(@NonNegative int capacity)
             throws IllegalArgumentException {
         super(capacity);
     }
@@ -38,7 +39,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, int length)
+    protected String getValue(@NotNull BytesStore cs, @NonNegative int length)
             throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
         StringBuilder sb = SBP.acquireStringBuilder();
         AppendableUtil.parseUtf8(cs, sb, true, length);

@@ -2,6 +2,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -37,12 +38,12 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     @Override
-    public long capacity() {
+    public @NonNegative long capacity() {
         return capacity;
     }
 
     @Override
-    public void ensureCapacity(long desiredCapacity) throws IllegalArgumentException, IllegalStateException {
+    public void ensureCapacity(@NonNegative long desiredCapacity) throws IllegalArgumentException, IllegalStateException {
         if (isElastic() && bytesStore.capacity() < desiredCapacity)
             resize(desiredCapacity);
         else
@@ -55,7 +56,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     @Override
-    protected void writeCheckOffset(long offset, long adding)
+    protected void writeCheckOffset(@NonNegative long offset, @NonNegative long adding)
             throws BufferOverflowException, IllegalStateException {
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             long writeEnd = offset + adding;
@@ -70,12 +71,12 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         }
     }
 
-    private void throwBeyondWriteLimit(long advance, long writeEnd)
+    private void throwBeyondWriteLimit(@NonNegative long advance, @NonNegative long writeEnd)
             throws DecoratedBufferOverflowException {
         throw new DecoratedBufferOverflowException("attempt to write " + advance + " bytes to " + writeEnd + " limit: " + writeLimit);
     }
 
-    private void checkResize(long endOfBuffer)
+    private void checkResize(@NonNegative long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
         if (isElastic())
             resize(endOfBuffer);
@@ -84,7 +85,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
-    private void resize(long endOfBuffer)
+    private void resize(@NonNegative long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
         if (endOfBuffer < 0)
             throw new BufferOverflowException();

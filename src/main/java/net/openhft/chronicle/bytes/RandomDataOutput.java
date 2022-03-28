@@ -120,7 +120,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeByte(long offset, byte i8)
+    R writeByte(@NonNegative long offset, byte i8)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -132,11 +132,11 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeShort(long offset, short i)
+    R writeShort(@NonNegative long offset, short i)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    default R writeInt24(long offset, int i)
+    default R writeInt24(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException {
         writeShort(offset, (short) i);
         return writeByte(offset + 2, (byte) (i >> 16));
@@ -151,7 +151,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeInt(long offset, int i)
+    R writeInt(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -163,7 +163,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeOrderedInt(long offset, int i)
+    R writeOrderedInt(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -189,7 +189,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeLong(long offset, long i)
+    R writeLong(@NonNegative long offset, long i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -200,7 +200,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return this
      */
     @NotNull
-    R writeOrderedLong(long offset, long i)
+    R writeOrderedLong(@NonNegative long offset, long i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -225,7 +225,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeFloat(long offset, float d)
+    R writeFloat(@NonNegative long offset, float d)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -237,33 +237,33 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R writeDouble(long offset, double d)
+    R writeDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    R writeVolatileByte(long offset, byte i8)
+    R writeVolatileByte(@NonNegative long offset, byte i8)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    R writeVolatileShort(long offset, short i16)
+    R writeVolatileShort(@NonNegative long offset, short i16)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    R writeVolatileInt(long offset, int i32)
+    R writeVolatileInt(@NonNegative long offset, int i32)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    R writeVolatileLong(long offset, long i64)
+    R writeVolatileLong(@NonNegative long offset, long i64)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
-    default R writeVolatileFloat(long offset, float f)
+    default R writeVolatileFloat(@NonNegative long offset, float f)
             throws BufferOverflowException, IllegalStateException {
         return writeVolatileInt(offset, Float.floatToRawIntBits(f));
     }
 
     @NotNull
-    default R writeVolatileDouble(long offset, double d)
+    default R writeVolatileDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, IllegalStateException {
         return writeVolatileLong(offset, Double.doubleToRawLongBits(d));
     }
@@ -272,7 +272,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * Copies whole byte[] into this. See {@link #write(long, byte[], int, int)}
      */
     @NotNull
-    default R write(long offsetInRDO, @NotNull byte[] bytes)
+    default R write(@NonNegative long offsetInRDO, byte[] bytes)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         return write(offsetInRDO, bytes, 0, bytes.length);
@@ -312,14 +312,14 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException
      * @throws IllegalStateException
      */
-    void write(long writeOffset, @NotNull ByteBuffer bytes, int readOffset, int length)
+    void write(@NonNegative long writeOffset, @NotNull ByteBuffer bytes, @NonNegative int readOffset, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
      * Copies whole BytesStore into this - see {@link #write(long, RandomDataInput, long, long)}
      */
     @NotNull
-    default R write(long offsetInRDO, @NotNull BytesStore bytes)
+    default R write(@NonNegative long offsetInRDO, @NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         try {
@@ -342,7 +342,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException
      */
     @NotNull
-    R write(long writeOffset, @NotNull RandomDataInput bytes, long readOffset, long length)
+    R write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException;
 
     /**
@@ -354,18 +354,18 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws BufferOverflowException if the capacity was exceeded
      */
     @NotNull
-    R zeroOut(long start, long end)
+    R zeroOut(@NonNegative long start, @NonNegative long end)
             throws IllegalStateException;
 
     @NotNull
-    default R append(long offset, long value, int digits)
+    default R append(@NonNegative long offset, long value, int digits)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         BytesInternal.append(this, offset, value, digits);
         return (R) this;
     }
 
     @NotNull
-    default R append(long offset, double value, int decimalPlaces, int digits)
+    default R append(@NonNegative long offset, double value, int decimalPlaces, int digits)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
         if (decimalPlaces < 20) {
             double d2 = value * Maths.tens(decimalPlaces);
@@ -380,12 +380,11 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     /**
      * expert level method to copy data from native memory into the BytesStore
-     *
-     * @param address  in native memory to copy from
+     *  @param address  in native memory to copy from
      * @param position in BytesStore to copy to
      * @param size     in bytes
      */
-    void nativeWrite(long address, long position, long size)
+    void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException;
 
     /**
@@ -397,7 +396,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return the writeOffset after the char sequence written, in this {@code RandomDataOutput}
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
-    default long writeUtf8(long writeOffset, @Nullable CharSequence text)
+    default long writeUtf8(@NonNegative long writeOffset, @Nullable CharSequence text)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.writeUtf8(this, writeOffset, text);
     }
@@ -418,7 +417,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @see RandomDataInput#readUtf8Limited(long, Appendable, int)
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
-    default long writeUtf8Limited(long writeOffset, @Nullable CharSequence text, int maxUtf8Len)
+    default long writeUtf8Limited(@NonNegative long writeOffset, @Nullable CharSequence text, @NonNegative int maxUtf8Len)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         return BytesInternal.writeUtf8(this, writeOffset, text, maxUtf8Len);
     }
@@ -430,8 +429,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param bs       to copy.
      * @return the offset after the char sequence written, in this {@code RandomDataOutput}
      */
-    long write8bit(long position, @NotNull BytesStore bs);
+    long write8bit(@NonNegative long position, @NotNull BytesStore bs);
 
-    long write8bit(long position, @NotNull String s, int start, int length);
+    long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length);
 
 }

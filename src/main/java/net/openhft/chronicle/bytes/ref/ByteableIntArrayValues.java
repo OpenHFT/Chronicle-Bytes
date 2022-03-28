@@ -20,14 +20,15 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.DynamicallySized;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.IntArrayValues;
 
 @SuppressWarnings("rawtypes")
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {
     @Override
-    long sizeInBytes(long sizeInBytes)
+    long sizeInBytes(@NonNegative long sizeInBytes)
             throws IllegalStateException;
 
-    ByteableIntArrayValues capacity(long arrayLength)
+    ByteableIntArrayValues capacity(@NonNegative long arrayLength)
             throws IllegalStateException;
 }

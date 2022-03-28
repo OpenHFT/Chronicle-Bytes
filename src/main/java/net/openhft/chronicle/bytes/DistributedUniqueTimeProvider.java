@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.ref.BinaryLongArrayReference;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
@@ -37,7 +38,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     static final int HOST_IDS = 100;
     private static final int NANOS_PER_MICRO = 1000;
 
-    private DistributedUniqueTimeProvider(int hostId, boolean unmonitor) {
+    private DistributedUniqueTimeProvider(@NonNegative int hostId, boolean unmonitor) {
         hostId(hostId);
         try {
             file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
@@ -75,11 +76,11 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         file.releaseLast();
     }
 
-    public static DistributedUniqueTimeProvider forHostId(int hostId) {
+    public static DistributedUniqueTimeProvider forHostId(@NonNegative int hostId) {
         return new DistributedUniqueTimeProvider(hostId, false);
     }
 
-    public DistributedUniqueTimeProvider hostId(int hostId) {
+    public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         if (hostId < 0)
             throw new IllegalArgumentException("Invalid hostId: " + hostId);
         this.hostId = hostId % HOST_IDS;

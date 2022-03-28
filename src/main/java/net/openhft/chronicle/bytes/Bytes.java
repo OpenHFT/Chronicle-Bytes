@@ -669,7 +669,7 @@ public interface Bytes<U> extends
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
-                           final long maxLen) throws
+                           @NonNegative final long maxLen) throws
             BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNegative(maxLen);
         if (buffer.refCount() < 1)
@@ -834,7 +834,7 @@ public interface Bytes<U> extends
      * lower than the virtual {@link #capacity()}.
      */
     @Override
-    default long realCapacity() {
+    default @NonNegative long realCapacity() {
         return BytesStore.super.realCapacity();
     }
 
@@ -870,7 +870,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code maxLength} is negative.
      */
     @NotNull
-    default String toHexString(long maxLength) {
+    default String toHexString(@NonNegative long maxLength) {
         return toHexString(readPosition(), maxLength);
     }
 
@@ -884,7 +884,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code maxLength}  or provided {@code maxLength} is negative.
      */
     @NotNull
-    default String toHexString(long offset, long maxLength) {
+    default String toHexString(@NonNegative long offset, @NonNegative long maxLength) {
         requireNonNegative(offset);
         requireNonNegative(maxLength);
 
@@ -1017,7 +1017,7 @@ public interface Bytes<U> extends
      * @param fromOffset the offset from the target bytes
      * @param count      the number of bytes to un-write
      */
-    default void unwrite(long fromOffset, int count)
+    default void unwrite(@NonNegative long fromOffset, @NonNegative int count)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long wp = writePosition();
 
@@ -1151,7 +1151,7 @@ public interface Bytes<U> extends
      * @return index of equal contents or -1
      * @throws NullPointerException if the provided {@code source } is {@code null}
      */
-    default int indexOf(@NotNull BytesStore source, int fromIndex)
+    default int indexOf(@NotNull BytesStore source, @NonNegative int fromIndex)
             throws IllegalStateException {
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
@@ -1224,7 +1224,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code length} is negative.
      * @throws NullPointerException     if the provided {@code bytesOut} is {@code null}.
      */
-    default void readWithLength(long length, @NotNull BytesOut<U> bytesOut)
+    default void readWithLength(@NonNegative long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
         requireNonNegative(length);
         if (length > readRemaining())

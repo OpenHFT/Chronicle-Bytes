@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -37,7 +38,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     public static final boolean IS_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
-    static long applyAsLong1to7(@NotNull BytesStore store, int remaining) throws IllegalStateException, BufferUnderflowException {
+    static long applyAsLong1to7(@NotNull BytesStore store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
 
         return hash(readIncompleteLong(address, remaining));
@@ -57,7 +58,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
         return agitate(l * K0 + hi * K1);
     }
 
-    static long applyAsLong9to16(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
+    static long applyAsLong9to16(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -83,7 +84,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    static long applyAsLong17to32(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
+    static long applyAsLong17to32(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -109,7 +110,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, int remaining) throws BufferUnderflowException {
+    public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
@@ -145,7 +146,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    public static long applyAsLongAny(@NotNull BytesStore store, long remaining) throws BufferUnderflowException {
+    public static long applyAsLongAny(@NotNull BytesStore store, @NonNegative long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0;
@@ -222,7 +223,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-    static long readIncompleteLong(long address, int len) {
+    static long readIncompleteLong(long address, @NonNegative int len) {
         switch (len) {
             case 1:
                 return MEMORY.readByte(address);
@@ -262,7 +263,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     @Override
-    public long applyAsLong(@NotNull BytesStore store, long remaining) throws IllegalStateException, BufferUnderflowException {
+    public long applyAsLong(@NotNull BytesStore store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;

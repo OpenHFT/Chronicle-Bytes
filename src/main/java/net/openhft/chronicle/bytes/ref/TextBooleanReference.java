@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.BooleanValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,7 +34,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
     @SuppressWarnings("rawtypes")
-    public static void write(final boolean value, final BytesStore bytes, long offset)
+    public static void write(final boolean value, final BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException, BufferOverflowException {
         bytes.writeVolatileInt(offset, value ? TRUE : FALSE);
         bytes.writeByte(offset + 4, (byte) 'e');

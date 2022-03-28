@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
+
 import java.util.List;
 
 public interface BytesRingBufferStats {
@@ -27,17 +29,22 @@ public interface BytesRingBufferStats {
      *
      * @return Long.MAX_VALUE if no read calls were made since the last time this method was called.
      */
+    @NonNegative
     long minNumberOfWriteBytesRemaining();
 
     /**
      * @return the total capacity in bytes
      */
+    @NonNegative
     long capacity();
 
+    @NonNegative
     long getAndClearWriteCount();
 
+    @NonNegative
     long getAndClearMissedWriteCount();
 
+    @NonNegative
     long getAndClearContentionCount();
 
     List<RingBufferReaderStats> readers();

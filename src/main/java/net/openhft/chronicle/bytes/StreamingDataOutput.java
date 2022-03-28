@@ -55,11 +55,11 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     int JAVA9_STRING_CODER_UTF16 = 1;
 
     @NotNull
-    S writePosition(long position)
+    S writePosition(@NonNegative long position)
             throws BufferOverflowException;
 
     @NotNull
-    S writeLimit(long limit)
+    S writeLimit(@NonNegative long limit)
             throws BufferOverflowException;
 
     /**
@@ -201,7 +201,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S write8bit(@NotNull CharSequence text, int start, int length)
+    default S write8bit(@NotNull CharSequence text, @NonNegative int start, @NonNegative int length)
             throws BufferOverflowException, IndexOutOfBoundsException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         requireNonNull(text);
         if (text instanceof String)
@@ -216,7 +216,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    S write8bit(@NotNull String text, int start, int length);
+    S write8bit(@NotNull String text, @NonNegative int start, @NonNegative int length);
 
     /**
      * Writes the provided {@code text} to this StreamingDataOutput at the current writePosition().
@@ -251,8 +251,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     @NotNull
     default S write(@NotNull final CharSequence text,
-                    final int startText,
-                    final int length)
+                    @NonNegative final int startText,
+                    @NonNegative final int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException {
         requireNonNull(text);
         requireNonNegative(startText);
@@ -337,7 +337,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    S writeIntAdv(int i, int advance)
+    S writeIntAdv(int i, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
@@ -362,7 +362,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    S writeLongAdv(long i64, int advance)
+    S writeLongAdv(long i64, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException;
 
     @NotNull
@@ -427,6 +427,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return capacity without resize or -1 if closed
      */
     @Override
+    @NonNegative
     long realCapacity();
 
     default boolean canWriteDirect(long count) {
@@ -465,7 +466,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull RandomDataInput bytes, long readOffset, long length)
+    default S write(@NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         BytesInternal.writeFully(bytes, readOffset, length, this);
         return (S) this;
@@ -477,7 +478,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull BytesStore<?, ?> bytes, long readOffset, long length)
+    default S write(@NotNull BytesStore<?, ?> bytes, @NonNegative long readOffset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNull(bytes);
         requireNonNegative(readOffset);
@@ -522,12 +523,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             @NonNegative final int offset,
             @NonNegative final int length) throws BufferOverflowException, IllegalStateException, IllegalArgumentException, ArrayIndexOutOfBoundsException;
 
-    default S unsafeWriteObject(Object o, int length)
+    default S unsafeWriteObject(Object o, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException {
         return unsafeWriteObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
-    default S unsafeWriteObject(Object o, int offset, int length)
+    default S unsafeWriteObject(Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException {
         if (this.isDirectMemory()) {
             writeSkip(length); // blow up here if this isn't going to work
@@ -548,7 +549,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      *
      * @return this
      */
-    default S unsafeWrite(long address, int length) {
+    default S unsafeWrite(long address, @NonNegative int length) {
         if (isDirectMemory()) {
             writeSkip(length); // blow up if there isn't that much space left
             long destAddress = addressForWrite(writePosition() - length);
@@ -605,7 +606,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S appendUtf8(char[] chars, int offset, int length)
+    default S appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
         int i;
         ascii:
@@ -626,7 +627,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     @NotNull
-    default S appendUtf8(@NotNull CharSequence cs, int offset, int length)
+    default S appendUtf8(@NotNull CharSequence cs, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IndexOutOfBoundsException, IllegalStateException, BufferUnderflowException {
         BytesInternal.appendUtf8(this, cs, offset, length);
         return (S) this;
@@ -635,7 +636,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     // length is number of characters (not bytes)
     @Java9
     @NotNull
-    default S appendUtf8(final byte[] bytes, int offset, int length, byte coder)
+    default S appendUtf8(final byte[] bytes, @NonNegative int offset, @NonNegative int length, byte coder)
             throws BufferOverflowException, IllegalStateException {
         if (coder == JAVA9_STRING_CODER_LATIN) {
             for (int i = 0; i < length; i++) {
@@ -658,7 +659,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
     @Java9
     @NotNull
-    default S appendUtf8(final byte[] bytes, int offset, int length)
+    default S appendUtf8(final byte[] bytes, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalStateException {
         for (int i = 0; i < length; i++) {
             int b = bytes[offset + i] & 0xFF; // unsigned byte
@@ -699,7 +700,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         BytesInternal.copy(input, this);
     }
 
-    default void writePositionRemaining(long position, long length)
+    default void writePositionRemaining(@NonNegative long position, @NonNegative long length)
             throws BufferOverflowException {
         requireNonNegative(position);
         requireNonNegative(length);

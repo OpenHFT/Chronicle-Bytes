@@ -18,6 +18,8 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.IOException;
@@ -36,12 +38,11 @@ import java.nio.channels.FileLock;
 public interface Byteable<B extends BytesStore<B, U>, U> {
     /**
      * This setter for a data type which points to an underlying ByteStore.
-     *
-     * @param bytesStore the fix point ByteStore
+     *  @param bytesStore the fix point ByteStore
      * @param offset     the offset within the ByteStore
      * @param length     the length in the ByteStore
      */
-    void bytesStore(BytesStore<B, U> bytesStore, long offset, long length)
+    void bytesStore(@NotNull BytesStore<B, U> bytesStore, @NonNegative long offset, @NonNegative long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
 
     @Nullable

@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -100,9 +101,11 @@ public enum BytesUtil {
      * Are all the fields in the range given trivially copyable
      *
      * @param clazz to check
+     * @param offset start of field area
+     * @param length of the field area
      * @return true if the fields in range are trivially copyable.
      */
-    public static boolean isTriviallyCopyable(Class clazz, int offset, int length) {
+    public static boolean isTriviallyCopyable(Class clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -200,7 +203,7 @@ public enum BytesUtil {
         return true;
     }
 
-    public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, long offset, int length)
+    public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, @NonNegative long offset, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         if (cs == null || cs.length() != length)
             return false;
@@ -245,7 +248,7 @@ public enum BytesUtil {
     }
 
     @NotNull
-    public static char[] toCharArray(@NotNull Bytes bytes, long position, int length)
+    public static char[] toCharArray(@NotNull Bytes bytes, @NonNegative long position, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         @NotNull final char[] chars = new char[length];
 
@@ -269,7 +272,7 @@ public enum BytesUtil {
     /**
      * @return the resulting offset
      */
-    public static long writeStopBit(BytesStore bs, long offset, long n)
+    public static long writeStopBit(BytesStore bs, @NonNegative long offset, @NonNegative long n)
             throws IllegalStateException, BufferOverflowException {
         return BytesInternal.writeStopBit(bs, offset, n);
     }
@@ -283,7 +286,7 @@ public enum BytesUtil {
     }
 
     public static void parseUtf8(
-            @NotNull StreamingDataInput in, Appendable appendable, int utflen)
+            @NotNull StreamingDataInput in, Appendable appendable, @NonNegative int utflen)
             throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
         BytesInternal.parseUtf8(in, appendable, true, utflen);
     }
@@ -294,7 +297,7 @@ public enum BytesUtil {
     }
 
     // used by Chronicle FIX.
-    public static void appendBytesFromStart(@NotNull Bytes bytes, long startPosition, @NotNull StringBuilder sb)
+    public static void appendBytesFromStart(@NotNull Bytes bytes, @NonNegative long startPosition, @NotNull StringBuilder sb)
             throws IllegalStateException {
         try {
             BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
@@ -352,13 +355,13 @@ public enum BytesUtil {
         bytes.zeroOut(start, end);
     }
 
-    public static String toDebugString(@NotNull RandomDataInput bytes, long start, long maxLength)
+    public static String toDebugString(@NotNull RandomDataInput bytes, @NonNegative long start, @NonNegative long maxLength)
             throws IllegalStateException, BufferUnderflowException, ArithmeticException {
         BytesStore bytes2 = bytes.subBytes(start, maxLength);
         return bytes2.toDebugString(maxLength);
     }
 
-    public static void copy8bit(BytesStore bs, long addressForWrite, long length) {
+    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) {
         BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
@@ -375,7 +378,7 @@ public enum BytesUtil {
         }
     }
 
-    public static void reverse(Bytes<?> text, int start) {
+    public static void reverse(Bytes<?> text, @NonNegative int start) {
         long rp = text.readPosition();
         int end = text.length() - 1;
         int mid = (start + end + 1) / 2;

@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +54,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     private long length = VALUES;
 
-    public static void write(@NotNull Bytes bytes, long capacity)
+    public static void write(@NotNull Bytes bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
         long start = bytes.writePosition();
         bytes.write(SECTION1);
@@ -72,7 +73,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         bytes.write(SECTION4);
     }
 
-    public static long peakLength(@NotNull BytesStore bytes, long offset)
+    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
         //todo check this, I think there could be a bug here
         return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
@@ -134,7 +135,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public ByteableLongArrayValues capacity(long arrayLength) {
+    public ByteableLongArrayValues capacity(@NonNegative long arrayLength) {
         BytesStore bytesStore = bytesStore();
         long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
@@ -146,7 +147,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public long getValueAt(long index)
+    public long getValueAt(@NonNegative long index)
             throws IllegalStateException {
         try {
             return bytes.parseLong(VALUES + offset + index * VALUE_SIZE);
@@ -160,7 +161,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public void setValueAt(long index, long value)
+    public void setValueAt(@NonNegative long index, long value)
             throws IllegalStateException {
         try {
             bytes.append(VALUES + offset + index * VALUE_SIZE, value, DIGITS);
@@ -173,26 +174,26 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public void bindValueAt(long index, LongValue value) {
+    public void bindValueAt(@NonNegative long index, LongValue value) {
         throw new UnsupportedOperationException("todo");
     }
 
     @Override
-    public long getVolatileValueAt(long index)
+    public long getVolatileValueAt(@NonNegative long index)
             throws IllegalStateException {
         OS.memory().loadFence();
         return getValueAt(index);
     }
 
     @Override
-    public void setOrderedValueAt(long index, long value)
+    public void setOrderedValueAt(@NonNegative long index, long value)
             throws IllegalStateException {
         setValueAt(index, value);
         OS.memory().storeFence();
     }
 
     @Override
-    public boolean compareAndSet(long index, long expected, long value)
+    public boolean compareAndSet(@NonNegative long index, long expected, long value)
             throws IllegalStateException {
         try {
             if (!bytes.compareAndSwapInt(LOCK_OFFSET + offset, FALS, TRU))
@@ -217,7 +218,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+    public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosedInSetter();
 
@@ -272,7 +273,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     @Override
-    public long sizeInBytes(long capacity) {
+    public long sizeInBytes(@NonNegative long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;
     }
 }

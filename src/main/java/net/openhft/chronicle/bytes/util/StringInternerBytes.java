@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -31,7 +32,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 
 public class StringInternerBytes extends StringInterner {
 
-    public StringInternerBytes(int capacity)
+    public StringInternerBytes(@NonNegative int capacity)
             throws IllegalArgumentException {
         super(capacity);
     }
@@ -53,7 +54,7 @@ public class StringInternerBytes extends StringInterner {
      * @return the string made from bytes only ( rather than chars )
      */
     @SuppressWarnings("rawtypes")
-    public String intern(@NotNull final Bytes bytes, int length)
+    public String intern(@NotNull final Bytes bytes, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         try {
 
