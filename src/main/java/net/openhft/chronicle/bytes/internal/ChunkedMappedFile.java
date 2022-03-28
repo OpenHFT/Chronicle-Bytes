@@ -39,6 +39,7 @@ import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,7 +85,7 @@ public class ChunkedMappedFile extends MappedFile {
         try {
             Jvm.setExceptionHandlers(Slf4jExceptionHandler.ERROR, null, null);
 
-            final Path path = Files.createTempDirectory("warmup");
+            final Path path = Files.createTempDirectory(Paths.get("warmup_dir"), "warmup");
 
             final File file = File.createTempFile("delete_warming_up", "me", path.toFile());
             file.deleteOnExit();
