@@ -685,8 +685,12 @@ enum BytesInternal {
         }
     }
 
-    private static void parseUtf82Guarded(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen,
-                                          int count, long rp0) throws IOException {
+    private static void parseUtf82Guarded(@NotNull Bytes bytes,
+                                          @NotNull StringBuilder sb,
+                                          boolean utf,
+                                          int utflen,
+                                          int count,
+                                          long rp0) throws IOException {
         try {
             parseUtf82(bytes, sb, utf, utflen, count);
         } catch (UTFDataFormatRuntimeException e) {
@@ -1707,10 +1711,8 @@ enum BytesInternal {
      *
      * @param width Maximum width. I will be padded with zeros to the left if necessary
      */
-    public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces,
-                                     int width)
-            throws
-            IORuntimeException, IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException {
+    public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
+            throws IORuntimeException, IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException {
         if (decimalPlaces == 0) {
             append(out, offset, num, width);
             return;
@@ -2233,8 +2235,7 @@ enum BytesInternal {
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
-    private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(final long offset,
-                                                                                  final String suffix) {
+    private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(final long offset, final String suffix) {
         return new UTFDataFormatRuntimeException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
@@ -2257,8 +2258,7 @@ enum BytesInternal {
         readUtf82(bytes, appendable, tester);
     }
 
-    private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable
-            appendable, @NotNull StopCharTester tester)
+    private static void readUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
             throws IOException, IllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
@@ -2317,8 +2317,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable
-            builder, @NotNull StopCharsTester tester)
+    public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder, @NotNull StopCharsTester tester)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         try {
             AppendableUtil.setLength(builder, 0);
@@ -2337,8 +2336,7 @@ enum BytesInternal {
         AppendableUtil.read8bitAndAppend(bytes, builder, tester);
     }
 
-    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes
-            builder, @NotNull StopCharsTester tester)
+    public static void parse8bit(@NotNull StreamingDataInput bytes, @NotNull Bytes builder, @NotNull StopCharsTester tester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(builder);
