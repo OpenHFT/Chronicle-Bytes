@@ -283,6 +283,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     @NotNull
     public abstract RandomAccessFile raf();
 
+    @Deprecated
     @Override
     protected void finalize()
             throws Throwable {

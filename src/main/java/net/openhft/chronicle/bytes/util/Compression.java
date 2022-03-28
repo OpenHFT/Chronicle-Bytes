@@ -61,20 +61,16 @@ public interface Compression {
             case '!':
                 if (StringUtils.isEqual("binary", cs) || StringUtils.isEqual("!binary", cs)) {
                     Compressions.Binary.uncompress(from, to);
-                    return;
                 }
-
                 break;
             case 'l':
                 if (StringUtils.isEqual("lzw", cs)) {
                     Compressions.LZW.uncompress(from, to);
-                    return;
                 }
                 break;
             case 'g':
                 if (StringUtils.isEqual("gzip", cs)) {
                     Compressions.GZIP.uncompress(from, to);
-                    return;
                 }
                 break;
             default:
@@ -82,7 +78,6 @@ public interface Compression {
         }
     }
 
-    @Nullable
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {
         switch (cs.charAt(0)) {
@@ -105,7 +100,7 @@ public interface Compression {
         return null;
     }
 
-    default byte[] compress(@NotNull byte[] bytes) {
+    default byte[] compress(byte[] bytes) {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
             output.write(bytes);
@@ -125,11 +120,11 @@ public interface Compression {
         }
     }
 
-    default byte[] uncompress(@NotNull byte[] bytes)
+    default byte[] uncompress(byte[] bytes)
             throws IORuntimeException {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (InputStream input = decompressingStream(new ByteArrayInputStream(bytes))) {
-            @NotNull byte[] buf = new byte[512];
+            byte[] buf = new byte[512];
             for (int len; (len = input.read(buf)) > 0; )
                 baos.write(buf, 0, len);
 

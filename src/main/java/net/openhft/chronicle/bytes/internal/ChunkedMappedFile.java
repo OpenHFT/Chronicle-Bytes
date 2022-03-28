@@ -358,6 +358,7 @@ public class ChunkedMappedFile extends MappedFile {
         return raf;
     }
 
+    @Deprecated
     @Override
     protected void finalize()
             throws Throwable {

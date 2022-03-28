@@ -2,7 +2,6 @@ package net.openhft.chronicle.bytes.internal.migration;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 
 public final class HashCodeEqualsUtil {
