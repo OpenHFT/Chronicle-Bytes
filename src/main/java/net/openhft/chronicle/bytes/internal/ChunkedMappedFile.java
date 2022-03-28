@@ -358,6 +358,12 @@ public class ChunkedMappedFile extends MappedFile {
         return raf;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * @deprecated as per https://github.com/OpenHFT/Chronicle-Bytes/issues/348
+     */
+    @Deprecated
     @Override
     protected void finalize()
             throws Throwable {

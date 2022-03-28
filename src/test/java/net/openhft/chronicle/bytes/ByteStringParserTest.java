@@ -116,19 +116,9 @@ public class ByteStringParserTest extends BytesTestCommon {
     }
 
     @Test
-    public void testLastDecimalPlaces() throws IORuntimeException {
+    public void testLastDecimalPlacesLong() throws IORuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        bytes.append("1").append(' ');
-        bytes.append("1.").append(' ');
-        bytes.append("0.0").append(' ');
-        bytes.append("0.1").append(' ');
-        bytes.append("1.1").append(' ');
-        bytes.append("1.28").append(' ');
-        bytes.append("1.10").append(' ');
-        bytes.append("1.10000").append(' ');
-
-        // test long first
-        bytes.readPosition(0);
+        appendVariousNumbers();
         assertEquals(1, bytes.parseLongDecimal());
         assertEquals(0, bytes.lastDecimalPlaces());
 
@@ -152,9 +142,13 @@ public class ByteStringParserTest extends BytesTestCommon {
 
         assertEquals(110000, bytes.parseLongDecimal());
         assertEquals(5, bytes.lastDecimalPlaces());
+    }
 
-        // test double
-        bytes.readPosition(0);
+    @Test
+    public void testLastDecimalPlacesDouble() throws IORuntimeException {
+        assumeFalse(GuardedNativeBytes.areNewGuarded());
+        appendVariousNumbers();
+
         assertEquals(1, bytes.parseDouble(), 0);
         assertEquals(0, bytes.lastDecimalPlaces());
 
@@ -178,6 +172,18 @@ public class ByteStringParserTest extends BytesTestCommon {
 
         assertEquals(1.10000, bytes.parseDouble(), 0);
         assertEquals(5, bytes.lastDecimalPlaces());
+    }
+
+    private void appendVariousNumbers() {
+        bytes.append("1").append(' ');
+        bytes.append("1.").append(' ');
+        bytes.append("0.0").append(' ');
+        bytes.append("0.1").append(' ');
+        bytes.append("1.1").append(' ');
+        bytes.append("1.28").append(' ');
+        bytes.append("1.10").append(' ');
+        bytes.append("1.10000").append(' ');
+        bytes.readPosition(0);
     }
 
     @Test

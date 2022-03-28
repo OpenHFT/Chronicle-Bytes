@@ -439,7 +439,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S writeSome(@NotNull Bytes bytes)
+    default S writeSome(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
         try {
             long length = Math.min(bytes.readRemaining(), writeRemaining());
@@ -477,7 +477,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Calling this method will update the cursors of this, but not the bytes we read from.
      */
     @NotNull
-    default S write(@NotNull BytesStore bytes, long readOffset, long length)
+    default S write(@NotNull BytesStore<?, ?> bytes, long readOffset, long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
         requireNonNull(bytes);
         requireNonNegative(readOffset);

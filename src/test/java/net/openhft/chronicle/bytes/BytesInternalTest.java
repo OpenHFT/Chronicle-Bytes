@@ -118,27 +118,17 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void parseDoubleScientificNegative() {
-
-        String strDouble = "6.1E-4";
-        double expected = 6.1E-4;
-        int expectedDp = 5; //0.00061 needs dp 5
-        parseDoubleScientific(strDouble, expected, expectedDp);
+        parseDoubleScientific("6.1E-4", 6.1E-4, 5  /*0.00061 needs dp 5*/);
     }
 
     @Test
     public void parseDoubleScientificNegative1() {
-        String strDouble = "6.123E-4";
-        double expected = 6.123E-4;
-        int expectedDp = 7; //0.0006123 needs dp 7
-        parseDoubleScientific(strDouble, expected, expectedDp);
+        parseDoubleScientific("6.123E-4", 6.123E-4, 7 /* 0.0006123 needs dp 7 */);
     }
 
     @Test
     public void parseDoubleScientificPositive1() {
-        String strDouble = "6.12345E4";
-        double expected = 6.12345E4;
-        int expectedDp = 1; //6.12345 x 10^4 = 61234.5 needs 1
-        parseDoubleScientific(strDouble, expected, expectedDp);
+        parseDoubleScientific("6.12345E4", 6.12345E4, 1 /* 6.12345 x 10^4 = 61234.5 needs 1 */);
     }
 
     private void parseDoubleScientific(final String strDouble,

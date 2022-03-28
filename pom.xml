@@ -321,7 +321,6 @@
                         <configuration>
                             <excludes>
                                 <!--<exclude>META-INF/**</exclude>-->
-<!--                                <exclude>chronicle-bytes-2.22ea3.jar</exclude>-->
                                 <exclude>*.jar</exclude>
 <!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
                                 <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
