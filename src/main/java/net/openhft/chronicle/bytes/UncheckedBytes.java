@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -70,7 +71,7 @@ public class UncheckedBytes<U>
     }
 
     @Override
-    public void ensureCapacity(long desiredCapacity)
+    public void ensureCapacity(@NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
@@ -91,37 +92,37 @@ public class UncheckedBytes<U>
     }
 
     @Override
-    protected void writeCheckOffset(long offset, long adding) {
+    protected void writeCheckOffset(@NonNegative long offset, @NonNegative long adding) {
         // Do nothing
     }
 
     @Override
-    protected void readCheckOffset(long offset, long adding, boolean given) {
+    protected void readCheckOffset(@NonNegative long offset, long adding, boolean given) {
         // Do nothing
     }
 
     @Override
-    void prewriteCheckOffset(long offset, long subtracting) {
+    void prewriteCheckOffset(@NonNegative long offset, long subtracting) {
         // Do nothing
     }
 
     @NotNull
     @Override
-    public Bytes<U> readPosition(long position) {
+    public Bytes<U> readPosition(@NonNegative long position) {
         readPosition = position;
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<U> readLimit(long limit) {
+    public Bytes<U> readLimit(@NonNegative long limit) {
         uncheckedWritePosition(limit);
         return this;
     }
 
     @NotNull
     @Override
-    public Bytes<U> writePosition(long position) {
+    public Bytes<U> writePosition(@NonNegative long position) {
         uncheckedWritePosition(position);
         return this;
     }
@@ -142,7 +143,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> writeLimit(long limit) {
+    public Bytes<U> writeLimit(@NonNegative long limit) {
         writeLimit = limit;
         return this;
     }
@@ -160,21 +161,21 @@ public class UncheckedBytes<U>
     }
 
     @Override
-    protected long readOffsetPositionMoved(long adding) {
+    protected long readOffsetPositionMoved(@NonNegative long adding) {
         long offset = readPosition;
         readPosition += adding;
         return offset;
     }
 
     @Override
-    protected long writeOffsetPositionMoved(long adding, long advance) {
+    protected long writeOffsetPositionMoved(@NonNegative long adding, @NonNegative long advance) {
         long oldPosition = writePosition();
         uncheckedWritePosition(writePosition() + advance);
         return oldPosition;
     }
 
     @Override
-    protected long prewriteOffsetPositionMoved(long subtracting)
+    protected long prewriteOffsetPositionMoved(@NonNegative long subtracting)
             throws BufferOverflowException {
         readPosition -= subtracting;
         return readPosition;
@@ -182,7 +183,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
+    public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         requireNonNull(bytes);
         if (length == 8) {
@@ -196,7 +197,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull BytesStore bytes, long offset, long length)
+    public Bytes<U> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(offset);
@@ -234,7 +235,7 @@ public class UncheckedBytes<U>
         return this;
     }
 
-    long rawCopy(@NotNull BytesStore bytes, long offset, long length)
+    long rawCopy(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         requireNonNull(bytes);
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
@@ -300,7 +301,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<U> appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         requireNonNull(chars);
         long wp = writePosition();

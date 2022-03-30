@@ -18,12 +18,13 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
 @FunctionalInterface
 public interface MappedBytesStoreFactory {
     @NotNull
-    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, long start, long address, long capacity, long safeCapacity)
+    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException;
 }

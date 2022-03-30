@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.ByteStringWriter;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
@@ -265,7 +266,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @Override
     @NotNull
-    default B append(@NotNull CharSequence cs, int start, int end)
+    default B append(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IndexOutOfBoundsException {
         BytesInternal.appendUtf8(this, cs, start, end - start);
         return (B) this;
@@ -335,7 +336,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
      */
-    default B append8bit(@NotNull CharSequence cs, int start, int end)
+    default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs, (long) start, end);
@@ -361,7 +362,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws IndexOutOfBoundsException if the specified indexes for the BytesStore are out of range
      * @throws IllegalStateException     if the underlying Bytes is closed
      */
-    default B append8bit(@NotNull BytesStore bs, long start, long end)
+    default B append8bit(@NotNull BytesStore bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         return write(bs, start, end);
     }

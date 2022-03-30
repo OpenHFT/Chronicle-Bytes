@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -62,7 +63,7 @@ public class StreamingInputStream extends InputStream {
     }
 
     @Override
-    public int read(byte[] b, int off, int len)
+    public int read(byte[] b, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
             if (len == 0) {

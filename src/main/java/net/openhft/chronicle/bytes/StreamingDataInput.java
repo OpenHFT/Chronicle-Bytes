@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
@@ -45,24 +46,24 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
     @NotNull
-    S readPosition(long position)
+    S readPosition(@NonNegative long position)
             throws BufferUnderflowException, IllegalStateException;
 
     @NotNull
-    default S readPositionUnlimited(long position)
+    default S readPositionUnlimited(@NonNegative long position)
             throws BufferUnderflowException, IllegalStateException {
         return readLimitToCapacity().readPosition(position);
     }
 
     @NotNull
-    default S readPositionRemaining(long position, long remaining)
+    default S readPositionRemaining(@NonNegative long position, @NonNegative long remaining)
             throws BufferUnderflowException, IllegalStateException {
         readLimit(position + remaining);
         return readPosition(position);
     }
 
     @NotNull
-    S readLimit(long limit)
+    S readLimit(@NonNegative long limit)
             throws BufferUnderflowException;
 
     default S readLimitToCapacity()
@@ -107,7 +108,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength0(long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
+    default void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
@@ -126,7 +127,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength(long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
+    default void readWithLength(@NonNegative long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
@@ -384,7 +385,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return read(bytes, 0, bytes.length);
     }
 
-    default int read(byte[] bytes, int off, int len)
+    default int read(byte[] bytes, @NonNegative int off, @NonNegative int len)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();
@@ -399,7 +400,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
-    default int read(char[] bytes, int off, int len)
+    default int read(char[] bytes, @NonNegative int off, @NonNegative int len)
             throws IllegalStateException {
         requireNonNull(bytes);
         long remaining = readRemaining();
@@ -431,7 +432,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     default void read(@NotNull final Bytes<?> bytes,
-                      final int length)
+                      @NonNegative final int length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         int len2 = (int) Math.min(length, readRemaining());
@@ -442,12 +443,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes.rawWriteByte(rawReadByte());
     }
 
-    default void unsafeReadObject(@NotNull Object o, int length)
+    default void unsafeReadObject(@NotNull Object o, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
-    default void unsafeReadObject(@NotNull Object o, int offset, int length)
+    default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(o);
         assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
@@ -470,7 +471,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             UnsafeMemory.unsafePutByte(o, (long) offset + i, rawReadByte());
     }
 
-    default S unsafeRead(long address, int length) {
+    default S unsafeRead(long address, @NonNegative int length) {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
             readSkip(length);
@@ -507,7 +508,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param sb            buffer to copy into
      * @param encodedLength length of the UTF encoded data in bytes
      */
-    default void parseUtf8(@NotNull Appendable sb, int encodedLength)
+    default void parseUtf8(@NotNull Appendable sb, @NonNegative int encodedLength)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         parseUtf8(sb, true, encodedLength);
     }
@@ -519,7 +520,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param utf    true if the length is the UTF-8 encoded length, false if the length is the length of chars
      * @param length to limit the read.
      */
-    default void parseUtf8(@NotNull Appendable sb, boolean utf, int length)
+    default void parseUtf8(@NotNull Appendable sb, boolean utf, @NonNegative int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUtf8(this, sb, utf, length);

@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
@@ -39,11 +40,12 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      * @return nextReadPosition which should be passed to {@link RingBufferReader#afterRead(long)}
      */
     @SuppressWarnings("rawtypes")
+    @NonNegative
     long beforeRead(Bytes bytes);
 
-    void afterRead(long next);
+    void afterRead(@NonNegative long next);
 
-    void afterRead(long next, long payloadStart, long underlyingIndex);
+    void afterRead(@NonNegative long next, long payloadStart, long underlyingIndex);
 
     long underlyingIndex();
 

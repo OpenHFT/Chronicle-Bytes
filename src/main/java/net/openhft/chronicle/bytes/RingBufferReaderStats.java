@@ -17,11 +17,16 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
+
 public interface RingBufferReaderStats {
 
+    @NonNegative
     long getAndClearReadCount();
 
+    @NonNegative
     long getAndClearMissedReadCount();
 
+    @NonNegative
     long behind();
 }

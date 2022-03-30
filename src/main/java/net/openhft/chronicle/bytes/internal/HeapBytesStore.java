@@ -60,7 +60,7 @@ public class HeapBytesStore<U>
         this.capacity = byteBuffer.capacity();
     }
 
-    private HeapBytesStore(@NotNull byte @NotNull [] byteArray) {
+    private HeapBytesStore(byte[] byteArray) {
         super(false);
         //noinspection unchecked
         this.underlyingObject = (U) byteArray;
@@ -102,7 +102,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public void move(long from, long to, long length)
+    public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
         throwExceptionIfReleased();
@@ -132,7 +132,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long capacity() {
+    public @NonNegative long capacity() {
         return capacity;
     }
 
@@ -143,7 +143,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
+    public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value) {
         try {
             return memory.compareAndSwapInt(realUnderlyingObject, dataOffset + offset, expected, value);
         } catch (NullPointerException ifReleased) {
@@ -153,7 +153,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public void testAndSetInt(long offset, int expected, int value)
+    public void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws IllegalStateException {
         try {
             memory.testAndSetInt(realUnderlyingObject, dataOffset + offset, expected, value);
@@ -164,7 +164,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
+    public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value) {
         try {
             return memory.compareAndSwapLong(
                     realUnderlyingObject, dataOffset + offset, expected, value);
@@ -175,7 +175,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public byte readByte(long offset)
+    public byte readByte(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readByte(realUnderlyingObject, dataOffset + offset);
@@ -186,7 +186,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public short readShort(long offset)
+    public short readShort(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readShort(realUnderlyingObject, dataOffset + offset);
@@ -197,7 +197,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public int readInt(long offset)
+    public int readInt(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readInt(realUnderlyingObject, dataOffset + offset);
@@ -208,7 +208,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long readLong(long offset)
+    public long readLong(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readLong(realUnderlyingObject, dataOffset + offset);
@@ -219,7 +219,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public float readFloat(long offset)
+    public float readFloat(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readFloat(realUnderlyingObject, dataOffset + offset);
@@ -230,7 +230,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public double readDouble(long offset)
+    public double readDouble(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readDouble(realUnderlyingObject, dataOffset + offset);
@@ -241,7 +241,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public byte readVolatileByte(long offset)
+    public byte readVolatileByte(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readVolatileByte(realUnderlyingObject, dataOffset + offset);
@@ -252,7 +252,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public short readVolatileShort(long offset)
+    public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             return memory.readVolatileShort(realUnderlyingObject, dataOffset + offset);
@@ -263,7 +263,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public int readVolatileInt(long offset)
+    public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             throwExceptionIfReleased();
@@ -275,7 +275,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long readVolatileLong(long offset)
+    public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException {
         try {
             throwExceptionIfReleased();
@@ -287,7 +287,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long write8bit(long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
         requireNonNull(bs);
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);
@@ -300,7 +300,7 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long write8bit(long position, @NotNull String s, int start, int length) {
+    public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNegative(position);
         requireNonNull(s);
         requireNonNegative(start);
@@ -318,7 +318,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeByte(long offset, byte b)
+    public HeapBytesStore<U> writeByte(@NonNegative long offset, byte b)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -332,7 +332,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeShort(long offset, short i16)
+    public HeapBytesStore<U> writeShort(@NonNegative long offset, short i16)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -346,7 +346,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeInt(long offset, int i32)
+    public HeapBytesStore<U> writeInt(@NonNegative long offset, int i32)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -360,7 +360,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeOrderedInt(long offset, int i32)
+    public HeapBytesStore<U> writeOrderedInt(@NonNegative long offset, int i32)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -374,7 +374,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeLong(long offset, long i64)
+    public HeapBytesStore<U> writeLong(@NonNegative long offset, long i64)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -388,7 +388,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeOrderedLong(long offset, long i)
+    public HeapBytesStore<U> writeOrderedLong(@NonNegative long offset, long i)
             throws BufferOverflowException {
         try {
             throwExceptionIfReleased();
@@ -402,7 +402,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeFloat(long offset, float f)
+    public HeapBytesStore<U> writeFloat(@NonNegative long offset, float f)
             throws BufferOverflowException {
         try {
             memory.writeFloat(realUnderlyingObject, dataOffset + offset, f);
@@ -415,7 +415,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeDouble(long offset, double d)
+    public HeapBytesStore<U> writeDouble(@NonNegative long offset, double d)
             throws BufferOverflowException {
         try {
             memory.writeDouble(realUnderlyingObject, dataOffset + offset, d);
@@ -428,7 +428,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeVolatileByte(long offset, byte i8)
+    public HeapBytesStore<U> writeVolatileByte(@NonNegative long offset, byte i8)
             throws BufferOverflowException {
         try {
             memory.writeVolatileByte(realUnderlyingObject, dataOffset + offset, i8);
@@ -441,7 +441,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeVolatileShort(long offset, short i16)
+    public HeapBytesStore<U> writeVolatileShort(@NonNegative long offset, short i16)
             throws BufferOverflowException {
         try {
             memory.writeVolatileShort(realUnderlyingObject, dataOffset + offset, i16);
@@ -454,7 +454,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeVolatileInt(long offset, int i32)
+    public HeapBytesStore<U> writeVolatileInt(@NonNegative long offset, int i32)
             throws BufferOverflowException {
         try {
             memory.writeVolatileInt(realUnderlyingObject, dataOffset + offset, i32);
@@ -467,7 +467,7 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> writeVolatileLong(long offset, long i64)
+    public HeapBytesStore<U> writeVolatileLong(@NonNegative long offset, long i64)
             throws BufferOverflowException {
         try {
             memory.writeVolatileLong(realUnderlyingObject, dataOffset + offset, i64);
@@ -500,7 +500,7 @@ public class HeapBytesStore<U>
 
     @Override
     public void write(
-            long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length)
+            @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException {
         try {
             assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
@@ -520,8 +520,8 @@ public class HeapBytesStore<U>
 
     @NotNull
     @Override
-    public HeapBytesStore<U> write(long writeOffset,
-                                   @NotNull RandomDataInput bytes, long readOffset, long length)
+    public HeapBytesStore<U> write(@NonNegative long writeOffset,
+                                   @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
@@ -546,8 +546,8 @@ public class HeapBytesStore<U>
         return this;
     }
 
-    private void writeLongLength(long writeOffset,
-                                 @NotNull RandomDataInput bytes, long readOffset, long length)
+    private void writeLongLength(@NonNegative long writeOffset,
+                                 @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws IllegalStateException, BufferUnderflowException, BufferOverflowException {
         requireNonNull(bytes);
         long i;
@@ -562,13 +562,13 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public long addressForRead(long offset)
+    public long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long addressForWrite(long offset)
+    public long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException {
         requireNonNegative(offset);
         throw new UnsupportedOperationException();
@@ -581,12 +581,12 @@ public class HeapBytesStore<U>
     }
 
     @Override
-    public void nativeRead(long position, long address, long size) {
+    public void nativeRead(@NonNegative long position, @NonNegative long address, @NonNegative long size) {
         throw new UnsupportedOperationException("todo");
     }
 
     @Override
-    public void nativeWrite(long address, long position, long size) {
+    public void nativeWrite(@NonNegative long address, @NonNegative long position, @NonNegative long size) {
         throw new UnsupportedOperationException("todo");
     }
 

@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -56,7 +57,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     @Override
-    public long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException {
+    public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long start = bytes.readPosition();
         if (length <= 8) {
             if (length == 0)

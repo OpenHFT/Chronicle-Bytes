@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.ThrowingIntSupplier;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
@@ -44,7 +45,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int DIGITS = 10;
 
     @SuppressWarnings("rawtypes")
-    public static void write(@NotNull Bytes bytes, int value)
+    public static void write(@NotNull Bytes bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);
@@ -148,7 +149,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, long length)
+    public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 

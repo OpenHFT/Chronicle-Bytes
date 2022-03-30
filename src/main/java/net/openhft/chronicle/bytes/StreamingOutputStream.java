@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -43,7 +44,7 @@ public class StreamingOutputStream extends OutputStream {
     }
 
     @Override
-    public void write(byte[] b, int off, int len)
+    public void write(byte[] b, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
             sdo.write(b, off, len);

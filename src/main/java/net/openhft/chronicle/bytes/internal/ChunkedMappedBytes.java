@@ -102,10 +102,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public @NotNull ChunkedMappedBytes write(final long writeOffset,
+    public @NotNull ChunkedMappedBytes write(@NonNegative final long writeOffset,
                                              @NotNull final RandomDataInput bytes,
-                                             long readOffset,
-                                             final long length)
+                                             @NonNegative long readOffset,
+                                             @NonNegative final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
@@ -144,14 +144,14 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-    private long copySize(final long writePosition) {
+    private long copySize(@NonNegative final long writePosition) {
         long size = mappedFile.chunkSize();
         return size - writePosition % size;
     }
 
     @NotNull
     @Override
-    public Bytes<Void> readPositionRemaining(final long position, final long remaining)
+    public Bytes<Void> readPositionRemaining(@NonNegative final long position, @NonNegative final long remaining)
             throws BufferUnderflowException, IllegalStateException {
 
         final long limit = position + remaining;
@@ -174,7 +174,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> readPosition(final long position)
+    public Bytes<Void> readPosition(@NonNegative final long position)
             throws BufferUnderflowException, IllegalStateException {
 
         if (bytesStore.inside(position)) {
@@ -197,7 +197,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
      * If manipulating offsets which may reside in the overlap region, always use the 2-argument version below
      */
     @Override
-    public long addressForRead(final long offset)
+    public long addressForRead(@NonNegative final long offset)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNegative(offset);
 
@@ -219,7 +219,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
      * overlap region
      */
     @Override
-    public long addressForRead(final long offset, final int buffer)
+    public long addressForRead(@NonNegative final long offset, @NonNegative final int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
 
         BytesStore bytesStore = this.bytesStore;
@@ -229,7 +229,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public long addressForWrite(final long offset)
+    public long addressForWrite(@NonNegative final long offset)
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException {
         requireNonNegative(offset);
 
@@ -240,7 +240,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    protected void readCheckOffset(final long offset,
+    protected void readCheckOffset(@NonNegative final long offset,
                                    final long adding,
                                    final boolean given)
             throws BufferUnderflowException, IllegalStateException {
@@ -254,7 +254,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    protected void writeCheckOffset(final long offset, final long adding)
+    protected void writeCheckOffset(final @NonNegative long offset, final @NonNegative long adding)
             throws BufferOverflowException, IllegalStateException {
 
         throwExceptionIfClosed();
@@ -275,7 +275,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public void ensureCapacity(final long desiredCapacity)
+    public void ensureCapacity(@NonNegative final long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -318,7 +318,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // DON'T call this directly.
     // TODO Check whether we need synchronized; original comment; require protection from concurrent mutation to bytesStore field
-    private synchronized @NotNull MappedBytesStore acquireNextByteStore0(final long offset, final boolean set)
+    private synchronized @NotNull MappedBytesStore acquireNextByteStore0(@NonNegative final long offset, final boolean set)
             throws IllegalStateException {
         throwExceptionIfClosed();
 
@@ -407,8 +407,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull final BytesStore bytes,
-                             final long offset,
-                             final long length)
+                             @NonNegative final long offset,
+                             @NonNegative final long length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
         requireNonNegative(offset);
@@ -436,7 +436,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-    void rawCopy(final long length, final long fromAddress)
+    void rawCopy(@NonNegative final long length, final long fromAddress)
             throws BufferOverflowException, IllegalStateException {
         this.throwExceptionIfReleased();
         OS.memory().copyMemory(fromAddress, addressForWritePosition(), length);
@@ -445,7 +445,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @Override
     @NotNull
-    public Bytes<Void> writeOrderedInt(long offset, int i)
+    public Bytes<Void> writeOrderedInt(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -459,7 +459,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public byte readVolatileByte(long offset)
+    public byte readVolatileByte(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -471,7 +471,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public short readVolatileShort(long offset)
+    public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -483,7 +483,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public int readVolatileInt(long offset)
+    public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -495,7 +495,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public long readVolatileLong(long offset)
+    public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -523,7 +523,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public int peekUnsignedByte(final long offset)
+    public int peekUnsignedByte(@NonNegative final long offset)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfClosed();
 
@@ -552,7 +552,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     @NotNull
     @Override
-    public Bytes<Void> appendUtf8(char[] chars, int offset, int length)
+    public Bytes<Void> appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         requireNonNull(chars);
         throwExceptionIfClosed();
@@ -586,7 +586,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // used by the Pretoucher, don't change this without considering the impact.
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value)
+    public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 

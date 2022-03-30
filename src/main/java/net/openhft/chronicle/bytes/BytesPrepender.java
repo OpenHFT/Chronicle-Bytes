@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +36,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @throws BufferOverflowException if the length &gt; capacity() - start()
      */
     @NotNull
-    B clearAndPad(long length)
+    B clearAndPad(@NonNegative long length)
             throws BufferOverflowException, IllegalStateException;
 
     /**

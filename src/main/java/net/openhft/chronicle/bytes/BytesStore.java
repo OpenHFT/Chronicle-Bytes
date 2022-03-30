@@ -24,6 +24,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
@@ -122,19 +123,19 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param capacity of the buffer
      */
-    static BytesStore<?, Void> nativeStore(long capacity) {
+    static BytesStore<?, Void> nativeStore(@NonNegative long capacity) {
         return NativeBytesStore.nativeStore(capacity);
     }
 
-    static BytesStore<?, Void> nativeStoreWithFixedCapacity(long capacity) {
+    static BytesStore<?, Void> nativeStoreWithFixedCapacity(@NonNegative long capacity) {
         return NativeBytesStore.nativeStoreWithFixedCapacity(capacity);
     }
 
-    static BytesStore<?, Void> lazyNativeBytesStoreWithFixedCapacity(long capacity) {
+    static BytesStore<?, Void> lazyNativeBytesStoreWithFixedCapacity(@NonNegative long capacity) {
         return NativeBytesStore.lazyNativeBytesStoreWithFixedCapacity(capacity);
     }
 
-    static BytesStore<?, ByteBuffer> elasticByteBuffer(int size, long maxSize) {
+    static BytesStore<?, ByteBuffer> elasticByteBuffer(@NonNegative int size, @NonNegative long maxSize) {
         return NativeBytesStore.elasticByteBuffer(size, maxSize);
     }
 
@@ -168,7 +169,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return a PointerBytesStore
      */
     @NotNull
-    static PointerBytesStore wrap(long address, long length) {
+    static PointerBytesStore wrap(long address, @NonNegative long length) {
         @NotNull PointerBytesStore pbs = nativePointer();
         pbs.set(address, length);
         return pbs;
@@ -252,7 +253,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return the actual capacity available before resizing
      */
     @Override
-    default long realCapacity() {
+    default @NonNegative long realCapacity() {
         return capacity();
     }
 
@@ -260,6 +261,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return The maximum limit you can set.
      */
     @Override
+    @NonNegative
     long capacity();
 
     /**
@@ -276,7 +278,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset the specified offset to check
      * @return <code>true</code> if offset is safe
      */
-    default boolean inside(long offset) {
+    default boolean inside(@NonNegative long offset) {
         return start() <= offset && offset < safeLimit();
     }
 
@@ -287,7 +289,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param buffer the number of bytes after the offset to check
      * @return <code>true</code> if the bytes between the offset and offset+buffer are inside the BytesStore
      */
-    default boolean inside(long offset, long buffer) {
+    default boolean inside(@NonNegative long offset, @NonNegative long buffer) {
         return start() <= offset && offset + buffer < safeLimit();
     }
 
@@ -348,7 +350,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     @Override
     @NotNull
-    default B zeroOut(long start, long end)
+    default B zeroOut(@NonNegative long start, @NonNegative long end)
             throws IllegalStateException {
         if (end <= start)
             return (B) this;
@@ -376,6 +378,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return length in bytes to read or Integer.MAX_VALUE if longer.
      */
     @Override
+    @NonNegative
     default int length() {
         return (int) Math.min(Integer.MAX_VALUE, readRemaining());
     }
@@ -384,7 +387,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Assume ISO-8859-1 encoding, subclasses can override this.
      */
     @Override
-    default char charAt(int index)
+    default char charAt(@NonNegative int index)
             throws IndexOutOfBoundsException {
         try {
             return (char) readUnsignedByte(readPosition() + index);
@@ -404,7 +407,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     @NotNull
     @Override
-    default CharSequence subSequence(int start, int end) {
+    default CharSequence subSequence(@NonNegative int start, @NonNegative int end) {
         if (start < 0 || end > length() || end < start)
             throw new IndexOutOfBoundsException("start " + start + ", end " + end + ", length " + length());
 
@@ -431,7 +434,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return this BytesStore as a DebugString.
      */
     @NotNull
-    default String toDebugString(long maxLength)
+    default String toDebugString(@NonNegative long maxLength)
             throws IllegalStateException, ArithmeticException {
         return BytesInternal.toDebugString(this, maxLength);
     }
@@ -451,7 +454,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param length     the length to match
      * @return <code>true</code> if the bytes up to min(length, this.length(), bytesStore.length()) matched.
      */
-    default boolean equalBytes(@NotNull BytesStore bytesStore, long length)
+    default boolean equalBytes(@NotNull BytesStore bytesStore, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
         return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
@@ -482,7 +485,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws BufferUnderflowException if the specified indexes are outside the limits of the BytesStore
      * @throws IllegalStateException    if the BytesStore has been released
      */
-    default int byteCheckSum(long start, long end)
+    default int byteCheckSum(@NonNegative long start, @NonNegative long end)
             throws BufferUnderflowException, IllegalStateException {
         int sum = 0;
         for (long i = start; i < end; i++) {
@@ -563,7 +566,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetUnsignedByteNotAtomic(long offset, int adding)
+    default int addAndGetUnsignedByteNotAtomic(@NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             int r = (readUnsignedByte(offset) + adding) & 0xFF;
@@ -581,7 +584,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default short addAndGetShortNotAtomic(long offset, short adding)
+    default short addAndGetShortNotAtomic(@NonNegative long offset, short adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             short r = (short) (readShort(offset) + adding);
@@ -599,7 +602,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default int addAndGetIntNotAtomic(long offset, int adding)
+    default int addAndGetIntNotAtomic(@NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             int r = readInt(offset) + adding;
@@ -617,7 +620,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default double addAndGetDoubleNotAtomic(long offset, double adding)
+    default double addAndGetDoubleNotAtomic(@NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             double r = readDouble(offset) + adding;
@@ -635,7 +638,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding value to add, can be 1
      * @return the sum
      */
-    default float addAndGetFloatNotAtomic(long offset, float adding)
+    default float addAndGetFloatNotAtomic(@NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             float r = readFloat(offset) + adding;
@@ -646,7 +649,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         }
     }
 
-    void move(long from, long to, long length)
+    void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException;
 
     /**
@@ -655,7 +658,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset  the offset to write to
      * @param atLeast the long value that is to be written at offset if it is not less than the current value at offset
      */
-    default void writeMaxLong(long offset, long atLeast)
+    default void writeMaxLong(@NonNegative long offset, long atLeast)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -677,7 +680,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset  the offset to write to
      * @param atLeast the int value that is to be written at offset if it is not less than the current value at offset
      */
-    default void writeMaxInt(long offset, int atLeast)
+    default void writeMaxInt(@NonNegative long offset, int atLeast)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -762,7 +765,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param s      the String to compare to
      * @return <code>true</code> if the specified portion of this BytesStore is equal to s
      */
-    default boolean isEqual(long start, long length, String s) {
+    default boolean isEqual(@NonNegative long start, @NonNegative long length, String s) {
         if (s == null || s.length() != length)
             return false;
         int length2 = (int) length;

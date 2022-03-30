@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.ByteStringParser;
+import net.openhft.chronicle.core.annotation.NonNegative;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -61,7 +62,7 @@ public class ByteStringReader extends Reader {
     }
 
     @Override
-    public int read(char[] cbuf, int off, int len)
+    public int read(char[] cbuf, @NonNegative int off, @NonNegative int len)
             throws IOException {
         try {
             return in.read(cbuf, off, len);

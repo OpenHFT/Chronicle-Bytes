@@ -18,7 +18,9 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
+
 @FunctionalInterface
 public interface NewChunkListener {
-    void onNewChunk(String filename, int chunk, long delayMicros);
+    void onNewChunk(String filename, @NonNegative int chunk, @NonNegative long delayMicros);
 }

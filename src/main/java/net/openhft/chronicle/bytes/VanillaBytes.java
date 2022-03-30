@@ -22,6 +22,7 @@
     import net.openhft.chronicle.bytes.internal.NativeBytesStore;
     import net.openhft.chronicle.core.*;
     import net.openhft.chronicle.core.annotation.Java9;
+    import net.openhft.chronicle.core.annotation.NonNegative;
     import net.openhft.chronicle.core.io.IORuntimeException;
     import net.openhft.chronicle.core.util.StringUtils;
     import org.jetbrains.annotations.NotNull;
@@ -121,7 +122,7 @@
             return true;
         }
 
-        private static boolean isEqual1(char[] chars, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(char[] chars, @NotNull BytesStore bytesStore, @NonNegative long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < chars.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -132,7 +133,7 @@
         }
 
         @Java9
-        private static boolean isEqual1(byte[] bytes, byte coder, @NotNull BytesStore bytesStore, long readPosition)
+        private static boolean isEqual1(byte[] bytes, byte coder, @NotNull BytesStore bytesStore, @NonNegative long readPosition)
                 throws BufferUnderflowException, IllegalStateException {
             for (int i = 0; i < bytes.length; i++) {
                 int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -152,16 +153,16 @@
         }
 
         @Override
-        public long readVolatileLong(long offset)
+        public long readVolatileLong(@NonNegative long offset)
                 throws BufferUnderflowException, IllegalStateException {
             readCheckOffset(offset, 8, true);
             return bytesStore.readVolatileLong(offset);
         }
 
         @Override
-        public void bytesStore(@NotNull final BytesStore<Bytes<U>, U> byteStore,
-                               final long offset,
-                               final long length)
+        public void bytesStore(final @NotNull BytesStore<Bytes<U>, U> byteStore,
+                               final @NonNegative long offset,
+                               final @NonNegative long length)
                 throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
             requireNonNull(byteStore);
             setBytesStore(byteStore);
@@ -251,7 +252,7 @@
         }
 
         @Override
-        public long realCapacity() {
+        public @NonNegative long realCapacity() {
             return bytesStore.realCapacity();
         }
 
@@ -282,7 +283,7 @@
 
         @NotNull
         @Override
-        public Bytes<U> write(@NotNull RandomDataInput bytes, long offset, long length)
+        public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             requireNonNegative(offset);
@@ -292,7 +293,7 @@
             return this;
         }
 
-        protected void optimisedWrite(@NotNull RandomDataInput bytes, long offset, long length)
+        protected void optimisedWrite(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             if (length <= safeCopySize() && isDirectMemory() && bytes.isDirectMemory()) {
@@ -311,7 +312,7 @@
             }
         }
 
-        public void write(long position, @NotNull CharSequence str, int offset, int length)
+        public void write(long position, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
             requireNonNegative(position);
             requireNonNull(str);
@@ -327,13 +328,13 @@
             }
         }
 
-        private char charAt(@NotNull CharSequence str, int index) {
+        private char charAt(@NotNull CharSequence str, @NonNegative int index) {
             return str.charAt(index);
         }
 
         @Override
         @NotNull
-        public VanillaBytes append(@NotNull CharSequence str, int start, int end)
+        public VanillaBytes append(@NotNull CharSequence str, @NonNegative int start, @NonNegative int end)
                 throws IndexOutOfBoundsException {
             assert end > start : "end=" + end + ",start=" + start;
             requireNonNull(str);
@@ -427,7 +428,7 @@
 
         @NotNull
         @Override
-        public Bytes<U> write(@NotNull BytesStore bytes, long offset, long length)
+        public Bytes<U> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
             requireNonNegative(offset);
@@ -593,7 +594,7 @@
             }
         }
 
-        public void read8Bit(char[] chars, int length)
+        public void read8Bit(char[] chars, @NonNegative int length)
                 throws BufferUnderflowException, IllegalStateException {
             ReportUnoptimised.reportOnce();
 
@@ -610,7 +611,7 @@
 
         // TODO: protected?
         @Override
-        public int byteCheckSum(int start, int end)
+        public int byteCheckSum(@NonNegative int start, @NonNegative int end)
                 throws IORuntimeException, BufferUnderflowException {
             byte b = 0;
             // the below cast is safe as should only be called from net.openhft.chronicle.bytes.AbstractBytes.byteCheckSum(long, long)
@@ -634,7 +635,7 @@
 
         @NotNull
         @Override
-        public Bytes<U> appendUtf8(char[] chars, int offset, int length)
+        public Bytes<U> appendUtf8(char[] chars, @NonNegative int offset, @NonNegative int length)
                 throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IllegalArgumentException {
             long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
             ensureCapacity(writePosition() + actualUTF8Length);

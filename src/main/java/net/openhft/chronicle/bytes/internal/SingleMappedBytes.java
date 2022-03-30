@@ -105,10 +105,10 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     @Override
-    public @NotNull SingleMappedBytes write(final long writeOffset,
+    public @NotNull SingleMappedBytes write(@NonNegative final long writeOffset,
                                             @NotNull final RandomDataInput bytes,
-                                            long readOffset,
-                                            final long length)
+                                            @NonNegative long readOffset,
+                                            @NonNegative final long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
@@ -142,14 +142,14 @@ public class SingleMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-    private long copySize(final long writePosition) {
+    private long copySize(@NonNegative final long writePosition) {
         long size = mappedFile.chunkSize();
         return size - writePosition % size;
     }
 
     @NotNull
     @Override
-    public Bytes<Void> readPositionRemaining(final long position, final long remaining)
+    public Bytes<Void> readPositionRemaining(@NonNegative final long position, @NonNegative final long remaining)
             throws BufferUnderflowException, IllegalStateException {
         //  throwExceptionIfClosed
 
@@ -181,7 +181,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
     }
 
     @NotNull
-    private BufferOverflowException newBufferOverflowException(final long offset) {
+    private BufferOverflowException newBufferOverflowException(@NonNegative final long offset) {
         BufferOverflowException exception = new BufferOverflowException();
         exception.initCause(new IllegalArgumentException("Offset out of bound " + offset));
         return exception;
@@ -219,7 +219,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
     // used by the Pretoucher, don't change this without considering the impact.
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value)
+    public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosed();
 

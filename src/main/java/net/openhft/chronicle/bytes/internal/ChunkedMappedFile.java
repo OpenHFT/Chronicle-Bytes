@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
@@ -63,9 +64,9 @@ public class ChunkedMappedFile extends MappedFile {
 
     public ChunkedMappedFile(@NotNull final File file,
                              @NotNull final RandomAccessFile raf,
-                             final long chunkSize,
+                             @NonNegative final long chunkSize,
                              final long overlapSize,
-                             final long capacity,
+                             @NonNegative final long capacity,
                              final boolean readOnly)
             throws IORuntimeException {
         super(file, readOnly);
@@ -109,7 +110,7 @@ public class ChunkedMappedFile extends MappedFile {
     private static void warmupChunks(List<IOException> errorsDuringWarmup,
                                      File file,
                                      long mapAlignment,
-                                     int chunks) {
+                                     @NonNegative int chunks) {
         try {
             try (@NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, "rw")) {
                 try (final ChunkedMappedFile mappedFile = new ChunkedMappedFile(file, raf, mapAlignment, 0, mapAlignment * chunks, false)) {
@@ -123,7 +124,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     private static void warmup0(final long mapAlignment,
-                                final int chunks,
+                                @NonNegative final int chunks,
                                 @NotNull final ChunkedMappedFile mappedFile) {
         try {
             ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
@@ -142,7 +143,7 @@ public class ChunkedMappedFile extends MappedFile {
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
-            final long position,
+            @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
@@ -215,7 +216,7 @@ public class ChunkedMappedFile extends MappedFile {
         }
     }
 
-    private void resizeRafIfTooSmall(final int chunk)
+    private void resizeRafIfTooSmall(@NonNegative final int chunk)
             throws IOException {
         Jvm.safepoint();
 
@@ -380,14 +381,14 @@ public class ChunkedMappedFile extends MappedFile {
     /**
      * Calls lock on the underlying file channel
      */
-    public FileLock lock(long position, long size, boolean shared) throws IOException {
+    public FileLock lock(long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
 
     /**
      * Calls tryLock on the underlying file channel
      */
-    public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+    public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
     }
 

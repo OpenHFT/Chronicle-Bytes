@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.util;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
@@ -36,7 +37,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, int length) throws IllegalStateException, BufferUnderflowException {
+    protected String getValue(@NotNull BytesStore cs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         StringBuilder sb = SBP.acquireStringBuilder();
         for (int i = 0; i < length; i++)
             sb.append((char) cs.readUnsignedByte(cs.readPosition() + i));

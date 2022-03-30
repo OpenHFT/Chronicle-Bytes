@@ -351,7 +351,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @NotNull StreamingDataInput bytes, Appendable appendable, boolean utf, int length)
+            @NotNull StreamingDataInput bytes, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         // Because Bytes implements Appendable, we need to check if it might be closed
@@ -368,7 +368,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @NotNull RandomDataInput input, long offset, Appendable appendable, boolean utf, int length)
+            @NotNull RandomDataInput input, long offset, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
 
         assert utf;
@@ -388,7 +388,7 @@ enum BytesInternal {
         parseUtf81(input, offset, appendable, length);
     }
 
-    public static boolean compareUtf8(@NotNull RandomDataInput input, long offset, @Nullable CharSequence other)
+    public static boolean compareUtf8(@NotNull RandomDataInput input, @NonNegative long offset, @Nullable CharSequence other)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(input);
         if (other != null)
@@ -421,7 +421,7 @@ enum BytesInternal {
     }
 
     private static boolean compareUtf8(
-            @NotNull RandomDataInput input, long offset, long utfLen, @NotNull CharSequence other)
+            @NotNull RandomDataInput input, @NonNegative long offset, @NonNegative long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
@@ -442,7 +442,7 @@ enum BytesInternal {
     }
 
     private static boolean compareUtf82(
-            @NotNull RandomDataInput input, long offset, int charI, long utfLen, @NotNull CharSequence other)
+            @NotNull RandomDataInput input, @NonNegative long offset, int charI, @NonNegative long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(other);
@@ -508,7 +508,7 @@ enum BytesInternal {
         return offset == limit && charI == other.length();
     }
 
-    public static void parse8bit(long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, int utflen)
+    public static void parse8bit(@NonNegative long offset, @NotNull RandomDataInput bytesStore, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, IllegalStateException {
         throwExceptionIfReleased(bytesStore);
         throwExceptionIfReleased(appendable);
@@ -521,7 +521,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf81(
-            @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, int length)
+            @NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -575,7 +575,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, int utflen)
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, @NonNegative int utflen)
             throws IllegalStateException {
         throwExceptionIfReleased(bytes);
         assert bytes.readRemaining() >= utflen;
@@ -597,7 +597,7 @@ enum BytesInternal {
         StringUtils.setLength(sb, utflen);
     }
 
-    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, int utflen)
+    public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
             throws IllegalStateException, IOException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -608,7 +608,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, int utflen)
+    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IllegalStateException, IOException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -620,7 +620,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen)
+    public static void parseUtf8_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
         try {
@@ -647,7 +647,7 @@ enum BytesInternal {
         }
     }
 
-    private static void parseUtf82Guarded(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, int utflen, int count, long rp0) throws IOException {
+    private static void parseUtf82Guarded(@NotNull Bytes bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen, int count, long rp0) throws IOException {
         try {
             parseUtf82(bytes, sb, utf, utflen, count);
         } catch (UTFDataFormatRuntimeException e) {
@@ -656,7 +656,7 @@ enum BytesInternal {
         }
     }
 
-    private static int calculateCount(@NotNull Bytes bytes, @NotNull StringBuilder sb, int utflen, long readPosition) {
+    private static int calculateCount(@NotNull Bytes bytes, @NotNull StringBuilder sb, @NonNegative int utflen, @NonNegative long readPosition) {
         int count = 0;
         if (Jvm.isJava9Plus()) {
             sb.setLength(utflen);
@@ -678,8 +678,8 @@ enum BytesInternal {
         return count;
     }
 
-    public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, long offset,
-                                     @NotNull StringBuilder sb, int utflen)
+    public static void parseUtf8_SB1(@NotNull NativeBytesStore bytes, @NonNegative long offset,
+                                     @NotNull StringBuilder sb, @NonNegative int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         requireNonNull(sb);
@@ -717,7 +717,7 @@ enum BytesInternal {
         }
     }
 
-    public static int parse8bit_SB1(long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, int length) {
+    public static int parse8bit_SB1(@NonNegative long offset, @NotNull NativeBytesStore nbs, @NotNull StringBuilder sb, @NonNegative int length) {
         throwExceptionIfReleased(nbs);
         requireNonNull(sb);
         long address = nbs.address + nbs.translate(offset);
@@ -753,7 +753,7 @@ enum BytesInternal {
         return count;
     }
 
-    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, int length, int count)
+    static void parseUtf82(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, boolean utf, @NonNegative int length, @NonNegative int count)
             throws IOException, UTFDataFormatRuntimeException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -817,8 +817,8 @@ enum BytesInternal {
         }
     }
 
-    static void parseUtf82(@NotNull RandomDataInput input, long offset, long limit,
-                           @NotNull Appendable appendable, int utflen)
+    static void parseUtf82(@NotNull RandomDataInput input, @NonNegative long offset, @NonNegative long limit,
+                           @NotNull Appendable appendable, @NonNegative int utflen)
             throws IOException, UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(input);
         throwExceptionIfReleased(appendable);
@@ -916,7 +916,7 @@ enum BytesInternal {
     }
 
     public static long writeUtf8(@NotNull RandomDataOutput out,
-                                 long writeOffset,
+                                 @NonNegative long writeOffset,
                                  @Nullable CharSequence str)
             throws BufferOverflowException, IllegalStateException, ArithmeticException {
         throwExceptionIfReleased(out);
@@ -983,7 +983,7 @@ enum BytesInternal {
     }
 
     @NotNull
-    public static Bytes asBytes(@NotNull RandomDataOutput bytes, long position, long limit)
+    public static Bytes asBytes(@NotNull RandomDataOutput bytes, @NonNegative long position, @NonNegative long limit)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         throwExceptionIfReleased(bytes);
         Bytes sbytes = bytes.bytesForWrite();
@@ -994,7 +994,7 @@ enum BytesInternal {
     }
 
     public static void appendUtf8(@NotNull StreamingDataOutput bytes,
-                                  @NotNull CharSequence str, int offset, int length)
+                                  @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws IndexOutOfBoundsException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(str);
@@ -1013,7 +1013,7 @@ enum BytesInternal {
     }
 
     private static void appendUtf82(@NotNull StreamingDataOutput bytes,
-                                    @NotNull CharSequence str, int offset, int length, int i)
+                                    @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length, @NonNegative int i)
             throws IndexOutOfBoundsException, BufferOverflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(str);
@@ -1023,8 +1023,8 @@ enum BytesInternal {
         }
     }
 
-    public static long appendUtf8(@NotNull RandomDataOutput out, long outOffset,
-                                  @NotNull CharSequence str, int strOffset, int length)
+    public static long appendUtf8(@NotNull RandomDataOutput out, @NonNegative long outOffset,
+                                  @NotNull CharSequence str, @NonNegative int strOffset, @NonNegative int length)
             throws IndexOutOfBoundsException, BufferOverflowException, IllegalStateException {
         throwExceptionIfReleased(out);
         throwExceptionIfReleased(str);
@@ -1038,8 +1038,8 @@ enum BytesInternal {
         return appendUtf82(out, outOffset, str, strOffset, length, i);
     }
 
-    private static long appendUtf82(@NotNull RandomDataOutput out, long outOffset,
-                                    @NotNull CharSequence str, int strOffset, int length, int i)
+    private static long appendUtf82(@NotNull RandomDataOutput out, @NonNegative long outOffset,
+                                    @NotNull CharSequence str, @NonNegative int strOffset, @NonNegative int length, @NonNegative int i)
             throws IndexOutOfBoundsException, BufferOverflowException, IllegalStateException {
         throwExceptionIfReleased(out);
         throwExceptionIfReleased(str);
@@ -1050,7 +1050,7 @@ enum BytesInternal {
         return outOffset;
     }
 
-    public static void append8bit(long offsetInRDO, RandomDataOutput bytes, @NotNull CharSequence str, int offset, int length)
+    public static void append8bit(@NonNegative long offsetInRDO, RandomDataOutput bytes, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
             IndexOutOfBoundsException, IllegalStateException, ArithmeticException {
         throwExceptionIfReleased(bytes);
@@ -1095,7 +1095,7 @@ enum BytesInternal {
         }
     }
 
-    public static long appendUtf8Char(@NotNull RandomDataOutput out, long offset, int c)
+    public static long appendUtf8Char(@NotNull RandomDataOutput out, @NonNegative long offset, int c)
             throws BufferOverflowException, IllegalStateException {
         if (c <= 0x007F) {
             out.writeByte(offset++, (byte) c);
@@ -1141,7 +1141,7 @@ enum BytesInternal {
         writeStopBit0(out, n);
     }
 
-    public static long writeStopBit(@NotNull final long addr, final long n)
+    public static long writeStopBit(final long addr, final long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
             UnsafeMemory.INSTANCE.writeByte(addr, (byte) n);
@@ -1172,7 +1172,7 @@ enum BytesInternal {
         writeStopBit0(out, n);
     }
 
-    public static long writeStopBit(@NotNull RandomDataOutput out, long offset, long n)
+    public static long writeStopBit(@NotNull RandomDataOutput out, @NonNegative long offset, long n)
             throws BufferOverflowException, IllegalStateException {
         if ((n & ~0x7F) == 0) {
             out.writeByte(offset++, (byte) n);
@@ -1258,7 +1258,7 @@ enum BytesInternal {
         return addr + i;
     }
 
-    static long writeStopBit0(@NotNull RandomDataOutput out, long offset, long n)
+    static long writeStopBit0(@NotNull RandomDataOutput out, @NonNegative long offset, long n)
             throws BufferOverflowException, IllegalStateException {
         boolean neg = false;
         if (n < 0) {
@@ -1293,7 +1293,7 @@ enum BytesInternal {
         return len + 1;
     }
 
-    public static String toDebugString(@NotNull RandomDataInput bytes, long maxLength)
+    public static String toDebugString(@NotNull RandomDataInput bytes, @NonNegative long maxLength)
             throws IllegalStateException, ArithmeticException {
         if (bytes.refCount() < 1) {
             // Make sure not to access a released resource
@@ -1325,10 +1325,10 @@ enum BytesInternal {
     }
 
     private static void appendContent(@NotNull final RandomDataInput bytes,
-                                      final long maxLength,
+                                      @NonNegative final long maxLength,
                                       @NotNull final StringBuilder sb,
-                                      final long readPosition,
-                                      final long readLimit) {
+                                      @NonNegative final long readPosition,
+                                      @NonNegative final long readLimit) {
         try {
             final long start = Math.max(bytes.start(), readPosition - 64);
             long end = Math.min(readLimit + 64, start + maxLength);
@@ -1351,7 +1351,7 @@ enum BytesInternal {
     }
 
     @NotNull
-    public static Object asSize(long size) {
+    public static Object asSize(@NonNegative long size) {
         return size == Bytes.MAX_CAPACITY ? "8EiB" : size;
     }
 
@@ -1408,10 +1408,10 @@ enum BytesInternal {
 
     private static void toString(@NotNull RandomDataInput bytes,
                                  @NotNull Appendable sb,
-                                 long start,
-                                 long readPosition,
-                                 long writePosition,
-                                 long end)
+                                 @NonNegative long start,
+                                 @NonNegative long readPosition,
+                                 @NonNegative long writePosition,
+                                 @NonNegative long end)
             throws IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(sb);
@@ -1441,7 +1441,7 @@ enum BytesInternal {
         }
     }
 
-    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, long start, long last)
+    private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, @NonNegative long start, @NonNegative long last)
             throws IOException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(sb);
@@ -1642,7 +1642,7 @@ enum BytesInternal {
      * The length of the number must be fixed otherwise short numbers will not overwrite longer
      * numbers
      */
-    public static void append(@NotNull RandomDataOutput out, long offset, long num, int digits)
+    public static void append(@NotNull RandomDataOutput out, @NonNegative long offset, long num, int digits)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         boolean negative = num < 0;
         num = Math.abs(num);
@@ -1668,7 +1668,7 @@ enum BytesInternal {
      *
      * @param width Maximum width. I will be padded with zeros to the left if necessary
      */
-    public static void appendDecimal(@NotNull RandomDataOutput out, long num, long offset, int decimalPlaces, int width)
+    public static void appendDecimal(@NotNull RandomDataOutput out, long num, @NonNegative long offset, int decimalPlaces, int width)
             throws IORuntimeException, IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException {
         if (decimalPlaces == 0) {
             append(out, offset, num, width);
@@ -2010,7 +2010,7 @@ enum BytesInternal {
     }
 
     @Nullable
-    public static String readUtf8(@NotNull RandomDataInput in, long offset, int maxUtf8Len)
+    public static String readUtf8(@NotNull RandomDataInput in, @NonNegative long offset, @NonNegative int maxUtf8Len)
             throws BufferUnderflowException, IllegalArgumentException,
             IllegalStateException, IORuntimeException {
         throwExceptionIfReleased(in);
@@ -2188,11 +2188,11 @@ enum BytesInternal {
         }
     }
 
-    private static UTFDataFormatException newUTFDataFormatException(final long offset, final String suffix) {
+    private static UTFDataFormatException newUTFDataFormatException(@NonNegative final long offset, final String suffix) {
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
-    private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(final long offset, final String suffix) {
+    private static UTFDataFormatRuntimeException newUTFDataFormatRuntimeException(@NonNegative final long offset, final String suffix) {
         return new UTFDataFormatRuntimeException(MALFORMED_INPUT_AROUND_BYTE + offset + " " + suffix);
     }
 
@@ -2756,7 +2756,7 @@ enum BytesInternal {
         return false;
     }
 
-    public static float addAndGetFloat(@NotNull RandomDataInput in, long offset, float adding)
+    public static float addAndGetFloat(@NotNull RandomDataInput in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2771,7 +2771,7 @@ enum BytesInternal {
         }
     }
 
-    public static double addAndGetDouble(@NotNull RandomDataInput in, long offset, double adding)
+    public static double addAndGetDouble(@NotNull RandomDataInput in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2786,7 +2786,7 @@ enum BytesInternal {
         }
     }
 
-    public static int addAndGetInt(@NotNull RandomDataInput in, long offset, int adding)
+    public static int addAndGetInt(@NotNull RandomDataInput in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2800,7 +2800,7 @@ enum BytesInternal {
         }
     }
 
-    public static long addAndGetLong(@NotNull RandomDataInput in, long offset, long adding)
+    public static long addAndGetLong(@NotNull RandomDataInput in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2820,7 +2820,7 @@ enum BytesInternal {
      * @param bytes the buffer you wish to toString()
      * @return hex representation of the buffer, from example [0D ,OA, FF]
      */
-    public static String toHexString(@NotNull final Bytes bytes, long offset, long len)
+    public static String toHexString(@NotNull final Bytes bytes, @NonNegative long offset, @NonNegative long len)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         if (len == 0)
@@ -2919,7 +2919,7 @@ enum BytesInternal {
         b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, long readRemaining)
+    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, @NonNegative long readRemaining)
             throws BufferUnderflowException, IllegalStateException {
 
         if (b1.readRemaining() < readRemaining)
@@ -3074,7 +3074,7 @@ enum BytesInternal {
     }
 
     @NotNull
-    public static BytesStore subBytes(RandomDataInput from, long start, long length)
+    public static BytesStore subBytes(RandomDataInput from, @NonNegative long start, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
         try {
             @NotNull BytesStore ret;
@@ -3202,7 +3202,7 @@ enum BytesInternal {
         return BytesInternal.SI.intern(sb);
     }
 
-    public static void copy8bit(BytesStore bs, long addressForWrite, long length) {
+    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) {
         throwExceptionIfReleased(bs);
         int length0 = Math.toIntExact(length);
         int i = 0;
@@ -3215,7 +3215,6 @@ enum BytesInternal {
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
-        @Nullable
         private byte[] lastDateStr = null;
 
         DateCache() {

@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 import org.jetbrains.annotations.NotNull;
 
@@ -37,7 +38,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     @NotNull
     static MultiReaderBytesRingBuffer newInstance(
             @NotNull BytesStore<?, Void> bytesStore,
-            int numReaders) {
+            @NonNegative int numReaders) {
         try {
             @NotNull final Class<MultiReaderBytesRingBuffer> aClass = clazz();
             final Constructor<MultiReaderBytesRingBuffer> constructor = aClass
@@ -60,11 +61,11 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
                 "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
 
-    static long sizeFor(long capacity) {
+    static long sizeFor(@NonNegative long capacity) {
         return sizeFor(capacity, 1);
     }
 
-    static long sizeFor(long capacity, int numReaders) {
+    static long sizeFor(@NonNegative long capacity, @NonNegative int numReaders) {
         try {
             final Method sizeFor = Class.forName(
                     "software.chronicle.enterprise.queue.ChronicleRingBuffer").getMethod("sizeFor", long.class, int.class);

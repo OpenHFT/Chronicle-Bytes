@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,7 +36,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
 
     @SuppressWarnings("rawtypes")
     @Override
-    public void bytesStore(@NotNull final BytesStore bytes, long offset, final long length)
+    public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative final long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 

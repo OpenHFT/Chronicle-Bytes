@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -38,7 +39,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * @throws BufferUnderflowException if capacity is less than start
      * @throws IllegalArgumentException
      */
-    public SubBytes(@NotNull BytesStore bytesStore, long start, long capacity)
+    public SubBytes(@NotNull BytesStore bytesStore, @NonNegative long start, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);
         this.start = start;
@@ -47,16 +48,19 @@ public class SubBytes<U> extends VanillaBytes<U> {
         readLimit(writeLimit());
     }
 
+    @NonNegative
     @Override
     public long capacity() {
         return capacity;
     }
 
+    @NonNegative
     @Override
     public long start() {
         return start;
     }
 
+    @NonNegative
     @Override
     public long realCapacity() {
         return capacity;

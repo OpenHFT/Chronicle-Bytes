@@ -3,6 +3,7 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.UnsafeMemory;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 public enum BinaryLengthLength {
@@ -21,7 +22,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
+        public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             long length = (end - positionReturnedFromInitialise - 1) & MASK;
             if (length >= 1 << 8)
                 throw invalidLength(length);
@@ -44,7 +45,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
+        public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             final long length = (end - positionReturnedFromInitialise - 2) & MASK;
             if (length >= 1 << 16)
                 throw invalidLength(length);
@@ -67,7 +68,7 @@ public enum BinaryLengthLength {
         }
 
         @Override
-        public void writeLength(@NotNull Bytes<?> bytes, long positionReturnedFromInitialise, long end) {
+        public void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end) {
             final long length = (end - positionReturnedFromInitialise - 4) & MASK;
             if (length >= 1L << 31)
                 throw invalidLength(length);
@@ -77,7 +78,7 @@ public enum BinaryLengthLength {
 
     static final long MASK = 0xFFFFFFFFL;
 
-    IllegalStateException invalidLength(final long length) {
+    IllegalStateException invalidLength(@NonNegative final long length) {
         return new IllegalStateException("length: " + length);
     }
 
@@ -86,6 +87,6 @@ public enum BinaryLengthLength {
     public abstract long initialise(@NotNull BytesOut<?> bytes);
 
     public abstract void writeLength(@NotNull Bytes<?> bytes,
-                                     long positionReturnedFromInitialise,
-                                     long end);
+                                     @NonNegative long positionReturnedFromInitialise,
+                                     @NonNegative long end);
 }

@@ -21,6 +21,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
@@ -53,7 +54,7 @@ public class SingleMappedFile extends MappedFile {
 
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
-                            final long capacity,
+                            @NonNegative final long capacity,
                             final boolean readOnly)
             throws IORuntimeException {
         super(file, readOnly);
@@ -95,7 +96,7 @@ public class SingleMappedFile extends MappedFile {
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
-            final long position,
+            @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IllegalArgumentException {
@@ -106,7 +107,7 @@ public class SingleMappedFile extends MappedFile {
         return store;
     }
 
-    private void resizeRafIfTooSmall(final long minSize)
+    private void resizeRafIfTooSmall(@NonNegative final long minSize)
             throws IOException {
         Jvm.safepoint();
 
@@ -258,14 +259,14 @@ public class SingleMappedFile extends MappedFile {
     /**
      * Calls lock on the underlying file channel
      */
-    public FileLock lock(long position, long size, boolean shared) throws IOException {
+    public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
 
     /**
      * Calls tryLock on the underlying file channel
      */
-    public FileLock tryLock(long position, long size, boolean shared) throws IOException {
+    public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
     }
 

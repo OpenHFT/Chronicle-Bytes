@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +39,7 @@ public enum AppendableUtil {
 
     private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
 
-    public static void setCharAt(@NotNull Appendable sb, int index, char ch)
+    public static void setCharAt(@NotNull Appendable sb, @NonNegative int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setCharAt(index, ch);
@@ -52,12 +53,12 @@ public enum AppendableUtil {
             throw new IllegalArgumentException("" + sb.getClass());
     }
 
-    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, int length)
+    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }
 
-    public static void setLength(@NotNull Appendable sb, int newLength)
+    public static void setLength(@NotNull Appendable sb, @NonNegative int newLength)
             throws IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         requireNonNull(sb);
         if (sb instanceof StringBuilder)
@@ -206,7 +207,7 @@ public enum AppendableUtil {
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
     }
 
-    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, int length)
+    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
@@ -216,7 +217,7 @@ public enum AppendableUtil {
         bytes.readSkip(count);
     }
 
-    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, int utflen)
+    public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IOException, IllegalStateException {
         if (appendable instanceof StringBuilder) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
@@ -230,7 +231,7 @@ public enum AppendableUtil {
         }
     }
 
-    public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, long start, long len)
+    public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, @NonNegative long start, @NonNegative long len)
             throws ArithmeticException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
             if (cs instanceof Bytes)
@@ -322,7 +323,7 @@ public enum AppendableUtil {
         return utflen;
     }
 
-    public static long findUtf8Length(char[] chars, int offset, int length) {
+    public static long findUtf8Length(char[] chars, @NonNegative int offset, @NonNegative int length) {
         requireNonNull(chars);
         long utflen = length;
         for (int i = offset, end = offset + length; i < end; i++) {

@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
 import net.openhft.chronicle.bytes.internal.SingleMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ManagedCloseable;
 import org.jetbrains.annotations.NotNull;
@@ -54,19 +55,19 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull final String filename, final long capacity)
+    public static MappedBytes singleMappedBytes(@NotNull final String filename, @NonNegative final long capacity)
             throws FileNotFoundException, IllegalStateException {
         return singleMappedBytes(new File(filename), capacity);
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull final File file, final long capacity)
+    public static MappedBytes singleMappedBytes(@NotNull final File file, @NonNegative final long capacity)
             throws FileNotFoundException, IllegalStateException {
         return singleMappedBytes(file, capacity, false);
     }
 
     @NotNull
-    public static MappedBytes singleMappedBytes(@NotNull File file, long capacity, boolean readOnly)
+    public static MappedBytes singleMappedBytes(@NotNull File file, @NonNegative long capacity, boolean readOnly)
             throws FileNotFoundException, IllegalStateException {
         final MappedFile rw = MappedFile.ofSingle(file, capacity, readOnly);
         try {
@@ -77,19 +78,19 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final String filename, final long chunkSize)
+    public static MappedBytes mappedBytes(@NotNull final String filename, @NonNegative final long chunkSize)
             throws FileNotFoundException, IllegalStateException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final File file, final long chunkSize)
+    public static MappedBytes mappedBytes(@NotNull final File file, @NonNegative final long chunkSize)
             throws FileNotFoundException, IllegalStateException {
         return mappedBytes(file, chunkSize, OS.pageSize());
     }
 
     @NotNull
-    public static MappedBytes mappedBytes(@NotNull final File file, final long chunkSize, final long overlapSize)
+    public static MappedBytes mappedBytes(@NotNull final File file, @NonNegative final long chunkSize, @NonNegative final long overlapSize)
             throws FileNotFoundException, IllegalStateException {
         final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
         try {
@@ -101,8 +102,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,
-                                          final long chunkSize,
-                                          final long overlapSize,
+                                          @NonNegative final long chunkSize,
+                                          @NonNegative final long overlapSize,
                                           final boolean readOnly)
             throws FileNotFoundException,
             IllegalStateException {

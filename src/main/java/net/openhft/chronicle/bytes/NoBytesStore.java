@@ -96,73 +96,73 @@ public enum NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public RandomDataOutput writeByte(long offset, byte i8) {
+    public RandomDataOutput writeByte(@NonNegative long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeShort(long offset, short i) {
+    public RandomDataOutput writeShort(@NonNegative long offset, short i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeInt(long offset, int i) {
+    public RandomDataOutput writeInt(@NonNegative long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedInt(long offset, int i) {
+    public RandomDataOutput writeOrderedInt(@NonNegative long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeLong(long offset, long i) {
+    public RandomDataOutput writeLong(@NonNegative long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedLong(long offset, long i) {
+    public RandomDataOutput writeOrderedLong(@NonNegative long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeFloat(long offset, float d) {
+    public RandomDataOutput writeFloat(@NonNegative long offset, float d) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeDouble(long offset, double d) {
+    public RandomDataOutput writeDouble(@NonNegative long offset, double d) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileByte(long offset, byte i8) {
+    public RandomDataOutput writeVolatileByte(@NonNegative long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileShort(long offset, short i16) {
+    public RandomDataOutput writeVolatileShort(@NonNegative long offset, short i16) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileInt(long offset, int i32) {
+    public RandomDataOutput writeVolatileInt(@NonNegative long offset, int i32) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileLong(long offset, long i64) {
+    public RandomDataOutput writeVolatileLong(@NonNegative long offset, long i64) {
         throw new UnsupportedOperationException();
     }
 
@@ -182,7 +182,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void write(long offsetInRDO, @NotNull ByteBuffer bytes, int offset, int length) {
+    public void write(@NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length) {
         requireNonNull(bytes);
         if (length != 0)
             throw new UnsupportedOperationException();
@@ -190,7 +190,7 @@ public enum NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public RandomDataOutput write(long writeOffset, RandomDataInput bytes, long readOffset, long length) {
+    public RandomDataOutput write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length) {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(readOffset);
@@ -201,60 +201,60 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public byte readByte(long offset) {
+    public byte readByte(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int peekUnsignedByte(long offset) {
+    public int peekUnsignedByte(@NonNegative long offset) {
         return -1;
     }
 
     @Override
-    public short readShort(long offset) {
+    public short readShort(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int readInt(long offset) {
+    public int readInt(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long readLong(long offset) {
+    public long readLong(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public float readFloat(long offset) {
+    public float readFloat(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public double readDouble(long offset) {
+    public double readDouble(@NonNegative long offset) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public byte readVolatileByte(long offset)
+    public byte readVolatileByte(@NonNegative long offset)
             throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public short readVolatileShort(long offset)
+    public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public int readVolatileInt(long offset)
+    public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long readVolatileLong(long offset)
+    public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException {
         throw new BufferUnderflowException();
     }
@@ -276,7 +276,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long capacity() {
+    public @NonNegative long capacity() {
         return 0;
     }
 
@@ -286,12 +286,12 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean inside(long offset) {
+    public boolean inside(@NonNegative long offset) {
         return false;
     }
 
     @Override
-    public boolean inside(long offset, long buffer) {
+    public boolean inside(@NonNegative long offset, @NonNegative long buffer) {
         return false;
     }
 
@@ -303,39 +303,39 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void nativeWrite(long address, long position, long size) {
+    public void nativeWrite(long address, @NonNegative long position, @NonNegative long size) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long write8bit(long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
         requireNonNull(bs);
         throw new BufferOverflowException();
     }
 
     @Override
-    public long write8bit(long position, @NotNull String s, int start, int length) {
+    public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
         requireNonNull(s);
         throw new BufferOverflowException();
     }
 
     @Override
-    public void nativeRead(long position, long address, long size) {
+    public void nativeRead(@NonNegative long position, long address, @NonNegative long size) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean compareAndSwapInt(long offset, int expected, int value) {
+    public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void testAndSetInt(long offset, int expected, int value) {
+    public void testAndSetInt(@NonNegative long offset, int expected, int value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean compareAndSwapLong(long offset, long expected, long value) {
+    public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value) {
         throw new UnsupportedOperationException();
     }
 
@@ -346,12 +346,12 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public void move(long from, long to, long length) {
+    public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public long addressForRead(long offset)
+    public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
         if (offset != 0)
             throw new BufferUnderflowException();
@@ -359,7 +359,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long addressForWrite(long offset)
+    public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
         if (offset != 0)
             throw new BufferOverflowException();

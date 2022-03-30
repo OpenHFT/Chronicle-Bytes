@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.StackTrace;
+import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -50,7 +51,7 @@ public class NativeBytes<U>
     private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
 
-    public NativeBytes(@NotNull final BytesStore store, final long capacity)
+    public NativeBytes(@NotNull final BytesStore store, @NonNegative final long capacity)
             throws IllegalStateException, IllegalArgumentException {
         super(store, 0, capacity);
         this.capacity = capacity;
@@ -101,7 +102,7 @@ public class NativeBytes<U>
     }
 
     @NotNull
-    public static NativeBytes<Void> nativeBytes(final long initialCapacity)
+    public static NativeBytes<Void> nativeBytes(@NonNegative final long initialCapacity)
             throws IllegalArgumentException {
         @NotNull final BytesStore<?, Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
@@ -136,7 +137,7 @@ public class NativeBytes<U>
     }
 
     @NotNull
-    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, long capacity)
+    public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException {
         requireNonNull(bs);
         return newGuarded
@@ -152,12 +153,12 @@ public class NativeBytes<U>
     }
 
     @Override
-    public long capacity() {
+    public @NonNegative long capacity() {
         return capacity;
     }
 
     @Override
-    protected void writeCheckOffset(final long offset, final long adding)
+    protected void writeCheckOffset(final @NonNegative long offset, final @NonNegative long adding)
             throws BufferOverflowException, IllegalStateException {
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
@@ -173,7 +174,7 @@ public class NativeBytes<U>
     }
 
     @Override
-    void prewriteCheckOffset(long offset, long subtracting)
+    void prewriteCheckOffset(@NonNegative long offset, long subtracting)
             throws BufferOverflowException, IllegalStateException {
         if (offset - subtracting >= bytesStore.start()) {
             if (offset <= bytesStore.safeLimit()) {
@@ -188,7 +189,7 @@ public class NativeBytes<U>
     }
 
     @Override
-    public void ensureCapacity(final long desiredCapacity)
+    public void ensureCapacity(final @NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
         try {
             assert desiredCapacity >= 0;
@@ -200,7 +201,7 @@ public class NativeBytes<U>
         }
     }
 
-    private void checkResize(final long endOfBuffer)
+    private void checkResize(@NonNegative final long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
         if (isElastic())
             resize(endOfBuffer);
@@ -214,12 +215,12 @@ public class NativeBytes<U>
     }
 
     @Override
-    public boolean isEqual(long start, long length, String s) {
+    public boolean isEqual(@NonNegative long start, @NonNegative long length, String s) {
         return bytesStore.isEqual(start, length, s);
     }
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
-    private void resize(final long endOfBuffer)
+    private void resize(@NonNegative final long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfReleased();
         if (endOfBuffer < 0)
@@ -264,7 +265,7 @@ public class NativeBytes<U>
         resizeHelper(size, isByteBufferBacked);
     }
 
-    private void resizeHelper(final long size,
+    private void resizeHelper(@NonNegative final long size,
                               final boolean isByteBufferBacked) {
         final BytesStore store;
         int position = 0;
@@ -303,7 +304,7 @@ public class NativeBytes<U>
     }
 
     @NotNull
-    private BytesStore allocate(long size) {
+    private BytesStore allocate(@NonNegative long size) {
         final BytesStore store;
         try {
             store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
@@ -321,7 +322,7 @@ public class NativeBytes<U>
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, long offset, long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
@@ -329,7 +330,7 @@ public class NativeBytes<U>
     }
 
     @NotNull
-    private BytesStore allocateNewByteBufferBackedStore(final int size) {
+    private BytesStore allocateNewByteBufferBackedStore(@NonNegative final int size) {
         if (isDirectMemory()) {
             return BytesStore.elasticByteBuffer(size, capacity());
         } else {
@@ -364,7 +365,7 @@ public class NativeBytes<U>
     }
 
     @Override
-    protected long writeOffsetPositionMoved(final long adding, final long advance)
+    protected long writeOffsetPositionMoved(final @NonNegative long adding, final @NonNegative long advance)
             throws BufferOverflowException, IllegalStateException {
         final long oldPosition = writePosition();
         if (writePosition < bytesStore.start())
@@ -378,7 +379,7 @@ public class NativeBytes<U>
         return oldPosition;
     }
 
-    private void throwBeyondWriteLimit(long advance, long writeEnd)
+    private void throwBeyondWriteLimit(@NonNegative long advance, @NonNegative long writeEnd)
             throws DecoratedBufferOverflowException {
         throw new DecoratedBufferOverflowException("attempt to write " + advance + " bytes to " + writeEnd + " limit: " + writeLimit);
     }
