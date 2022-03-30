@@ -15,14 +15,15 @@
   ~ limitations under the License..
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.30</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -39,6 +40,11 @@
 
     <dependencyManagement>
         <dependencies>
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-core-assertions</artifactId>
+                <version>2.23ea7</version>
+            </dependency>
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
@@ -58,6 +64,12 @@
     </dependencyManagement>
 
     <dependencies>
+
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>chronicle-core-assertions</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>posix</artifactId>
@@ -114,6 +126,10 @@
     </dependencies>
 
     <repositories>
+        <repository>
+            <id>assertion-repo</id>
+            <url>file://${project.basedir}/repository/</url>
+        </repository>
         <repository>
             <id>chronicle-enterprise-snapshots</id>
             <name>Snapshot Repository</name>
@@ -218,13 +234,23 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.1</version>
                 <configuration>
                     <compilerArgument>-Xlint:deprecation</compilerArgument>
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
+<!--                    <verbose>true</verbose>-->
                 </configuration>
+
+                <!--                Does not work...-->
+                <!--                <dependencies>
+                                    <dependency>
+                                        <groupId>net.openhft</groupId>
+                                        <artifactId>chronicle-core-assertions</artifactId>
+                                        <version>2.23ea7</version>
+                                    </dependency>
+                                </dependencies>-->
+
             </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
@@ -311,6 +337,17 @@
     </scm>
 
     <profiles>
+
+        <profile>
+            <id>enable-zero-cost-assertions</id>
+            <dependencies>
+                <dependency>
+                    <groupId>net.openhft</groupId>
+                    <artifactId>chronicle-core-assertions</artifactId>
+                </dependency>
+            </dependencies>
+        </profile>
+
         <profile>
             <id>sonar</id>
             <build>
