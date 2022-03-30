@@ -52,7 +52,11 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * The read position must be {@code start() <= readPosition() && readPosition() <= readLimit() && readPosition < safeLimit()}
+     * Returns the read position.
+     * <p>
+     * The read position is {@code start() <= readPosition() && readPosition() <= readLimit() && readPosition < safeLimit()}
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
      *
      * @return position to read from.
      */
@@ -62,7 +66,11 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * The write position must be {@code readPosition() <= writePosition() && writePosition() <= writeLimit()}
+     * Returns the write position.
+     *
+     * The write position is {@code readPosition() <= writePosition() && writePosition() <= writeLimit()}
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
      *
      * @return position to write to.
      */
@@ -73,6 +81,8 @@ interface RandomCommon extends ReferenceCounted {
 
     /**
      * Typically this calculates the difference however for HexDumpBytes it's not as simple.
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
      *
      * @param startPosition to compare against
      * @return the length from the startPosition
@@ -82,6 +92,10 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Returns the remaining bytes that can be read.
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
      * @return How many more bytes can we read.
      */
     default long readRemaining() {
@@ -89,6 +103,9 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
      * @return how much can be safely read directly.
      */
     default long realReadRemaining() {
@@ -96,6 +113,9 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
      * @return How many more bytes can we written.
      */
     default long writeRemaining() {
@@ -103,6 +123,10 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     *
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
      * @return writeRemaining with resize
      */
     default long realWriteRemaining() {
@@ -110,6 +134,10 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     *
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
      * @return the highest offset or position allowed for this buffer.
      */
     @NonNegative
@@ -117,6 +145,14 @@ interface RandomCommon extends ReferenceCounted {
         return realCapacity();
     }
 
+
+    /**
+     * Returns the write limit.
+     * <p>
+     * If the resource is closed, the returned value is unspecified.
+     *
+     * @return the write limit
+     */
     @NonNegative
     default long writeLimit() {
         return realCapacity();
