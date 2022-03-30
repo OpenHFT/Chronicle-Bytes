@@ -44,6 +44,7 @@
                 <groupId>net.openhft</groupId>
                 <artifactId>chronicle-core-assertions</artifactId>
                 <version>2.23ea6</version>
+                <optional>true</optional>
             </dependency>
             <dependency>
                 <groupId>net.openhft</groupId>
@@ -64,11 +65,13 @@
     </dependencyManagement>
 
     <dependencies>
+<!--
 
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-core-assertions</artifactId>
         </dependency>
+-->
 
         <dependency>
             <groupId>net.openhft</groupId>
