@@ -33,6 +33,7 @@
     <packaging>bundle</packaging>
 
     <properties>
+        <zero.cost.assertions>disabled</zero.cost.assertions>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -65,10 +66,11 @@
     </dependencyManagement>
 
     <dependencies>
-
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-core-assertions</artifactId>
+            <version>${zero.cost.assertions}</version>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
@@ -242,15 +244,6 @@
                     <encoding>UTF-8</encoding>
 <!--                    <verbose>true</verbose>-->
                 </configuration>
-
-                <!--                Does not work...-->
-                <!--                <dependencies>
-                                    <dependency>
-                                        <groupId>net.openhft</groupId>
-                                        <artifactId>chronicle-core-assertions</artifactId>
-                                    </dependency>
-                                </dependencies>-->
-
             </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
