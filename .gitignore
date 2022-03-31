@@ -8,6 +8,7 @@
 ### Package Files
 *.war
 *.ear
+*.jar
 
 ### Log file
 *.log
