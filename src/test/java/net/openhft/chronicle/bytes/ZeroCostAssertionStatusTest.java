@@ -1,6 +1,6 @@
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.util.AssertUtil;
+import net.openhft.chronicle.assertions.AssertUtil;
 import org.junit.jupiter.api.Test;
 
 class ZeroCostAssertionStatusTest {
