@@ -4,7 +4,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 
-import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
+import static net.openhft.chronicle.core.util.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
