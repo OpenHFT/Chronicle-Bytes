@@ -6,9 +6,9 @@
 *.class
 
 ### Package Files
+*.jar
 *.war
 *.ear
-*.jar
 
 ### Log file
 *.log
