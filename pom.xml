@@ -33,7 +33,7 @@
     <packaging>bundle</packaging>
 
     <properties>
-        <zero.cost.assertions>assertions-disabled</zero.cost.assertions>
+        <zero.cost.assertions>disabled</zero.cost.assertions>
         <compiler.argument>-Xlint:deprecation</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
@@ -62,8 +62,8 @@
     <dependencies>
         <dependency>
             <groupId>net.openhft</groupId>
-            <artifactId>${zero.cost.assertions}</artifactId>
-            <version>2.23ea1-SNAPSHOT</version>
+            <artifactId>assertions-${zero.cost.assertions}</artifactId>
+            <scope>provided</scope>
         </dependency>
 
         <dependency>
