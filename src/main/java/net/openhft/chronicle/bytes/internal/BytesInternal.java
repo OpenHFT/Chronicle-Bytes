@@ -53,12 +53,12 @@ import java.util.Date;
 import java.util.TimeZone;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_LATIN;
 import static net.openhft.chronicle.bytes.StreamingDataOutput.JAVA9_STRING_CODER_UTF16;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.ReferenceOwner.temporary;
-import static net.openhft.chronicle.core.util.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
