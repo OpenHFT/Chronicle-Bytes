@@ -20,10 +20,10 @@ public class WriteLimitTest extends BytesTestCommon {
     static Random random = new Random();
     final String name;
     final Allocator allocator;
-    final Consumer<Bytes> action;
+    final Consumer<Bytes<?>> action;
     final int length;
 
-    public WriteLimitTest(String name, Allocator allocator, Consumer<Bytes> action, int length) {
+    public WriteLimitTest(String name, Allocator allocator, Consumer<Bytes<?>> action, int length) {
         this.name = name;
         this.allocator = allocator;
         this.action = action;
@@ -49,7 +49,7 @@ public class WriteLimitTest extends BytesTestCommon {
         return tests;
     }
 
-    static void addTest(String name, Consumer<Bytes> action, int length) {
+    static void addTest(String name, Consumer<Bytes<?>> action, int length) {
         for (Allocator a : ALLOCATORS)
             tests.add(new Object[]{a + " " + name, a, action, length});
     }

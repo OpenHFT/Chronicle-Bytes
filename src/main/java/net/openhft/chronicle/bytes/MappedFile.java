@@ -214,12 +214,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * Convenience method so you don't need to release the BytesStore
      */
     @NotNull
-    public Bytes acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
+    public Bytes<?> acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
             throws IOException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
-        final Bytes bytes = mbs.bytesForRead();
+        final Bytes<?> bytes = mbs.bytesForRead();
         bytes.readPositionUnlimited(position);
         bytes.reserveTransfer(INIT, owner);
         mbs.release(owner);
@@ -235,12 +235,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     @NotNull
-    public Bytes acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
+    public Bytes<?> acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferOverflowException {
         throwExceptionIfClosed();
 
         @Nullable MappedBytesStore mbs = acquireByteStore(owner, position, null);
-        @NotNull Bytes bytes = mbs.bytesForWrite();
+        @NotNull Bytes<?> bytes = mbs.bytesForWrite();
         bytes.writePosition(position);
         bytes.reserveTransfer(INIT, owner);
         mbs.release(owner);

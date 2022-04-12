@@ -34,8 +34,7 @@ import static org.junit.Assume.assumeFalse;
 
 @RunWith(Parameterized.class)
 public class ByteStringAppenderTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
-    private final Bytes bytes;
+    private final Bytes<?> bytes;
 
     public ByteStringAppenderTest(String name, boolean direct) {
         bytes = direct ? Bytes.allocateElasticDirect() : Bytes.elasticByteBuffer();
@@ -58,10 +57,10 @@ public class ByteStringAppenderTest extends BytesTestCommon {
     @Test
     public void testConvertTo() {
         Bytes<?> hello = Bytes.from("hello");
-        Bytes hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
+        Bytes<?> hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
         assertTrue(hello.contentEquals(hello1));
         VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
-        Bytes one = ObjectUtils.convertTo(Bytes.class, 1);
+        Bytes<?> one = ObjectUtils.convertTo(Bytes.class, 1);
         assertTrue(bytes.append(1).contentEquals(one));
         one.releaseLast();
         hello1.releaseLast();

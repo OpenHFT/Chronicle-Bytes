@@ -36,14 +36,14 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
 
     @Override
     @SuppressWarnings("rawtypes")
-    default void readMarshallable(BytesIn bytes)
+    default void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         BytesUtil.readMarshallable(this, bytes);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
-    default void writeMarshallable(BytesOut bytes)
+    default void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
         BytesUtil.writeMarshallable(this, bytes);
     }

@@ -56,8 +56,8 @@ public class GzipTest extends BytesTestCommon {
         byte[] compress = GZIP.compress(bytes);
 //        System.out.println(compress.length);
 
-        Bytes bytes2 = Bytes.wrapForRead(bytes);
-        @NotNull Bytes bytes3 = Bytes.allocateElasticDirect();
+        Bytes<?> bytes2 = Bytes.wrapForRead(bytes);
+        @NotNull Bytes<?> bytes3 = Bytes.allocateElasticDirect();
         GZIP.compress(bytes2, bytes3);
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = GZIP.uncompress(bytes4);
@@ -70,7 +70,7 @@ public class GzipTest extends BytesTestCommon {
         assertEquals(compress.length, bytes4.length);
         assertArrayEquals(compress, bytes4);
 
-        @NotNull Bytes bytes6 = Bytes.allocateElasticDirect();
+        @NotNull Bytes<?> bytes6 = Bytes.allocateElasticDirect();
         GZIP.uncompress(bytes3, bytes6);
         assertArrayEquals(bytes, bytes6.toByteArray());
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),

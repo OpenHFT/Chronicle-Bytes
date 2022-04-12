@@ -141,8 +141,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
             BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
     }
 
-    @SuppressWarnings("rawtypes")
-    default void parse8bit(Bytes buffer, @NotNull StopCharsTester stopCharsTester)
+    default void parse8bit(Bytes<?> buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }

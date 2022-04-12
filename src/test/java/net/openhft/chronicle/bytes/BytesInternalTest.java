@@ -380,13 +380,13 @@ public class BytesInternalTest extends BytesTestCommon {
     @Test
     public void testNoneDirectWritePerformance() {
         final int size = 64;
-        Bytes a = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes b = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes c = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes d = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes e = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes f = Bytes.allocateElasticOnHeap(size + 8);
-        Bytes g = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> b = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> c = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> d = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> e = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> f = Bytes.allocateElasticOnHeap(size + 8);
+        Bytes<?> g = Bytes.allocateElasticOnHeap(size + 8);
         int retry = 1;
         for (int t = 0; t <= 4; t++) {
             long time1 = 0, time2 = 0, time3 = 0;

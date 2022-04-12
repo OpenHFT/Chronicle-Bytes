@@ -30,11 +30,11 @@ import java.util.function.Function;
 public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocationHandler implements BytesMethodWriterInvocationHandler {
     private final Function<Method, MethodEncoder> methodToId;
     @SuppressWarnings("rawtypes")
-    private final BytesOut out;
+    private final BytesOut<?> out;
     private final Map<Method, MethodEncoder> methodToIdMap = new LinkedHashMap<>();
 
     @SuppressWarnings("rawtypes")
-    public BinaryBytesMethodWriterInvocationHandler(Class tClass, Function<Method, MethodEncoder> methodToId, BytesOut out) {
+    public BinaryBytesMethodWriterInvocationHandler(Class tClass, Function<Method, MethodEncoder> methodToId, BytesOut<?> out) {
         super(tClass);
         this.methodToId = methodToId;
         this.out = out;

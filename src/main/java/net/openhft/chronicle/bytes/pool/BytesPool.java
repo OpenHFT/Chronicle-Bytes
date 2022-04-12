@@ -24,10 +24,10 @@ import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("rawtypes")
 public class BytesPool {
-    final ThreadLocal<Bytes> bytesTL = new ThreadLocal<>();
+    final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
 
-    public Bytes acquireBytes() {
-        Bytes bytes = bytesTL.get();
+    public Bytes<?> acquireBytes() {
+        Bytes<?> bytes = bytesTL.get();
         if (bytes != null) {
             try {
                 return bytes.clear();
@@ -42,8 +42,8 @@ public class BytesPool {
     }
 
     @NotNull
-    protected Bytes createBytes() {
-        Bytes bbb = Bytes.allocateElasticDirect(256);
+    protected Bytes<?> createBytes() {
+        Bytes<?> bbb = Bytes.allocateElasticDirect(256);
         IOTools.unmonitor(bbb);
         return bbb;
     }

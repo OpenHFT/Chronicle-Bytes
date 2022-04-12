@@ -41,7 +41,7 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      */
     @SuppressWarnings("rawtypes")
     @NonNegative
-    long beforeRead(Bytes bytes);
+    long beforeRead(Bytes<?> bytes);
 
     void afterRead(@NonNegative long next);
 
@@ -55,7 +55,7 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      * @return whether read succeeded
      */
     @SuppressWarnings("rawtypes")
-    boolean read(BytesOut bytes);
+    boolean read(BytesOut<?> bytes);
 
     /**
      * @return the byteStore which backs the ring buffer

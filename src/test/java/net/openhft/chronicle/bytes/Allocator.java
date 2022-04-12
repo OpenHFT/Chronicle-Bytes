@@ -101,7 +101,7 @@ public enum Allocator {
         }
 
         @Override
-        Bytes fixedBytes(int capacity) {
+        Bytes<?> fixedBytes(int capacity) {
             if (capacity >= 128)
                 throw new IllegalArgumentException();
             Padding padding = new Padding();
@@ -120,7 +120,7 @@ public enum Allocator {
         }
 
         @Override
-        Bytes fixedBytes(int capacity) {
+        Bytes<?> fixedBytes(int capacity) {
             return new HexDumpBytes();
         }
     };
@@ -131,7 +131,7 @@ public enum Allocator {
     @NotNull
     abstract ByteBuffer byteBuffer(int capacity);
 
-    Bytes fixedBytes(int capacity) {
+    Bytes<?> fixedBytes(int capacity) {
         return Bytes.wrapForWrite(byteBuffer(capacity));
     }
 

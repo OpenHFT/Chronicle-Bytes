@@ -26,7 +26,7 @@ public class PrewriteTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @Test
     public void test() {
-        Bytes bytes = Bytes.allocateDirect(64);
+        Bytes<?> bytes = Bytes.allocateDirect(64);
         bytes.clearAndPad(64);
         bytes.prepend(1234);
         bytes.prewrite(",hi,".getBytes());

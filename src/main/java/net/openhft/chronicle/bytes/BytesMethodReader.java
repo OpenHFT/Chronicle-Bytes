@@ -13,12 +13,12 @@ import java.util.function.Consumer;
 
 @SuppressWarnings("rawtypes")
 public class BytesMethodReader extends SimpleCloseable implements MethodReader {
-    private final BytesIn in;
+    private final BytesIn<?> in;
     private final BytesParselet defaultParselet;
     private final List<Consumer<BytesIn>> methodEncoders = new ArrayList<>();
     private final Map<Long, Consumer<BytesIn>> methodEncoderMap = new LinkedHashMap<>();
 
-    public BytesMethodReader(BytesIn in,
+    public BytesMethodReader(BytesIn<?> in,
                              BytesParselet defaultParselet,
                              MethodEncoderLookup methodEncoderLookup,
                              Object[] objects) {

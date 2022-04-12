@@ -226,7 +226,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     @Test
     public void read() {
-        Bytes in = Bytes.wrapForRead(BYTE6K);
+        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore bs0 = mb.bytesStore();
@@ -238,7 +238,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     @Test
     public void read2() {
-        Bytes in = Bytes.wrapForRead(BYTE6K);
+        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore bs0 = mb.bytesStore();
@@ -250,7 +250,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     @Test
     public void parse8bit() {
-        Bytes in = Bytes.wrapForRead(BYTE6K);
+        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore bs0 = mb.bytesStore();
@@ -262,7 +262,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
 
     @Test
     public void parseUTF8() {
-        Bytes in = Bytes.wrapForRead(BYTE6K);
+        Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             final BytesStore bs0 = mb.bytesStore();

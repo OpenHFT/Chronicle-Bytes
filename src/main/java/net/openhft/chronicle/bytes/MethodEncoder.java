@@ -24,10 +24,10 @@ public interface MethodEncoder {
     long messageId();
 
     @SuppressWarnings("rawtypes")
-    void encode(Object[] objects, BytesOut out)
+    void encode(Object[] objects, BytesOut<?> out)
             throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException;
 
     @SuppressWarnings("rawtypes")
-    Object[] decode(Object[] lastObjects, BytesIn in)
+    Object[] decode(Object[] lastObjects, BytesIn<?> in)
             throws BufferUnderflowException, IllegalStateException;
 }

@@ -103,7 +103,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * @throws BufferOverflowException is the {@code using} buffer is not large enough
      */
     @Override
-    boolean read(@NotNull BytesOut using);
+    boolean read(@NotNull BytesOut<?> using);
 
     long readRemaining();
 

@@ -61,7 +61,7 @@ public class BytesTextMethodTester<T> {
                 : new Object[]{component};
 
         if (setup != null) {
-            Bytes bytes0 = HexDumpBytes.fromText(BytesUtil.readFile(setup));
+            Bytes<?> bytes0 = HexDumpBytes.fromText(BytesUtil.readFile(setup));
 
             BytesMethodReader reader0 = bytes0.bytesMethodReaderBuilder()
                     .defaultParselet(this::unknownMessageId)
@@ -75,11 +75,11 @@ public class BytesTextMethodTester<T> {
         // expected
         expected = BytesUtil.readFile(output).toString().trim().replace("\r", "");
 
-        Bytes text = BytesUtil.readFile(input);
+        Bytes<?> text = BytesUtil.readFile(input);
         for (String text2 : text.toString().split("###[^\n]*\n")) {
             if (text2.trim().length() <= 0)
                 continue;
-            Bytes bytes = HexDumpBytes.fromText(text2);
+            Bytes<?> bytes = HexDumpBytes.fromText(text2);
 
             BytesMethodReader reader = bytes.bytesMethodReaderBuilder()
                     .defaultParselet(this::unknownMessageId)
@@ -103,7 +103,7 @@ public class BytesTextMethodTester<T> {
         return this;
     }
 
-    private void unknownMessageId(long id, BytesIn b) {
+    private void unknownMessageId(long id, BytesIn<?> b) {
         Jvm.warn().on(getClass(), "Unknown message id " + Long.toHexString(id));
         try {
             b.readPosition(b.readLimit());

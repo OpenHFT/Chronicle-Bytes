@@ -41,7 +41,7 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes)
+        public void readMarshallable(BytesIn<?> bytes)
                 throws IORuntimeException, BufferUnderflowException {
             BytesIn<?> in = (BytesIn<?>) bytes;
             i1 = in.readMarshallableLength16(RWInner.class, i1);
@@ -49,28 +49,28 @@ public class ReadWriteMarshallableTest extends BytesTestCommon {
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.writeMarshallableLength16(i1);
             bytes.writeMarshallableLength16(i2);
         }
     }
 
     static class RWInner implements BytesMarshallable {
-        Bytes data;
+        Bytes<?> data;
 
-        public RWInner(Bytes data) {
+        public RWInner(Bytes<?> data) {
             this.data = data;
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes)
+        public void readMarshallable(BytesIn<?> bytes)
                 throws IORuntimeException {
             if (data == null) data = Bytes.allocateElasticOnHeap(64);
             data.clear().write((BytesStore) bytes);
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) {
+        public void writeMarshallable(BytesOut<?> bytes) {
             bytes.write(data);
         }
     }

@@ -153,8 +153,8 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
     //@Test
     void a() throws IOException {
         Bytes<?> bytes = Bytes.allocateDirect(SIZE);
-        //Bytes<?> bytes = Bytes.allocateDirect(SIZE).unchecked(true) ;
-        // Bytes<?> bytes = new GuardedNativeBytes<>(Bytes.allocateDirect(SIZE), 10);
+        //Bytes bytes = Bytes.allocateDirect(SIZE).unchecked(true) ;
+        // Bytes bytes = new GuardedNativeBytes<>(Bytes.allocateDirect(SIZE), 10);
         bytes.releaseLast();
 
         //bytes.bytesMethodReaderBuilder();

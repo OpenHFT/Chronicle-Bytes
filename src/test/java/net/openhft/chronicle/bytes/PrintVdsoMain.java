@@ -47,7 +47,7 @@ public class PrintVdsoMain {
         @NotNull PointerBytesStore nb = new PointerBytesStore();
         nb.set(start, end - start);
         @NotNull FileOutputStream fos = new FileOutputStream("vdso.elf");
-        for (Bytes b = nb.bytesForRead(); b.readRemaining() > 0; )
+        for (Bytes<?> b = nb.bytesForRead(); b.readRemaining() > 0; )
             fos.write(b.readByte());
         fos.close();
     }

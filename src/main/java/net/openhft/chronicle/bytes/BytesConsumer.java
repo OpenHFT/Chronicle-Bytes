@@ -30,8 +30,7 @@ public interface BytesConsumer {
      * @param bytes to read into
      * @return false if this queue is empty
      */
-    @SuppressWarnings("rawtypes")
-    boolean read(BytesOut bytes)
+    boolean read(BytesOut<?> bytes)
             throws BufferOverflowException;
 
 }

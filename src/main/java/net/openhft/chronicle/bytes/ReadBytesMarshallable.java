@@ -35,6 +35,6 @@ public interface ReadBytesMarshallable extends CommonMarshallable {
      * @param bytes to read.
      */
     @SuppressWarnings("rawtypes")
-    void readMarshallable(BytesIn bytes)
+    void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException;
 }

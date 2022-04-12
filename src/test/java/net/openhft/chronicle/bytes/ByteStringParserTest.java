@@ -36,7 +36,7 @@ import static org.junit.Assume.assumeFalse;
 public class ByteStringParserTest extends BytesTestCommon {
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytes = Bytes.elasticByteBuffer();
+    Bytes<?> bytes = Bytes.elasticByteBuffer();
 
     @Override
     public void afterChecks() {
@@ -50,7 +50,7 @@ public class ByteStringParserTest extends BytesTestCommon {
     public void testParseLong() {
         long expected = 123456789012345678L;
         bytes.append(expected);
-        Bytes bytes2 = Bytes.allocateElasticOnHeap((int) bytes.readRemaining());
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap((int) bytes.readRemaining());
 
         Assert.assertEquals(expected, bytes.parseLong(0));
         Assert.assertEquals(expected, BytesInternal.parseLong(bytes));

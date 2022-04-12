@@ -23,7 +23,7 @@ public class Issue128Test extends BytesTestCommon {
 
     @Test
     public void testCorrect() {
-        Bytes bytes = Bytes.allocateDirect(32);
+        Bytes<?> bytes = Bytes.allocateDirect(32);
         try {
             // odd ones are trouble.
             for (int i = 1; i < 1_000_000; i += 2) {
@@ -42,7 +42,7 @@ public class Issue128Test extends BytesTestCommon {
         }
     }
 
-    public void doTest(Bytes bytes, double v) {
+    public void doTest(Bytes<?> bytes, double v) {
         String format = DF.format(v);
         String output = testAppendDouble(bytes, v);
         if (Double.parseDouble(output) != v || format.length() != output.length())

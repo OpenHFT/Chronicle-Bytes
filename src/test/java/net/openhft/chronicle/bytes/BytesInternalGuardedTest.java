@@ -124,7 +124,7 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
     @Test
     public void testWritingDecimalVsJava() {
-        Bytes bytes = Bytes.allocateElasticOnHeap(32);
+        Bytes<?> bytes = Bytes.allocateElasticOnHeap(32);
         bytes.clear();
         double d = 0.04595828484241039; //Math.pow(1e9, rand.nextDouble()) / 1e3;
         bytes.append(d);
@@ -142,10 +142,10 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
         Bytes<?> a = Bytes.elasticByteBuffer(9, 20)
                 .append(Bytes.from("Hello"))
                 .readLimit(16);
-        Bytes b = Bytes.elasticByteBuffer(5, 20)
+        Bytes<?> b = Bytes.elasticByteBuffer(5, 20)
                 .append(Bytes.from("Hello"))
                 .readLimit(16);
-        Bytes c = Bytes.elasticByteBuffer(15, 20)
+        Bytes<?> c = Bytes.elasticByteBuffer(15, 20)
                 .append(Bytes.from("Hello"))
                 .readLimit(16);
         String actual1 = a.toString();

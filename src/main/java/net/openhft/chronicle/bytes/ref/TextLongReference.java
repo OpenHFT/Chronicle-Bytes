@@ -45,7 +45,7 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int DIGITS = 20;
 
     @SuppressWarnings("rawtypes")
-    public static void write(@NotNull Bytes bytes, @NonNegative long value)
+    public static void write(@NotNull Bytes<?> bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);

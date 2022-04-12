@@ -84,7 +84,7 @@ class Bytes4Test extends BytesTestCommon {
         print("by", by);
 
         Bytes<?> b1 = by.bytesForRead();
-        Bytes b2 = by.bytesForWrite();
+        Bytes<?> b2 = by.bytesForWrite();
         //  b1.writeInt(2);
         //int I1 = b2.readInt();
 

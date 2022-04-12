@@ -53,8 +53,8 @@ public class LZWTest extends BytesTestCommon {
         byte[] compress = LZW.compress(bytes);
 //        System.out.println(compress.length);
 
-        Bytes bytes2 = Bytes.wrapForRead(bytes);
-        @NotNull Bytes bytes3 = Bytes.allocateElasticDirect();
+        Bytes<?> bytes2 = Bytes.wrapForRead(bytes);
+        @NotNull Bytes<?> bytes3 = Bytes.allocateElasticDirect();
         LZW.compress(bytes2, bytes3);
         @NotNull byte[] bytes4 = bytes3.toByteArray();
         byte[] bytes5 = LZW.uncompress(bytes4);
@@ -67,7 +67,7 @@ public class LZWTest extends BytesTestCommon {
         assertEquals(compress.length, bytes4.length);
         assertArrayEquals(compress, bytes4);
 
-        @NotNull Bytes bytes6 = Bytes.allocateElasticDirect();
+        @NotNull Bytes<?> bytes6 = Bytes.allocateElasticDirect();
         LZW.uncompress(bytes3, bytes6);
         assertArrayEquals(bytes, bytes6.toByteArray());
 //        assertEquals(Arrays.toString(bytes).replace(", ", "\n"),

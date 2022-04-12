@@ -10,7 +10,7 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void release() {
-        Bytes bytes = Bytes.allocateElasticDirect();
+        Bytes<?> bytes = Bytes.allocateElasticDirect();
         assertEquals(NoBytesStore.class, bytes.bytesStore().getClass());
         bytes.writeLong(0, 0);
         assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());

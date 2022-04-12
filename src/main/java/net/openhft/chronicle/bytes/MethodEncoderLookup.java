@@ -40,7 +40,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
             @SuppressWarnings("rawtypes")
             @Override
-            public void encode(Object[] objects, BytesOut out)
+            public void encode(Object[] objects, BytesOut<?> out)
                     throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
                 for (Object object : objects) {
                     if (object instanceof BytesMarshallable) {
@@ -53,7 +53,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
             @SuppressWarnings("rawtypes")
             @Override
-            public Object[] decode(Object[] lastObjects, BytesIn in)
+            public Object[] decode(Object[] lastObjects, BytesIn<?> in)
                     throws BufferUnderflowException, IllegalStateException {
                 for (Object lastObject : lastObjects)
                     ((BytesMarshallable) lastObject).readMarshallable(in);

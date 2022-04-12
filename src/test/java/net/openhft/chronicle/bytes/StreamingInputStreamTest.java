@@ -37,7 +37,7 @@ public class StreamingInputStreamTest extends BytesTestCommon {
     @Test
     public void readOfZeroShouldReturnZero()
             throws IOException {
-        @NotNull Bytes b = Bytes.allocateElasticDirect();
+        @NotNull Bytes<?> b = Bytes.allocateElasticDirect();
         prepareBytes(b);
 
         @NotNull InputStream is = b.inputStream();
@@ -49,7 +49,7 @@ public class StreamingInputStreamTest extends BytesTestCommon {
     public void testReadBlock()
             throws IOException {
 
-        @NotNull Bytes b = Bytes.allocateElasticDirect();
+        @NotNull Bytes<?> b = Bytes.allocateElasticDirect();
         @NotNull byte[] test = prepareBytes(b);
 
         @NotNull InputStream is = b.inputStream();
@@ -64,7 +64,7 @@ public class StreamingInputStreamTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    private byte[] prepareBytes(final Bytes b) {
+    private byte[] prepareBytes(final Bytes<?> b) {
         @NotNull byte[] test = "Hello World, Have a great day!".getBytes(ISO_8859_1);
         b.write(test);
         return test;

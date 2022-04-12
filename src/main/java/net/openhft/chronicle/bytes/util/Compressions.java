@@ -45,16 +45,16 @@ public enum Compressions implements Compression {
         }
 
         @Override
-        public void compress(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
+        public void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
             copy(from, to);
         }
 
         @Override
-        public void uncompress(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
+        public void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
             copy(from, to);
         }
 
-        private void copy(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
+        private void copy(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
             long copied = from.copyTo((BytesStore) to);
             to.writeSkip(copied);
         }

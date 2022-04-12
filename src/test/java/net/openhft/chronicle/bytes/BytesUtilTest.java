@@ -17,7 +17,7 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void fromFileInJar()
             throws IOException {
-        Bytes bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
+        Bytes<?> bytes = BytesUtil.readFile("/net/openhft/chronicle/core/onoes/Google.properties");
         Bytes<?> apache_license = Bytes.from("Apache License");
         long n = bytes.indexOf(apache_license);
         assertTrue(n > 0);

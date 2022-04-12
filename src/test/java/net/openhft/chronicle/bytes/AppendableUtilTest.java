@@ -14,7 +14,7 @@ public class AppendableUtilTest extends BytesTestCommon {
         AppendableUtil.setLength(sb, 5);
         assertEquals("hello", sb.toString());
 
-        Bytes b = Bytes.from("Hello World");
+        Bytes<?> b = Bytes.from("Hello World");
         AppendableUtil.setLength(b, 5);
         assertEquals("Hello", b.toString());
 
@@ -32,7 +32,7 @@ public class AppendableUtilTest extends BytesTestCommon {
     @Test
     public void setCharAt() {
         StringBuilder sb = new StringBuilder("hello world");
-        Bytes b = Bytes.allocateElasticOnHeap(16).append("Hello World");
+        Bytes<?> b = Bytes.allocateElasticOnHeap(16).append("Hello World");
         AppendableUtil.setCharAt(sb, 5, 'X');
         AppendableUtil.setCharAt(b, 5, 'X');
         assertEquals("helloXworld", sb.toString());

@@ -35,6 +35,6 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      *
      * @param bytes to write to.
      */
-    void writeMarshallable(BytesOut bytes)
+    void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException;
 }

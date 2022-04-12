@@ -112,7 +112,7 @@ public class StructTest extends BytesTestCommon {
          * Get handle to underlying bytes
          * @return - the underlying bytes corresponding to this instance's members
          */
-        public Bytes bytes() { return bytes; }
+        public Bytes<?> bytes() { return bytes; }
 
         private void allocateAndInitialise() {
             if(self == null) {
@@ -353,13 +353,13 @@ public class StructTest extends BytesTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             // read from bytes to address. advance read position in bytes
             bytes.unsafeRead(address, SIZE);
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             // write from address to bytes. advance write position in bytes
             bytes.unsafeWrite(address, SIZE);
         }
@@ -512,12 +512,12 @@ public class StructTest extends BytesTestCommon {
         }
 
         @Override
-        public void readMarshallable(BytesIn bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+        public void readMarshallable(BytesIn<?> bytes) throws IORuntimeException, BufferUnderflowException, IllegalStateException {
             bytes.unsafeRead(address, SIZE);
         }
 
         @Override
-        public void writeMarshallable(BytesOut bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+        public void writeMarshallable(BytesOut<?> bytes) throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
             bytes.unsafeWrite(address, SIZE);
         }
 

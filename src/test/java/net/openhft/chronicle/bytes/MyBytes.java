@@ -5,13 +5,13 @@ import java.io.IOException;
 
 @SuppressWarnings("rawtypes")
 class MyBytes implements BytesMarshallable, Closeable {
-    Bytes bytes1;
-    Bytes bytes2;
+    Bytes<?> bytes1;
+    Bytes<?> bytes2;
 
     public MyBytes() {
     }
 
-    public MyBytes(Bytes bytes1, Bytes bytes2) {
+    public MyBytes(Bytes<?> bytes1, Bytes<?> bytes2) {
         this.bytes1 = bytes1;
         this.bytes2 = bytes2;
     }

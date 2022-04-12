@@ -156,7 +156,7 @@ public enum BytesUtil {
         return file.getAbsolutePath();
     }
 
-    public static Bytes readFile(@NotNull String name)
+    public static Bytes<?> readFile(@NotNull String name)
             throws IOException {
         if (name.startsWith("=")) {
             return Bytes.from(name.substring(1));
@@ -237,7 +237,7 @@ public enum BytesUtil {
     }
 
     @NotNull
-    public static char[] toCharArray(@NotNull Bytes bytes)
+    public static char[] toCharArray(@NotNull Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         @NotNull final char[] chars = new char[Maths.toUInt31(bytes.readRemaining())];
 
@@ -248,7 +248,7 @@ public enum BytesUtil {
     }
 
     @NotNull
-    public static char[] toCharArray(@NotNull Bytes bytes, @NonNegative long position, @NonNegative int length)
+    public static char[] toCharArray(@NotNull Bytes<?> bytes, @NonNegative long position, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         @NotNull final char[] chars = new char[length];
 
@@ -297,7 +297,7 @@ public enum BytesUtil {
     }
 
     // used by Chronicle FIX.
-    public static void appendBytesFromStart(@NotNull Bytes bytes, @NonNegative long startPosition, @NotNull StringBuilder sb)
+    public static void appendBytesFromStart(@NotNull Bytes<?> bytes, @NonNegative long startPosition, @NotNull StringBuilder sb)
             throws IllegalStateException {
         try {
             BytesInternal.parse8bit(startPosition, bytes, sb, (int) (bytes.readPosition() - startPosition));
@@ -308,12 +308,12 @@ public enum BytesUtil {
         }
     }
 
-    public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn bytes) {
+    public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .readMarshallable(marshallable, bytes);
     }
 
-    public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut bytes)
+    public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
         try {
             BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())

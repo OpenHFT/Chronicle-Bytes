@@ -719,7 +719,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
      */
     @NotNull
-    static String toString(@NotNull final Bytes buffer,
+    static String toString(@NotNull final Bytes<?> buffer,
                            @NonNegative final long position,
                            @NonNegative final long length) {
         requireNonNull(buffer);
@@ -771,7 +771,7 @@ public interface Bytes<U> extends
     }
 
     @NotNull
-    static Bytes fromHexString(@NotNull String s) {
+    static Bytes<?> fromHexString(@NotNull String s) {
         return BytesInternal.fromHexString(s);
     }
 

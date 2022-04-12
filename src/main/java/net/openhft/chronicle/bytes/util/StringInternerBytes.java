@@ -38,7 +38,7 @@ public class StringInternerBytes extends StringInterner {
     }
 
     @SuppressWarnings("rawtypes")
-    public String intern(@NotNull final Bytes bytes)
+    public String intern(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
         return intern(bytes, Maths.toUInt31(bytes.readRemaining()));
     }
@@ -54,7 +54,7 @@ public class StringInternerBytes extends StringInterner {
      * @return the string made from bytes only ( rather than chars )
      */
     @SuppressWarnings("rawtypes")
-    public String intern(@NotNull final Bytes bytes, @NonNegative int length)
+    public String intern(@NotNull final Bytes<?> bytes, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
         try {
 

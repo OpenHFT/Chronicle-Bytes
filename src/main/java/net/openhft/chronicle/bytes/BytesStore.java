@@ -703,7 +703,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         return readRemaining() == 0;
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
             throws IllegalStateException {
         final long readPos = outBytes.readPosition();
         try {
@@ -734,7 +734,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         }
     }
 
-    default void cipher(@NotNull Cipher cipher, @NotNull Bytes outBytes)
+    default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes)
             throws IllegalStateException {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }

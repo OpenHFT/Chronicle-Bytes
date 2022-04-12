@@ -86,7 +86,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         this.bytes.reserve(this);
     }
 
-    public static void write(@NotNull Bytes bytes, @NonNegative long capacity)
+    public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
@@ -97,7 +97,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
-    public static void lazyWrite(@NotNull Bytes bytes, @NonNegative long capacity)
+    public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
 
@@ -224,7 +224,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public void readMarshallable(BytesIn bytes)
+    public void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
@@ -247,7 +247,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     }
 
     @Override
-    public void writeMarshallable(BytesOut bytes)
+    public void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
         boolean retainsComments = bytes.retainsComments();
         if (retainsComments)

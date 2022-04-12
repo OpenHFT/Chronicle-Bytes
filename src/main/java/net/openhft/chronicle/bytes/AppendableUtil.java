@@ -207,7 +207,7 @@ public enum AppendableUtil {
         return new UTFDataFormatException(MALFORMED_INPUT_AROUND_BYTE + Integer.toHexString(c));
     }
 
-    public static void parse8bit_SB1(@NotNull Bytes bytes, @NotNull StringBuilder sb, @NonNegative int length)
+    public static void parse8bit_SB1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
