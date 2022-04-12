@@ -22,5 +22,5 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 @FunctionalInterface
 public interface OffsetFormat {
     @SuppressWarnings("rawtypes")
-    void append(@NonNegative long offset, Bytes bytes);
+    void append(@NonNegative long offset, Bytes<?> bytes);
 }

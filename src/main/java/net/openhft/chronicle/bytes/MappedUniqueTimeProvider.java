@@ -37,7 +37,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     private static final int NANOS_PER_MICRO = 1000;
 
     @SuppressWarnings("rawtypes")
-    private final Bytes bytes;
+    private final Bytes<?> bytes;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
 
     MappedUniqueTimeProvider() {

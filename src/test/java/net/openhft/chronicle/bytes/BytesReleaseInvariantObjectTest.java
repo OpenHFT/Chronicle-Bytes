@@ -74,7 +74,7 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
                     bytes.toString();
                 });*/
 
-        //Bytes<?> bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
+        //Bytes bytes = wipe(Bytes.allocateDirect(SIZE).unchecked(true));
         HexDumpBytes bytes = wipe(new HexDumpBytes());
         // bytes.contentDependentHashcodeAndEquals(false);
         bytes.append("Arne");

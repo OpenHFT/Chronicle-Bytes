@@ -145,7 +145,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
 
     @NotNull
     @Override
-    public Bytes writeLong(long i64)
+    public Bytes<U> writeLong(long i64)
             throws BufferOverflowException, IllegalStateException {
         super.writeByte(LONG_T);
         return super.writeLong(i64);

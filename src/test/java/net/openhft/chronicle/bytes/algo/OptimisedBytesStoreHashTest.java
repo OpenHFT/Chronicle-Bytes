@@ -83,7 +83,7 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
         for (int t = 0; t < runs; t++) {
             @NotNull long[] hashs = new long[8192];
             @NotNull byte[] init = new byte[hashs.length / 8];
-            Bytes b = Bytes.allocateDirect(init.length);
+            Bytes<?> b = Bytes.allocateDirect(init.length);
             rand.nextBytes(init);
             for (int i = 0; i < hashs.length; i++) {
                 b.clear();
@@ -191,10 +191,10 @@ public class OptimisedBytesStoreHashTest extends BytesTestCommon {
 
     @Test
     public void testReadIncompleteLong() {
-        Bytes bs = Bytes.allocateDirect(8);
+        Bytes<?> bs = Bytes.allocateDirect(8);
         for (int i = 1; i <= 8; i++)
             bs.writeUnsignedByte(i);
-        @NotNull Bytes bs2 = Bytes.allocateDirect(9).unchecked(true);
+        @NotNull Bytes<?> bs2 = Bytes.allocateDirect(9).unchecked(true);
 
         for (int i = 0; i <= 8; i++) {
             assertEquals("i: " + i, Long.toHexString(bs2.readLong(0)),

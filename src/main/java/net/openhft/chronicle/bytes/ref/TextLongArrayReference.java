@@ -54,7 +54,7 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     private long length = VALUES;
 
-    public static void write(@NotNull Bytes bytes, @NonNegative long capacity)
+    public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
         long start = bytes.writePosition();
         bytes.write(SECTION1);

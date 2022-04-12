@@ -41,9 +41,9 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedBytes<U>
         extends AbstractBytes<U> {
-    Bytes underlyingBytes;
+    Bytes<?> underlyingBytes;
 
-    public UncheckedBytes(@NotNull Bytes underlyingBytes)
+    public UncheckedBytes(@NotNull Bytes<?> underlyingBytes)
             throws IllegalStateException {
         super(requireNonNull(underlyingBytes.bytesStore()),
                 underlyingBytes.writePosition(),
@@ -54,7 +54,7 @@ public class UncheckedBytes<U>
             writeLimit(capacity());
     }
 
-    public void setBytes(@NotNull Bytes bytes)
+    public void setBytes(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
         requireNonNull(bytes);
         final BytesStore underlying = bytes.bytesStore();

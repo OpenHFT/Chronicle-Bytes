@@ -197,7 +197,7 @@ interface RandomCommon extends ReferenceCounted {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytesForRead()
+    Bytes<?> bytesForRead()
             throws IllegalStateException;
 
     /**
@@ -205,7 +205,7 @@ interface RandomCommon extends ReferenceCounted {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    Bytes bytesForWrite()
+    Bytes<?> bytesForWrite()
             throws IllegalStateException;
 
     /**

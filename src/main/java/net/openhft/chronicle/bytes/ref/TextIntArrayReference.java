@@ -53,7 +53,7 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
 
     private long length = VALUES;
 
-    public static void write(@NotNull Bytes bytes, @NonNegative long capacity)
+    public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {
         long start = bytes.writePosition();
         bytes.write(SECTION1);

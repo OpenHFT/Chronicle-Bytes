@@ -4,7 +4,6 @@ import net.openhft.chronicle.core.Maths;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.math.BigDecimal;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.text.DecimalFormat;
@@ -28,7 +27,7 @@ public class Issue85Test extends BytesTestCommon {
     }
 
     @SuppressWarnings("rawtypes")
-    static double parseDouble(Bytes bytes) {
+    static double parseDouble(Bytes<?> bytes) {
         long value = 0;
         int deci = Integer.MIN_VALUE;
         while (bytes.readRemaining() > 0) {

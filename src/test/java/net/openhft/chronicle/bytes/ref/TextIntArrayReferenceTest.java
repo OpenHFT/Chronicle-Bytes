@@ -29,7 +29,7 @@ public class TextIntArrayReferenceTest extends BytesTestCommon {
     @Test
     public void getSetValues() {
         int length = 5 * 12 + 70;
-        Bytes bytes = Bytes.allocateDirect(length);
+        Bytes<?> bytes = Bytes.allocateDirect(length);
         TextIntArrayReference.write(bytes, 5);
 
         try (@NotNull TextIntArrayReference array = new TextIntArrayReference()) {

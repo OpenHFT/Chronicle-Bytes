@@ -313,7 +313,7 @@ public class MappedBytesTest extends BytesTestCommon {
         bytes.writePosition(0);
         bytes.write(64, Bytes.wrapForRead(largeBytes), 64L, largeBytes.length - 64L);
 
-        Bytes bytes2 = Bytes.allocateDirect(largeBytes);
+        Bytes<?> bytes2 = Bytes.allocateDirect(largeBytes);
         bytes.writePosition(0);
         bytes.write(bytes2);
         bytes.writePosition(0);
@@ -469,7 +469,7 @@ public class MappedBytesTest extends BytesTestCommon {
         int chunkSize = 256 << 16;
         int overlapSize = 64 << 16;
         String longString = new String(new char[overlapSize * 2]);
-        Bytes csb = Bytes.from(longString);
+        Bytes<?> csb = Bytes.from(longString);
         try (MappedBytes mb = MappedBytes.mappedBytes(new File(tmpfile), chunkSize, overlapSize)) {
             StringBuilder sb = new StringBuilder();
             for (int offset : new int[]{chunkSize - OS.pageSize(), chunkSize + overlapSize - OS.pageSize()}) {

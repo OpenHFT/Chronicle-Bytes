@@ -43,7 +43,7 @@ public enum NoBytesStore implements BytesStore {
     public static final long NO_PAGE;
 
     @NotNull
-    public static final Bytes NO_BYTES;
+    public static final Bytes<?> NO_BYTES;
 
     static {
         try {
@@ -271,7 +271,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public @NotNull Bytes bytesForRead() throws IllegalStateException {
+    public @NotNull Bytes<?> bytesForRead() throws IllegalStateException {
         return new VanillaBytes(this, 0, 0);
     }
 
@@ -374,7 +374,7 @@ public enum NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public Bytes bytesForWrite() {
+    public Bytes<?> bytesForWrite() {
         throw new UnsupportedOperationException("todo");
     }
 

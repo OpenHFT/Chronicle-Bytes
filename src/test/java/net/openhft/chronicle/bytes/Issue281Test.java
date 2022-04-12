@@ -17,8 +17,8 @@ public class Issue281Test extends BytesTestCommon {
 
     @Test
     public void testByteBufferToBytes() {
-        final Bytes data = Bytes.allocateElasticDirect().append("1234567890ABCD");
-        final Bytes retVal = Bytes.allocateElasticDirect();
+        final Bytes<?> data = Bytes.allocateElasticDirect().append("1234567890ABCD");
+        final Bytes<?> retVal = Bytes.allocateElasticDirect();
         ByteBuffer buffer = ByteBuffer.allocateDirect(16);
         String test = "1234567890ABCD";
         buffer.put((byte) test.length());

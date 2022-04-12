@@ -191,7 +191,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public BytesOut indent(final int n)
+    public BytesOut<Void> indent(final int n)
             throws IllegalStateException {
         indent += n;
         if (lineLength() > 0) {
@@ -254,13 +254,13 @@ public class HexDumpBytes
 
     @Override
     @NotNull
-    public Bytes compact() {
+    public Bytes<Void> compact() {
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
-    public Bytes clear()
+    public Bytes<Void> clear()
             throws IllegalStateException {
         base.clear();
         text.clear();
@@ -724,7 +724,7 @@ public class HexDumpBytes
 
     @Override
     public void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<Bytes<Void>, IORuntimeException, BytesOut> bytesConsumer,
-                                StringBuilder sb, BytesOut toBytes)
+                                StringBuilder sb, BytesOut<?> toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         base.readWithLength0(length, bytesConsumer, sb, toBytes);
     }
@@ -1328,7 +1328,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public Bytes write(@NotNull InputStream inputStream)
+    public Bytes<?> write(@NotNull InputStream inputStream)
             throws IOException, IllegalStateException, BufferOverflowException {
         long pos = base.writePosition();
         try {
@@ -1630,7 +1630,7 @@ public class HexDumpBytes
 
     @NotNull
     @Override
-    public Bytes<Void> writeSome(@NotNull Bytes bytes)
+    public Bytes<Void> writeSome(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
         long pos = base.writePosition();
         try {
@@ -1772,9 +1772,9 @@ public class HexDumpBytes
 
     private static class TextBytesReader extends Reader {
         private final Reader reader;
-        private final Bytes base;
+        private final Bytes<?> base;
 
-        public TextBytesReader(Reader reader, Bytes base) {
+        public TextBytesReader(Reader reader, Bytes<?> base) {
             this.reader = reader;
             this.base = base;
         }

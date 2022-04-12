@@ -25,15 +25,13 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
 import java.nio.BufferOverflowException;
 
-@SuppressWarnings("rawtypes")
 public interface Compression {
 
-    static void compress(@NotNull CharSequence cs, @NotNull Bytes uncompressed, @NotNull Bytes compressed)
+    static void compress(@NotNull CharSequence cs, @NotNull Bytes<?> uncompressed, @NotNull Bytes<?> compressed)
             throws IllegalStateException, BufferOverflowException {
         switch (cs.charAt(0)) {
             case 'l':
@@ -54,7 +52,7 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
-    static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn from, @NotNull BytesOut to)
+    static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalArgumentException, IllegalStateException, BufferOverflowException {
         switch (cs.charAt(0)) {
             case 'b':
@@ -111,7 +109,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void compress(@NotNull BytesIn from, @NotNull BytesOut to) throws IllegalStateException, BufferOverflowException {
+    default void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
 
@@ -134,7 +132,7 @@ public interface Compression {
         return baos.toByteArray();
     }
 
-    default void uncompress(@NotNull BytesIn from, @NotNull BytesOut to)
+    default void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalStateException, BufferOverflowException {
         try (InputStream input = decompressingStream(from.inputStream())) {
             to.copyFrom(input);

@@ -24,8 +24,7 @@ public interface BytesContext extends Closeable {
     /**
      * @return a bytes to write to
      */
-    @SuppressWarnings("rawtypes")
-    Bytes bytes();
+    Bytes<?> bytes();
 
     /**
      * @return the key to be written to

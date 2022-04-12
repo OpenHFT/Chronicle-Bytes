@@ -108,7 +108,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     /**
      * Perform a set of actions with a temporary bounds mode.
      */
-    default void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut toBytes)
+    default void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut<?> toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
         requireNonNull(bytesConsumer);
         if (length > readRemaining())
@@ -310,7 +310,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
-    default boolean readUtf8(@NotNull Bytes sb)
+    default boolean readUtf8(@NotNull Bytes<?> sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.readPositionRemaining(0, 0);
         if (readRemaining() <= 0)
@@ -426,7 +426,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @param bytes to copy to.
      * @see StreamingDataOutput#write(BytesStore)
      */
-    default void read(@NotNull final Bytes bytes) {
+    default void read(@NotNull final Bytes<?> bytes) {
         int length = Math.toIntExact(Math.min(readRemaining(), bytes.writeRemaining()));
         read(bytes, length);
     }

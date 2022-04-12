@@ -245,7 +245,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
 
         // try {
         //   final File file = create(File.createTempFile("mapped-file", "bin"), SIZE);
-        //    final Bytes<?> bytes = MappedBytes.mappedBytes(file, SIZE);
+        //    final Bytes bytes = MappedBytes.mappedBytes(file, SIZE);
         //   bytes.realCapacity();
         //   System.out.println("bytes.realCapacity() = " + bytes.realCapacity());
         //    try {
@@ -266,7 +266,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         //    throw new RuntimeException(e);
         // }
 
-        // Bytes<?> bytes = Bytes.allocateDirect(SIZE);
+        // Bytes bytes = Bytes.allocateDirect(SIZE);
         // bytes.writeUtf8(1, (CharSequence) null);
         // releaseAndAssertReleased(bytes);
 

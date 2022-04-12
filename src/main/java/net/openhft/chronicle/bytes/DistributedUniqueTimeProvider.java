@@ -60,8 +60,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         return DistributedUniqueTimeProviderHolder.INSTANCE;
     }
 
-    @SuppressWarnings("rawtypes")
-    private final Bytes bytes;
+    private final Bytes<?> bytes;
     private final MappedFile file;
     private final BinaryLongArrayReference values;
     private final VanillaDistributedUniqueTimeDeduplicator deduplicator;

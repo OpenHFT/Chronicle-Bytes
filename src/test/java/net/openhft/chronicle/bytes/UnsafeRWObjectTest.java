@@ -42,7 +42,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         assertEquals("[12, 32]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(AA.class)));
-        Bytes bytes = Bytes.allocateDirect(32);
+        Bytes<?> bytes = Bytes.allocateDirect(32);
         AA aa = new AA(1, 2, 3);
         bytes.unsafeWriteObject(aa, 4 + 2 * 8);
         assertEquals("" +
@@ -63,7 +63,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         assertEquals("[16, 80]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(BB.class)));
-        Bytes bytes = Bytes.allocateDirect(8 * 8);
+        Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         BB bb = new BB(1, 2, 3, 4, 5, 6, 7, 8);
         bytes.unsafeWriteObject(bb, 16, 8 * 8);
         String expected = "" +
@@ -75,7 +75,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                 bytes.toHexString());
         BB b2 = new BB(0, 0, 0, 0, 0, 0, 0, 0);
         bytes.unsafeReadObject(b2, 16, 8 * 8);
-        Bytes bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
         bytes2.unsafeWriteObject(b2, 16, 8 * 8);
         assertEquals(expected,
                 bytes2.toHexString());
@@ -89,7 +89,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         assertEquals("[16]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(byte[].class)));
-        Bytes bytes = Bytes.allocateDirect(32);
+        Bytes<?> bytes = Bytes.allocateDirect(32);
         byte[] byteArray = "Hello World.".getBytes();
         bytes.unsafeWriteObject(byteArray, byteArray.length);
         assertEquals("" +

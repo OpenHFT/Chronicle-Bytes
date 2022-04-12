@@ -22,13 +22,12 @@ import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
-@SuppressWarnings("rawtypes")
 public class BytesMethodReaderBuilder implements MethodReaderBuilder {
-    private final BytesIn in;
+    private final BytesIn<?> in;
     private BytesParselet defaultParselet = createDefaultParselet();
     private MethodEncoderLookup methodEncoderLookup = MethodEncoderLookup.BY_ANNOTATION;
 
-    public BytesMethodReaderBuilder(BytesIn in) {
+    public BytesMethodReaderBuilder(BytesIn<?> in) {
         throwExceptionIfReleased(in);
         this.in = in;
     }
@@ -36,7 +35,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     @NotNull
     static BytesParselet createDefaultParselet() {
         return (msg, in) -> {
-            Bytes bytes = (Bytes) in;
+            Bytes<?> bytes = (Bytes) in;
             Jvm.rethrow(new IllegalArgumentException("Unknown message type " + msg + " " + bytes.toHexString()));
         };
     }

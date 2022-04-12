@@ -116,7 +116,7 @@ public class NativeBytes<U>
         }
     }
 
-    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes bytes)
+    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
             throws IllegalStateException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         final long remaining = bytes.readRemaining();
@@ -195,7 +195,7 @@ public class NativeBytes<U>
             assert desiredCapacity >= 0;
             writeCheckOffset(desiredCapacity, 0);
         } catch (BufferOverflowException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Bytes cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
+            IllegalArgumentException iae = new IllegalArgumentException("Bytes<?> cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
             Jvm.error().on(NativeBytes.class, iae);
             throw iae;
         }
@@ -340,7 +340,7 @@ public class NativeBytes<U>
 
     @Override
     @NotNull
-    public NativeBytes writeSome(@NotNull final Bytes bytes)
+    public NativeBytes writeSome(@NotNull final Bytes<?> bytes)
             throws IllegalStateException {
         requireNonNull(bytes);
         ReportUnoptimised.reportOnce();

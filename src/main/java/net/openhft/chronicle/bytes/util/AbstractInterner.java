@@ -60,7 +60,7 @@ public abstract class AbstractInterner<T> {
         return bs.fastHash(bs.readPosition(), length);
     }
 
-    public T intern(@NotNull Bytes cs)
+    public T intern(@NotNull Bytes<?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, (int) cs.readRemaining());
     }
@@ -70,7 +70,7 @@ public abstract class AbstractInterner<T> {
         return intern(cs, (int) cs.readRemaining());
     }
 
-    public T intern(@NotNull Bytes cs, @NonNegative int length)
+    public T intern(@NotNull Bytes<?> cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, length);
     }

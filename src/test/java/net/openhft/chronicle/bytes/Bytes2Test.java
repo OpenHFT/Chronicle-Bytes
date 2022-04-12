@@ -52,8 +52,8 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Test
     public void testPartialWrite() {
-        Bytes from = alloc1.elasticBytes(1);
-        Bytes to = alloc2.fixedBytes(6);
+        Bytes<?> from = alloc1.elasticBytes(1);
+        Bytes<?> to = alloc2.fixedBytes(6);
 
         try {
             from.write("Hello World");
@@ -69,8 +69,8 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Test
     public void testPartialWrite64plus() {
-        Bytes from = alloc1.elasticBytes(1);
-        Bytes to = alloc2.fixedBytes(6);
+        Bytes<?> from = alloc1.elasticBytes(1);
+        Bytes<?> to = alloc2.fixedBytes(6);
 
         from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
 
@@ -85,8 +85,8 @@ public class Bytes2Test extends BytesTestCommon {
 
     @Test
     public void testWrite64plus() {
-        Bytes from = alloc1.fixedBytes(128);
-        Bytes to = alloc2.fixedBytes(128);
+        Bytes<?> from = alloc1.fixedBytes(128);
+        Bytes<?> to = alloc2.fixedBytes(128);
 
         from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
 
@@ -102,8 +102,8 @@ public class Bytes2Test extends BytesTestCommon {
     @Test
     public void testParseToBytes()
             throws IORuntimeException {
-        Bytes from = alloc1.fixedBytes(64);
-        Bytes to = alloc2.fixedBytes(32);
+        Bytes<?> from = alloc1.fixedBytes(64);
+        Bytes<?> to = alloc2.fixedBytes(32);
         try {
             from.append8bit("0123456789 aaaaaaaaaa 0123456789 0123456789");
 
