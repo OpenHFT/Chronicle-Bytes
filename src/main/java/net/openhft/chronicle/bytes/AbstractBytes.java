@@ -822,8 +822,8 @@ public abstract class AbstractBytes<U>
 
     @Override
     public int peekUnsignedByte(@NonNegative long offset)
-            throws BufferUnderflowException, IllegalStateException {
-        return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
+            throws IllegalStateException {
+        return offset < start() || readLimit() <= offset ? -1 : bytesStore.peekUnsignedByte(offset);
     }
 
     @Override

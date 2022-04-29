@@ -854,7 +854,7 @@ public class NativeBytesStore<U>
         @Nullable final Memory mem = this.memory;
         final long translate = translate(offset);
         final long address2 = addr + translate;
-        return translate >= limit
+        return translate < start() || limit <= translate
                 ? -1
                 : mem.readByte(address2) & 0xFF;
     }

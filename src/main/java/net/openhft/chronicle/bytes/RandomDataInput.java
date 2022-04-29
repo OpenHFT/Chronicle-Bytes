@@ -101,11 +101,10 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @param offset to read
      * @return the unsigned byte or -1
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     int peekUnsignedByte(@NonNegative long offset)
-            throws BufferUnderflowException, IllegalStateException;
+            throws IllegalStateException;
 
     /**
      * Read a short at an offset

@@ -156,6 +156,7 @@ public class BytesTest extends BytesTestCommon {
             bytes.readLimit(1);
 
             assertEquals(0x11, bytes.readUnsignedByte(0));
+            assertEquals(-1, bytes.peekUnsignedByte(-1));
             assertEquals(-1, bytes.peekUnsignedByte(1));
 
             // as the offset is given it only needs to be under the writeLimit.

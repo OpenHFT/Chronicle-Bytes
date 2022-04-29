@@ -224,7 +224,7 @@ public class HexDumpBytes
         if (offsetFormat == null) return;
         offsetFormat.append(offset, this.text);
         long wp = text.writePosition();
-        if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ')
+        if (text.peekUnsignedByte(wp - 1) > ' ')
             text.append(' ');
         startOfLine = text.writePosition();
     }
@@ -969,7 +969,7 @@ public class HexDumpBytes
                 }
                 pos++;
                 final long wp = text.writePosition();
-                if (wp > 0 && text.peekUnsignedByte(wp - 1) > ' ') {
+                if (text.peekUnsignedByte(wp - 1) > ' ') {
                     text.append(' ');
                 }
                 appendBase16(value);

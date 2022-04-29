@@ -577,7 +577,7 @@ public class UncheckedNativeBytes<U>
 
     @Override
     public int peekUnsignedByte(@NonNegative long offset) {
-        return offset >= writePosition ? -1 : readByte(offset);
+        return offset < start() || writePosition <= offset ? -1 : readByte(offset);
     }
 
     @Override

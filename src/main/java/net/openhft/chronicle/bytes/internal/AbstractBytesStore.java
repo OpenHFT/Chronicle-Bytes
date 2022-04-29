@@ -24,8 +24,6 @@ import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
-import java.nio.BufferUnderflowException;
-
 /**
  * Abstract BytesStore
  * @param <B> ByteStore type
@@ -45,8 +43,8 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
 
     @Override
     public int peekUnsignedByte(@NonNegative long offset)
-            throws BufferUnderflowException, IllegalStateException {
-        return offset >= readLimit() ? -1 : readUnsignedByte(offset);
+            throws IllegalStateException {
+        return offset < start() || readLimit() <= offset ? -1 : readUnsignedByte(offset);
     }
 
     @Override

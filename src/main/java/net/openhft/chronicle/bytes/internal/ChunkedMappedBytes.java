@@ -531,7 +531,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         if (!bytesStore.inside(offset, 1)) {
             bytesStore = acquireNextByteStore0(offset, false);
         }
-        return offset >= readLimit() ? -1 : bytesStore.peekUnsignedByte(offset);
+        return offset < start() || readLimit() <= offset ? -1 : bytesStore.peekUnsignedByte(offset);
     }
 
     @SuppressWarnings("restriction")
