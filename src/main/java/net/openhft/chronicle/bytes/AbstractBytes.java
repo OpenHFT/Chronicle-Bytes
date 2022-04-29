@@ -1277,6 +1277,12 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public boolean startsWith(@Nullable final BytesStore bytesStore) throws IllegalStateException {
+        // This class implements
+        return bytesStore != null && BytesInternal.startsWithUnchecked(this, bytesStore);
+    }
+
+    @Override
     public @NotNull UncheckedRandomDataInput acquireUncheckedInput() {
         return uncheckedRandomDataInput;
     }

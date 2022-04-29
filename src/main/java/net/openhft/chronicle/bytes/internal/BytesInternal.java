@@ -323,9 +323,30 @@ enum BytesInternal {
             return false;
 
         try {
-            if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
+            return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    public static <U extends BytesStore & HasUncheckedRandomDataInput>
+    boolean startsWithUnchecked(@NotNull final U a,
+                                @NotNull final BytesStore b) {
+        throwExceptionIfReleased(a);
+        throwExceptionIfReleased(b);
+        final long bRealReadRemaining = b.realReadRemaining();
+        if (a.realReadRemaining() < bRealReadRemaining) {
+            return false;
+        }
+
+        try {
+            if (b instanceof HasUncheckedRandomDataInput) {
                 // We have hoisted out boundary checks in this path
-                return startsWithUnchecked(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
+                return startsWithUnchecked(a.acquireUncheckedInput(),
+                        ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
+                        a.readPosition(),
+                        b.readPosition(),
+                        bRealReadRemaining);
             } else {
                 return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
             }
@@ -334,13 +355,11 @@ enum BytesInternal {
         }
     }
 
-    public static boolean startsWithUnchecked(@NotNull final BytesStore a,
-                                              @NotNull final BytesStore b,
-                                              @NonNegative final long aPos,
-                                              @NonNegative final long bPos,
-                                              @NonNegative final long length) {
-        final UncheckedRandomDataInput ua = ((HasUncheckedRandomDataInput) a).acquireUncheckedInput();
-        final UncheckedRandomDataInput ub = ((HasUncheckedRandomDataInput) b).acquireUncheckedInput();
+    private static boolean startsWithUnchecked(@NotNull final UncheckedRandomDataInput ua,
+                                               @NotNull final UncheckedRandomDataInput ub,
+                                               @NonNegative final long aPos,
+                                               @NonNegative final long bPos,
+                                               @NonNegative final long length) {
         int i;
         for (i = 0; i < length - 7; i += 8) {
             if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
@@ -362,11 +381,11 @@ enum BytesInternal {
         return true;
     }
 
-    public static boolean startsWith(@NotNull final BytesStore a,
-                                     @NotNull final BytesStore b,
-                                     @NonNegative final long aPos,
-                                     @NonNegative final long bPos,
-                                     @NonNegative final long length) {
+    private static boolean startsWith(@NotNull final BytesStore a,
+                                      @NotNull final BytesStore b,
+                                      @NonNegative final long aPos,
+                                      @NonNegative final long bPos,
+                                      @NonNegative final long length) {
         int i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
