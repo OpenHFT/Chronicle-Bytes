@@ -704,7 +704,7 @@ enum BytesInternal {
         }
     }
 
-    private static  void parseUtf82Guarded(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen, int count, long rp0) throws IOException {
+    private static void parseUtf82Guarded(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, boolean utf, @NonNegative int utflen, int count, long rp0) throws IOException {
         try {
             parseUtf82(bytes, sb, utf, utflen, count);
         } catch (UTFDataFormatRuntimeException e) {
