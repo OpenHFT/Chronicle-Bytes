@@ -319,35 +319,92 @@ enum BytesInternal {
         throwExceptionIfReleased(a);
         throwExceptionIfReleased(b);
         final long bRealReadRemaining = b.realReadRemaining();
-
         if (a.realReadRemaining() < bRealReadRemaining)
             return false;
+
         try {
-            long aPos = a.readPosition();
-            long bPos = b.readPosition();
-            long length = bRealReadRemaining;
-            long i;
-            for (i = 0; i < length - 7; i += 8) {
-                if (a.readLong(aPos + i) != b.readLong(bPos + i))
-                    return false;
-            }
-            if (i < length - 3) {
-                if (a.readInt(aPos + i) != b.readInt(bPos + i))
-                    return false;
-                i += 4;
-            }
-            if (i < length - 1) {
-                if (a.readShort(aPos + i) != b.readShort(bPos + i))
-                    return false;
-                i += 2;
-            }
-            if (i < length) {
-                return a.readByte(aPos + i) == b.readByte(bPos + i);
-            }
-            return true;
+            return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
+    }
+
+    public static <U extends BytesStore & HasUncheckedRandomDataInput>
+    boolean startsWithUnchecked(@NotNull final U a,
+                                @NotNull final BytesStore b) {
+        throwExceptionIfReleased(a);
+        throwExceptionIfReleased(b);
+        final long bRealReadRemaining = b.realReadRemaining();
+        if (a.realReadRemaining() < bRealReadRemaining) {
+            return false;
+        }
+
+        try {
+            if (b instanceof HasUncheckedRandomDataInput) {
+                // We have hoisted out boundary checks in this path
+                return startsWithUnchecked(a.acquireUncheckedInput(),
+                        ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
+                        a.readPosition(),
+                        b.readPosition(),
+                        bRealReadRemaining);
+            } else {
+                return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
+            }
+        } catch (BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    private static boolean startsWithUnchecked(@NotNull final UncheckedRandomDataInput ua,
+                                               @NotNull final UncheckedRandomDataInput ub,
+                                               @NonNegative final long aPos,
+                                               @NonNegative final long bPos,
+                                               @NonNegative final long length) {
+        int i;
+        for (i = 0; i < length - 7; i += 8) {
+            if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
+                return false;
+        }
+        if (i < length - 3) {
+            if (ua.readInt(aPos + i) != ub.readInt(bPos + i))
+                return false;
+            i += 4;
+        }
+        if (i < length - 1) {
+            if (ua.readShort(aPos + i) != ub.readShort(bPos + i))
+                return false;
+            i += 2;
+        }
+        if (i < length) {
+            return ua.readByte(aPos + i) == ub.readByte(bPos + i);
+        }
+        return true;
+    }
+
+    private static boolean startsWith(@NotNull final BytesStore a,
+                                      @NotNull final BytesStore b,
+                                      @NonNegative final long aPos,
+                                      @NonNegative final long bPos,
+                                      @NonNegative final long length) {
+        int i;
+        for (i = 0; i < length - 7; i += 8) {
+            if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                return false;
+        }
+        if (i < length - 3) {
+            if (a.readInt(aPos + i) != b.readInt(bPos + i))
+                return false;
+            i += 4;
+        }
+        if (i < length - 1) {
+            if (a.readShort(aPos + i) != b.readShort(bPos + i))
+                return false;
+            i += 2;
+        }
+        if (i < length) {
+            return a.readByte(aPos + i) == b.readByte(bPos + i);
+        }
+        return true;
     }
 
     public static void parseUtf8(
@@ -2977,7 +3034,8 @@ enum BytesInternal {
     public static void writeFully(@NotNull final RandomDataInput bytes,
                                   @NonNegative final long offset,
                                   @NonNegative final long length,
-                                  @NotNull final StreamingDataOutput sdo) throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+                                  @NotNull final StreamingDataOutput sdo)
+            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
 
         if (bytes instanceof HasUncheckedRandomDataInput) {
