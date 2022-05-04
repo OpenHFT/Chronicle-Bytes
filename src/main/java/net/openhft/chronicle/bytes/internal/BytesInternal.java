@@ -2813,6 +2813,7 @@ enum BytesInternal {
         return false;
     }
 
+    @Deprecated(/* methods signature will change in x.25 to use RandomDataOutput since its mutating data (this is an internal api)*/)
     public static float addAndGetFloat(@NotNull RandomDataInput in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
@@ -2828,6 +2829,7 @@ enum BytesInternal {
         }
     }
 
+    @Deprecated(/* methods signature will change in x.25 to use RandomDataOutput since its mutating data (this is an internal api)*/)
     public static double addAndGetDouble(@NotNull RandomDataInput in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
@@ -2843,6 +2845,7 @@ enum BytesInternal {
         }
     }
 
+    @Deprecated(/* methods signature will change in x.25 to use RandomDataOutput since its mutating data (this is an internal api)*/)
     public static int addAndGetInt(@NotNull RandomDataInput in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
@@ -2857,6 +2860,7 @@ enum BytesInternal {
         }
     }
 
+    @Deprecated(/* methods signature will change in x.25 to use RandomDataOutput since its mutating data (this is an internal api)*/)
     public static long addAndGetLong(@NotNull RandomDataInput in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         try {

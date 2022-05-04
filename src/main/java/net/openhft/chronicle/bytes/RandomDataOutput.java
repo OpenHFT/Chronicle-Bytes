@@ -31,7 +31,7 @@ import java.nio.ByteBuffer;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
-public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomCommon {
+public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomDataInput, RandomCommon {
     /**
      * Write a byte at an offset.
      *
@@ -432,5 +432,114 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     long write8bit(@NonNegative long position, @NotNull BytesStore bs);
 
     long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length);
+
+
+    /**
+     * Perform a 32-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+    void testAndSetInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+    /**
+     * Perform a 64-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
+            throws BufferOverflowException, IllegalStateException;
+
+    /**
+     * Perform a 32-bit float CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
+    }
+
+    /**
+     * Perform a 64-bit double CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
+    }
+
+
+
+    /**
+     * Perform an atomic add and get operation for a 32-bit int
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    default int addAndGetInt(@NonNegative long offset, int adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetInt(this, offset, adding);
+    }
+
+    /**
+     * Perform an atomic add and get operation for a 64-bit long
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    default long addAndGetLong(@NonNegative long offset, long adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetLong(this, offset, adding);
+    }
+
+    /**
+     * Perform an atomic add and get operation for a 32-bit float
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     */
+    default float addAndGetFloat(@NonNegative long offset, float adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetFloat(this, offset, adding);
+    }
+
+    /**
+     * Perform an atomic add and get operation for a 64-bit double
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    default double addAndGetDouble(@NonNegative long offset, double adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetDouble(this, offset, adding);
+    }
 
 }
