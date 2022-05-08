@@ -270,7 +270,6 @@ public class MappedBytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void testLargeWrites() throws IOException {
         testLargeWrites(128 << 10, 64 << 10, 500 << 10);
@@ -328,7 +327,6 @@ public class MappedBytesTest extends BytesTestCommon {
 
         assertTrue(bytes.isClosed());
     }
-
 
     @Test
     public void shouldNotBeReadOnly()

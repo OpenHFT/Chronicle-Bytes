@@ -29,7 +29,6 @@ class NotNullHandlingTest extends BytesTestCommon {
         assertThrows(IllegalArgumentException.class, () -> fooAssert("a", -1));
     }
 
-
     private void fooMostCorrect(@NotNull CharSequence text, @NonNegative int value) {
         // Consistently throwing IllegalArgumentException for any failing invariant check
         if (text == null) // <- We could obviously create a method for this

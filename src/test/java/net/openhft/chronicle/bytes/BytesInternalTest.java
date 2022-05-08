@@ -460,14 +460,7 @@ public class BytesInternalTest extends BytesTestCommon {
 
             System.out.println("time1 " + time1 + ", time2 " + time2 + ", time3: " + time3);
             System.out.println("time4 " + time4 + ", time5 " + time5 + ", time6: " + time6);
-/*
-            if (t > 0) {
-                assertTrue(time1 < time2);
-                assertTrue(time1 < time3 * 0.9);
-            }
 
-
-*/
             // This is a performance test so just assert it ran
             assertTrue(time1 > 0);
             assertTrue(time2 > 0);

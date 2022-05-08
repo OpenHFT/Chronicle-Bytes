@@ -74,7 +74,6 @@ public class LockingByteableTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void lockableSharedSingle() throws IOException {
         final String tmp = IOTools.tempName("lockableShared");

@@ -139,7 +139,6 @@ public class ChunkedMappedFile extends MappedFile {
         }
     }
 
-
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,

@@ -145,7 +145,6 @@ interface RandomCommon extends ReferenceCounted {
         return realCapacity();
     }
 
-
     /**
      * Returns the write limit.
      * <p>

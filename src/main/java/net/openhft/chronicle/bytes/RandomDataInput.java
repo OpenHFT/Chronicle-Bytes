@@ -82,7 +82,6 @@ public interface RandomDataInput extends RandomCommon {
     byte readByte(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException;
 
-
     /**
      * Read an unsigned byte at an offset
      *

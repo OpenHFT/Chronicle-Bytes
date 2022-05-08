@@ -1,7 +1,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -225,7 +224,6 @@ final class BytesFactoryUtil {
             }
         }
     }
-
 
     static final class BytesInitialInfo {
         private final long readPosition;

@@ -149,26 +149,4 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(b -> b.bytesMethodWriter(Object.class), "bytesMethodWriter()")
         );
     }
-
-    //@Test
-    void a() throws IOException {
-        Bytes<?> bytes = Bytes.allocateDirect(SIZE);
-        //Bytes bytes = Bytes.allocateDirect(SIZE).unchecked(true) ;
-        // Bytes bytes = new GuardedNativeBytes<>(Bytes.allocateDirect(SIZE), 10);
-        bytes.releaseLast();
-
-        //bytes.bytesMethodReaderBuilder();
-        bytes.parseUtf8(l -> true);
-
-        /*        bytes.copyTo(new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-
-            }
-        });*/
-
-
-        /*                .unchecked(true);*/
-    }
-
 }

@@ -59,7 +59,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     protected long lastActualSize = 0;
     private boolean initReleased;
 
-
     // assume the mapped file is reserved already.
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
@@ -113,7 +112,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
         uncheckedWritePosition(writePosition() + remaining);
         return this;
     }
-
 
     @NotNull
     public CommonMappedBytes write(@NonNegative final long offsetInRDO, @NotNull final RandomDataInput bytes)

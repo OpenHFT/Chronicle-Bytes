@@ -101,7 +101,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         );
     }
 
-
     // Todo: Do some write operations so that we know we have content then try operations
 
     /**
@@ -192,7 +191,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 NamedConsumer.of(bytes -> bytes.writeEnum((MyEnum) null), "writeEnum()"),
                 // Read operations with reference parameters
 
-
                 NamedConsumer.of(bytes -> bytes.read((ByteBuffer) null), "read(ByteBuffer)"),
                 NamedConsumer.of(bytes -> bytes.read((Bytes<?>) null), "read(Bytes)"),
                 NamedConsumer.of(bytes -> bytes.read((Bytes<?>) null, 0), "read(Bytes, int)"),
@@ -234,55 +232,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         final BytesInitialInfo expectedInfo = INITIAL_INFO_MAP.get(createCommand);
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
         assertEquals(expectedInfo, actualInfo, createCommand);
-    }
-
-
-    /**
-     * This test is for manual debug
-     */
-    // @Test
-    void manualTest() {
-
-        // try {
-        //   final File file = create(File.createTempFile("mapped-file", "bin"), SIZE);
-        //    final Bytes bytes = MappedBytes.mappedBytes(file, SIZE);
-        //   bytes.realCapacity();
-        //   System.out.println("bytes.realCapacity() = " + bytes.realCapacity());
-        //    try {
-        //       bytes.write((InputStream) null);
-        //   } catch (Exception e) {
-        //       //ignore
-        //   }
-        //   System.out.println("bytes.realCapacity() = " + bytes.realCapacity());
-        //   bytes.releaseLast();
-        //} catch (IOException ioException) {
-        //   Jvm.rethrow(ioException);
-        //}
-
-        //try {
-        //   Bytes.allocateDirect(SIZE)
-        //            .write((InputStream) null);
-        //} catch (Exception e) {
-        //    throw new RuntimeException(e);
-        // }
-
-        // Bytes bytes = Bytes.allocateDirect(SIZE);
-        // bytes.writeUtf8(1, (CharSequence) null);
-        // releaseAndAssertReleased(bytes);
-
-
-        // Bytes.allocateDirect(SIZE)
-        //        .readObject(null);
-
-        // MassiveFieldHolder holder = new MassiveFieldHolder();
-        // Bytes<MassiveFieldHolder> bytes = Bytes.forFieldGroup(holder, "b");
-        // try {
-//            bytes.write((InputStream) null);
-//        } catch (Exception e) {
-//            throw new RuntimeException(e);
-//        }
-//        releaseAndAssertReleased(bytes);
-
     }
 
 }

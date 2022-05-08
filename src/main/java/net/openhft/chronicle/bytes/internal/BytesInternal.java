@@ -123,7 +123,6 @@ enum BytesInternal {
                 : contentEqualsLong(a, b);
     }
 
-
     // Optimise for the common case where the length is 31-bit.
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
@@ -145,7 +144,6 @@ enum BytesInternal {
                 return contentEqualInt(a, b, aLength, bLength);
         }
     }
-
 
     // a >= b here and we also know it is safe to read bLength
     static boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
@@ -239,7 +237,6 @@ enum BytesInternal {
         }
     }
 
-
     // a >= b here and we also know it is safe to read bLength
     private static boolean contentEqualsLong(@NotNull final BytesStore a,
                                              @NotNull final BytesStore b,
@@ -273,7 +270,6 @@ enum BytesInternal {
             throw new AssertionError(e);
         }
     }
-
 
     // a >= b here and we also know it is safe to read bLength
     private static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
@@ -2550,7 +2546,6 @@ enum BytesInternal {
             bsp.lastNumberHadDigits(digits);
         }
     }
-
 
     public static double parseDouble(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IllegalStateException {

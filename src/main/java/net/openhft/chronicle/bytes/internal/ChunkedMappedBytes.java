@@ -583,7 +583,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         return this;
     }
 
-
     // used by the Pretoucher, don't change this without considering the impact.
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)

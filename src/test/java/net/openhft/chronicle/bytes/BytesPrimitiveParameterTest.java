@@ -157,7 +157,6 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
 
                 NamedConsumer.of(b -> b.writePosition(-1), "writePosition(-1)")
 
-
         );
     }
 
@@ -178,41 +177,4 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
 
         );
     }
-
-    // @Test
-    void a() throws IOException {
-
-        ByteBuffer heapByteBuffer = ByteBuffer.wrap(SILLY_NAME.getBytes(StandardCharsets.UTF_8));
-
-        /* Bytes<Object> bytes = BytesFactoryUtil.provideBytesObjects()
-                .map(BytesFactoryUtil::bytes)
-                .filter(MappedBytes.class::isInstance)
-                .findAny()
-                .get(); */
-
-        //Bytes bytes = Bytes.allocateDirect(SIZE).unchecked(true);
-        // Bytes bytes = Bytes.allocateDirect(SIZE);
-        // Bytes bytes = new GuardedNativeBytes<>(Bytes.allocateDirect(SIZE), 10);
-        //bytes.releaseLast();
-
-        /*final ByteBuffer heapByteBuffer = ByteBuffer.allocate(SIZE);
-        Bytes<?> bytes = Bytes.wrapForWrite(heapByteBuffer)*/
-
-        final Bytes<?> bytes = Bytes.wrapForWrite(heapByteBuffer);
-        bytes.writePosition(-1);
-
-        //bytes.bytesMethodReaderBuilder();
-        //bytes.write(-1, BytesStore.from(SILLY_NAME));
-
-        /*        bytes.copyTo(new OutputStream() {
-            @Override
-            public void write(int b) throws IOException {
-
-            }
-        });*/
-
-
-        /*                .unchecked(true);*/
-    }
-
 }

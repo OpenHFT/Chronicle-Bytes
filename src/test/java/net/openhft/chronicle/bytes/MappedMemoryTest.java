@@ -47,7 +47,6 @@ public class MappedMemoryTest extends BytesTestCommon {
         }
     }
 
-
     // on i7-3970X ~ 3.3 ns
     @Test
     public void testRawMemoryMapped()

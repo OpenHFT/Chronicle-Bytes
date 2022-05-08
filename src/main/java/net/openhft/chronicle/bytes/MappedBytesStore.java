@@ -277,7 +277,6 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return this;
     }
 
-
     @NotNull
     @Override
     public MappedBytesStore writeVolatileLong(@NonNegative long offset, long i64)
