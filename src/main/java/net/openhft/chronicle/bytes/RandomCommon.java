@@ -208,62 +208,6 @@ interface RandomCommon extends ReferenceCounted {
             throws IllegalStateException;
 
     /**
-     * Perform a 32-bit CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
-            throws BufferOverflowException, IllegalStateException;
-
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    void testAndSetInt(@NonNegative long offset, int expected, int value)
-            throws BufferOverflowException, IllegalStateException;
-
-    /**
-     * Perform a 64-bit CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
-            throws BufferOverflowException, IllegalStateException;
-
-    /**
-     * Perform a 32-bit float CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
-            throws BufferOverflowException, IllegalStateException {
-        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
-    }
-
-    /**
-     * Perform a 64-bit double CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
-            throws BufferOverflowException, IllegalStateException {
-        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
-    }
-
-    /**
      * @return true if these Bytes use shared memory.
      */
     boolean sharedMemory();
