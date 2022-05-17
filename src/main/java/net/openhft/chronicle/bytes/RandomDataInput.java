@@ -387,6 +387,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.addAndGetInt(this, offset, adding);
@@ -401,6 +402,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.addAndGetLong(this, offset, adding);
@@ -414,6 +416,7 @@ public interface RandomDataInput extends RandomCommon {
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default float addAndGetFloat(@NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.addAndGetFloat(this, offset, adding);
@@ -428,6 +431,7 @@ public interface RandomDataInput extends RandomCommon {
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
      * @throws IllegalStateException    if released
      */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default double addAndGetDouble(@NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.addAndGetDouble(this, offset, adding);
