@@ -433,4 +433,15 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length);
 
+
+    /**
+     * Perform a 64-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
+            throws BufferOverflowException, IllegalStateException;
 }
