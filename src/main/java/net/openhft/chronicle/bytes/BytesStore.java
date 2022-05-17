@@ -55,7 +55,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
     /**
-     * Returns a BytesStore using the bytes in a specified CharSequence. This chars are encoded
+     * Returns a BytesStore using the bytes in a specified CharSequence. These chars are encoded
      * using ISO_8859_1
      *
      * @param cs a CharSequence to convert
