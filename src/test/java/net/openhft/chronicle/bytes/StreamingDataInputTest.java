@@ -15,34 +15,15 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    interface BytesFactory {
-        Bytes<?> createBuffer();
-    }
-
-    private enum BytesType implements BytesFactory {
-        DIRECT {
-            @Override
-            public Bytes<?> createBuffer() {
-                return Bytes.allocateElasticDirect();
-            }
-        },
-        ON_HEAP {
-            @Override
-            public Bytes<?> createBuffer() {
-                return Bytes.allocateElasticOnHeap();
-            }
-        }
-    }
-
     private BytesType bytesType;
-
-    @Parameterized.Parameters(name="bytesType={0}")
-    public static Object[] params() {
-        return Arrays.stream(BytesType.values()).toArray();
-    }
 
     public StreamingDataInputTest(BytesType bytesType) {
         this.bytesType = bytesType;
+    }
+
+    @Parameterized.Parameters(name = "bytesType={0}")
+    public static Object[] params() {
+        return Arrays.stream(BytesType.values()).toArray();
     }
 
     @Test
@@ -65,6 +46,25 @@ public class StreamingDataInputTest extends BytesTestCommon {
         TestObject dest = new TestObject();
         b.unsafeReadObject(dest, 13);
         assertEquals(source, dest);
+    }
+
+    private enum BytesType implements BytesFactory {
+        DIRECT {
+            @Override
+            public Bytes<?> createBuffer() {
+                return Bytes.allocateElasticDirect();
+            }
+        },
+        ON_HEAP {
+            @Override
+            public Bytes<?> createBuffer() {
+                return Bytes.allocateElasticOnHeap();
+            }
+        }
+    }
+
+    interface BytesFactory {
+        Bytes<?> createBuffer();
     }
 
     static class TestObject {
