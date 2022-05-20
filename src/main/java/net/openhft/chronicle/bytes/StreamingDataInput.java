@@ -547,7 +547,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         bytes.clear();
         int length = Maths.toUInt31(readStopBit());
         int i;
-        for (i = 0; i < length - 7; i++)
+        for (i = 0; i < length - 7; i += 8)
             bytes.writeLong(readLong());
         for (; i < length; i++)
             bytes.writeByte(readByte());

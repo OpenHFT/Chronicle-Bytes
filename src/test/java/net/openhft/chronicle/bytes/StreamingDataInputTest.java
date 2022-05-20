@@ -48,6 +48,22 @@ public class StreamingDataInputTest extends BytesTestCommon {
         assertEquals(source, dest);
     }
 
+    @Test
+    public void readWithLength() {
+        int max = 130; // two bytes of length for a stop bit encoded length
+        Bytes bytes = Bytes.allocateElasticOnHeap(max + 2);
+        Bytes from = Bytes.wrapForRead(new byte[max]);
+        Bytes to = Bytes.wrapForRead(new byte[max]);
+        for (int len = 0; len <= max; len++) {
+            from.readPositionRemaining(0, len);
+            bytes.clear();
+            bytes.writeWithLength(from);
+            assertEquals(len + (len < 128 ? 1 : 2), bytes.readRemaining());
+            bytes.readWithLength(to);
+            assertEquals(len, to.readRemaining());
+        }
+    }
+
     private enum BytesType implements BytesFactory {
         DIRECT {
             @Override
