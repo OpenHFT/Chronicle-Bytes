@@ -2808,7 +2808,7 @@ enum BytesInternal {
         return false;
     }
 
-    public static float addAndGetFloat(@NotNull RandomDataInput in, @NonNegative long offset, float adding)
+    public static float addAndGetFloat(@NotNull BytesStore<?,?> in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2823,7 +2823,7 @@ enum BytesInternal {
         }
     }
 
-    public static double addAndGetDouble(@NotNull RandomDataInput in, @NonNegative long offset, double adding)
+    public static double addAndGetDouble(@NotNull BytesStore<?,?> in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2838,7 +2838,7 @@ enum BytesInternal {
         }
     }
 
-    public static int addAndGetInt(@NotNull RandomDataInput in, @NonNegative long offset, int adding)
+    public static int addAndGetInt(@NotNull BytesStore<?,?> in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2852,7 +2852,7 @@ enum BytesInternal {
         }
     }
 
-    public static long addAndGetLong(@NotNull RandomDataInput in, @NonNegative long offset, long adding)
+    public static long addAndGetLong(@NotNull BytesStore<?,?> in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
