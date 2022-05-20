@@ -183,6 +183,11 @@ public interface Bytes<U> extends
      *         transient long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15;
      *     }
      * }</pre>
+     * <p>
+     *  NOTE: the length of the data has to be recorded at the start as an unsigned byte.
+     *  This consumes one byte and limits it's maximum size to 255 usable bytes.
+     *  </p>
+     *
      *
      * @param object    non-null object whose fields are to be reflected
      * @param groupName of the field group, non-null
