@@ -438,7 +438,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Write all data available from bytes argument, constrained by how much space available in this.
      * <p>
      * Calling this method will update the cursors of this, but not the bytes we read from.
+     *
+     * @deprecated use write(bytes) instead and alter the bytes as you intended
      */
+    @Deprecated(/* to be removed in x.25 */)
     @NotNull
     default S writeSome(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
