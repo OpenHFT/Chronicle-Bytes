@@ -32,7 +32,6 @@
     import java.nio.BufferUnderflowException;
     import java.nio.ByteBuffer;
 
-    import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
     import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
     import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -64,7 +63,7 @@
         @NotNull
         public static VanillaBytes<Void> vanillaBytes() {
             try {
-                return new NativeBytes<>(noBytesStore());
+                return new NativeBytes<>(BytesStore.empty());
 
             } catch (IllegalStateException | IllegalArgumentException e) {
                 throw new AssertionError(e);

@@ -34,7 +34,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
-import static net.openhft.chronicle.bytes.NoBytesStore.noBytesStore;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -95,7 +94,7 @@ public class NativeBytes<U>
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
         try {
-            return NativeBytes.wrapWithNativeBytes(noBytesStore(), Bytes.MAX_CAPACITY);
+            return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
         } catch (IllegalStateException | IllegalArgumentException e) {
             throw new AssertionError(e);
         }

@@ -5,7 +5,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
-import net.openhft.chronicle.bytes.domestic.EmptyByteStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Ints;

@@ -56,9 +56,9 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     protected MappedBytes(final String name)
             throws IllegalStateException {
-        super(NoBytesStore.noBytesStore(),
-                NoBytesStore.noBytesStore().writePosition(),
-                NoBytesStore.noBytesStore().writeLimit(),
+        super(BytesStore.empty(),
+                BytesStore.empty().writePosition(),
+                BytesStore.empty().writeLimit(),
                 name);
     }
 
