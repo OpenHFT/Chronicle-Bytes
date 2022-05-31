@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.domestic.EmptyByteStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -35,7 +36,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
+ * @deprecated from the public API for removal in x.24. Use domestic {@link EmptyByteStore#acquire()} instead.
  */
+@Deprecated
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;
@@ -58,7 +61,7 @@ public enum NoBytesStore implements BytesStore {
 
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
-        return NO_BYTES_STORE;
+        return (BytesStore<B, T>)NO_BYTES_STORE;
     }
 
     @Override
