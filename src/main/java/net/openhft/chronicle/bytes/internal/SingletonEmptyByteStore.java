@@ -278,8 +278,7 @@ public final class SingletonEmptyByteStore implements EmptyByteStore {
 
     @Override
     public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
-        return new VanillaBytes<Void>(this, 0, 0) {
-        };
+        return VanillaBytes.vanillaBytes();
     }
 
     @Override
