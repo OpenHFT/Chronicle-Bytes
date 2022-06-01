@@ -1,6 +1,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -11,7 +12,7 @@ public class ReleasedBytesStoreTest extends BytesTestCommon {
     @Test
     public void release() {
         Bytes<?> bytes = Bytes.allocateElasticDirect();
-        assertEquals(NoBytesStore.class, bytes.bytesStore().getClass());
+        assertEquals(SingletonEmptyByteStore.class, bytes.bytesStore().getClass());
         bytes.writeLong(0, 0);
         assertEquals(NativeBytesStore.class, bytes.bytesStore().getClass());
         bytes.releaseLast();
