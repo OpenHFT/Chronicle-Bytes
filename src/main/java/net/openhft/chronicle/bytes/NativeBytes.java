@@ -47,6 +47,9 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class NativeBytes<U>
         extends VanillaBytes<U> {
+
+
+
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
@@ -162,7 +165,7 @@ public class NativeBytes<U>
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
             // Always resize if we are backed by a SingletonEmptyByteStore as this is shared and does not provide all functionality
-            if (writeEnd <= bytesStore.safeLimit() && !(EmptyByteStore.class.isInstance(bytesStore))) {
+            if (writeEnd <= bytesStore.safeLimit() && !isBackedByEmptyByteStore()) {
                 return; // do nothing.
             }
             if (writeEnd >= capacity)
@@ -228,7 +231,7 @@ public class NativeBytes<U>
         if (endOfBuffer > capacity())
             throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
-        if (endOfBuffer <= realCapacity && !(EmptyByteStore.class.isInstance(bytesStore))) {
+        if (endOfBuffer <= realCapacity && !(isBackedByEmptyByteStore())) {
             //  No resize
             return;
         }
