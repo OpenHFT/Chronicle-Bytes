@@ -822,13 +822,13 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException, IllegalStateException {
-        return ((RandomDataOutput<?>) this).compareAndSwapInt(offset, expected, value);
+        return ((RandomDataOutput<B>) this).compareAndSwapInt(offset, expected, value);
     }
 
     // Can be removed once RandomDataInput:compareAndSwapLong is removed
     @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalStateException {
-        return ((RandomDataOutput<?>) this).compareAndSwapLong(offset, expected, value);
+        return ((RandomDataOutput<B>) this).compareAndSwapLong(offset, expected, value);
     }
 }
