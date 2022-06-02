@@ -47,6 +47,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
+ *
  * @param <B> BytesStore type
  * @param <U> Underlying type
  */
@@ -815,5 +816,19 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             if (s.charAt(i) != readUnsignedByte(start + i))
                 return false;
         return true;
+    }
+
+    // Can be removed once RandomDataInput:compareAndSwapInt is removed
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException, IllegalStateException {
+        return ((RandomDataOutput<?>) this).compareAndSwapInt(offset, expected, value);
+    }
+
+    // Can be removed once RandomDataInput:compareAndSwapLong is removed
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalStateException {
+        return ((RandomDataOutput<?>) this).compareAndSwapLong(offset, expected, value);
     }
 }
