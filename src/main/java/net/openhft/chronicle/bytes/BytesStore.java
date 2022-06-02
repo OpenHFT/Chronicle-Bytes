@@ -819,6 +819,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     // Can be removed once RandomDataInput:compareAndSwapInt is removed
+    // To be removed in x.24
     @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException, IllegalStateException {
@@ -826,6 +827,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     // Can be removed once RandomDataInput:compareAndSwapLong is removed
+    // To be removed in x.24
     @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalStateException {
