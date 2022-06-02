@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.EmptyByteStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -57,8 +59,7 @@ public class NativeBytes<U>
 
     public NativeBytes(@NotNull final BytesStore store)
             throws IllegalStateException, IllegalArgumentException {
-        super(store, 0, store.capacity());
-        capacity = store.capacity();
+        this(store, store.capacity());
     }
 
     /**
@@ -160,7 +161,8 @@ public class NativeBytes<U>
             throws BufferOverflowException, IllegalStateException {
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
-            if (writeEnd <= bytesStore.safeLimit()) {
+            // Always resize if we are backed by a SingletonEmptyByteStore as this is shared and does not provide all functionality
+            if (writeEnd <= bytesStore.safeLimit() && !(EmptyByteStore.class.isInstance(bytesStore))) {
                 return; // do nothing.
             }
             if (writeEnd >= capacity)
@@ -226,7 +228,7 @@ public class NativeBytes<U>
         if (endOfBuffer > capacity())
             throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
-        if (endOfBuffer <= realCapacity) {
+        if (endOfBuffer <= realCapacity && !(EmptyByteStore.class.isInstance(bytesStore))) {
             //  No resize
             return;
         }
