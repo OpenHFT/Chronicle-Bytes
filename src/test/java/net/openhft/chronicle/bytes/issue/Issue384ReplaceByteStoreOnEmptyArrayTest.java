@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.VanillaBytes;
-import net.openhft.chronicle.bytes.internal.EmptyByteStore;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
@@ -41,7 +40,7 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest {
             // resize since the empty bytes is using a shared backing EmptyByteStore.
             bytes.write(new byte[0]);
             // Make sure we are not using an EmptyByteStore
-            replacedOrRefused = !(bytes.bytesStore() instanceof EmptyByteStore);
+            replacedOrRefused = !bytes.isImmutableEmptyByteStore();
         } catch (AssertionError ignored) {
             // This is ok as some of the Bytes objects are not elastic.
             replacedOrRefused = true;
