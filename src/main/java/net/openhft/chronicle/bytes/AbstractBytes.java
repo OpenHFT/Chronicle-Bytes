@@ -1322,12 +1322,13 @@ public abstract class AbstractBytes<U>
         return sum & 0xFF;
     }
 
-    protected boolean isBackedByEmptyByteStore() {
-        return EmptyByteStore.class.isInstance(bytesStore);
+    @Override
+    public boolean isImmutableEmptyByteStore() {
+        return bytesStore.isImmutableEmptyByteStore();
     }
 
     private void replaceByteStoreIfEmpty() {
-        if (isBackedByEmptyByteStore()) {
+        if (isImmutableEmptyByteStore()) {
             // This forces a replacement of the underlying ByteStore
             write(EMPTY_ARRAY);
         }

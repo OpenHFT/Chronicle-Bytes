@@ -449,6 +449,11 @@ public final class SingletonEmptyByteStore implements EmptyByteStore {
         throw new BufferOverflowException();
     }
 
+    @Override
+    public boolean isImmutableEmptyByteStore() {
+        return true;
+    }
+
     // CharSequence methods
 
     @NotNull

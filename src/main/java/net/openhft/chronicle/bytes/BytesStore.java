@@ -833,4 +833,15 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     default boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalStateException {
         return ((RandomDataOutput<B>) this).compareAndSwapLong(offset, expected, value);
     }
+
+    /**
+     * Returns if this ByteStore is an immutable empty ByteStore or if it is backed
+     * by an immutable empty ByteStore.
+     *
+     * @return if immutable empty or backed by such
+     */
+    default boolean isImmutableEmptyByteStore() {
+        return false;
+    }
+
 }

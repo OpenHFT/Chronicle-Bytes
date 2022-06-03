@@ -383,4 +383,9 @@ public enum NoBytesStore implements BytesStore {
     public boolean sharedMemory() {
         return false;
     }
+
+    @Override
+    public boolean isImmutableEmptyByteStore() {
+        return true;
+    }
 }

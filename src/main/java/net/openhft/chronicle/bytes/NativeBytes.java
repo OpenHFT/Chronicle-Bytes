@@ -162,7 +162,7 @@ public class NativeBytes<U>
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
             // Always resize if we are backed by a SingletonEmptyByteStore as this is shared and does not provide all functionality
-            if (writeEnd <= bytesStore.safeLimit() && !isBackedByEmptyByteStore()) {
+            if (writeEnd <= bytesStore.safeLimit() && !isImmutableEmptyByteStore()) {
                 return; // do nothing.
             }
             if (writeEnd >= capacity)
@@ -228,7 +228,7 @@ public class NativeBytes<U>
         if (endOfBuffer > capacity())
             throw new DecoratedBufferOverflowException(endOfBuffer + ">" + capacity());
         final long realCapacity = realCapacity();
-        if (endOfBuffer <= realCapacity && !(isBackedByEmptyByteStore())) {
+        if (endOfBuffer <= realCapacity && !(isImmutableEmptyByteStore())) {
             //  No resize
             return;
         }
