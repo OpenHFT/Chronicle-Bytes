@@ -48,8 +48,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class NativeBytes<U>
         extends VanillaBytes<U> {
 
-
-
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
     private static boolean newGuarded = BYTES_GUARDED;
     private long capacity;
