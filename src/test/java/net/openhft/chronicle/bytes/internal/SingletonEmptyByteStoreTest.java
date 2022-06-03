@@ -415,6 +415,11 @@ class SingletonEmptyByteStoreTest {
     }
 
     @Test
+    void isImmutableEmptyByteStore() {
+        assertTrue(INSTANCE.isImmutableEmptyByteStore());
+    }
+
+    @Test
     void testToString() {
         final BytesStore<?, ?> bytes = Bytes.from("");
         final BytesStore<?, ?> bs = bytes.bytesStore();

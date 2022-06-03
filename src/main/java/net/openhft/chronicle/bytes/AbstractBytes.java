@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
-import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
@@ -53,6 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput {
+    private static final byte[] EMPTY_ARRAY = new byte[0];
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // used for debugging
@@ -1161,18 +1159,21 @@ public abstract class AbstractBytes<U>
     @Override
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
+        replaceByteStoreIfEmpty();
         return bytesStore.addressForRead(offset);
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException, IllegalStateException {
+        replaceByteStoreIfEmpty();
         return bytesStore.addressForWrite(offset);
     }
 
     @Override
     public long addressForWritePosition()
             throws BufferOverflowException, IllegalStateException {
+        replaceByteStoreIfEmpty();
         return bytesStore.addressForWrite(writePosition());
     }
 
@@ -1319,6 +1320,18 @@ public abstract class AbstractBytes<U>
             sum += readByte(i);
         }
         return sum & 0xFF;
+    }
+
+    @Override
+    public boolean isImmutableEmptyByteStore() {
+        return bytesStore.isImmutableEmptyByteStore();
+    }
+
+    private void replaceByteStoreIfEmpty() {
+        if (isImmutableEmptyByteStore()) {
+            // This forces a replacement of the underlying ByteStore
+            write(EMPTY_ARRAY);
+        }
     }
 
     static final class ReportUnoptimised {
