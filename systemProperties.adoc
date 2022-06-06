@@ -2,11 +2,9 @@
 == System Properties
 Below, a number of relevant System Properties are listed.
 
-NOTE:
-With boolean properties, see javadoc:
-`net.openhft.chronicle.core.Jvm#getBoolean(java.lang.String)`
 
-When boolean system properties are set to "", "yes" or "true", the property is enabled.
+NOTE: With `getBoolean`, returns if a System Property with the provided {@code systemPropertyKey} either exists, is set to "yes" or is set to "true", see
+https://github.com/OpenHFT/Chronicle-Core/blob/351e79ed593fa656c21b4e5a540a3a5831cd06a3/src/main/java/net/openhft/chronicle/core/Jvm.java#L1184[javadoc].
 
 .System properties
 [cols=4*, options="header"]
