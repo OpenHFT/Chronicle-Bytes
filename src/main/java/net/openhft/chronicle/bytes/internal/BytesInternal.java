@@ -18,6 +18,7 @@
 
 package net.openhft.chronicle.bytes.internal;
 
+
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.pool.BytesPool;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
@@ -40,10 +41,14 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -95,12 +100,25 @@ enum BytesInternal {
     private static final int MAX_STRING_LEN = Jvm.getInteger("bytes.max-string-len", 128 * 1024);
     private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
+    static MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
+
+
     static {
         try {
             SI = new StringInternerBytes(Jvm.getInteger("wire.string-interner.size", 4096));
             ClassAliasPool.CLASS_ALIASES.addAlias(BytesStore.class, "!binary");
         } catch (Exception e) {
             throw new AssertionError(e);
+        }
+
+        try {
+            // requires java11 or later to set this with the following exports added
+            //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
+            Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
+            Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch", Object.class, long.class, Object.class, long.class, int.class, int.class);
+            VECTORIZED_MISMATCH_METHOD_HANDLE = MethodHandles.lookup().unreflect(vectorizedMismatch);
+        } catch (Exception ignore) {
+
         }
     }
 
@@ -118,10 +136,50 @@ enum BytesInternal {
         if (readRemaining != b.readRemaining())
             // The size is different so, we know that a and b cannot be equal
             return false;
+
+        if (VECTORIZED_MISMATCH_METHOD_HANDLE != null && a.isDirectMemory() && b.isDirectMemory() && a.readRemaining() < Integer.MAX_VALUE)
+            // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
+            return java11ContentEqualUsingVectorizedMismatch(a, b);
+
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
                 : contentEqualsLong(a, b);
     }
+
+    /**
+     * returns true if the contents are equal using VectorizedMismatch
+     * This mehtod re
+     *
+     * @param left
+     * @param right
+     * @return true if the content are equal
+     * <p>
+     * see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924
+     * JDK-8033148 will add methods to Arrays for array equals, compare and mismatch.
+     * <p>
+     * The implementations of equals, compare and mismatch can be reimplemented using underlying mismatch methods that in turn defer to a single method, vectorizedMismatch, that accesses the memory contents of arrays using Unsafe.getLongUnaligned.
+     * <p>
+     * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
+     * <p>
+     * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
+     */
+    private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
+                                                                     @Nullable final BytesStore right) {
+        try {
+            long aAddress = left.addressForRead(left.readPosition());
+            long bAddress = right.addressForRead(right.readPosition());
+
+            return (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
+                    null, aAddress,
+                    null, bAddress,
+                    (int) left.readRemaining(), 0) < 0;
+        } catch (Throwable e) {
+            throw new AssertionError(e);
+        }
+
+
+    }
+
 
     // Optimise for the common case where the length is 31-bit.
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
