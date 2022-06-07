@@ -116,9 +116,10 @@ enum BytesInternal {
             //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
             Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
             Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch", Object.class, long.class, Object.class, long.class, int.class, int.class);
+            vectorizedMismatch.setAccessible(true);
             VECTORIZED_MISMATCH_METHOD_HANDLE = MethodHandles.lookup().unreflect(vectorizedMismatch);
-        } catch (Exception ignore) {
-
+        } catch (Exception e) {
+            Jvm.debug().on(BytesInternal.class, e);
         }
     }
 
@@ -183,7 +184,7 @@ enum BytesInternal {
             int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
                     null, aAddress,
                     null, bAddress,
-                    (int) Math.min(left.realReadRemaining(),right.realReadRemaining()), 0);
+                    (int) Math.min(left.realReadRemaining(), right.realReadRemaining()), 0);
             return invoke < 0;
         } catch (Throwable e) {
             throw new AssertionError(e);
