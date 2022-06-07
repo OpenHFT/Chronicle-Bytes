@@ -137,7 +137,11 @@ enum BytesInternal {
             // The size is different so, we know that a and b cannot be equal
             return false;
 
-        if (VECTORIZED_MISMATCH_METHOD_HANDLE != null && a.isDirectMemory() && b.isDirectMemory() && a.readRemaining() < Integer.MAX_VALUE)
+        if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
+                && a.isDirectMemory()
+                && b.isDirectMemory()
+                && a.realReadRemaining() < Integer.MAX_VALUE
+                && b.realReadRemaining() < Integer.MAX_VALUE)
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
             return java11ContentEqualUsingVectorizedMismatch(a, b);
 
@@ -166,13 +170,21 @@ enum BytesInternal {
     private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
                                                                      @Nullable final BytesStore right) {
         try {
+
+     /*       System.out.println(((NativeBytes)left).toHexString());
+            System.out.println(((NativeBytes)right).toHexString());
+
+            System.out.println("left.realReadRemaining() = " + left.realReadRemaining());
+            System.out.println("right.realReadRemaining() = " + right.realReadRemaining());
+*/
             long aAddress = left.addressForRead(left.readPosition());
             long bAddress = right.addressForRead(right.readPosition());
 
-            return (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
+            int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
                     null, aAddress,
                     null, bAddress,
-                    (int) left.readRemaining(), 0) < 0;
+                    (int) Math.min(left.realReadRemaining(),right.realReadRemaining()), 0);
+            return invoke < 0;
         } catch (Throwable e) {
             throw new AssertionError(e);
         }
