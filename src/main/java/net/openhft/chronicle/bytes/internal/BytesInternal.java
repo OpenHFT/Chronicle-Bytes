@@ -100,7 +100,7 @@ enum BytesInternal {
     private static final int MAX_STRING_LEN = Jvm.getInteger("bytes.max-string-len", 128 * 1024);
     private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
-    static MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
+    private static final MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
 
 
     static {
@@ -111,16 +111,21 @@ enum BytesInternal {
             throw new AssertionError(e);
         }
 
+        MethodHandle vectorizedMismatchMethodHandle = null;
         try {
             // requires java11 or later to set this with the following exports added
             //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
             Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
             Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch", Object.class, long.class, Object.class, long.class, int.class, int.class);
             vectorizedMismatch.setAccessible(true);
-            VECTORIZED_MISMATCH_METHOD_HANDLE = MethodHandles.lookup().unreflect(vectorizedMismatch);
+            vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
+
         } catch (Exception e) {
             Jvm.debug().on(BytesInternal.class, e);
+        } finally {
+            VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
         }
+
     }
 
     public static boolean contentEqual(@Nullable final BytesStore a,
@@ -178,16 +183,18 @@ enum BytesInternal {
             System.out.println("left.realReadRemaining() = " + left.realReadRemaining());
             System.out.println("right.realReadRemaining() = " + right.realReadRemaining());
 */
-            long aAddress = left.addressForRead(left.readPosition());
-            long bAddress = right.addressForRead(right.readPosition());
+            final long aAddress = left.addressForRead(left.readPosition());
+            final long bAddress = right.addressForRead(right.readPosition());
 
-            int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
+            if (left.realReadRemaining() != right.realReadRemaining())
+                return false;
+            final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
                     null, aAddress,
                     null, bAddress,
                     (int) Math.min(left.realReadRemaining(), right.realReadRemaining()), 0);
             return invoke < 0;
         } catch (Throwable e) {
-            throw new AssertionError(e);
+            throw new RuntimeException(e);
         }
 
 
