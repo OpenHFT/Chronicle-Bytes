@@ -1,50 +1,71 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.Assert;
-import org.junit.jupiter.api.Test;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Arrays;
+import java.util.Collection;
 
-class BytesInternalTest {
+import static net.openhft.chronicle.bytes.Allocator.HEAP;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+@RunWith(Parameterized.class)
+public class BytesInternalTest {
+    private final Bytes a;
+    private final Bytes b;
+
+    @Parameterized.Parameters
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticOnHeap()}
+                , {Bytes.allocateElasticDirect(), Bytes.allocateElasticOnHeap()}
+                , {Bytes.allocateElasticDirect(), Bytes.allocateElasticDirect()}
+                , {Bytes.allocateElasticOnHeap(), Bytes.allocateElasticDirect()}
+                , {Bytes.elasticByteBuffer(), Bytes.elasticByteBuffer()}
+                , {Bytes.elasticHeapByteBuffer(), Bytes.elasticHeapByteBuffer()}
+                , {Bytes.elasticHeapByteBuffer(), Bytes.elasticByteBuffer()}
+        });
+    }
+
+    public BytesInternalTest(Bytes left, Bytes right) {
+        this.a = left;
+        this.b = right;
+    }
+
+    @Before
+    public void before() {
+        a.clear();
+        b.clear();
+
+    }
 
     @Test
-    void testContentEqual() {
-
-        Bytes a = Bytes.allocateElasticDirect();
-        Bytes b = Bytes.allocateElasticDirect();
-
+    public void testContentEqual() {
         a.append("hello world");
         b.append("hello world");
-
         Assert.assertTrue(a.contentEquals(b));
     }
 
-
     @Test
-    void testContentNotEqualButSameLen() {
-
-        Bytes a = Bytes.allocateElasticDirect();
-        Bytes b = Bytes.allocateElasticDirect();
-
-
+    public void testContentNotEqualButSameLen() {
         a.append("hello world1");
         b.append("hello world2");
-
         Assert.assertFalse(a.contentEquals(b));
     }
 
     @Test
-    void testContentNotEqualButDiffLen() {
-
-        Bytes a = Bytes.allocateElasticDirect();
-        Bytes b = Bytes.allocateElasticDirect();
-
-
+    public void testContentNotEqualButDiffLen() {
         a.append("hello world");
         b.append("hello world2");
-
         Assert.assertFalse(a.contentEquals(b));
     }
+
 
 }

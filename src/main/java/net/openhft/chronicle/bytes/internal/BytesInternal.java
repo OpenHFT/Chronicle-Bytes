@@ -144,12 +144,13 @@ enum BytesInternal {
             return false;
 
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
-                && a.isDirectMemory()
-                && b.isDirectMemory()
                 && a.realReadRemaining() < Integer.MAX_VALUE
-                && b.realReadRemaining() < Integer.MAX_VALUE)
+                && b.realReadRemaining() < Integer.MAX_VALUE) {
+
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
             return java11ContentEqualUsingVectorizedMismatch(a, b);
+        }
+
 
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
@@ -158,10 +159,9 @@ enum BytesInternal {
 
     /**
      * returns true if the contents are equal using VectorizedMismatch
-     * This mehtod re
      *
-     * @param left
-     * @param right
+     * @param left  the byte on the left
+     * @param right the byte on the right
      * @return true if the content are equal
      * <p>
      * see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924
@@ -173,24 +173,58 @@ enum BytesInternal {
      * <p>
      * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
      */
+
+
     private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
                                                                      @Nullable final BytesStore right) {
-        try {
 
-     /*       System.out.println(((NativeBytes)left).toHexString());
-            System.out.println(((NativeBytes)right).toHexString());
+        try {
+/*
+            System.out.println(((Bytes) left).toHexString());
+            System.out.println(((Bytes) right).toHexString());
 
             System.out.println("left.realReadRemaining() = " + left.realReadRemaining());
             System.out.println("right.realReadRemaining() = " + right.realReadRemaining());
-*/
-            final long aAddress = left.addressForRead(left.readPosition());
-            final long bAddress = right.addressForRead(right.readPosition());
 
-            if (left.realReadRemaining() != right.realReadRemaining())
-                return false;
-            final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(
-                    null, aAddress,
-                    null, bAddress,
+*/
+            final Object leftObject;
+            final long leftOffset;
+
+            if (left.isDirectMemory()) {
+                leftObject = null;
+                leftOffset = left.addressForRead(left.readPosition());
+            } else {
+                final BytesStore bytesStore = left.bytesForRead().bytesStore();
+                if (bytesStore instanceof HeapBytesStore) {
+                    final HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
+                    leftObject = heapBytesStore.realUnderlyingObject();
+                    leftOffset = heapBytesStore.dataOffset();
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            final Object rightObject;
+            final long rightOffset;
+
+            if (right.isDirectMemory()) {
+                rightObject = null;
+                rightOffset = right.addressForRead(right.readPosition());
+            } else {
+                final BytesStore bytesStore = right.bytesForRead().bytesStore();
+                if (bytesStore instanceof HeapBytesStore) {
+                    final HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
+                    rightObject = heapBytesStore.realUnderlyingObject();
+                    rightOffset = heapBytesStore.dataOffset();
+                } else {
+                    throw new UnsupportedOperationException();
+                }
+            }
+
+            final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
+                    leftOffset,
+                    rightObject,
+                    rightOffset,
                     (int) Math.min(left.realReadRemaining(), right.realReadRemaining()), 0);
             return invoke < 0;
         } catch (Throwable e) {
