@@ -115,8 +115,15 @@ enum BytesInternal {
         try {
             // requires java11 or later to set this with the following exports added
             //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
-            Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
-            Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch", Object.class, long.class, Object.class, long.class, int.class, int.class);
+            final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
+            final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
+                    Object.class,
+                    long.class,
+                    Object.class,
+                    long.class,
+                    int.class,
+                    int.class);
+
             vectorizedMismatch.setAccessible(true);
             vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
 
@@ -145,10 +152,15 @@ enum BytesInternal {
 
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
                 && b.realReadRemaining() == a.realReadRemaining()
-                && a.realReadRemaining() < Integer.MAX_VALUE) {
+                && a.realReadRemaining() < Integer.MAX_VALUE
+                && !(a instanceof HexDumpBytes) && !(b instanceof HexDumpBytes)) {
 
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
-            return java11ContentEqualUsingVectorizedMismatch(a, b);
+            try {
+                return java11ContentEqualUsingVectorizedMismatch(a, b);
+            } catch (UnsupportedOperationException e) {
+                Jvm.debug().on(BytesInternal.class, e);
+            }
         }
 
         return readRemaining <= Integer.MAX_VALUE
@@ -184,14 +196,9 @@ enum BytesInternal {
                 leftObject = null;
                 leftOffset = left.addressForRead(left.readPosition());
             } else {
-                final BytesStore bytesStore = left.bytesForRead().bytesStore();
-                if (bytesStore instanceof HeapBytesStore) {
-                    final HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
-                    leftObject = heapBytesStore.realUnderlyingObject();
-                    leftOffset = heapBytesStore.dataOffset();
-                } else {
-                    throw new UnsupportedOperationException();
-                }
+                final HeapBytesStore heapBytesStore = heapBytesStore(left);
+                leftObject = heapBytesStore.realUnderlyingObject();
+                leftOffset = heapBytesStore.dataOffset();
             }
 
             final Object rightObject;
@@ -201,29 +208,28 @@ enum BytesInternal {
                 rightObject = null;
                 rightOffset = right.addressForRead(right.readPosition());
             } else {
-                final BytesStore bytesStore = right.bytesForRead().bytesStore();
-                if (bytesStore instanceof HeapBytesStore) {
-                    final HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
-                    rightObject = heapBytesStore.realUnderlyingObject();
-                    rightOffset = heapBytesStore.dataOffset();
-                } else {
-                    throw new UnsupportedOperationException();
-                }
+                final HeapBytesStore heapBytesStore = heapBytesStore(right);
+                rightObject = heapBytesStore.realUnderlyingObject();
+                rightOffset = heapBytesStore.dataOffset();
             }
 
             final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
                     leftOffset,
                     rightObject,
                     rightOffset,
-                    (int) left.realReadRemaining(), 0);
+                    (int) left.realReadRemaining(),
+                    0);
 
             return invoke < 0;
-
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
+    }
 
+    private static HeapBytesStore heapBytesStore(BytesStore bs) {
+        if (bs.bytesStore() instanceof HeapBytesStore) return (HeapBytesStore) bs.bytesStore();
 
+        throw new UnsupportedOperationException();
     }
 
 
