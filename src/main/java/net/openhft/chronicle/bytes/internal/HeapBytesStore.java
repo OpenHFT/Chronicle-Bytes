@@ -77,7 +77,7 @@ public class HeapBytesStore<U>
         this.capacity = length;
     }
 
-    public long dataOffset() {
+    long dataOffset() {
         return dataOffset;
     }
 
@@ -145,7 +145,8 @@ public class HeapBytesStore<U>
     public U underlyingObject() {
         return underlyingObject;
     }
-    public Object realUnderlyingObject(){
+
+    Object realUnderlyingObject() {
         return realUnderlyingObject;
     }
 

@@ -144,13 +144,12 @@ enum BytesInternal {
             return false;
 
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
-                && a.realReadRemaining() < Integer.MAX_VALUE
-                && b.realReadRemaining() < Integer.MAX_VALUE) {
+                && b.realReadRemaining() == a.realReadRemaining()
+                && a.realReadRemaining() < Integer.MAX_VALUE) {
 
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
             return java11ContentEqualUsingVectorizedMismatch(a, b);
         }
-
 
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
@@ -177,16 +176,7 @@ enum BytesInternal {
 
     private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
                                                                      @Nullable final BytesStore right) {
-
         try {
-/*
-            System.out.println(((Bytes) left).toHexString());
-            System.out.println(((Bytes) right).toHexString());
-
-            System.out.println("left.realReadRemaining() = " + left.realReadRemaining());
-            System.out.println("right.realReadRemaining() = " + right.realReadRemaining());
-
-*/
             final Object leftObject;
             final long leftOffset;
 
@@ -225,8 +215,10 @@ enum BytesInternal {
                     leftOffset,
                     rightObject,
                     rightOffset,
-                    (int) Math.min(left.realReadRemaining(), right.realReadRemaining()), 0);
+                    (int) left.realReadRemaining(), 0);
+
             return invoke < 0;
+
         } catch (Throwable e) {
             throw new RuntimeException(e);
         }
