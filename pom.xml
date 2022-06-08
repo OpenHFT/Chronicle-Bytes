@@ -15,14 +15,15 @@
   ~ limitations under the License..
   -->
 
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.31</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -237,7 +238,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
-<!--                    <verbose>true</verbose>-->
+                    <!--                    <verbose>true</verbose>-->
                 </configuration>
             </plugin>
             <!--
@@ -336,11 +337,11 @@
                             <excludes>
                                 <!--<exclude>META-INF/**</exclude>-->
                                 <exclude>*.jar</exclude>
-<!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
+                                <!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
                             </excludes>
                         </configuration>
                         <executions>
@@ -397,6 +398,7 @@
             </build>
         </profile>
 
+        <!-- to be removed once new root pom is updated -->
         <profile>
             <id>java11</id>
             <activation>
@@ -419,6 +421,39 @@
                 </plugins>
             </build>
         </profile>
+
+        <!-- to be removed once new root pom is updated -->
+        <profile>
+            <id>java17</id>
+            <activation>
+                <jdk>[17,</jdk>
+            </activation>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-surefire-plugin</artifactId>
+                        <configuration>
+                            <argLine>
+                                --illegal-access=permit
+                                --add-exports java.base/jdk.internal.ref=ALL-UNNAMED
+                                --add-exports=java.base/sun.nio.ch=ALL-UNNAMED
+                                --add-exports=jdk.unsupported/sun.misc=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+                                --add-opens=jdk.compiler/com.sun.tools.javac=ALL-UNNAMED
+                                --add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED
+                                --add-opens=java.base/java.lang=ALL-UNNAMED
+                                --add-opens=java.base/java.lang.reflect=ALL-UNNAMED
+                                --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED
+                                --add-exports java.base/jdk.internal.util=ALL-UNNAMED
+                                --add-exports java.base/jdk.internal.misc=ALL-UNNAMED
+                            </argLine>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
     </profiles>
 
 </project>
