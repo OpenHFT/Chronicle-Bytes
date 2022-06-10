@@ -169,19 +169,15 @@ enum BytesInternal {
     }
 
     /**
-     * returns true if the contents are equal using VectorizedMismatch
+     * returns true if the contents are equal using VectorizedMismatch*
      *
      * @param left  the byte on the left
      * @param right the byte on the right
      * @return true if the content are equal
-     * <p>
      * see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924
      * JDK-8033148 will add methods to Arrays for array equals, compare and mismatch.
-     * <p>
      * The implementations of equals, compare and mismatch can be reimplemented using underlying mismatch methods that in turn defer to a single method, vectorizedMismatch, that accesses the memory contents of arrays using Unsafe.getLongUnaligned.
-     * <p>
      * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
-     * <p>
      * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
      */
 
