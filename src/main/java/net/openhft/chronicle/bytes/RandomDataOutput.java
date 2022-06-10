@@ -432,6 +432,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
     long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length);
 
+
     /**
      * Perform a 32-bit CAS at a given offset.
      *
@@ -446,6 +447,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException;
 
+
     /**
      * Perform a 64-bit CAS at a given offset.
      *
@@ -456,6 +458,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException;
+
 
     /**
      * Perform a 32-bit float CAS at a given offset.
@@ -519,4 +522,5 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws IllegalStateException    if released
      */
     double addAndGetDouble(@NonNegative long offset, double adding);
+
 }

@@ -76,6 +76,10 @@ public class HeapBytesStore<U>
         this.capacity = length;
     }
 
+    long dataOffset() {
+        return dataOffset;
+    }
+
     public static <T> HeapBytesStore<T> forFields(Object o, String groupName, int padding) {
         final BytesFieldInfo lookup = BytesFieldInfo.lookup(o.getClass());
         final long start = lookup.startOf(groupName);
@@ -139,6 +143,10 @@ public class HeapBytesStore<U>
     @Override
     public U underlyingObject() {
         return underlyingObject;
+    }
+
+    Object realUnderlyingObject() {
+        return realUnderlyingObject;
     }
 
     @Override

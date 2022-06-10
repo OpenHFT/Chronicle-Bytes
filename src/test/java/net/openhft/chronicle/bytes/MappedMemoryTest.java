@@ -77,7 +77,11 @@ public class MappedMemoryTest extends BytesTestCommon {
                 assertEquals(file0.referenceCounts(), 0, file0.refCount());
                 Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
-                deleteIfPossible(tempFile);
+                try {
+                    deleteIfPossible(tempFile);
+                } catch (AssertionError ignore) {
+                    // windows creates AssertionError when deleting file
+                }
             }
         }
     }

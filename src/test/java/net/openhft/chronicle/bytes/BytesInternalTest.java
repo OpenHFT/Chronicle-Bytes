@@ -343,7 +343,7 @@ public class BytesInternalTest extends BytesTestCommon {
         final Bytes<byte[]> src = Bytes.from("hello again");
 
         src.readSkip(7);
-        assertEquals(src.copy(), src);
+        assertEquals(src.copy().toString(), src.toString());
     }
 
     @Test

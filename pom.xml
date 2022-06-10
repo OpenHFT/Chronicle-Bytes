@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-
     Copyright (c) 2016-2022 chronicle.software
 
     https://chronicle.software
@@ -19,13 +18,16 @@
 
 -->
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
-        <version>1.1.33</version>
-        <relativePath />
+
+        <version>1.1.34</version>
+        <relativePath/>
+
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -117,6 +119,11 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>net.openhft</groupId>
+            <artifactId>jlbh</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -233,7 +240,7 @@
                     <source>1.8</source>
                     <target>1.8</target>
                     <encoding>UTF-8</encoding>
-<!--                    <verbose>true</verbose>-->
+                    <!--                    <verbose>true</verbose>-->
                 </configuration>
             </plugin>
             <!--
@@ -367,11 +374,11 @@
                             <excludes>
                                 <!--<exclude>META-INF/**</exclude>-->
                                 <exclude>*.jar</exclude>
-<!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
-                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
+                                <!--                                <exclude>net/openhft/chronicle/bytes/AbstractBytes.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/AppendableUtil.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/BinaryBytesMethodWriterInvocationHandler.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/BinaryWireCode.class</exclude>
+                                                                <exclude>net/openhft/chronicle/bytes/*.class</exclude>-->
                             </excludes>
                         </configuration>
                         <executions>

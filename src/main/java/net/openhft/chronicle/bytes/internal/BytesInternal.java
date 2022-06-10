@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.pool.BytesPool;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
@@ -39,10 +40,14 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.UTFDataFormatException;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
+import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -94,6 +99,9 @@ enum BytesInternal {
     private static final int MAX_STRING_LEN = Jvm.getInteger("bytes.max-string-len", 128 * 1024);
     private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
+    private static final MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
+
+
     static {
         try {
             SI = new StringInternerBytes(Jvm.getInteger("wire.string-interner.size", 4096));
@@ -101,6 +109,29 @@ enum BytesInternal {
         } catch (Exception e) {
             throw new AssertionError(e);
         }
+
+        MethodHandle vectorizedMismatchMethodHandle = null;
+        try {
+            // requires java11 or later to set this with the following exports added
+            //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
+            final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
+            final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
+                    Object.class,
+                    long.class,
+                    Object.class,
+                    long.class,
+                    int.class,
+                    int.class);
+
+            vectorizedMismatch.setAccessible(true);
+            vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
+
+        } catch (Exception e) {
+            Jvm.debug().on(BytesInternal.class, e);
+        } finally {
+            VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
+        }
+
     }
 
     public static boolean contentEqual(@Nullable final BytesStore a,
@@ -117,10 +148,85 @@ enum BytesInternal {
         if (readRemaining != b.readRemaining())
             // The size is different so, we know that a and b cannot be equal
             return false;
+
+        if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
+                && b.realReadRemaining() == a.realReadRemaining()
+                && a.realReadRemaining() < Integer.MAX_VALUE
+                && !(a instanceof HexDumpBytes) && !(b instanceof HexDumpBytes)) {
+
+            // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
+            try {
+                return java11ContentEqualUsingVectorizedMismatch(a, b);
+            } catch (UnsupportedOperationException e) {
+                Jvm.debug().on(BytesInternal.class, e);
+            }
+        }
+
         return readRemaining <= Integer.MAX_VALUE
                 ? contentEqualInt(a, b)
                 : contentEqualsLong(a, b);
     }
+
+    /**
+     * returns true if the contents are equal using VectorizedMismatch*
+     *
+     * @param left  the byte on the left
+     * @param right the byte on the right
+     * @return true if the content are equal
+     * see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924
+     * JDK-8033148 will add methods to Arrays for array equals, compare and mismatch.
+     * The implementations of equals, compare and mismatch can be reimplemented using underlying mismatch methods that in turn defer to a single method, vectorizedMismatch, that accesses the memory contents of arrays using Unsafe.getLongUnaligned.
+     * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
+     * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
+     */
+
+
+    private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
+                                                                     @Nullable final BytesStore right) {
+        try {
+            final Object leftObject;
+            final long leftOffset;
+
+            if (left.isDirectMemory()) {
+                leftObject = null;
+                leftOffset = left.addressForRead(left.readPosition());
+            } else {
+                final HeapBytesStore heapBytesStore = heapBytesStore(left);
+                leftObject = heapBytesStore.realUnderlyingObject();
+                leftOffset = heapBytesStore.dataOffset();
+            }
+
+            final Object rightObject;
+            final long rightOffset;
+
+            if (right.isDirectMemory()) {
+                rightObject = null;
+                rightOffset = right.addressForRead(right.readPosition());
+            } else {
+                final HeapBytesStore heapBytesStore = heapBytesStore(right);
+                rightObject = heapBytesStore.realUnderlyingObject();
+                rightOffset = heapBytesStore.dataOffset();
+            }
+
+            final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
+                    leftOffset,
+                    rightObject,
+                    rightOffset,
+                    (int) left.realReadRemaining(),
+                    0);
+
+            return invoke < 0;
+        } catch (Throwable e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private static HeapBytesStore heapBytesStore(BytesStore bs) {
+        if (bs.bytesStore() instanceof HeapBytesStore) return (HeapBytesStore) bs.bytesStore();
+
+        throw new UnsupportedOperationException();
+    }
+
 
     // Optimise for the common case where the length is 31-bit.
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
