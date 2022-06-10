@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
@@ -23,6 +22,7 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -47,12 +47,55 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * An immutable reference to some bytes with fixed extents. This can be shared safely across thread
  * provided the data referenced is accessed in a thread safe manner. Only offset access within the
  * capacity is possible.
+ *
  * @param <B> BytesStore type
  * @param <U> Underlying type
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default int addAndGetInt(@NonNegative long offset, int adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetInt(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default long addAndGetLong(@NonNegative long offset, long adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetLong(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default float addAndGetFloat(@NonNegative long offset, float adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetFloat(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default double addAndGetDouble(@NonNegative long offset, double adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetDouble(this, offset, adding);
+    }
 
     /**
      * Returns a BytesStore using the bytes in a specified CharSequence. These chars are encoded
@@ -176,10 +219,10 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
-     * @return an empty, fixed sized Bytes
+     * @return an empty, fixed-sized immutable BytesStore.
      */
     static BytesStore empty() {
-        return NoBytesStore.noBytesStore();
+        return SingletonEmptyByteStore.INSTANCE;
     }
 
     /**
@@ -774,4 +817,31 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 return false;
         return true;
     }
+
+    // Can be removed once RandomDataInput:compareAndSwapInt is removed
+    // To be removed in x.24
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapInt(long offset, int expected, int value) throws BufferOverflowException, IllegalStateException {
+        return ((RandomDataOutput<B>) this).compareAndSwapInt(offset, expected, value);
+    }
+
+    // Can be removed once RandomDataInput:compareAndSwapLong is removed
+    // To be removed in x.24
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapLong(long offset, long expected, long value) throws BufferOverflowException, IllegalStateException {
+        return ((RandomDataOutput<B>) this).compareAndSwapLong(offset, expected, value);
+    }
+
+    /**
+     * Returns if this ByteStore is an immutable empty ByteStore or if it is backed
+     * by an immutable empty ByteStore.
+     *
+     * @return if immutable empty or backed by such
+     */
+    default boolean isImmutableEmptyByteStore() {
+        return false;
+    }
+
 }

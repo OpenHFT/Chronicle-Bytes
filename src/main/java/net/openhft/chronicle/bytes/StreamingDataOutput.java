@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
@@ -438,7 +437,10 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * Write all data available from bytes argument, constrained by how much space available in this.
      * <p>
      * Calling this method will update the cursors of this, but not the bytes we read from.
+     *
+     * @deprecated use write(bytes) instead and alter the bytes as you intended
      */
+    @Deprecated(/* to be removed in x.25 */)
     @NotNull
     default S writeSome(@NotNull Bytes<?> bytes)
             throws IllegalStateException {

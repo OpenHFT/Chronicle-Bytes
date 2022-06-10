@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes.internal;
 
 
@@ -2914,7 +2913,7 @@ enum BytesInternal {
         return false;
     }
 
-    public static float addAndGetFloat(@NotNull RandomDataInput in, @NonNegative long offset, float adding)
+    public static float addAndGetFloat(@NotNull BytesStore<?,?> in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2929,7 +2928,7 @@ enum BytesInternal {
         }
     }
 
-    public static double addAndGetDouble(@NotNull RandomDataInput in, @NonNegative long offset, double adding)
+    public static double addAndGetDouble(@NotNull BytesStore<?,?> in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2944,7 +2943,7 @@ enum BytesInternal {
         }
     }
 
-    public static int addAndGetInt(@NotNull RandomDataInput in, @NonNegative long offset, int adding)
+    public static int addAndGetInt(@NotNull BytesStore<?,?> in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2958,7 +2957,7 @@ enum BytesInternal {
         }
     }
 
-    public static long addAndGetLong(@NotNull RandomDataInput in, @NonNegative long offset, long adding)
+    public static long addAndGetLong(@NotNull BytesStore<?,?> in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
@@ -25,6 +24,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
@@ -390,7 +390,7 @@ public interface RandomDataInput extends RandomCommon {
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetInt(this, offset, adding);
+        return BytesInternal.addAndGetInt((BytesStore<?, ?>) this, offset, adding);
     }
 
     /**
@@ -405,7 +405,7 @@ public interface RandomDataInput extends RandomCommon {
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetLong(this, offset, adding);
+        return BytesInternal.addAndGetLong((BytesStore<?, ?>) this, offset, adding);
     }
 
     /**
@@ -419,7 +419,7 @@ public interface RandomDataInput extends RandomCommon {
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default float addAndGetFloat(@NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetFloat(this, offset, adding);
+        return BytesInternal.addAndGetFloat((BytesStore<?, ?>) this, offset, adding);
     }
 
     /**
@@ -434,7 +434,63 @@ public interface RandomDataInput extends RandomCommon {
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default double addAndGetDouble(@NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetDouble(this, offset, adding);
+        return BytesInternal.addAndGetDouble((BytesStore<?, ?>) this, offset, adding);
+    }
+
+    /**
+     * Perform a 32-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
+    boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
+    void testAndSetInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+    /**
+     * Perform a 64-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
+    boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
+            throws BufferOverflowException, IllegalStateException;
+
+    /**
+     * Perform a 32-bit float CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
+    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
+    }
+
+    /**
+     * Perform a 64-bit double CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
+    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
     }
 
     /**

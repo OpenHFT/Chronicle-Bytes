@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 26.2.1, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1"
+	 id="Lager_1" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns:svg="http://www.w3.org/2000/svg"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 525.8 482.2"
+	 style="enable-background:new 0 0 525.8 482.2;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill:#222649;}
+	.st1{fill:#E29633;stroke:#FFFFFF;stroke-miterlimit:10;}
+	.st2{fill:none;stroke:#FFFFFF;stroke-width:2;stroke-miterlimit:10;}
+	.st3{fill:#FFFFFF;}
+	.st4{font-family:'Poppins-Medium';}
+	.st5{font-size:17px;}
+</style>
+<rect id="rect1007" class="st0" width="525.8" height="482.2"/>
+<sodipodi:namedview  bordercolor="#eeeeee" borderopacity="1" id="namedview1411" inkscape:current-layer="Lager_1" inkscape:cx="381.5959" inkscape:cy="249.6908" inkscape:pagecheckerboard="0" inkscape:pageopacity="0" inkscape:pageshadow="0" inkscape:window-height="770" inkscape:window-maximized="0" inkscape:window-width="1440" inkscape:window-x="0" inkscape:window-y="25" inkscape:zoom="1.3456643" pagecolor="#505050" showgrid="false">
+	</sodipodi:namedview>
+<rect x="310.9" y="386.8" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="354.1" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="321.4" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="288.7" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="256" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="223.3" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="190.7" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="158" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="125.3" class="st1" width="104.2" height="32.6"/>
+<rect x="310.9" y="92.6" class="st1" width="104.2" height="32.6"/>
+<g>
+	<path class="st2" d="M229.7,109.3c21.9,0,43.9,0,65.9,0"/>
+	<g>
+		<polygon class="st3" points="293.8,115.2 304.2,109.2 293.8,103.3 		"/>
+	</g>
+</g>
+<text id="text1354_00000005256367505110268620000002479841835059336871_" transform="matrix(1 0 0 1 313.4232 71.0452)" class="st3 st4 st5">Bytes buffer</text>
+<g>
+	<path class="st2" d="M229.7,207.1c21.9,0,43.9,0,65.9,0"/>
+	<g>
+		<polygon class="st3" points="293.8,213 304.2,207 293.8,201 		"/>
+	</g>
+</g>
+<g>
+	<path class="st2" d="M229.7,403.2c21.9,0,43.9,0,65.9,0"/>
+	<g>
+		<polygon class="st3" points="293.8,409.1 304.2,403.1 293.8,397.1 		"/>
+	</g>
+</g>
+<g>
+	<path class="st2" d="M229.7,305.1c21.9,0,43.9,0,65.9,0"/>
+	<g>
+		<polygon class="st3" points="293.8,311 304.2,305 293.8,299 		"/>
+	</g>
+</g>
+<text id="text1354_00000000191495238654980990000012409685044327324815_" transform="matrix(1 0 0 1 180.6007 112.4395)" class="st3 st4 st5">start</text>
+<text id="text1354_00000129891763925944521940000003391898141005991081_" transform="matrix(1 0 0 1 111.9288 209.5346)" class="st3 st4 st5">readPosition</text>
+<text id="text1354_00000047031167397406097880000001578307249955265421_" transform="matrix(1 0 0 1 110.5979 307.105)" class="st3 st4 st5">writePosition</text>
+<text id="text1354_00000015336292252440225900000011919839927564206720_" transform="matrix(1 0 0 1 108.7676 405.8819)" class="st3 st4 st5">realCapacity</text>
+</svg>

@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
@@ -33,7 +32,15 @@ import java.io.FileNotFoundException;
 /**
  * Bytes to wrap memory mapped data.
  * <p>
- * NOTE These Bytes are single Threaded as are all Bytes.
+ * Memory is grouped in chunks of 64 MB by default.
+ * The chunk size can be increased greatly if the OS.isSparseFileSupported()
+ * e.g. blockSize(512 << 30)
+ * <p>
+ * The chunk containing the most recent accessed memory is reserved and the previous chunk is released.
+ * For random access, you can reserve a chunk by obtaining the bytesStore() and using reserve(owner) on it,
+ * remembering to release(owner) the same BytesStore before closing the file.
+ * <p>
+ * NOTE These MappedBytes are single threaded as are all Bytes.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable {
@@ -48,9 +55,9 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     protected MappedBytes(final String name)
             throws IllegalStateException {
-        super(NoBytesStore.noBytesStore(),
-                NoBytesStore.noBytesStore().writePosition(),
-                NoBytesStore.noBytesStore().writeLimit(),
+        super(BytesStore.empty(),
+                BytesStore.empty().writePosition(),
+                BytesStore.empty().writeLimit(),
                 name);
     }
 

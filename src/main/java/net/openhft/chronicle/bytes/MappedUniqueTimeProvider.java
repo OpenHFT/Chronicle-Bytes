@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -7,7 +7,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *       http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -36,8 +36,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     private static final int LAST_TIME = 128;
     private static final int NANOS_PER_MICRO = 1000;
 
-    @SuppressWarnings("rawtypes")
-    private final Bytes<?> bytes;
+    private final BytesStore<?, ?> bytesStore;
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
 
     MappedUniqueTimeProvider() {
@@ -46,8 +45,9 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             String timeStampDir = Jvm.getProperty("timestamp.dir", OS.TMP);
             final File timeStampPath = new File(timeStampDir, ".time-stamp." + user + ".dat");
             MappedFile file = MappedFile.ofSingle(timeStampPath, OS.pageSize(), false);
-            bytes = file.acquireBytesForWrite(this, 0);
+            final Bytes<?> bytes = file.acquireBytesForWrite(this, 0);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
+            this.bytesStore = bytes.bytesStore();
             IOTools.unmonitor(file);
             IOTools.unmonitor(bytes);
         } catch (Exception ioe) {
@@ -55,6 +55,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
         }
     }
 
+    // Todo: Handle thread safety
     public MappedUniqueTimeProvider provider(TimeProvider provider) {
         this.provider = provider;
         return this;
@@ -73,18 +74,19 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             throws IllegalStateException {
         long timeus = provider.currentTimeMicros();
         while (true) {
-            long time0 = bytes.readVolatileLong(LAST_TIME);
+            final long time0 = lastTimeStored();
             long time0us = time0 / NANOS_PER_MICRO;
             long time;
             if (time0us >= timeus)
                 time = (time0us + 1) * NANOS_PER_MICRO;
             else
                 time = timeus * NANOS_PER_MICRO;
-            if (bytes.compareAndSwapLong(LAST_TIME, time0, time))
+            if (casLastTimeStored(time0, time))
                 return time / NANOS_PER_MICRO;
             Jvm.nanoPause();
         }
     }
+
 
     @Override
     public long currentTimeNanos()
@@ -92,18 +94,27 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
         long time = provider.currentTimeNanos();
         long time5 = time >>> 5;
 
-        long time0 = bytes.readVolatileLong(LAST_TIME);
+        long time0 = lastTimeStored();
         long timeNanos5 = time0 >>> 5;
 
-        if (time5 > timeNanos5 && bytes.compareAndSwapLong(LAST_TIME, time0, time))
+        if (time5 > timeNanos5 && casLastTimeStored(time0, time))
             return time;
 
         while (true) {
-            time0 = bytes.readVolatileLong(LAST_TIME);
+            time0 = lastTimeStored();
             long next = (time0 + 0x20) & ~0x1f;
-            if (bytes.compareAndSwapLong(LAST_TIME, time0, next))
+            if (casLastTimeStored(time0, next))
                 return next;
             Jvm.nanoPause();
         }
     }
+
+    private long lastTimeStored() {
+        return bytesStore.readVolatileLong(LAST_TIME);
+    }
+
+    private boolean casLastTimeStored(final long expected, final long value) {
+        return ((RandomDataOutput<?>) bytesStore).compareAndSwapLong(LAST_TIME, expected, value);
+    }
+
 }

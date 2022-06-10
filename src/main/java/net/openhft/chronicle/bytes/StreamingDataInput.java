@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
@@ -547,7 +546,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         bytes.clear();
         int length = Maths.toUInt31(readStopBit());
         int i;
-        for (i = 0; i < length - 7; i++)
+        for (i = 0; i < length - 7; i += 8)
             bytes.writeLong(readLong());
         for (; i < length; i++)
             bytes.writeByte(readByte());

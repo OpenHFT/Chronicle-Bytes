@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2020 chronicle.software
+ * Copyright (c) 2016-2022 chronicle.software
  *
  * https://chronicle.software
  *
@@ -15,7 +15,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
@@ -435,6 +434,21 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
 
 
     /**
+     * Perform a 32-bit CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+    void testAndSetInt(@NonNegative long offset, int expected, int value)
+            throws BufferOverflowException, IllegalStateException;
+
+
+    /**
      * Perform a 64-bit CAS at a given offset.
      *
      * @param offset   to perform CAS
@@ -444,4 +458,69 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException;
+
+
+    /**
+     * Perform a 32-bit float CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value);
+
+    /**
+     * Perform a 64-bit double CAS at a given offset.
+     *
+     * @param offset   to perform CAS
+     * @param expected value
+     * @param value    to set
+     * @return true, if successful.
+     */
+    boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value);
+
+    /**
+     * Perform an atomic add and get operation for a 32-bit int
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    int addAndGetInt(@NonNegative long offset, int adding);
+
+    /**
+     * Perform an atomic add and get operation for a 64-bit long
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    long addAndGetLong(@NonNegative long offset, long adding);
+
+    /**
+     * Perform an atomic add and get operation for a 32-bit float
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     */
+    float addAndGetFloat(@NonNegative long offset, float adding);
+
+    /**
+     * Perform an atomic add and get operation for a 64-bit double
+     *
+     * @param offset to add and get
+     * @param adding value to add, can be 1
+     * @return the sum
+     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
+     */
+    double addAndGetDouble(@NonNegative long offset, double adding);
+
 }
