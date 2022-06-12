@@ -153,6 +153,9 @@ public class MappedMemoryTest extends BytesTestCommon {
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
 
+        if (OS.isWindows())
+            expectException("Unable to delete");
+
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;
         try {
