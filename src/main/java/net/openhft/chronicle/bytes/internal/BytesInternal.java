@@ -156,7 +156,9 @@ enum BytesInternal {
 
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
             try {
-                return java11ContentEqualUsingVectorizedMismatch(a, b);
+                Boolean vectorizedResult = java11ContentEqualUsingVectorizedMismatch(a, b);
+                if (vectorizedResult != null)
+                    return vectorizedResult;
             } catch (UnsupportedOperationException e) {
                 Jvm.debug().on(BytesInternal.class, e);
             }
@@ -181,9 +183,12 @@ enum BytesInternal {
      */
 
 
-    private static boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
+    private static Boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
                                                                      @Nullable final BytesStore right) {
         try {
+            if (left == null || right == null)
+                return null;
+
             final Object leftObject;
             final long leftOffset;
 
@@ -191,7 +196,11 @@ enum BytesInternal {
                 leftObject = null;
                 leftOffset = left.addressForRead(left.readPosition());
             } else {
-                final HeapBytesStore heapBytesStore = heapBytesStore(left);
+                BytesStore bytesStore = left.bytesStore();
+                if (!(bytesStore instanceof HeapBytesStore))
+                    return null;
+
+                HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 leftObject = heapBytesStore.realUnderlyingObject();
                 leftOffset = heapBytesStore.dataOffset();
             }
@@ -203,7 +212,11 @@ enum BytesInternal {
                 rightObject = null;
                 rightOffset = right.addressForRead(right.readPosition());
             } else {
-                final HeapBytesStore heapBytesStore = heapBytesStore(right);
+                BytesStore bytesStore = right.bytesStore();
+                if (!(bytesStore instanceof HeapBytesStore))
+                    return null;
+
+                HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 rightObject = heapBytesStore.realUnderlyingObject();
                 rightOffset = heapBytesStore.dataOffset();
             }
@@ -215,16 +228,13 @@ enum BytesInternal {
                     (int) left.realReadRemaining(),
                     0);
 
-            return invoke < 0;
+            return invoke < 0 ? Boolean.TRUE : Boolean.FALSE;
         } catch (Throwable e) {
-            throw new RuntimeException(e);
+            if (Jvm.debug().isEnabled(BytesInternal.class))
+                Jvm.debug().on(BytesInternal.class, e);
+
+            return null;
         }
-    }
-
-    private static HeapBytesStore heapBytesStore(BytesStore bs) {
-        if (bs.bytesStore() instanceof HeapBytesStore) return (HeapBytesStore) bs.bytesStore();
-
-        throw new UnsupportedOperationException();
     }
 
 
