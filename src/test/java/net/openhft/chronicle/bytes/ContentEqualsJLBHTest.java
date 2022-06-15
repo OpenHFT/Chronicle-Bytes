@@ -48,8 +48,6 @@ public class ContentEqualsJLBHTest {
     }
 
     public static void main(String[] args) {
-
-
         ContentEqualsJLBHTest benchmark = new ContentEqualsJLBHTest();
         JLBHTask task = new SimpleJLBHTask(benchmark.left, benchmark.right);
         JLBHOptions jlbhOptions = new JLBHOptions()

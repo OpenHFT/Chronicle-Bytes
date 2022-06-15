@@ -78,9 +78,9 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
-    public void clearUsedByThread() {
-        super.clearUsedByThread();
-        closeable.clearUsedByThread();
+    public void singleThreadedCheckReset() {
+        super.singleThreadedCheckReset();
+        closeable.singleThreadedCheckReset();
     }
 
     @Override
@@ -567,9 +567,15 @@ public abstract class CommonMappedBytes extends MappedBytes {
         return true;
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     public CommonMappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck) {
-        closeable.disableThreadSafetyCheck(disableThreadSafetyCheck);
+        singleThreadedCheckDisabled(disableThreadSafetyCheck);
         return this;
+    }
+
+    public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
+        super.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+        closeable.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
     }
 
     @NotNull

@@ -1793,4 +1793,16 @@ public class HexDumpBytes
             reader.close();
         }
     }
+
+    @Override
+    public void singleThreadedCheckReset() {
+        base.singleThreadedCheckReset();
+        text.singleThreadedCheckReset();
+    }
+
+    @Override
+    public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
+        base.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+        text.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+    }
 }

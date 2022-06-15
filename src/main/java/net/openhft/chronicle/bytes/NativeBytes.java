@@ -17,9 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.EmptyByteStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
-import net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -193,6 +191,7 @@ public class NativeBytes<U>
             throws IllegalArgumentException, IllegalStateException {
         try {
             assert desiredCapacity >= 0;
+            assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
             writeCheckOffset(desiredCapacity, 0);
         } catch (BufferOverflowException e) {
             IllegalArgumentException iae = new IllegalArgumentException("Bytes<?> cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);

@@ -40,7 +40,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
 
     protected AbstractReference() {
         // assume thread safe.
-        disableThreadSafetyCheck(true);
+        singleThreadedCheckDisabled(true);
     }
 
     @Override

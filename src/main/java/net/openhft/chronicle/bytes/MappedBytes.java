@@ -150,6 +150,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         return true;
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     public abstract MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck);
 
     public abstract void chunkCount(long[] chunkCount);

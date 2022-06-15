@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.SingleThreadedChecked;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -68,7 +69,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public interface Bytes<U> extends
         BytesStore<Bytes<U>, U>,
         BytesIn<U>,
-        BytesOut<U> {
+        BytesOut<U>,
+        SingleThreadedChecked {
 
     /**
      * The max capacity a Bytes can ever have.

@@ -553,8 +553,8 @@ public class MappedBytesTest extends BytesTestCommon {
                 } catch (IllegalStateException expected) {
 //                expected.printStackTrace();
                 }
-                bytes.disableThreadSafetyCheck(true)
-                        .writeLong(-1);
+                bytes.singleThreadedCheckDisabled(true);
+                bytes.writeLong(-1);
             }
         } finally {
             t.interrupt();
