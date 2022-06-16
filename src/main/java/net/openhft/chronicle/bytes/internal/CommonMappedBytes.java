@@ -165,6 +165,14 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
+    public long realWriteRemaining() {
+        long limit = writeLimit();
+        if (limit > lastActualSize)
+            limit = Math.min(realCapacity(), limit);
+        return limit - writePosition();
+    }
+
+    @Override
     public long realCapacity() {
 
         try {
