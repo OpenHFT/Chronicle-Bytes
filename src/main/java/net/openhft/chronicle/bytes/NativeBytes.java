@@ -163,7 +163,7 @@ public class NativeBytes<U>
             if (writeEnd <= bytesStore.safeLimit() && !isImmutableEmptyByteStore()) {
                 return; // do nothing.
             }
-            if (writeEnd >= capacity)
+            if (writeEnd > capacity)
                 throw new BufferOverflowException(/*"Write exceeds capacity"*/);
             checkResize(writeEnd);
         } else {
