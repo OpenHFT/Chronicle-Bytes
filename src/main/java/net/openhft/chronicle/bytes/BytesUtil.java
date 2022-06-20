@@ -407,4 +407,17 @@ public enum BytesUtil {
     public static long padOffset(long from) {
         return (-from) & 0x3L;
     }
+
+    /**
+     * If the last two characters were a newline, rewind one character so there is only one newline.
+     *
+     * @param bytes to check and trim as needed.
+     */
+    public static void combineDoubleNewline(Bytes<?> bytes) {
+        long wp = bytes.writePosition();
+        if (bytes.peekUnsignedByte(wp - 1) == '\n'
+                && bytes.peekUnsignedByte(wp - 2) == '\n')
+            bytes.writePosition(wp - 1);
+    }
+
 }
