@@ -40,7 +40,6 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -112,20 +111,21 @@ enum BytesInternal {
 
         MethodHandle vectorizedMismatchMethodHandle = null;
         try {
-            // requires java11 or later to set this with the following exports added
-            //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
-            final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
-            final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
-                    Object.class,
-                    long.class,
-                    Object.class,
-                    long.class,
-                    int.class,
-                    int.class);
+            if (Jvm.isJava9Plus()) {
+                // requires java11 or later to set this with the following exports added
+                //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
+                final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
+                final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
+                        Object.class,
+                        long.class,
+                        Object.class,
+                        long.class,
+                        int.class,
+                        int.class);
 
-            vectorizedMismatch.setAccessible(true);
-            vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
-
+                vectorizedMismatch.setAccessible(true);
+                vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
+            }
         } catch (Exception e) {
             Jvm.debug().on(BytesInternal.class, e);
         } finally {
