@@ -28,10 +28,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.UnsafeText;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -54,7 +51,8 @@ public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
         HasUncheckedRandomDataInput {
-    protected static final boolean DISABLE_THREAD_SAFETY = Jvm.getBoolean("disable.thread.safety", false);
+    @Deprecated(/* remove in x.25 */)
+    protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final byte[] EMPTY_ARRAY = new byte[0];
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
