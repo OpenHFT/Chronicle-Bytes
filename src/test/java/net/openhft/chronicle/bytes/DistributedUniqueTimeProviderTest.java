@@ -31,7 +31,6 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assume.assumeFalse;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -39,16 +38,11 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeClass
     public static void checks() throws IOException {
-        try {
-            System.setProperty("timestamp.dir", OS.getTarget());
-            final File file = new File(BytesUtil.TIME_STAMP_PATH);
-            file.delete();
-            file.deleteOnExit();
-            try (FileOutputStream fos = new FileOutputStream(file)) {
-            }
-        } catch (IOException ioe) {
-            assumeFalse(OS.isWindows());
-            throw ioe;
+        System.setProperty("timestamp.dir", OS.getTarget());
+        final File file = new File(BytesUtil.TIME_STAMP_PATH);
+        deleteIfPossible(file);
+        file.deleteOnExit();
+        try (FileOutputStream fos = new FileOutputStream(file)) {
         }
     }
 
