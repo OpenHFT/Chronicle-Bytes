@@ -23,11 +23,13 @@ import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
 import net.openhft.chronicle.core.threads.ThreadDump;
+import org.jetbrains.annotations.NotNull;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
+import java.io.File;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Predicate;
@@ -120,16 +122,28 @@ public class BytesTestCommon {
     @After
     @AfterEach
     public void afterChecks() {
-        CleaningThread.performCleanup(Thread.currentThread());
-
-        // find any discarded resources.
-        System.gc();
-        waitForCloseablesToClose(100);
+        cleanResources();
 
         if (finishedNormally) {
             assertReferencesReleased();
             checkThreadDump();
             checkExceptions();
+        }
+    }
+
+    private static void cleanResources() {
+        CleaningThread.performCleanup(Thread.currentThread());
+
+        // find any discarded resources.
+        System.gc();
+        waitForCloseablesToClose(100);
+    }
+
+    protected static void deleteIfPossible(@NotNull final File file) {
+        cleanResources();
+
+        if (file.exists() && !file.delete()) {
+            Jvm.error().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
         }
     }
 }

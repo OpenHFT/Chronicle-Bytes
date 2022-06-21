@@ -18,11 +18,13 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
@@ -33,7 +35,12 @@ public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
     @BeforeClass
     public static void checks() throws IOException {
+        try {
             DistributedUniqueTimeProviderTest.checks();
+        } catch (FileNotFoundException e) {
+            if (!OS.isWindows())
+                throw e;
+        }
     }
 
     @Test

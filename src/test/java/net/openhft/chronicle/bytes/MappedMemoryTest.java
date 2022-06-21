@@ -21,7 +21,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;
@@ -39,20 +38,10 @@ public class MappedMemoryTest extends BytesTestCommon {
     private static final long SHIFT = 27L;
     private static final long BLOCK_SIZE = 1L << SHIFT;
 
-    private static void deleteIfPossible(@NotNull final File file) {
-        if (!file.delete()) {
-            // needed for the recordExceptions() check to expect this warning.
-            Jvm.warn().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
-        }
-    }
-
     // on i7-3970X ~ 3.3 ns
     @Test
     public void testRawMemoryMapped()
             throws IOException {
-
-        if (OS.isWindows())
-            expectException("Unable to delete");
 
         final ReferenceOwner test = ReferenceOwner.temporary("test");
         for (int t = 0; t < 5; t++) {
@@ -77,11 +66,7 @@ public class MappedMemoryTest extends BytesTestCommon {
                 assertEquals(file0.referenceCounts(), 0, file0.refCount());
                 Jvm.perf().on(getClass(), "With RawMemory,\t\t time= " + 80 * (System.nanoTime() - startTime) / BLOCK_SIZE / 10.0 + " ns, number of longs written=" + BLOCK_SIZE / 8);
             } finally {
-                try {
-                    deleteIfPossible(tempFile);
-                } catch (AssertionError ignore) {
-                    // windows creates AssertionError when deleting file
-                }
+                deleteIfPossible(tempFile);
             }
         }
     }
@@ -90,8 +75,6 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void withMappedNativeBytesTest()
             throws IOException {
-        if (OS.isWindows())
-            expectException("Unable to delete");
 
         for (int t = 0; t < 3; t++) {
             final File tempFile = File.createTempFile("chronicle", "q");
@@ -116,8 +99,6 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void withRawNativeBytesTess()
             throws IOException {
-        if (OS.isWindows())
-            expectException("Unable to delete");
         final ReferenceOwner test = ReferenceOwner.temporary("test");
 
         for (int t = 0; t < 3; t++) {
@@ -152,9 +133,6 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
-
-        if (OS.isWindows())
-            expectException("Unable to delete");
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;
@@ -195,8 +173,6 @@ public class MappedMemoryTest extends BytesTestCommon {
     @Test
     public void mappedMemoryTestSingle()
             throws IOException, IORuntimeException {
-        if (OS.isWindows())
-            expectException("Unable to delete");
 
         final File tempFile = File.createTempFile("chronicle", "q");
         Bytes<?> bytes0;
@@ -229,6 +205,8 @@ public class MappedMemoryTest extends BytesTestCommon {
                 }
             }
         } finally {
+            if (OS.isWindows())
+                ignoreException("Unable to delete");
             deleteIfPossible(tempFile);
         }
         assertEquals(0, bytes0.refCount());
