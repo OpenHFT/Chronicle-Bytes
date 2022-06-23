@@ -1007,6 +1007,7 @@ public abstract class AbstractBytes<U>
     protected long writeOffsetPositionMoved(@NonNegative long adding, @NonNegative long advance)
             throws BufferOverflowException, IllegalStateException {
         long oldPosition = writePosition();
+        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
         writeCheckOffset(oldPosition, adding);
         uncheckedWritePosition(writePosition() + advance);
         return oldPosition;
@@ -1319,29 +1320,6 @@ public abstract class AbstractBytes<U>
         return uncheckedRandomDataInput;
     }
 
-    private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
-
-        @Override
-        public byte readByte(@NonNegative long offset) {
-            return bytesStore.readByte(offset);
-        }
-
-        @Override
-        public short readShort(@NonNegative long offset) {
-            return bytesStore.readShort(offset);
-        }
-
-        @Override
-        public int readInt(@NonNegative long offset) {
-            return bytesStore.readInt(offset);
-        }
-
-        @Override
-        public long readLong(@NonNegative long offset) {
-            return bytesStore.readLong(offset);
-        }
-    }
-
     public int byteCheckSum(@NonNegative int start, @NonNegative int end)
             throws BufferUnderflowException, IllegalStateException {
         int sum = 0;
@@ -1373,6 +1351,29 @@ public abstract class AbstractBytes<U>
 
         static void reportOnce() {
             // Do nothing
+        }
+    }
+
+    private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
+
+        @Override
+        public byte readByte(@NonNegative long offset) {
+            return bytesStore.readByte(offset);
+        }
+
+        @Override
+        public short readShort(@NonNegative long offset) {
+            return bytesStore.readShort(offset);
+        }
+
+        @Override
+        public int readInt(@NonNegative long offset) {
+            return bytesStore.readInt(offset);
+        }
+
+        @Override
+        public long readLong(@NonNegative long offset) {
+            return bytesStore.readLong(offset);
         }
     }
 }
