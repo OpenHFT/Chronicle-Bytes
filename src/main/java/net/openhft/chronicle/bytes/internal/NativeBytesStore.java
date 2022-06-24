@@ -309,19 +309,17 @@ public class NativeBytesStore<U>
         long size = end - start;
         // align the start
         while ((addr & 0x7) != 0 && size > 0) {
-            if (memory.readByte(addr, 0) != 0)
-                memory.writeByte(addr, (byte) 0);
+            memory.writeByte(addr, (byte) 0);
             addr++;
             size--;
         }
         long i = 0;
         for (; i < size - 7; i += 8)
-            if (memory.readLong(addr + i, 0) != 0)
+            if (memory.readLong(addr + i) != 0)
                 memory.writeLong(addr + i, 0);
 
         for (; i < size; i++)
-            if (memory.readByte(addr + i, 0) != 0)
-                memory.writeByte(addr + i, (byte) 0);
+            memory.writeByte(addr + i, (byte) 0);
         return this;
     }
 
