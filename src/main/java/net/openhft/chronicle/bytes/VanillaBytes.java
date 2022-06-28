@@ -35,22 +35,22 @@
 
     package net.openhft.chronicle.bytes;
 
-    import net.openhft.chronicle.bytes.internal.BytesInternal;
-    import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-    import net.openhft.chronicle.core.*;
-    import net.openhft.chronicle.core.annotation.Java9;
-    import net.openhft.chronicle.core.annotation.NonNegative;
-    import net.openhft.chronicle.core.io.IORuntimeException;
-    import net.openhft.chronicle.core.util.StringUtils;
-    import org.jetbrains.annotations.NotNull;
-    import org.jetbrains.annotations.Nullable;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.*;
+import net.openhft.chronicle.core.annotation.Java9;
+import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.util.StringUtils;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
-    import java.nio.BufferOverflowException;
-    import java.nio.BufferUnderflowException;
-    import java.nio.ByteBuffer;
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+import java.nio.ByteBuffer;
 
-    import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
-    import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
     /**
      * Simple Bytes implementation which is not Elastic.
@@ -302,8 +302,10 @@
         public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
-            requireNonNegative(offset);
-            requireNonNegative(length);
+            if ((offset | length) < 0) {
+                requireNonNegative(offset);
+                requireNonNegative(length);
+            }
             ensureCapacity(writePosition() + length);
             optimisedWrite(bytes, offset, length);
             return this;
@@ -330,10 +332,13 @@
 
         public void write(long position, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
                 throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
-            requireNonNegative(position);
             requireNonNull(str);
-            requireNonNegative(offset);
-            requireNonNegative(length);
+            if ((offset | length | position) < 0) {
+                requireNonNegative(position);
+                requireNonNegative(offset);
+                requireNonNegative(length);
+            }
+
             ensureCapacity(writePosition() + length);
             if (offset + length > str.length())
                 throw new IllegalArgumentException("offset=" + offset + " + length=" + length + " > str.length =" + str.length());
@@ -447,8 +452,10 @@
         public Bytes<U> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {
             requireNonNull(bytes);
-            requireNonNegative(offset);
-            requireNonNegative(length);
+            if ((offset | length) < 0) {
+                requireNonNegative(offset);
+                requireNonNegative(length);
+            }
             ensureCapacity(writePosition() + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {
