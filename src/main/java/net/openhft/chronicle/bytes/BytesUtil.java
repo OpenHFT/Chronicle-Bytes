@@ -419,5 +419,4 @@ public enum BytesUtil {
                 && bytes.peekUnsignedByte(wp - 2) == '\n')
             bytes.writePosition(wp - 1);
     }
-
 }
