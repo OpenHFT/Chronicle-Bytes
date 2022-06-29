@@ -135,6 +135,29 @@ public class BytesUtilTest extends BytesTestCommon {
         }
     }
 
+    @Test
+    public void combineDoubleNewline() {
+        doTestCombineDoubleNewline("\n", "\n");
+        doTestCombineDoubleNewline("\r\n", "\r\n");
+        doTestCombineDoubleNewline("\n", "\n ");
+        doTestCombineDoubleNewline(" ", " ");
+        doTestCombineDoubleNewline(" ", "  ");
+        doTestCombineDoubleNewline("  ", "   ");
+        doTestCombineDoubleNewline("\n", "\n\n");
+        doTestCombineDoubleNewline("\n", " \n");
+        doTestCombineDoubleNewline(" \n", "  \n");
+        doTestCombineDoubleNewline("AA", "AA");
+        doTestCombineDoubleNewline("AA ", "AA ");
+        doTestCombineDoubleNewline("AA ", "AA  ");
+        doTestCombineDoubleNewline("AA  ", "AA   ");
+    }
+
+    private void doTestCombineDoubleNewline(String a, String b) {
+        final Bytes<byte[]> b2 = Bytes.from(b);
+        BytesUtil.combineDoubleNewline(b2);
+        assertEquals(a, b2.toString());
+    }
+
     static class A {
         int i;
         long l;
