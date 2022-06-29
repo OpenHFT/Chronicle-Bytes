@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -382,19 +383,8 @@ public class BytesInternalTest extends BytesTestCommon {
         Assert.assertEquals("Different " + (100.0 * different) / max + "%", 0, different);
     }
 
-    static class Nested {
-        public static final int LENGTH;
-
-        static {
-            long maxMemory = Runtime.getRuntime().maxMemory();
-            int maxLength = OS.isLinux() ? 1 << 30 : 1 << 28;
-            LENGTH = (int) Math.min(maxMemory / 16, maxLength);
-            if (LENGTH < maxLength)
-                System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
-        }
-    }
-
     @Test
+    @Ignore(/* peformance test */)
     public void testNoneDirectWritePerformance() {
         final int size = 64;
         Bytes<?> a = Bytes.allocateElasticOnHeap(size + 8);
@@ -486,6 +476,18 @@ public class BytesInternalTest extends BytesTestCommon {
             assertTrue(time5 > 0);
             assertTrue(time6 > 0);
             Thread.yield();
+        }
+    }
+
+    static class Nested {
+        public static final int LENGTH;
+
+        static {
+            long maxMemory = Runtime.getRuntime().maxMemory();
+            int maxLength = OS.isLinux() ? 1 << 30 : 1 << 28;
+            LENGTH = (int) Math.min(maxMemory / 32, maxLength);
+            if (LENGTH < maxLength)
+                System.out.println("Not enough memory to run big test, was " + (LENGTH >> 20) + " MB.");
         }
     }
 
