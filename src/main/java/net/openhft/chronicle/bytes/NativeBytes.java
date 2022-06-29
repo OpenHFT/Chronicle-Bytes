@@ -194,10 +194,14 @@ public class NativeBytes<U>
             assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
             writeCheckOffset(desiredCapacity, 0);
         } catch (BufferOverflowException e) {
-            IllegalArgumentException iae = new IllegalArgumentException("Bytes<?> cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
-            Jvm.error().on(NativeBytes.class, iae);
-            throw iae;
+            handleBOEEnsureCapacity(desiredCapacity, e);
         }
+    }
+
+    private void handleBOEEnsureCapacity(long desiredCapacity, BufferOverflowException e) {
+        IllegalArgumentException iae = new IllegalArgumentException("Bytes<?> cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
+        Jvm.error().on(NativeBytes.class, iae);
+        throw iae;
     }
 
     private void checkResize(@NonNegative final long endOfBuffer)

@@ -309,7 +309,8 @@ public abstract class AbstractBytes<U>
 
         if (position < readPosition())
             this.readPosition = position;
-        ensureCapacity(position);
+        if (isElastic())
+            ensureCapacity(position);
         uncheckedWritePosition(position);
         return this;
     }
