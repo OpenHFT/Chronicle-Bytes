@@ -99,7 +99,7 @@ public enum BytesUtil {
     /**
      * Are all the fields in the range given trivially copyable
      *
-     * @param clazz to check
+     * @param clazz  to check
      * @param offset start of field area
      * @param length of the field area
      * @return true if the fields in range are trivially copyable.
@@ -364,19 +364,6 @@ public enum BytesUtil {
         BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
-    static final class WarnUncheckedElasticBytes {
-        static {
-            Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
-        }
-
-        private WarnUncheckedElasticBytes() {
-        }
-
-        static void warn() {
-            // static block does the work.
-        }
-    }
-
     public static void reverse(Bytes<?> text, @NonNegative int start) {
         long rp = text.readPosition();
         int end = text.length() - 1;
@@ -415,8 +402,40 @@ public enum BytesUtil {
      */
     public static void combineDoubleNewline(Bytes<?> bytes) {
         long wp = bytes.writePosition();
-        if (bytes.peekUnsignedByte(wp - 1) == '\n'
-                && bytes.peekUnsignedByte(wp - 2) == '\n')
+        final int ch1 = bytes.peekUnsignedByte(wp - 1);
+        if (isControlSpace(ch1)) {
+            final int ch2 = bytes.peekUnsignedByte(wp - 2);
+            if (!isControlSpace(ch2))
+                return;
+
+            if (ch2 == ' ') {
+                if (ch1 == '\n') {
+                    bytes.writePosition(wp - 1);
+                    bytes.writeUnsignedByte(wp - 2, '\n');
+                    return;
+                }
+
+            } else if (ch2 == '\r' && ch1 == '\n') {
+                return;
+            }
             bytes.writePosition(wp - 1);
+        }
+    }
+
+    static boolean isControlSpace(int ch) {
+        return 0 <= ch && ch <= ' ';
+    }
+
+    static final class WarnUncheckedElasticBytes {
+        static {
+            Jvm.debug().on(WarnUncheckedElasticBytes.class, "Wrapping elastic bytes with unchecked() will require calling ensureCapacity() as needed!");
+        }
+
+        private WarnUncheckedElasticBytes() {
+        }
+
+        static void warn() {
+            // static block does the work.
+        }
     }
 }
