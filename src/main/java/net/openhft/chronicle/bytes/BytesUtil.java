@@ -403,22 +403,37 @@ public enum BytesUtil {
     public static void combineDoubleNewline(Bytes<?> bytes) {
         long wp = bytes.writePosition();
         final int ch1 = bytes.peekUnsignedByte(wp - 1);
-        if (isControlSpace(ch1)) {
-            final int ch2 = bytes.peekUnsignedByte(wp - 2);
-            if (!isControlSpace(ch2))
-                return;
+        switch (ch1) {
+            case '\n': {
+                final int ch2 = bytes.peekUnsignedByte(wp - 2);
+                switch (ch2) {
+                    case '\n':
+                        bytes.writePosition(wp - 1);
+                        return;
 
-            if (ch2 == ' ') {
-                if (ch1 == '\n') {
-                    bytes.writePosition(wp - 1);
-                    bytes.writeUnsignedByte(wp - 2, '\n');
-                    return;
+                    case ' ':
+                        bytes.writePosition(wp - 2);
+                        bytes.append('\n');
+                        return;
+
+                    default:
+                        return;
                 }
-
-            } else if (ch2 == '\r' && ch1 == '\n') {
-                return;
             }
-            bytes.writePosition(wp - 1);
+            case ' ': {
+                final int ch2 = bytes.peekUnsignedByte(wp - 2);
+                switch (ch2) {
+                    case ' ':
+                        final int ch3 = bytes.peekUnsignedByte(wp - 3);
+                        if (ch3 > ' ') {
+                            bytes.writePosition(wp - 1);
+                        }
+                        return;
+
+                    default:
+                        return;
+                }
+            }
         }
     }
 

@@ -139,17 +139,17 @@ public class BytesUtilTest extends BytesTestCommon {
     public void combineDoubleNewline() {
         doTestCombineDoubleNewline("\n", "\n");
         doTestCombineDoubleNewline("\r\n", "\r\n");
-        doTestCombineDoubleNewline("\n", "\n ");
+        doTestCombineDoubleNewline("\n ", "\n ");
         doTestCombineDoubleNewline(" ", " ");
-        doTestCombineDoubleNewline(" ", "  ");
-        doTestCombineDoubleNewline("  ", "   ");
+        doTestCombineDoubleNewline("  ", "  ");
+        doTestCombineDoubleNewline("   ", "   ");
         doTestCombineDoubleNewline("\n", "\n\n");
         doTestCombineDoubleNewline("\n", " \n");
         doTestCombineDoubleNewline(" \n", "  \n");
         doTestCombineDoubleNewline("AA", "AA");
         doTestCombineDoubleNewline("AA ", "AA ");
         doTestCombineDoubleNewline("AA ", "AA  ");
-        doTestCombineDoubleNewline("AA  ", "AA   ");
+        doTestCombineDoubleNewline("AA   ", "AA   ");
     }
 
     private void doTestCombineDoubleNewline(String a, String b) {
