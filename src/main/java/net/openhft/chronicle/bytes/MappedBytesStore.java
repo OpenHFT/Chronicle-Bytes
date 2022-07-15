@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -350,8 +351,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             long start0 = System.currentTimeMillis();
             PosixAPI.posix().msync(address, safeLimit - start, syncMode.mSyncFlag());
             long time0 = System.currentTimeMillis() - start0;
-            if (time0 >= 5)
-                System.out.println("Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+            if (time0 >= 10)
+                Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
         }
         // must sync before releasing
         super.performRelease();
