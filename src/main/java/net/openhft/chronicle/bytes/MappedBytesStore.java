@@ -348,17 +348,41 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     protected void performRelease() {
         if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
-            long start0 = System.currentTimeMillis();
-            PosixAPI.posix().msync(address, safeLimit - start, syncMode.mSyncFlag());
-            long time0 = System.currentTimeMillis() - start0;
-            if (time0 >= 10)
-                Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+            performMsync(0, safeLimit - start);
         }
         // must sync before releasing
         super.performRelease();
     }
 
+    private void performMsync(long offset, long length) {
+        long start0 = System.currentTimeMillis();
+        PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
+        long time0 = System.currentTimeMillis() - start0;
+        if (time0 >= 10)
+            Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+    }
+
     public void syncMode(SyncMode syncMode) {
         this.syncMode = syncMode;
+    }
+
+    /**
+     * Synchronise from the last complete page up to this position.
+     *
+     * @param position to sync with the syncMode()
+     */
+    public void syncUpTo(long position) {
+        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
+            return;
+        long length = position - start;
+        if (position <= length)
+            return;
+        final long maxLength = safeLimit - start;
+        if (length > maxLength)
+            length = maxLength;
+        long pageEnd = (length + 0xFFF) & ~0xFFF;
+        long pageStart = length & ~0xFFF;
+        performMsync(syncLength, pageEnd - syncLength);
+        syncLength = pageStart;
     }
 }
