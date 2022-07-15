@@ -156,4 +156,5 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     public abstract void chunkCount(long[] chunkCount);
 
     public abstract MappedFile mappedFile();
+
 }

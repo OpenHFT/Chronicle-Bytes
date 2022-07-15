@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.posix.PosixAPI;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -40,10 +41,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
     public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
+    protected final Runnable writeCheck;
     private final MappedFile mappedFile;
     private final long start;
     private final long safeLimit;
-    protected final Runnable writeCheck;
+    private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
+    private long syncLength = 0;
 
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException {
@@ -339,5 +342,22 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             throws IllegalStateException {
         writeCheck.run();
         return super.appendUtf8(pos, chars, offset, length);
+    }
+
+    @Override
+    protected void performRelease() {
+        if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
+            long start0 = System.currentTimeMillis();
+            PosixAPI.posix().msync(address, safeLimit - start, syncMode.mSyncFlag());
+            long time0 = System.currentTimeMillis() - start0;
+            if (time0 >= 5)
+                System.out.println("Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+        }
+        // must sync before releasing
+        super.performRelease();
+    }
+
+    public void syncMode(SyncMode syncMode) {
+        this.syncMode = syncMode;
     }
 }

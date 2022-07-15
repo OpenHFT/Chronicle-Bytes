@@ -26,6 +26,8 @@ import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.ObjectUtils;
+import net.openhft.posix.PosixAPI;
+import net.openhft.posix.internal.jnr.JNRPosixAPI;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

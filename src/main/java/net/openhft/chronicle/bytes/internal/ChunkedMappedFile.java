@@ -50,8 +50,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 @SuppressWarnings({"restriction"})
 public class ChunkedMappedFile extends MappedFile {
-    static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
-
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -60,6 +58,7 @@ public class ChunkedMappedFile extends MappedFile {
     private final List<MappedBytesStore> stores = new ArrayList<>();
     private final long capacity;
     private long[] chunkCount = {0L};
+    private SyncMode syncMode = DEFAULT_SYNC_MODE;
 
     public ChunkedMappedFile(@NotNull final File file,
                              @NotNull final RandomAccessFile raf,
@@ -133,7 +132,8 @@ public class ChunkedMappedFile extends MappedFile {
                 mappedFile.acquireBytesForWrite(warmup, i * mapAlignment)
                         .release(warmup);
             }
-        } catch (BufferUnderflowException | IllegalArgumentException | IOException | IllegalStateException | BufferOverflowException e) {
+        } catch (BufferUnderflowException | IllegalArgumentException | IOException | IllegalStateException |
+                 BufferOverflowException e) {
             throw new AssertionError(e);
         }
     }
@@ -199,6 +199,7 @@ public class ChunkedMappedFile extends MappedFile {
             final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
             final MappedBytesStore mbs2 =
                     mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+            mbs2.syncMode(syncMode);
             if (RETAIN)
                 mbs2.reserve(this);
             stores.set(chunk, mbs2);
@@ -212,6 +213,16 @@ public class ChunkedMappedFile extends MappedFile {
 
             return mbs2;
         }
+    }
+
+    @Override
+    public void syncMode(SyncMode syncMode) {
+        synchronized (stores) {
+            for (MappedBytesStore store : stores) {
+                store.syncMode(syncMode);
+            }
+        }
+        this.syncMode = syncMode;
     }
 
     private void resizeRafIfTooSmall(@NonNegative final int chunk)
