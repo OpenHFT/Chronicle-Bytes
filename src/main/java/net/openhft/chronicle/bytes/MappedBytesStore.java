@@ -362,6 +362,10 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
     }
 
+    public SyncMode syncMode() {
+        return syncMode;
+    }
+
     public void syncMode(SyncMode syncMode) {
         this.syncMode = syncMode;
     }
@@ -375,7 +379,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long length = position - start;
-        if (position <= length)
+        if (length <= syncLength)
             return;
         final long maxLength = safeLimit - start;
         if (length > maxLength)
