@@ -113,6 +113,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         }
     }
 
+    @Deprecated(/* remove in x.24 */)
     @Override
     public long getVolatileValue(long closedValue) {
         if (isClosed())
