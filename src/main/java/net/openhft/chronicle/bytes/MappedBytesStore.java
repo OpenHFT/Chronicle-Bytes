@@ -386,7 +386,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             length = maxLength;
         long pageEnd = (length + 0xFFF) & ~0xFFF;
         long pageStart = length & ~0xFFF;
-        performMsync(syncLength, pageEnd - syncLength);
+        final long length2 = pageEnd - syncLength;
+        performMsync(syncLength, length2);
         syncLength = pageStart;
     }
 }
