@@ -43,8 +43,6 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class SingleMappedFile extends MappedFile {
-    static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
-
     @NotNull
     private final RandomAccessFile raf;
     private final FileChannel fileChannel;
@@ -72,6 +70,7 @@ public class SingleMappedFile extends MappedFile {
             resizeRafIfTooSmall(capacity);
             final long address = OS.map(fileChannel, mode, 0, capacity);
             final MappedBytesStore mbs2 = MAPPED_BYTES_STORE_FACTORY.create(this, this, 0, address, capacity, capacity);
+            mbs2.syncMode(DEFAULT_SYNC_MODE);
 
             final long elapsedNs = System.nanoTime() - beginNs;
             if (newChunkListener != null)
@@ -90,6 +89,11 @@ public class SingleMappedFile extends MappedFile {
             if (!ok)
                 close();
         }
+    }
+
+    @Override
+    public void syncMode(SyncMode syncMode) {
+        store.syncMode(syncMode);
     }
 
     @NotNull

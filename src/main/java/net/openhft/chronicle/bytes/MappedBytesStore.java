@@ -19,9 +19,11 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.posix.PosixAPI;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -40,10 +42,12 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
     public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
+    protected final Runnable writeCheck;
     private final MappedFile mappedFile;
     private final long start;
     private final long safeLimit;
-    protected final Runnable writeCheck;
+    private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
+    private long syncLength = 0;
 
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException {
@@ -339,5 +343,62 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             throws IllegalStateException {
         writeCheck.run();
         return super.appendUtf8(pos, chars, offset, length);
+    }
+
+    /**
+     * Sync the ByteStore if required.
+     */
+    @Override
+    protected void performRelease() {
+        if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
+            performMsync(0, safeLimit - start);
+        }
+        // must sync before releasing
+        super.performRelease();
+    }
+
+    private void performMsync(long offset, long length) {
+        long start0 = System.currentTimeMillis();
+        PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
+        long time0 = System.currentTimeMillis() - start0;
+        if (time0 >= 10)
+            Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+    }
+
+    /**
+     * @return the sync mode for this ByteStore
+     */
+    public SyncMode syncMode() {
+        return syncMode;
+    }
+
+    /**
+     * Set the sync mode for this ByteStore
+     *
+     * @param syncMode
+     */
+    public void syncMode(SyncMode syncMode) {
+        this.syncMode = syncMode;
+    }
+
+    /**
+     * Synchronise from the last complete page up to this position.
+     *
+     * @param position to sync with the syncMode()
+     */
+    public void syncUpTo(long position) {
+        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
+            return;
+        long length = position - start;
+        if (length <= syncLength)
+            return;
+        final long maxLength = safeLimit - start;
+        if (length > maxLength)
+            length = maxLength;
+        long pageEnd = (length + 0xFFF) & ~0xFFF;
+        long pageStart = length & ~0xFFF;
+        final long length2 = pageEnd - syncLength;
+        performMsync(syncLength, length2);
+        syncLength = pageStart;
     }
 }
