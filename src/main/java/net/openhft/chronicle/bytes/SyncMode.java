@@ -20,8 +20,17 @@ package net.openhft.chronicle.bytes;
 import net.openhft.posix.MSyncFlag;
 
 public enum SyncMode {
+    /**
+     * No sync is performed on any playform
+     */
     NONE(null),
+    /**
+     * Wait for a sync to disk to be performed, if the platform supports this
+     */
     SYNC(MSyncFlag.MS_SYNC),
+    /**
+     * Schedule a sync to disk to be performed, but don't wait for it, if the platform supports this
+     */
     ASYNC(MSyncFlag.MS_ASYNC);
 
     private final MSyncFlag mSyncFlag;

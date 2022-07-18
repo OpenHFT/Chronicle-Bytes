@@ -345,6 +345,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         return super.appendUtf8(pos, chars, offset, length);
     }
 
+    /**
+     * Sync the ByteStore if required.
+     */
     @Override
     protected void performRelease() {
         if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
@@ -362,10 +365,18 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
     }
 
+    /**
+     * @return the sync mode for this ByteStore
+     */
     public SyncMode syncMode() {
         return syncMode;
     }
 
+    /**
+     * Set the sync mode for this ByteStore
+     *
+     * @param syncMode
+     */
     public void syncMode(SyncMode syncMode) {
         this.syncMode = syncMode;
     }

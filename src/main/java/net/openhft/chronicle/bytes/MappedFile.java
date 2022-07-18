@@ -333,7 +333,13 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
 
     public abstract MappedBytes createBytesFor();
 
-
+    /**
+     * This mode determines whether an MS_ASYNC or MS_SYNC should be performed on a chunk release.
+     * <p>
+     * Performs this sync on any open store as well
+     *
+     * @param syncMode of sync to perform.
+     */
     public abstract void syncMode(SyncMode syncMode);
 
 }
