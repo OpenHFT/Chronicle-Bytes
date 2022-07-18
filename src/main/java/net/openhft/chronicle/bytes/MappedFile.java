@@ -45,7 +45,7 @@ import java.nio.channels.FileLock;
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
-    public static final SyncMode DEFAULT_SYNC_MODE = SyncMode.valueOf(System.getProperty("mappedFile.defaultSyncMode", "SYNC"));
+    public static final SyncMode DEFAULT_SYNC_MODE = SyncMode.valueOf(System.getProperty("mappedFile.defaultSyncMode", "ASYNC"));
     protected static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
     private static final long DEFAULT_CAPACITY = 128L << 40;
     private final String internalizedToken;
