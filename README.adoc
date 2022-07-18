@@ -1087,9 +1087,34 @@ NOTE: Creating and maintain such tests can be an overhead you don't need. In thi
 | yes
 | na
 | yes
+
+| Sync to disk of memory mapped files
+| no
+| no
+| no
+| MS_ASYNC and MS_SYNC
 |===
 
-=== View Chronicle-Bytes in the debugger
+== Memory mapped files
+
+Memory mapped files act as Bytes, growing as needed.
+A chunk size is set to determine how much to grwo by as more of the Bytes are used.
+A `syncMode` can be set to flush data as each chunk is released.
+
+.Open two MappedBytes for the same region of memory
+[source,java]
+----
+// set the file name, chunk size, and overlap size of each chunk
+try (MappedBytes bytesW = MappedBytes.mappedBytes(file, 64 << 10, 16 << 10);
+        MappedBytes bytesR = MappedBytes.mappedBytes(file,  64 << 10, 16 << 10))
+    {
+        bytesW.syncMode(SyncMode.ASYNC); // asycnhronously flush each chunk to disk
+    }
+----
+
+Memory mapped files ware used by Chronicle Map and Chronicle Queue.
+
+== View Chronicle-Bytes in the debugger
 
 When using IntelliJ Idea, you can set up a custom renderer to view the bytes, see the images below :
 
