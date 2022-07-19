@@ -21,7 +21,7 @@ import net.openhft.posix.MSyncFlag;
 
 public enum SyncMode {
     /**
-     * No sync is performed on any playform
+     * No sync is performed on any platform
      */
     NONE(null),
     /**

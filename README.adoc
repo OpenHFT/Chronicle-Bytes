@@ -1108,7 +1108,7 @@ A `syncMode` can be set to flush data as each chunk is released.
 try (MappedBytes bytesW = MappedBytes.mappedBytes(file, 64 << 10, 16 << 10);
         MappedBytes bytesR = MappedBytes.mappedBytes(file,  64 << 10, 16 << 10))
     {
-        bytesW.syncMode(SyncMode.ASYNC); // asycnhronously flush each chunk to disk
+        bytesW.syncMode(SyncMode.ASYNC); // asynchronously flush each chunk to disk
     }
 ----
 
