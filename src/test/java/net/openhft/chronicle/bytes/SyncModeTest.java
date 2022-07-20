@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
-public class SyncModeTest {
+public class SyncModeTest extends BytesTestCommon {
     private final SyncMode syncMode;
 
     public SyncModeTest(SyncMode syncMode) {

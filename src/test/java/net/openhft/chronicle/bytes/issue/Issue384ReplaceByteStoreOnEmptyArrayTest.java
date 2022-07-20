@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-final class Issue384ReplaceByteStoreOnEmptyArrayTest {
+final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
 
     @ParameterizedTest(name = "{index}: ({0})")
     @MethodSource("bytesToTest")

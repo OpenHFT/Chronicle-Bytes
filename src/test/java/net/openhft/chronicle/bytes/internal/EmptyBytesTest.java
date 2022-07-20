@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import org.junit.jupiter.api.Test;
@@ -31,10 +32,9 @@ import java.nio.ByteBuffer;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
-import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.*;
 
-class EmptyBytesTest {
+class EmptyBytesTest extends BytesTestCommon {
 
     private static final Bytes INSTANCE = Bytes.empty();
 
@@ -284,12 +284,8 @@ class EmptyBytesTest {
     @Test
     void write8bit() {
         final BytesStore<?, ?> bs = BytesStore.from("A");
-        try {
-            assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, bs));
-            assertThrows(BufferUnderflowException.class, () -> INSTANCE.write8bit(-1, bs));
-        } finally {
-            bs.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, bs));
+        assertThrows(BufferUnderflowException.class, () -> INSTANCE.write8bit(-1, bs));
     }
 
     @Test
@@ -348,7 +344,7 @@ class EmptyBytesTest {
 
     @Test
     void move() {
-        assertThrowsBufferException(() -> INSTANCE.move(0, 0, 0));
+        assertThrowsBufferException(() -> INSTANCE.move(0, 0, 1));
         assertThrowsBufferException(() -> INSTANCE.move(-1, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, 0, -1));
@@ -439,10 +435,6 @@ class EmptyBytesTest {
     void read(final ObjLongConsumer<BytesStore> getter) {
         assertThrowsBufferException(() -> getter.accept(INSTANCE, 0));
         assertThrows(DecoratedBufferUnderflowException.class, () -> getter.accept(INSTANCE, -1));
-    }
-
-    void assertThrowsUOE(final Runnable consumer) {
-        assertThrows(UnsupportedOperationException.class, consumer::run);
     }
 
     void assertThrowsBufferException(final Runnable consumer) {
