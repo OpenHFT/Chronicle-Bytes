@@ -571,13 +571,20 @@ public class HeapBytesStore<U>
     @Override
     public long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException {
+        if (offset < start())
+            throw new BufferUnderflowException();
+        if (offset >= capacity)
+            throw new BufferOverflowException();
         throw new UnsupportedOperationException();
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException {
-        requireNonNegative(offset);
+        if (offset < start())
+            throw new BufferUnderflowException();
+        if (offset >= capacity)
+            throw new BufferOverflowException();
         throw new UnsupportedOperationException();
     }
 

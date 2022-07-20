@@ -368,7 +368,7 @@ class EmptyBytesTest {
 
     @Test
     void addressForWritePosition() {
-        assertThrowsUOE(INSTANCE::addressForWritePosition);
+        assertThrowsBufferException(INSTANCE::addressForWritePosition);
     }
 
     @Test

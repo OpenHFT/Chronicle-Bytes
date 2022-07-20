@@ -1197,7 +1197,7 @@ public abstract class AbstractBytes<U>
             throws BufferUnderflowException, IllegalStateException {
         if (offset < 0)
             throw new BufferUnderflowException();
-        readCheckOffset(offset, 4, true);
+        readCheckOffset(offset, isElastic() ?  Math.min(64, capacity() - offset) : 0, true);
         return bytesStore.addressForRead(offset);
     }
 
@@ -1206,7 +1206,7 @@ public abstract class AbstractBytes<U>
             throws BufferOverflowException, IllegalStateException {
         if (offset < 0)
             throw new BufferUnderflowException();
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, isElastic() ? Math.min(64, capacity() - offset) : 0);
         return bytesStore.addressForWrite(offset);
     }
 
@@ -1214,7 +1214,7 @@ public abstract class AbstractBytes<U>
     public long addressForWritePosition()
             throws BufferOverflowException, IllegalStateException {
         final long offset = writePosition();
-        ensureCapacity(offset);
+        writeCheckOffset(offset, isElastic() ? Math.min(64, capacity() - offset) : 0);
         return bytesStore.addressForWrite(offset);
     }
 
