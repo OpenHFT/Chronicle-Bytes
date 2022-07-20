@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
@@ -65,7 +64,7 @@ public class HeapBytesStore<U>
         this.underlyingObject = (U) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
-        this.capacity = byteArray.length;
+        this.capacity = byteArray == null ? 0 :byteArray.length;
     }
 
     private HeapBytesStore(Object object, long start, long length) {
@@ -74,10 +73,6 @@ public class HeapBytesStore<U>
         this.realUnderlyingObject = object;
         this.dataOffset = Math.toIntExact(start);
         this.capacity = length;
-    }
-
-    long dataOffset() {
-        return dataOffset;
     }
 
     public static <T> HeapBytesStore<T> forFields(Object o, String groupName, int padding) {
@@ -99,6 +94,10 @@ public class HeapBytesStore<U>
         return new HeapBytesStore<>(bb);
     }
 
+    long dataOffset() {
+        return dataOffset;
+    }
+
     @Override
     public boolean isDirectMemory() {
         return false;
@@ -108,9 +107,10 @@ public class HeapBytesStore<U>
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ArithmeticException {
         if (from < 0 || to < 0) throw new BufferUnderflowException();
+        if (length < 0 || (int) length != length) throw new IllegalArgumentException();
         throwExceptionIfReleased();
         try {
-            memory.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, Maths.toUInt31(length));
+            memory.copyMemory(realUnderlyingObject, dataOffset + from, realUnderlyingObject, dataOffset + to, (int) length);
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;
@@ -589,12 +589,26 @@ public class HeapBytesStore<U>
 
     @Override
     public void nativeRead(@NonNegative long position, @NonNegative long address, @NonNegative long size) {
-        throw new UnsupportedOperationException("todo");
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (size + position > readLimit())
+            throw new BufferOverflowException();
+        if (size < 0)
+            throw new IllegalArgumentException();
+        if (size > 0)
+            throw new UnsupportedOperationException("todo");
     }
 
     @Override
     public void nativeWrite(@NonNegative long address, @NonNegative long position, @NonNegative long size) {
-        throw new UnsupportedOperationException("todo");
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (size + position > writeLimit())
+            throw new BufferOverflowException();
+        if (size < 0)
+            throw new IllegalArgumentException();
+        if (size > 0)
+            throw new UnsupportedOperationException("todo");
     }
 
     @Override

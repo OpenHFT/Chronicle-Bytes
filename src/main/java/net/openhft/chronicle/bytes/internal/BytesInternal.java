@@ -3089,7 +3089,8 @@ enum BytesInternal {
     public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, @NonNegative long readRemaining)
             throws BufferUnderflowException, IllegalStateException {
 
-        if (b1.readRemaining() < readRemaining)
+        if (b1.readRemaining() < readRemaining
+                || b2.readRemaining() < readRemaining)
             return false;
 
         long i = 0;

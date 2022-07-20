@@ -557,6 +557,12 @@ public interface Bytes<U> extends
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
+    /**
+     * @return an empty, fixed-sized immutable BytesStore.
+     */
+    static Bytes<?> empty() {
+        return BytesStore.empty().bytesForRead();
+    }
     @UsedViaReflection
     static Bytes<byte[]> valueOf(String text) {
         return from(text);

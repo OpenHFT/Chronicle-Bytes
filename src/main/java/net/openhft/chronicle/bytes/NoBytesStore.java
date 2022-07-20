@@ -36,7 +36,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
  * @deprecated from the public API for removal in x.24. Use {@link BytesStore#empty()} } instead.
  */
-@Deprecated
+@Deprecated(/* to be removed in x.25 */)
 @SuppressWarnings({"rawtypes", "unchecked"})
 public enum NoBytesStore implements BytesStore {
     NO_BYTES_STORE;

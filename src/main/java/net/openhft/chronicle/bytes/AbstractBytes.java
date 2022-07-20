@@ -801,11 +801,19 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + bs.readRemaining() > writeLimit)
+            throw new BufferOverflowException();
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + length > writeLimit)
+            throw new BufferOverflowException();
         return bytesStore.write8bit(position, s, start, length);
     }
 
