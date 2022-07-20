@@ -362,6 +362,12 @@
 
     <profiles>
         <profile>
+            <id>assertions</id>
+            <properties>
+                <zero.cost.assertions>enabled</zero.cost.assertions>
+            </properties>
+        </profile>
+        <profile>
             <id>sonar</id>
             <build>
                 <plugins>
