@@ -1197,7 +1197,7 @@ public abstract class AbstractBytes<U>
             throws BufferUnderflowException, IllegalStateException {
         if (offset < 0)
             throw new BufferUnderflowException();
-        ensureCapacity(offset + 1);
+        readCheckOffset(offset, 8, true);
         return bytesStore.addressForRead(offset);
     }
 
@@ -1206,7 +1206,7 @@ public abstract class AbstractBytes<U>
             throws BufferOverflowException, IllegalStateException {
         if (offset < 0)
             throw new BufferUnderflowException();
-        ensureCapacity(offset + 1);
+        writeCheckOffset(offset, 8);
         return bytesStore.addressForWrite(offset);
     }
 
