@@ -23,6 +23,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.nio.BufferOverflowException;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -38,10 +39,10 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest {
         try {
             // Write an empty array into the empty bytes. This should trigger a
             // resize since the empty bytes is using a shared backing EmptyByteStore.
-            bytes.write(new byte[0]);
+            bytes.ensureCapacity(1);
             // Make sure we are not using an EmptyByteStore
             replacedOrRefused = !bytes.isImmutableEmptyByteStore();
-        } catch (AssertionError ignored) {
+        } catch (BufferOverflowException ignored) {
             // This is ok as some of the Bytes objects are not elastic.
             replacedOrRefused = true;
         } finally {

@@ -840,8 +840,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return if immutable empty or backed by such
      */
+    @Deprecated(/* to be removed in x.25 */)
     default boolean isImmutableEmptyByteStore() {
-        return false;
+        return capacity() == 0;
     }
 
 }

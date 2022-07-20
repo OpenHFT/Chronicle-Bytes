@@ -607,4 +607,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
         mappedFile.chunkCount(chunkCount);
     }
 
+    @Override
+    public boolean readWrite() {
+        return !mappedFile.readOnly();
+    }
 }

@@ -276,7 +276,7 @@ class EmptyBytesTest {
 
     @Test
     void nativeWrite() {
-        assertThrowsBufferException(() -> INSTANCE.nativeWrite(34, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, 0, -1));
         assertThrowsBufferException(() -> INSTANCE.nativeWrite(34, 0, 0));
     }
@@ -302,7 +302,7 @@ class EmptyBytesTest {
     @Test
     void nativeRead() {
         assertThrowsBufferException(() -> INSTANCE.nativeRead(0, 1, 1));
-        assertThrowsBufferException(() -> INSTANCE.nativeRead(-1, 1, 0));
+        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(-1, 1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(0, 1, -1));
     }
 
@@ -350,20 +350,20 @@ class EmptyBytesTest {
     void move() {
         assertThrowsBufferException(() -> INSTANCE.move(0, 0, 0));
         assertThrowsBufferException(() -> INSTANCE.move(-1, 0, 0));
-        assertThrowsBufferException(() -> INSTANCE.move(0, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, 0, -1));
     }
 
     @Test
     void addressForRead() {
-        assertThrowsUOE(() -> INSTANCE.addressForRead(0));
-        assertThrowsUOE(() -> INSTANCE.addressForRead(-1));
+        assertThrowsBufferException(() -> INSTANCE.addressForRead(0));
+        assertThrowsBufferException(() -> INSTANCE.addressForRead(-1));
     }
 
     @Test
     void addressForWrite() {
-        assertThrowsUOE(() -> INSTANCE.addressForWrite(0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.addressForWrite(-1));
+        assertThrowsBufferException(() -> INSTANCE.addressForWrite(0));
+        assertThrowsBufferException(() -> INSTANCE.addressForWrite(-1));
     }
 
     @Test

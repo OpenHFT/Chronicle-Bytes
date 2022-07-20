@@ -164,11 +164,16 @@ public class NativeBytes<U>
                 return; // do nothing.
             }
             if (writeEnd > capacity)
-                throw new BufferOverflowException(/*"Write exceeds capacity"*/);
+                throw newDBOE(writeEnd);
             checkResize(writeEnd);
         } else {
             throw new BufferOverflowException();
         }
+    }
+
+    @NotNull
+    private DecoratedBufferOverflowException newDBOE(long writeEnd) {
+        return new DecoratedBufferOverflowException("Write cannot grow Bytes to " + writeEnd + ", capacity: " + capacity);
     }
 
     @Override
@@ -189,20 +194,12 @@ public class NativeBytes<U>
     @Override
     public void ensureCapacity(final @NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
-        try {
-            assert desiredCapacity >= 0;
-            assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
-            writeCheckOffset(desiredCapacity, 0);
-        } catch (BufferOverflowException e) {
-            handleBOEEnsureCapacity(desiredCapacity, e);
-        }
+
+        assert desiredCapacity >= 0;
+        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        writeCheckOffset(desiredCapacity, 0);
     }
 
-    private void handleBOEEnsureCapacity(long desiredCapacity, BufferOverflowException e) {
-        IllegalArgumentException iae = new IllegalArgumentException("Bytes<?> cannot be resized to " + desiredCapacity + " limit: " + capacity(), e);
-        Jvm.error().on(NativeBytes.class, iae);
-        throw iae;
-    }
 
     private void checkResize(@NonNegative final long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
@@ -261,7 +258,7 @@ public class NativeBytes<U>
                     stack);
         }
         // native block of 128 KiB or more have an individual memory mapping so are more expensive.
-        if (endOfBuffer >= 128 << 10)
+        if (endOfBuffer >= 128 << 10 && realCapacity > 0)
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
