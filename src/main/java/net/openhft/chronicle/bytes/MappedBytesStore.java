@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.posix.PosixAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -375,7 +376,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     /**
      * Set the sync mode for this ByteStore
      *
-     * @param syncMode
+     * @param syncMode to use
      */
     public void syncMode(SyncMode syncMode) {
         this.syncMode = syncMode;
@@ -396,9 +397,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         if (length > maxLength)
             length = maxLength;
         long pageEnd = (length + 0xFFF) & ~0xFFF;
-        long pageStart = length & ~0xFFF;
         final long length2 = pageEnd - syncLength;
         performMsync(syncLength, length2);
-        syncLength = pageStart;
+        syncLength = position;
     }
 }
