@@ -431,7 +431,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public boolean isClosed() {
-        return closeable != null && closeable.isClosed();
+        return closeable.isClosed();
     }
 
     @Override

@@ -77,7 +77,7 @@ final class BytesReleaseInvariantObjectTest extends BytesTestCommon {
         final String toString = bytes.toString();
         assertEquals(expected, toString);
         releaseAndAssertReleased(bytes);
-        assertThrows(ClosedIllegalStateException.class, bytes::toString, createCommand);
+        assertThrows(ClosedIllegalStateException.class, bytes::toHexString, createCommand);
     }
 
     //@Test
