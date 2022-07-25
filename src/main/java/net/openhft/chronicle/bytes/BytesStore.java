@@ -54,6 +54,48 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public interface BytesStore<B extends BytesStore<B, U>, U>
         extends RandomDataInput, RandomDataOutput<B>, ReferenceCounted, CharSequence {
 
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
+            throws BufferOverflowException, IllegalStateException {
+        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default int addAndGetInt(@NonNegative long offset, int adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetInt(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default long addAndGetLong(@NonNegative long offset, long adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetLong(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default float addAndGetFloat(@NonNegative long offset, float adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetFloat(this, offset, adding);
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    default double addAndGetDouble(@NonNegative long offset, double adding)
+            throws BufferUnderflowException, IllegalStateException {
+        return BytesInternal.addAndGetDouble(this, offset, adding);
+    }
+
     /**
      * Returns a BytesStore using the bytes in a specified CharSequence. These chars are encoded
      * using ISO_8859_1
@@ -181,48 +223,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     static BytesStore empty() {
         byte[] noBytes = null;
         return HeapBytesStore.wrap(noBytes);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
-            throws BufferOverflowException, IllegalStateException {
-        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
-            throws BufferOverflowException, IllegalStateException {
-        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default int addAndGetInt(@NonNegative long offset, int adding)
-            throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetInt(this, offset, adding);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default long addAndGetLong(@NonNegative long offset, long adding)
-            throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetLong(this, offset, adding);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default float addAndGetFloat(@NonNegative long offset, float adding)
-            throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetFloat(this, offset, adding);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    default double addAndGetDouble(@NonNegative long offset, double adding)
-            throws BufferUnderflowException, IllegalStateException {
-        return BytesInternal.addAndGetDouble(this, offset, adding);
     }
 
     /**
