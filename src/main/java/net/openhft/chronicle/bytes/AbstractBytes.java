@@ -103,6 +103,7 @@ public abstract class AbstractBytes<U>
     public void move(long from, long to, long length)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         long start = start();
+        ensureCapacity(to + length);
         bytesStore.move(from - start, to - start, length);
     }
 
@@ -772,11 +773,21 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long write8bit(long position, @NotNull BytesStore bs) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + bs.readRemaining() > writeLimit)
+            throw new BufferOverflowException();
+        ensureCapacity(position + bs.readRemaining());
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
     public long write8bit(long position, @NotNull String s, int start, int length) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + length > writeLimit)
+            throw new BufferOverflowException();
+        ensureCapacity(position + length);
         return bytesStore.write8bit(position, s, start, length);
     }
 
@@ -1202,12 +1213,14 @@ public abstract class AbstractBytes<U>
     @Override
     public void nativeRead(long position, long address, long size)
             throws BufferUnderflowException, IllegalStateException {
+        ensureCapacity(position+size);
         bytesStore.nativeRead(position, address, size);
     }
 
     @Override
     public void nativeWrite(long address, long position, long size)
             throws BufferOverflowException, IllegalStateException {
+        ensureCapacity(position+size);
         bytesStore.nativeWrite(address, position, size);
     }
 
