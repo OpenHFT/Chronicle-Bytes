@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ManagedCloseable;
+import net.openhft.chronicle.core.io.Syncable;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -43,7 +44,7 @@ import java.io.FileNotFoundException;
  * NOTE These MappedBytes are single threaded as are all Bytes.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable {
+public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {
 
     protected static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");
 
@@ -156,4 +157,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     public abstract void chunkCount(long[] chunkCount);
 
     public abstract MappedFile mappedFile();
+
+    @Override
+    public void sync() {
+        final BytesStore bs = bytesStore;
+        if (bs instanceof MappedBytesStore) {
+            MappedBytesStore mbs = (MappedBytesStore) bs;
+            mbs.syncUpTo(writePosition());
+        }
+    }
 }
