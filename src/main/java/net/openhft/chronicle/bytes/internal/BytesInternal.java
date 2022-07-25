@@ -75,20 +75,19 @@ public
 enum BytesInternal {
 
     ; // none
+    public static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
+    public static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
+    public static final StringInternerBytes SI;
+    static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final String INFINITY = "Infinity";
     private static final String NAN = "NaN";
     private static final String MALFORMED_INPUT_PARTIAL_CHARACTER_AT_END = "malformed input: partial character at end";
     private static final String MALFORMED_INPUT_AROUND_BYTE = "malformed input around byte ";
     private static final String WAS = " was ";
     private static final String CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS = "Can't parse flexible long without precision loss: ";
-
-    static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
-    public static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
-    public static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final BytesPool BP = new BytesPool();
-    public static final StringInternerBytes SI;
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
@@ -2923,7 +2922,7 @@ enum BytesInternal {
         return false;
     }
 
-    public static float addAndGetFloat(@NotNull BytesStore<?,?> in, @NonNegative long offset, float adding)
+    public static float addAndGetFloat(@NotNull BytesStore<?, ?> in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2938,7 +2937,7 @@ enum BytesInternal {
         }
     }
 
-    public static double addAndGetDouble(@NotNull BytesStore<?,?> in, @NonNegative long offset, double adding)
+    public static double addAndGetDouble(@NotNull BytesStore<?, ?> in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2953,7 +2952,7 @@ enum BytesInternal {
         }
     }
 
-    public static int addAndGetInt(@NotNull BytesStore<?,?> in, @NonNegative long offset, int adding)
+    public static int addAndGetInt(@NotNull BytesStore<?, ?> in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -2967,7 +2966,7 @@ enum BytesInternal {
         }
     }
 
-    public static long addAndGetLong(@NotNull BytesStore<?,?> in, @NonNegative long offset, long adding)
+    public static long addAndGetLong(@NotNull BytesStore<?, ?> in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
         try {
             for (; ; ) {
@@ -3089,8 +3088,7 @@ enum BytesInternal {
     public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, @NonNegative long readRemaining)
             throws BufferUnderflowException, IllegalStateException {
 
-        if (b1.readRemaining() < readRemaining
-                || b2.readRemaining() < readRemaining)
+        if (Math.min(b1.readRemaining(), b2.readRemaining()) < readRemaining)
             return false;
 
         long i = 0;
