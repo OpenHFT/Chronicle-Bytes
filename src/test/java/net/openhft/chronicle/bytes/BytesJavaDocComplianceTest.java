@@ -66,7 +66,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    @Disabled("Check why  SingleMappedFile Discarded without being released by [SingleMappedBytes@5 refCount=1 closed=false]")
     void unchecked(final Bytes<?> bytes) {
         assertEquals(bytes.getClass().getSimpleName().contains("Unchecked"), bytes.unchecked());
         releaseAndAssertReleased(bytes);
@@ -77,7 +76,6 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
      */
     @ParameterizedTest
     @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    @Disabled("https://github.com/OpenHFT/Chronicle-Bytes/issues/239")
     void readWrite(final Bytes<?> bytes,
                    final boolean readWrite) {
 
@@ -92,7 +90,8 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         assertEquals(readWrite, writeable);
 
         // Checks that bytes reflects this
-        assertEquals(writeable, bytes.readWrite());
+        if (writeable != bytes.readWrite())
+            assertEquals(writeable, bytes.readWrite());
         releaseAndAssertReleased(bytes);
     }
 

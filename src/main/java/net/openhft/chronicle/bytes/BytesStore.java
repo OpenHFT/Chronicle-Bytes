@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -222,7 +221,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return an empty, fixed-sized immutable BytesStore.
      */
     static BytesStore empty() {
-        return SingletonEmptyByteStore.INSTANCE;
+        byte[] noBytes = null;
+        return HeapBytesStore.wrap(noBytes);
     }
 
     /**
@@ -840,8 +840,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return if immutable empty or backed by such
      */
+    @Deprecated(/* to be removed in x.25 */)
     default boolean isImmutableEmptyByteStore() {
-        return false;
+        return capacity() == 0;
     }
 
 }

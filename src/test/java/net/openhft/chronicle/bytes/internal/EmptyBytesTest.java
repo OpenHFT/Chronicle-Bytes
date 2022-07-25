@@ -19,139 +19,105 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.RandomDataOutput;
+import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
-import static net.openhft.chronicle.bytes.internal.SingletonEmptyByteStore.INSTANCE;
-import static net.openhft.chronicle.core.io.ReferenceOwner.INIT;
 import static org.junit.jupiter.api.Assertions.*;
 
-class SingletonEmptyByteStoreTest {
+class EmptyBytesTest extends BytesTestCommon {
 
-    @Test
-    void reserve() {
-        assertDoesNotThrow(() ->
-                INSTANCE.reserve(INIT)
-        );
-    }
-
-    @Test
-    void release() {
-        assertDoesNotThrow(() ->
-                INSTANCE.release(INIT)
-        );
-    }
-
-    @Test
-    void releaseLast() {
-        assertDoesNotThrow(() ->
-                INSTANCE.releaseLast()
-        );
-    }
-
-    @Test
-    void releaseLastArg() {
-        assertDoesNotThrow(() ->
-                INSTANCE.releaseLast(INIT)
-        );
-    }
+    private static final Bytes INSTANCE = Bytes.empty();
 
     @Test
     void refCount() {
-        assertEquals(1, INSTANCE.refCount());
-    }
-
-    @Test
-    void tryReserve() {
-        assertFalse(INSTANCE.tryReserve(INIT));
-    }
-
-    @Test
-    void reservedBy() {
-        assertTrue(INSTANCE.reservedBy(INIT));
+        assertNotEquals(0, INSTANCE.refCount());
     }
 
     @Test
     void writeByteInt() {
-        assertThrowsUOE(() -> INSTANCE.writeByte(0, 0));
+        assertThrowsBufferException(() -> INSTANCE.writeByte(0, 0));
     }
 
     @Test
     void writeByte() {
-        assertThrowsUOE(() -> INSTANCE.writeByte(0, (byte) 0));
+        assertThrowsBufferException(() -> INSTANCE.writeByte(0, (byte) 0));
     }
 
     @Test
     void writeShort() {
-        assertThrowsUOE(() -> INSTANCE.writeShort(0, (short) 0));
+        assertThrowsBufferException(() -> INSTANCE.writeShort(0, (short) 0));
     }
 
     @Test
     void writeInt() {
-        assertThrowsUOE(() -> INSTANCE.writeInt(0, 0));
+        assertThrowsBufferException(() -> INSTANCE.writeInt(0, 0));
     }
 
     @Test
     void writeOrderedInt() {
-        assertThrowsUOE(() -> INSTANCE.writeOrderedInt(0, 0));
+        assertThrowsBufferException(() -> INSTANCE.writeOrderedInt(0, 0));
     }
 
     @Test
     void writeLong() {
-        assertThrowsUOE(() -> INSTANCE.writeLong(0, 0));
+        assertThrowsBufferException(() -> INSTANCE.writeLong(0, 0));
     }
 
     @Test
     void writeOrderedLong() {
-        assertThrowsUOE(() -> INSTANCE.writeOrderedLong(0, 0L));
+        assertThrowsBufferException(() -> INSTANCE.writeOrderedLong(0, 0L));
     }
 
     @Test
     void writeFloat() {
-        assertThrowsUOE(() -> INSTANCE.writeFloat(0, 0.0f));
+        assertThrowsBufferException(() -> INSTANCE.writeFloat(0, 0.0f));
     }
 
     @Test
     void writeDouble() {
-        assertThrowsUOE(() -> INSTANCE.writeDouble(0, 0.0d));
+        assertThrowsBufferException(() -> INSTANCE.writeDouble(0, 0.0d));
     }
 
     @Test
     void writeVolatileByte() {
-        assertThrowsUOE(() -> INSTANCE.writeVolatileByte(0, (byte) 0));
+        assertThrowsBufferException(() -> INSTANCE.writeVolatileByte(0, (byte) 0));
     }
 
     @Test
     void writeVolatileShort() {
-        assertThrowsUOE(() -> INSTANCE.writeVolatileShort(0, (short) 0));
+        assertThrowsBufferException(() -> INSTANCE.writeVolatileShort(0, (short) 0));
     }
 
     @Test
     void writeVolatileInt() {
-        assertThrowsUOE(() -> INSTANCE.writeVolatileInt(0, 0));
+        assertThrowsBufferException(() -> INSTANCE.writeVolatileInt(0, 0));
     }
 
     @Test
     void writeVolatileLong() {
-        assertThrowsUOE(() -> INSTANCE.writeVolatileLong(0, 0L));
+        assertThrowsBufferException(() -> INSTANCE.writeVolatileLong(0, 0L));
     }
 
     @Test
     void write() {
-        assertThrowsUOE(() -> INSTANCE.write(0, new byte[1], 0, 0));
+        assertThrowsBufferException(() -> INSTANCE.write(0, new byte[1], 0, 0));
     }
 
     @Test
     void write2() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
-            assertThrowsUOE(() -> INSTANCE.write(0, bytes, 0, 0));
+            assertThrowsBufferException(() -> INSTANCE.write(0, bytes, 0, 0));
         } finally {
             bytes.releaseLast();
         }
@@ -159,14 +125,14 @@ class SingletonEmptyByteStoreTest {
 
     @Test
     void write3() {
-        assertThrowsUOE(() -> INSTANCE.write(0, new byte[1]));
+        assertThrowsBufferException(() -> INSTANCE.write(0, new byte[1]));
     }
 
     @Test
     void write4() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
-            assertThrowsUOE(() -> INSTANCE.write(0, bytes));
+            assertThrowsBufferException(() -> INSTANCE.write(0, bytes));
         } finally {
             bytes.releaseLast();
         }
@@ -174,7 +140,7 @@ class SingletonEmptyByteStoreTest {
 
     @Test
     void readByte() {
-        read(EmptyByteStore::readByte);
+        read(BytesStore::readByte);
     }
 
     @Test
@@ -184,47 +150,47 @@ class SingletonEmptyByteStoreTest {
 
     @Test
     void readShort() {
-        read(EmptyByteStore::readShort);
+        read(BytesStore::readShort);
     }
 
     @Test
     void readInt() {
-        read(EmptyByteStore::readLong);
+        read(BytesStore::readLong);
     }
 
     @Test
     void readLong() {
-        read(EmptyByteStore::readLong);
+        read(BytesStore::readLong);
     }
 
     @Test
     void readFloat() {
-        read(EmptyByteStore::readFloat);
+        read(BytesStore::readFloat);
     }
 
     @Test
     void readDouble() {
-        read(EmptyByteStore::readDouble);
+        read(BytesStore::readDouble);
     }
 
     @Test
     void readVolatileByte() {
-        read(EmptyByteStore::readVolatileByte);
+        read(BytesStore::readVolatileByte);
     }
 
     @Test
     void readVolatileShort() {
-        read(EmptyByteStore::readVolatileShort);
+        read(BytesStore::readVolatileShort);
     }
 
     @Test
     void readVolatileInt() {
-        read(EmptyByteStore::readVolatileInt);
+        read(BytesStore::readVolatileInt);
     }
 
     @Test
     void readVolatileLong() {
-        read(EmptyByteStore::readVolatileLong);
+        read(BytesStore::readVolatileLong);
     }
 
     @Test
@@ -247,7 +213,7 @@ class SingletonEmptyByteStoreTest {
 
     @Test
     void copy() {
-        final BytesStore<EmptyByteStore, Void> copy = INSTANCE.copy();
+        final BytesStore<?, Void> copy = INSTANCE.copy();
         assertEquals(INSTANCE, copy);
     }
 
@@ -312,57 +278,53 @@ class SingletonEmptyByteStoreTest {
     void nativeWrite() {
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, 0, -1));
-        assertThrowsUOE(() -> INSTANCE.nativeWrite(34, 0, 0));
+        assertThrowsBufferException(() -> INSTANCE.nativeWrite(34, 0, 0));
     }
 
     @Test
     void write8bit() {
         final BytesStore<?, ?> bs = BytesStore.from("A");
-        try {
-            assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, bs));
-            assertThrows(IllegalArgumentException.class, () -> INSTANCE.write8bit(-1, bs));
-        } finally {
-            bs.releaseLast();
-        }
+        assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, bs));
+        assertThrows(BufferUnderflowException.class, () -> INSTANCE.write8bit(-1, bs));
     }
 
     @Test
     void testWrite8bit() {
-        assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, "A", 0, 1));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.write8bit(-1, "A", -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.write8bit(-1, "A", 0, -1));
+        assertThrowsBufferException(() -> INSTANCE.write8bit(0, "A", 0, 1));
+        assertThrowsBufferException(() -> INSTANCE.write8bit(-1, "A", -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> INSTANCE.write8bit(0, "A", 0, -1));
     }
 
     @Test
     void nativeRead() {
-        assertThrowsUOE(() -> INSTANCE.nativeRead(0, 1, 1));
+        assertThrowsBufferException(() -> INSTANCE.nativeRead(0, 1, 1));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(-1, 1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(0, 1, -1));
     }
 
     @Test
     void compareAndSwapInt() {
-        assertThrowsUOE(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapInt(0, 1, 1));
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapInt(0, 1, 1));
     }
 
     @Test
     void compareAndSwapLong() {
-        assertThrowsUOE(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapLong(0, 1L, 1L));
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapLong(0, 1L, 1L));
     }
 
     @Test
     void compareAndSwapDouble() {
-        assertThrowsUOE(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapDouble(0, 1d, 1d));
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapDouble(0, 1d, 1d));
     }
 
     @Test
     void compareAndSwapFloat() {
-        assertThrowsUOE(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapFloat(0, 1f, 1f));
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapFloat(0, 1f, 1f));
     }
 
     @Test
     void testAndSetInt() {
-        assertThrowsUOE(() -> ((RandomDataOutput<?>) INSTANCE).testAndSetInt(0, 1, 1));
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).testAndSetInt(0, 1, 1));
     }
 
     @Test
@@ -371,8 +333,9 @@ class SingletonEmptyByteStoreTest {
         final BytesStore<?, ?> emptyBs = BytesStore.from("");
         try {
             assertTrue(INSTANCE.equalBytes(bs, 0));
-            assertTrue(INSTANCE.equalBytes(emptyBs, 1));
-            assertThrows(IllegalArgumentException.class, () -> INSTANCE.equalBytes(bs, -1));
+            assertFalse(INSTANCE.equalBytes(emptyBs, 1));
+            assertTrue(INSTANCE.equalBytes(emptyBs, 0));
+            assertTrue(INSTANCE.equalBytes(bs, -1));
         } finally {
             bs.releaseLast();
             emptyBs.releaseLast();
@@ -381,32 +344,32 @@ class SingletonEmptyByteStoreTest {
 
     @Test
     void move() {
-        assertThrowsUOE(() -> INSTANCE.move(0, 0, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(-1, 0, 0));
+        assertThrowsBufferException(() -> INSTANCE.move(0, 0, 1));
+        assertThrowsBufferException(() -> INSTANCE.move(-1, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, 0, -1));
     }
 
     @Test
     void addressForRead() {
-        assertThrowsUOE(() -> INSTANCE.addressForRead(0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.addressForRead(-1));
+        assertThrowsBufferException(() -> INSTANCE.addressForRead(0));
+        assertThrowsBufferException(() -> INSTANCE.addressForRead(-1));
     }
 
     @Test
     void addressForWrite() {
-        assertThrowsUOE(() -> INSTANCE.addressForWrite(0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.addressForWrite(-1));
+        assertThrowsBufferException(() -> INSTANCE.addressForWrite(0));
+        assertThrowsBufferException(() -> INSTANCE.addressForWrite(-1));
     }
 
     @Test
     void addressForWritePosition() {
-        assertThrowsUOE(INSTANCE::addressForWritePosition);
+        assertThrowsBufferException(INSTANCE::addressForWritePosition);
     }
 
     @Test
     void bytesForWrite() {
-        assertThrowsUOE(INSTANCE::bytesForWrite);
+        assertThrowsBufferException(() -> INSTANCE.bytesForWrite().writeSkip(1));
     }
 
     @Test
@@ -415,8 +378,8 @@ class SingletonEmptyByteStoreTest {
     }
 
     @Test
-    void isImmutableEmptyByteStore() {
-        assertTrue(INSTANCE.isImmutableEmptyByteStore());
+    void isImmutableBytesStore() {
+        assertEquals(0, INSTANCE.capacity());
     }
 
     @Test
@@ -464,17 +427,24 @@ class SingletonEmptyByteStoreTest {
     @Test
     void zeroOut() {
         assertDoesNotThrow(() -> INSTANCE.zeroOut(0, 0));
-        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
-        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
+        // outside bounds are ignored
+//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
+//        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    void read(final ObjLongConsumer<EmptyByteStore> getter) {
-        assertThrowsUOE(() -> getter.accept(INSTANCE, 0));
-        assertThrows(IllegalArgumentException.class, () -> getter.accept(INSTANCE, -1));
+    void read(final ObjLongConsumer<BytesStore> getter) {
+        assertThrowsBufferException(() -> getter.accept(INSTANCE, 0));
+        assertThrows(DecoratedBufferUnderflowException.class, () -> getter.accept(INSTANCE, -1));
     }
 
-    void assertThrowsUOE(final Runnable consumer) {
-        assertThrows(UnsupportedOperationException.class, consumer::run);
+    void assertThrowsBufferException(final Runnable consumer) {
+        try {
+            consumer.run();
+        } catch (BufferOverflowException | BufferUnderflowException e) {
+            // expected
+        } catch (Throwable t) {
+            throw new AssertionFailedError("expected Buffer*Exception", t);
+        }
     }
 
 }

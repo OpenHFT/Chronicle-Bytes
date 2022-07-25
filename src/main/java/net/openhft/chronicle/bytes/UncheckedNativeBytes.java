@@ -814,7 +814,8 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public String toString() {
-        throwExceptionIfReleased();
+        if (refCount() <= 0)
+            return "(released)";
         return BytesInternal.toString(this);
     }
 

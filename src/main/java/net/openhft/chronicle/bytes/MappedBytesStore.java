@@ -362,7 +362,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         long start0 = System.currentTimeMillis();
         PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
         long time0 = System.currentTimeMillis() - start0;
-        if (time0 >= 10)
+        if (time0 >= 20)
             Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
     }
 

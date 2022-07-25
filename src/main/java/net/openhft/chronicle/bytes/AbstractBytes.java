@@ -103,6 +103,7 @@ public abstract class AbstractBytes<U>
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
         long start = start();
+        ensureCapacity(to + length);
         bytesStore.move(from - start, to - start, length);
     }
 
@@ -801,11 +802,21 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + bs.readRemaining() > writeLimit)
+            throw new BufferOverflowException();
+        ensureCapacity(position + bs.readRemaining());
         return bytesStore.write8bit(position, bs);
     }
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
+        if (position < start())
+            throw new BufferUnderflowException();
+        if (position + length > writeLimit)
+            throw new BufferOverflowException();
+        ensureCapacity(position + length);
         return bytesStore.write8bit(position, s, start, length);
     }
 
@@ -1156,11 +1167,7 @@ public abstract class AbstractBytes<U>
     public Bytes<U> writeSome(@NotNull ByteBuffer buffer)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         int length = (int) Math.min(buffer.remaining(), writeRemaining());
-        try {
-            ensureCapacity(writePosition() + length);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        ensureCapacity(writePosition() + length);
         bytesStore.write(writePosition(), buffer, buffer.position(), length);
         uncheckedWritePosition(writePosition() + length);
         buffer.position(buffer.position() + length);
@@ -1188,22 +1195,23 @@ public abstract class AbstractBytes<U>
     @Override
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        replaceByteStoreIfEmpty();
+        readCheckOffset(offset, isElastic() ?  Math.min(64, capacity() - offset) : 0, true);
         return bytesStore.addressForRead(offset);
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException, IllegalStateException {
-        replaceByteStoreIfEmpty();
+        writeCheckOffset(offset, isElastic() ? Math.min(64, capacity() - offset) : 0);
         return bytesStore.addressForWrite(offset);
     }
 
     @Override
     public long addressForWritePosition()
             throws BufferOverflowException, IllegalStateException {
-        replaceByteStoreIfEmpty();
-        return bytesStore.addressForWrite(writePosition());
+        final long offset = writePosition();
+        writeCheckOffset(offset, isElastic() ? Math.min(64, capacity() - offset) : 0);
+        return bytesStore.addressForWrite(offset);
     }
 
     @Override
@@ -1234,12 +1242,14 @@ public abstract class AbstractBytes<U>
     @Override
     public void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, IllegalStateException {
+        ensureCapacity(position+size);
         bytesStore.nativeRead(position, address, size);
     }
 
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException {
+        ensureCapacity(position+size);
         bytesStore.nativeWrite(address, position, size);
     }
 
@@ -1330,14 +1340,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public boolean isImmutableEmptyByteStore() {
-        return bytesStore.isImmutableEmptyByteStore();
-    }
-
-    private void replaceByteStoreIfEmpty() {
-        if (isImmutableEmptyByteStore()) {
-            // This forces a replacement of the underlying ByteStore
-            write(EMPTY_ARRAY);
-        }
+        return bytesStore.capacity() == 0;
     }
 
     static final class ReportUnoptimised {

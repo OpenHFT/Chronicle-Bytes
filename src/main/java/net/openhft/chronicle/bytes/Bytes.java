@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -557,6 +558,12 @@ public interface Bytes<U> extends
         return wrapForRead(text.getBytes(StandardCharsets.ISO_8859_1));
     }
 
+    /**
+     * @return an empty, fixed-sized immutable BytesStore.
+     */
+    static Bytes<?> empty() {
+        return BytesStore.empty().bytesForRead();
+    }
     @UsedViaReflection
     static Bytes<byte[]> valueOf(String text) {
         return from(text);
@@ -912,14 +919,15 @@ public interface Bytes<U> extends
      * enough capacity then this method will throw an {@link IllegalArgumentException}
      *
      * @param desiredCapacity the capacity that you required
-     * @throws IllegalArgumentException if the buffer is not elastic and there is not enough space or if the
+     * @throws IllegalStateException if closed and it needs a resize
+     * @throws DecoratedBufferOverflowException if the buffer is not elastic and there is not enough space or if the
      *                                  provided {@code desiredCapacity} is negative;
      */
     default void ensureCapacity(@NonNegative long desiredCapacity)
-            throws IllegalArgumentException, IllegalStateException {
+            throws DecoratedBufferOverflowException, IllegalStateException {
         requireNonNegative(desiredCapacity);
         if (desiredCapacity > capacity())
-            throw new IllegalArgumentException(isElastic() ? "todo" : "not elastic");
+            throw new DecoratedBufferOverflowException(isElastic() ? "todo" : "not elastic");
     }
 
     /**

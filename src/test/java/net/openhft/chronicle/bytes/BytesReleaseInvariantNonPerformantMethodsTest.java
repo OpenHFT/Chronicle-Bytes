@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import net.openhft.chronicle.core.util.Histogram;
@@ -46,64 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommon {
 
     private static final String SILLY_NAME = "Tryggve";
-
-    /**
-     * Checks that methods throws ClosedIllegalStateException and does not change the state of the Bytes
-     */
-    @TestFactory
-    Stream<DynamicTest> nonPerformanceCriticalOperators() {
-        final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
-        return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
-                BytesReleaseInvariantNonPerformantMethodsTest::provideNonPerformantOperations,
-                (args, bytes, nc) -> {
-                    if (bytes.refCount() > 0) {
-                        if (isReadWrite(args)) {
-                            bytes.write(SILLY_NAME);
-                        }
-                        initialInfo.set(new BytesInitialInfo(bytes));
-                        bytes.releaseLast();
-                    }
-                    final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();
-
-                    assertThrows(ClosedIllegalStateException.class, () -> nc.accept(bytes), name);
-
-                    // Unable to check actual size for released MappedBytes
-                    if (!MappedBytes.class.isInstance(bytes)) {
-                        // Todo: remove this check once the cursors are invalid for released resources
-                        final BytesInitialInfo info = new BytesInitialInfo(bytes);
-                        assertEquals(initialInfo.get(), info, name);
-                    }
-                }
-        );
-    }
-
-    /**
-     * Checks the bytes.toDebugString() works with released resources
-     */
-    @ParameterizedTest
-    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void toDebugString(final Bytes<?> bytes, final boolean readWrite) {
-        toDebug(bytes, readWrite, Bytes::toDebugString);
-    }
-
-    /**
-     * Checks the bytes.toDebugString(10) works with released resources
-     */
-    @ParameterizedTest
-    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
-    void toDebugString10(final Bytes<?> bytes, final boolean readWrite) {
-        toDebug(bytes, readWrite, b -> b.toDebugString(10));
-    }
-
-    // Rather than throwing an exception, toDebug provides a String instead
-    private void toDebug(final Bytes<?> bytes, final boolean readWrite, Function<? super Bytes<?>, String> operation) {
-        if (readWrite) {
-            bytes.append(SILLY_NAME);
-        }
-        releaseAndAssertReleased(bytes);
-        final String actual = operation.apply(bytes);
-        assertEquals("<released>", actual);
-    }
 
     private static Stream<NamedConsumer<Bytes<Object>>> provideNonPerformantOperations() {
         final OutputStream os = new OutputStream() {
@@ -165,5 +108,62 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                 NamedConsumer.of(ByteStringAppender::writer, "writer()"),
                 NamedConsumer.of(b -> b.bytesMethodWriter(Object.class), "bytesMethodWriter()")
         );
+    }
+
+    /**
+     * Checks that methods throws ClosedIllegalStateException and does not change the state of the Bytes
+     */
+    @TestFactory
+    Stream<DynamicTest> nonPerformanceCriticalOperators() {
+        final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
+        return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
+                BytesReleaseInvariantNonPerformantMethodsTest::provideNonPerformantOperations,
+                (args, bytes, nc) -> {
+                    if (bytes.refCount() > 0) {
+                        if (isReadWrite(args)) {
+                            bytes.write(SILLY_NAME);
+                        }
+                        initialInfo.set(new BytesInitialInfo(bytes));
+                        bytes.releaseLast();
+                    }
+                    final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();
+
+                    assertThrows(ClosedIllegalStateException.class, () -> nc.accept(bytes), name);
+
+                    // Unable to check actual size for released MappedBytes
+                    if ((Bytes) bytes instanceof MappedBytes || bytes instanceof EmbeddedBytes)
+                        return;
+                    final BytesInitialInfo info = new BytesInitialInfo(bytes);
+                    assertEquals(initialInfo.get(), info, name);
+                }
+        );
+    }
+
+    /**
+     * Checks the bytes.toDebugString() works with released resources
+     */
+    @ParameterizedTest
+    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
+    void toDebugString(final Bytes<?> bytes, final boolean readWrite) {
+        toDebug(bytes, readWrite, Bytes::toDebugString);
+    }
+
+    /**
+     * Checks the bytes.toDebugString(10) works with released resources
+     */
+    @ParameterizedTest
+    @MethodSource("net.openhft.chronicle.bytes.BytesFactoryUtil#provideBytesObjects")
+    void toDebugString10(final Bytes<?> bytes, final boolean readWrite) {
+        toDebug(bytes, readWrite, b -> b.toDebugString(10));
+    }
+
+    // Rather than throwing an exception, toDebug provides a String instead
+    private void toDebug(final Bytes<?> bytes, final boolean readWrite, Function<? super Bytes<?>, String> operation) {
+        if (readWrite) {
+            bytes.append(SILLY_NAME);
+        }
+        releaseAndAssertReleased(bytes);
+        final String actual = operation.apply(bytes);
+        assertEquals("<released>", actual);
     }
 }

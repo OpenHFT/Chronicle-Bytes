@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ReferenceCounted;
+import net.openhft.chronicle.core.util.ThrowingConsumer;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.params.provider.Arguments;
 
@@ -40,42 +41,39 @@ import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 
 final class BytesFactoryUtil {
 
-    private static final AtomicInteger CNT = new AtomicInteger();
-
-    private BytesFactoryUtil() {
-    }
-
     static final int SIZE = 128;
     static final int CHUNK_SIZE = 64 << 10;
+    private static final AtomicInteger CNT = new AtomicInteger();
+    private BytesFactoryUtil() {
+    }
 
     static Stream<Arguments> provideBytesObjects() {
         final ByteBuffer heapByteBuffer = ByteBuffer.allocate(SIZE);
         final ByteBuffer directByteBuffer = ByteBuffer.allocateDirect(SIZE);
 
         try {
-            final File file = create(File.createTempFile("mapped-file" + CNT.getAndIncrement(), "bin"), SIZE);
+            final File file = create(File.createTempFile("mapped-file" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE * 2);
             file.deleteOnExit();
-            final File fileRo = create(File.createTempFile("mapped-file-ro" + CNT.getAndIncrement(), "bin"), SIZE);
+            final File fileRo = create(File.createTempFile("mapped-file-ro" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE * 2);
             fileRo.deleteOnExit();
-            final File singleFile = create(File.createTempFile("single-mapped-file" + CNT.getAndIncrement(), "bin"), SIZE);
+            final File singleFile = create(File.createTempFile("single-mapped-file" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE * 2);
             singleFile.deleteOnExit();
             // Must be filled to the CHUNK_SIZE
-            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE);
+            final File singleFileRo = create(File.createTempFile("single-mapped-file-ro" + CNT.getAndIncrement(), "bin"), CHUNK_SIZE * 2);
             singleFileRo.deleteOnExit();
-            //final MassiveFieldHolder holder = new MassiveFieldHolder();
+            final MassiveFieldHolder holder = new MassiveFieldHolder();
             return Stream.of(
                     Arguments.of(Bytes.allocateDirect(SIZE), true, "Bytes.allocateDirect(SIZE)"),
                     Arguments.of(Bytes.allocateElasticOnHeap(SIZE), true, "Bytes.allocateElasticOnHeap(SIZE)"),
                     Arguments.of(wipe(Bytes.allocateElasticDirect()), true, "Bytes.allocateElasticDirect()"),
                     Arguments.of(Bytes.wrapForWrite(heapByteBuffer), true, "Bytes.wrapForWrite(heapByteBuffer)"),
                     Arguments.of(Bytes.wrapForWrite(directByteBuffer), true, "Bytes.wrapForWrite(directByteBuffer)"),
-                    Arguments.of(MappedBytes.mappedBytes(file, CHUNK_SIZE), true, "MappedBytes.mappedBytes(file, SIZE)"),
-                    Arguments.of(MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true), false, "MappedBytes.mappedBytes(fileRo, SIZE, 0, true)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE), true, "MappedBytes.singleMappedBytes(singleFile, SIZE)"),
-                    Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, SIZE, true)"),
+                    Arguments.of(MappedBytes.mappedBytes(file, CHUNK_SIZE), true, "MappedBytes.mappedBytes(file, CHUNK_SIZE)"),
+                    Arguments.of(MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true), false, "MappedBytes.mappedBytes(fileRo, CHUNK_SIZE, 0, true)"),
+                    Arguments.of(MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE), true, "MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE)"),
+                    Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true)"),
 
-                    // Todo: reactivate this one once https://github.com/OpenHFT/Chronicle-Bytes/issues/254 is fixed
-                    // Arguments.of(Bytes.forFieldGroup(holder, "b"), true, "Bytes.forFieldGroup(holder, \"b\")"),
+                     Arguments.of(Bytes.forFieldGroup(holder, "a"), true, "Bytes.forFieldGroup(holder, \"a\")"),
 
                     Arguments.of(new UncheckedBytes<>(Bytes.allocateDirect(SIZE)), true, "new UncheckedBytes<>(Bytes.allocateDirect(SIZE))"),
                     Arguments.of(new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE])), true, "new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE]))"),
@@ -126,19 +124,6 @@ final class BytesFactoryUtil {
         }
     }
 
-    static final class MassiveFieldHolder {
-
-        @FieldGroup("b")
-        long a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af;
-        //final byte[] bytes = new byte[SIZE];
-
-        static {
-            // Fields above must match
-            assert SIZE == Long.BYTES * 8 * 2;
-        }
-
-    }
-
     static File truncate(final File file) {
         try (FileChannel fc = FileChannel.open(file.toPath(), StandardOpenOption.WRITE)) {
             fc.truncate(0);
@@ -185,6 +170,12 @@ final class BytesFactoryUtil {
         void accept(T t, U u, V v);
     }
 
+    static final class MassiveFieldHolder {
+        // need an extra byte for the length
+        @FieldGroup("a")
+        long a0, a1, a2, a3, a4, a5, a6, a7, a8, a9, aa, ab, ac, ad, ae, af, ag;
+    }
+
     static class NamedConsumer<T> implements HasName, Consumer<T> {
 
         private final Consumer<T> consumer;
@@ -193,6 +184,14 @@ final class BytesFactoryUtil {
         NamedConsumer(Consumer<T> consumer, String name) {
             this.consumer = consumer;
             this.name = name;
+        }
+
+        static <T> NamedConsumer<T> of(Consumer<T> consumer, String name) {
+            return new NamedConsumer<>(consumer, name);
+        }
+
+        static <O, T extends Throwable> NamedConsumer<O> ofThrowing(ThrowingConsumer<O, T> consumer, String name) {
+            return new NamedConsumer<>(new ThrowingConsumerWrapper<>(consumer), name);
         }
 
         @Override
@@ -205,38 +204,21 @@ final class BytesFactoryUtil {
             return name;
         }
 
-        static <T> NamedConsumer<T> of(Consumer<T> consumer, String name) {
-            return new NamedConsumer<>(consumer, name);
-        }
-
-        static <T> NamedConsumer<T> ofThrowing(ThrowingConsumer<T, ?> consumer, String name) {
-            return new NamedConsumer<>(wrapThrowing(consumer), name);
-        }
-
     }
 
-    @FunctionalInterface
-    interface ThrowingConsumer<T, X extends Exception> {
-        void accept(T t) throws X;
-    }
+    private static final class ThrowingConsumerWrapper<O, T extends Throwable> implements Consumer<O> {
 
-    static <T> Consumer<T> wrapThrowing(ThrowingConsumer<T, ?> consumer) {
-        return new ThrowingConsumerWrapper<>(consumer);
-    }
+        private final ThrowingConsumer<O, T> delegate;
 
-    private static final class ThrowingConsumerWrapper<T> implements Consumer<T> {
-
-        private final ThrowingConsumer<T, ?> delegate;
-
-        public ThrowingConsumerWrapper(ThrowingConsumer<T, ?> delegate) {
+        public ThrowingConsumerWrapper(ThrowingConsumer<O, T> delegate) {
             this.delegate = delegate;
         }
 
         @Override
-        public void accept(T t) {
+        public void accept(O o) {
             try {
-                delegate.accept(t);
-            } catch (Exception e) {
+                delegate.accept(o);
+            } catch (Throwable e) {
                 Jvm.rethrow(e);
             }
         }

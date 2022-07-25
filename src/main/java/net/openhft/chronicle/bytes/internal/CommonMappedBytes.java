@@ -44,15 +44,15 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  */
 @SuppressWarnings({"unchecked"})
 public abstract class CommonMappedBytes extends MappedBytes {
-
-    protected final MappedFile mappedFile;
-    private final boolean backingFileIsReadOnly;
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
         protected void performClose() throws IllegalStateException {
             CommonMappedBytes.this.performClose();
         }
     };
+
+    protected final MappedFile mappedFile;
+    private final boolean backingFileIsReadOnly;
     private final long capacity;
 
     protected long lastActualSize = 0;
@@ -607,4 +607,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
         mappedFile.chunkCount(chunkCount);
     }
 
+    @Override
+    public boolean readWrite() {
+        return !mappedFile.readOnly();
+    }
 }

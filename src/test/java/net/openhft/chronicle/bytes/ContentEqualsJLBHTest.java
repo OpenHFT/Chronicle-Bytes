@@ -22,7 +22,7 @@ import net.openhft.chronicle.jlbh.JLBH;
 import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 
-public class ContentEqualsJLBHTest {
+public class ContentEqualsJLBHTest extends BytesTestCommon {
 
     // to use vectorizedMismatch you should run on java 11 or later, with the following VM args
     // --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
