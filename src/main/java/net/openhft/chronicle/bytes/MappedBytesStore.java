@@ -23,7 +23,6 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.Syncable;
 import net.openhft.posix.PosixAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -359,6 +358,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     private void performMsync(long offset, long length) {
+        final SyncMode syncMode = this.syncMode();
+        if (syncMode == SyncMode.NONE)
+            return;
         long start0 = System.currentTimeMillis();
         PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
         long time0 = System.currentTimeMillis() - start0;
@@ -370,7 +372,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @return the sync mode for this ByteStore
      */
     public SyncMode syncMode() {
-        return syncMode;
+        return syncMode == null ? SyncMode.NONE : syncMode;
     }
 
     /**
