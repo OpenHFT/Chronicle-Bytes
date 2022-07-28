@@ -126,7 +126,7 @@ enum BytesInternal {
                 vectorizedMismatchMethodHandle = MethodHandles.lookup().unreflect(vectorizedMismatch);
             }
         } catch (Exception e) {
-            if (e.getClass().getName().equals("InaccessibleObjectException"))
+            if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
                 Jvm.debug().on(BytesInternal.class, e.toString());
             else
                 Jvm.debug().on(BytesInternal.class, e);
