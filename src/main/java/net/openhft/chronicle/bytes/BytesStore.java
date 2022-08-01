@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.nio.ch.DirectBuffer;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -156,7 +157,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
-                ? NativeBytesStore.wrap(bb)
+                ? new NativeBytesStore(((DirectBuffer)bb).address(), bb.limit())
                 : HeapBytesStore.wrap(bb);
     }
 
