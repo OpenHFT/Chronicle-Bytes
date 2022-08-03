@@ -1,5 +1,6 @@
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -447,7 +448,6 @@ public class MappedBytesTest extends BytesTestCommon {
             throws FileNotFoundException {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
-        file.deleteOnExit();
         try (MappedBytes mb = MappedBytes.singleMappedBytes(file, 64 << 10)) {
             mb.realCapacity();
             assertTrue(Thread.currentThread().isInterrupted());
@@ -603,6 +603,29 @@ public class MappedBytesTest extends BytesTestCommon {
         } finally {
             t.interrupt();
             t.join(Jvm.isDebug() ? 60_000 : 1000);
+        }
+    }
+
+    @Test
+    public void testEnsureCapacity() throws FileNotFoundException {
+        File file = IOTools.createTempFile("ensure");
+        final int chunkSize = 256 << 10;
+        try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
+            final int chunks3 = chunkSize * 3;
+            mb.writePosition(chunks3).writeByte((byte) 0);
+            assertEquals(chunks3, mb.bytesStore().start());
+            mb.ensureCapacity(chunks3);
+            assertEquals("ensureCapacity used to add writePosition", chunks3, mb.bytesStore().start());
+        }
+    }
+
+    @Test(expected = DecoratedBufferOverflowException.class)
+    public void testIncreaseCapacityOverMax() throws FileNotFoundException {
+        File file = IOTools.createTempFile("ensure2");
+        final int chunkSize = 256 << 10;
+        try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
+            final long capacity = mb.capacity();
+            mb.ensureCapacity(capacity + 1);
         }
     }
 }
