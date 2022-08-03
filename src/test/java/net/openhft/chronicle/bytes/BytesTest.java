@@ -60,12 +60,12 @@ public class BytesTest extends BytesTestCommon {
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-//                {"Native Unchecked", NATIVE_UNCHECKED},
-//                {"Native", NATIVE},
-//                {"Heap", HEAP},
-//                {"Heap ByteBuffer", BYTE_BUFFER},
-//                {"Heap Unchecked", HEAP_UNCHECKED},
-//                {"Heap Embedded", HEAP_EMBEDDED},
+                {"Native Unchecked", NATIVE_UNCHECKED},
+                {"Native", NATIVE},
+                {"Heap", HEAP},
+                {"Heap ByteBuffer", BYTE_BUFFER},
+                {"Heap Unchecked", HEAP_UNCHECKED},
+                {"Heap Embedded", HEAP_EMBEDDED},
                 {"Hex Dump", HEX_DUMP}
         });
     }
