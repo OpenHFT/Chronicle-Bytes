@@ -661,7 +661,7 @@ public interface RandomDataInput extends RandomCommon {
             throws IllegalStateException {
         requireNonNull(bytes);
         try {
-            int len = (int) Math.min(length, readLimit() - offsetInRDI);
+            int len = Math.min(length, Maths.toUInt31(readLimit() - offsetInRDI));
             for (int i = 0; i < len; i++)
                 bytes[offset + i] = readByte(offsetInRDI + i);
             return len;
