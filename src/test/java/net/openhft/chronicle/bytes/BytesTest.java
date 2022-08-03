@@ -31,6 +31,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
@@ -1099,6 +1101,25 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("", a.toString());
             if (!a.unchecked())
                 assertThrows(BufferOverflowException.class, () -> a.writeSkip(-1));
+        } finally {
+            postTest(a);
+        }
+    }
+
+    @Test
+    public void testCopyToStream() throws IOException {
+        @NotNull Bytes<?> a = alloc1.elasticBytes(16);
+        String text = "Hello World";
+
+        try {
+            a.append(text);
+            try (ByteArrayOutputStream os = new ByteArrayOutputStream()) {
+                a.copyTo(os);
+
+                byte[] array = os.toByteArray();
+                assertEquals(text.length(), array.length);
+                assertArrayEquals(text.getBytes("UTF8"), array);
+            }
         } finally {
             postTest(a);
         }

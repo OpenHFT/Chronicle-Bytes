@@ -25,6 +25,7 @@ import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -1128,7 +1129,8 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) throws IllegalStateException {
-        return bytesStore.read(offsetInRDI, bytes, offset, length);
+        int len = Math.min(length, Maths.toUInt31(readLimit() - offsetInRDI));
+        return bytesStore.read(offsetInRDI, bytes, offset, len);
     }
 
     @NotNull
