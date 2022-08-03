@@ -388,7 +388,7 @@ public class NativeBytes<U>
     @Override
     public Bytes<U> writeByte(final byte i8)
             throws BufferOverflowException, IllegalStateException {
-        final long offset = writeOffsetPositionMoved(1, 1);
+        final long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
     }
@@ -397,7 +397,7 @@ public class NativeBytes<U>
     @Override
     public Bytes<U> writeLong(final long i64)
             throws BufferOverflowException, IllegalStateException {
-        final long offset = writeOffsetPositionMoved(8L, 8L);
+        final long offset = writeOffsetPositionMoved(8L);
         bytesStore.writeLong(offset, i64);
         return this;
     }
