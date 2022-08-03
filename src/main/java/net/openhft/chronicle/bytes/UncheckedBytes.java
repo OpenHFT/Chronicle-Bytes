@@ -251,7 +251,7 @@ public class UncheckedBytes<U>
     @Override
     public Bytes<U> writeByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(1, 1);
+        long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
     }
