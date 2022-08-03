@@ -916,7 +916,7 @@ public interface Bytes<U> extends
 
     /**
      * Grows the buffer if the buffer is elastic, if the buffer is not elastic and there is not
-     * enough capacity then this method will throw an {@link IllegalArgumentException}
+     * enough capacity then this method will throw an {@link DecoratedBufferOverflowException}
      *
      * @param desiredCapacity the capacity that you required
      * @throws IllegalStateException if closed and it needs a resize

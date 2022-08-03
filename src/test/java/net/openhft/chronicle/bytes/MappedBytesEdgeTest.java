@@ -47,10 +47,10 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 {1, ReadWrite.READ, (Consumer<Bytes<?>>)(StreamingDataInput::peekUnsignedByte) },
                 {4, ReadWrite.READ, (Consumer<Bytes<?>>)(StreamingDataInput::readInt) },
                 {4, ReadWrite.READ, (Consumer<Bytes<?>>)(StreamingDataInput::readVolatileInt) },
+                {4, ReadWrite.READ, (Consumer<Bytes<?>>)(b -> b.peekVolatileInt()) },
                 {8, ReadWrite.READ, (Consumer<Bytes<?>>)(StreamingDataInput::readLong) },
                 {8, ReadWrite.READ, (Consumer<Bytes<?>>)(StreamingDataInput::readDouble) },
 
-                {1, ReadWrite.WRITE, (Consumer<Bytes<?>>)(b -> b.ensureCapacity(0)) },
                 {1, ReadWrite.WRITE, (Consumer<Bytes<?>>)(b -> b.writeByte((byte) 99)) },
                 {2, ReadWrite.WRITE, (Consumer<Bytes<?>>)(b -> b.writeShort((short) 123)) },
                 {4, ReadWrite.WRITE, (Consumer<Bytes<?>>)(b -> b.writeInt(1234)) },
@@ -71,7 +71,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
         int overlap = 65536;
         try (final MappedBytes bytes = MappedBytes.mappedBytes(tempMBFile, chunk, overlap)) {
             // map in the real file
-            bytes.writePosition(0).ensureCapacity(0);
+            bytes.writePosition(0).writeByte((byte) 0);
             assertEquals(0, bytes.bytesStore().start());
 
             if (rw == ReadWrite.WRITE) {
