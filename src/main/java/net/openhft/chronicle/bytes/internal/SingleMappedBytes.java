@@ -233,7 +233,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
         assert bytes != this : "you should not write to yourself !";
 
         long length = bytes.readRemaining();
-        bytesStore.write(writePosition, bytes);
+        bytesStore.write(writePosition(), bytes);
         writeSkip(length);
         return this;
     }
