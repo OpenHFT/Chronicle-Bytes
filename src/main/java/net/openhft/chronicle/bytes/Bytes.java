@@ -289,7 +289,8 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a new Bytes wrapping the provided {@code byteBuffer}.
      * <p>
-     * The returned Bytes is ready for writing.
+     * The returned Bytes is ready for writing. When that Bytes instance is closed, direct {@code byteBuffer} will be
+     * deallocated and should no longer be used.
      * <p>
      * Method for convenience only - might not be ideal for performance (creates garbage).
      * To avoid garbage, use something like this example:
@@ -361,7 +362,8 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a new Bytes wrapping the provided {@code byteArray}.
      * <p>
-     * The returned Bytes is ready for reading.
+     * The returned Bytes is ready for reading. When that Bytes instance is closed, direct {@code byteBuffer} will be
+     * deallocated and should no longer be used.
      * <p>
      * Method for convenience only - might not be ideal for performance (creates garbage).
      * To avoid garbage, use something like this example:

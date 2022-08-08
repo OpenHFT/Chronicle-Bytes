@@ -28,7 +28,6 @@ import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.nio.ch.DirectBuffer;
 
 import javax.crypto.Cipher;
 import java.io.IOException;
@@ -150,6 +149,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * Wraps a ByteBuffer which can be either on heap or off heap.
+     * <p>
+     * When resulting BytesStore instance is closed, direct {@code byteBuffer} will be deallocated and should
+     * no longer be used.
      *
      * @param bb the ByteBuffer to wrap
      * @return BytesStore
@@ -157,7 +159,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
-                ? new NativeBytesStore(((DirectBuffer)bb).address(), bb.capacity())
+                ? NativeBytesStore.wrap(bb)
                 : HeapBytesStore.wrap(bb);
     }
 
