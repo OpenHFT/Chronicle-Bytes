@@ -157,7 +157,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     @NotNull
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
-                ? new NativeBytesStore(((DirectBuffer)bb).address(), bb.limit())
+                ? new NativeBytesStore(((DirectBuffer)bb).address(), bb.capacity())
                 : HeapBytesStore.wrap(bb);
     }
 

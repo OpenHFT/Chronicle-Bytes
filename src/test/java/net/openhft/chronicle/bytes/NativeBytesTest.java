@@ -51,7 +51,7 @@ public class NativeBytesTest extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE}, {HEAP}, {BYTE_BUFFER}
+                {NATIVE_WRAPPED}, {NATIVE_ADDRESS}, {HEAP}, {BYTE_BUFFER}
         });
     }
 

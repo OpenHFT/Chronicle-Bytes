@@ -113,6 +113,7 @@ public class NativeBytes<U>
         }
     }
 
+    // Not much reason for this method to be in this specific class.
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
             throws IllegalStateException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
@@ -120,7 +121,7 @@ public class NativeBytes<U>
         final long position = bytes.readPosition();
 
         try {
-            final NativeBytes<Void> bytes2 = Bytes.allocateElasticDirect(remaining);
+            final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
             bytes2.write(bytes, position, remaining);
             return bytes2;
         } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {

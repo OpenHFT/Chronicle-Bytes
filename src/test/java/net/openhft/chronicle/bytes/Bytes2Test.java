@@ -25,8 +25,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.Allocator.HEAP;
-import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -45,7 +44,7 @@ public class Bytes2Test extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE, NATIVE}, {HEAP, NATIVE}, {NATIVE, HEAP}, {HEAP, HEAP}
+                {NATIVE_WRAPPED, NATIVE_WRAPPED}, {HEAP, NATIVE_WRAPPED}, {NATIVE_WRAPPED, HEAP}, {HEAP, HEAP}
         });
     }
 

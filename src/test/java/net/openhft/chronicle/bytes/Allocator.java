@@ -17,13 +17,19 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
+import sun.nio.ch.DirectBuffer;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+
+import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 public enum Allocator {
 
-    NATIVE {
+    NATIVE_WRAPPED {
         @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
@@ -34,6 +40,58 @@ public enum Allocator {
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocateDirect(capacity);
+        }
+
+        @Override
+        Bytes<?> fixedBytes(int capacity) {
+            @NotNull final ByteBuffer byteBuffer = byteBuffer(capacity);
+            requireNonNull(byteBuffer);
+            BytesStore<?, ByteBuffer> bs = NativeBytesStore.wrap(byteBuffer);
+            try {
+                try {
+                    Bytes<ByteBuffer> bbb = bs.bytesForWrite();
+                    bbb.writePosition(byteBuffer.position());
+                    bbb.writeLimit(byteBuffer.limit());
+                    return bbb;
+                } finally {
+                    bs.release(ReferenceOwner.INIT);
+                }
+            } catch (IllegalStateException | BufferOverflowException ise) {
+                throw new AssertionError(ise);
+            }
+        }
+    },
+
+    NATIVE_ADDRESS {
+        @NotNull
+        @Override
+        Bytes<ByteBuffer> elasticBytes(int capacity) {
+            return Bytes.elasticByteBuffer(capacity);
+        }
+
+        @NotNull
+        @Override
+        ByteBuffer byteBuffer(int capacity) {
+            return ByteBuffer.allocateDirect(capacity);
+        }
+
+        @Override
+        Bytes<?> fixedBytes(int capacity) {
+            @NotNull final ByteBuffer byteBuffer = byteBuffer(capacity);
+            requireNonNull(byteBuffer);
+            BytesStore<?, ByteBuffer> bs = new NativeBytesStore(((DirectBuffer)byteBuffer).address(), byteBuffer.capacity());
+            try {
+                try {
+                    Bytes<ByteBuffer> bbb = bs.bytesForWrite();
+                    bbb.writePosition(byteBuffer.position());
+                    bbb.writeLimit(byteBuffer.limit());
+                    return bbb;
+                } finally {
+                    bs.release(ReferenceOwner.INIT);
+                }
+            } catch (IllegalStateException | BufferOverflowException ise) {
+                throw new AssertionError(ise);
+            }
         }
     },
     HEAP {
