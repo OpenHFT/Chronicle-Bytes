@@ -44,7 +44,7 @@ public class Bytes2Test extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE_WRAPPED, NATIVE_WRAPPED}, {HEAP, NATIVE_WRAPPED}, {NATIVE_WRAPPED, HEAP}, {HEAP, HEAP}
+                {NATIVE, NATIVE}, {HEAP, NATIVE}, {NATIVE, HEAP}, {HEAP, HEAP}
         });
     }
 

@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
@@ -64,7 +63,7 @@ public class BytesTest extends BytesTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Native Wrapped", NATIVE_WRAPPED},
+                {"Native Wrapped", NATIVE},
                 {"Native Address", NATIVE_ADDRESS},
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
@@ -192,16 +191,6 @@ public class BytesTest extends BytesTestCommon {
         assertEquals(hist, histB);
         assertEquals(hist2, histC);
         postTest(bytes);
-    }
-
-
-    @Test
-    public void testA() {
-        ByteBuffer bb = ByteBuffer.allocateDirect(1024);
-        String expected = NativeBytesStore.wrap(bb).toDebugString();
-        String actual = BytesStore.wrap(bb).toDebugString();
-        assertEquals(expected, actual);
-
     }
 
     @Test
@@ -793,9 +782,9 @@ public class BytesTest extends BytesTestCommon {
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
         try {
             b.writeEnum(HEAP);
-            b.writeEnum(NATIVE_WRAPPED);
+            b.writeEnum(NATIVE);
             assertEquals(HEAP, b.readEnum(Allocator.class));
-            assertEquals(NATIVE_WRAPPED, b.readEnum(Allocator.class));
+            assertEquals(NATIVE, b.readEnum(Allocator.class));
 
         } finally {
             postTest(b);
@@ -1076,7 +1065,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendReallySmallDouble() {
-        assumeFalse(alloc1 == NATIVE_WRAPPED || alloc1 == NATIVE_ADDRESS);
+        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
         for (double d = 1; d >= 1e-19; d *= 0.99) {

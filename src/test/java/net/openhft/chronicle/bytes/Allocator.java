@@ -25,11 +25,9 @@ import sun.nio.ch.DirectBuffer;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
-import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
-
 public enum Allocator {
 
-    NATIVE_WRAPPED {
+    NATIVE {
         @NotNull
         @Override
         Bytes<ByteBuffer> elasticBytes(int capacity) {
@@ -40,25 +38,6 @@ public enum Allocator {
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocateDirect(capacity);
-        }
-
-        @Override
-        Bytes<?> fixedBytes(int capacity) {
-            @NotNull final ByteBuffer byteBuffer = byteBuffer(capacity);
-            requireNonNull(byteBuffer);
-            BytesStore<?, ByteBuffer> bs = NativeBytesStore.wrap(byteBuffer);
-            try {
-                try {
-                    Bytes<ByteBuffer> bbb = bs.bytesForWrite();
-                    bbb.writePosition(byteBuffer.position());
-                    bbb.writeLimit(byteBuffer.limit());
-                    return bbb;
-                } finally {
-                    bs.release(ReferenceOwner.INIT);
-                }
-            } catch (IllegalStateException | BufferOverflowException ise) {
-                throw new AssertionError(ise);
-            }
         }
     },
 
@@ -75,11 +54,15 @@ public enum Allocator {
             return ByteBuffer.allocateDirect(capacity);
         }
 
+        /**
+         * Modified {@link Bytes#wrap(ByteBuffer)} that wraps NativeBytesStore by address without providing underlying.
+         */
         @Override
         Bytes<?> fixedBytes(int capacity) {
-            @NotNull final ByteBuffer byteBuffer = byteBuffer(capacity);
-            requireNonNull(byteBuffer);
-            BytesStore<?, ByteBuffer> bs = new NativeBytesStore(((DirectBuffer)byteBuffer).address(), byteBuffer.capacity());
+            final ByteBuffer byteBuffer = byteBuffer(capacity);
+
+            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(
+                    ((DirectBuffer)byteBuffer).address(), byteBuffer.capacity());
             try {
                 try {
                     Bytes<ByteBuffer> bbb = bs.bytesForWrite();

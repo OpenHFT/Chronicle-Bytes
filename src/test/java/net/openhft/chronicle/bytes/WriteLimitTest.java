@@ -32,7 +32,7 @@ import static org.junit.Assert.fail;
 
 @RunWith(Parameterized.class)
 public class WriteLimitTest extends BytesTestCommon {
-    static final Allocator[] ALLOCATORS = {Allocator.NATIVE_WRAPPED, Allocator.NATIVE_ADDRESS, Allocator.HEAP, Allocator.BYTE_BUFFER};
+    static final Allocator[] ALLOCATORS = {Allocator.NATIVE, Allocator.NATIVE_ADDRESS, Allocator.HEAP, Allocator.BYTE_BUFFER};
     static List<Object[]> tests;
     static Random random = new Random();
     final String name;
