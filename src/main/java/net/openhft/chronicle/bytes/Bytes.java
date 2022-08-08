@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -66,6 +67,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @param <U> Underlying type
  * @see BytesStore
  */
+@SingleThreaded
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface Bytes<U> extends
         BytesStore<Bytes<U>, U>,
