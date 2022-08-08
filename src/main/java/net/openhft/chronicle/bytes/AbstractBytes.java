@@ -64,7 +64,7 @@ public abstract class AbstractBytes<U>
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
-    protected long writePosition;
+    private long writePosition; // May be overridden in subclasses - use writePosition() getter to access it
     protected long writeLimit;
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
