@@ -300,7 +300,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
             throws BufferOverflowException, IllegalStateException {
 
         requireNonNull(s);
-        ensureCapacity(writePosition + length);
+        ensureCapacity(writePosition() + length);
         long address = addressForWritePosition();
         Memory memory = ((MappedBytesStore) bytesStore()).memory;
         if (Jvm.isJava9Plus()) {

@@ -368,7 +368,7 @@ public class NativeBytes<U>
     protected long writeOffsetPositionMoved(final @NonNegative long adding, final @NonNegative long advance)
             throws BufferOverflowException, IllegalStateException {
         final long oldPosition = writePosition();
-        if (writePosition < bytesStore.start())
+        if (writePosition() < bytesStore.start())
             throw new BufferOverflowException();
         final long writeEnd = writePosition() + adding;
         if (writeEnd > writeLimit)

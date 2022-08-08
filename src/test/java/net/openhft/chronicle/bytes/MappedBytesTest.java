@@ -150,8 +150,8 @@ public class MappedBytesTest extends BytesTestCommon {
             // write
             Bytes<?> from = Bytes.from(text);
             bytesW.write(from);
-            long wp = bytesW.writePosition;
-            Assert.assertEquals(text.length(), bytesW.writePosition);
+            long wp = bytesW.writePosition();
+            Assert.assertEquals(text.length(), bytesW.writePosition());
 
             // read
             bytesR.readLimit(wp);
@@ -191,7 +191,7 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from);
             long wp = text.length() + offset;
-            Assert.assertEquals(0, bytesW.writePosition);
+            Assert.assertEquals(0, bytesW.writePosition());
 
             // read
             bytesR.readLimit(wp);
@@ -214,7 +214,7 @@ public class MappedBytesTest extends BytesTestCommon {
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from);
             long wp = text.length() + offset;
-            Assert.assertEquals(0, bytesW.writePosition);
+            Assert.assertEquals(0, bytesW.writePosition());
 
             // read
             bytesR.readLimit(wp);
@@ -236,7 +236,7 @@ public class MappedBytesTest extends BytesTestCommon {
             //write
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from, shift, text.length() - shift);
-            Assert.assertEquals(0, bytesW.writePosition);
+            Assert.assertEquals(0, bytesW.writePosition());
 
             // read
             bytesR.readLimit(offset + (text.length() - shift));
@@ -259,7 +259,7 @@ public class MappedBytesTest extends BytesTestCommon {
             //write
             Bytes<?> from = Bytes.from(text);
             bytesW.write(offset, from, shift, text.length() - shift);
-            Assert.assertEquals(0, bytesW.writePosition);
+            Assert.assertEquals(0, bytesW.writePosition());
 
             // read
             bytesR.readLimit(offset + (text.length() - shift));

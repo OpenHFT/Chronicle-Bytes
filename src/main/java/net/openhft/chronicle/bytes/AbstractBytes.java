@@ -64,6 +64,7 @@ public abstract class AbstractBytes<U>
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
+    // Make private in x.24 - can be overridden in subclasses, should be accessed via writePosition() getter
     protected long writePosition;
     protected long writeLimit;
     protected boolean isPresent;
@@ -133,7 +134,7 @@ public abstract class AbstractBytes<U>
             throws IllegalStateException {
         final long start = start();
         final long capacity = capacity();
-        if (readPosition == start && writePosition == start && writeLimit == capacity)
+        if (readPosition == start && writePosition() == start && writeLimit == capacity)
             return this;
         assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
         readPosition = start;
@@ -274,7 +275,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> readLimit(@NonNegative long limit)
             throws BufferUnderflowException {
-        if (this.writePosition == limit)
+        if (writePosition() == limit)
             return this;
 
         assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
@@ -300,7 +301,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writePosition(@NonNegative long position)
             throws BufferOverflowException {
-        if (writePosition == position)
+        if (writePosition() == position)
             return this;
 
         if (position > writeLimit())
