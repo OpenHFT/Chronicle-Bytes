@@ -25,8 +25,7 @@ import org.junit.runners.Parameterized;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.Allocator.HEAP;
-import static net.openhft.chronicle.bytes.Allocator.NATIVE;
+import static net.openhft.chronicle.bytes.Allocator.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

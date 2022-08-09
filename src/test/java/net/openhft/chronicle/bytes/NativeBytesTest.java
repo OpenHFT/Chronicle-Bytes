@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.junit.Assert;
 import org.junit.Assume;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,7 +50,7 @@ public class NativeBytesTest extends BytesTestCommon {
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {NATIVE}, {HEAP}, {BYTE_BUFFER}
+                {NATIVE}, {NATIVE_ADDRESS}, {HEAP}, {BYTE_BUFFER}
         });
     }
 

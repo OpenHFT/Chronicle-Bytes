@@ -17,8 +17,12 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
+import sun.nio.ch.DirectBuffer;
 
+import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 public enum Allocator {
@@ -34,6 +38,43 @@ public enum Allocator {
         @Override
         ByteBuffer byteBuffer(int capacity) {
             return ByteBuffer.allocateDirect(capacity);
+        }
+    },
+
+    NATIVE_ADDRESS {
+        @NotNull
+        @Override
+        Bytes<ByteBuffer> elasticBytes(int capacity) {
+            return Bytes.elasticByteBuffer(capacity);
+        }
+
+        @NotNull
+        @Override
+        ByteBuffer byteBuffer(int capacity) {
+            return ByteBuffer.allocateDirect(capacity);
+        }
+
+        /**
+         * Modified {@link Bytes#wrap(ByteBuffer)} that wraps NativeBytesStore by address without providing underlying.
+         */
+        @Override
+        Bytes<?> fixedBytes(int capacity) {
+            final ByteBuffer byteBuffer = byteBuffer(capacity);
+
+            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(
+                    ((DirectBuffer)byteBuffer).address(), byteBuffer.capacity());
+            try {
+                try {
+                    Bytes<ByteBuffer> bbb = bs.bytesForWrite();
+                    bbb.writePosition(byteBuffer.position());
+                    bbb.writeLimit(byteBuffer.limit());
+                    return bbb;
+                } finally {
+                    bs.release(ReferenceOwner.INIT);
+                }
+            } catch (IllegalStateException | BufferOverflowException ise) {
+                throw new AssertionError(ise);
+            }
         }
     },
     HEAP {

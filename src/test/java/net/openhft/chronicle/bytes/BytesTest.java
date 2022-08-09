@@ -63,7 +63,8 @@ public class BytesTest extends BytesTestCommon {
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
                 {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Native", NATIVE},
+                {"Native Wrapped", NATIVE},
+                {"Native Address", NATIVE_ADDRESS},
                 {"Heap", HEAP},
                 {"Heap ByteBuffer", BYTE_BUFFER},
                 {"Heap Unchecked", HEAP_UNCHECKED},
@@ -1064,7 +1065,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testAppendReallySmallDouble() {
-        assumeFalse(alloc1 == NATIVE);
+        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
         for (double d = 1; d >= 1e-19; d *= 0.99) {
