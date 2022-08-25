@@ -1263,7 +1263,7 @@ public abstract class AbstractBytes<U>
     }
 
     protected void bytesStore(BytesStore<Bytes<U>, U> bytesStore) {
-        this.bytesStore = bytesStore;
+        this.bytesStore = BytesInternal.warnIfBytesOnBytes(bytesStore);
     }
 
     @Override
