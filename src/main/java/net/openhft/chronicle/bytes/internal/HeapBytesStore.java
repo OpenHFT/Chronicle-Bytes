@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -58,7 +59,7 @@ public class HeapBytesStore<U>
         this.capacity = byteBuffer.capacity();
     }
 
-    private HeapBytesStore(byte[] byteArray) {
+    private HeapBytesStore(@Nullable byte[] byteArray) {
         super(false);
         //noinspection unchecked
         this.underlyingObject = (U) byteArray;
@@ -139,7 +140,6 @@ public class HeapBytesStore<U>
         return capacity;
     }
 
-    @NotNull
     @Override
     public U underlyingObject() {
         return underlyingObject;
