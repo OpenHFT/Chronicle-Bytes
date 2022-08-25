@@ -48,6 +48,17 @@ public class StreamingDataInputTest extends BytesTestCommon {
         Bytes<?> b = bytesType.createBuffer();
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
+        b.readPosition(3);
+        b.read(byteArr);
+        assertEquals("3456789HIJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
+        b.releaseLast();
+    }
+
+    @Test
+    public void readOffset() {
+        Bytes<?> b = bytesType.createBuffer();
+        b.append("0123456789");
+        byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.read(byteArr, 2, 6);
         assertEquals("AB012345IJKLMNOP", new String(byteArr, StandardCharsets.ISO_8859_1));
         assertEquals('6', b.readByte());
