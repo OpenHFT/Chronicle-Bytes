@@ -39,7 +39,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
-import java.util.Collection;
 import java.util.Locale;
 import java.util.Scanner;
 
@@ -55,22 +54,13 @@ public class BytesTest extends BytesTestCommon {
 
     private final Allocator alloc1;
 
-    public BytesTest(String ignored, Allocator alloc1) {
+    public BytesTest(Allocator alloc1) {
         this.alloc1 = alloc1;
     }
 
     @Parameterized.Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        return Arrays.asList(new Object[][]{
-                {"Native Unchecked", NATIVE_UNCHECKED},
-                {"Native Wrapped", NATIVE},
-                {"Native Address", NATIVE_ADDRESS},
-                {"Heap", HEAP},
-                {"Heap ByteBuffer", BYTE_BUFFER},
-                {"Heap Unchecked", HEAP_UNCHECKED},
-                {"Heap Embedded", HEAP_EMBEDDED},
-                {"Hex Dump", HEX_DUMP}
-        });
+    public static Object[] data() {
+        return Arrays.stream(Allocator.values()).toArray();
     }
 
     @Test

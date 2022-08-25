@@ -32,20 +32,20 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    private BytesType bytesType;
+    private Allocator allocator;
 
-    public StreamingDataInputTest(BytesType bytesType) {
-        this.bytesType = bytesType;
+    public StreamingDataInputTest(Allocator allocator) {
+        this.allocator = allocator;
     }
 
-    @Parameterized.Parameters(name = "bytesType={0}")
+    @Parameterized.Parameters(name = "allocator={0}")
     public static Object[] params() {
-        return Arrays.stream(BytesType.values()).toArray();
+        return Arrays.stream(Allocator.values()).toArray();
     }
 
     @Test
     public void read() {
-        Bytes<?> b = bytesType.createBuffer();
+        Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.readPosition(3);
@@ -56,7 +56,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @Test
     public void readOffset() {
-        Bytes<?> b = bytesType.createBuffer();
+        Bytes<?> b = allocator.elasticBytes(32);
         b.append("0123456789");
         byte[] byteArr = "ABCDEFGHIJKLMNOP".getBytes();
         b.read(byteArr, 2, 6);
@@ -68,7 +68,7 @@ public class StreamingDataInputTest extends BytesTestCommon {
     @Test
     public void roundTripWorksOnHeap() {
         assumeFalse(Jvm.isAzulZing());
-        Bytes<?> b = bytesType.createBuffer();
+        Bytes<?> b = allocator.elasticBytes(32);
         TestObject source = new TestObject(123L, 123, false);
         b.unsafeWriteObject(source, 13);
         TestObject dest = new TestObject();
@@ -90,25 +90,6 @@ public class StreamingDataInputTest extends BytesTestCommon {
             bytes.readWithLength(to);
             assertEquals(len, to.readRemaining());
         }
-    }
-
-    private enum BytesType implements BytesFactory {
-        DIRECT {
-            @Override
-            public Bytes<?> createBuffer() {
-                return Bytes.allocateElasticDirect();
-            }
-        },
-        ON_HEAP {
-            @Override
-            public Bytes<?> createBuffer() {
-                return Bytes.allocateElasticOnHeap();
-            }
-        }
-    }
-
-    interface BytesFactory {
-        Bytes<?> createBuffer();
     }
 
     static class TestObject {

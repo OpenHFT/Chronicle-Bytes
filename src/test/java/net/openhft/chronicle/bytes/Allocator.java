@@ -163,6 +163,17 @@ public enum Allocator {
         Bytes<?> fixedBytes(int capacity) {
             return new HexDumpBytes();
         }
+    },
+    HEAP_BYTES_BACKING_BYTES {
+        @Override
+        @NotNull Bytes<?> elasticBytes(int capacity) {
+            return new OnHeapBytes(HEAP.elasticBytes(capacity), true);
+        }
+
+        @Override
+        @NotNull ByteBuffer byteBuffer(int capacity) {
+            return HEAP.byteBuffer(capacity);
+        }
     };
 
     @NotNull
