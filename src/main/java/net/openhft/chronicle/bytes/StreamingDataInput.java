@@ -32,10 +32,13 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -561,4 +564,46 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     boolean lenient();
 
+    /**
+     * Creates and returns a new BigDecimal representing the contents of this Bytes object.
+     * <p>
+     * If this Byte object is empty, an object equal to {@link BigDecimal#ZERO} is returned.
+     *
+     * @return a new BigDecimal
+     * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
+     * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
+     * @throws IllegalStateException    if this Bytes object was previously released
+     */
+    @NotNull
+    default BigDecimal readBigDecimal()
+            throws ArithmeticException, BufferUnderflowException, IllegalStateException {
+        throwExceptionIfReleased(this);
+        return new BigDecimal(readBigInteger(), Maths.toUInt31(readStopBit()));
+    }
+
+    /**
+     * Creates and returns a new BigInteger representing the contents of this Bytes object or {@link BigInteger#ZERO}
+     * if this Bytes object is empty.
+     *
+     * @return a new BigInteger
+     * @throws ArithmeticException      if the content of this Bytes object could not be successfully converted
+     * @throws BufferUnderflowException if the content of this Bytes object is insufficient to be successfully converted
+     * @throws IllegalStateException    if this Bytes object was previously released
+     */
+    @NotNull
+    default BigInteger readBigInteger()
+            throws ArithmeticException, BufferUnderflowException, IllegalStateException {
+        throwExceptionIfReleased(this);
+        int length = Maths.toUInt31(readStopBit());
+        if (length == 0) {
+            if (lenient()) {
+                return BigInteger.ZERO;
+            } else {
+                throw new BufferUnderflowException();
+            }
+        }
+        byte[] bytes = new byte[length];
+        read(bytes);
+        return new BigInteger(bytes);
+    }
 }
