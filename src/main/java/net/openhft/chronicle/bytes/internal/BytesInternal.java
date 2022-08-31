@@ -2202,6 +2202,7 @@ enum BytesInternal {
         throwExceptionIfReleased(in);
         if (in.peekUnsignedByte() == 0x80 && in instanceof RandomDataInput) {
             RandomDataInput rdi = (RandomDataInput) in;
+            // checks if the string was null
             if (rdi.peekUnsignedByte(in.readPosition() + 1) == 0) {
                 in.readSkip(2);
                 return null;
