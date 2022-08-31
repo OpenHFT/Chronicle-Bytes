@@ -92,7 +92,9 @@ public class PointerBytesStoreTest extends BytesTestCommon {
             pbs.set(elasticAddr, bytesElastic.capacity());
 
             assertEquals(pbs.capacity(), elasticCap);
-            // we are not supposed to use elastic bytes with PBS
+            expectException("the provided capacity of underlying looks like it may have come from an elastic bytes, " +
+                    "please make sure you do not use PointerBytesStore with ElasticBytes since " +
+                    "the address of the underlying store may change once it expands");
             assertFalse(bytes.isElastic());
         } finally {
             bytesFixed.releaseLast();
