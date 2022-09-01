@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A BytesStore which can point to arbitrary memory.
- * Used to act as a view of Bytes over an area of memory.
+ * Acts as a view of Bytes over an area of memory.
  * Recommended not to use this in conjunction with ElasticBytes as underlying data structure may move.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
