@@ -21,9 +21,19 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
+import java.nio.ByteBuffer;
+
 import static org.junit.Assert.*;
 
 public class PointerBytesStoreTest extends BytesTestCommon {
+
+    @Test
+    public void testWriteSetLimitRead() {
+        final Bytes<?> data = Bytes.allocateDirect(14);
+        data.write8bit("Test me again");
+        data.writeLimit(data.readLimit()); // this breaks the check
+        assertEquals(data.read8bit(), "Test me again");
+    }
 
     @Test
     public void testWrap() {
