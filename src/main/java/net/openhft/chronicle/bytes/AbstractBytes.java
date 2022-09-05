@@ -1198,14 +1198,14 @@ public abstract class AbstractBytes<U>
     @Override
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, isElastic() ?  Math.min(64, capacity() - offset) : 0, true);
+        readCheckOffset(offset, 0, true);
         return bytesStore.addressForRead(offset);
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, isElastic() ? Math.min(64, capacity() - offset) : 0);
+        writeCheckOffset(offset, 0);
         return bytesStore.addressForWrite(offset);
     }
 
