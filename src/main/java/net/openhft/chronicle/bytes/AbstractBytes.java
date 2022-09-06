@@ -1130,7 +1130,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) throws IllegalStateException {
-        int len = Math.min(length, Maths.toUInt31(readLimit() - offsetInRDI));
+        int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
         return bytesStore.read(offsetInRDI, bytes, offset, len);
     }
 
