@@ -839,7 +839,7 @@ public class NativeBytesStore<U>
     @Override
     public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) {
         requireNonNull(bytes);
-        int len = Math.min(length, Maths.toUInt31(requireNonNegative(readLimit() - offsetInRDI)));
+        int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
 
         memory.readBytes(this.address + translate(offsetInRDI), bytes, offset, len);
         return len;
