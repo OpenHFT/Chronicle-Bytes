@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -601,7 +602,7 @@ public interface RandomDataInput extends RandomCommon {
             throws IllegalStateException {
         requireNonNull(bytes);
         try {
-            int len = Math.min(length, Maths.toUInt31(readLimit() - offsetInRDI));
+            int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
             for (int i = 0; i < len; i++)
                 bytes[offset + i] = readByte(offsetInRDI + i);
             return len;
