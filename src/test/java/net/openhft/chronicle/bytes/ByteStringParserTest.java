@@ -133,7 +133,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         assertEquals(11, bytes.parseLongDecimal());
         assertEquals(1, bytes.lastDecimalPlaces());
 
-        assertEquals(128, bytes.parseLongDecimal());
+        assertEquals(-128, bytes.parseLongDecimal());
         assertEquals(2, bytes.lastDecimalPlaces());
 
         assertEquals(110, bytes.parseLongDecimal());
@@ -163,7 +163,7 @@ public class ByteStringParserTest extends BytesTestCommon {
         assertEquals(1.1, bytes.parseDouble(), 0);
         assertEquals(1, bytes.lastDecimalPlaces());
 
-        assertEquals(1.28, bytes.parseDouble(), 0);
+        assertEquals(-1.28, bytes.parseDouble(), 0);
         assertEquals(2, bytes.lastDecimalPlaces());
 
         assertEquals(1.10, bytes.parseDouble(), 0);
@@ -171,17 +171,25 @@ public class ByteStringParserTest extends BytesTestCommon {
 
         assertEquals(1.10000, bytes.parseDouble(), 0);
         assertEquals(5, bytes.lastDecimalPlaces());
+
+        assertEquals(0.01, bytes.parseDouble(), 0);
+        assertEquals(2, bytes.lastDecimalPlaces());
+
+        assertEquals(100, bytes.parseDouble(), 0);
+        assertEquals(0, bytes.lastDecimalPlaces());
     }
 
     private void appendVariousNumbers() {
         bytes.append("1").append(' ');
         bytes.append("1.").append(' ');
         bytes.append("0.0").append(' ');
-        bytes.append("0.1").append(' ');
+        bytes.append("+0.1").append(' ');
         bytes.append("1.1").append(' ');
-        bytes.append("1.28").append(' ');
+        bytes.append("-1.28").append(' ');
         bytes.append("1.10").append(' ');
         bytes.append("1.10000").append(' ');
+        bytes.append("1E-2").append(' ');
+        bytes.append("1E+2").append(' ');
         bytes.readPosition(0);
     }
 
@@ -432,6 +440,9 @@ public class ByteStringParserTest extends BytesTestCommon {
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
 
         bytes.append("-Infinity").append(' ');
+        assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
+
+        bytes.append("+Infinity").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
 
         bytes.append("NaN").append(' ');

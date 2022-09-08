@@ -2575,6 +2575,11 @@ enum BytesInternal {
                     sign = -1;
                     ch = in.rawReadByte();
                     break;
+                case '+':
+                    if (compareRest(in, INFINITY))
+                        throw new IORuntimeException("Expected flexible long, but got: +Infinity");
+                    ch = in.rawReadByte();
+                    break;
                 default:
                     // Do nothing
             }
@@ -2699,6 +2704,11 @@ enum BytesInternal {
                     if (compareRest(in, INFINITY))
                         return Double.NEGATIVE_INFINITY;
                     break;
+                case '+':
+                    in.readSkip(1);
+                    if (compareRest(in, INFINITY))
+                        return Double.POSITIVE_INFINITY;
+                    break;
                 default:
                     // do nothing
             }
@@ -2794,7 +2804,7 @@ enum BytesInternal {
             } else if (b == '.') {
                 consumeDecimals(in);
                 break;
-            } else if (b == '_') {
+            } else if (b == '_' || b == '+') {
                 // ignore
             } else {
                 break;
@@ -2864,7 +2874,7 @@ enum BytesInternal {
             } else if (b == ']' || b == '}') {
                 in.readSkip(-1);
                 break;
-            } else if (b == '_') {
+            } else if (b == '_' || b == '+') {
                 // ignore
                 first = false;
             } else if (!first || b > ' ') {
@@ -2910,7 +2920,7 @@ enum BytesInternal {
                 num = num * 10 + b - '0';
             else if (b == '-')
                 negative = true;
-            else if (b != '_')
+            else if (b != '_' && b != '+')
                 break;
         }
         return negative ? -num : num;
