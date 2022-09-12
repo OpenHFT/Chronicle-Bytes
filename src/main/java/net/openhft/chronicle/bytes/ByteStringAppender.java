@@ -337,8 +337,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+        assert end >= start : "end=" + end + ",start=" + start;
         if (cs instanceof BytesStore) {
-            return write((BytesStore) cs, (long) start, end);
+            return write((BytesStore) cs, (long) start, end - start);
         }
         for (int i = start; i < end; i++) {
             char c = cs.charAt(i);
@@ -363,7 +364,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull BytesStore bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
-        return write(bs, start, end);
+        assert end > start : "end=" + end + ",start=" + start;
+        return write(bs, start, end - start);
     }
 
     /**

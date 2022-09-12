@@ -241,4 +241,16 @@ public class ByteStringAppenderTest extends BytesTestCommon {
             d *= 10;
         }
     }
+
+    @Test
+    public void testAppend8bit() {
+        BytesStore bs = BytesStore.elasticByteBuffer(4, 16);
+        bs.write(0, " -\n".getBytes());
+
+        bytes.append8bit((CharSequence) bs, 1, 2);
+        bytes.append8bit(bs, (long)0, 1);
+        bytes.append8bit(bs, (long)2, 3);
+
+        assertEquals("- \n", bytes.toString());
+    }
 }
