@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.ReferenceChangeListener;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
@@ -83,6 +84,16 @@ public enum NoBytesStore implements BytesStore {
     @Override
     public int refCount() {
         return 1;
+    }
+
+    @Override
+    public void addReferenceChangeListener(ReferenceChangeListener referenceChangeListener) {
+        // Do nothing
+    }
+
+    @Override
+    public void removeReferenceChangeListener(ReferenceChangeListener referenceChangeListener) {
+        // Do nothing
     }
 
     @Override

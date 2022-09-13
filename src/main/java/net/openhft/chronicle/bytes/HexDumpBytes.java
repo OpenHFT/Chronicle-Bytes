@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceChangeListener;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
@@ -367,6 +368,16 @@ public class HexDumpBytes
     @Override
     public int refCount() {
         return base.refCount();
+    }
+
+    @Override
+    public void addReferenceChangeListener(ReferenceChangeListener referenceChangeListener) {
+        base.addReferenceChangeListener(referenceChangeListener);
+    }
+
+    @Override
+    public void removeReferenceChangeListener(ReferenceChangeListener referenceChangeListener) {
+        base.removeReferenceChangeListener(referenceChangeListener);
     }
 
     @Override
