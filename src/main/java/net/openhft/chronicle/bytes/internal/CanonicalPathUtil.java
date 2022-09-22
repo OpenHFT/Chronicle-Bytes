@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,7 +28,7 @@ import java.security.SecureRandom;
 public final class CanonicalPathUtil {
 
     // This is unlikely to collide with other internalized strings and is seldom the same across JVMs
-    private static final String PREFIX = CanonicalPathUtil.class.getName() + Math.abs(new SecureRandom().nextInt(1 << 30)) + "::";
+    private static final String PREFIX = CanonicalPathUtil.class.getName() + Jvm.getProcessId() + "::";
 
     private CanonicalPathUtil() {}
 
