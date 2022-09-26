@@ -402,10 +402,11 @@ public enum BytesUtil {
      */
     public static void combineDoubleNewline(Bytes<?> bytes) {
         long wp = bytes.writePosition();
-        final int ch1 = bytes.peekUnsignedByte(wp - 1);
+        long delta = wp - bytes.start();
+        final int ch1 = delta >= 1 ? bytes.peekUnsignedByte(wp - 1) : '\0';
         switch (ch1) {
             case '\n': {
-                final int ch2 = bytes.peekUnsignedByte(wp - 2);
+                final int ch2 = delta >= 2 ? bytes.peekUnsignedByte(wp - 2) : '\0';
                 switch (ch2) {
                     case '\n':
                         bytes.writePosition(wp - 1);
@@ -421,10 +422,10 @@ public enum BytesUtil {
                 }
             }
             case ' ': {
-                final int ch2 = bytes.peekUnsignedByte(wp - 2);
+                final int ch2 = delta >= 2 ? bytes.peekUnsignedByte(wp - 2) : '\0';
                 switch (ch2) {
                     case ' ':
-                        final int ch3 = bytes.peekUnsignedByte(wp - 3);
+                        final int ch3 = delta >= 3 ? bytes.peekUnsignedByte(wp - 3) : '\0';
                         if (ch3 > ' ') {
                             bytes.writePosition(wp - 1);
                         }
