@@ -77,9 +77,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
         try {
             final MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
             final MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
-            bytes.comment("mb1").writeUnsignedByte(1);
+            bytes.writeHexDumpDescription("mb1").writeUnsignedByte(1);
             mb1.writeMarshallable(bytes);
-            bytes.comment("mb2").writeUnsignedByte(2);
+            bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
             assertEquals(
@@ -122,9 +122,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
         try {
             final MyScalars mb1 = new MyScalars("Hello", BigInteger.ONE, BigDecimal.TEN, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
             final MyScalars mb2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, LocalDate.now(), LocalTime.now(), LocalDateTime.now(), ZonedDateTime.now(), UUID.randomUUID());
-            bytes.comment("mb1").writeUnsignedByte(1);
+            bytes.writeHexDumpDescription("mb1").writeUnsignedByte(1);
             mb1.writeMarshallable(bytes);
-            bytes.comment("mb2").writeUnsignedByte(2);
+            bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
 /*
@@ -197,9 +197,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
             final MyScalars ms2 = new MyScalars("World", BigInteger.ZERO, BigDecimal.ZERO, zdt2.toLocalDate(), zdt2.toLocalTime(), zdt2.toLocalDateTime(), zdt2, uuid2);
             final MyNested mn1 = new MyNested(mb1, ms1);
             final MyNested mn2 = new MyNested(mb2, ms2);
-            bytes.comment("mn1").writeUnsignedByte(1);
+            bytes.writeHexDumpDescription("mn1").writeUnsignedByte(1);
             mn1.writeMarshallable(bytes);
-            bytes.comment("mn2").writeUnsignedByte(2);
+            bytes.writeHexDumpDescription("mn2").writeUnsignedByte(2);
             mn2.writeMarshallable(bytes);
 
             String expected = "01                                              # mn1\n" +
@@ -339,9 +339,9 @@ public class BytesMarshallableTest extends BytesTestCommon {
         final Bytes<?> byeee = Bytes.from("byeee");
         try (MyBytes mb1 = new MyBytes(hello, Bytes.allocateElasticDirect().append("2"));
              MyBytes mb2 = new MyBytes(byeee, null)) {
-            bytes.comment("mb1").writeUnsignedByte(1);
+            bytes.writeHexDumpDescription("mb1").writeUnsignedByte(1);
             mb1.writeMarshallable(bytes);
-            bytes.comment("mb2").writeUnsignedByte(2);
+            bytes.writeHexDumpDescription("mb2").writeUnsignedByte(2);
             mb2.writeMarshallable(bytes);
 
             final Bytes<?> bytes2 = HexDumpBytes.fromText(bytes.toHexString());

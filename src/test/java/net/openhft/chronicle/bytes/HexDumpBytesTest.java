@@ -28,9 +28,9 @@ public class HexDumpBytesTest extends BytesTestCommon {
         HexDumpBytes bytes = new HexDumpBytes()
                 .numberWrap(8)
                 .offsetFormat((o, b) -> b.appendBase16(o, 4));
-        bytes.comment("hi").write(new byte[18]);
-        bytes.indent(1);
-        bytes.comment("nest").write(new byte[18]);
+        bytes.writeHexDumpDescription("hi").write(new byte[18]);
+        bytes.adjustHexDumpIndentation(1);
+        bytes.writeHexDumpDescription("nest").write(new byte[18]);
         assertEquals("0000 00 00 00 00 00 00 00 00 # hi\n" +
                 "0008 00 00 00 00 00 00 00 00\n" +
                 "0010 00 00\n" +

@@ -93,10 +93,10 @@ class Bytes4Test extends BytesTestCommon {
         // System.out.println();
         //  bytes.comment("true").writeBoolean(true);
         by.writeInt(55);
-        by.comment("new1").writeInt(7);
-        by.comment("new2").writeInt(8);
-        by.comment("new2").writeInt(9);
-        by.comment("new2").writeInt(10);
+        by.writeHexDumpDescription("new1").writeInt(7);
+        by.writeHexDumpDescription("new2").writeInt(8);
+        by.writeHexDumpDescription("new2").writeInt(9);
+        by.writeHexDumpDescription("new2").writeInt(10);
         //   bytes.comment("new3").writeBigInteger(BigInteger.valueOf(456729));
         print("by", by);
 

@@ -113,42 +113,9 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         });
     }
 
-    @Deprecated(/* remove in x.24 */)
-    @Override
-    public long getVolatileValue()
-            throws IllegalStateException {
-        return getValue();
-    }
-
-    @Deprecated(/* remove in x.24 */)
-    @Override
-    public void setVolatileValue(long value)
-            throws IllegalStateException {
-        setValue(value);
-    }
-
-    @Deprecated(/* remove in x.24 */)
-    @Override
-    public long getVolatileValue(long closedValue) {
-        if (isClosed())
-            return closedValue;
-        try {
-            return getVolatileValue();
-        } catch (Exception e) {
-            return closedValue;
-        }
-    }
-
     @Override
     public long maxSize() {
         return template.length;
-    }
-
-    @Deprecated(/* remove in x.24 */)
-    @Override
-    public void setOrderedValue(long value)
-            throws IllegalStateException {
-        setValue(value);
     }
 
     @NotNull
@@ -169,13 +136,6 @@ public class TextLongReference extends AbstractReference implements LongReferenc
             bytes.append(offset + VALUE, value, DIGITS);
             return value;
         });
-    }
-
-    @Deprecated(/* remove in x.24 */)
-    @Override
-    public long addAtomicValue(long delta)
-            throws IllegalStateException {
-        return addValue(delta);
     }
 
     @Override

@@ -20,15 +20,13 @@ package net.openhft.chronicle.bytes;
 /**
  * This interface is for additional description to be added to HexDumpBytes
  */
-// TODO rename to HexDumpBytesDescription in x.24
-public interface BytesComment<B extends BytesComment<B>> {
+public interface HexDumpBytesDescription<B extends HexDumpBytesDescription<B>> {
     /**
      * Do these Bytes support saving comments as descriptions for fields.
      *
      * @return true if comments are for field descriptions
      */
-    // TODO rename to retainedHexDumpDescription in x.24
-    default boolean retainsComments() {
+    default boolean retainedHexDumpDescription() {
         return false;
     }
 
@@ -39,8 +37,7 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @return this
      */
     @SuppressWarnings("unchecked")
-    // TODO rename to writeHexDumpDescription in x.24
-    default B comment(CharSequence comment)
+    default B writeHexDumpDescription(CharSequence comment)
             throws IllegalStateException {
         return (B) this;
     }
@@ -51,9 +48,8 @@ public interface BytesComment<B extends BytesComment<B>> {
      * @param n +1 indent in, -1 reduce indenting
      * @return this.
      */
-    // TODO rename to adjustHexDumpIndentation in x.24
     @SuppressWarnings("unchecked")
-    default B indent(int n)
+    default B adjustHexDumpIndentation(int n)
             throws IllegalStateException {
         return (B) this;
     }

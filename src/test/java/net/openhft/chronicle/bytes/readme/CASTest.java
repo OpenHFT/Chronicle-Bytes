@@ -35,12 +35,12 @@ public class CASTest extends BytesTestCommon {
                 .offsetFormat((o, b) -> b.appendBase16(o, 4));
         try {
 
-            bytes.comment("s32").writeUtf8("s32");
+            bytes.writeHexDumpDescription("s32").writeUtf8("s32");
             bytes.writeSkip((-bytes.writePosition()) & (4 - 1));
             long s32 = bytes.writePosition();
             bytes.writeInt(0);
 
-            bytes.comment("s64").writeUtf8("s64");
+            bytes.writeHexDumpDescription("s64").writeUtf8("s64");
             bytes.writeSkip((-bytes.writePosition()) & (8 - 1));
             long s64 = bytes.writePosition();
             bytes.writeLong(0);

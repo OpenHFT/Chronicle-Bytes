@@ -32,7 +32,7 @@ public interface BytesOut<U> extends
         StreamingDataOutput<Bytes<U>>,
         ByteStringAppender<Bytes<U>>,
         BytesPrepender<Bytes<U>>,
-        BytesComment<BytesOut<U>> {
+        HexDumpBytesDescription<BytesOut<U>> {
 
     /**
      * Proxy an interface so each message called is written to a file for replay.
