@@ -172,12 +172,12 @@ public class HexDumpBytes
     }
 
     @Override
-    public boolean retainsComments() {
+    public boolean retainedHexDumpDescription() {
         return true;
     }
 
     @Override
-    public Bytes<Void> comment(@NotNull CharSequence comment)
+    public Bytes<Void> writeHexDumpDescription(@NotNull CharSequence comment)
             throws IllegalStateException {
         if (this.comment.readRemaining() > 0)
             newLine();
@@ -192,7 +192,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public BytesOut<Void> indent(final int n)
+    public BytesOut<Void> adjustHexDumpIndentation(final int n)
             throws IllegalStateException {
         indent += n;
         if (lineLength() > 0) {
@@ -250,7 +250,7 @@ public class HexDumpBytes
     @Override
     @NotNull
     public BytesStore bytesStore() {
-        return base;
+        return base.bytesStore();
     }
 
     @Override

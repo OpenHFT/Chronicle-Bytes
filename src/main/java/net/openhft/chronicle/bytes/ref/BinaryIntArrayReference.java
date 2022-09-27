@@ -223,20 +223,20 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     @Override
     public void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException {
-        final boolean retainsComments = bytes.retainsComments();
+        final boolean retainsComments = bytes.retainedHexDumpDescription();
         if (retainsComments)
-            bytes.comment("BinaryIntArrayReference");
+            bytes.writeHexDumpDescription("BinaryIntArrayReference");
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
             if (retainsComments)
-                bytes.comment("capacity");
+                bytes.writeHexDumpDescription("capacity");
             bytes.writeLong(capacity);
             if (retainsComments)
-                bytes.comment("used");
+                bytes.writeHexDumpDescription("used");
             bytes.writeLong(0);
             if (retainsComments)
-                bytes.comment("values");
+                bytes.writeHexDumpDescription("values");
             bytes.writeSkip(capacity << SHIFT);
         } else {
             try {

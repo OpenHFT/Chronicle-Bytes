@@ -34,10 +34,10 @@ public class StringsTest extends BytesTestCommon {
 
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.comment("write8bit").write8bit("£ 1");
-            bytes.comment("writeUtf8").writeUtf8("£ 1");
-            bytes.comment("append8bit").append8bit("£ 1").append('\n');
-            bytes.comment("appendUtf8").appendUtf8("£ 1").append('\n');
+            bytes.writeHexDumpDescription("write8bit").write8bit("£ 1");
+            bytes.writeHexDumpDescription("writeUtf8").writeUtf8("£ 1");
+            bytes.writeHexDumpDescription("append8bit").append8bit("£ 1").append('\n');
+            bytes.writeHexDumpDescription("appendUtf8").appendUtf8("£ 1").append('\n');
 
             // System.out.println(bytes.toHexString());
 
@@ -69,8 +69,8 @@ public class StringsTest extends BytesTestCommon {
     public void testNull() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.comment("write8bit").write8bit((String) null);
-            bytes.comment("writeUtf8").writeUtf8(null);
+            bytes.writeHexDumpDescription("write8bit").write8bit((String) null);
+            bytes.writeHexDumpDescription("writeUtf8").writeUtf8(null);
 
             //System.out.println(bytes.toHexString());
 

@@ -38,7 +38,7 @@ public class StopBitTest extends BytesTestCommon {
                     1L << 42, 1L << 49,
                     1L << 56, Long.MAX_VALUE,
                     Long.MIN_VALUE}) {
-                bytes.comment(i + "L").writeStopBit(i);
+                bytes.writeHexDumpDescription(i + "L").writeStopBit(i);
             }
 
             for (double d : new double[]{
@@ -51,7 +51,7 @@ public class StopBitTest extends BytesTestCommon {
                     Double.NEGATIVE_INFINITY,
                     Double.NaN,
                     Double.POSITIVE_INFINITY}) {
-                bytes.comment(d + "").writeStopBit(d);
+                bytes.writeHexDumpDescription(d + "").writeStopBit(d);
             }
 
             final String actual = bytes.toHexString();

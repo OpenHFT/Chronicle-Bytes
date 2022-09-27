@@ -47,7 +47,7 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
         if (info == null) {
             Jvm.warn().on(getClass(), "Unknown method " + method + " ignored");
         } else {
-            out.comment(method.getName());
+            out.writeHexDumpDescription(method.getName());
             out.writeStopBit(info.messageId());
             info.encode(args, out);
         }

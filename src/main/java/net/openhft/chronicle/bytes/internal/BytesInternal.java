@@ -3403,11 +3403,12 @@ enum BytesInternal {
         }
     }
 
-    public static <B extends BytesStore<B, U>, U> BytesStore<B, U> warnIfBytesOnBytes(BytesStore<B, U> bytesStore) {
-        // TODO: x.24 should throw if this happens
-        if (bytesStore instanceof Bytes)
-            Jvm.warn().on(BytesInternal.class, "A BytesStore is required as backing but a Bytes has been provided. " +
-                    "This is not supported, and in a future release this warning will be converted to an exception. Bytes class: " + bytesStore.getClass().getSimpleName());
+    public static <B extends BytesStore<B, U>, U> BytesStore<B, U> failIfBytesOnBytes(BytesStore<B, U> bytesStore) {
+        if (bytesStore instanceof Bytes) {
+            throw new IllegalArgumentException("A BytesStore is required as backing but a Bytes has been provided: " +
+                    bytesStore.getClass().getSimpleName());
+        }
+
         return bytesStore;
     }
 }

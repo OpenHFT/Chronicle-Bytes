@@ -62,7 +62,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
         underlyingBytes.reserve(this);
-        this.bytesStore = BytesInternal.warnIfBytesOnBytes(underlyingBytes.bytesStore());
+        this.bytesStore = BytesInternal.failIfBytesOnBytes(underlyingBytes.bytesStore());
         assert bytesStore.start() == 0;
         writePosition = underlyingBytes.writePosition();
         readPosition = underlyingBytes.readPosition();

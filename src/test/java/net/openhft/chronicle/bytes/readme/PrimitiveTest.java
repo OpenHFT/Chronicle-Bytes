@@ -34,7 +34,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.comment("outer");
+            bytes.writeHexDumpDescription("outer");
             outer.writeMarshallable(bytes);
 
             final String expected =
@@ -72,7 +72,7 @@ public class PrimitiveTest extends BytesTestCommon {
 
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.comment("dto");
+            bytes.writeHexDumpDescription("dto");
             dto.writeMarshallable(bytes);
 
             final String expected = "                                                # dto\n" +
@@ -101,19 +101,19 @@ public class PrimitiveTest extends BytesTestCommon {
     public void testBinaryPrimitive() {
         final HexDumpBytes bytes = new HexDumpBytes();
         try {
-            bytes.comment("flag").writeBoolean(true);
-            bytes.comment("s8").writeByte((byte) 1);
-            bytes.comment("u8").writeUnsignedByte(2);
-            bytes.comment("s16").writeShort((short) 3);
-            bytes.comment("u16").writeUnsignedShort(4);
-            bytes.comment("ch").writeStopBit('5');
-            bytes.comment("s24").writeInt24(-6_666_666);
-            bytes.comment("u24").writeUnsignedInt24(16_666_666);
-            bytes.comment("s32").writeInt(6);
-            bytes.comment("u32").writeUnsignedInt(7);
-            bytes.comment("s64").writeLong(8);
-            bytes.comment("f32").writeFloat(9);
-            bytes.comment("f64").writeDouble(10);
+            bytes.writeHexDumpDescription("flag").writeBoolean(true);
+            bytes.writeHexDumpDescription("s8").writeByte((byte) 1);
+            bytes.writeHexDumpDescription("u8").writeUnsignedByte(2);
+            bytes.writeHexDumpDescription("s16").writeShort((short) 3);
+            bytes.writeHexDumpDescription("u16").writeUnsignedShort(4);
+            bytes.writeHexDumpDescription("ch").writeStopBit('5');
+            bytes.writeHexDumpDescription("s24").writeInt24(-6_666_666);
+            bytes.writeHexDumpDescription("u24").writeUnsignedInt24(16_666_666);
+            bytes.writeHexDumpDescription("s32").writeInt(6);
+            bytes.writeHexDumpDescription("u32").writeUnsignedInt(7);
+            bytes.writeHexDumpDescription("s64").writeLong(8);
+            bytes.writeHexDumpDescription("f32").writeFloat(9);
+            bytes.writeHexDumpDescription("f64").writeDouble(10);
 
             final String expected =
                     "59                                              # flag\n" +

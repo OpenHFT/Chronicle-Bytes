@@ -104,12 +104,12 @@ public class BytesTextMethodTester<T> {
 
             while (reader.readOne()) {
                 if (bytes.readRemaining() > 1)
-                    bytes2.comment("## End Of Message");
+                    bytes2.writeHexDumpDescription("## End Of Message");
             }
             bytes.releaseLast();
-            bytes2.comment("## End Of Block");
+            bytes2.writeHexDumpDescription("## End Of Block");
         }
-        bytes2.comment("## End Of Test");
+        bytes2.writeHexDumpDescription("## End Of Test");
 
         actual = bytes2.toHexString().trim();
         if (afterRun != null) {

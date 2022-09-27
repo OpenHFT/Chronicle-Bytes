@@ -65,11 +65,11 @@ public class BytesMarshaller<T> {
 
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut<?> out)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
-        out.indent(+1);
+        out.adjustHexDumpIndentation(+1);
         for (@NotNull FieldAccess field : fields) {
             field.write(t, out);
         }
-        out.indent(-1);
+        out.adjustHexDumpIndentation(-1);
     }
 
     abstract static class FieldAccess {
@@ -153,7 +153,7 @@ public class BytesMarshaller<T> {
 
         void write(Object o, BytesOut<?> write)
                 throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
-            write.comment(field.getName());
+            write.writeHexDumpDescription(field.getName());
             getValue(o, write);
         }
 

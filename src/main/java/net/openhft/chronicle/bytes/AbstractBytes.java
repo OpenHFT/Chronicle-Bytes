@@ -64,8 +64,7 @@ public abstract class AbstractBytes<U>
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
-    // Make private in x.24 - can be overridden in subclasses, should be accessed via writePosition() getter
-    protected long writePosition;
+    private long writePosition;
     protected long writeLimit;
     protected boolean isPresent;
     private int lastDecimalPlaces = 0;
@@ -1263,7 +1262,7 @@ public abstract class AbstractBytes<U>
     }
 
     protected void bytesStore(BytesStore<Bytes<U>, U> bytesStore) {
-        this.bytesStore = BytesInternal.warnIfBytesOnBytes(bytesStore);
+        this.bytesStore = BytesInternal.failIfBytesOnBytes(bytesStore);
     }
 
     @Override

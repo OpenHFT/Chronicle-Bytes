@@ -947,11 +947,42 @@ public interface Bytes<U> extends
     @Override
     default Bytes<U> bytesForRead()
             throws IllegalStateException {
+        throwExceptionIfReleased(this);
+
         try {
+            BytesStore bytesStore = bytesStore();
+
+            assert bytesStore != null : "bytesStore is null";
+
             return isClear()
-                    ? BytesStore.super.bytesForRead()
-                    : new SubBytes<>(this, readPosition(), readLimit() + start());
+                    ? bytesStore.bytesForRead()
+                    : new SubBytes<>(bytesStore, readPosition(), readLimit() + start());
         } catch (IllegalArgumentException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    /**
+     * Returns a Bytes that wraps this Bytes object's bytesStore from the {@code start} to the {@code realCapacity}.
+     * <p>
+     * The returned Bytes is not elastic and can be both read and written using cursors.
+     *
+     * @return a Bytes that wraps this BytesStore
+     * @throws IllegalStateException if this BytesStore has been released
+     */
+    @Override
+    @NotNull
+    default Bytes<U> bytesForWrite()
+            throws IllegalStateException {
+        throwExceptionIfReleased(this);
+
+        try {
+            BytesStore bytesStore = bytesStore();
+
+            assert bytesStore != null : "bytesStore is null";
+
+            return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
+        } catch (IllegalArgumentException e) {
             throw new AssertionError(e);
         }
     }

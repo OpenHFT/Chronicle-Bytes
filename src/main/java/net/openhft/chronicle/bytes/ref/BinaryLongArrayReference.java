@@ -249,20 +249,20 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     @Override
     public void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException {
-        boolean retainsComments = bytes.retainsComments();
+        boolean retainsComments = bytes.retainedHexDumpDescription();
         if (retainsComments)
-            bytes.comment("BinaryLongArrayReference");
+            bytes.writeHexDumpDescription("BinaryLongArrayReference");
         BytesStore bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
             if (retainsComments)
-                bytes.comment("capacity");
+                bytes.writeHexDumpDescription("capacity");
             bytes.writeLong(capacity);
             if (retainsComments)
-                bytes.comment("used");
+                bytes.writeHexDumpDescription("used");
             bytes.writeLong(0);
             if (retainsComments)
-                bytes.comment("values");
+                bytes.writeHexDumpDescription("values");
             bytes.writeSkip(capacity << SHIFT);
         } else {
             try {
