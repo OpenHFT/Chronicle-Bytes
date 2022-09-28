@@ -289,7 +289,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @deprecated as per https://github.com/OpenHFT/Chronicle-Bytes/issues/348
      */
-    @Deprecated
+    @Deprecated(/* To be removed in 2.25 */)
     @Override
     protected void finalize()
             throws Throwable {
