@@ -35,6 +35,7 @@ import java.util.Arrays;
 import java.util.Queue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.*;
@@ -85,6 +86,33 @@ public class MappedBytesTest extends BytesTestCommon {
             for (int i = 0; i < 5; i++) {
                 bytesR.write(data);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            fail(e.getMessage());
+        }
+    }
+
+    @Test
+    public void testAcquireNextByteStoreShiftingBackwards() throws IOException {
+        final long chunkSize = OS.mapAlign(40_000);
+
+        File tempFile1 = File.createTempFile("mapped", "bytes");
+        try (MappedBytes bytesW = MappedBytes.mappedBytes(tempFile1, chunkSize, chunkSize)) {
+
+            for (int i = 0; i < chunkSize / 4; i++)
+                bytesW.writeLong(ThreadLocalRandom.current().nextLong());
+
+            Assert.assertEquals(chunkSize * 2, bytesW.writePosition());
+
+            bytesW.writeInt(7);
+            Assert.assertEquals(chunkSize * 2 + 4, bytesW.writePosition());
+
+            bytesW.writeInt(chunkSize * 2 - 2, 9);
+
+            bytesW.readPosition(chunkSize * 2 - 2);
+            Assert.assertEquals(9, bytesW.readInt());
+
+
         } catch (Exception e) {
             e.printStackTrace();
             fail(e.getMessage());
