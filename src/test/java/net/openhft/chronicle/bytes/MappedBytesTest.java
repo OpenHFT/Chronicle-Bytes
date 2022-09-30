@@ -111,11 +111,6 @@ public class MappedBytesTest extends BytesTestCommon {
 
             bytesW.readPosition(chunkSize * 2 - 2);
             Assert.assertEquals(9, bytesW.readInt());
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            fail(e.getMessage());
         }
     }
 
