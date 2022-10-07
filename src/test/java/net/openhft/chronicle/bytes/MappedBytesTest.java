@@ -33,6 +33,7 @@ import java.io.RandomAccessFile;
 import java.nio.BufferOverflowException;
 import java.util.Arrays;
 import java.util.Queue;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
@@ -605,6 +606,43 @@ public class MappedBytesTest extends BytesTestCommon {
         try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
             final long capacity = mb.capacity();
             mb.ensureCapacity(capacity + 1);
+        }
+    }
+
+    @Test
+    public void testBoundaryUnderflow() throws FileNotFoundException {
+        expectException("A BytesStore is required as backing but a Bytes has been provided");
+
+        File file = IOTools.createTempFile("boundary-underflow");
+
+        Bytes slice = null;
+        try (MappedBytes mf = MappedBytes.mappedBytes(file, 256L * OS.pageSize(), OS.pageSize())) {
+            slice = mf.bytesForRead();
+
+            mf.writePosition(0);
+            mf.readPositionRemaining(0, 0);
+            slice.writeLimit(slice.capacity());
+
+            Random rnd = new Random(123456L);
+            for (int i = 0; i < 320000; i++) {
+                int size = 10 + rnd.nextInt(100);
+                byte[] msg = new byte[size];
+                rnd.nextBytes(msg);
+
+                long start = mf.readLimit() + Short.BYTES;
+                long wLim = mf.writeLimit();
+
+                slice.writeLimit(wLim);
+                slice.writePosition(start);
+                slice.readPosition(start);
+                slice.write(msg);
+
+                short msgSize = (short) slice.readRemaining();
+                mf.writeShort(msgSize);
+                mf.writeSkip(msgSize);
+            }
+        } finally {
+            slice.releaseLast();
         }
     }
 }
