@@ -309,8 +309,8 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean inside(@NonNegative long offset, @NonNegative long buffer) {
-        return false;
+    public boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
+        return offset == 0 && bufferSize == 0;
     }
 
     @Override

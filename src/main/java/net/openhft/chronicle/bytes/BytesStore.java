@@ -353,18 +353,13 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * Returns if a number of bytes starting from an offset are inside this ByteStore limits.
-     * If you are going to write n bytes starting at offset, you need to call this method with buffer=n-1,
-     * as the 1st byte is written at offset, and the last at offset+n-1
-     * <p>
-     * Use this test to determine if an offset is considered safe to write to. Note that it checks we are
-     * inside the BytesStore limits *including* the overlap
      *
      * @param offset the starting index to check
-     * @param buffer the number of bytes after the offset to check
+     * @param bufferSize the number of bytes to be read/written
      * @return <code>true</code> if the bytes between the offset and offset+buffer are inside the BytesStore
      */
-    default boolean inside(@NonNegative long offset, @NonNegative long buffer) {
-        return start() <= offset && offset + buffer < safeLimit();
+    default boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
+        return start() <= offset && offset + bufferSize <= safeLimit();
     }
 
     /**

@@ -110,9 +110,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     @Override
-    public boolean inside(@NonNegative long offset, @NonNegative long buffer) {
-        // yes this is different than the method above
-        return start <= offset && offset + buffer < limit;
+    public boolean inside(@NonNegative long offset, @NonNegative long bufferSize) {
+        // yes this is different to the method above (we take into account the overlap because we know the length)
+        return start <= offset && offset + bufferSize <= limit;
     }
 
     @Override

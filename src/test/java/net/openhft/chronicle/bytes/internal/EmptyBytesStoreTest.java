@@ -293,7 +293,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void inside() {
-        assertFalse(instance.inside(0, 0));
+        assertTrue(instance.inside(0, 0));  // Nothing at index zero is in the empty store
         assertFalse(instance.inside(0, 1));
         assertFalse(instance.inside(1, 0));
     }

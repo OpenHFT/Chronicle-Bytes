@@ -54,7 +54,6 @@ public abstract class AbstractBytes<U>
         HasUncheckedRandomDataInput {
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
-    private static final byte[] EMPTY_ARRAY = new byte[0];
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // used for debugging
@@ -218,21 +217,21 @@ public abstract class AbstractBytes<U>
     @Override
     public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Integer.BYTES);
         return bytesStore.compareAndSwapInt(offset, expected, value);
     }
 
     @Override
     public void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Integer.BYTES);
         bytesStore.testAndSetInt(offset, expected, value);
     }
 
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 8);
+        writeCheckOffset(offset, Long.BYTES);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
@@ -410,7 +409,7 @@ public abstract class AbstractBytes<U>
     public int readUnsignedByte()
             throws IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(1);
+            long offset = readOffsetPositionMoved(Byte.BYTES);
             return bytesStore.readUnsignedByte(offset);
 
         } catch (BufferUnderflowException e) {
@@ -439,7 +438,7 @@ public abstract class AbstractBytes<U>
     public byte readByte()
             throws IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(1);
+            long offset = readOffsetPositionMoved(Byte.BYTES);
             return bytesStore.readByte(offset);
 
         } catch (BufferUnderflowException e) {
@@ -464,7 +463,7 @@ public abstract class AbstractBytes<U>
     public short readShort()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(2);
+            long offset = readOffsetPositionMoved(Short.BYTES);
             return bytesStore.readShort(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -478,7 +477,7 @@ public abstract class AbstractBytes<U>
     public int readInt()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(4);
+            long offset = readOffsetPositionMoved(Integer.BYTES);
             return bytesStore.readInt(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -491,28 +490,28 @@ public abstract class AbstractBytes<U>
     @Override
     public byte readVolatileByte(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 1, true);
+        readCheckOffset(offset, Byte.BYTES, true);
         return bytesStore.readVolatileByte(offset);
     }
 
     @Override
     public short readVolatileShort(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 2, true);
+        readCheckOffset(offset, Short.BYTES, true);
         return bytesStore.readVolatileShort(offset);
     }
 
     @Override
     public int readVolatileInt(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 4, true);
+        readCheckOffset(offset, Integer.BYTES, true);
         return bytesStore.readVolatileInt(offset);
     }
 
     @Override
     public long readVolatileLong(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 8, true);
+        readCheckOffset(offset, Long.BYTES, true);
         return bytesStore.readVolatileLong(offset);
     }
 
@@ -520,7 +519,7 @@ public abstract class AbstractBytes<U>
     public long readLong()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(8);
+            long offset = readOffsetPositionMoved(Long.BYTES);
             return bytesStore.readLong(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -534,7 +533,7 @@ public abstract class AbstractBytes<U>
     public float readFloat()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(4);
+            long offset = readOffsetPositionMoved(Float.BYTES);
             return bytesStore.readFloat(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -548,7 +547,7 @@ public abstract class AbstractBytes<U>
     public double readDouble()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(8);
+            long offset = readOffsetPositionMoved(Double.BYTES);
             return bytesStore.readDouble(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -562,7 +561,7 @@ public abstract class AbstractBytes<U>
     public int readVolatileInt()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(4);
+            long offset = readOffsetPositionMoved(Integer.BYTES);
             return bytesStore.readVolatileInt(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -576,7 +575,7 @@ public abstract class AbstractBytes<U>
     public long readVolatileLong()
             throws BufferUnderflowException, IllegalStateException {
         try {
-            long offset = readOffsetPositionMoved(8);
+            long offset = readOffsetPositionMoved(Long.BYTES);
             return bytesStore.readVolatileLong(offset);
         } catch (BufferUnderflowException e) {
             if (lenient) {
@@ -600,7 +599,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeByte(@NonNegative long offset, byte i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 1);
+        writeCheckOffset(offset, Byte.BYTES);
         bytesStore.writeByte(offset, i);
         return this;
     }
@@ -609,7 +608,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeShort(@NonNegative long offset, short i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 2);
+        writeCheckOffset(offset, Short.BYTES);
         bytesStore.writeShort(offset, i);
         return this;
     }
@@ -618,7 +617,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeInt(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Integer.BYTES);
         bytesStore.writeInt(offset, i);
         return this;
     }
@@ -627,7 +626,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeOrderedInt(@NonNegative long offset, int i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Integer.BYTES);
         bytesStore.writeOrderedInt(offset, i);
         return this;
     }
@@ -636,7 +635,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeLong(@NonNegative long offset, long i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 8);
+        writeCheckOffset(offset, Long.BYTES);
         bytesStore.writeLong(offset, i);
         return this;
     }
@@ -645,7 +644,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeOrderedLong(@NonNegative long offset, long i)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 8);
+        writeCheckOffset(offset, Long.BYTES);
         bytesStore.writeOrderedLong(offset, i);
         return this;
     }
@@ -654,7 +653,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeFloat(@NonNegative long offset, float d)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Float.BYTES);
         bytesStore.writeFloat(offset, d);
         return this;
     }
@@ -663,7 +662,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 8);
+        writeCheckOffset(offset, Double.BYTES);
         bytesStore.writeDouble(offset, d);
         return this;
     }
@@ -672,7 +671,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeVolatileByte(@NonNegative long offset, byte i8)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 1);
+        writeCheckOffset(offset, Byte.BYTES);
         bytesStore.writeVolatileByte(offset, i8);
         return this;
     }
@@ -681,7 +680,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeVolatileShort(@NonNegative long offset, short i16)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 2);
+        writeCheckOffset(offset, Short.BYTES);
         bytesStore.writeVolatileShort(offset, i16);
         return this;
     }
@@ -690,7 +689,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeVolatileInt(@NonNegative long offset, int i32)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 4);
+        writeCheckOffset(offset, Integer.BYTES);
         bytesStore.writeVolatileInt(offset, i32);
         return this;
     }
@@ -699,7 +698,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeVolatileLong(@NonNegative long offset, long i64)
             throws BufferOverflowException, IllegalStateException {
-        writeCheckOffset(offset, 8);
+        writeCheckOffset(offset, Long.BYTES);
         bytesStore.writeVolatileLong(offset, i64);
         return this;
     }
@@ -766,10 +765,10 @@ public abstract class AbstractBytes<U>
 
             int i = 0;
             if (bytes.order() == ByteOrder.nativeOrder()) {
-                for (; i < length - 7; i += 8)
+                for (; i < length - 7; i += Long.BYTES)
                     writeLong(offsetInRDO + i, bytes.getLong(offset + i));
             } else {
-                for (; i < length - 7; i += 8)
+                for (; i < length - 7; i += Long.BYTES)
                     writeLong(offsetInRDO + i, Long.reverseBytes(bytes.getLong(offset + i)));
             }
             for (; i < length; i++)
@@ -884,7 +883,7 @@ public abstract class AbstractBytes<U>
     @Override
     public byte readByte(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 1, true);
+        readCheckOffset(offset, Byte.BYTES, true);
         return bytesStore.readByte(offset);
     }
 
@@ -897,35 +896,35 @@ public abstract class AbstractBytes<U>
     @Override
     public short readShort(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 2, true);
+        readCheckOffset(offset, Short.BYTES, true);
         return bytesStore.readShort(offset);
     }
 
     @Override
     public int readInt(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 4, true);
+        readCheckOffset(offset, Integer.BYTES, true);
         return bytesStore.readInt(offset);
     }
 
     @Override
     public long readLong(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 8, true);
+        readCheckOffset(offset, Long.BYTES, true);
         return bytesStore.readLong(offset);
     }
 
     @Override
     public float readFloat(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 4, true);
+        readCheckOffset(offset, Float.BYTES, true);
         return bytesStore.readFloat(offset);
     }
 
     @Override
     public double readDouble(@NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
-        readCheckOffset(offset, 8, true);
+        readCheckOffset(offset, Double.BYTES, true);
         return bytesStore.readDouble(offset);
     }
 
@@ -986,7 +985,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(1);
+        long offset = writeOffsetPositionMoved(Byte.BYTES);
         bytesStore.writeByte(offset, i8);
         return this;
     }
@@ -1013,7 +1012,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> prewriteByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
-        long offset = prewriteOffsetPositionMoved(1);
+        long offset = prewriteOffsetPositionMoved(Byte.BYTES);
         bytesStore.writeByte(offset, i8);
         return this;
     }
@@ -1022,7 +1021,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> prewriteInt(int i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = prewriteOffsetPositionMoved(4);
+        long offset = prewriteOffsetPositionMoved(Integer.BYTES);
         bytesStore.writeInt(offset, i);
         return this;
     }
@@ -1031,7 +1030,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> prewriteShort(short i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = prewriteOffsetPositionMoved(2);
+        long offset = prewriteOffsetPositionMoved(Short.BYTES);
         bytesStore.writeShort(offset, i);
         return this;
     }
@@ -1040,7 +1039,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> prewriteLong(long l)
             throws BufferOverflowException, IllegalStateException {
-        long offset = prewriteOffsetPositionMoved(8);
+        long offset = prewriteOffsetPositionMoved(Long.BYTES);
         bytesStore.writeLong(offset, l);
         return this;
     }
@@ -1074,7 +1073,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeShort(short i16)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(2);
+        long offset = writeOffsetPositionMoved(Short.BYTES);
         bytesStore.writeShort(offset, i16);
         return this;
     }
@@ -1083,7 +1082,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeInt(int i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(4);
+        long offset = writeOffsetPositionMoved(Integer.BYTES);
         bytesStore.writeInt(offset, i);
         return this;
     }
@@ -1092,7 +1091,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeIntAdv(int i, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(4, advance);
+        long offset = writeOffsetPositionMoved(Integer.BYTES, advance);
         bytesStore.writeInt(offset, i);
         return this;
     }
@@ -1101,7 +1100,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeLong(long i64)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(8);
+        long offset = writeOffsetPositionMoved(Long.BYTES);
         bytesStore.writeLong(offset, i64);
         return this;
     }
@@ -1110,7 +1109,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeLongAdv(long i64, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(8, advance);
+        long offset = writeOffsetPositionMoved(Long.BYTES, advance);
         bytesStore.writeLong(offset, i64);
         return this;
     }
@@ -1119,7 +1118,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeFloat(float f)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(4);
+        long offset = writeOffsetPositionMoved(Float.BYTES);
         bytesStore.writeFloat(offset, f);
         return this;
     }
@@ -1128,7 +1127,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeDouble(double d)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(8);
+        long offset = writeOffsetPositionMoved(Double.BYTES);
         bytesStore.writeDouble(offset, d);
         return this;
     }
@@ -1137,7 +1136,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeDoubleAndInt(double d, int i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(12);
+        long offset = writeOffsetPositionMoved(Double.BYTES + Integer.BYTES);
         bytesStore.writeDouble(offset, d);
         bytesStore.writeInt(offset + 8, i);
         return this;
@@ -1220,7 +1219,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeOrderedInt(int i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(4);
+        long offset = writeOffsetPositionMoved(Integer.BYTES);
         bytesStore.writeOrderedInt(offset, i);
         return this;
     }
@@ -1229,7 +1228,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeOrderedLong(long i)
             throws BufferOverflowException, IllegalStateException {
-        long offset = writeOffsetPositionMoved(8);
+        long offset = writeOffsetPositionMoved(Long.BYTES);
         bytesStore.writeOrderedLong(offset, i);
         return this;
     }
