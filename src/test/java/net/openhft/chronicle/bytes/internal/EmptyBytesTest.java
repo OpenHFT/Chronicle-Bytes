@@ -240,7 +240,7 @@ class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     void inside() {
-        assertFalse(INSTANCE.inside(0, 0));
+        assertTrue(INSTANCE.inside(0, 0));
         assertFalse(INSTANCE.inside(0, 1));
         assertFalse(INSTANCE.inside(1, 0));
     }

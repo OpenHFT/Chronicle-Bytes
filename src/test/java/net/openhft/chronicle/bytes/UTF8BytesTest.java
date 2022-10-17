@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
 import java.io.File;
@@ -33,7 +34,7 @@ public class UTF8BytesTest extends BytesTestCommon {
             throws IOException {
         File f = File.createTempFile("testUtfEncoding", "data");
         f.deleteOnExit();
-        final MappedBytes bytes = MappedBytes.mappedBytes(f, 256);
+        final MappedBytes bytes = MappedBytes.mappedBytes(f, 256, 0);
         int len = (int) AppendableUtil.findUtf8Length(MESSAGE);
         bytes.appendUtf8(MESSAGE);
 

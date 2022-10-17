@@ -1098,7 +1098,7 @@ NOTE: Creating and maintain such tests can be an overhead you don't need. In thi
 == Memory mapped files
 
 Memory mapped files act as Bytes, growing as needed.
-A chunk size is set to determine how much to grwo by as more of the Bytes are used.
+A chunk size is set to determine how much to grow by as more of the Bytes are used.
 A `syncMode` can be set to flush data as each chunk is released.
 
 .Open two MappedBytes for the same region of memory

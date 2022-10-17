@@ -55,7 +55,7 @@ public class MappedFileTest extends BytesTestCommon {
         // this is what it will end up as
         final long chunkSize = OS.mapAlign(64);
         final ReferenceOwner test = ReferenceOwner.temporary("test");
-        try (final MappedFile mappedFile = MappedFile.mappedFile(file, 64)) {
+        try (final MappedFile mappedFile = MappedFile.mappedFile(file, 64, 0)) {
             final MappedBytesStore first = mappedFile.acquireByteStore(test, 1);
 
             final int expected = MappedFile.RETAIN ? 2 : 1;
