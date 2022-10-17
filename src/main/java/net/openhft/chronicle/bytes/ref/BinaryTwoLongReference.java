@@ -42,7 +42,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public long getValue2()
             throws IllegalStateException {
         try {
-            return bytes.readLong(offset + 8);
+            return bytes.readLong(offset + Long.BYTES);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -55,7 +55,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public void setValue2(long value)
             throws IllegalStateException {
         try {
-            bytes.writeLong(offset + 8, value);
+            bytes.writeLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -68,7 +68,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public long getVolatileValue2()
             throws IllegalStateException {
         try {
-            return bytes.readVolatileLong(offset + 8);
+            return bytes.readVolatileLong(offset + Long.BYTES);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -82,7 +82,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public void setVolatileValue2(long value)
             throws IllegalStateException {
         try {
-            bytes.writeVolatileLong(offset + 8, value);
+            bytes.writeVolatileLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -95,7 +95,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public void setOrderedValue2(long value)
             throws IllegalStateException {
         try {
-            bytes.writeOrderedLong(offset + 8, value);
+            bytes.writeOrderedLong(offset + Long.BYTES, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -108,7 +108,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public long addValue2(long delta)
             throws IllegalStateException {
         try {
-            return bytes.addAndGetLong(offset + 8, delta);
+            return bytes.addAndGetLong(offset + Long.BYTES, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -132,7 +132,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     public boolean compareAndSwapValue2(long expected, long value)
             throws IllegalStateException {
         try {
-            return bytes.compareAndSwapLong(offset + 8, expected, value);
+            return bytes.compareAndSwapLong(offset + Long.BYTES, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;

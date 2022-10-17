@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
+import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 
 /**
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
@@ -65,7 +66,7 @@ public class ChunkedMappedFile extends MappedFile {
     public ChunkedMappedFile(@NotNull final File file,
                              @NotNull final RandomAccessFile raf,
                              @NonNegative final long chunkSize,
-                             final long overlapSize,
+                             @NonNegative final long overlapSize,
                              @NonNegative final long capacity,
                              final boolean readOnly)
             throws IORuntimeException {
@@ -73,8 +74,10 @@ public class ChunkedMappedFile extends MappedFile {
 
         this.raf = raf;
         this.fileChannel = raf.getChannel();
-        this.chunkSize = OS.mapAlign(chunkSize);
-        this.overlapSize = overlapSize > 0 && overlapSize < 64 << 10 ? chunkSize : OS.mapAlign(overlapSize);
+        this.chunkSize = OS.mapAlign(requireNonNegative(chunkSize));
+        this.overlapSize = OS.mapAlign(requireNonNegative(overlapSize));
+        if (this.overlapSize > this.chunkSize)
+            throw new IllegalArgumentException("overlapSize cannot be greater than chunkSize");
         this.capacity = capacity;
 
         Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
