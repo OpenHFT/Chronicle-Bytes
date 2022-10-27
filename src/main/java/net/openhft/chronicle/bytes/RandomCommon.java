@@ -66,7 +66,7 @@ interface RandomCommon extends ReferenceCounted {
 
     /**
      * Returns the write position.
-     *
+     * <p>
      * The write position is {@code readPosition() <= writePosition() && writePosition() <= writeLimit()}
      * <p>
      * If the resource is closed, the returned value is unspecified.

@@ -197,7 +197,7 @@ public class NativeBytes<U>
             throws IllegalArgumentException, IllegalStateException {
 
         assert desiredCapacity >= 0;
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         writeCheckOffset(desiredCapacity, 0);
     }
 

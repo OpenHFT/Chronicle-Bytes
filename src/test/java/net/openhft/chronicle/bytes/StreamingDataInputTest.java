@@ -32,7 +32,7 @@ import static org.junit.Assume.assumeFalse;
 @RunWith(Parameterized.class)
 public class StreamingDataInputTest extends BytesTestCommon {
 
-    private Allocator allocator;
+    private final Allocator allocator;
 
     public StreamingDataInputTest(Allocator allocator) {
         this.allocator = allocator;

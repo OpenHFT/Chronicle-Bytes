@@ -42,11 +42,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
-    @NotNull
+    @Nullable
     private final Object realUnderlyingObject;
     private final int dataOffset;
     private final long capacity;
-    @NotNull
+    @Nullable
     private final U underlyingObject;
     private UnsafeMemory memory = UnsafeMemory.MEMORY;
 

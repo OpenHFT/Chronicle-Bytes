@@ -278,7 +278,7 @@ public class ByteStoreTest extends BytesTestCommon {
             bytes.writeStopBit(i);
 //            Jvm.debug().on(getClass(), i + " " + bytes.position());
         }
-        assertEquals(9 + 10, +5 + 6, bytes.writePosition());
+        assertEquals(9 + 10, 5 + 6, bytes.writePosition());
 
         for (long i : longs)
             assertEquals(i, bytes.readStopBit());
