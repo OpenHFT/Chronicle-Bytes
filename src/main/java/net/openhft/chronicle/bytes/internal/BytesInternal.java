@@ -3404,7 +3404,8 @@ enum BytesInternal {
     }
 
     public static <B extends BytesStore<B, U>, U> BytesStore<B, U> failIfBytesOnBytes(BytesStore<B, U> bytesStore) {
-        if (bytesStore instanceof Bytes) {
+        // MappedBytes don't have a backing BytesStore so we have to allow them to be used this way
+        if (bytesStore instanceof Bytes && ! (bytesStore instanceof MappedBytes)) {
             throw new IllegalArgumentException("A BytesStore is required as backing but a Bytes has been provided: " +
                     bytesStore.getClass().getSimpleName());
         }
