@@ -21,8 +21,6 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
-import java.nio.ByteBuffer;
-
 import static org.junit.Assert.*;
 
 public class PointerBytesStoreTest extends BytesTestCommon {

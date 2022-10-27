@@ -196,7 +196,7 @@ public class BytesUtilTest extends BytesTestCommon {
         double d;
     }
 
-    class Nested {
+    static class Nested {
         // implicit this$0
         int i;
     }

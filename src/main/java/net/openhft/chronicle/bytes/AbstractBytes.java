@@ -102,7 +102,7 @@ public abstract class AbstractBytes<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
         ensureCapacity(to + length);
         bytesStore.move(from - start, to - start, length);
@@ -112,7 +112,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> compact()
             throws IllegalStateException {
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
         long readRemaining = readRemaining();
         try {
@@ -135,7 +135,7 @@ public abstract class AbstractBytes<U>
         final long capacity = capacity();
         if (readPosition == start && writePosition() == start && writeLimit == capacity)
             return this;
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         readPosition = start;
         uncheckedWritePosition(start);
         writeLimit = capacity;
@@ -146,7 +146,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> clearAndPad(@NonNegative long length)
             throws BufferOverflowException {
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         final long start = start();
         if ((start + length) > capacity()) {
             throw newBOERange(start, length, "clearAndPad failed. Start: %d + length: %d > capacity: %d", capacity());
@@ -258,7 +258,7 @@ public abstract class AbstractBytes<U>
         if (this.readPosition == position)
             return this;
 
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         if (position < start()) {
             throw new DecoratedBufferUnderflowException(String.format("readPosition failed. Position: %d < start: %d", position, start()));
         }
@@ -277,7 +277,7 @@ public abstract class AbstractBytes<U>
         if (writePosition() == limit)
             return this;
 
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         if (limit < start())
             throw limitLessThanStart(limit);
 
@@ -331,7 +331,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> readSkip(long bytesToSkip)
             throws BufferUnderflowException, IllegalStateException {
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         if (lenient) {
             bytesToSkip = Math.min(bytesToSkip, readRemaining());
         }
@@ -354,7 +354,7 @@ public abstract class AbstractBytes<U>
     public Bytes<U> writeSkip(long bytesToSkip)
             throws BufferOverflowException, IllegalStateException {
         final long writePos = writePosition();
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         writeCheckOffset(writePos, bytesToSkip);
         uncheckedWritePosition(writePos + bytesToSkip);
         return this;
@@ -580,7 +580,7 @@ public abstract class AbstractBytes<U>
     protected long readOffsetPositionMoved(@NonNegative long adding)
             throws BufferUnderflowException, IllegalStateException {
         long offset = readPosition;
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         readCheckOffset(readPosition, Math.toIntExact(adding), false);
         readPosition += adding;
         assert readPosition <= readLimit();
@@ -1018,7 +1018,7 @@ public abstract class AbstractBytes<U>
     protected long writeOffsetPositionMoved(@NonNegative long adding, @NonNegative long advance)
             throws BufferOverflowException, IllegalStateException {
         long oldPosition = writePosition();
-        assert DISABLE_THREAD_SAFETY || threadSafetyCheck(true);
+        assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         writeCheckOffset(oldPosition, adding);
         uncheckedWritePosition(writePosition() + advance);
         return oldPosition;
