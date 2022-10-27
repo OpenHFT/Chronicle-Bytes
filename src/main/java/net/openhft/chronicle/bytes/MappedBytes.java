@@ -29,6 +29,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.nio.BufferUnderflowException;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -164,6 +165,32 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         if (bs instanceof MappedBytesStore) {
             MappedBytesStore mbs = (MappedBytesStore) bs;
             mbs.syncUpTo(writePosition());
+        }
+    }
+
+    @Override
+    public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
+        throwExceptionIfReleased();
+
+        try {
+            // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
+            return isClear()
+                    ? new VanillaBytes(this, writePosition(), bytesStore.writeLimit())
+                    : new SubBytes<>(this, readPosition(), readLimit() + start());
+        } catch (IllegalArgumentException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
+    }
+
+    @Override
+    public @NotNull Bytes<Void> bytesForWrite() throws IllegalStateException {
+        throwExceptionIfReleased();
+
+        try {
+            // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
+            return new VanillaBytes(this, writePosition(), writeLimit());
+        } catch (IllegalArgumentException e) {
+            throw new AssertionError(e);
         }
     }
 }
