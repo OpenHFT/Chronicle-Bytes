@@ -61,28 +61,30 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
     @Test
     public void currentTimeMicrosPerf() {
         TimeProvider tp = DistributedUniqueTimeProvider.instance();
-        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
                 blackHole = tp.currentTimeMicros();
             count += 1000;
-        } while (System.currentTimeMillis() < start + 500);
-        System.out.println("currentTimeMicrosPerf count/sec: " + count * 2);
+        } while ((end = System.currentTimeMillis()) < start + 500);
+        long rate = 1000L * count / (end - start);
+        System.out.printf("currentTimeMicrosPerf count/sec: %,d%n", rate);
         assertTrue(count > 128_000 / 2); // half the speed of Rasberry Pi
     }
 
     @Test
     public void currentTimeNanosPerf() {
         TimeProvider tp = DistributedUniqueTimeProvider.instance();
-        long start = System.currentTimeMillis();
+        long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
                 blackHole = tp.currentTimeNanos();
             count += 1000;
-        } while (System.currentTimeMillis() < start + 500);
-        System.out.println("currentTimeNanosPerf count/sec: " + count * 2);
+        } while ((end = System.currentTimeMillis()) < start + 500);
+        long rate = 1000L * count / (end - start);
+        System.out.printf("currentTimeNanosPerf count/sec: %,d%n", rate);
         assertTrue(count > 202_000 / 2); // half the speed of Rasberry Pi
     }
 
