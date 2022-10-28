@@ -145,7 +145,7 @@ public class StructTest extends BytesTestCommon {
             }
         }
 
-        /**
+        /*
         private <T extends Struct> void assertSameClass(T s) {
             if(!getClass().equals(s.getClass()))
                 throw new IllegalArgumentException("Invalid assignment requested");
@@ -295,7 +295,7 @@ public class StructTest extends BytesTestCommon {
      * };
      */
 
-    static enum Gender {
+    enum Gender {
         MALE(0),
         FEMALE(1);
         final int code;

@@ -185,10 +185,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     }
 
     /**
-     * This single-argument version of the call returns an address which is guarateed safe for a contiguous
+     * This single-argument version of the call returns an address which is guaranteed safe for a contiguous
      * read up to the overlap size.
      * <p>
-     * NOTE: If called with an offset which is already in the overlap region this call with therefore
+     * NOTE: If called with an offset which is already in the overlap region this call will therefore
      * prompt a remapping to the new segment, which in turn may unmap the current segment.
      * Any other handles using data in the current segment may therefore result in a memory violation
      * when next used.
@@ -505,7 +505,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
         BytesStore bytesStore = this.bytesStore;
         if (!bytesStore.inside(offset, 0)) {
-            bytesStore = acquireNextByteStore0(offset + 0, false);
+            bytesStore = acquireNextByteStore0(offset, false);
         }
         return offset < start() || readLimit() <= offset ? -1 : bytesStore.peekUnsignedByte(offset);
     }

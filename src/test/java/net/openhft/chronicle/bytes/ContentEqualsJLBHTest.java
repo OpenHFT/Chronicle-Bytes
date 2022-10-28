@@ -65,8 +65,8 @@ public class ContentEqualsJLBHTest extends BytesTestCommon {
     private static class SimpleJLBHTask implements JLBHTask {
 
         private JLBH jlbh;
-        private Bytes left;
-        private Bytes right;
+        private final Bytes left;
+        private final Bytes right;
 
         public SimpleJLBHTask(Bytes left, Bytes right) {
             this.left = left;
