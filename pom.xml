@@ -18,14 +18,15 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.35</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -346,6 +347,46 @@
                         <goals>
                             <goal>check</goal>
                         </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- benchmark MMap latency with Byte -->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+
+                <executions>
+                    <!-- PingPong test - run this first -->
+                    <execution>
+                        <id>MMapPing</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.bytes.perf.MMapPingPongMain</mainClass>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                    </execution>
+                    <!-- PingPong test - run this second -->
+                    <execution>
+                        <id>MMapPong</id>
+                        <goals>
+                            <goal>java</goal>
+                        </goals>
+                        <configuration>
+                            <skip>false</skip>
+                            <mainClass>net.openhft.chronicle.bytes.perf.MMapPingPongMain</mainClass>
+                            <classpathScope>test</classpathScope>
+                            <systemProperties>
+                                <property>
+                                    <key>pong</key>
+                                    <value>true</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
