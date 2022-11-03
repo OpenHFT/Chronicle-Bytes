@@ -24,6 +24,28 @@ import net.openhft.chronicle.core.OS;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+/*
+on the same Ryzen 9 5950X
+Ping pong rate: 5,573,745 ping-pong/second
+Ping pong rate: 5,588,202 ping-pong/second
+Ping pong rate: 5,586,779 ping-pong/second
+Ping pong rate: 5,584,569 ping-pong/second
+Ping pong rate: 5,586,606 ping-pong/second
+
+on the same CCX
+Ping pong rate: 21,924,377 ping-pong/second
+Ping pong rate: 21,724,836 ping-pong/second
+Ping pong rate: 21,766,510 ping-pong/second
+Ping pong rate: 21,747,684 ping-pong/second
+Ping pong rate: 21,716,257 ping-pong/second
+
+on the same CPU
+Ping pong rate: 55,534,644 ping-pong/second
+Ping pong rate: 49,489,835 ping-pong/second
+Ping pong rate: 49,691,925 ping-pong/second
+Ping pong rate: 49,610,643 ping-pong/second
+Ping pong rate: 49,665,545 ping-pong/second
+ */
 public class MMapPingPongMain {
     static final boolean PONG = Jvm.getBoolean("pong");
 
