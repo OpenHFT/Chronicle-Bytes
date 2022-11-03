@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.perf;
 
+import net.openhft.affinity.AffinityLock;
 import net.openhft.chronicle.bytes.MappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -40,11 +41,11 @@ Ping pong rate: 21,747,684 ping-pong/second
 Ping pong rate: 21,716,257 ping-pong/second
 
 on the same CPU
-Ping pong rate: 55,534,644 ping-pong/second
-Ping pong rate: 49,489,835 ping-pong/second
-Ping pong rate: 49,691,925 ping-pong/second
-Ping pong rate: 49,610,643 ping-pong/second
-Ping pong rate: 49,665,545 ping-pong/second
+Ping pong rate: 56,272,342 ping-pong/second
+Ping pong rate: 52,262,765 ping-pong/second
+Ping pong rate: 52,583,207 ping-pong/second
+Ping pong rate: 52,590,468 ping-pong/second
+Ping pong rate: 52,661,971 ping-pong/second
  */
 public class MMapPingPongMain {
     static final boolean PONG = Jvm.getBoolean("pong");
@@ -55,7 +56,8 @@ public class MMapPingPongMain {
         int from = PONG ? 0 : 1;
         int to = PONG ? 1 : 0;
         final int count = 20_000_000;
-        try (MappedBytes bytes = MappedBytes.mappedBytes(tmpFile, OS.pageSize())) {
+        try (AffinityLock lock = AffinityLock.acquireLock(PONG ? 31 : 15);
+             MappedBytes bytes = MappedBytes.mappedBytes(tmpFile, OS.pageSize())) {
             // wait for the first one
             while (!bytes.compareAndSwapLong(0, from, to))
                 Thread.yield();
