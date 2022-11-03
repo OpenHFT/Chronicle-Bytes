@@ -49,6 +49,7 @@ Ping pong rate: 52,661,971 ping-pong/second
  */
 public class MMapPingPongMain {
     static final boolean PONG = Jvm.getBoolean("pong");
+    static final boolean USE_AFFINITY = Jvm.getBoolean("useAffinity");
 
     public static void main(String[] args) throws FileNotFoundException {
         File tmpFile = new File(OS.getTmp(), "ping-pong-" + OS.getUserName() + ".tmp");
@@ -56,7 +57,8 @@ public class MMapPingPongMain {
         int from = PONG ? 0 : 1;
         int to = PONG ? 1 : 0;
         final int count = 20_000_000;
-        try (AffinityLock lock = AffinityLock.acquireLock(PONG ? 31 : 15);
+        int lastCPU = Runtime.getRuntime().availableProcessors() - 1;
+        try (AffinityLock lock = USE_AFFINITY ? AffinityLock.acquireLock(PONG ? lastCPU : lastCPU / 2) : null;
              MappedBytes bytes = MappedBytes.mappedBytes(tmpFile, OS.pageSize())) {
             // wait for the first one
             while (!bytes.compareAndSwapLong(0, from, to))
