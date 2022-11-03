@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
-import sun.nio.ch.DirectBuffer;
 
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
@@ -61,8 +60,7 @@ public enum Allocator {
         Bytes<?> fixedBytes(int capacity) {
             final ByteBuffer byteBuffer = byteBuffer(capacity);
 
-            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(
-                    ((DirectBuffer)byteBuffer).address(), byteBuffer.capacity());
+            BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(byteBuffer, false, byteBuffer.capacity());
             try {
                 try {
                     Bytes<ByteBuffer> bbb = bs.bytesForWrite();
