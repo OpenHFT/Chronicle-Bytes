@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
@@ -48,7 +49,24 @@ public class NativeBytesStore<U>
     private static final Field BB_CAPACITY;
     private static final Field BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
-    private static final NativeBytesStore<Void> EMPTY = new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, false);
+    private static final NativeBytesStore<Void> EMPTY = new NativeBytesStore<Void>(NoBytesStore.NO_PAGE, 0, null, false) {
+        @Override
+        public void reserve(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public boolean tryReserve(ReferenceOwner id) throws IllegalStateException, IllegalArgumentException {
+            return true;
+        }
+
+        @Override
+        public void release(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+        }
+    };
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -222,7 +240,7 @@ public class NativeBytesStore<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
-        if (from < 0 || to < 0) throw new BufferUnderflowException();
+        if (from < 0 || to < 0) throw new IllegalArgumentException();
         long addr = this.address;
         if (addr == 0) throwException(null);
         memoryCopyMemory(addr + from, addr + to, length);

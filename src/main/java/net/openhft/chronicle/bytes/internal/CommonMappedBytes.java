@@ -135,7 +135,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public BytesStore<Bytes<Void>, Void> copy()
             throws IllegalStateException {
-        return NativeBytes.copyOf(this);
+        return BytesUtil.copyOf(this);
     }
 
     @Override

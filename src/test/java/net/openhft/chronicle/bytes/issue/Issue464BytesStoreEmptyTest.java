@@ -19,6 +19,7 @@
 package net.openhft.chronicle.bytes.issue;
 
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 
 import java.util.function.Supplier;
@@ -26,7 +27,7 @@ import java.util.function.Supplier;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 
-public class Issue464BytesStoreEmptyTest {
+public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
     public void emptyShouldNotAllocate() {
         doTest(BytesStore::empty);
@@ -65,6 +66,11 @@ public class Issue464BytesStoreEmptyTest {
     @Test
     public void emptyNativeStoreFromShouldNotAllocate() {
         doTest(() -> BytesStore.nativeStoreFrom(new byte[0]));
+    }
+
+    @Test
+    public void emptyCopyFromShouldNotAllocate() {
+        doTest(() -> BytesStore.empty().copy());
     }
 
     @Test

@@ -293,7 +293,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
                     throw new AssertionError(e);
                 }
             } else {
-                return (BytesStore) NativeBytes.copyOf(this);
+                return (BytesStore) BytesUtil.copyOf(this);
             }
         }
 

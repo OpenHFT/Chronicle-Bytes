@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -42,7 +43,24 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
-    private static final HeapBytesStore<byte[]> EMPTY = new HeapBytesStore<>((byte[]) null);
+    private static final HeapBytesStore<byte[]> EMPTY = new HeapBytesStore<byte[]>((byte[]) null) {
+        @Override
+        public void reserve(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public boolean tryReserve(ReferenceOwner id) throws IllegalStateException, IllegalArgumentException {
+            return true;
+        }
+
+        @Override
+        public void release(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+        }
+    };
     @Nullable
     private final Object realUnderlyingObject;
     private final int dataOffset;
@@ -66,7 +84,7 @@ public class HeapBytesStore<U>
         this.underlyingObject = (U) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
-        this.capacity = byteArray == null ? 0 :byteArray.length;
+        this.capacity = byteArray == null ? 0 : byteArray.length;
     }
 
     private HeapBytesStore(Object object, long start, long length) {
@@ -108,7 +126,7 @@ public class HeapBytesStore<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, ArithmeticException {
-        if (from < 0 || to < 0) throw new BufferUnderflowException();
+        if (from < 0 || to < 0) throw new IllegalArgumentException();
         if (length < 0 || (int) length != length) throw new IllegalArgumentException();
         throwExceptionIfReleased();
         try {
