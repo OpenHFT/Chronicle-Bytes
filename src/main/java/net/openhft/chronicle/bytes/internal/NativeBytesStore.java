@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
@@ -48,6 +49,24 @@ public class NativeBytesStore<U>
     private static final Field BB_CAPACITY;
     private static final Field BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
+    private static final NativeBytesStore<Void> EMPTY = new NativeBytesStore<Void>(NoBytesStore.NO_PAGE, 0, null, false) {
+        @Override
+        public void reserve(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public boolean tryReserve(ReferenceOwner id) throws IllegalStateException, IllegalArgumentException {
+            return true;
+        }
+
+        @Override
+        public void release(ReferenceOwner id) throws IllegalStateException {
+        }
+
+        @Override
+        public void releaseLast(ReferenceOwner id) throws IllegalStateException {
+        }
+    };
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -138,9 +157,11 @@ public class NativeBytesStore<U>
     @NotNull
     private static NativeBytesStore<Void> of(@NonNegative long capacity, boolean zeroOut, boolean elastic)
             throws IllegalArgumentException {
-        if (capacity <= 0)
-            return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
-
+        if (capacity <= 0) {
+            if (elastic)
+                return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
+            return EMPTY;
+        }
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
@@ -227,7 +248,6 @@ public class NativeBytesStore<U>
 
     private void memoryCopyMemory(long fromAddress, long toAddress, @NonNegative long length)
             throws IllegalStateException {
-        if (length < 0) throw new IllegalArgumentException();
         try {
             memory.copyMemory(fromAddress, toAddress, length);
         } catch (NullPointerException ifReleased) {
@@ -574,20 +594,16 @@ public class NativeBytesStore<U>
     @Override
     public long addressForRead(@NonNegative long offset)
             throws BufferUnderflowException {
-        if (offset < start() || offset > realCapacity()) {
-            if (offset < 0) throw new IllegalArgumentException();
+        if (offset < start() || offset > realCapacity())
             throw new BufferUnderflowException();
-        }
         return address + translate(offset);
     }
 
     @Override
     public long addressForWrite(@NonNegative long offset)
             throws BufferOverflowException {
-        if (offset < start() || offset > realCapacity()) {
-            if (offset < 0) throw new IllegalArgumentException();
+        if (offset < start() || offset > realCapacity())
             throw new BufferOverflowException();
-        }
         return address + translate(offset);
     }
 
@@ -626,12 +642,14 @@ public class NativeBytesStore<U>
     @Override
     public void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, IllegalStateException {
+        // TODO add bounds checking.
         memoryCopyMemory(addressForRead(position), address, size);
     }
 
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException {
+        // TODO add bounds checking.
         memoryCopyMemory(address, addressForWrite(position), size);
     }
 
