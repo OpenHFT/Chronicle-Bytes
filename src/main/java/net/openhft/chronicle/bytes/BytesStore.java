@@ -105,6 +105,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      */
     static BytesStore from(@NotNull CharSequence cs)
             throws IllegalStateException {
+        if (cs.length() == 0)
+            return empty();
         if (cs instanceof BytesStore)
             return from((BytesStore) cs);
         return from(cs.toString());
@@ -130,7 +132,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return BytesStore
      */
     static BytesStore from(@NotNull String cs) {
-        return BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
+        return cs.length() == 0 ? empty() : BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
     }
 
     static <T> BytesStore<?, T> forFields(Object o, String groupName, int padding) {

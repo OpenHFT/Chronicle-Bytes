@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;

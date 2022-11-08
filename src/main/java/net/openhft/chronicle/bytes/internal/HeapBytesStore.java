@@ -42,6 +42,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
+    private static final HeapBytesStore<byte[]> EMPTY = new HeapBytesStore<>((byte[]) null);
     @Nullable
     private final Object realUnderlyingObject;
     private final int dataOffset;
@@ -86,7 +87,7 @@ public class HeapBytesStore<U>
     // Used by Chronicle-Map.
     @NotNull
     public static HeapBytesStore<byte[]> wrap(byte[] byteArray) {
-        return new HeapBytesStore<>(byteArray);
+        return byteArray == null ? EMPTY : new HeapBytesStore<>(byteArray);
     }
 
     // Used by Chronicle-Map.
@@ -127,6 +128,8 @@ public class HeapBytesStore<U>
     @NotNull
     @Override
     public BytesStore<HeapBytesStore<U>, U> copy() {
+        if (capacity == 0)
+            return (BytesStore) EMPTY;
         throw new UnsupportedOperationException("todo");
     }
 

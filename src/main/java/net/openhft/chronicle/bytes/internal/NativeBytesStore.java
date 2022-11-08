@@ -48,6 +48,7 @@ public class NativeBytesStore<U>
     private static final Field BB_CAPACITY;
     private static final Field BB_ATT;
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
+    private static final NativeBytesStore<Void> EMPTY = new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, false);
 
     static {
         Class directBB = ByteBuffer.allocateDirect(0).getClass();
@@ -138,8 +139,11 @@ public class NativeBytesStore<U>
     @NotNull
     private static NativeBytesStore<Void> of(@NonNegative long capacity, boolean zeroOut, boolean elastic)
             throws IllegalArgumentException {
-        if (capacity <= 0)
-            return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
+        if (capacity <= 0) {
+            if (elastic)
+                return new NativeBytesStore<>(NoBytesStore.NO_PAGE, 0, null, elastic);
+            return EMPTY;
+        }
         Memory memory = OS.memory();
         long address = memory.allocate(capacity);
         if (zeroOut || capacity < MEMORY_MAPPED_SIZE) {
@@ -181,9 +185,7 @@ public class NativeBytesStore<U>
     public static NativeBytesStore from(byte[] bytes) {
         try {
             @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
-            Bytes<byte[]> bytes2 = Bytes.wrapForRead(bytes);
-            bytes2.copyTo(nbs);
-            bytes2.releaseLast();
+            nbs.write(0, bytes);
             return nbs;
         } catch (IllegalArgumentException | IllegalStateException e) {
             throw new AssertionError(e);
