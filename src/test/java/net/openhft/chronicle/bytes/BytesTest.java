@@ -867,6 +867,18 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
+    public void contentEqualsSingleChar() {
+        @NotNull Bytes<?> a = alloc1.elasticBytes(16);
+        @NotNull Bytes<?> b = alloc1.elasticBytes(16);
+        a.clear().append("0");
+        b.clear().append("0");
+        assertTrue(a.contentEquals(b));
+        a.clear().append("0");
+        b.clear().append("1");
+        assertFalse(a.contentEquals(b));
+    }
+
+    @Test
     public void to8BitString() {
         @NotNull Bytes<?> a = alloc1.elasticBytes(16);
         try {
