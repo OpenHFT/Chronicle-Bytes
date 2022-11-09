@@ -238,8 +238,10 @@ enum BytesInternal {
             int remaining = length - ~invoke;
 
             for (; remaining < length; remaining++) {
-                if (left.peekUnsignedByte(remaining) != right.peekUnsignedByte(remaining))
+                if (left.readByte(left.readPosition() + remaining) !=
+                        right.readByte(right.readPosition() + remaining)) {
                     return Boolean.FALSE;
+                }
             }
 
             return Boolean.TRUE;
