@@ -67,8 +67,8 @@ public class BytesInternalTest extends BytesTestCommon {
 
     @Test
     public void testContentNotEqualButSameLen() {
-        a.append("hello world1");
-        b.append("hello world2");
+        a.append("hello world1111");
+        b.append("hello world1112");
         Assert.assertFalse(a.contentEquals(b));
     }
 

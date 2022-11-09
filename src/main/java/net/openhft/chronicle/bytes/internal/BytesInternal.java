@@ -154,6 +154,7 @@ enum BytesInternal {
         if (VECTORIZED_MISMATCH_METHOD_HANDLE != null
                 && b.realReadRemaining() == a.realReadRemaining()
                 && a.realReadRemaining() < Integer.MAX_VALUE
+                && a.realReadRemaining() > 7
                 && !(a instanceof HexDumpBytes) && !(b instanceof HexDumpBytes)) {
 
             // this will use AVX instructions, this is very fast; much faster than a handwritten loop.
@@ -223,14 +224,27 @@ enum BytesInternal {
                 rightOffset = heapBytesStore.dataOffset();
             }
 
+            final int length = (int) left.realReadRemaining();
             final int invoke = (int) VECTORIZED_MISMATCH_METHOD_HANDLE.invoke(leftObject,
                     leftOffset,
                     rightObject,
                     rightOffset,
-                    (int) left.realReadRemaining(),
+                    length,
                     0);
 
-            return invoke < 0 ? Boolean.TRUE : Boolean.FALSE;
+            if (invoke >= 0)
+                return Boolean.FALSE;
+
+            int remaining = length - ~invoke;
+
+            for (; remaining < length; remaining++) {
+                if (left.readByte(left.readPosition() + remaining) !=
+                        right.readByte(right.readPosition() + remaining)) {
+                    return Boolean.FALSE;
+                }
+            }
+
+            return Boolean.TRUE;
         } catch (Throwable e) {
             if (Jvm.debug().isEnabled(BytesInternal.class))
                 Jvm.debug().on(BytesInternal.class, e);
