@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
@@ -113,20 +112,10 @@ public class NativeBytes<U>
         }
     }
 
-    // Not much reason for this method to be in this specific class.
+    @Deprecated(/* to be removed in x.26 */)
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
             throws IllegalStateException {
-        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
-        final long remaining = bytes.readRemaining();
-        final long position = bytes.readPosition();
-
-        try {
-            final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
-            bytes2.write(bytes, position, remaining);
-            return bytes2;
-        } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return BytesUtil.copyOf(bytes);
     }
 
     private static long alignToPageSize(final long size) {
@@ -196,7 +185,7 @@ public class NativeBytes<U>
     public void ensureCapacity(final @NonNegative long desiredCapacity)
             throws IllegalArgumentException, IllegalStateException {
 
-        assert desiredCapacity >= 0;
+        if (desiredCapacity < 0) throw new IllegalArgumentException();
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         writeCheckOffset(desiredCapacity, 0);
     }

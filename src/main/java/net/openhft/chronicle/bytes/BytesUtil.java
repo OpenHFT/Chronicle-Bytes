@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesFieldInfo;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -440,6 +441,23 @@ public enum BytesUtil {
 
     static boolean isControlSpace(int ch) {
         return 0 <= ch && ch <= ' ';
+    }
+
+    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
+            throws IllegalStateException {
+        ReferenceCountedUtil.throwExceptionIfReleased(bytes);
+        final long remaining = bytes.readRemaining();
+        if (remaining == 0)
+            return BytesStore.empty();
+        final long position = bytes.readPosition();
+
+        try {
+            final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
+            bytes2.write(bytes, position, remaining);
+            return bytes2;
+        } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {
+            throw new AssertionError(e);
+        }
     }
 
     static final class WarnUncheckedElasticBytes {

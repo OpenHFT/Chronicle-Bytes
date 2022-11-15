@@ -17,209 +17,219 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.BytesStore;
-import net.openhft.chronicle.bytes.BytesTestCommon;
-import net.openhft.chronicle.bytes.RandomDataOutput;
+import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.junit.runners.Parameterized;
 import org.opentest4j.AssertionFailedError;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
 import static org.junit.jupiter.api.Assertions.*;
 
-class EmptyBytesTest extends BytesTestCommon {
+@RunWith(Parameterized.class)
+public class EmptyBytesTest extends BytesTestCommon {
 
-    private static final Bytes INSTANCE = Bytes.empty();
+    private final BytesStore instance;
 
-    @Test
-    void refCount() {
-        assertNotEquals(0, INSTANCE.refCount());
+    public EmptyBytesTest(String type, BytesStore instance) {
+        this.instance = instance;
+    }
+
+    @Parameterized.Parameters(name = "{0}")
+    public static Collection<Object[]> data() {
+        return Arrays.asList(new Object[][]{
+                {"default", Bytes.empty()},
+                {"heap-read", HeapBytesStore.wrap((byte[]) null).bytesForRead()},
+                {"heap-write", HeapBytesStore.wrap((byte[]) null).bytesForWrite()},
+        });
     }
 
     @Test
-    void writeByteInt() {
-        assertThrowsBufferException(() -> INSTANCE.writeByte(0, 0));
+    public void refCount() {
+        assertNotEquals(0, instance.refCount());
     }
 
     @Test
-    void writeByte() {
-        assertThrowsBufferException(() -> INSTANCE.writeByte(0, (byte) 0));
+    public void writeByteInt() {
+        assertThrowsBufferException(() -> instance.writeByte(0, 0));
     }
 
     @Test
-    void writeShort() {
-        assertThrowsBufferException(() -> INSTANCE.writeShort(0, (short) 0));
+    public void writeByte() {
+        assertThrowsBufferException(() -> instance.writeByte(0, (byte) 0));
     }
 
     @Test
-    void writeInt() {
-        assertThrowsBufferException(() -> INSTANCE.writeInt(0, 0));
+    public void writeShort() {
+        assertThrowsBufferException(() -> instance.writeShort(0, (short) 0));
     }
 
     @Test
-    void writeOrderedInt() {
-        assertThrowsBufferException(() -> INSTANCE.writeOrderedInt(0, 0));
+    public void writeInt() {
+        assertThrowsBufferException(() -> instance.writeInt(0, 0));
     }
 
     @Test
-    void writeLong() {
-        assertThrowsBufferException(() -> INSTANCE.writeLong(0, 0));
+    public void writeOrderedInt() {
+        assertThrowsBufferException(() -> instance.writeOrderedInt(0, 0));
     }
 
     @Test
-    void writeOrderedLong() {
-        assertThrowsBufferException(() -> INSTANCE.writeOrderedLong(0, 0L));
+    public void writeLong() {
+        assertThrowsBufferException(() -> instance.writeLong(0, 0));
     }
 
     @Test
-    void writeFloat() {
-        assertThrowsBufferException(() -> INSTANCE.writeFloat(0, 0.0f));
+    public void writeOrderedLong() {
+        assertThrowsBufferException(() -> instance.writeOrderedLong(0, 0L));
     }
 
     @Test
-    void writeDouble() {
-        assertThrowsBufferException(() -> INSTANCE.writeDouble(0, 0.0d));
+    public void writeFloat() {
+        assertThrowsBufferException(() -> instance.writeFloat(0, 0.0f));
     }
 
     @Test
-    void writeVolatileByte() {
-        assertThrowsBufferException(() -> INSTANCE.writeVolatileByte(0, (byte) 0));
+    public void writeDouble() {
+        assertThrowsBufferException(() -> instance.writeDouble(0, 0.0d));
     }
 
     @Test
-    void writeVolatileShort() {
-        assertThrowsBufferException(() -> INSTANCE.writeVolatileShort(0, (short) 0));
+    public void writeVolatileByte() {
+        assertThrowsBufferException(() -> instance.writeVolatileByte(0, (byte) 0));
     }
 
     @Test
-    void writeVolatileInt() {
-        assertThrowsBufferException(() -> INSTANCE.writeVolatileInt(0, 0));
+    public void writeVolatileShort() {
+        assertThrowsBufferException(() -> instance.writeVolatileShort(0, (short) 0));
     }
 
     @Test
-    void writeVolatileLong() {
-        assertThrowsBufferException(() -> INSTANCE.writeVolatileLong(0, 0L));
+    public void writeVolatileInt() {
+        assertThrowsBufferException(() -> instance.writeVolatileInt(0, 0));
     }
 
     @Test
-    void write() {
-        assertThrowsBufferException(() -> INSTANCE.write(0, new byte[1], 0, 0));
+    public void writeVolatileLong() {
+        assertThrowsBufferException(() -> instance.writeVolatileLong(0, 0L));
     }
 
     @Test
-    void write2() {
+    public void write() {
+        assertThrowsBufferException(() -> instance.write(0, new byte[1], 0, 0));
+    }
+
+    @Test
+    public void write2() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
-            assertThrowsBufferException(() -> INSTANCE.write(0, bytes, 0, 0));
+            assertThrowsBufferException(() -> instance.write(0, bytes, 0, 0));
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
-    void write3() {
-        assertThrowsBufferException(() -> INSTANCE.write(0, new byte[1]));
+    public void write3() {
+        assertThrowsBufferException(() -> instance.write(0, new byte[1]));
     }
 
     @Test
-    void write4() {
+    public void write4() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
-            assertThrowsBufferException(() -> INSTANCE.write(0, bytes));
+            assertThrowsBufferException(() -> instance.write(0, bytes));
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
-    void readByte() {
+    public void readByte() {
         read(BytesStore::readByte);
     }
 
     @Test
-    void peekUnsignedByte() {
-        assertEquals(-1, INSTANCE.peekUnsignedByte(0));
+    public void peekUnsignedByte() {
+        assertEquals(-1, instance.peekUnsignedByte(0));
     }
 
     @Test
-    void readShort() {
+    public void readShort() {
         read(BytesStore::readShort);
     }
 
     @Test
-    void readInt() {
+    public void readInt() {
         read(BytesStore::readLong);
     }
 
     @Test
-    void readLong() {
+    public void readLong() {
         read(BytesStore::readLong);
     }
 
     @Test
-    void readFloat() {
+    public void readFloat() {
         read(BytesStore::readFloat);
     }
 
     @Test
-    void readDouble() {
+    public void readDouble() {
         read(BytesStore::readDouble);
     }
 
     @Test
-    void readVolatileByte() {
+    public void readVolatileByte() {
         read(BytesStore::readVolatileByte);
     }
 
     @Test
-    void readVolatileShort() {
+    public void readVolatileShort() {
         read(BytesStore::readVolatileShort);
     }
 
     @Test
-    void readVolatileInt() {
+    public void readVolatileInt() {
         read(BytesStore::readVolatileInt);
     }
 
     @Test
-    void readVolatileLong() {
+    public void readVolatileLong() {
         read(BytesStore::readVolatileLong);
     }
 
     @Test
-    void isDirectMemory() {
-        assertFalse(INSTANCE.isDirectMemory());
-    }
-
-    @Test
-    void hashCodeTest() {
-        int actual = INSTANCE.hashCode();
+    public void hashCodeTest() {
+        int actual = instance.hashCode();
         int expected = NativeBytesStore.from("").hashCode();
         assertEquals(expected, actual);
     }
 
     @Test
-    void equalsTest() {
-        assertNotEquals(null, INSTANCE);
-        assertEquals(NativeBytesStore.from(""), INSTANCE);
+    public void equalsTest() {
+        assertNotEquals(null, instance);
+        assertEquals(NativeBytesStore.from(""), instance);
     }
 
     @Test
-    void copy() {
-        final BytesStore<?, Void> copy = INSTANCE.copy();
-        assertEquals(INSTANCE, copy);
+    public void copy() {
+        final BytesStore<?, Void> copy = instance.copy();
+        assertEquals(instance, copy);
     }
 
     @Test
-    void bytesForRead() {
-        final Bytes<Void> bytes = INSTANCE.bytesForRead();
+    public void bytesForRead() {
+        final Bytes<Void> bytes = instance.bytesForRead();
         try {
             assertEquals(0, bytes.capacity());
             assertEquals(0, bytes.readPosition());
@@ -229,113 +239,113 @@ class EmptyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    void capacity() {
-        assertEquals(0, INSTANCE.capacity());
+    public void capacity() {
+        assertEquals(0, instance.capacity());
     }
 
     @Test
-    void underlyingObject() {
-        assertNull(INSTANCE.underlyingObject());
+    public void underlyingObject() {
+        assertNull(instance.underlyingObject());
     }
 
     @Test
-    void inside() {
-        assertFalse(INSTANCE.inside(0, 0));
-        assertFalse(INSTANCE.inside(0, 1));
-        assertFalse(INSTANCE.inside(1, 0));
+    public void inside() {
+        assertFalse(instance.inside(0, 0));
+        assertFalse(instance.inside(0, 1));
+        assertFalse(instance.inside(1, 0));
     }
 
     @Test
-    void testInside() {
-        assertFalse(INSTANCE.inside(0));
+    public void testInside() {
+        assertFalse(instance.inside(0));
     }
 
     @Test
-    void copyTo() {
+    public void copyTo() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
-            assertDoesNotThrow(() -> INSTANCE.copyTo(bytes));
+            assertDoesNotThrow(() -> instance.copyTo(bytes));
         } finally {
             bytes.releaseLast();
         }
 
         final byte[] arr = new byte[1];
         arr[0] = 13;
-        assertDoesNotThrow(() -> INSTANCE.copyTo(arr));
+        assertDoesNotThrow(() -> instance.copyTo(arr));
         assertEquals(13, arr[0]);
 
         final ByteBuffer bb = ByteBuffer.allocate(1);
-        assertDoesNotThrow(() -> INSTANCE.copyTo(bb));
+        assertDoesNotThrow(() -> instance.copyTo(bb));
         assertEquals(0, bb.position());
 
         final ByteArrayOutputStream os = new ByteArrayOutputStream();
-        assertDoesNotThrow(() -> INSTANCE.copyTo(os));
+        assertDoesNotThrow(() -> instance.copyTo(os));
         final byte[] toByteArray = os.toByteArray();
         assertEquals(0, toByteArray.length);
     }
 
     @Test
-    void nativeWrite() {
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeWrite(34, 0, -1));
-        assertThrowsBufferException(() -> INSTANCE.nativeWrite(34, 0, 0));
+    public void nativeWrite() {
+        assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, 0, -1));
+        assertThrowsBufferException(() -> instance.nativeWrite(34, 0, 0));
     }
 
     @Test
-    void write8bit() {
+    public void write8bit() {
         final BytesStore<?, ?> bs = BytesStore.from("A");
-        assertThrows(BufferOverflowException.class, () -> INSTANCE.write8bit(0, bs));
-        assertThrows(BufferUnderflowException.class, () -> INSTANCE.write8bit(-1, bs));
+        assertThrows(BufferOverflowException.class, () -> instance.write8bit(0, bs));
+        assertThrows(BufferUnderflowException.class, () -> instance.write8bit(-1, bs));
     }
 
     @Test
-    void testWrite8bit() {
-        assertThrowsBufferException(() -> INSTANCE.write8bit(0, "A", 0, 1));
-        assertThrowsBufferException(() -> INSTANCE.write8bit(-1, "A", -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.write8bit(0, "A", 0, -1));
+    public void testWrite8bit() {
+        assertThrowsBufferException(() -> instance.write8bit(0, "A", 0, 1));
+        assertThrowsBufferException(() -> instance.write8bit(-1, "A", -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(0, "A", 0, -1));
     }
 
     @Test
-    void nativeRead() {
-        assertThrowsBufferException(() -> INSTANCE.nativeRead(0, 1, 1));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(-1, 1, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.nativeRead(0, 1, -1));
+    public void nativeRead() {
+        assertThrowsBufferException(() -> instance.nativeRead(0, 1, 1));
+        assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(-1, 1, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(0, 1, -1));
     }
 
     @Test
-    void compareAndSwapInt() {
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapInt(0, 1, 1));
+    public void compareAndSwapInt() {
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
     }
 
     @Test
-    void compareAndSwapLong() {
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapLong(0, 1L, 1L));
+    public void compareAndSwapLong() {
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
     }
 
     @Test
-    void compareAndSwapDouble() {
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapDouble(0, 1d, 1d));
+    public void compareAndSwapDouble() {
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
     }
 
     @Test
-    void compareAndSwapFloat() {
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).compareAndSwapFloat(0, 1f, 1f));
+    public void compareAndSwapFloat() {
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
     }
 
     @Test
-    void testAndSetInt() {
-        assertThrowsBufferException(() -> ((RandomDataOutput<?>) INSTANCE).testAndSetInt(0, 1, 1));
+    public void testAndSetInt() {
+        assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
     }
 
     @Test
-    void equalBytes() {
+    public void equalBytes() {
         final BytesStore<?, ?> bs = BytesStore.from("A");
         final BytesStore<?, ?> emptyBs = BytesStore.from("");
         try {
-            assertTrue(INSTANCE.equalBytes(bs, 0));
-            assertFalse(INSTANCE.equalBytes(emptyBs, 1));
-            assertTrue(INSTANCE.equalBytes(emptyBs, 0));
-            assertTrue(INSTANCE.equalBytes(bs, -1));
+            assertTrue(instance.equalBytes(bs, 0));
+            assertFalse(instance.equalBytes(emptyBs, 1));
+            assertTrue(instance.equalBytes(emptyBs, 0));
+            assertTrue(instance.equalBytes(bs, -1));
         } finally {
             bs.releaseLast();
             emptyBs.releaseLast();
@@ -343,101 +353,101 @@ class EmptyBytesTest extends BytesTestCommon {
     }
 
     @Test
-    void move() {
-        assertThrowsBufferException(() -> INSTANCE.move(0, 0, 1));
-        assertThrowsBufferException(() -> INSTANCE.move(-1, 0, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, -1, 0));
-        assertThrows(IllegalArgumentException.class, () -> INSTANCE.move(0, 0, -1));
+    public void move() {
+        assertThrowsBufferException(() -> instance.move(0, 0, 1));
+        assertThrows(IllegalArgumentException.class, () -> instance.move(-1, 0, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.move(0, -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.move(0, 0, -1));
     }
 
     @Test
-    void addressForRead() {
-        assertThrowsBufferException(() -> INSTANCE.addressForRead(0));
-        assertThrowsBufferException(() -> INSTANCE.addressForRead(-1));
+    public void addressForRead() {
+        assertThrowsBufferException(() -> instance.addressForRead(0));
+        assertThrowsBufferException(() -> instance.addressForRead(-1));
     }
 
     @Test
-    void addressForWrite() {
-        assertThrowsBufferException(() -> INSTANCE.addressForWrite(0));
-        assertThrowsBufferException(() -> INSTANCE.addressForWrite(-1));
+    public void addressForWrite() {
+        assertThrowsBufferException(() -> instance.addressForWrite(0));
+        assertThrowsBufferException(() -> instance.addressForWrite(-1));
     }
 
     @Test
-    void addressForWritePosition() {
-        assertThrowsBufferException(INSTANCE::addressForWritePosition);
+    public void addressForWritePosition() {
+        assertThrowsBufferException(instance::addressForWritePosition);
     }
 
     @Test
-    void bytesForWrite() {
-        assertThrowsBufferException(() -> INSTANCE.bytesForWrite().writeSkip(1));
+    public void bytesForWrite() {
+        assertThrowsBufferException(() -> instance.bytesForWrite().writeSkip(1));
     }
 
     @Test
-    void sharedMemory() {
-        assertFalse(INSTANCE.sharedMemory());
+    public void sharedMemory() {
+        assertFalse(instance.sharedMemory());
     }
 
     @Test
-    void isImmutableBytesStore() {
-        assertEquals(0, INSTANCE.capacity());
+    public void isImmutableBytesStore() {
+        assertEquals(0, instance.capacity());
     }
 
     @Test
-    void testToString() {
+    public void testToString() {
         final BytesStore<?, ?> bytes = Bytes.from("");
         final BytesStore<?, ?> bs = bytes.bytesStore();
         assertNotNull(bs);
         try {
-            assertEquals(bs.toString(), INSTANCE.toString());
-            assertEquals(bs.toDebugString(), INSTANCE.toDebugString());
-            assertEquals(bs.toDebugString(2), INSTANCE.toDebugString(2));
-            assertEquals(bs.to8bitString(), INSTANCE.to8bitString());
+            assertEquals(bs.toString(), instance.toString());
+            assertEquals(bs.toDebugString(), instance.toDebugString());
+            assertEquals(bs.toDebugString(2), instance.toDebugString(2));
+            assertEquals(bs.to8bitString(), instance.to8bitString());
         } finally {
             bytes.releaseLast();
         }
     }
 
     @Test
-    void chars() {
-        assertEquals(0, INSTANCE.chars().count());
+    public void chars() {
+        assertEquals(0, instance.chars().count());
     }
 
     @Test
-    void codePoints() {
-        assertEquals(0, INSTANCE.codePoints().count());
+    public void codePoints() {
+        assertEquals(0, instance.codePoints().count());
     }
 
     @Test
-    void length() {
-        assertEquals(0, INSTANCE.length());
+    public void length() {
+        assertEquals(0, instance.length());
     }
 
     @Test
-    void charAt() {
-        assertThrows(IndexOutOfBoundsException.class, () -> INSTANCE.charAt(-1));
+    public void charAt() {
+        assertThrows(IndexOutOfBoundsException.class, () -> instance.charAt(-1));
     }
 
     @Test
-    void subSequence() {
-        assertThrows(IndexOutOfBoundsException.class, () -> INSTANCE.subSequence(-1, 0));
-        assertThrows(IndexOutOfBoundsException.class, () -> INSTANCE.subSequence(2, 1));
-        assertThrows(IndexOutOfBoundsException.class, () -> INSTANCE.subSequence(1, 2));
+    public void subSequence() {
+        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(-1, 0));
+        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(2, 1));
+        assertThrows(IndexOutOfBoundsException.class, () -> instance.subSequence(1, 2));
     }
 
     @Test
-    void zeroOut() {
-        assertDoesNotThrow(() -> INSTANCE.zeroOut(0, 0));
+    public void zeroOut() {
+        assertDoesNotThrow(() -> instance.zeroOut(0, 0));
         // outside bounds are ignored
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(0, 1));
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    void read(final ObjLongConsumer<BytesStore> getter) {
-        assertThrowsBufferException(() -> getter.accept(INSTANCE, 0));
-        assertThrows(DecoratedBufferUnderflowException.class, () -> getter.accept(INSTANCE, -1));
+    public void read(final ObjLongConsumer<BytesStore> getter) {
+        assertThrowsBufferException(() -> getter.accept(instance, 0));
+        assertThrows(DecoratedBufferUnderflowException.class, () -> getter.accept(instance, -1));
     }
 
-    void assertThrowsBufferException(final Runnable consumer) {
+    public void assertThrowsBufferException(final Runnable consumer) {
         try {
             consumer.run();
         } catch (BufferOverflowException | BufferUnderflowException e) {

@@ -102,6 +102,8 @@ public abstract class AbstractBytes<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
+        if (from < 0 || to < 0) throw new IllegalArgumentException();
+        if (length == 0) return;
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
         ensureCapacity(to + length);
