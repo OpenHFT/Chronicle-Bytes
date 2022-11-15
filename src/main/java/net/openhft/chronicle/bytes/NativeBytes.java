@@ -157,6 +157,8 @@ public class NativeBytes<U>
                 throw newDBOE(writeEnd);
             checkResize(writeEnd);
         } else {
+            if (offset < 0)
+                throw new IllegalArgumentException();
             throw new BufferOverflowException();
         }
     }

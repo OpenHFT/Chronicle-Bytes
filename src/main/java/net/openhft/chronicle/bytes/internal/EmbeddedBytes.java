@@ -27,11 +27,11 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
         super(bytesStore, writePosition, writeLimit);
     }
 
-    public static <U> EmbeddedBytes<U> wrap(BytesStore<?, ?> bytesStore) {
-        return wrap((HeapBytesStore<?>) bytesStore);
+    public static <U> EmbeddedBytes<U> wrap(BytesStore<?, U> bytesStore) {
+        return wrap((HeapBytesStore<U>) bytesStore);
     }
 
-    public static <U> EmbeddedBytes<U> wrap(HeapBytesStore<?> bytesStore) {
+    public static <U> EmbeddedBytes<U> wrap(HeapBytesStore<U> bytesStore) {
         long wp = bytesStore.start();
         int length = bytesStore.readUnsignedByte(wp - 1);
         return new EmbeddedBytes<>(bytesStore, wp, wp + length);

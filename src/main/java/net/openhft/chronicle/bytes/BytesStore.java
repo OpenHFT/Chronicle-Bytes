@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.HeapBytesStore;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -226,8 +227,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return an empty, fixed-sized immutable BytesStore.
      */
     static BytesStore empty() {
-        byte[] noBytes = null;
-        return HeapBytesStore.wrap(noBytes);
+        return NoBytesStore.NO_BYTES_STORE;
     }
 
     /**
