@@ -62,11 +62,6 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     }
 
     @Test
-    public void emptyCopyFromShouldNotAllocate() {
-        doTest(() -> BytesStore.empty().copy());
-    }
-
-    @Test
     public void emptyByteArrayShouldHaveDifferentUnderlying() {
         BytesStore a = BytesStore.wrap(new byte[0]);
         BytesStore b = BytesStore.wrap(new byte[0]);
