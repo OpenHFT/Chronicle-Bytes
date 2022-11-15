@@ -23,7 +23,6 @@ import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -43,24 +42,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("restriction")
 public class HeapBytesStore<U>
         extends AbstractBytesStore<HeapBytesStore<U>, U> {
-    private static final HeapBytesStore<byte[]> EMPTY = new HeapBytesStore<byte[]>((byte[]) null) {
-        @Override
-        public void reserve(ReferenceOwner id) throws IllegalStateException {
-        }
-
-        @Override
-        public boolean tryReserve(ReferenceOwner id) throws IllegalStateException, IllegalArgumentException {
-            return true;
-        }
-
-        @Override
-        public void release(ReferenceOwner id) throws IllegalStateException {
-        }
-
-        @Override
-        public void releaseLast(ReferenceOwner id) throws IllegalStateException {
-        }
-    };
     @Nullable
     private final Object realUnderlyingObject;
     private final int dataOffset;
@@ -105,7 +86,8 @@ public class HeapBytesStore<U>
     // Used by Chronicle-Map.
     @NotNull
     public static HeapBytesStore<byte[]> wrap(byte[] byteArray) {
-        return byteArray == null ? EMPTY : new HeapBytesStore<>(byteArray);
+        if (byteArray == null) throw new NullPointerException();
+        return new HeapBytesStore<>(byteArray);
     }
 
     // Used by Chronicle-Map.
@@ -147,7 +129,7 @@ public class HeapBytesStore<U>
     @Override
     public BytesStore<HeapBytesStore<U>, U> copy() {
         if (capacity == 0)
-            return (BytesStore) EMPTY;
+            return (BytesStore) NoBytesStore.NO_BYTES_STORE;
         throw new UnsupportedOperationException("todo");
     }
 

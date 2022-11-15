@@ -23,8 +23,7 @@ import org.junit.Test;
 
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertNotSame;
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.*;
 
 public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
     @Test
@@ -34,7 +33,7 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
 
     @Test
     public void nullByteArrayShouldNotAllocate() {
-        doTest(() -> BytesStore.wrap((byte[]) null));
+        assertThrows(NullPointerException.class, () -> BytesStore.wrap((byte[]) null));
     }
 
     @Test
@@ -52,19 +51,9 @@ public class Issue464BytesStoreEmptyTest extends BytesTestCommon {
         doTest(() -> BytesStore.from(new StringBuilder()));
     }
 
-    @Test
-    public void emptyNativeShouldNotAllocate() {
-        doTest(() -> BytesStore.nativeStoreWithFixedCapacity(0));
-    }
-
     @Test(expected = NullPointerException.class)
     public void nullNativeStoreFromShouldNotAllocate() {
         doTest(() -> BytesStore.nativeStoreFrom(null));
-    }
-
-    @Test
-    public void emptyNativeStoreFromShouldNotAllocate() {
-        doTest(() -> BytesStore.nativeStoreFrom(new byte[0]));
     }
 
     @Test

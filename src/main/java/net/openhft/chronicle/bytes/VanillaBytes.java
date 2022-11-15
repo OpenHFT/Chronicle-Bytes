@@ -67,6 +67,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
             this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
         }
 
+        public static <U> VanillaBytes<U> wrap(BytesStore<?, U> bytesStore) {
+            return new VanillaBytes<>(bytesStore);
+        }
+
         protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
                 throws IllegalStateException, IllegalArgumentException {
             super(bytesStore, writePosition, writeLimit);
@@ -587,6 +591,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
                 throws BufferUnderflowException, IllegalStateException {
             requireNonNull(bytesStore);
             ReportUnoptimised.reportOnce();
+            if (length < 0) throw new IllegalArgumentException();
 
             if (isDirectMemory() &&
                     bytesStore instanceof VanillaBytes &&
