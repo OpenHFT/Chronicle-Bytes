@@ -339,7 +339,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
         assert end >= start : "end=" + end + ",start=" + start;
         if (cs instanceof BytesStore) {
-            return write((BytesStore) cs, (long) start, end - start);
+            return write((BytesStore) cs, start, (long)end - start);
         }
         for (int i = start; i < end; i++) {
             char c = cs.charAt(i);

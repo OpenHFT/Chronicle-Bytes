@@ -182,21 +182,32 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         }
 
         if (text instanceof BytesStore) {
-            long offset = ((BytesStore<?, ?>) text).readPosition();
-            long readRemaining = Math.min(writeRemaining(), ((BytesStore<?, ?>) text).readLimit() - offset);
-            writeStopBit(readRemaining);
-            try {
-                write((BytesStore<?, ?>) text, offset, readRemaining);
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
-            return (S) this;
+            return write8bit((BytesStore<?, ?>) text);
         }
 
         if (text instanceof String)
             return write8bit((String) text);
 
         return write8bit(text, 0, text.length());
+    }
+
+    /**
+     * This is not strictly required as part of the API, but is a very common case and is broken out to
+     * allow optimisation, and to avoid calls to instanceof in {@link #write(CharSequence)}
+     * @param text text to write
+     * @return this
+     */
+    @NotNull
+    default S write8bit(final @NotNull BytesStore<?, ?> text) {
+        long offset = text.readPosition();
+        long readRemaining = Math.min(writeRemaining(), text.readLimit() - offset);
+        writeStopBit(readRemaining);
+        try {
+            write(text, offset, readRemaining);
+        } catch (BufferUnderflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
+        return (S) this;
     }
 
     @NotNull
