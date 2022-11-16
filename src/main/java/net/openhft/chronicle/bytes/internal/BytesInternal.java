@@ -111,8 +111,6 @@ enum BytesInternal {
         MethodHandle vectorizedMismatchMethodHandle = null;
         try {
             if (Jvm.isJava9Plus()) {
-                // requires java11 or later to set this with the following exports added
-                //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
                 final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
                 final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
                         Object.class,
@@ -127,9 +125,11 @@ enum BytesInternal {
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
-                Jvm.debug().on(BytesInternal.class, e.toString());
+                Jvm.warn().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
+                        "--illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED" +
+                        ". exception: " + e);
             else
-                Jvm.debug().on(BytesInternal.class, e);
+                Jvm.warn().on(BytesInternal.class, "Cannot get access to vectorizedMismatch", e);
         } finally {
             VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
         }
@@ -163,7 +163,7 @@ enum BytesInternal {
                 if (vectorizedResult != null)
                     return vectorizedResult;
             } catch (UnsupportedOperationException e) {
-                Jvm.debug().on(BytesInternal.class, e);
+                Jvm.warn().on(BytesInternal.class, e);
             }
         }
 
