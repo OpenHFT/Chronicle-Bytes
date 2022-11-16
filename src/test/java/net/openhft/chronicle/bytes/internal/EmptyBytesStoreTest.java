@@ -17,8 +17,12 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.bytes.RandomDataOutput;
+import net.openhft.chronicle.core.io.IOTools;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -33,24 +37,38 @@ import java.util.Collection;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
 @RunWith(Parameterized.class)
-public class EmptyBytesTest extends BytesTestCommon {
+public class EmptyBytesStoreTest extends BytesTestCommon {
 
     private final BytesStore instance;
 
-    public EmptyBytesTest(String type, BytesStore instance) {
+    public EmptyBytesStoreTest(String type, BytesStore instance) {
         this.instance = instance;
     }
 
     @Parameterized.Parameters(name = "{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][]{
-                {"default", Bytes.empty()},
-                {"heap-read", HeapBytesStore.wrap((byte[]) null).bytesForRead()},
-                {"heap-write", HeapBytesStore.wrap((byte[]) null).bytesForWrite()},
+                {"Bytes.empty()", Bytes.empty()},
+                {"BytesStore.empty()", BytesStore.empty()},
+                {"native", NativeBytesStore.nativeStoreWithFixedCapacity(0)},
+                {"NativeByteStore.bytesForRead()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForRead()},
+                {"NativeByteStore.bytesForWrite()", NativeBytesStore.nativeStoreWithFixedCapacity(0).bytesForWrite()},
         });
+    }
+
+    @After
+    public void teardown() {
+        IOTools.unmonitor(instance);
+    }
+
+    @Test
+    public void notSameAsEmpty() {
+        // a case which should produce a different instance. Wire depends on this
+        assertNotSame(BytesStore.wrap(new byte[0]), instance);
     }
 
     @Test
@@ -60,79 +78,97 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void writeByteInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeByte(0, 0));
     }
 
     @Test
     public void writeByte() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeByte(0, (byte) 0));
     }
 
     @Test
     public void writeShort() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeShort(0, (short) 0));
     }
 
     @Test
     public void writeInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeInt(0, 0));
     }
 
     @Test
     public void writeOrderedInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeOrderedInt(0, 0));
     }
 
     @Test
     public void writeLong() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeLong(0, 0));
     }
 
     @Test
     public void writeOrderedLong() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeOrderedLong(0, 0L));
     }
 
     @Test
     public void writeFloat() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeFloat(0, 0.0f));
     }
 
     @Test
     public void writeDouble() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeDouble(0, 0.0d));
     }
 
     @Test
     public void writeVolatileByte() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeVolatileByte(0, (byte) 0));
     }
 
     @Test
     public void writeVolatileShort() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeVolatileShort(0, (short) 0));
     }
 
     @Test
     public void writeVolatileInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeVolatileInt(0, 0));
     }
 
     @Test
     public void writeVolatileLong() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.writeVolatileLong(0, 0L));
     }
 
     @Test
     public void write() {
-        assertThrowsBufferException(() -> instance.write(0, new byte[1], 0, 0));
+        assertDoesNotThrow(() -> instance.write(0, new byte[1], 0, 0));
+        assumeFalse(instance instanceof NativeBytesStore);
+        assertThrowsBufferException(() -> instance.write(0, new byte[1], 0, 1));
     }
 
     @Test
     public void write2() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
+        bytes.append("Hello");
         try {
-            assertThrowsBufferException(() -> instance.write(0, bytes, 0, 0));
+            assertDoesNotThrow(() -> instance.write(0, bytes, 0, 0));
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrowsBufferException(() -> instance.write(0, bytes, 0, 1));
         } finally {
             bytes.releaseLast();
         }
@@ -140,6 +176,7 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void write3() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.write(0, new byte[1]));
     }
 
@@ -147,7 +184,11 @@ public class EmptyBytesTest extends BytesTestCommon {
     public void write4() {
         final Bytes<ByteBuffer> bytes = elasticByteBuffer();
         try {
+            assertDoesNotThrow(() -> instance.write(0, bytes));
+            bytes.append("Hello");
+            assumeFalse(instance instanceof NativeBytesStore);
             assertThrowsBufferException(() -> instance.write(0, bytes));
+            assertThrowsBufferException(() -> instance.write(1, bytes));
         } finally {
             bytes.releaseLast();
         }
@@ -218,7 +259,9 @@ public class EmptyBytesTest extends BytesTestCommon {
     @Test
     public void equalsTest() {
         assertNotEquals(null, instance);
+        assertNotEquals(instance, null);
         assertEquals(NativeBytesStore.from(""), instance);
+        assertEquals(instance, NativeBytesStore.from(""));
     }
 
     @Test
@@ -288,25 +331,27 @@ public class EmptyBytesTest extends BytesTestCommon {
     public void nativeWrite() {
         assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, -1, 0));
         assertThrows(IllegalArgumentException.class, () -> instance.nativeWrite(34, 0, -1));
-        assertThrowsBufferException(() -> instance.nativeWrite(34, 0, 0));
+        assertDoesNotThrow(() -> instance.nativeWrite(34, 0, 0));
     }
 
     @Test
     public void write8bit() {
         final BytesStore<?, ?> bs = BytesStore.from("A");
+        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(-1, bs));
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrows(BufferOverflowException.class, () -> instance.write8bit(0, bs));
-        assertThrows(BufferUnderflowException.class, () -> instance.write8bit(-1, bs));
     }
 
     @Test
     public void testWrite8bit() {
         assertThrowsBufferException(() -> instance.write8bit(0, "A", 0, 1));
-        assertThrowsBufferException(() -> instance.write8bit(-1, "A", -1, 0));
+        assertThrows(IllegalArgumentException.class, () -> instance.write8bit(-1, "A", -1, 0));
         assertThrows(IllegalArgumentException.class, () -> instance.write8bit(0, "A", 0, -1));
     }
 
     @Test
     public void nativeRead() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.nativeRead(0, 1, 1));
         assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(-1, 1, 0));
         assertThrows(IllegalArgumentException.class, () -> instance.nativeRead(0, 1, -1));
@@ -314,26 +359,31 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void compareAndSwapInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapInt(0, 1, 1));
     }
 
     @Test
     public void compareAndSwapLong() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapLong(0, 1L, 1L));
     }
 
     @Test
     public void compareAndSwapDouble() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapDouble(0, 1d, 1d));
     }
 
     @Test
     public void compareAndSwapFloat() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).compareAndSwapFloat(0, 1f, 1f));
     }
 
     @Test
     public void testAndSetInt() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> ((RandomDataOutput<?>) instance).testAndSetInt(0, 1, 1));
     }
 
@@ -345,7 +395,8 @@ public class EmptyBytesTest extends BytesTestCommon {
             assertTrue(instance.equalBytes(bs, 0));
             assertFalse(instance.equalBytes(emptyBs, 1));
             assertTrue(instance.equalBytes(emptyBs, 0));
-            assertTrue(instance.equalBytes(bs, -1));
+            assumeFalse(instance instanceof NativeBytesStore);
+            assertThrows(IllegalArgumentException.class, () -> instance.equalBytes(bs, -1));
         } finally {
             bs.releaseLast();
             emptyBs.releaseLast();
@@ -354,6 +405,7 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void move() {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> instance.move(0, 0, 1));
         assertThrows(IllegalArgumentException.class, () -> instance.move(-1, 0, 0));
         assertThrows(IllegalArgumentException.class, () -> instance.move(0, -1, 0));
@@ -362,24 +414,36 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void addressForRead() {
+        assertThrowsBufferException(() -> instance.addressForRead(1));
+        assertThrows(IllegalArgumentException.class, () -> instance.addressForRead(-1));
+        assumeFalse(instance.isDirectMemory());
         assertThrowsBufferException(() -> instance.addressForRead(0));
-        assertThrowsBufferException(() -> instance.addressForRead(-1));
     }
 
     @Test
     public void addressForWrite() {
+        assertThrowsBufferException(() -> instance.addressForWrite(1));
+        assertThrows(IllegalArgumentException.class, () -> instance.addressForWrite(-1));
+        assumeFalse(instance.isDirectMemory());
         assertThrowsBufferException(() -> instance.addressForWrite(0));
-        assertThrowsBufferException(() -> instance.addressForWrite(-1));
     }
 
     @Test
     public void addressForWritePosition() {
+        assumeFalse(instance instanceof NativeBytesStore);
+        assumeFalse(instance.bytesStore() instanceof NativeBytesStore);
         assertThrowsBufferException(instance::addressForWritePosition);
     }
 
     @Test
     public void bytesForWrite() {
-        assertThrowsBufferException(() -> instance.bytesForWrite().writeSkip(1));
+        try {
+            final Bytes bytes = instance.bytesForWrite();
+            IOTools.unmonitor(bytes);
+            assertThrowsBufferException(() -> bytes.writeSkip(1));
+        } catch (UnsupportedOperationException ignored) {
+
+        }
     }
 
     @Test
@@ -424,7 +488,8 @@ public class EmptyBytesTest extends BytesTestCommon {
 
     @Test
     public void charAt() {
-        assertThrows(IndexOutOfBoundsException.class, () -> instance.charAt(-1));
+        assumeFalse(instance instanceof NativeBytesStore);
+        assertThrows(IllegalArgumentException.class, () -> instance.charAt(-1));
     }
 
     @Test
@@ -443,18 +508,35 @@ public class EmptyBytesTest extends BytesTestCommon {
     }
 
     public void read(final ObjLongConsumer<BytesStore> getter) {
+        assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
-        assertThrows(DecoratedBufferUnderflowException.class, () -> getter.accept(instance, -1));
+        assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));
+    }
+
+    public void assertThrows(Class<? extends Throwable> tClass, Runnable runnable) {
+        try {
+            runnable.run();
+
+        } catch (UnsupportedOperationException ignored) {
+            return;
+        } catch (Throwable t) {
+            if (tClass.isInstance(t))
+                return;
+            throw new AssertionFailedError("Unexpected exception type thrown", tClass, t.getClass(), t);
+        }
+        throw new AssertionFailedError("expected " + tClass);
     }
 
     public void assertThrowsBufferException(final Runnable consumer) {
         try {
             consumer.run();
-        } catch (BufferOverflowException | BufferUnderflowException e) {
-            // expected
+
+        } catch (BufferOverflowException | BufferUnderflowException | UnsupportedOperationException e) {
+            return;
         } catch (Throwable t) {
             throw new AssertionFailedError("expected Buffer*Exception", t);
         }
+        throw new AssertionFailedError("expected Buffer*Exception");
     }
 
 }

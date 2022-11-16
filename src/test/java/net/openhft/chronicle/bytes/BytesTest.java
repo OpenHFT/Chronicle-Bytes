@@ -420,37 +420,36 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsBufferOverflowException()
+    @Test(expected = IllegalArgumentException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesThrowsIllegalArgumentException()
             throws BufferOverflowException, IllegalStateException {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(4);
+        assumeFalse(bytes.unchecked());
+
         try {
-            if (bytes.unchecked())
-                throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsBufferOverflowException()
+    @Test(expected = IllegalArgumentException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnElasticBytesOfInsufficientCapacityThrowsIllegalArgumentException()
             throws IllegalStateException, BufferOverflowException {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(1);
+        assumeFalse(bytes.unchecked());
 
         try {
-            if (bytes.unchecked())
-                throw new BufferOverflowException();
             bytes.writeInt(-1, 1);
         } finally {
             postTest(bytes);
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsBufferOverflowException() {
+    @Test(expected = IllegalArgumentException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(4);
         try {
@@ -460,10 +459,10 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-    @Test(expected = BufferOverflowException.class)
-    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsBufferOverflowException() {
+    @Test(expected = IllegalArgumentException.class)
+    public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
-        Bytes<ByteBuffer> bytes =  (Bytes) alloc1.fixedBytes(1);
+        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(1);
         try {
             bytes.writeInt(-1, 1);
         } finally {
@@ -864,18 +863,6 @@ public class BytesTest extends BytesTestCommon {
             postTest(a);
             postTest(b);
         }
-    }
-
-    @Test
-    public void contentEqualsSingleChar() {
-        @NotNull Bytes<?> a = alloc1.elasticBytes(16);
-        @NotNull Bytes<?> b = alloc1.elasticBytes(16);
-        a.clear().append("0");
-        b.clear().append("0");
-        assertTrue(a.contentEquals(b));
-        a.clear().append("0");
-        b.clear().append("1");
-        assertFalse(a.contentEquals(b));
     }
 
     @Test

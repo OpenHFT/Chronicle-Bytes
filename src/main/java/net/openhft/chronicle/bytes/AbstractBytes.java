@@ -64,9 +64,9 @@ public abstract class AbstractBytes<U>
     @NotNull
     protected BytesStore<Bytes<U>, U> bytesStore;
     protected long readPosition;
-    private long writePosition;
     protected long writeLimit;
     protected boolean isPresent;
+    private long writePosition;
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
@@ -805,8 +805,11 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
-        if (position < start())
+        if (position < start()) {
+            if (position < 0)
+                throw new IllegalArgumentException();
             throw new BufferUnderflowException();
+        }
         if (position + bs.readRemaining() > writeLimit)
             throw new BufferOverflowException();
         ensureCapacity(position + bs.readRemaining());
@@ -815,8 +818,11 @@ public abstract class AbstractBytes<U>
 
     @Override
     public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
-        if (position < start())
+        if (position < start()) {
+            if (position < 0)
+                throw new IllegalArgumentException();
             throw new BufferUnderflowException();
+        }
         if (position + length > writeLimit)
             throw new BufferOverflowException();
         ensureCapacity(position + length);
@@ -849,6 +855,8 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     private DecoratedBufferOverflowException newBOELower(@NonNegative long offset) {
+        if (offset < 0)
+            throw new IllegalArgumentException("offset: " + offset);
         return new DecoratedBufferOverflowException(String.format("writeCheckOffset failed. Offset: %d < start: %d", offset, start()));
     }
 
@@ -920,6 +928,8 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     private DecoratedBufferUnderflowException newBOEReadUpper(@NonNegative long offset, long adding, boolean given) {
+        if (offset < 0)
+            throw new IllegalArgumentException("offset: " + offset);
         long limit2 = given ? writeLimit() : readLimit();
         return new DecoratedBufferUnderflowException(String
                 .format("readCheckOffset0 failed. Offset: %d + adding: %d > limit: %d (given: %s)", offset, adding, limit2, given));
@@ -927,6 +937,8 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     private DecoratedBufferUnderflowException newBOEReadLower(@NonNegative long offset) {
+        if (offset < 0)
+            throw new IllegalArgumentException("offset: " + offset);
         return new DecoratedBufferUnderflowException(String.format("readCheckOffset0 failed. Offset: %d < start: %d", offset, start()));
     }
 
@@ -1246,14 +1258,14 @@ public abstract class AbstractBytes<U>
     @Override
     public void nativeRead(@NonNegative long position, long address, @NonNegative long size)
             throws BufferUnderflowException, IllegalStateException {
-        ensureCapacity(position+size);
+        ensureCapacity(position + size);
         bytesStore.nativeRead(position, address, size);
     }
 
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException {
-        ensureCapacity(position+size);
+        ensureCapacity(position + size);
         bytesStore.nativeWrite(address, position, size);
     }
 

@@ -84,6 +84,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             }
             checkResize(writeEnd);
         } else {
+            if (offset < 0) throw new IllegalArgumentException();
             throw new BufferOverflowException();
         }
     }
