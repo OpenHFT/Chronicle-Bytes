@@ -30,6 +30,7 @@ import org.junit.rules.TemporaryFolder;
 
 import java.io.*;
 import java.nio.BufferUnderflowException;
+import java.nio.file.Files;
 
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
@@ -148,7 +149,7 @@ public class MappedFileTest extends BytesTestCommon {
             throws IOException {
         assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows());
 
-        final File file = File.createTempFile("largeReadOnlyFile", "deleteme");
+        final File file = Files.createTempFile("largeReadOnlyFile", "deleteme").toFile();
         file.deleteOnExit();
         try (MappedBytes bytes = MappedBytes.mappedBytes(file, 1 << 30, OS.pageSize())) {
             bytes.writeLong(3L << 30, 0x12345678); // make the file 3 GB.
@@ -165,7 +166,7 @@ public class MappedFileTest extends BytesTestCommon {
         if (Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows())
             return;
 
-        final File file = File.createTempFile("largeReadOnlyFile", "deleteme");
+        final File file = Files.createTempFile("largeReadOnlyFile", "deleteme").toFile();
         file.deleteOnExit();
         try (MappedBytes bytes = MappedBytes.singleMappedBytes(file, 4L << 30)) {
             bytes.writeLong(3L << 30, 0x12345678); // make the file 3 GB.
@@ -210,7 +211,7 @@ public class MappedFileTest extends BytesTestCommon {
 
         String text = "Some text to put in this file. yay!\n";
 
-        @NotNull File file = File.createTempFile("readOnlyOpenFile", "deleteme");
+        @NotNull File file = Files.createTempFile("readOnlyOpenFile", "deleteme").toFile();
 
         // write some stuff to a file so it exits using stock java APIs
         @NotNull OutputStreamWriter outWrite = new OutputStreamWriter(new FileOutputStream(file));

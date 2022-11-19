@@ -22,6 +22,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.nio.BufferOverflowException;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
@@ -62,7 +63,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test
     public void testCanCopyBytesFromMappedBytes1()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), 0);
     }
@@ -70,7 +71,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test
     public void testCanCopyBytesFromMappedBytesSingle1()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.singleMappedBytes(bytes, 64 << 10), 0);
     }
@@ -78,7 +79,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test
     public void testCanCopyBytesFromMappedBytes2()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 64 << 10, 0), (64 << 10) - 8);
     }
@@ -86,7 +87,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test
     public void testCanCopyBytesFromMappedBytesSingle2()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.singleMappedBytes(bytes, 128 << 10), (64 << 10) - 8);
     }
@@ -94,7 +95,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test
     public void testCanCopyBytesFromMappedBytes3()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.mappedBytes(bytes, 16 << 10, 16 << 10), (64 << 10) - 8);
     }
@@ -102,7 +103,7 @@ public class CopyBytesTest extends BytesTestCommon {
     @Test(expected = BufferOverflowException.class)
     public void testCanCopyBytesFromMappedBytesSingle3()
             throws Exception {
-        File bytes = File.createTempFile("mapped-test", "bytes");
+        File bytes = Files.createTempFile("mapped-test", "bytes").toFile();
         bytes.deleteOnExit();
         doTest(MappedBytes.singleMappedBytes(bytes, 32 << 10), (64 << 10) - 8);
     }

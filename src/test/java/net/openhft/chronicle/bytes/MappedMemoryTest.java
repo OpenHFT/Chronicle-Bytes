@@ -25,6 +25,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 
 import static net.openhft.chronicle.bytes.MappedBytes.mappedBytes;
@@ -45,7 +46,7 @@ public class MappedMemoryTest extends BytesTestCommon {
 
         final ReferenceOwner test = ReferenceOwner.temporary("test");
         for (int t = 0; t < 5; t++) {
-            final File tempFile = File.createTempFile("chronicle", "q");
+            final File tempFile = Files.createTempFile("chronicle", "q").toFile();
             try {
 
                 final long startTime = System.nanoTime();
@@ -77,7 +78,7 @@ public class MappedMemoryTest extends BytesTestCommon {
             throws IOException {
 
         for (int t = 0; t < 3; t++) {
-            final File tempFile = File.createTempFile("chronicle", "q");
+            final File tempFile = Files.createTempFile("chronicle", "q").toFile();
             try {
 
                 final long startTime = System.nanoTime();
@@ -102,7 +103,7 @@ public class MappedMemoryTest extends BytesTestCommon {
         final ReferenceOwner test = ReferenceOwner.temporary("test");
 
         for (int t = 0; t < 3; t++) {
-            final File tempFile = File.createTempFile("chronicle", "q");
+            final File tempFile = Files.createTempFile("chronicle", "q").toFile();
             try {
 
                 final long startTime = System.nanoTime();
@@ -134,7 +135,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     public void mappedMemoryTest()
             throws IOException, IORuntimeException {
 
-        final File tempFile = File.createTempFile("chronicle", "q");
+        final File tempFile = Files.createTempFile("chronicle", "q").toFile();
         Bytes<?> bytes0;
         try {
             try (MappedBytes bytes = mappedBytes(tempFile, OS.pageSize())) {
@@ -174,7 +175,7 @@ public class MappedMemoryTest extends BytesTestCommon {
     public void mappedMemoryTestSingle()
             throws IOException, IORuntimeException {
 
-        final File tempFile = File.createTempFile("chronicle", "q");
+        final File tempFile = Files.createTempFile("chronicle", "q").toFile();
         Bytes<?> bytes0;
         try {
             try (MappedBytes bytes = singleMappedBytes(tempFile, OS.pageSize() * 8)) {

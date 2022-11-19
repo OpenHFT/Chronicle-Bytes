@@ -85,7 +85,7 @@ public class ChunkedMappedFile extends MappedFile {
 
             final Path path = Files.createTempDirectory("warmup");
 
-            final File file = File.createTempFile("delete_warming_up", "me", path.toFile());
+            final File file = Files.createTempFile(path.toFile().toPath(), "delete_warming_up", "me").toFile();
             file.deleteOnExit();
             final long mapAlignment = OS.mapAlignment();
             final int chunks = 64;

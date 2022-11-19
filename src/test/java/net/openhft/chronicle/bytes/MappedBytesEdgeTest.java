@@ -23,6 +23,7 @@ import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Consumer;
@@ -66,7 +67,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
 
     @Test
     public void testCorrectChunkResolved() throws IOException {
-        final File tempMBFile = File.createTempFile("mapped", "bytes");
+        final File tempMBFile = Files.createTempFile("mapped", "bytes").toFile();
         int chunk = 262144;
         int overlap = 65536;
         try (final MappedBytes bytes = MappedBytes.mappedBytes(tempMBFile, chunk, overlap)) {

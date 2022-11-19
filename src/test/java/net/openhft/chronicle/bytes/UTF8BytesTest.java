@@ -21,6 +21,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 
 import static org.junit.Assert.assertEquals;
 
@@ -31,7 +32,7 @@ public class UTF8BytesTest extends BytesTestCommon {
     @Test
     public void testUtfEncoding()
             throws IOException {
-        File f = File.createTempFile("testUtfEncoding", "data");
+        File f = Files.createTempFile("testUtfEncoding", "data").toFile();
         f.deleteOnExit();
         final MappedBytes bytes = MappedBytes.mappedBytes(f, 256);
         int len = (int) AppendableUtil.findUtf8Length(MESSAGE);
