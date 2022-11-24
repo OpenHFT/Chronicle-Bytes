@@ -323,7 +323,7 @@ public interface RandomDataInput extends RandomCommon {
 
     /**
      * Copy data from this RandomDataInput to the ByteBuffer. The minimum of {@link #readRemaining()} and
-     * {@link ByteBuffer#remaining()}. Starting from {@link #start()} in this RandomDataInput and from {@link
+     * {@link ByteBuffer#remaining()}. Starting from {@link #readPosition()} in this RandomDataInput and from {@link
      * ByteBuffer#position()} of the given bb. Does NOT change the position or limit or mark of the given ByteBuffer.
      * Returns the number of the copied bytes.
      *
@@ -335,11 +335,12 @@ public interface RandomDataInput extends RandomCommon {
         throwExceptionIfReleased(this);
         int pos = bb.position();
         int len = (int) Math.min(bb.remaining(), readRemaining());
+        long readPosition = readPosition();
         int i;
         for (i = 0; i < len - 7; i += 8)
-            bb.putLong(pos + i, readLong(start() + i));
+            bb.putLong(pos + i, readLong(readPosition + i));
         for (; i < len; i++)
-            bb.put(pos + i, readByte(start() + i));
+            bb.put(pos + i, readByte(readPosition + i));
         return len;
     }
 
