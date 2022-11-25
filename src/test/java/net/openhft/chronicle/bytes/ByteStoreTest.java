@@ -645,6 +645,30 @@ public class ByteStoreTest extends BytesTestCommon {
     }
 
     @Test
+    public void testCopyToDestOffset() {
+        final BytesStore<?, ?> bytesStoreOriginal = BytesStore.wrap(new byte[SIZE]);
+        try {
+            for (int i = 0; i < SIZE; i++) {
+                final byte randomByte = (byte) i;
+                bytesStoreOriginal.writeByte(i, randomByte);
+            }
+            int destOffset = 2;
+            final Bytes<?> bytesStoreCopy = Bytes.wrapForWrite(new byte[SIZE]);
+            bytesStoreCopy.writePosition(destOffset);
+            try {
+                long bytesCopied = bytesStoreOriginal.copyTo(bytesStoreCopy);
+                assertEquals("Unexpected number of bytes copied", SIZE - destOffset, bytesCopied);
+                for (int i = 0; i < bytesCopied; i++)
+                    assertEquals(bytesStoreOriginal.readByte(i), bytesStoreCopy.readByte(i + destOffset));
+            } finally {
+                bytesStoreCopy.releaseLast();
+            }
+        } finally {
+            bytesStoreOriginal.releaseLast();
+        }
+    }
+
+    @Test
     public void testEmpty() {
         assertEquals(0, BytesStore.empty().realCapacity());
     }

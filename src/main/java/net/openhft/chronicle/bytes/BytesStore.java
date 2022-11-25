@@ -370,7 +370,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         throwExceptionIfReleased(store);
         long readPos = readPosition();
         long writePos = store.writePosition();
-        long copy = min(readRemaining(), store.capacity());
+        long copy = min(readRemaining(), store.writeRemaining());
         long i = 0;
         try {
             for (; i < copy - 7; i += 8)
