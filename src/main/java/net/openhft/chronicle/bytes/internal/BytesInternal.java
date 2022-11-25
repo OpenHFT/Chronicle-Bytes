@@ -132,7 +132,7 @@ enum BytesInternal {
         } finally {
             VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
         }
-
+        System.out.println("patched Bytes");
     }
 
     public static boolean contentEqual(@Nullable final BytesStore a,
