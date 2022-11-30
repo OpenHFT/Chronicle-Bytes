@@ -17,8 +17,10 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
+import org.jetbrains.annotations.NotNull;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -34,7 +36,7 @@ public final class ReferenceCountedUtil {
      * @throws ClosedIllegalStateException if the provided {@code referenceCounted} is released
      * @throws NullPointerException        if the provided {@code referenceCounted} is {@code null}
      */
-    public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) {
+    public static void throwExceptionIfReleased(@NotNull final ReferenceCounted referenceCounted) {
         if (referenceCounted.refCount() <= 0) {
             // Rather than throwing a new ClosedIllegalStateException, we invoke releaseLast() that
             // will provide much more tracing information.
@@ -51,12 +53,10 @@ public final class ReferenceCountedUtil {
      * @throws ClosedIllegalStateException if the provided {@code object} is released
      * @throws NullPointerException        if the provided {@code object} is {@code null}
      */
-    public static void throwExceptionIfReleased(final Object object) {
-        if (object instanceof ReferenceCounted) {
+    public static void throwExceptionIfReleased(@NotNull final Object object) {
+        requireNonNull(object);
+        if (Jvm.isResourceTracing() && object instanceof ReferenceCounted) {
             throwExceptionIfReleased((ReferenceCounted) object);
-        } else {
-            requireNonNull(object);
         }
     }
-
 }
