@@ -24,7 +24,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
+import net.openhft.chronicle.core.onoes.ThreadLocalisedExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -80,8 +82,14 @@ public class ChunkedMappedFile extends MappedFile {
 
     public static void warmup() {
         final List<IOException> errorsDuringWarmup = new ArrayList<>();
+
+
+        ExceptionHandler error = ((ThreadLocalisedExceptionHandler) Jvm.error()).defaultHandler();
+        ExceptionHandler warn = ((ThreadLocalisedExceptionHandler) Jvm.warn()).defaultHandler();
+        ExceptionHandler debug = ((ThreadLocalisedExceptionHandler) Jvm.debug()).defaultHandler();
+
         try {
-            Jvm.setExceptionHandlers(Slf4jExceptionHandler.ERROR, null, null);
+            Jvm.setExceptionHandlers(error, null, null);
 
             final Path path = Files.createTempDirectory("warmup");
 
@@ -96,10 +104,10 @@ public class ChunkedMappedFile extends MappedFile {
             Thread.yield();
             Files.delete(file.toPath());
         } catch (IOException e) {
-            Jvm.resetExceptionHandlers();
+            Jvm.setExceptionHandlers(error, warn, debug);
             Jvm.warn().on(ChunkedMappedFile.class, "Error during warmup", e);
         } finally {
-            Jvm.resetExceptionHandlers();
+            Jvm.setExceptionHandlers(error, warn, debug);
             if (!errorsDuringWarmup.isEmpty())
                 Jvm.warn().on(ChunkedMappedFile.class, errorsDuringWarmup.size() + " errors during warmup: " + errorsDuringWarmup);
         }
