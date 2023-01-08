@@ -163,8 +163,8 @@ public class MappedFileTest extends BytesTestCommon {
     @Test
     public void largeReadOnlyFileSingle()
             throws IOException {
-        if (Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE || OS.isWindows())
-            return;
+        assumeFalse(OS.isWindows());
+        assumeFalse(Runtime.getRuntime().maxMemory() < Integer.MAX_VALUE);
 
         final File file = Files.createTempFile("largeReadOnlyFile", "deleteme").toFile();
         file.deleteOnExit();
