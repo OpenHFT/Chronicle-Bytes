@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
@@ -25,7 +26,6 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
-import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.onoes.ThreadLocalisedExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -255,7 +255,7 @@ public class ChunkedMappedFile extends MappedFile {
                 size = fileChannel.size();
                 if (size < minSize) {
                     final long beginNs = System.nanoTime();
-                    try (FileLock ignore = fileChannel.lock()) {
+                    try (FileLock ignore = ReentrantFileLock.lock(file(), fileChannel)) {
                         size = fileChannel.size();
                         if (size < minSize) {
                             Jvm.safepoint();
