@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -133,7 +134,7 @@ public class SingleMappedFile extends MappedFile {
                 size = fileChannel.size();
                 if (size < minSize) {
                     final long beginNs = System.nanoTime();
-                    try (FileLock ignore = fileChannel.lock()) {
+                    try (FileLock ignore = ReentrantFileLock.lock(file(), fileChannel)) {
                         size = fileChannel.size();
                         if (size < minSize) {
                             Jvm.safepoint();
