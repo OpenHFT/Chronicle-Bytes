@@ -25,7 +25,6 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
-import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.onoes.ThreadLocalisedExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -242,7 +241,7 @@ public class ChunkedMappedFile extends MappedFile {
             return;
 
         // handle a possible race condition between processes.
-        try {
+        try (final ReentrantThreadScopedFileLock lock = ReentrantThreadScopedFileLock.lock(file(), fileChannel)) {
             // A single JVM cannot lock a distinct canonical file more than once.
 
             // We might have several MappedFile objects that maps to
@@ -251,23 +250,16 @@ public class ChunkedMappedFile extends MappedFile {
 
             // Ensure exclusivity for any and all MappedFile objects handling
             // the same canonical file.
-            synchronized (internalizedToken()) {
-                size = fileChannel.size();
-                if (size < minSize) {
-                    final long beginNs = System.nanoTime();
-                    try (FileLock ignore = fileChannel.lock()) {
-                        size = fileChannel.size();
-                        if (size < minSize) {
-                            Jvm.safepoint();
-                            raf.setLength(minSize);
-                            Jvm.safepoint();
-                        }
-                    }
-                    final long elapsedNs = System.nanoTime() - beginNs;
-                    if (elapsedNs >= 1_000_000L) {
-                        Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
-                    }
-                }
+            final long beginNs = System.nanoTime();
+            size = fileChannel.size();
+            if (size < minSize) {
+                Jvm.safepoint();
+                raf.setLength(minSize);
+                Jvm.safepoint();
+            }
+            final long elapsedNs = System.nanoTime() - beginNs;
+            if (elapsedNs >= 1_000_000L) {
+                Jvm.perf().on(getClass(), "Took " + elapsedNs / 1000L + " us to grow file " + file());
             }
         } catch (IOException ioe) {
             throw new IOException("Failed to resize to " + minSize, ioe);
