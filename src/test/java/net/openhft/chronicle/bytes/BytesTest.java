@@ -129,7 +129,8 @@ public class BytesTest extends BytesTestCommon {
         Bytes<?> bytes = alloc1.fixedBytes(32);
         for (int i = 0; i < 4; i++)
             bytes.writeIntAdv('1', 1);
-        assertEquals("1111", bytes.toString());
+        assertEquals("1111", Bytes.toString(bytes));
+        assertEquals("1111", Bytes.toString(bytes));
         postTest(bytes);
     }
 
