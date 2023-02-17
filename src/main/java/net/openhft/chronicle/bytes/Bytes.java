@@ -700,6 +700,8 @@ public interface Bytes<U> extends
             final long length = Math.min(maxLen + 1, buffer.readRemaining());
 
             @NotNull final StringBuilder builder = new StringBuilder();
+
+            final long readPosition = buffer.readPosition();
             try {
                 buffer.readWithLength(length, b -> {
                     while (buffer.readRemaining() > 0) {
@@ -712,6 +714,8 @@ public interface Bytes<U> extends
                 });
             } catch (Exception e) {
                 builder.append(' ').append(e);
+            } finally {
+                buffer.readPosition(readPosition);
             }
             return builder.toString();
         } finally {
