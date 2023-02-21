@@ -156,6 +156,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * When resulting BytesStore instance is closed, direct {@code byteBuffer} will be deallocated and should
      * no longer be used.
      *
+     * @see #follow(ByteBuffer)
+     *
      * @param bb the ByteBuffer to wrap
      * @return BytesStore
      */
@@ -163,6 +165,24 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     static BytesStore<?, ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return bb.isDirect()
                 ? NativeBytesStore.wrap(bb)
+                : HeapBytesStore.wrap(bb);
+    }
+
+    /**
+     * Wraps a ByteBuffer which can be either on heap or off heap without taking ownership of that buffer.
+     * <p>
+     * When resulting BytesStore instance is closed, direct {@code byteBuffer} will not be deallocated so its
+     * life cycle should be tracked elsewhere.
+     *
+     * @see #wrap(ByteBuffer)
+     *
+     * @param bb the ByteBuffer to follow
+     * @return BytesStore
+     */
+    @NotNull
+    static BytesStore<?, ByteBuffer> follow(@NotNull ByteBuffer bb) {
+        return bb.isDirect()
+                ? NativeBytesStore.follow(bb)
                 : HeapBytesStore.wrap(bb);
     }
 

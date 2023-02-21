@@ -43,6 +43,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"restriction", "rawtypes", "unchecked"})
 public class NativeBytesStore<U>
         extends AbstractBytesStore<NativeBytesStore<U>, U> {
+    private static final SimpleCleaner NO_DEALLOCATOR = new NoDeallocator();
     private static final long MEMORY_MAPPED_SIZE = 128 << 10;
     private static final Field BB_ADDRESS;
     private static final Field BB_CAPACITY;
@@ -84,8 +85,7 @@ public class NativeBytesStore<U>
         this.maximumLimit = elastic ? maximumLimit : Math.min(limit, maximumLimit);
     }
 
-    public NativeBytesStore(
-            long address, long limit) {
+    public NativeBytesStore(long address, long limit) {
         this(address, limit, null, false);
     }
 
@@ -111,12 +111,27 @@ public class NativeBytesStore<U>
     }
 
     /**
+     * @see BytesStore#wrap(ByteBuffer)
      * @param bb ByteBuffer
      * @return BytesStore
      */
     @NotNull
     public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
         return new NativeBytesStore<>(bb, false);
+    }
+
+    /**
+     * @see BytesStore#follow(ByteBuffer)
+     * @param bb ByteBuffer
+     * @return BytesStore
+     */
+    @NotNull
+    public static NativeBytesStore<ByteBuffer> follow(@NotNull ByteBuffer bb) {
+        NativeBytesStore store = new NativeBytesStore();
+        store.init(bb, false);
+        store.maximumLimit = store.limit;
+        store.cleaner = NO_DEALLOCATOR;
+        return store;
     }
 
     @NotNull
@@ -199,7 +214,10 @@ public class NativeBytesStore<U>
         return limit >= length;
     }
 
-    // Used in Chronicle Map
+    /**
+     * @deprecated use {@link #follow(ByteBuffer)} instead.
+     */
+    @Deprecated(/* To be removed in x.26 */)
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (U) bb;
@@ -207,7 +225,10 @@ public class NativeBytesStore<U>
         this.limit = bb.capacity();
     }
 
-    // Used in Chronicle Map
+    /**
+     * @deprecated use {@link #follow(ByteBuffer)} instead.
+     */
+    @Deprecated(/* To be removed in x.26 */)
     public void uninit() {
         underlyingObject = null;
         address = 0;
@@ -938,5 +959,17 @@ public class NativeBytesStore<U>
             super.finalize();
             warnAndReleaseIfNotReleased();
         }
+    }
+
+    private static final class NoDeallocator extends SimpleCleaner {
+        private NoDeallocator() {
+            super(null);
+        }
+
+        @Override
+        public void clean() {
+            // No-op.
+        }
+
     }
 }

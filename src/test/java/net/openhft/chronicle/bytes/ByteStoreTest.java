@@ -655,4 +655,18 @@ public class ByteStoreTest extends BytesTestCommon {
             b.releaseLast();
         }
     }
+
+    @Test
+    public void testFollow() {
+        ByteBuffer direct = ByteBuffer.allocateDirect(128);
+        for (int i = 0; i < 128; i++) {
+            BytesStore<?, ByteBuffer> store = BytesStore.follow(direct);
+            store.write(i, new byte[] {(byte)i});
+            store.releaseLast();
+        }
+
+        for (int i = 0; i < 128; i++) {
+            assertEquals(i, (int)direct.get(i));
+        }
+    }
 }
