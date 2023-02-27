@@ -2141,7 +2141,7 @@ enum BytesInternal {
             out.rawWriteByte((byte) '0');
     }
 
-    private static double asDouble(long value, int exp, boolean negative, int deci) {
+    public static double asDouble(long value, int exp, boolean negative, int deci) {
         // these numbers were determined empirically.
         int leading =
                 Long.numberOfLeadingZeros(value) - 1;

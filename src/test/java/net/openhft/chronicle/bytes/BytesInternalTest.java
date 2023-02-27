@@ -548,4 +548,9 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
+    @Test
+    public void failingAsDoubleExamples() {
+        assertTrue(0.00017853 == BytesInternal.asDouble(17853, 0, false, 8));
+        assertTrue(0.00035706 == BytesInternal.asDouble(35706, 0, false, 8));
+    }
 }
