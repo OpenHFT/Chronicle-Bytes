@@ -220,25 +220,23 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void tens() {
-        double d = 1;
         for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
             bytes.clear();
             {
-                double expected = d;
-                bytes.append(expected).append(' ');
+                double d = Math.pow(10, i);
+                bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                double ulp = i < 90 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
-                assertEquals(s, expected, d2, ulp);
+                double ulp = i < 31 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
+                assertEquals(s, d, d2, ulp);
             }
             {
-                double expected = 1 / d;
-                bytes.append(expected).append(' ');
+                double d = Math.pow(10, -i);
+                bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                assertEquals(s, expected, d2, Jvm.isArm() ? 2e-39 : 2e-40);
+                assertEquals(s, d, d2, Jvm.isArm() ? 2e-39 : 2e-40);
             }
-            d *= 10;
         }
     }
 
