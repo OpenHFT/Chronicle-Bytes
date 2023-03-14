@@ -25,7 +25,7 @@
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.1.36</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -479,6 +479,70 @@
                             </properties>
                             <streamLogs>true</streamLogs>
                         </configuration>
+                    </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+
+                        <configuration>
+                            <systemProperties>
+                                <systemProperty>
+                                    <key>jvm.resource.tracing</key>
+                                    <value>false</value>
+                                </systemProperty>
+                            </systemProperties>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
+                        <executions>
+                            <execution>
+                                <id>NativeBytesArrayReadWriteJLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>OnHeapBytesArrayReadWriteJLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ChunkedMappedBytesArrayReadWriteJLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>SingleMappedBytesArrayReadWriteJLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>java</goal>
+                                </goals>
+                                <configuration>
+                                    <mainClass>
+                                        net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH
+                                    </mainClass>
+                                </configuration>
+                            </execution>
+                        </executions>
                     </plugin>
                     <plugin>
                         <groupId>org.apache.maven.plugins</groupId>
