@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -315,7 +316,10 @@ public interface RandomDataInput extends RandomCommon {
         int len = (int) Math.min(bytes.length, readRemaining());
         long readPosition = readPosition();
 
-        for (int i = 0; i < len; i++)
+        int i = 0;
+        for (; i < len - 7; i += 8)
+            UnsafeMemory.unsafePutLong(bytes, i, readLong(readPosition + i));
+        for (; i < len; i++)
             bytes[i] = readByte(readPosition + i);
 
         return len;
