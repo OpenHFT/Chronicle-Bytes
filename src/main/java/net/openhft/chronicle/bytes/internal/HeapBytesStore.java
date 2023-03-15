@@ -21,10 +21,12 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.bytes.RandomDataInput;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import sun.misc.Unsafe;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -178,6 +180,22 @@ public class HeapBytesStore<U>
         try {
             return memory.compareAndSwapLong(
                     realUnderlyingObject, dataOffset + offset, expected, value);
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
+    }
+
+    @Override
+    public long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length) {
+        requireNonNegative(offsetInRDI);
+        requireNonNull(bytes);
+        requireNonNegative(offset);
+        requireNonNegative(length);
+        try {
+            int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
+            memory.copyMemory(realUnderlyingObject, this.dataOffset + offsetInRDI, bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET + offset, len);
+            return len;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;
