@@ -181,7 +181,7 @@ public class BytesReadWriteJLBH implements JLBHTask {
         writeUTF8.sampleNanos(System.nanoTime() - writeUTF8Start);
         expectAmountActioned("write", CharacterEncoding.UTF8.lengthOfEncodedString(length), bytesImpl.writePosition());
 
-        // copyTo (not optimised by any implementation)
+        // copyTo
         populateBytes(CharacterEncoding.ASCII);
         long copyToStart = System.nanoTime();
         int copied = bytesImpl.copyTo(BYTE_ARRAY);
