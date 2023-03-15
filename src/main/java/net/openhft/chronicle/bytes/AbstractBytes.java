@@ -1359,6 +1359,12 @@ public abstract class AbstractBytes<U>
         return bytesStore.capacity() == 0;
     }
 
+    @Override
+    public int copyTo(byte[] bytes) throws BufferUnderflowException, IllegalStateException {
+        throwExceptionIfReleased();
+        return (int) read(readPosition(), bytes, 0, bytes.length);
+    }
+
     static final class ReportUnoptimised {
         static {
             Jvm.reportUnoptimised();
