@@ -319,12 +319,12 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParseDouble() {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
         @NotNull Object[][] tests = {
+                {"-1.16823E70 ", -1.16823E70},
                 {"0e0 ", 0.0},
                 {"-1E-3 ", -1E-3},
                 {"12E3 ", 12E3},
                 {"-1.1E-3 ", -1.1E-3},
                 {"-1.1E3 ", -1.1E3},
-                {"-1.16823E70 ", -1.16823E70},
                 {"1.17045E70 ", 1.17045E70},
                 {"6.85202", 6.85202}
         };

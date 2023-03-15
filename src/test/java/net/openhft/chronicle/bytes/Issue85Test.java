@@ -82,10 +82,14 @@ public class Issue85Test extends BytesTestCommon {
 
     @Test
     public void bytesParseDouble_Issue85_Many0() {
+        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+        doTest(bytes, 1, 999999999999.994);
+        doTest(bytes, 2, 1000000000000.003);
+        doTest(bytes, 3, 1000000000000.004);
+        doTest(bytes, 4, 1000000000000.005);
         assumeFalse(NativeBytes.areNewGuarded());
         int max = 100, count = 0;
-        Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
-        for (double d0 = 1e21; d0 >= 1e-8; d0 /= 10) {
+        for (double d0 = 1e15; d0 >= 1e-8; d0 /= 10) {
             long val = Double.doubleToRawLongBits(d0);
             for (int i = -max / 2; i <= max / 2; i++) {
                 double d = Double.longBitsToDouble(val + i);
@@ -94,7 +98,7 @@ public class Issue85Test extends BytesTestCommon {
             count += max + 1;
         }
         SecureRandom rand = new SecureRandom();
-        for (int i = 0; i < max * 100; i++) {
+        for (int i = 0; i < max * 1000; i++) {
             double d = Math.pow(1e12, rand.nextDouble()) / 1e3;
             doTest(bytes, 0, d);
             count++;
@@ -109,7 +113,7 @@ public class Issue85Test extends BytesTestCommon {
         bytes.clear().append(s);
         double d2 = bytes.parseDouble();
         if (d != d2) {
-//            System.out.println(i + ": Parsing " + s + " != " + d2);
+            System.out.println(i + ": Parsing " + s + " != " + d2);
             ++different2;
         }
 
