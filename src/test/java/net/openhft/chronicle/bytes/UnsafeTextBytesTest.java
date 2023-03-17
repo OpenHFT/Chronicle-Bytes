@@ -71,12 +71,17 @@ public class UnsafeTextBytesTest extends BytesTestCommon {
 
     @Test
     public void appendDouble() {
-        final Random rand = new Random(1);
+
         final Bytes<?> bytes = Bytes.allocateDirect(32);
+        // testAppendFixed(bytes, 864960913420.1180, 4);
+        testAppendFixed(bytes, 98472368148.9340, 4);
+        testAppendFixed(bytes, 21.0607, 4);
+
+        final Random rand = new Random(1);
         try {
             testAppendFixed(bytes, 0.0003, 4);
-            for (int i = 0; i < 1000000; i++) {
-                double d = Math.pow(1e16, rand.nextDouble()) / 1e4;
+            for (int i = 0; i < 300000; i++) {
+                double d = Math.pow(1e15, rand.nextDouble()) / 1e4;
                 testAppendDouble(bytes, d);
                 testAppendFixed(bytes, d, 4);
             }

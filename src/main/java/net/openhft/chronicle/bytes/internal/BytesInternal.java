@@ -2067,7 +2067,8 @@ enum BytesInternal {
                         out.rawWriteByte((byte) ('0' + num));
                         mantissa -= num << precision;
 
-                        final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
+                        int deci = ++decimalPlaces;
+                        final double parsedValue = Maths.asDouble(value, 0, sign != 0, deci);
                         if (parsedValue == d)
                             break;
                     }
@@ -2110,7 +2111,8 @@ enum BytesInternal {
                     assert !(c < '0' || c > '9');
                     out.rawWriteByte((byte) c);
                     mantissa -= num << precision;
-                    final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
+                    int deci = ++decimalPlaces;
+                    final double parsedValue = Maths.asDouble(value, 0, sign != 0, deci);
                     if (parsedValue == d)
                         break;
                 }
@@ -2139,43 +2141,6 @@ enum BytesInternal {
         appendLong0(out, val2);
         for (int i = 0; i < digits; i++)
             out.rawWriteByte((byte) '0');
-    }
-
-    private static double asDouble(long value, int exp, boolean negative, int deci) {
-        // these numbers were determined empirically.
-        int leading =
-                Long.numberOfLeadingZeros(value) - 1;
-        if (leading > 9)
-            leading = (27 + leading) >>> 2;
-
-        int scale2 = 0;
-        if (leading > 0) {
-            scale2 = leading;
-            value <<= scale2;
-        }
-        double d;
-        if (deci > 0) {
-            if (deci < 28) {
-                long fives = Maths.fives(deci);
-                long whole = value / fives;
-                long rem = value % fives;
-                d = whole + (double) rem / fives;
-            } else {
-                d = value / Math.pow(5, deci);
-            }
-        } else if (deci < -27) {
-            d = value * Math.pow(5, -deci);
-
-        } else if (deci < 0) {
-            double fives = Maths.fives(-deci);
-            d = value * fives;
-
-        } else {
-            d = value;
-        }
-
-        double scalb = Math.scalb(d, exp - deci - scale2);
-        return negative ? -scalb : scalb;
     }
 
     @Nullable
@@ -2757,7 +2722,7 @@ enum BytesInternal {
 
             decimalPlaces = decimalPlaces - tens;
 
-            return asDouble(value, exp, negative, decimalPlaces);
+            return Maths.asDouble(value, exp, negative, decimalPlaces);
         } finally {
             final ByteStringParser bsp = (ByteStringParser) in;
             bsp.lastDecimalPlaces(decimalPlaces);

@@ -204,7 +204,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(double d)
             throws BufferOverflowException, IllegalStateException {
-        BytesInternal.append(this, d);
+        Bytes<?> bytes = BytesInternal.acquireBytes();
+        bytes.append(d);
+        append(bytes);
         return (B) this;
     }
 
