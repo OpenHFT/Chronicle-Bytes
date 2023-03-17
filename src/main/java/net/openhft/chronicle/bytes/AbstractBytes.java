@@ -233,22 +233,18 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
-        boolean fits = canWriteDirect(380);
-        double ad = Math.abs(d);
-        if (ad < 1e-18) {
-            append(Double.toString(d));
-            return this;
-        }
-        if (!fits) {
-            fits = 1e-6 <= ad && ad < 1e20 && canWriteDirect(24);
-        }
+        boolean fits = canWriteDirect(32);
         if (fits) {
             long address = addressForWrite(writePosition());
             long address2 = UnsafeText.appendDouble(address, d);
             writeSkip(address2 - address);
             return this;
+        } else {
+            Bytes<?> bytes = BytesInternal.acquireBytes();
+            assert this != bytes;
+            bytes.append(d);
+            append(bytes);
         }
-        BytesInternal.append(this, d);
         return this;
     }
 
