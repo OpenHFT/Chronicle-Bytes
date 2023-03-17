@@ -2067,7 +2067,8 @@ enum BytesInternal {
                         out.rawWriteByte((byte) ('0' + num));
                         mantissa -= num << precision;
 
-                        final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
+                        int deci = ++decimalPlaces;
+                        final double parsedValue = Maths.asDouble(value, 0, sign != 0, deci);
                         if (parsedValue == d)
                             break;
                     }
@@ -2110,7 +2111,8 @@ enum BytesInternal {
                     assert !(c < '0' || c > '9');
                     out.rawWriteByte((byte) c);
                     mantissa -= num << precision;
-                    final double parsedValue = asDouble(value, 0, sign != 0, ++decimalPlaces);
+                    int deci = ++decimalPlaces;
+                    final double parsedValue = Maths.asDouble(value, 0, sign != 0, deci);
                     if (parsedValue == d)
                         break;
                 }
@@ -2139,10 +2141,6 @@ enum BytesInternal {
         appendLong0(out, val2);
         for (int i = 0; i < digits; i++)
             out.rawWriteByte((byte) '0');
-    }
-
-    public static double asDouble(long value, int exp, boolean negative, int deci) {
-        return Maths.asDouble(value, exp, negative, deci);
     }
 
     @Nullable
@@ -2724,7 +2722,7 @@ enum BytesInternal {
 
             decimalPlaces = decimalPlaces - tens;
 
-            return asDouble(value, exp, negative, decimalPlaces);
+            return Maths.asDouble(value, exp, negative, decimalPlaces);
         } finally {
             final ByteStringParser bsp = (ByteStringParser) in;
             bsp.lastDecimalPlaces(decimalPlaces);
