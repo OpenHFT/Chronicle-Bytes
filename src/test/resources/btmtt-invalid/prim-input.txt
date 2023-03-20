@@ -1,17 +1,27 @@
 81 01                                           # myByteable
    4e                                              # flag
-   02                                              # b
+   01                                              # b
    02 00                                           # s
    33                                              # c
    04 00 00 00                                     # i
    00 00 b0 40                                     # f
    06 00 00 00 00 00 00 00                         # l
    cd cc cc cc cc cc 1e 40                         # d
-### End Of Block
+### End Of Block # b == 0 is invlid on read
 81 01                                           # myByteable
    59                                              # flag
-   16                                              # b
+   00                                              # b
    16 00                                           # s
+   54                                              # c
+   2c 00 00 00                                     # i
+   8f c2 b1 40                                     # f
+   42 00 00 00 00 00 00 00                         # l
+   e1 7a 14 ae 47 71 53 40                         # d
+### End Of Block # b = s is invalid on write.
+81 01                                           # myByteable
+   59                                              # flag
+   01                                              # b
+   00 00                                           # s
    54                                              # c
    2c 00 00 00                                     # i
    8f c2 b1 40                                     # f
@@ -35,7 +45,7 @@
 83 01                                           # myNested
                                                 # byteable
       59                                              # flag
-      0b                                              # b
+      00                                              # b
       16 00                                           # s
       54                                              # c
       2c 00 00 00                                     # i

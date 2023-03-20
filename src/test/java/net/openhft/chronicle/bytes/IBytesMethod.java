@@ -17,9 +17,11 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 interface IBytesMethod {
     @MethodId(0x81L)
-    void myByteable(MyByteable byteable);
+    void myByteable(MyByteable byteable) throws InvalidMarshallableException;
 
     @MethodId(0x82L)
     void myScalars(MyScalars scalars);

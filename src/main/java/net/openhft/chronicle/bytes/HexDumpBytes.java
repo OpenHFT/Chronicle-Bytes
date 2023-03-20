@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.ReferenceChangeListener;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.Histogram;
@@ -715,7 +716,7 @@ public class HexDumpBytes
 
     @Override
     public <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> clazz, @Nullable T using)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException {
         return base.readMarshallableLength16(clazz, using);
     }
 
@@ -1329,7 +1330,7 @@ public class HexDumpBytes
 
     @Override
     public void writeMarshallableLength16(@NotNull WriteBytesMarshallable marshallable)
-            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException {
         long pos = base.writePosition();
         try {
             base.writeMarshallableLength16(marshallable);

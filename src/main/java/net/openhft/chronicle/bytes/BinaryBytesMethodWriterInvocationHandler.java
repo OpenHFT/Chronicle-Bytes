@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.AbstractInvocationHandler;
 
 import java.lang.reflect.Method;
@@ -42,14 +43,20 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
 
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args)
-            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException {
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException {
         MethodEncoder info = methodToIdMap.computeIfAbsent(method, methodToId);
         if (info == null) {
             Jvm.warn().on(getClass(), "Unknown method " + method + " ignored");
         } else {
-            out.writeHexDumpDescription(method.getName());
-            out.writeStopBit(info.messageId());
-            info.encode(args, out);
+            long pos = out.writePosition();
+            try {
+                out.writeHexDumpDescription(method.getName());
+                out.writeStopBit(info.messageId());
+                info.encode(args, out);
+            } catch (Throwable t) {
+                out.writePosition(pos);
+                throw t;
+            }
         }
         return null;
     }

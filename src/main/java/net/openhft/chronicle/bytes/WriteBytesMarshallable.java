@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -31,9 +32,11 @@ import java.nio.BufferUnderflowException;
 public interface WriteBytesMarshallable extends CommonMarshallable {
     /**
      * Write to Bytes.  This can be used as an interface to extend or a lambda
-     *
+     * <p>
+     *     This method is responsible for calling net.openhft.chronicle.core.io.Validatable#validate() as needed
+     * </p>
      * @param bytes to write to.
      */
     void writeMarshallable(BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException;
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException;
 }

@@ -23,9 +23,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.SingleThreadedChecked;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -1268,7 +1266,7 @@ public interface Bytes<U> extends
      */
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
                                                                          @Nullable final T using)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException {
 
         final T object = (using == null)
                 ? ObjectUtils.newInstance(clazz)
@@ -1281,6 +1279,7 @@ public interface Bytes<U> extends
             lenient(true);
             readLimit(end);
             object.readMarshallable(this);
+
         } finally {
             readPosition(end);
             readLimit(limit);
@@ -1303,10 +1302,10 @@ public interface Bytes<U> extends
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException {
+            throws BufferOverflowException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException {
         requireNonNull(marshallable);
         long position = writePosition();
-
+        ValidatableUtil.validate(marshallable);
         try {
             writeUnsignedShort(0);
             marshallable.writeMarshallable(this);

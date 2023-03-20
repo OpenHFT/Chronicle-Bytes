@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.SimpleCloseable;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -65,8 +66,10 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
             try {
                 array[0] = (BytesMarshallable[]) encoder.decode(array[0], bytesIn);
                 method.invoke(object, array[0]);
-            } catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException | IllegalArgumentException | IllegalStateException e) {
+            } catch (IllegalAccessException | InvocationTargetException | BufferUnderflowException |
+                     IllegalArgumentException | IllegalStateException | InvalidMarshallableException e) {
                 Jvm.warn().on(getClass(), "Exception calling " + method + " " + Arrays.toString(array[0]), e);
+                bytesIn.readPosition(bytesIn.readLimit());
             }
         };
         long messageId = encoder.messageId();

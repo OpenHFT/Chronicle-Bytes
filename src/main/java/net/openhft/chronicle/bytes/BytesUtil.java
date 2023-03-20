@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -308,13 +309,13 @@ public enum BytesUtil {
         }
     }
 
-    public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) {
+    public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) throws InvalidMarshallableException {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .readMarshallable(marshallable, bytes);
     }
 
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
+            throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
         try {
             BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                     .writeMarshallable(marshallable, bytes);

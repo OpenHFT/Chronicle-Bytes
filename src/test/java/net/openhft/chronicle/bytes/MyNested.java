@@ -17,9 +17,11 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
-class MyNested implements BytesMarshallable {
+class MyNested implements BytesMarshallable, Validatable {
     MyByteable byteable;
     MyScalars scalars;
 
@@ -38,5 +40,10 @@ class MyNested implements BytesMarshallable {
                 "byteable=" + byteable +
                 ", scalars=" + scalars +
                 '}';
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        byteable.validate();
     }
 }

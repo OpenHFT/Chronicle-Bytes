@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 import java.nio.BufferUnderflowException;
 
@@ -30,10 +31,12 @@ import java.nio.BufferUnderflowException;
 public interface ReadBytesMarshallable extends CommonMarshallable {
     /**
      * Bytes to read.  This can be used as a method to implement or as a lambda.
-     *
+     * <p>
+     *     This method is responsible for calling net.openhft.chronicle.core.io.Validatable#validate() as needed
+     * </p>
      * @param bytes to read.
      */
     @SuppressWarnings("rawtypes")
     void readMarshallable(BytesIn<?> bytes)
-            throws IORuntimeException, BufferUnderflowException, IllegalStateException;
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException;
 }
