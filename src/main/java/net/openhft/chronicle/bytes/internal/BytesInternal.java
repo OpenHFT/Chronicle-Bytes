@@ -110,9 +110,7 @@ enum BytesInternal {
 
         MethodHandle vectorizedMismatchMethodHandle = null;
         try {
-            if (Jvm.isJava9Plus()) {
-                // requires java11 or later to set this with the following exports added
-                //  --illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED
+            if (Jvm.isJava9Plus() && !Jvm.getBoolean("disable.vectorized.content_equals")) {
                 final Class<?> arraysSupportClass = Class.forName("jdk.internal.util.ArraysSupport");
                 final Method vectorizedMismatch = Jvm.getMethod(arraysSupportClass, "vectorizedMismatch",
                         Object.class,
@@ -127,9 +125,11 @@ enum BytesInternal {
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
-                Jvm.debug().on(BytesInternal.class, e.toString());
+                Jvm.warn().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
+                        "--illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED" +
+                        ". exception: " + e);
             else
-                Jvm.debug().on(BytesInternal.class, e);
+                Jvm.warn().on(BytesInternal.class, e);
         } finally {
             VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
         }
@@ -163,7 +163,7 @@ enum BytesInternal {
                 if (vectorizedResult != null)
                     return vectorizedResult;
             } catch (UnsupportedOperationException e) {
-                Jvm.debug().on(BytesInternal.class, e);
+                Jvm.warn().on(BytesInternal.class, e);
             }
         }
 
@@ -184,14 +184,9 @@ enum BytesInternal {
      * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
      * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
      */
-
-
-    private static Boolean java11ContentEqualUsingVectorizedMismatch(@Nullable final BytesStore left,
-                                                                     @Nullable final BytesStore right) {
+    private static Boolean java11ContentEqualUsingVectorizedMismatch(@NotNull final BytesStore left,
+                                                                     @NotNull final BytesStore right) {
         try {
-            if (left == null || right == null)
-                return null;
-
             final Object leftObject;
             final long leftOffset;
 
@@ -246,9 +241,7 @@ enum BytesInternal {
 
             return Boolean.TRUE;
         } catch (Throwable e) {
-            if (Jvm.debug().isEnabled(BytesInternal.class))
-                Jvm.debug().on(BytesInternal.class, e);
-
+            Jvm.warn().on(BytesInternal.class, e);
             return null;
         }
     }

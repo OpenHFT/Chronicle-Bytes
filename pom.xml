@@ -485,12 +485,6 @@
                         <artifactId>exec-maven-plugin</artifactId>
 
                         <configuration>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>jvm.resource.tracing</key>
-                                    <value>false</value>
-                                </systemProperty>
-                            </systemProperties>
                             <classpathScope>test</classpathScope>
                         </configuration>
                         <executions>
@@ -498,48 +492,88 @@
                                 <id>NativeBytesArrayReadWriteJLBH</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>OnHeapBytesArrayReadWriteJLBH</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>ChunkedMappedBytesArrayReadWriteJLBH</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
                                 <id>SingleMappedBytesArrayReadWriteJLBH</id>
                                 <phase>test</phase>
                                 <goals>
-                                    <goal>java</goal>
+                                    <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <mainClass>
-                                        net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH
-                                    </mainClass>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ContentEqual2JLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ContentEqual20JLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ContentEqual128JLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH</commandlineArgs>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>ContentEqual8192JLBH</id>
+                                <phase>test</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH</commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>
