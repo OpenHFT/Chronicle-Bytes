@@ -706,6 +706,20 @@ public abstract class AbstractBytes<U>
         }
     }
 
+    public Bytes<U> write(@NotNull BytesStore<?, ?> bytes)
+            throws BufferOverflowException, IllegalStateException {
+        assert bytes != this : "you should not write to yourself !";
+        requireNonNull(bytes);
+
+        if (bytes.readRemaining() > writeRemaining())
+            throw new BufferOverflowException();
+        try {
+            return write(bytes, bytes.readPosition(), bytes.readRemaining());
+        } catch (BufferUnderflowException | IllegalArgumentException e) {
+            throw new AssertionError(e);
+        }
+    }
+
     @Override
     @NotNull
     public Bytes<U> write(@NonNegative long offsetInRDO,

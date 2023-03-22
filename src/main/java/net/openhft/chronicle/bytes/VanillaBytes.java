@@ -276,6 +276,16 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
             return bytesStore.realCapacity();
         }
 
+        @Override
+        public long findByte(byte stopByte) throws IllegalStateException {
+            return BytesInternal.findByte(this, stopByte);
+        }
+
+        @Override
+        public long parseLong() throws BufferUnderflowException, IllegalStateException {
+            return BytesInternal.parseLong(this);
+        }
+
         @NotNull
         @Override
         public BytesStore<Bytes<U>, U> copy()
