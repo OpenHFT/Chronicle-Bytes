@@ -34,10 +34,6 @@ public class Issue128Test extends BytesTestCommon {
         DF = df;
     }
 
-    static String toDecimal(double d) {
-        return DF.format(d);
-    }
-
     @Test
     public void testCorrect() {
         Bytes<?> bytes = Bytes.allocateDirect(32);
@@ -51,7 +47,7 @@ public class Issue128Test extends BytesTestCommon {
                 doTest(bytes, v7);
                 double v8 = (double) i / 100_000_000;
                 doTest(bytes, v8);
-                double v9 = (double) i / 100_000_000;
+                double v9 = (double) i / 1_000_000_000;
                 doTest(bytes, v9);
             }
         } finally {
@@ -62,8 +58,13 @@ public class Issue128Test extends BytesTestCommon {
     public void doTest(Bytes<?> bytes, double v) {
         String format = DF.format(v);
         String output = testAppendDouble(bytes, v);
-        if (Double.parseDouble(output) != v || format.length() != output.length())
-            assertEquals(DF.format(v), output);
-//            System.out.println(DF.format(v)+" != " + output);
+        if (Double.parseDouble(output) != v || format.length() != output.length()) {
+            // Don't compare strings if we've added an exponent
+            if (!output.contains("E")) {
+                assertEquals(DF.format(v), output);
+            } else {
+                assertEquals(v, Double.parseDouble(output), 0.0);
+            }
+        }
     }
 }
