@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -46,14 +48,15 @@ public interface BytesIn<U> extends
     }
 
     <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
-            throws BufferUnderflowException, IllegalStateException;
+            throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException;
 
     default <T> T readObject(@NotNull Class<T> componentType0)
-            throws BufferUnderflowException, IllegalArgumentException, IllegalStateException, ArithmeticException, BufferOverflowException {
+            throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException, InvalidMarshallableException {
         Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
             BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);
             bm.readMarshallable(this);
+
             return (T) bm;
         }
         if (Enum.class.isAssignableFrom(componentType)) {

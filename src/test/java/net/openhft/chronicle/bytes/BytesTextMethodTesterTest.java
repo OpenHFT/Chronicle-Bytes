@@ -17,6 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -30,6 +33,18 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
             throws IOException {
         assumeFalse(NativeBytes.areNewGuarded());
         btmttTest("btmtt/prim-input.txt", "btmtt/prim-output.txt");
+    }
+
+    @Test
+    public void runInvalid()
+            throws IOException {
+        // invalid on read
+        expectException(ek -> ek.throwable instanceof InvalidMarshallableException, "InvalidMarshallableException");
+        // invalid on write
+        expectException("Exception calling public void net.openhft.chronicle.bytes.BytesTextMethodTesterTest$IBMImpl.myByteable");
+        assumeFalse(NativeBytes.areNewGuarded());
+
+        btmttTest("btmtt-invalid/prim-input.txt", "btmtt-invalid/prim-output.txt");
     }
 
     @SuppressWarnings("rawtypes")
@@ -52,7 +67,8 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
         }
 
         @Override
-        public void myByteable(MyByteable byteable) {
+        public void myByteable(MyByteable byteable) throws InvalidMarshallableException {
+            byteable.b = (byte) byteable.s;
             out.myByteable(byteable);
         }
 

@@ -18,6 +18,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -56,7 +58,7 @@ public interface BytesOut<U> extends
     }
 
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException;
+            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException;
 
     /**
      * Write a limit set of writeObject types.
@@ -65,10 +67,11 @@ public interface BytesOut<U> extends
      * @param obj           of componentType
      */
     default void writeObject(Class componentType, Object obj)
-            throws IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException {
+            throws IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
         if (obj instanceof BytesMarshallable) {
+            ValidatableUtil.validate(obj);
             ((BytesMarshallable) obj).writeMarshallable(this);
             return;
         }

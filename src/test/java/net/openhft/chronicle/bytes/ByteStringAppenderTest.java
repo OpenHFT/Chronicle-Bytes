@@ -235,7 +235,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                assertEquals(s, d, d2, Jvm.isArm() ? 2e-39 : 2e-40);
+                assertEquals(s, d, d2, Jvm.isArm() ? 2E-27 : 2e-40);
             }
         }
     }

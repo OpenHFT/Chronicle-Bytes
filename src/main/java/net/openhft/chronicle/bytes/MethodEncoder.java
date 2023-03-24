@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
@@ -25,9 +27,9 @@ public interface MethodEncoder {
 
     @SuppressWarnings("rawtypes")
     void encode(Object[] objects, BytesOut<?> out)
-            throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException;
+            throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException, InvalidMarshallableException;
 
     @SuppressWarnings("rawtypes")
     Object[] decode(Object[] lastObjects, BytesIn<?> in)
-            throws BufferUnderflowException, IllegalStateException;
+            throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException;
 }

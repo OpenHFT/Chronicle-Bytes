@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ValidatableUtil;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -36,18 +38,21 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
     @Override
     @SuppressWarnings("rawtypes")
     default void readMarshallable(BytesIn<?> bytes)
-            throws IORuntimeException, BufferUnderflowException, IllegalStateException {
+            throws IORuntimeException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException {
         BytesUtil.readMarshallable(this, bytes);
+        ValidatableUtil.validate(this);
     }
 
     @SuppressWarnings("rawtypes")
     @Override
     default void writeMarshallable(BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException {
+            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException {
+        ValidatableUtil.validate(this);
         BytesUtil.writeMarshallable(this, bytes);
     }
 
     default String $toString() {
+        ValidatableUtil.startValidateDisabled();
         try {
             HexDumpBytes bytes = new HexDumpBytes();
             writeMarshallable(bytes);
@@ -56,6 +61,8 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
             return s;
         } catch (Throwable e) {
             return e.toString();
+        } finally {
+            ValidatableUtil.endValidateDisabled();
         }
     }
 }

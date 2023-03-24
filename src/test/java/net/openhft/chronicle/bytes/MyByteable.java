@@ -17,9 +17,14 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
-class MyByteable implements BytesMarshallable {
+import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
+
+class MyByteable implements BytesMarshallable, Validatable {
     boolean flag;
     byte b;
     short s;
@@ -41,6 +46,12 @@ class MyByteable implements BytesMarshallable {
         this.f = f;
         this.l = l;
         this.d = d;
+    }
+
+    @Override
+    public void validate() throws InvalidMarshallableException {
+        if (b == 0)
+            throw new InvalidMarshallableException("b must not be 0");
     }
 
     @NotNull
