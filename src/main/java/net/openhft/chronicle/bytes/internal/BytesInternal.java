@@ -2136,6 +2136,39 @@ enum BytesInternal {
             out.rawWriteByte((byte) '0');
     }
 
+    public static void append(@NotNull ByteStringAppender bytesStringAppender, double d, int decimalPlaces)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
+        if (decimalPlaces < 0)
+            throw new IllegalArgumentException();
+        if (decimalPlaces < 18) {
+            long factor = Maths.tens(decimalPlaces);
+            double d1 = d;
+            boolean neg = d1 < 0;
+            d1 = Math.abs(d1);
+            final double df = d1 * factor;
+            if (df < Long.MAX_VALUE) {
+                // changed from java.lang.Math.round(d2) as this was shown up to cause latency
+                long ldf = (long) df;
+                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
+                if (residual >= 0.5)
+                    ldf++;
+                if (neg)
+                    ldf = -ldf;
+                long round = ldf;
+
+                if (bytesStringAppender.canWriteDirect(20L + decimalPlaces)) {
+                    long address = bytesStringAppender.addressForWritePosition();
+                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                    bytesStringAppender.writeSkip(address2 - address);
+                } else {
+                    bytesStringAppender.appendDecimal(round, decimalPlaces);
+                }
+                return;
+            }
+        }
+        bytesStringAppender.append(d);
+    }
+
     @Nullable
     public static String readUtf8(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException, ArithmeticException {
