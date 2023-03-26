@@ -194,6 +194,11 @@ public abstract class AbstractBytes<U>
         return bytesStore.underlyingObject();
     }
 
+    @Override
+    public int length() {
+        return (int) Math.min(Integer.MAX_VALUE, readRemaining());
+    }
+
     @NonNegative
     @Override
     public long start() {
@@ -246,6 +251,12 @@ public abstract class AbstractBytes<U>
             bytes.append(d);
             append(bytes);
         }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(double d, int decimalPlaces) throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
+        BytesInternal.append(this, d, decimalPlaces);
         return this;
     }
 
@@ -1198,6 +1209,11 @@ public abstract class AbstractBytes<U>
         uncheckedWritePosition(writePosition() + length);
         buffer.position(buffer.position() + length);
         return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> writeBoolean(boolean flag) throws BufferOverflowException, IllegalStateException {
+        return writeByte(flag ? (byte) 'Y' : (byte) 'N');
     }
 
     @NotNull

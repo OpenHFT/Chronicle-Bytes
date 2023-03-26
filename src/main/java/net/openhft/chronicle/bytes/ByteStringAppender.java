@@ -22,7 +22,6 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.UnsafeText;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
@@ -224,35 +223,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(double d, int decimalPlaces)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
-        if (decimalPlaces < 0)
-            throw new IllegalArgumentException();
-        if (decimalPlaces < 18) {
-            long factor = Maths.tens(decimalPlaces);
-            double d1 = d;
-            boolean neg = d1 < 0;
-            d1 = Math.abs(d1);
-            final double df = d1 * factor;
-            if (df < Long.MAX_VALUE) {
-                // changed from java.lang.Math.round(d2) as this was shown up to cause latency
-                long ldf = (long) df;
-                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
-                if (residual >= 0.5)
-                    ldf++;
-                if (neg)
-                    ldf = -ldf;
-                long round = ldf;
-
-                if (canWriteDirect(20L + decimalPlaces)) {
-                    long address = addressForWritePosition();
-                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
-                    writeSkip(address2 - address);
-                } else {
-                    appendDecimal(round, decimalPlaces);
-                }
-                return (B) this;
-            }
-        }
-        return append(d);
+        BytesInternal.append(this, d, decimalPlaces);
+        return (B) this;
     }
 
     /**
