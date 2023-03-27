@@ -1393,6 +1393,8 @@ public abstract class AbstractBytes<U>
 
     @Override
     public byte[] internalNumberBuffer() {
+        if (bytesStore.capacity() < 20)
+            ensureCapacity(20);
         return bytesStore.internalNumberBuffer();
     }
 
