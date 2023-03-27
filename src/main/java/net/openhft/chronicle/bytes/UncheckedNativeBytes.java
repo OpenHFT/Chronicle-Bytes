@@ -968,6 +968,11 @@ public class UncheckedNativeBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    @Override
+    public byte[] internalNumberBuffer() {
+        return bytesStore.internalNumberBuffer();
+    }
+
     private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
 
         @Override

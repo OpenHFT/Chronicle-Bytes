@@ -91,7 +91,6 @@ enum BytesInternal {
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
-    private static final ThreadLocal<byte[]> NUMBER_BUFFER = ThreadLocal.withInitial(() -> new byte[20]);
     private static final long MAX_VALUE_DIVIDE_10 = Long.MAX_VALUE / 10;
     private static final ThreadLocal<DateCache> dateCacheTL = new ThreadLocal<>();
     private static final int MAX_STRING_LEN = Jvm.getInteger("bytes.max-string-len", 128 * 1024);
@@ -1748,7 +1747,7 @@ enum BytesInternal {
 
     public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
-        byte[] numberBuffer = NUMBER_BUFFER.get();
+        byte[] numberBuffer = out.internalNumberBuffer();
         int len = 0;
         do {
             int digit = (int) (num & 0xF);
@@ -1766,7 +1765,7 @@ enum BytesInternal {
             return;
         }
 
-        byte[] numberBuffer = NUMBER_BUFFER.get();
+        byte[] numberBuffer = out.internalNumberBuffer();
         int endIndex;
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
@@ -1852,7 +1851,7 @@ enum BytesInternal {
             return;
         }
 
-        byte[] numberBuffer = NUMBER_BUFFER.get();
+        byte[] numberBuffer = out.internalNumberBuffer();;
         int endIndex;
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
@@ -1917,7 +1916,7 @@ enum BytesInternal {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
 
         } else {
-            byte[] numberBuffer = NUMBER_BUFFER.get();
+            byte[] numberBuffer = out.internalNumberBuffer();
             // Extract digits into the end of the numberBuffer
             int endIndex = appendLong1(numberBuffer, num);
 

@@ -430,7 +430,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     void rawCopy(@NonNegative final long length, final long fromAddress)
             throws BufferOverflowException, IllegalStateException {
         this.throwExceptionIfReleased();
-        OS.memory().copyMemory(fromAddress, addressForWritePosition(), length);
+        final long offset = writePosition();
+        writeCheckOffset(offset, length);
+        long address = bytesStore.addressForWrite(offset);
+        OS.memory().copyMemory(fromAddress, address, length);
         uncheckedWritePosition(writePosition() + length);
     }
 

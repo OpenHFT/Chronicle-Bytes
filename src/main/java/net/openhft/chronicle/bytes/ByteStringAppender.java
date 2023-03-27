@@ -393,4 +393,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         append(bigDecimal.toString());
         return (B) this;
     }
+
+    // internal method to cache a byte[]
+    byte[] internalNumberBuffer();
 }

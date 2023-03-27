@@ -1391,6 +1391,11 @@ public abstract class AbstractBytes<U>
         return (int) read(readPosition(), bytes, 0, bytes.length);
     }
 
+    @Override
+    public byte[] internalNumberBuffer() {
+        return bytesStore.internalNumberBuffer();
+    }
+
     static final class ReportUnoptimised {
         static {
             Jvm.reportUnoptimised();

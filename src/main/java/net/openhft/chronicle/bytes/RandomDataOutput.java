@@ -523,4 +523,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     double addAndGetDouble(@NonNegative long offset, double adding);
 
+    // internal method to cache a byte[]
+    byte[] internalNumberBuffer();
 }
