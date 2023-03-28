@@ -2507,7 +2507,7 @@ enum BytesInternal {
             }
             bytes2.writeUnsignedByte(ch);
             ch = next;
-        } while (bytes.readRemaining() > 1);
+        } while (bytes.readRemaining() > 0);
 
         if (tester.isStopChar(ch, -1)) {
             bytes.readSkip(-1);
