@@ -37,6 +37,8 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
 
+import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE_ENDIAN;
+
 /**
  * Bytes to wrap memory mapped data.
  * <p>
@@ -311,7 +313,11 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 int c1 = bytes[i + start + 1] & 0xff;
                 int c2 = bytes[i + start + 2] & 0xff;
                 int c3 = bytes[i + start + 3] & 0xff;
-                memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                if (IS_LITTLE_ENDIAN) {
+                    memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                } else {
+                    memory.writeInt(address, (c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
+                }                  
                 address += 4;
             }
             for (; i < length; i++) {
@@ -327,7 +333,11 @@ public abstract class CommonMappedBytes extends MappedBytes {
                 int c1 = chars[i + start + 1] & 0xff;
                 int c2 = chars[i + start + 2] & 0xff;
                 int c3 = chars[i + start + 3] & 0xff;
-                memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                if (IS_LITTLE_ENDIAN) {
+                    memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
+                } else {
+                    memory.writeInt(address, (c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
+                }
                 address += 4;
             }
             for (; i < length; i++) {
