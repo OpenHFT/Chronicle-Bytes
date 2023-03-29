@@ -35,6 +35,10 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
         throw new UnsupportedOperationException();
     }
 
+    default MethodWriterBuilder<T> verboseTypes(boolean updateInterceptor) {
+        return this;
+    }
+
     default T build() {
         return get();
     }
