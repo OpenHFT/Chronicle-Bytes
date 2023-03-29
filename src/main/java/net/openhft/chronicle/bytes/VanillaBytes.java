@@ -454,11 +454,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
         public Bytes<U> append8bit(@NotNull BytesStore bs)
                 throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
             long remaining = bs.readLimit() - bs.readPosition();
-            try {
-                return write(bs, 0L, remaining);
-            } catch (IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            return write0(bs, 0L, remaining);
         }
 
         @NotNull
@@ -470,6 +466,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
                 requireNonNegative(offset);
                 requireNonNegative(length);
             }
+            return write0(bytes, offset, length);
+        }
+
+        @NotNull
+        private VanillaBytes<U> write0(@NotNull BytesStore bytes, long offset, long length) {
             ensureCapacity(writePosition() + length);
             if (length == (int) length) {
                 if (bytes.canReadDirect(length) && canWriteDirect(length)) {

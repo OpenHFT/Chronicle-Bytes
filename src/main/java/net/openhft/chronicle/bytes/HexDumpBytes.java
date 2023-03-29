@@ -61,6 +61,7 @@ public class HexDumpBytes
     private long startOfLine = 0;
     private int indent = 0;
     private int numberWrap = 16;
+    private final byte[] internalNumberBuffer = new byte[20];
 
     public HexDumpBytes() {
         try {
@@ -1780,6 +1781,11 @@ public class HexDumpBytes
         } finally {
             copyToText(pos);
         }
+    }
+
+    @Override
+    public byte[] internalNumberBuffer() {
+        return internalNumberBuffer;
     }
 
     private static class TextBytesReader extends Reader {
