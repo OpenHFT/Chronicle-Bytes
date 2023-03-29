@@ -32,6 +32,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         extends AbstractReferenceCounted
         implements BytesStore<B, U> {
 
+    private final byte[] internalNumberBuffer = new byte[20];
     protected AbstractBytesStore() {
     }
 
@@ -79,5 +80,10 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
     @Override
     protected boolean canReleaseInBackground() {
         return isDirectMemory();
+    }
+
+    @Override
+    public byte[] internalNumberBuffer() {
+        return internalNumberBuffer;
     }
 }
