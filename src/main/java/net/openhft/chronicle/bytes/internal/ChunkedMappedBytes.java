@@ -363,7 +363,8 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
     @Override
     public Bytes<Void> readSkip(final long bytesToSkip)
             throws BufferUnderflowException, IllegalStateException {
-        // called often so skip this check for performance
+        if (bytesToSkip == 0)
+            return this;
 
         if (readPosition + bytesToSkip > readLimit()) throw new BufferUnderflowException();
         long check = bytesToSkip >= 0 ? this.readPosition : this.readPosition + bytesToSkip;
