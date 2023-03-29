@@ -348,6 +348,14 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
+    public long readPositionForHeader(boolean skipPadding) {
+        long position = readPosition();
+        if (skipPadding)
+            return readSkip(BytesUtil.padOffset(position)).readPosition();
+        return position;
+    }
+
+    @Override
     public void uncheckedReadSkipOne() {
         readPosition++;
     }
