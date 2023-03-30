@@ -32,6 +32,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
 
+import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -137,8 +138,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public long translate(@NonNegative long offset) {
-        assert offset >= start;
-        assert offset < limit;
+        assert SKIP_ASSERTIONS || offset >= start;
+        assert SKIP_ASSERTIONS || offset < limit;
 
         return offset - start;
     }
