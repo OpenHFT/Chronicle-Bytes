@@ -356,8 +356,14 @@ public class UncheckedNativeBytes<U>
     protected void performRelease()
             throws IllegalStateException {
         this.underlyingBytes.release(this);
-        // need to wait as checks rely on this completing.
-        BackgroundResourceReleaser.releasePendingResources();
+        final boolean interrupted = Thread.interrupted();
+        try {
+            // need to wait as checks rely on this completing.
+            BackgroundResourceReleaser.releasePendingResources();
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
+        }
     }
 
     @Override
