@@ -413,14 +413,25 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         assert bytes != this : "you should not write to yourself !";
         requireNonNull(bytes);
 
-        if (bytes.readRemaining() > writeRemaining())
-            throw new BufferOverflowException();
+        ensureCapacity(bytes.readRemaining() + readPosition());
         try {
             return write(bytes, bytes.readPosition(), bytes.readRemaining());
         } catch (BufferUnderflowException | IllegalArgumentException e) {
             throw new AssertionError(e);
         }
     }
+
+    /**
+     * Grows the buffer if the buffer is elastic, if the buffer is not elastic and there is not
+     * enough capacity then this method will throw an {@link DecoratedBufferOverflowException}
+     *
+     * @param desiredCapacity the capacity that you required
+     * @throws IllegalStateException            if closed and it needs a resize
+     * @throws DecoratedBufferOverflowException if the buffer is not elastic and there is not enough space or if the
+     *                                          provided {@code desiredCapacity} is negative;
+     */
+    void ensureCapacity(@NonNegative long desiredCapacity)
+            throws DecoratedBufferOverflowException, IllegalStateException;
 
     /**
      * @return capacity without resize or -1 if closed
@@ -486,8 +497,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         requireNonNegative(readOffset);
         requireNonNegative(length);
 
-        if (length + writePosition() > capacity())
-            throw new DecoratedBufferOverflowException("Cannot write " + length + " bytes as position is " + writePosition() + " and capacity is " + capacity());
+        ensureCapacity(length + writePosition());
         BytesInternal.writeFully(bytes, readOffset, length, this);
         return (S) this;
     }

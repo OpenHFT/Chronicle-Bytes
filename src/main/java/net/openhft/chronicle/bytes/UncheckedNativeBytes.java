@@ -99,6 +99,7 @@ public class UncheckedNativeBytes<U>
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws IllegalStateException, BufferUnderflowException {
+        ensureCapacity(to + length);
         bytesStore.move(from - start(), to - start(), length);
     }
 
@@ -124,6 +125,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> readPosition(@NonNegative long position) {
+        assert position <= bytesStore.capacity();
         readPosition = position;
         return this;
     }
@@ -131,6 +133,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> readLimit(@NonNegative long limit) {
+        assert limit <= bytesStore.capacity();
         writePosition = limit;
         return this;
     }
@@ -138,6 +141,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writePosition(@NonNegative long position) {
+        assert position <= bytesStore.capacity();
         writePosition = requireNonNegative(position);
         return this;
     }
@@ -146,6 +150,7 @@ public class UncheckedNativeBytes<U>
     @Override
     public Bytes<U> readSkip(long bytesToSkip) {
         readPosition += bytesToSkip;
+        assert readPosition <= readLimit();
         return this;
     }
 
@@ -193,6 +198,7 @@ public class UncheckedNativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLimit(@NonNegative long limit) {
+        assert limit <= bytesStore.capacity();
         writeLimit = requireNonNegative(limit);
         return this;
     }
@@ -212,6 +218,8 @@ public class UncheckedNativeBytes<U>
     protected long readOffsetPositionMoved(@NonNegative long adding) {
         long offset = readPosition;
         readPosition += adding;
+        // TODO FIX MoldUdpHandlerTest
+//        assert readPosition <= readLimit();
         return offset;
     }
 
@@ -224,6 +232,7 @@ public class UncheckedNativeBytes<U>
         long writeEnd = oldPosition + adding;
         assert writeEnd <= bytesStore.safeLimit();
         writePosition += advance;
+        assert readPosition < writeLimit();
         return oldPosition;
     }
 
@@ -348,8 +357,14 @@ public class UncheckedNativeBytes<U>
     protected void performRelease()
             throws IllegalStateException {
         this.underlyingBytes.release(this);
-        // need to wait as checks rely on this completing.
-        BackgroundResourceReleaser.releasePendingResources();
+        final boolean interrupted = Thread.interrupted();
+        try {
+            // need to wait as checks rely on this completing.
+            BackgroundResourceReleaser.releasePendingResources();
+        } finally {
+            if (interrupted)
+                Thread.currentThread().interrupt();
+        }
     }
 
     @Override
