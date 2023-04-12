@@ -85,9 +85,9 @@ public class ChunkedMappedFile extends MappedFile {
 
     public static void warmup() {
         final List<IOException> errorsDuringWarmup = new ArrayList<>();
-        ExceptionHandler error = ((ThreadLocalisedExceptionHandler) Jvm.error()).defaultHandler();
-        ExceptionHandler warn = ((ThreadLocalisedExceptionHandler) Jvm.warn()).defaultHandler();
-        ExceptionHandler debug = ((ThreadLocalisedExceptionHandler) Jvm.debug()).defaultHandler();
+        ExceptionHandler error = Jvm.error().defaultHandler();
+        ExceptionHandler warn = Jvm.warn().defaultHandler();
+        ExceptionHandler debug = Jvm.debug().defaultHandler();
 
         try {
             Jvm.setExceptionHandlers(error, null, null);
