@@ -17,13 +17,43 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.onoes.ExceptionHandler;
+
+/**
+ * Builder for MethodReaders
+ */
 public interface MethodReaderBuilder {
 
+    /**
+     * Interceptor for methods called
+     */
     MethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns);
 
-    MethodReaderBuilder warnMissing(boolean warnMissing);
+    default MethodReaderBuilder warnMissing(boolean warnMissing) {
+        return exceptionHandlerOnUnknownMethod(warnMissing ? Jvm.warn() : Jvm.debug());
+    }
 
+    /**
+     * setter to determine how unknown methods are logged or ExceptionHandler.ignoresEverything()
+     * @param exceptionHandler to call
+     * @return this
+     */
+    default MethodReaderBuilder exceptionHandlerOnUnknownMethod(ExceptionHandler exceptionHandler) {
+        return this;
+    }
+
+    /**
+     * Handler for meta data messages
+     * @param components to call
+     * @return this
+     */
     MethodReaderBuilder metaDataHandler(Object... components);
 
+    /**
+     * Build a MethodReader using the following components to call
+     * @param components to call
+     * @return this
+     */
     MethodReader build(Object... components);
 }
