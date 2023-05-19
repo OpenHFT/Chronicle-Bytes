@@ -270,7 +270,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         // check the start.
         long pos = writePosition();
         writeCheckOffset(pos, 0);
-        if (!(text instanceof String) || pos + (end - start) * 3 + 5 >= safeLimit()) {
+        if (!(text instanceof String) || pos + (end - start) * 3L + 5 >= safeLimit()) {
             return super.append8bit(text, start, end);
         }
         return append8bit0((String) text, start, end - start);

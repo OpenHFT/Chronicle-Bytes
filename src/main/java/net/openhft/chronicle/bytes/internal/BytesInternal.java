@@ -1851,7 +1851,7 @@ enum BytesInternal {
             return;
         }
 
-        byte[] numberBuffer = out.internalNumberBuffer();;
+        byte[] numberBuffer = out.internalNumberBuffer();
         int endIndex;
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
