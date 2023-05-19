@@ -76,7 +76,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
 
         h0 += (l0 + l1a - l2a) * M0;
         long h1 = (l1 + l2a - l3a) * M1;
-        long h2 = (l2 + l3a - l0a) * M2;
+        long h2 = ((long) -l0a) * M2;
         long h3 = (l3 + l0a - l1a) * M3;
 
         return agitate(h0) ^ agitate(h1)
@@ -198,7 +198,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
 
                 h0 += (l0 + l1a - l2a) * M0;
                 h1 += (l1 + l2a - l3a) * M1;
-                h2 += (l2 + l3a - l0a) * M2;
+                h2 += ((long) -l0a) * M2;
                 h3 += (l3 + l0a - l1a) * M3;
 
             } else {

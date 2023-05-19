@@ -425,16 +425,11 @@ public enum BytesUtil {
             }
             case ' ': {
                 final int ch2 = delta >= 2 ? bytes.peekUnsignedByte(wp - 2) : '\0';
-                switch (ch2) {
-                    case ' ':
-                        final int ch3 = delta >= 3 ? bytes.peekUnsignedByte(wp - 3) : '\0';
-                        if (ch3 > ' ') {
-                            bytes.writePosition(wp - 1);
-                        }
-                        return;
-
-                    default:
-                        return;
+                if (ch2 == ' ') {
+                    final int ch3 = delta >= 3 ? bytes.peekUnsignedByte(wp - 3) : '\0';
+                    if (ch3 > ' ') {
+                        bytes.writePosition(wp - 1);
+                    }
                 }
             }
         }

@@ -49,7 +49,7 @@ public enum AppendableUtil {
                 throw new AssertionError(e);
             }
         else
-            throw new IllegalArgumentException("" + sb.getClass());
+            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
     }
 
     public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, @NonNegative int length)
@@ -65,7 +65,7 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).readPositionRemaining(0, newLength);
         else
-            throw new IllegalArgumentException("" + sb.getClass());
+            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
     }
 
     public static void append(@NotNull Appendable sb, double value)
@@ -75,7 +75,7 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).append(value);
         else
-            throw new IllegalArgumentException("" + sb.getClass());
+            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
     }
 
     public static void append(@NotNull Appendable sb, long value)
@@ -85,7 +85,7 @@ public enum AppendableUtil {
         else if (sb instanceof Bytes)
             ((Bytes) sb).append(value);
         else
-            throw new IllegalArgumentException("" + sb.getClass());
+            throw new IllegalArgumentException(String.valueOf(sb.getClass()));
     }
 
     public static <C extends Appendable & CharSequence> void append(@NotNull C sb, String str) {
