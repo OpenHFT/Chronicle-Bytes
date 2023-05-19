@@ -75,8 +75,6 @@ public final class ReentrantFileLock extends FileLock {
         if (--counter == 0) {
             try {
                 delegate.release();
-            } catch (ClosedChannelException ignored) {
-                // ignored
             } finally {
                 heldLocks.get().remove(canonicalPath);
             }
