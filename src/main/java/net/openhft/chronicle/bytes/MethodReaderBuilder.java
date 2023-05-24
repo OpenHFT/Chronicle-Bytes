@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 
+import java.util.function.Predicate;
+
 /**
  * Builder for MethodReaders
  */
@@ -36,6 +38,7 @@ public interface MethodReaderBuilder {
 
     /**
      * setter to determine how unknown methods are logged or ExceptionHandler.ignoresEverything()
+     *
      * @param exceptionHandler to call
      * @return this
      */
@@ -45,6 +48,7 @@ public interface MethodReaderBuilder {
 
     /**
      * Handler for meta data messages
+     *
      * @param components to call
      * @return this
      */
@@ -52,8 +56,13 @@ public interface MethodReaderBuilder {
 
     /**
      * Build a MethodReader using the following components to call
+     *
      * @param components to call
      * @return this
      */
     MethodReader build(Object... components);
+
+    default MethodReaderBuilder predicate(Predicate<?> predicate) {
+        return this;
+    }
 }
