@@ -62,6 +62,16 @@ public interface MethodReaderBuilder {
      */
     MethodReader build(Object... components);
 
+    /**
+     * Sets a predicate that is executed on every call to readOne(). If the predicate returns {@code false},
+     * readOne() will return false without reading a message. This feature was introduced to enable
+     * flow control in chronicle-service. For more information, please refer to the documentation
+     * of chronicle-service.
+     *
+     * @param predicate a predicate to determine if readOne() should read a message. The default value is {@code true},
+     * @return this
+     */
+
     default MethodReaderBuilder predicate(Predicate<?> predicate) {
         return this;
     }
