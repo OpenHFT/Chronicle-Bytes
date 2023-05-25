@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 
+import java.util.function.Predicate;
+
 /**
  * Builder for MethodReaders
  */
@@ -36,6 +38,7 @@ public interface MethodReaderBuilder {
 
     /**
      * setter to determine how unknown methods are logged or ExceptionHandler.ignoresEverything()
+     *
      * @param exceptionHandler to call
      * @return this
      */
@@ -45,6 +48,7 @@ public interface MethodReaderBuilder {
 
     /**
      * Handler for meta data messages
+     *
      * @param components to call
      * @return this
      */
@@ -52,8 +56,22 @@ public interface MethodReaderBuilder {
 
     /**
      * Build a MethodReader using the following components to call
+     *
      * @param components to call
      * @return this
      */
     MethodReader build(Object... components);
+
+    /**
+     * Sets a predicate that is executed on every call to readOne(). If the predicate returns {@code false},
+     * readOne() will return false without reading a message. This feature was introduced to enable
+     * flow control in chronicle-service. For more information, please refer to the documentation
+     * of chronicle-service.
+     *
+     * @param predicate a predicate to determine if readOne() should read a message. The default value is {@code true},
+     * @return this
+     */
+    default MethodReaderBuilder predicate(Predicate<?> predicate) {
+        return this;
+    }
 }
