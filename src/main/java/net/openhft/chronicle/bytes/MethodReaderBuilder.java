@@ -71,7 +71,6 @@ public interface MethodReaderBuilder {
      * @param predicate a predicate to determine if readOne() should read a message. The default value is {@code true},
      * @return this
      */
-
     default MethodReaderBuilder predicate(Predicate<?> predicate) {
         return this;
     }
