@@ -374,21 +374,35 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnly()
             throws Exception {
-        try (MappedBytes bytes = MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
-            assertFalse(bytes.isBackingFileReadOnly());
-            bytes.writeUtf8(null); // used to blow up.
-            assertNull(bytes.readUtf8());
-        }
+        checkShouldNotBeReadOnly(MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10));
     }
 
     @Test
     public void shouldNotBeReadOnlySingle()
             throws Exception {
-        try (MappedBytes bytes = MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
-            assertFalse(bytes.isBackingFileReadOnly());
-            bytes.writeUtf8(null); // used to blow up.
-            assertNull(bytes.readUtf8());
+        checkShouldNotBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10));
+    }
+
+    private void checkShouldNotBeReadOnly(MappedBytes mappedBytes) {
+        try {
+            assertFalse(mappedBytes.isBackingFileReadOnly());
+            mappedBytes.writeUtf8(null); // used to blow up.
+            assertNull(mappedBytes.readUtf8());
+        } finally {
+            mappedBytes.close();
         }
+    }
+
+    @Test
+    public void shouldBeReadOnlyFileReadWrite()
+            throws Exception {
+        checkShouldBeReadOnly(MappedBytes.mappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, 32 << 10, true));
+    }
+
+    @Test
+    public void shouldNotBeReadOnlySingleFileReadWrite()
+            throws Exception {
+        checkShouldBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, true));
     }
 
     @Test
@@ -398,13 +412,28 @@ public class MappedBytesTest extends BytesTestCommon {
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
             raf.setLength(4096);
             assertTrue(tempFile.setWritable(false));
-            try (final MappedBytes mappedBytes = MappedBytes.readOnly(tempFile)) {
+            checkShouldBeReadOnly(MappedBytes.readOnly(tempFile));
+        }
+    }
 
-                assertTrue(mappedBytes.
-                        isBackingFileReadOnly());
-                mappedBytes.releaseLast();
-                assertEquals(0, mappedBytes.refCount());
-            }
+    private void checkShouldBeReadOnly(MappedBytes mappedBytes) {
+        try {
+            assertTrue(mappedBytes.isBackingFileReadOnly());
+            mappedBytes.releaseLast();
+            assertEquals(0, mappedBytes.refCount());
+        } finally {
+            mappedBytes.close();
+        }
+    }
+
+    @Test
+    public void cantOpenReadOnlyFileReadWrite()
+            throws Exception {
+        final File tempFile = Files.createTempFile("mapped", "bytes").toFile();
+        try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
+            raf.setLength(4096);
+            assertTrue(tempFile.setWritable(false));
+            assertThrows(FileNotFoundException.class, () -> MappedBytes.singleMappedBytes(tempFile, 64 << 10));
         }
     }
 
