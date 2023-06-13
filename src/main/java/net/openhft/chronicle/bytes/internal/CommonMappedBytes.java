@@ -73,7 +73,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         assert mappedFile != null;
         this.mappedFile = mappedFile;
         mappedFile.reserve(this);
-        this.backingFileIsReadOnly = !mappedFile.file().canWrite();
+        this.backingFileIsReadOnly = mappedFile.readOnly();
         assert !mappedFile.isClosed();
         clear();
         capacity = mappedFile.capacity();

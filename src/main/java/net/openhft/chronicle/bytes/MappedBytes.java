@@ -145,6 +145,11 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
         }
     }
 
+    /**
+     * Is backing file opened read only
+     *
+     * @return if backing file is opened read only
+     */
     public abstract boolean isBackingFileReadOnly();
 
     @Override
