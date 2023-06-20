@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -77,12 +78,16 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     @Override
-    protected void performClose()
-            throws IllegalStateException {
-        if (this.bytes != null) {
+    protected void performClose() {
+        if (this.bytes == null)
+            return;
+        
+        try {
             this.bytes.release(this);
-            this.bytes = null;
+        } catch (ClosedIllegalStateException ignored) {
+            // ignored
         }
+        this.bytes = null;
     }
 
     @Override
