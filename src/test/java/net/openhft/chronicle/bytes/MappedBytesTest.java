@@ -21,6 +21,7 @@ import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
@@ -402,7 +403,13 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnlySingleFileReadWrite()
             throws Exception {
-        checkShouldBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, true));
+        try {
+            checkShouldBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, true));
+        } catch (IORuntimeException e) {
+            // can't resize a read only mapping and can't map a file that's too small.
+            if(!OS.isWindows())
+                throw e;
+        }
     }
 
     @Test
