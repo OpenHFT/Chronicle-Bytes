@@ -81,13 +81,14 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     protected void performClose() {
         if (this.bytes == null)
             return;
-        
+
+        BytesStore<?, ?> bytes0 = this.bytes;
+        this.bytes = null;
         try {
-            this.bytes.release(this);
+            bytes0.release(this);
         } catch (ClosedIllegalStateException ignored) {
             // ignored
         }
-        this.bytes = null;
     }
 
     @Override
