@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractCloseable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -415,7 +416,11 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public void release(ReferenceOwner id)
             throws IllegalStateException {
-        super.release(id);
+        try {
+            super.release(id);
+        } catch (ClosedIllegalStateException ignored) {
+            // ignored
+        }
         initReleased |= id == INIT;
         if (refCount() <= 0)
             closeable.close();
