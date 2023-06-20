@@ -19,17 +19,21 @@ package net.openhft.chronicle.bytes;
 
 import java.nio.BufferOverflowException;
 
+/**
+ * A functional interface for consuming bytes.
+ * The interface defines a single method {@code read} for retrieving and removing the head of a queue into a given {@code BytesOut} object.
+ */
 @FunctionalInterface
 public interface BytesConsumer {
 
     /**
-     * Retrieves and removes the head of this queue, or returns {@code true} if this queue is
+     * Retrieves and removes the head of this queue, or returns {@code false} if this queue is
      * empty.
      *
-     * @param bytes to read into
-     * @return false if this queue is empty
+     * @param bytes the {@code BytesOut} object to read into.
+     * @return {@code false} if this queue is empty, {@code true} otherwise.
+     * @throws BufferOverflowException if there is insufficient space left in the buffer.
      */
     boolean read(BytesOut<?> bytes)
             throws BufferOverflowException;
-
 }

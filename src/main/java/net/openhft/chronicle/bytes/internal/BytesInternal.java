@@ -544,7 +544,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @NotNull RandomDataInput input, long offset, Appendable appendable, boolean utf, @NonNegative int length)
+            @NotNull RandomDataInput input, @NonNegative long offset, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
 
         assert utf;
@@ -724,7 +724,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf81(@NotNull RandomDataInput input, long offset,
+    public static void parseUtf81(@NotNull RandomDataInput input, @NonNegative long offset,
                                   @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(input);
@@ -784,7 +784,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
+    public static void parse8bit1(@NonNegative long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IllegalStateException, IOException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -2914,7 +2914,7 @@ enum BytesInternal {
         return num;
     }
 
-    public static long parseLong(@NotNull RandomDataInput in, long offset)
+    public static long parseLong(@NotNull RandomDataInput in, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         long num = 0;
         boolean negative = false;

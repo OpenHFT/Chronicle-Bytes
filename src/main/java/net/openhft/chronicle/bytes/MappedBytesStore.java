@@ -37,9 +37,16 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * BytesStore to wrap memory mapped data.
+ * A BytesStore implementation that wraps memory-mapped data.
+ *
  * <p>
- * <b>WARNING: Handle with care as this assumes the caller has correct bounds checking</b>
+ * This class is intended for working with large files that can be read from and written to as if they were a part of the program's memory.
+ * </p>
+ *
+ * <p>
+ * <b>WARNING:</b> This class assumes that the caller will correctly handle bounds checking. Incorrect handling can lead to {@link IndexOutOfBoundsException}.
+ * Misuse of this class can cause hard-to-diagnose memory access errors and data corruption.
+ * </p>
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
     public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
@@ -50,6 +57,17 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
     private long syncLength = 0;
 
+    /**
+     * Creates a new MappedBytesStore with the given parameters.
+     *
+     * @param owner        The owner of this MappedBytesStore.
+     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @throws IllegalStateException If the MappedFile has already been released.
+     */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity), false);
@@ -358,7 +376,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         super.performRelease();
     }
 
-    private void performMsync(long offset, long length) {
+    private void performMsync(@NonNegative long offset, long length) {
         final SyncMode syncMode = this.syncMode();
         if (syncMode == SyncMode.NONE)
             return;

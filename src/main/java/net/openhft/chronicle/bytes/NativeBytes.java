@@ -37,7 +37,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 /**
  * Elastic memory accessor which can wrap either a ByteBuffer or malloc'ed memory.
  * <p>
- * <p>This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
+ * This class can wrap <i>heap</i> ByteBuffers, called <i>Native</i>Bytes for historical reasons.
  *
  * @param <U> Underlying type
  */
@@ -70,9 +70,9 @@ public class NativeBytes<U>
 
     /**
      * turn guarding on/off. Can be enabled by assertion with
-     * <code>
+     * {@code
      * assert NativeBytes.setNewGuarded(true);
-     * </code>
+     * }
      *
      * @param guarded turn on if true
      */

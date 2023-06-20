@@ -29,7 +29,9 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import java.io.File;
 
 /**
- * Timestamps are unique across systems using a predefined hostId
+ * A TimeProvider implementation that ensures unique timestamps across multiple systems using a predefined hostId.
+ * It extends SimpleCloseable and implements TimeProvider to provide functionality for managing the timestamps.
+ * This class manages unique timestamp distribution across different hosts/systems.
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
 
@@ -64,6 +66,11 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         }
     }
 
+    /**
+     * Returns an instance of DistributedUniqueTimeProvider.
+     *
+     * @return the single instance of DistributedUniqueTimeProvider
+     */
     public static DistributedUniqueTimeProvider instance() {
         return DistributedUniqueTimeProviderHolder.INSTANCE;
     }

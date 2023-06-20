@@ -47,6 +47,16 @@ import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * A class that implements the {@link Bytes} interface for generating a hex dump of byte data. The hex dump is a
+ * human-readable display of data in hexadecimal and ASCII formats. It's commonly used for debugging, forensics,
+ * and analyzing low-level data.
+ *
+ * <p>It supports setting specific number wrap for byte data and custom offset formatting to provide more flexibility
+ * and control over the output of the hex dump. The class also enables indentation adjustment, which can be useful
+ * for nested data structures or logically grouped data within the byte array.</p>
+ */
+
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes
         implements Bytes<Void> {

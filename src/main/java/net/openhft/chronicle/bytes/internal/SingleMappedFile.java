@@ -247,6 +247,9 @@ public class SingleMappedFile extends MappedFile {
         return raf;
     }
 
+    /**
+     * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
+     */
     @Override
     protected void finalize()
             throws Throwable {

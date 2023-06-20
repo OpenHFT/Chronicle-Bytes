@@ -41,6 +41,9 @@ import java.util.List;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
+/**
+ * Class for internal use
+ */
 @SuppressWarnings("rawtypes")
 public enum BytesUtil {
     ; // none
@@ -180,7 +183,7 @@ public enum BytesUtil {
     }
 
     public static boolean bytesEqual(
-            @NotNull RandomDataInput a, long offset,
+            @NotNull RandomDataInput a, @NonNegative long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
             throws BufferUnderflowException, IllegalStateException {
         long i = 0;

@@ -33,13 +33,36 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.*;
 import java.util.function.Supplier;
-
+/**
+ * This class is used to marshal objects into bytes and unmarshal them from bytes.
+ * The object's fields are read and written in a streaming manner, with the ability
+ * to handle different types of fields. It uses a map to track the fields of the class
+ * and their corresponding values. This class makes use of the {@link FieldAccess} for
+ * actual field value extraction and setting.
+ *
+ * <p>This class also provides a method for extracting all fields from a class and its
+ * superclasses (except transient and static fields). All the fields are made accessible
+ * even if they are private, and are then stored in a map for future access.</p>
+ *
+ * <p>Note: This class suppresses rawtypes and unchecked warnings.</p>
+ *
+ * @param <T> the type of the object to be marshaled.
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class BytesMarshaller<T> {
+
+    /**
+     * Provides a ClassLocal instance for holding a unique BytesMarshaller for each class.
+     */
     public static final ClassLocal<BytesMarshaller> BYTES_MARSHALLER_CL
             = ClassLocal.withInitial(BytesMarshaller::new);
     private final FieldAccess[] fields;
 
+    /**
+     * Constructs a BytesMarshaller for the specified class.
+     *
+     * @param tClass the class for which the BytesMarshaller is to be created.
+     */
     public BytesMarshaller(@NotNull Class<T> tClass) {
         final Map<String, Field> map = new LinkedHashMap<>();
         getAllField(tClass, map);
@@ -48,6 +71,13 @@ public class BytesMarshaller<T> {
                 .toArray(FieldAccess[]::new);
     }
 
+    /**
+     * Extracts all fields from the specified class and its superclasses and stores
+     * them in the provided map. Only non-static and non-transient fields are considered.
+     *
+     * @param clazz the class from which to extract fields.
+     * @param map the map in which to store the fields.
+     */
     public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class)
             getAllField(clazz.getSuperclass(), map);
@@ -59,12 +89,31 @@ public class BytesMarshaller<T> {
         }
     }
 
+    /**
+     * Reads the state of the given ReadBytesMarshallable object from the specified BytesIn.
+     *
+     * @param t the object to read into.
+     * @param in the BytesIn from which to read.
+     * @throws InvalidMarshallableException if the object cannot be read due to invalid data.
+     */
     public void readMarshallable(ReadBytesMarshallable t, BytesIn<?> in) throws InvalidMarshallableException {
         for (@NotNull FieldAccess field : fields) {
             field.read(t, in);
         }
     }
 
+    /**
+     * Writes the state of the given WriteBytesMarshallable object to the specified BytesOut.
+     *
+     * @param t the object to write.
+     * @param out the BytesOut to which to write.
+     * @throws IllegalArgumentException if a method is invoked with an illegal or inappropriate argument.
+     * @throws IllegalStateException if there is an error in the internal state.
+     * @throws BufferOverflowException if there is not enough space in the buffer.
+     * @throws BufferUnderflowException if there is not enough data available in the buffer.
+     * @throws ArithmeticException if there is an arithmetic error.
+     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
+     */
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut<?> out)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException {
         out.adjustHexDumpIndentation(+1);

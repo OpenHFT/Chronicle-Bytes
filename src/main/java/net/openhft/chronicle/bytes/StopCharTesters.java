@@ -17,55 +17,85 @@
  */
 package net.openhft.chronicle.bytes;
 
+/**
+ * A collection of predefined {@link StopCharTester} implementations that define common stop character criteria.
+ */
 public enum StopCharTesters implements StopCharTester {
+    /**
+     * Stop character tester which considers a comma (',') as a stop character.
+     */
     COMMA_STOP {
         @Override
         public boolean isStopChar(int ch) {
             return ch < ' ' || ch == ',';
         }
     },
+    /**
+     * Stop character tester which considers a closing curly brace ('}') as a stop character.
+     */
     CURLY_STOP {
         @Override
         public boolean isStopChar(int ch) {
             return ch < ' ' || ch == '}';
         }
     },
+    /**
+     * Stop character tester which considers comma and spaces as stop characters.
+     */
     COMMA_SPACE_STOP {
         @Override
         public boolean isStopChar(int ch) {
             return ch <= ' ' || ch == ',';
         }
     },
+    /**
+     * Stop character tester which considers control characters (ASCII less than 32) as stop characters.
+     */
     CONTROL_STOP {
         @Override
         public boolean isStopChar(int ch) {
             return ch < ' ';
         }
     },
+    /**
+     * Stop character tester which considers spaces and null character as stop characters.
+     */
     SPACE_STOP {
         @Override
         public boolean isStopChar(int ch) {
             return Character.isWhitespace(ch) || ch == 0;
         }
     },
+    /**
+     * Stop character tester which considers quotes ('"') and null character as stop characters.
+     */
     QUOTES {
         @Override
         public boolean isStopChar(int ch) {
             return ch == '"' || ch <= 0;
         }
     },
+    /**
+     * Stop character tester which considers single quotes ('\'') and null character as stop characters.
+     */
     SINGLE_QUOTES {
         @Override
         public boolean isStopChar(int ch) {
             return ch == '\'' || ch <= 0;
         }
     },
+    /**
+     * Stop character tester which considers equals sign ('=') and null character as stop characters.
+     */
     EQUALS {
         @Override
         public boolean isStopChar(int ch) {
             return ch == '=' || ch <= 0;
         }
     },
+    /**
+     * Stop character tester which considers any non-numeric character as a stop character.
+     */
     NUMBER_END {
         @Override
         public boolean isStopChar(int ch) {
@@ -91,18 +121,27 @@ public enum StopCharTesters implements StopCharTester {
             }
         }
     },
+    /**
+     * Stop character tester which considers any non-alphabetic and non-digit character as a stop character.
+     */
     NON_ALPHA_DIGIT {
         @Override
         public boolean isStopChar(int ch) {
             return ch < '0' || !(Character.isAlphabetic(ch) || Character.isDigit(ch));
         }
     },
+    /**
+     * Stop character tester which considers null or less as stop characters.
+     */
     NON_NUL {
         @Override
         public boolean isStopChar(int ch) {
             return ch <= 0;
         }
     },
+    /**
+     * Stop character tester which considers all negative characters as stop characters.
+     */
     ALL {
         @Override
         public boolean isStopChar(int ch) {

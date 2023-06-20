@@ -44,7 +44,6 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int LOCKED = 20;
     private static final int DIGITS = 20;
 
-    @SuppressWarnings("rawtypes")
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long position = bytes.writePosition();
@@ -75,7 +74,6 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         }
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {

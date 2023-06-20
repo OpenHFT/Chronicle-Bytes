@@ -22,7 +22,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class PrewriteTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
     @Test
     public void test() {
         Bytes<?> bytes = Bytes.allocateDirect(64);

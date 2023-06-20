@@ -795,7 +795,7 @@ public interface Bytes<U> extends
      * Creates and returns a new Bytes which is optionally unchecked as indicated by the provided {@code unchecked}.
      * <p>
      * This allows bounds checks to be turned off.
-     * Note: this means that the result is no longer elastic, even if <code>this</code> is elastic.
+     * Note: this means that the result is no longer elastic, even if {@code this} is elastic.
      * Note: It is only possible to go from a checked Bytes to an unchecked bytes and not vice versa.
      *
      * @param unchecked if true, minimal bounds checks will be performed

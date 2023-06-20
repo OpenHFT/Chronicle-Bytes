@@ -25,7 +25,10 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
-interface RandomCommon extends ReferenceCounted {
+/**
+ * Interface defining methods for managing random access to a buffer. It extends ReferenceCounted to allow for reference counting features.
+ */
+ interface RandomCommon extends ReferenceCounted {
     /**
      * @return The smallest position allowed in this buffer.
      */
@@ -79,54 +82,59 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
+     * Calculates the length of data written from the given start position.
+     * <p>
      * Typically this calculates the difference however for HexDumpBytes it's not as simple.
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
-     * @param startPosition to compare against
-     * @return the length from the startPosition
+     * @param startPosition The position to calculate the length from.
+     * @return The length of data written from the given start position.
      */
     default long lengthWritten(@NonNegative long startPosition) {
         return writePosition() - startPosition;
     }
 
     /**
-     * Returns the remaining bytes that can be read.
+     * Calculates the number of bytes remaining that can be read from the current read position.
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
-     * @return How many more bytes can we read.
+     * @return The number of bytes that can still be read.
      */
     default long readRemaining() {
         return readLimit() - readPosition();
     }
 
     /**
+     * Calculates the number of bytes that can be safely read directly.
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
-     * @return how much can be safely read directly.
+     * @return The number of bytes that can be safely read directly.
      */
     default long realReadRemaining() {
         return Math.min(realCapacity(), readLimit()) - readPosition();
     }
 
     /**
+     * Calculates the number of bytes remaining that can be written from the current write position.
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
-     * @return How many more bytes can we written.
+     * @return The number of bytes that can still be written.
      */
     default long writeRemaining() {
         return writeLimit() - writePosition();
     }
 
     /**
+     * Calculates the number of bytes remaining that can be written from the current write position with resizing.
      *
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
-     * @return writeRemaining with resize
+     * @return The number of bytes that can still be written with resizing.
      */
     default long realWriteRemaining() {
         return Math.min(realCapacity(), writeLimit()) - writePosition();
@@ -145,7 +153,7 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Returns the write limit.
+     * Retrieves the maximum writable position within the buffer.
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
@@ -157,23 +165,34 @@ interface RandomCommon extends ReferenceCounted {
     }
 
     /**
-     * Obtain the underlying addressForRead.  This is for expert users only.
+     * Retrieves the underlying memory address for reading. This is for expert users only.
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
      * @throws BufferUnderflowException      if the offset is before the start() or the after the capacity()
+     * @throws IllegalStateException if the buffer has been closed.
      */
     long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Retrieves the underlying memory address for reading. This is for expert users only.
+     *
+     * @param offset The offset within this buffer.
+     * @param buffer The buffer index.
+     * @return The underlying memory address for reading at the specified offset.
+     * @throws UnsupportedOperationException if the underlying buffer is on the heap.
+     * @throws BufferUnderflowException if the offset is before the start or after the capacity.
+     * @throws IllegalStateException if the buffer has been closed.
+     */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
         return addressForRead(offset);
     }
 
     /**
-     * Obtain the underlying addressForRead.  This is for expert users only.
+     * Retrieves the underlying memory address for writing.  This is for expert users only.
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
@@ -183,33 +202,57 @@ interface RandomCommon extends ReferenceCounted {
     long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
 
+    /**
+     * Retrieves the underlying memory address for writing at the current write position.  This is for expert users only.
+     *
+     * @return The underlying memory address for writing at the current write position.
+     * @throws UnsupportedOperationException if the underlying buffer is on the heap.
+     * @throws BufferOverflowException if the current write position is before the start or after the capacity.
+     * @throws IllegalStateException if the buffer state doesn't allow the operation.
+     */
     long addressForWritePosition()
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
 
+    /**
+     * Retrieves the byte order used by the buffer.
+     *
+     * @return The byte order used by the buffer.
+     */
     default ByteOrder byteOrder() {
         return ByteOrder.nativeOrder();
     }
 
     /**
-     * @return the streaming bytes for reading.
+     * Retrieves a Bytes object for reading.
+     *
+     * @return A Bytes object for reading.
+     * @throws IllegalStateException if the buffer state doesn't allow the operation.
      */
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytesForRead()
             throws IllegalStateException;
 
     /**
-     * @return the streaming bytes for writing.
+     * Retrieves a Bytes object for writing.
+     *
+     * @return A Bytes object for writing.
+     * @throws IllegalStateException if the buffer state doesn't allow the operation.
      */
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytesForWrite()
             throws IllegalStateException;
 
     /**
-     * @return true if these Bytes use shared memory.
+     * Checks if the Bytes use shared memory.
+     *
+     * @return True if the Bytes use shared memory, false otherwise.
      */
     boolean sharedMemory();
 
+    /**
+     * Checks if the buffer uses direct memory.
+     *
+     * @return True if the buffer uses direct memory, false otherwise.
+     */
     boolean isDirectMemory();
 }

@@ -272,9 +272,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
-     * chars.  <code>null</code> values are also supported
+     * chars.  {@code null} values are also supported
      *
-     * @return a Unicode string or <code>null</code> if <code>writeUtf8(null)</code> was called
+     * @return a Unicode string or {@code null} if {@code writeUtf8(null)} was called
      */
     @Nullable
     default String readUtf8()
@@ -292,7 +292,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * The same as readUtf8() except the chars are copied to a truncated StringBuilder.
      *
      * @param sb to copy chars to
-     * @return <code>true</code> if there was a String, or <code>false</code> if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
      */
     default <C extends Appendable & CharSequence> boolean readUtf8(@NotNull C sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
@@ -556,7 +556,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * When there is no more data to read, return zero, <code>false</code> and empty string.
+     * When there is no more data to read, return zero, {@code false} and empty string.
      *
      * @param lenient if true, return nothing rather than error.
      */

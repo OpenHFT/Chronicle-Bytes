@@ -17,17 +17,29 @@
  */
 package net.openhft.chronicle.bytes.util;
 
+import net.openhft.chronicle.bytes.BinaryWireCode;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
-
+/**
+ * Enum representing different byte lengths for binary values.
+ * It provides methods to get the code associated with each byte length,
+ * to initialize a {@link BytesOut} object with the length code, and
+ * to write the length of the data into the {@link Bytes} object.
+ */
 public enum BinaryLengthLength {
+    /**
+     * Represents an 8-bit length binary value.
+     */
     LENGTH_8BIT {
+        /**
+         * @return The code for the 8-bit length.
+         */
         @Override
         public int code() {
-            return 0x80;
+            return BinaryWireCode.BYTES_LENGTH8;
         }
 
         @Override
@@ -47,10 +59,13 @@ public enum BinaryLengthLength {
             UnsafeMemory.MEMORY.storeFence();
         }
     },
+    /**
+     * Represents a 16-bit length binary value.
+     */
     LENGTH_16BIT {
         @Override
         public int code() {
-            return 0x81;
+            return BinaryWireCode.BYTES_LENGTH16;
         }
 
         @Override
@@ -70,10 +85,13 @@ public enum BinaryLengthLength {
             UnsafeMemory.MEMORY.storeFence();
         }
     },
+    /**
+     * Represents a 32-bit length binary value.
+     */
     LENGTH_32BIT {
         @Override
         public int code() {
-            return 0x82;
+            return BinaryWireCode.BYTES_LENGTH32;
         }
 
         @Override

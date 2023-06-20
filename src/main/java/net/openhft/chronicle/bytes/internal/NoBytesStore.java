@@ -218,7 +218,7 @@ public final class NoBytesStore implements BytesStore {
         throw throwBUE(offset);
     }
 
-    private static BufferUnderflowException throwBUE(long offset) {
+    private static BufferUnderflowException throwBUE(@NonNegative long offset) {
         requireNonNegative(offset);
         return new BufferUnderflowException();
     }

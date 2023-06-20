@@ -44,12 +44,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Return <code>true</code> or false, or null if it could not be detected
-     * as <code>true</code> or false.  Case is not important
+     * Return {@code true} or false, or null if it could not be detected
+     * as {@code true} or false.  Case is not important
      * <p>
-     * <p>false: f, false, n, no, 0
+     * false: f, false, n, no, 0
      * <p>
-     * <p>true: t, true, y, yes, 1
+     * true: t, true, y, yes, 1
      *
      * @param tester to detect the end of the text.
      * @return true, false, or null if neither.
@@ -106,7 +106,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer         to populate
      * @param stopCharTester to check if the end has been reached.
      */
-    @SuppressWarnings("rawtypes")
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)
@@ -131,7 +130,6 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer          to populate
      * @param stopCharsTester to check if the end has been reached.
      */
-    @SuppressWarnings("rawtypes")
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)

@@ -44,7 +44,6 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int VALUE = 34;
     private static final int DIGITS = 10;
 
-    @SuppressWarnings("rawtypes")
     public static void write(@NotNull Bytes<?> bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {
         long position = bytes.writePosition();

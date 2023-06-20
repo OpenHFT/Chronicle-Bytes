@@ -47,7 +47,6 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
         btmttTest("btmtt-invalid/prim-input.txt", "btmtt-invalid/prim-output.txt");
     }
 
-    @SuppressWarnings("rawtypes")
     protected void btmttTest(String input, String output)
             throws IOException {
         BytesTextMethodTester tester = new BytesTextMethodTester<>(

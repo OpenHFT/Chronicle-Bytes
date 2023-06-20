@@ -21,30 +21,48 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 
 import java.util.List;
 
+/**
+ * This interface provides statistics about a {@link BytesRingBuffer}.
+ */
 public interface BytesRingBufferStats {
     /**
-     * each time the ring is read, this logs the number of bytes in the write buffer, calling this
-     * method resets these statistics,
+     * Gets the minimum number of bytes remaining in the write buffer since the last read.
+     * Calling this method resets the statistics. If no read calls were made since the last
+     * call to this method, it returns Long.MAX_VALUE.
      *
-     * @return Long.MAX_VALUE if no read calls were made since the last time this method was called.
+     * @return the minimum number of bytes remaining in the write buffer since the last read
+     * or Long.MAX_VALUE if no reads were performed.
      */
     @NonNegative
     long minNumberOfWriteBytesRemaining();
 
     /**
-     * @return the total capacity in bytes
+     * @return the total capacity of the ring buffer in bytes.
      */
     @NonNegative
     long capacity();
 
+    /**
+     * @return the number of write operations performed since the last call to this method.
+     */
     @NonNegative
     long getAndClearWriteCount();
 
+    /**
+     * @return the number of missed write operations since the last call to this method.
+     */
     @NonNegative
     long getAndClearMissedWriteCount();
 
+    /**
+     * @return the number of contentions since the last call to this method.
+     */
     @NonNegative
     long getAndClearContentionCount();
 
+    /**
+     * @return a list of {@link RingBufferReaderStats} objects, each representing the statistics
+     * for a reader of the ring buffer.
+     */
     List<RingBufferReaderStats> readers();
 }

@@ -25,6 +25,25 @@ import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.BinaryWireCode.*;
 
+/**
+ * <p>
+ * This class extends the {@link NativeBytes} class and provides an additional layer of safety by tracking the raw primitives written to the byte buffer.
+ * </p>
+ *
+ * <p>
+ * The purpose of this class is to facilitate the detection of inconsistencies during testing. When inconsistencies are detected, they can be corrected before the code is moved into production.
+ * </p>
+ *
+ * <p>
+ * GuardedNativeBytes records the type of each primitive written into the bytes buffer (byte, short, int, long, float, double). This tracking enables validation of the consistency of data written and read, which is critical for data integrity.
+ * </p>
+ *
+ * <p>
+ * Please note that while this class is very useful for ensuring data consistency during testing, it may introduce a performance overhead and thus not recommended to be used in a production environment.
+ * </p>
+ *
+ * @param <U> The type of the object that this byte buffer is bound to.
+ */
 public class GuardedNativeBytes<U> extends NativeBytes<U> {
     static final byte BYTE_T = (byte) INT8;
     static final byte SHORT_T = (byte) INT16;
@@ -36,6 +55,14 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
 
     private static final String[] STRING_FOR_CODE = _stringForCode(GuardedNativeBytes.class);
 
+    /**
+     * Constructs a new GuardedNativeBytes instance backed by the specified BytesStore and with the specified capacity.
+     *
+     * @param store     The backing BytesStore.
+     * @param capacity  The capacity of the new GuardedNativeBytes instance.
+     * @throws IllegalStateException    If the backing store has been released.
+     * @throws IllegalArgumentException If the capacity is negative or exceeds the limit of the backing store.
+     */
     public GuardedNativeBytes(@NotNull BytesStore<?, ?> store, long capacity)
             throws IllegalStateException, IllegalArgumentException {
         super(store, capacity);

@@ -21,11 +21,24 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-
+/**
+ * Annotation used for grouping fields within a class. This can be useful for managing related fields
+ * as a single entity, particularly in classes that need precise control over the memory layout of their fields,
+ * or in scenarios where grouping fields can simplify code that operates over these fields.
+ *
+ * <p>The {@link FieldGroup} annotation is retained at runtime and can be used in any field declarations. The
+ * 'value' method should be used to specify the name of the group.</p>
+ *
+ */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface FieldGroup {
     String HEADER = "header";
 
+    /**
+     * Defines the name of the field group.
+     *
+     * @return the name of the group
+     */
     String value();
 }

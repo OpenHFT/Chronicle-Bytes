@@ -22,12 +22,32 @@ import net.openhft.chronicle.bytes.DynamicallySized;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.IntArrayValues;
 
+/**
+ * Interface for a resizable array of integer values that can be represented as bytes.
+ * This provides methods to get and set values, as well as to query and modify the size of the array.
+ * It extends the {@link IntArrayValues}, {@link Byteable}, and {@link DynamicallySized} interfaces.
+ */
 @SuppressWarnings("rawtypes")
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {
+
+    /**
+     * Returns the size in bytes of the array for a given number of elements.
+     *
+     * @param sizeInBytes The number of elements for which to compute the size in bytes.
+     * @return The size in bytes for the given number of elements.
+     * @throws IllegalStateException if the array is closed.
+     */
     @Override
     long sizeInBytes(@NonNegative long sizeInBytes)
             throws IllegalStateException;
 
+    /**
+     * Adjusts the capacity of the array.
+     *
+     * @param arrayLength The new capacity of the array.
+     * @return The current instance, adjusted to the new capacity.
+     * @throws IllegalStateException if the array is closed.
+     */
     ByteableIntArrayValues capacity(@NonNegative long arrayLength)
             throws IllegalStateException;
 }

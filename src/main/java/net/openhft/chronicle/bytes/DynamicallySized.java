@@ -18,8 +18,13 @@
 package net.openhft.chronicle.bytes;
 
 /**
- * Marker interface for implementors of {@link Byteable} that indicates
- * that size requirements can only be calculated on a user-supplied instance.
+ * An interface that indicates an implementor of {@link Byteable} has dynamic size requirements.
+ *
+ * <p>
+ * A class implementing the {@code DynamicallySized} interface indicates that
+ * the size of its instances in bytes cannot be determined statically (at compile time) but
+ * instead is dependent on the state of the individual object instances.
+ * </p>
  */
 public interface DynamicallySized {
 }

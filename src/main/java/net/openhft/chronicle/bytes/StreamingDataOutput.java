@@ -153,7 +153,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Write the same encoding as <code>writeUTF</code> with the following changes.  1) The length is stop bit encoded
+     * Write the same encoding as {@code writeUTF} with the following changes.  1) The length is stop bit encoded
      * i.e. one byte longer for short strings, but is not limited in length. 2) The string can be null.
      *
      * @param text the string value to be written. Can be null.

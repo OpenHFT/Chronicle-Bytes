@@ -23,17 +23,32 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A BytesStore which can point to arbitrary memory.
- * Acts as a view of Bytes over an area of memory.
- * Recommended not to use this in conjunction with ElasticBytes as underlying data structure may move.
+ * A BytesStore that points to arbitrary memory.
+ *
+ * This class represents a view of Bytes over an arbitrary area of memory. It provides methods to set and
+ * interact with this area of memory.
+ *
+ * <p><b>WARNING:</b> It is not recommended to use this in conjunction with ElasticBytes. ElasticBytes, by design,
+ * can change its underlying data structure's location, which might invalidate or corrupt the memory view
+ * held by this PointerBytesStore.</p>
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
 
+    /**
+     * Default constructor that initializes a PointerBytesStore with no data.
+     */
     public PointerBytesStore() {
         super(NoBytesStore.NO_PAGE, 0, null, false, false);
     }
 
-    public void set(long address, @NonNegative long capacity) {
+    /**
+     * Sets the memory address and capacity of this PointerBytesStore.
+     *
+     * @param address  the memory address
+     * @param capacity the size of the memory to which this PointerBytesStore should point
+     * @throws IllegalArgumentException if the capacity is negative
+     */
+    public void set(long address, @NonNegative long capacity) throws IllegalArgumentException {
         setAddress(address);
         this.limit = maximumLimit = capacity;
         if (capacity == Bytes.MAX_CAPACITY)
@@ -42,6 +57,12 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
                     "ElasticBytes since the address of the underlying store may change once it expands");
     }
 
+    /**
+     * Returns a new VanillaBytes for writing to this PointerBytesStore.
+     *
+     * @return a new VanillaBytes
+     * @throws IllegalStateException if unable to create VanillaBytes due to incorrect state
+     */
     @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite()
@@ -53,12 +74,22 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
         }
     }
 
+    /**
+     * Returns the safe limit of the memory to which this PointerBytesStore can write or read.
+     *
+     * @return the safe limit
+     */
     @NonNegative
     @Override
     public long safeLimit() {
         return limit;
     }
 
+    /**
+     * Returns the starting address of the memory to which this PointerBytesStore points.
+     *
+     * @return the start address, always 0 in the case of PointerBytesStore
+     */
     @NonNegative
     @Override
     public long start() {

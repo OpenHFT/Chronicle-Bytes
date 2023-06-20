@@ -18,9 +18,26 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
-
+/**
+ * Functional interface defining a format for appending offset information to a byte sequence.
+ *
+ * This interface provides a standardized way to append offset information to {@link Bytes},
+ * allowing different implementations to provide different formatting strategies.
+ *
+ * Implementations should define the {@link #append(long, Bytes)} method to handle the formatting and appending operation.
+ */
 @FunctionalInterface
 public interface OffsetFormat {
-    @SuppressWarnings("rawtypes")
+
+    /**
+     * Appends the given offset to the provided {@link Bytes} instance.
+     *
+     * This method allows the implementation to decide how the offset information should be formatted
+     * and appended to the {@link Bytes} instance.
+     *
+     * @param offset the offset to be appended
+     * @param bytes  the {@link Bytes} instance where the offset will be appended
+     * @throws IllegalArgumentException if the offset is negative
+     */
     void append(@NonNegative long offset, Bytes<?> bytes);
 }

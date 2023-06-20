@@ -32,11 +32,25 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
+/**
+ * This abstract class represents a reference to a byte store. It is designed
+ * to be extended by classes that need to provide byte store operations and
+ * lifecycle management.
+ *
+ * @author peter.lawrey
+ */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
 
+    /**
+     * BytesStore associated with this reference
+     */
     @Nullable
     protected BytesStore<?, ?> bytes;
+
+    /**
+     * Offset within the BytesStore for this reference
+     */
     protected long offset;
 
     protected AbstractReference() {
@@ -44,6 +58,13 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         singleThreadedCheckDisabled(true);
     }
 
+    /**
+     * Sets the BytesStore and the offset within the store for this reference.
+     *
+     * @param bytes  the BytesStore
+     * @param offset the offset within the BytesStore
+     * @throws IllegalStateException if this reference has been closed
+     */
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative final long offset, @NonNegative final long length)
             throws IllegalStateException, IllegalArgumentException, BufferOverflowException {
@@ -56,17 +77,29 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         this.offset = offset;
     }
 
+    /**
+     * @return the BytesStore associated with this reference
+     */
     @Nullable
     @Override
     public BytesStore bytesStore() {
         return bytes;
     }
 
+    /**
+     * @return the offset within the BytesStore for this reference
+     */
     @Override
     public long offset() {
         return offset;
     }
 
+    /**
+     * Updates the BytesStore for this reference, releasing any previous BytesStore
+     *
+     * @param bytes the new BytesStore
+     * @throws IllegalStateException if this reference has been closed
+     */
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {
         if (this.bytes != null) {
@@ -77,6 +110,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         this.bytes.reserve(this);
     }
 
+    /**
+     * Closes this reference, releasing any associated BytesStore
+     *
+     * @throws IllegalStateException if this reference has already been closed
+     */
     @Override
     protected void performClose() {
         if (this.bytes == null)
@@ -90,6 +128,10 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         this.bytes = null;
     }
 
+    /**
+     * @return the address of the start of this reference in the BytesStore
+     * @throws IllegalStateException if this reference has been closed
+     */
     @Override
     public long address()
             throws IllegalStateException, BufferUnderflowException {
@@ -98,6 +140,13 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return bytesStore().addressForRead(offset);
     }
 
+    /**
+     * Acquires a file lock on this reference.
+     *
+     * @param shared if the lock is shared
+     * @return the FileLock acquired
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     public FileLock lock(boolean shared) throws IOException {
         if (bytesStore() instanceof MappedBytesStore) {
@@ -107,6 +156,13 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
         return Byteable.super.lock(shared);
     }
 
+    /**
+     * Attempts to acquire a file lock on this reference.
+     *
+     * @param shared if the lock is shared
+     * @return the FileLock acquired, or null if the lock could not be acquired
+     * @throws IOException if an I/O error occurs
+     */
     @Override
     public FileLock tryLock(boolean shared) throws IOException {
         if (bytesStore() instanceof MappedBytesStore) {

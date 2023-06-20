@@ -452,7 +452,7 @@ public class VanillaBytes<U>
     }
 
     @NotNull
-    private VanillaBytes<U> write0(@NotNull BytesStore bytes, long offset, long length) {
+    private VanillaBytes<U> write0(@NotNull BytesStore bytes, @NonNegative long offset, long length) {
         ensureCapacity(writePosition() + length);
         if (length == (int) length) {
             if (bytes.canReadDirect(length) && canWriteDirect(length)) {
