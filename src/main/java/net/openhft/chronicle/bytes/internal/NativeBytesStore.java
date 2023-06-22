@@ -103,10 +103,10 @@ public class NativeBytesStore<U>
         this.cleaner = deallocator == null ? null : new SimpleCleaner(deallocator);
         underlyingObject = null;
         this.elastic = elastic;
-        if (cleaner == null) {
-            finalizer = null;
-        } else {
+        if (cleaner != null && Jvm.isResourceTracing()) {
             finalizer = new Finalizer();
+        } else {
+            finalizer = null;
         }
     }
 
