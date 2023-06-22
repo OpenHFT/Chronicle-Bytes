@@ -34,7 +34,7 @@ public interface StopCharTester {
      * <p>
      * Note: For safety reasons, a character of value 0 should either return true (i.e., be considered a stop character)
      * or throw an IllegalStateException. This is to prevent issues with null-terminated strings.
-     * </p>
+     * 
      *
      * @param ch the character to be tested. If ch is 0, the method should return true or throw an exception.
      * @return true if the provided character is a stop character, false otherwise.

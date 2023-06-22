@@ -22,13 +22,30 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 /**
- * Annotation used for grouping fields within a class. This can be useful for managing related fields
- * as a single entity, particularly in classes that need precise control over the memory layout of their fields,
- * or in scenarios where grouping fields can simplify code that operates over these fields.
+ * Annotation used for logically grouping fields within a class. It is especially useful in classes
+ * where precise control over the memory layout of fields is required, or in scenarios where
+ * logically grouping related fields can simplify code that operates on these fields.
  *
- * <p>The {@link FieldGroup} annotation is retained at runtime and can be used in any field declarations. The
- * 'value' method should be used to specify the name of the group.</p>
+ * <p>The {@link FieldGroup} annotation is retained at runtime and can be used to annotate
+ * fields within a class. The name of the group is specified through the 'value' method,
+ * allowing multiple fields to be associated with the same group by assigning them the same name.</p>
  *
+ * <p>One common use case is organizing the memory layout for serialization or memory-mapped
+ * objects where fields that are accessed together are placed adjacently in memory.</p>
+ *
+ * <p>Example:</p>
+ * <pre>
+ * public class Record {
+ *     &#64;FieldGroup("header")
+ *     private int headerField1;
+ *
+ *     &#64;FieldGroup("header")
+ *     private int headerField2;
+ *
+ *     &#64;FieldGroup("body")
+ *     private int bodyField1, bodyField2;
+ * }
+ * </pre>
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
@@ -36,7 +53,8 @@ public @interface FieldGroup {
     String HEADER = "header";
 
     /**
-     * Defines the name of the field group.
+     * Defines the name of the field group. Multiple fields with the same {@code value} are considered
+     * part of the same logical group.
      *
      * @return the name of the group
      */

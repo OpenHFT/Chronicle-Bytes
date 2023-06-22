@@ -24,7 +24,7 @@ package net.openhft.chronicle.bytes;
  * A class implementing the {@code DynamicallySized} interface indicates that
  * the size of its instances in bytes cannot be determined statically (at compile time) but
  * instead is dependent on the state of the individual object instances.
- * </p>
+ * 
  */
 public interface DynamicallySized {
 }

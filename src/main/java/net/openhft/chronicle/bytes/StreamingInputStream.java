@@ -24,19 +24,42 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.BufferUnderflowException;
 
+/**
+ * A special kind of InputStream implementation which reads data from a StreamingDataInput instance.
+ *
+ * <p>This class provides a way to connect APIs expecting an InputStream with data sources
+ * encapsulated in StreamingDataInput instances.</p>
+ *
+ * @see StreamingDataInput
+ * @see InputStream
+ */
 @SuppressWarnings("rawtypes")
 public class StreamingInputStream extends InputStream {
 
     private StreamingDataInput in;
 
+    /**
+     * Constructs a new StreamingInputStream instance and initializes the data source as an empty ByteStore.
+     */
     public StreamingInputStream() {
         this(NoBytesStore.NO_BYTES);
     }
 
+    /**
+     * Constructs a new StreamingInputStream instance with a specific StreamingDataInput as the data source.
+     *
+     * @param in the StreamingDataInput instance to read data from.
+     */
     public StreamingInputStream(StreamingDataInput in) {
         this.in = in;
     }
 
+    /**
+     * Initializes this StreamingInputStream instance with a specific StreamingDataInput as the data source.
+     *
+     * @param in the StreamingDataInput instance to read data from.
+     * @return this StreamingInputStream instance, for chaining.
+     */
     @NotNull
     public StreamingInputStream init(StreamingDataInput in) {
         this.in = in;

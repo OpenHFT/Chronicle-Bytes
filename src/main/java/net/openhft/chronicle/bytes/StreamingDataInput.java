@@ -43,20 +43,67 @@ import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * This data input has a position() and a limit()
+ * The StreamingDataInput interface represents a data stream for reading in binary data.
+ * It provides a range of read methods to retrieve different types of data from the stream,
+ * such as integers, longs, floating-point numbers, strings, byte arrays, etc.
+ *
+ * Reading methods in this interface are usually expected to advance the read position by the
+ * number of bytes read. This allows consecutive calls to the read methods to sequentially
+ * read chunks of data from the stream.
+ *
+ * Additionally, StreamingDataInput provides support for leniency and conversion of data into
+ * BigInteger or BigDecimal objects. When lenient mode is enabled, methods will return default
+ * values when there's no more data to read, instead of throwing exceptions.
+ *
+ * The interface includes methods for handling exceptions and managing the state of the stream,
+ * such as checking the remaining bytes or throwing an exception if the stream has been previously released.
+ *
+ * Defines a data input interface that supports setting and getting positions and limits.
+ * Implementing classes can be used to read data from a data source, typically a byte stream or byte buffer.
+ *
+ * Note: Implementations of this interface may choose to handle the actual reading of data
+ * in various ways, such as through direct memory access or other optimized mechanisms.
+ *
+ * @param <S> the type of StreamingDataInput
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface StreamingDataInput<S extends StreamingDataInput<S>> extends StreamingCommon<S> {
+
+    /**
+     * Sets the read position of this StreamingDataInput.
+     *
+     * @param position the new read position, must be non-negative
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the new position is greater than the limit
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     @NotNull
     S readPosition(@NonNegative long position)
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Sets the read position of this StreamingDataInput without limiting it to the current read limit.
+     *
+     * @param position the new read position, must be non-negative
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the new position is greater than the capacity
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     @NotNull
     default S readPositionUnlimited(@NonNegative long position)
             throws BufferUnderflowException, IllegalStateException {
         return readLimitToCapacity().readPosition(position);
     }
 
+    /**
+     * Sets the read position and limit of this StreamingDataInput based on the specified position and remaining values.
+     *
+     * @param position  the new read position, must be non-negative
+     * @param remaining the remaining size, which is used to set the read limit
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the new position is greater than the read limit
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     @NotNull
     default S readPositionRemaining(@NonNegative long position, @NonNegative long remaining)
             throws BufferUnderflowException, IllegalStateException {
@@ -64,31 +111,46 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return readPosition(position);
     }
 
+    /**
+     * Sets the read limit of this StreamingDataInput.
+     *
+     * @param limit the new read limit, must be non-negative
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the new limit is less than the read position
+     */
     @NotNull
     S readLimit(@NonNegative long limit)
             throws BufferUnderflowException;
-
+    /**
+     * Sets the read limit of this StreamingDataInput to its capacity.
+     *
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the capacity is less than the read position
+     */
     default S readLimitToCapacity()
             throws BufferUnderflowException {
         return readLimit(capacity());
     }
 
     /**
-     * Skip a number of bytes by moving the readPosition. Must be less than or equal to the readLimit.
+     * Skips the specified number of bytes by advancing the read position.
+     * The number of bytes to skip must be less than or equal to the read limit.
      *
-     * @param bytesToSkip bytes to skip.
-     * @return this
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @param bytesToSkip the number of bytes to skip
+     * @return this StreamingDataInput instance, for chaining
+     * @throws BufferUnderflowException if the new read position is outside the limits of the data source
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     @NotNull
     S readSkip(long bytesToSkip)
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * obtain the readPosition skipping any padding needed for a header.
+     * Obtains the current read position, optionally skipping padding bytes if specified.
+     * Useful when reading data with headers that may include padding.
      *
-     * @param skipPadding optional aligning to 4 bytes
-     * @return the read position.
+     * @param skipPadding if true, aligns the read position to a 4-byte boundary by skipping padding bytes
+     * @return the current read position
      */
     default long readPositionForHeader(boolean skipPadding) {
         long position = readPosition();
@@ -98,17 +160,28 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Read skip 1 when you are sure this is safe. Use at your own risk when you find a performance problem.
+     * Unchecked version of readSkip(1). This method skips one byte without performing any limit checks.
+     * Use this method only when you are certain that it is safe to do so, and you have identified a performance issue with readSkip(1).
      */
     void uncheckedReadSkipOne();
 
     /**
-     * Read skip -1 when you are sure this is safe. Use at your own risk when you find a performance problem.
+     * Unchecked version of readSkip(-1). This method skips back one byte without performing any limit checks.
+     * Use this method only when you are certain that it is safe to do so, and you have identified a performance issue with readSkip(-1).
      */
     void uncheckedReadSkipBackOne();
 
     /**
-     * Perform a set of actions with a temporary bounds mode.
+     * Perform a set of actions within a temporary bounds mode. The bounds are defined by the specified length.
+     * After the consumer has been executed, the original read limit is restored and the read position is moved forward by the specified length.
+     *
+     * @param length the length to set the temporary bounds to
+     * @param bytesConsumer the consumer to execute within the temporary bounds
+     * @param sb the StringBuilder to use
+     * @param toBytes the BytesOut to use
+     * @throws BufferUnderflowException if the specified length is greater than the number of bytes remaining to read
+     * @throws IORuntimeException if the bytesConsumer encounters an IO error
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     default void readWithLength0(@NonNegative long length, @NotNull ThrowingConsumerNonCapturing<S, IORuntimeException, BytesOut> bytesConsumer, StringBuilder sb, BytesOut<?> toBytes)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
@@ -127,7 +200,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Perform a set of actions with a temporary bounds mode.
+     * Perform a set of actions within a temporary bounds mode. The bounds are defined by the specified length.
+     * After the consumer has been executed, the original read limit is restored and the read position is moved forward by the specified length.
+     *
+     * @param length the length to set the temporary bounds to
+     * @param bytesConsumer the consumer to execute within the temporary bounds
+     * @throws BufferUnderflowException if the specified length is greater than the number of bytes remaining to read
+     * @throws IORuntimeException if the bytesConsumer encounters an IO error
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     default void readWithLength(@NonNegative long length, @NotNull ThrowingConsumer<S, IORuntimeException> bytesConsumer)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
@@ -145,26 +225,64 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
+    /**
+     * Provides an InputStream for the data represented by this StreamingDataInput.
+     *
+     * @return an InputStream over the underlying data
+     */
     @NotNull
     default InputStream inputStream() {
         return new StreamingInputStream(this);
     }
-
+    /**
+     * Reads a variable-length integer encoded using the stop bit encoding.
+     * This method is equivalent to calling {@code BytesInternal.readStopBit(this)}.
+     *
+     * @return the decoded integer
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws BufferUnderflowException if there's not enough data to read
+     */
     default long readStopBit()
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         return BytesInternal.readStopBit(this);
     }
 
+    /**
+     * Reads a variable-length character encoded using the stop bit encoding.
+     * This method is equivalent to calling {@code BytesInternal.readStopBitChar(this)}.
+     *
+     * @return the decoded character
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws BufferUnderflowException if there's not enough data to read
+     */
     default char readStopBitChar()
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
         return BytesInternal.readStopBitChar(this);
     }
 
+    /**
+     * Reads a variable-length double encoded using the stop bit encoding.
+     * This method is equivalent to calling {@code BytesInternal.readStopBitDouble(this)}.
+     *
+     * @return the decoded double
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default double readStopBitDouble()
             throws IllegalStateException {
         return BytesInternal.readStopBitDouble(this);
     }
 
+    /**
+     * Reads a decimal number represented as a variable-length double and scale encoded using the stop bit encoding.
+     * The absolute value of the returned double represents the value of the decimal,
+     * and the sign represents the sign of the decimal.
+     *
+     * @return the decoded decimal number
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws BufferUnderflowException if there's not enough data to read
+     */
     default double readStopBitDecimal()
             throws IllegalStateException, BufferUnderflowException {
         long value = readStopBit();
@@ -172,40 +290,88 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         value /= 10;
         return (double) value / Maths.tens(scale);
     }
-
+    /**
+     * Reads a boolean value from the input stream.
+     * It reads a byte and converts it into a boolean using {@code BytesUtil.byteToBoolean(b)}.
+     *
+     * @return the boolean value
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default boolean readBoolean()
             throws IllegalStateException {
         byte b = readByte();
         return BytesUtil.byteToBoolean(b);
     }
 
+    /**
+     * Reads a byte value from the input stream.
+     *
+     * @return the byte value
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     byte readByte()
             throws IllegalStateException;
 
+    /**
+     * Reads a raw byte value from the input stream.
+     * The main difference between this method and {@code readByte()} is that the latter might perform additional processing or checks.
+     *
+     * @return the raw byte value
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default byte rawReadByte()
             throws IllegalStateException {
         return readByte();
     }
 
+    /**
+     * Reads a character value from the input stream.
+     * The character is read using the stop bit encoding.
+     *
+     * @return the character value
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws BufferUnderflowException if there's not enough data to read
+     */
     default char readChar()
             throws IllegalStateException, BufferUnderflowException {
         return readStopBitChar();
     }
 
     /**
-     * @return the next unsigned 8 bit value or -1;
+     * Reads the next unsigned 8-bit value from the input stream.
+     * If there is no byte available, it returns -1.
+     *
+     * @return the next unsigned 8-bit value or -1
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     int readUnsignedByte()
             throws IllegalStateException;
 
     /**
-     * @return the next unsigned 8 bit value or -1;
+     * Reads the next unsigned 8-bit value from the input stream without performing boundary checks.
+     * If there is no byte available, it returns -1. Use this method with caution as it bypasses checks for data availability.
+     *
+     * @return the next unsigned 8-bit value or -1
      */
     int uncheckedReadUnsignedByte();
 
+    /**
+     * Reads a 16-bit short value from the input stream.
+     *
+     * @return the 16-bit short value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     short readShort()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Reads a 16-bit value from the input stream and converts it to an unsigned short by masking the sign bit.
+     *
+     * @return the unsigned 16-bit value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int readUnsignedShort()
             throws BufferUnderflowException, IllegalStateException {
         return readShort() & 0xFFFF;
@@ -221,22 +387,59 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return readUnsignedShort() | (readUnsignedByte() << 16);
     }
 
+    /**
+     * Reads a 32-bit integer value from the input stream.
+     *
+     * @return the 32-bit integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     int readInt()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Reads a 32-bit integer value from the input stream without performing boundary checks.
+     * Use this method with caution as it bypasses checks for data availability.
+     *
+     * @return the 32-bit integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int rawReadInt()
             throws BufferUnderflowException, IllegalStateException {
         return readInt();
     }
 
+    /**
+     * Reads a 32-bit value from the input stream and converts it to an unsigned integer by masking the sign bit.
+     *
+     * @return the unsigned 32-bit integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default long readUnsignedInt()
             throws BufferUnderflowException, IllegalStateException {
         return readInt() & 0xFFFFFFFFL;
     }
 
+    /**
+     * Reads a 64-bit long value from the input stream.
+     *
+     * @return the 64-bit long value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     long readLong()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Reads a 64-bit long value from the input stream without performing boundary checks.
+     * Use this method with caution as it bypasses checks for data availability.
+     *
+     * @return the 64-bit long value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default long rawReadLong()
             throws BufferUnderflowException, IllegalStateException {
         return readLong();
@@ -264,17 +467,35 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
+    /**
+     * Reads a 32-bit floating-point number from the input stream.
+     *
+     * @return the float value read from the stream
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     float readFloat()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Reads a 64-bit floating-point number from the input stream.
+     *
+     * @return the double value read from the stream
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     double readDouble()
             throws BufferUnderflowException, IllegalStateException;
 
     /**
-     * The same as readUTF() except the length is stop bit encoded.  This saves one byte for strings shorter than 128
-     * chars.  {@code null} values are also supported
+     * Reads a UTF-8 encoded string from the input stream. This method supports {@code null} values and
+     * utilizes stop bit encoding for length, saving one byte for strings shorter than 128 characters.
      *
      * @return a Unicode string or {@code null} if {@code writeUtf8(null)} was called
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IORuntimeException if an IO error occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws ArithmeticException if numeric overflow or underflow occurs
      */
     @Nullable
     default String readUtf8()
@@ -282,6 +503,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return BytesInternal.readUtf8(this);
     }
 
+    /**
+     * Reads an 8-bit encoded string from the input stream.
+     *
+     * @return an 8-bit string or {@code null} if {@code write8bit(null)} was called
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IORuntimeException if an IO error occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     */
     @Nullable
     default String read8bit()
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -289,10 +519,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * The same as readUtf8() except the chars are copied to a truncated StringBuilder.
+     * Reads a UTF-8 encoded string from the input stream and appends it to the provided appendable.
+     * This method is similar to {@code readUtf8()}, except it populates a provided appendable instead of creating a new string.
      *
-     * @param sb to copy chars to
+     * @param sb the appendable to which the read string will be appended
      * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @throws IORuntimeException if an IO error occurs
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws IllegalArgumentException if the appendable does not allow setting length
      */
     default <C extends Appendable & CharSequence> boolean readUtf8(@NotNull C sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
@@ -312,6 +548,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    /**
+     * Reads a UTF-8 encoded string from the input stream and appends it to the provided Bytes.
+     * This method is similar to {@code readUtf8()}, except it populates a provided Bytes instance instead of creating a new string.
+     *
+     * @param sb the Bytes instance to which the read string will be appended
+     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @throws IORuntimeException if an IO error occurs
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default boolean readUtf8(@NotNull Bytes<?> sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.readPositionRemaining(0, 0);
@@ -326,6 +573,17 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    /**
+     * Reads a UTF-8 encoded string from the input stream and appends it to the provided StringBuilder.
+     * This method is similar to {@code readUtf8()}, except it populates a provided StringBuilder instead of creating a new string.
+     *
+     * @param sb the StringBuilder to which the read string will be appended
+     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @throws IORuntimeException if an IO error occurs
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default boolean readUtf8(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);
@@ -340,6 +598,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    /**
+     * Reads an 8-bit encoded string from the input stream and appends it to the provided Bytes.
+     *
+     * @param b the Bytes instance to which the read string will be appended
+     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     * @throws BufferOverflowException if the buffer is full
+     */
     default boolean read8bit(@NotNull Bytes<?> b)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException {
         b.clear();
@@ -365,6 +633,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         }
     }
 
+    /**
+     * Reads an 8-bit encoded string from the input stream and appends it to the provided StringBuilder.
+     *
+     * @param sb the StringBuilder to which the read string will be appended
+     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @throws IORuntimeException if an IO error occurs
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws ArithmeticException if numeric overflow or underflow occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default boolean read8bit(@NotNull StringBuilder sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException {
         sb.setLength(0);
@@ -382,11 +660,29 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return true;
     }
 
+    /**
+     * Reads the input stream into the provided byte array.
+     *
+     * @param bytes the byte array to fill with the read data
+     * @return the number of bytes read, or -1 if the end of the stream is reached
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int read(byte[] bytes)
             throws BufferUnderflowException, IllegalStateException {
         return read(bytes, 0, bytes.length);
     }
 
+    /**
+     * Reads the input stream into the provided byte array, starting from the given offset and reading up to the specified length.
+     *
+     * @param bytes the byte array to fill with the read data
+     * @param off the start offset in the byte array
+     * @param len the maximum number of bytes to read
+     * @return the number of bytes read, or -1 if the end of the stream is reached
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int read(byte[] bytes, @NonNegative int off, @NonNegative int len)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(bytes);
@@ -402,6 +698,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
+    /**
+     * Reads the input stream into the provided char array, starting from the given offset and reading up to the specified length.
+     *
+     * @param bytes the char array to fill with the read data
+     * @param off the start offset in the char array
+     * @param len the maximum number of chars to read
+     * @return the number of chars read, or -1 if the end of the stream is reached
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int read(char[] bytes, @NonNegative int off, @NonNegative int len)
             throws IllegalStateException {
         requireNonNull(bytes);
@@ -414,6 +719,12 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         return len2;
     }
 
+    /**
+     * Reads the input stream into the provided ByteBuffer.
+     *
+     * @param buffer the ByteBuffer to fill with the read data
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default void read(@NotNull ByteBuffer buffer)
             throws IllegalStateException {
         requireNonNull(buffer);
@@ -422,10 +733,9 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * Transfer as many bytes as possible.
-     * If you want to write all the bytes or fail use write.
+     * Transfers as many bytes as possible from the input stream into the provided Bytes object.
      *
-     * @param bytes to copy to.
+     * @param bytes the Bytes object to fill with the read data
      * @see StreamingDataOutput#write(BytesStore)
      */
     default void read(@NotNull final Bytes<?> bytes) {
@@ -433,6 +743,15 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         read(bytes, length);
     }
 
+    /**
+     * Transfers the specified number of bytes from the input stream into the provided Bytes object.
+     *
+     * @param bytes the Bytes object to fill with the read data
+     * @param length the number of bytes to read
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws BufferOverflowException if there's not enough space in the provided Bytes object
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default void read(@NotNull final Bytes<?> bytes,
                       @NonNegative final int length)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
@@ -445,11 +764,28 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             bytes.rawWriteByte(rawReadByte());
     }
 
+    /**
+     * Reads data from the input stream into the provided object.
+     *
+     * @param o the object to fill with the read data
+     * @param length the number of bytes to read
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default void unsafeReadObject(@NotNull Object o, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
     }
 
+    /**
+     * Reads data from the input stream into the provided object, starting from the given offset.
+     *
+     * @param o the object to fill with the read data
+     * @param offset the start offset in the object
+     * @param length the number of bytes to read
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {
         requireNonNull(o);
@@ -473,6 +809,13 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             UnsafeMemory.unsafePutByte(o, (long) offset + i, rawReadByte());
     }
 
+    /**
+     * Reads data from the input stream into the memory at the provided address.
+     *
+     * @param address the address of the memory to fill with the read data
+     * @param length the number of bytes to read
+     * @return a reference to this object
+     */
     default S unsafeRead(long address, @NonNegative int length) {
         if (isDirectMemory()) {
             long src = addressForRead(readPosition());
@@ -488,16 +831,46 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
         return (S) this;
     }
-
+    /**
+     * Reads a volatile (concurrently mutable) integer value from the input stream.
+     *
+     * @return the read integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     int readVolatileInt()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Reads a volatile (concurrently mutable) long value from the input stream.
+     *
+     * @return the read long value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     long readVolatileLong()
             throws BufferUnderflowException, IllegalStateException;
 
+    /**
+     * Peeks (reads without moving the read pointer) the next unsigned byte from the input stream.
+     *
+     * @return the peeked byte value
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     int peekUnsignedByte()
             throws IllegalStateException;
 
+    /**
+     * Reads an Enum value from the input stream.
+     *
+     * @param eClass the class of the Enum
+     * @return the read Enum value
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws ArithmeticException if the number format is invalid
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws BufferOverflowException if there's not enough space in the buffer
+     */
     @NotNull
     default <E extends Enum<E>> E readEnum(@NotNull Class<E> eClass)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, BufferOverflowException {
@@ -505,10 +878,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * parse a UTF8 string.
+     * Parses a UTF-8 string from the input stream into the provided Appendable.
      *
-     * @param sb            buffer to copy into
-     * @param encodedLength length of the UTF encoded data in bytes
+     * @param sb the Appendable to fill with the parsed string
+     * @param encodedLength the length of the UTF-8 encoded data in bytes
+     * @throws IllegalArgumentException if an illegal argument is provided
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws UTFDataFormatRuntimeException if the string is not valid UTF-8
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     default void parseUtf8(@NotNull Appendable sb, @NonNegative int encodedLength)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
@@ -516,34 +893,75 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     }
 
     /**
-     * parse a UTF8 string.
+     * Parses a UTF-8 string from the input stream into the provided Appendable.
      *
-     * @param sb     buffer to copy into
+     * @param sb the Appendable to fill with the parsed string
      * @param utf    true if the length is the UTF-8 encoded length, false if the length is the length of chars
-     * @param length to limit the read.
+     * @param length the maximum number of bytes to read
+     * @throws IllegalArgumentException if an illegal argument is provided
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws UTFDataFormatRuntimeException if the string is not valid UTF-8
+     * @throws IllegalStateException if a required state for this operation is not met
      */
     default void parseUtf8(@NotNull Appendable sb, boolean utf, @NonNegative int length)
             throws IllegalArgumentException, BufferUnderflowException, UTFDataFormatRuntimeException, IllegalStateException {
         AppendableUtil.setLength(sb, 0);
         BytesInternal.parseUtf8(this, sb, utf, length);
     }
-
+    /**
+     * Parses a hexadecimal long value from the input stream.
+     *
+     * @return the parsed long value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default long parseHexLong()
             throws BufferUnderflowException, IllegalStateException {
         return BytesInternal.parseHexLong(this);
     }
 
+    /**
+     * Copies the data from the input stream to the provided OutputStream.
+     *
+     * @param out the OutputStream to copy the data to
+     * @throws IOException if an I/O error occurs
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     void copyTo(@NotNull OutputStream out)
             throws IOException, IllegalStateException;
 
+    /**
+     * Copies the data from the input stream to the provided BytesStore.
+     *
+     * @param to the BytesStore to copy the data to
+     * @return the number of bytes copied
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     long copyTo(@NotNull BytesStore to)
             throws IllegalStateException;
 
+    /**
+     * Reads data from the input stream into the provided Histogram.
+     *
+     * @param histogram the Histogram to fill with data
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     * @throws ArithmeticException if the number format is invalid
+     */
     default void readHistogram(@NotNull Histogram histogram)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
         BytesInternal.readHistogram(this, histogram);
     }
 
+    /**
+     * Reads data from the input stream with specified length into the provided Bytes.
+     *
+     * @param bytes the Bytes to fill with data
+     * @throws ArithmeticException if the number format is invalid
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws BufferOverflowException if there's not enough space in the buffer
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default void readWithLength(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalStateException {
         bytes.clear();

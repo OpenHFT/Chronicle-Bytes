@@ -40,20 +40,60 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
- * avoid wasting bytes at the end of chunks.
+ * Represents a memory-mapped file that can be randomly accessed in chunks. The file is divided
+ * into chunks, and each chunk has an overlapping region with the next chunk to avoid wasting bytes
+ * at the end of each chunk. This class provides methods for locking regions of the file, acquiring
+ * bytes for read or write operations, and managing the reference counts of the underlying mapped byte stores.
+ * <p>
+ * The class is abstract, and specific implementations may differ in how they manage the chunks
+ * and underlying file storage.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public abstract class MappedFile extends AbstractCloseableReferenceCounted {
+
+    /**
+     * The default disk synchronization mode for this mapped file.
+     */
     public static final SyncMode DEFAULT_SYNC_MODE = SyncMode.valueOf(System.getProperty("mappedFile.defaultSyncMode", "ASYNC"));
+
+    /**
+     * Flag to indicate if the mapped file should be retained.
+     */
     protected static final boolean RETAIN = Jvm.getBoolean("mappedFile.retain");
+
+    /**
+     * The default capacity of the mapped file.
+     */
     private static final long DEFAULT_CAPACITY = 128L << 40;
+
+    /**
+     * A token that represents the internalized file path.
+     */
     private final String internalizedToken;
+
+    /**
+     * The actual file that is memory-mapped.
+     */
     @NotNull
     private final File file;
+
+    /**
+     * Flag indicating if the file is read-only.
+     */
     private final boolean readOnly;
+
+    /**
+     * Listener for the event when a new chunk is created.
+     */
     protected NewChunkListener newChunkListener = MappedFile::logNewChunk;
 
+    /**
+     * Constructs a new MappedFile with the specified file and read-only flag.
+     *
+     * @param file     The file to be memory-mapped.
+     * @param readOnly True if the file should be read-only, false otherwise.
+     * @throws IORuntimeException if an I/O error occurs.
+     */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)
             throws IORuntimeException {
@@ -62,6 +102,13 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         this.readOnly = readOnly;
     }
 
+    /**
+     * Logs information about the allocation of a new chunk.
+     *
+     * @param filename   The name of the file for which the chunk was allocated.
+     * @param chunk      The size of the chunk.
+     * @param delayMicros The delay in microseconds it took to allocate the chunk.
+     */
     static void logNewChunk(final String filename,
                             @NonNegative final int chunk,
                             final long delayMicros) {
@@ -76,7 +123,17 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                 .toString();
         Jvm.perf().on(ChunkedMappedFile.class, message);
     }
-
+    /**
+     * Creates and returns a MappedFile instance with the specified file, chunk size, overlap size,
+     * and read-only mode.
+     *
+     * @param file        The file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
+     * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @param readOnly    If true, the file is opened in read-only mode; if false, it is opened for read-write.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile of(@NotNull final File file,
                                 @NonNegative final long chunkSize,
@@ -89,6 +146,15 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return new ChunkedMappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
     }
 
+    /**
+     * Creates and returns a MappedFile instance representing a single chunk of the specified file.
+     *
+     * @param file     The file to be memory-mapped.
+     * @param capacity The capacity of the memory-mapped file in bytes.
+     * @param readOnly If true, the file is opened in read-only mode; if false, it is opened for read-write.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile ofSingle(@NotNull final File file,
                                       @NonNegative final long capacity,
@@ -99,18 +165,44 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return new SingleMappedFile(file, raf, capacity, readOnly);
     }
 
+    /**
+     * Creates and returns a MappedFile instance for the specified file with the given chunk size.
+     * The overlap size is set to the default page size of the operating system.
+     *
+     * @param file      The file to be memory-mapped.
+     * @param chunkSize The size of each chunk in bytes.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file, @NonNegative final long chunkSize)
             throws FileNotFoundException {
         return mappedFile(file, chunkSize, OS.pageSize());
     }
 
+    /**
+     * Creates and returns a MappedFile instance for the specified file with the given chunk size.
+     * The overlap size is set to the default page size of the operating system.
+     *
+     * @param filename  The name of the file to be memory-mapped.
+     * @param chunkSize The size of each chunk in bytes.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final String filename, @NonNegative final long chunkSize)
             throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
-
+    /**
+     * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
+     *
+     * @param filename    The name of the file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
+     * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final String filename,
                                         @NonNegative final long chunkSize,
@@ -119,6 +211,15 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return mappedFile(new File(filename), chunkSize, overlapSize);
     }
 
+    /**
+     * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
+     *
+     * @param file        The file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
+     * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
                                         @NonNegative final long chunkSize,
@@ -127,6 +228,16 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return mappedFile(file, chunkSize, overlapSize, false);
     }
 
+    /**
+     * Creates and returns a MappedFile instance for the specified file with the given chunk size, overlap size, and read-only mode.
+     *
+     * @param file        The file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
+     * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @param readOnly    If true, the file is opened in read-only mode; if false, it is opened for read-write.
+     * @return A new MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
                                         @NonNegative final long chunkSize,
@@ -136,6 +247,16 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return MappedFile.of(file, chunkSize, overlapSize, readOnly);
     }
 
+    /**
+     * Creates and returns a read-only MappedFile instance for the specified file.
+     * The chunk size is set to the length of the file and overlap size is set to 0.
+     * On Windows, chunks of 4 GB or larger are not supported, so the chunk size is capped at 2^31 bytes
+     * and the overlap size is set to the default page size of the operating system.
+     *
+     * @param file The file to be memory-mapped.
+     * @return A new read-only MappedFile instance.
+     * @throws FileNotFoundException If the specified file does not exist.
+     */
     @NotNull
     public static MappedFile readOnly(@NotNull final File file)
             throws FileNotFoundException {
@@ -148,7 +269,18 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         }
         return MappedFile.of(file, chunkSize, overlapSize, true);
     }
-
+    /**
+     * Creates and returns a MappedFile instance with the specified file, capacity, chunk size,
+     * overlap size, and read-only mode.
+     *
+     * @param file        The file to be memory-mapped.
+     * @param capacity    The total size that the file should take up, in bytes.
+     * @param chunkSize   The size of each chunk in bytes.
+     * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @param readOnly    If true, the file is opened in read-only mode; if false, it is opened for read-write.
+     * @return A new MappedFile instance.
+     * @throws IOException If an I/O error occurs.
+     */
     @NotNull
     public static MappedFile mappedFile(@NotNull final File file,
                                         @NonNegative final long capacity,
@@ -163,21 +295,41 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return new ChunkedMappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
     }
 
+    /**
+     * Warms up the memory-mapped file by accessing its contents.
+     */
     public static void warmup() {
         ChunkedMappedFile.warmup();
     }
 
+    /**
+     * Returns the File object associated with this MappedFile.
+     *
+     * @return The File object.
+     */
     @NotNull
     public File file() {
         return file;
     }
 
+    /**
+     * Checks if this MappedFile is read-only.
+     *
+     * @return True if this MappedFile is read-only, false otherwise.
+     */
     public boolean readOnly() {
         return readOnly;
     }
 
     /**
-     * @throws IllegalStateException if closed.
+     * Acquires a byte store at the specified position.
+     *
+     * @param owner    The owner of the byte store.
+     * @param position The position at which the byte store should be acquired.
+     * @return A MappedBytesStore object.
+     * @throws IOException If an I/O error occurs.
+     * @throws IllegalArgumentException If the position is negative.
+     * @throws IllegalStateException If the MappedFile is closed.
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -186,7 +338,16 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(owner, position, null, MappedBytesStore::new);
     }
-
+    /**
+     * Acquires a byte store at the specified position with the ability to re-use an existing byte store.
+     *
+     * @param owner        The owner of the byte store.
+     * @param position     The position at which the byte store should be acquired.
+     * @param oldByteStore The old byte store that can be re-used, or null if not available.
+     * @return A MappedBytesStore object.
+     * @throws IOException           If an I/O error occurs.
+     * @throws IllegalStateException If the MappedFile is closed.
+     */
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
@@ -200,6 +361,19 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         }
     }
 
+    /**
+     * Acquires a byte store at the specified position with the ability to re-use an existing byte store,
+     * and specify a custom byte store factory.
+     *
+     * @param owner                 The owner of the byte store.
+     * @param position              The position at which the byte store should be acquired.
+     * @param oldByteStore          The old byte store that can be re-used, or null if not available.
+     * @param mappedBytesStoreFactory The factory to use for creating the MappedBytesStore.
+     * @return A MappedBytesStore object.
+     * @throws IOException           If an I/O error occurs.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws IllegalStateException    If the MappedFile is closed.
+     */
     @NotNull
     public abstract MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
@@ -211,7 +385,14 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             IllegalStateException;
 
     /**
-     * Convenience method so you don't need to release the BytesStore
+     * Acquires bytes for read at the specified position, without the need to release the BytesStore.
+     *
+     * @param owner    The owner of the bytes.
+     * @param position The position at which the bytes should be acquired.
+     * @return A Bytes object ready for read.
+     * @throws IOException               If an I/O error occurs.
+     * @throws IllegalStateException      If the MappedFile is closed.
+     * @throws BufferUnderflowException  If the position is beyond the limit.
      */
     @NotNull
     public Bytes<?> acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
@@ -225,7 +406,18 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         mbs.release(owner);
         return bytes;
     }
-
+    /**
+     * Acquires bytes for read at the specified position and stores them in the provided VanillaBytes object.
+     *
+     * @param owner    The owner of the bytes.
+     * @param position The position at which the bytes should be acquired.
+     * @param bytes    The VanillaBytes object to store the acquired bytes.
+     * @throws IOException                  If an I/O error occurs.
+     * @throws IllegalStateException         If the MappedFile is closed.
+     * @throws IllegalArgumentException      If an illegal argument is provided.
+     * @throws BufferUnderflowException     If there is not enough data available.
+     * @throws BufferOverflowException      If there is too much data.
+     */
     public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
@@ -234,6 +426,17 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         bytes.bytesStore(mbs, position, mbs.capacity() - position);
     }
 
+    /**
+     * Acquires bytes for write at the specified position.
+     *
+     * @param owner    The owner of the bytes.
+     * @param position The position at which the bytes should be acquired for write.
+     * @return A Bytes object ready for write.
+     * @throws IOException                  If an I/O error occurs.
+     * @throws IllegalStateException         If the MappedFile is closed.
+     * @throws IllegalArgumentException      If an illegal argument is provided.
+     * @throws BufferOverflowException      If there is too much data.
+     */
     @NotNull
     public Bytes<?> acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferOverflowException {
@@ -247,6 +450,18 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         return bytes;
     }
 
+    /**
+     * Acquires bytes for write at the specified position and stores them in the provided VanillaBytes object.
+     *
+     * @param owner    The owner of the bytes.
+     * @param position The position at which the bytes should be acquired for write.
+     * @param bytes    The VanillaBytes object to store the acquired bytes.
+     * @throws IOException                  If an I/O error occurs.
+     * @throws IllegalStateException         If the MappedFile is closed.
+     * @throws IllegalArgumentException      If an illegal argument is provided.
+     * @throws BufferUnderflowException     If there is not enough data available.
+     * @throws BufferOverflowException      If there is too much data.
+     */
     public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
         throwExceptionIfClosed();
@@ -256,31 +471,77 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         bytes.writePosition(position);
     }
 
+    /**
+     * Indicates whether the release operation can be performed in the background.
+     *
+     * @return True if release operation can be performed in the background; otherwise False.
+     */
     @Override
     protected boolean canReleaseInBackground() {
         // don't perform the close in the background as that just sets a flag. This does the real work.
         return true;
     }
-
+    /**
+     * Returns a string representation of the reference counts for the underlying mapped byte stores.
+     *
+     * @return A string representing the reference counts.
+     */
     @NotNull
     public abstract String referenceCounts();
 
+    /**
+     * Returns the capacity of the mapped file in bytes.
+     *
+     * @return The capacity in bytes.
+     */
     public abstract long capacity();
 
+    /**
+     * Returns the size of each chunk in the mapped file in bytes.
+     *
+     * @return The chunk size in bytes.
+     */
     public abstract long chunkSize();
 
+    /**
+     * Returns the size of the overlap between consecutive chunks in the mapped file in bytes.
+     *
+     * @return The overlap size in bytes.
+     */
     public abstract long overlapSize();
 
+    /**
+     * Returns the listener that is notified when a new chunk is created.
+     *
+     * @return The listener for new chunks.
+     */
     public NewChunkListener getNewChunkListener() {
         return newChunkListener;
     }
 
+    /**
+     * Sets the listener to be notified when a new chunk is created.
+     *
+     * @param listener The listener to be set.
+     */
     public void setNewChunkListener(final NewChunkListener listener) {
         this.newChunkListener = listener;
     }
 
+    /**
+     * Returns the actual size of the mapped file in bytes, including any space reserved
+     * for metadata, headers, etc.
+     *
+     * @return The actual size in bytes.
+     */
     public abstract long actualSize();
 
+    /**
+     * Returns the RandomAccessFile associated with the mapped file. This can be used for
+     * lower-level operations that are not directly supported by the MappedFile API.
+     *
+     * @return The RandomAccessFile associated with the mapped file.
+     */
     @NotNull
     public abstract RandomAccessFile raf();
 
@@ -293,7 +554,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         warnAndReleaseIfNotReleased();
         super.finalize();
     }
-
+    /**
+     * Performs a thread safety check on the component.
+     *
+     * @param isUsed Flag to indicate whether the component is used.
+     * @return Always returns true as the component is thread-safe.
+     */
     @Override
     protected boolean threadSafetyCheck(boolean isUsed) {
         // component is thread safe
@@ -306,28 +572,57 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * per JVM random string.
      * <p>
      * The canonical path is pre-pended with static and random data to reduce the probability of
-     * unrelated synchronization on internalized Strings
+     * unrelated synchronization on internalized Strings.
      *
-     * @return internalized token
+     * @return internalized token.
      */
     protected String internalizedToken() {
         return internalizedToken;
     }
 
     /**
-     * Calls lock on the underlying file channel
+     * Locks a specified region of this mapped file.
+     *
+     * @param position The byte position at which the locked region begins.
+     * @param size     The size of the region to lock, in bytes.
+     * @param shared   If {@code true}, the lock will be shared. Otherwise, it will be exclusive.
+     * @return A FileLock object representing the lock on the specified region.
+     * @throws IOException If an I/O error occurs.
      */
     public abstract FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException;
 
     /**
-     * Calls tryLock on the underlying file channel
+     * Attempts to lock a specified region of this mapped file.
+     *
+     * @param position The byte position at which the locked region begins.
+     * @param size     The size of the region to lock, in bytes.
+     * @param shared   If {@code true}, the lock will be shared. Otherwise, it will be exclusive.
+     * @return A FileLock object representing the lock on the specified region, or {@code null} if the lock could not be acquired.
+     * @throws IOException If an I/O error occurs.
      */
     public abstract FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException;
 
+    /**
+     * Returns the number of chunks in this mapped file.
+     *
+     * @return The number of chunks.
+     */
     public abstract long chunkCount();
 
+    /**
+     * Populates the provided array with detailed chunk count information.
+     * This may include, for example, counts of specific types of chunks.
+     *
+     * @param chunkCount The array to be populated with detailed chunk count information.
+     */
     public abstract void chunkCount(long[] chunkCount);
 
+    /**
+     * Creates a MappedBytes object for this mapped file. The MappedBytes object
+     * can be used for reading from and writing to the mapped file.
+     *
+     * @return A new MappedBytes object associated with this mapped file.
+     */
     public abstract MappedBytes createBytesFor();
 
     /**

@@ -35,33 +35,59 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Simple Bytes implementation which is not Elastic.
+ * A simple Bytes implementation that is non-elastic. It does not support dynamic resizing.
+ * This class provides functionality to work with a sequence of bytes, offering various read and write operations.
  *
- * @param <U> Underlying type
+ * @param <U> the type of the underlying object representation
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable<Bytes<U>, U>, Comparable<CharSequence> {
 
+    /**
+     * Constructor for creating an instance of VanillaBytes with the given BytesStore,
+     * using its write position and write limit.
+     *
+     * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
+     * @throws IllegalStateException if bytesStore is released.
+     * @throws IllegalArgumentException if the write limit of bytesStore is negative.
+     */
     protected VanillaBytes(@NotNull BytesStore bytesStore)
             throws IllegalStateException, IllegalArgumentException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
 
+    /**
+     * Factory method for creating an instance of VanillaBytes that wraps the provided BytesStore.
+     *
+     * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
+     * @return a new instance of VanillaBytes that wraps the given BytesStore.
+     */
     public static <U> VanillaBytes<U> wrap(BytesStore<?, U> bytesStore) {
         return new VanillaBytes<>(bytesStore);
     }
 
+    /**
+     * Constructor for creating an instance of VanillaBytes with the given BytesStore,
+     * write position, and write limit.
+     *
+     * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
+     * @param writePosition the position at which the next write will occur.
+     * @param writeLimit the maximum limit up to which writing can occur.
+     * @throws IllegalStateException if bytesStore is released.
+     * @throws IllegalArgumentException if the write limit is negative.
+     */
     protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
             throws IllegalStateException, IllegalArgumentException {
         super(bytesStore, writePosition, writeLimit);
     }
 
     /**
-     * Return a VanillaBytes which can have it's bytesStore() replaced as needed.
+     * Factory method for creating an instance of VanillaBytes with no initial ByteStore.
+     * This can be used in scenarios where the ByteStore is to be replaced or provided at a later point.
      *
-     * @return a non-elastic bytes with noByteStore()
+     * @return a new instance of VanillaBytes with no ByteStore.
      */
     @NotNull
     public static VanillaBytes<Void> vanillaBytes() {

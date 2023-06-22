@@ -27,7 +27,7 @@ import net.openhft.chronicle.core.annotation.DontChain;
  * The {@link DontChain} annotation is applied to this interface to indicate that when
  * MethodReaders and MethodWriters are exploring interfaces to implement, this interface
  * should not be considered.
- * </p>
+ * 
  */
 @DontChain
 public interface CommonMarshallable {

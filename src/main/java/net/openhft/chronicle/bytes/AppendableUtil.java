@@ -175,6 +175,15 @@ public enum AppendableUtil {
         }
     }
 
+    /**
+     * Reads an 8-bit character from a StreamingDataInput and appends it to an Appendable
+     * until a stop character as defined by the given StopCharsTester is encountered.
+     *
+     * @param bytes      the StreamingDataInput to read from
+     * @param appendable the Appendable to append to
+     * @param tester     the StopCharsTester defining the stop character
+     * @throws IllegalStateException if the StreamingDataInput is closed
+     */
     public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)

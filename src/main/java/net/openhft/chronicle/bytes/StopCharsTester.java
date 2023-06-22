@@ -33,7 +33,7 @@ public interface StopCharsTester {
      * <p>
      * For safety reasons, it is advised that a byte of value 0 should either be defined as a stop character
      * or should throw an IllegalStateException to prevent issues with null-terminated strings.
-     * </p>
+     * 
      *
      * @param ch  the character to test. If this is 0, it should return true or throw an exception.
      * @param peekNextCh the next character that would be parsed after 'ch'. It can be used for context aware stopping, like identifying escape sequences.
