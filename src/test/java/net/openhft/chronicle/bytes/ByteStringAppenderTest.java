@@ -227,7 +227,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                double ulp = i < 31 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
+                double ulp = i < 23 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
                 assertEquals(s, d, d2, ulp);
             }
             {

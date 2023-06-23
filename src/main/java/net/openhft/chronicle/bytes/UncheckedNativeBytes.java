@@ -45,7 +45,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U>, HasUncheckedRandomDataInput {
+        implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
     protected final long capacity;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
@@ -442,6 +442,12 @@ public class UncheckedNativeBytes<U>
             throws BufferOverflowException, IllegalStateException {
         writeCheckOffset(offset, 1);
         bytesStore.writeByte(offset, i);
+        return this;
+    }
+
+    @Override
+    public Bytes<U> rawWriteByte(byte i8) throws BufferOverflowException, IllegalStateException {
+        bytesStore.writeByte(writePosition++, i8);
         return this;
     }
 
@@ -906,6 +912,67 @@ public class UncheckedNativeBytes<U>
         long position = ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;
+    }
+
+    @Override
+    public @NotNull UncheckedNativeBytes<U> append(double d)
+            throws BufferOverflowException, IllegalStateException {
+        Decimalizer.INSTANCE.toDecimal(d, this);
+        return this;
+    }
+
+
+    @Override
+    public @NotNull UncheckedNativeBytes<U> append(float f)
+            throws BufferOverflowException, IllegalStateException {
+        Decimalizer.INSTANCE.toDecimal(f, this);
+        return this;
+    }
+
+    @Override
+    public void append(boolean negative, long mantissa, int exponent) {
+        ensureCapacity(32);
+        if (negative)
+            rawWriteByte((byte) '-');
+        long pos = writePosition();
+        if (exponent <= 0) {
+            rawWriteByte((byte) '0');
+            rawWriteByte((byte) '.');
+            while (exponent++ < 0)
+                rawWriteByte((byte) '0');
+            exponent = -1;
+        }
+
+        do {
+            if (exponent-- == 0)
+                rawWriteByte((byte) '.');
+            long base = mantissa % 10;
+            mantissa /= 10;
+            rawWriteByte((byte) ('0' + base));
+        } while (mantissa > 0 || exponent >= 0);
+        reverseBytesFrom(pos);
+    }
+
+    protected void reverseBytesFrom(long pos) {
+        long pos2 = writePosition()-1;
+        while (pos2 > pos) {
+            byte b1 = bytesStore.readByte(pos);
+            byte b2 = bytesStore.readByte(pos2);
+            bytesStore.writeByte(pos, b2);
+            bytesStore.writeByte(pos2, b1);
+            pos++;
+            pos2--;
+        }
+    }
+
+    @Override
+    public void appendHighPrecision(double d) {
+        append(Double.toString(d));
+    }
+
+    @Override
+    public void appendHighPrecision(float d) {
+        append(Float.toString(d));
     }
 
     @Override

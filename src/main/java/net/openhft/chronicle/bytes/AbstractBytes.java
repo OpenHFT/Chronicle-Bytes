@@ -17,10 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
-import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
@@ -29,7 +26,10 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.SingleThreadedChecked;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -51,7 +51,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
-        HasUncheckedRandomDataInput {
+        HasUncheckedRandomDataInput,
+        DecimalAppender {
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
@@ -238,19 +239,61 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
-        boolean fits = canWriteDirect(32);
-        if (fits) {
-            long address = addressForWrite(writePosition());
-            long address2 = UnsafeText.appendDouble(address, d);
-            writeSkip(address2 - address);
-            return this;
-        } else {
-            Bytes<?> bytes = BytesInternal.acquireBytes();
-            assert this != bytes;
-            bytes.append(d);
-            append(bytes);
-        }
+        Decimalizer.INSTANCE.toDecimal(d, this);
         return this;
+    }
+
+    @Override
+    public @NotNull AbstractBytes<U> append(float f)
+            throws BufferOverflowException, IllegalStateException {
+        Decimalizer.INSTANCE.toDecimal(f, this);
+        return this;
+    }
+
+    @Override
+    public void append(boolean negative, long mantissa, int exponent) {
+        ensureCapacity(32);
+        if (negative)
+            rawWriteByte((byte) '-');
+        long pos = writePosition();
+        if (exponent <= 0) {
+            rawWriteByte((byte) '0');
+            rawWriteByte((byte) '.');
+            while (exponent++ < 0)
+                rawWriteByte((byte) '0');
+            exponent = -1;
+        }
+
+        do {
+            if (exponent-- == 0)
+                rawWriteByte((byte) '.');
+            long base = mantissa % 10;
+            mantissa /= 10;
+            rawWriteByte((byte) ('0' + base));
+        } while (mantissa > 0 || exponent >= 0);
+        reverseBytesFrom(pos);
+    }
+
+    protected void reverseBytesFrom(long pos) {
+        long pos2 = writePosition() - 1;
+        while (pos2 > pos ) {
+            byte b1 = readByte(pos);
+            byte b2 = readByte(pos2);
+            writeByte(pos, b2);
+            writeByte(pos2, b1);
+            pos++;
+            pos2--;
+        }
+    }
+
+    @Override
+    public void appendHighPrecision(double d) {
+        append(Double.toString(d));
+    }
+
+    @Override
+    public void appendHighPrecision(float d) {
+        append(Float.toString(d));
     }
 
     @Override

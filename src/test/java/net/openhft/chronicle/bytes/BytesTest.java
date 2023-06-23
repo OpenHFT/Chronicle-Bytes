@@ -1079,10 +1079,24 @@ public class BytesTest extends BytesTestCommon {
         for (double d = 1; d >= 1e-19; d *= 0.99) {
             bytes.clear();
             bytes.append(d);
-            double err = d > 4.3e-10 ? 0
-                    : d > 2.14e-13 ? Math.ulp(d)
+            double err = d > 2.3e-10 ? 0
+                    : d > 2.0e-13 ? Math.ulp(d)
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
+        }
+    }
+
+    @Test
+    public void testAppendReallySmallFloat() {
+        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+
+        for (float f = 1; f >= 1e-19; f *= 0.99f) {
+            bytes.clear();
+            bytes.append(f);
+            float err = f > 1.2e-4 ? 0
+                    : Math.ulp(f);
+            assertEquals(f, bytes.parseFloat(), err);
         }
     }
 
