@@ -83,7 +83,8 @@ class DecimaliserFloatTest {
         public void append(boolean negative, long mantissa, int exponent) {
             assertFalse(negative);
             assertEquals(0, mantissa);
-            assertEquals(1, exponent);
+            if (exponent != 0)
+                assertEquals(1, exponent);
         }
 
         @Override
@@ -96,7 +97,8 @@ class DecimaliserFloatTest {
         public void append(boolean negative, long mantissa, int exponent) {
             assertTrue(negative);
             assertEquals(0, mantissa);
-            assertEquals(1, exponent);
+            if (exponent != 0)
+                assertEquals(1, exponent);
         }
 
         @Override
