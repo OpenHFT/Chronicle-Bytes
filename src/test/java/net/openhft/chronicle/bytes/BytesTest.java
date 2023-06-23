@@ -1077,9 +1077,10 @@ public class BytesTest extends BytesTestCommon {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
-        for (double d = 2.1328971635499866E-13; d >= 1e-40; d *= 0.99) {
+        for (double d = 1; d >= 1e-40; d *= 0.99) {
             bytes.clear();
             bytes.append(d);
+            // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             double err = d > 2.3e-10 ? 0
                     : d > 2.0e-13 && !Jvm.isArm() ? Math.ulp(d)
@@ -1097,6 +1098,7 @@ public class BytesTest extends BytesTestCommon {
         for (double d = 1e6; d <= 1e39; d *= 1.01) {
             bytes.clear();
             bytes.append(d);
+            // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             double err = d < 1.3e12 ? 0 : Math.ulp(d);
             double actual = bytes.parseDouble();
@@ -1112,6 +1114,7 @@ public class BytesTest extends BytesTestCommon {
         for (float f = 1; f > Float.MIN_NORMAL; f *= 0.99f) {
             bytes.clear();
             bytes.append(f);
+            // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             float err = f > 1.2e-4 ? 0 : Math.ulp(f);
             assertEquals(f, bytes.parseFloat(), err);
