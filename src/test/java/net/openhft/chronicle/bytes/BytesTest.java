@@ -1073,6 +1073,91 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
+    public void testAppendDouble() {
+
+        // TODO FIX
+        testAppendDoubleOnce(-145344868913.80003, "-145344868913.80002");
+
+        // ok
+        testAppendDoubleOnce(-1.4778838950354771E-9, "-0.0000000014778838950354771");
+
+        testAppendDoubleOnce(1.4753448053710411E-8, "0.000000014753448053710411");
+        testAppendDoubleOnce(4.731428525883379E-10, "0.0000000004731428525883379");
+        testAppendDoubleOnce(1e-5, "0.00001");
+
+        testAppendDoubleOnce(5.7270847085938394E-9, "0.0000000057270847085938394");
+        testAppendDoubleOnce(-3.5627763205104632E-9, "-0.0000000035627763205104632");
+        testAppendDoubleOnce(3.4363211797092447E-10, "0.00000000034363211797092447");
+
+        testAppendDoubleOnce(0.91234567890123456789, "0.91234567890123456");
+        testAppendDoubleOnce(0.7205789375929972, "0.7205789375929972");
+        testAppendDoubleOnce(1.7205789375929972E-8, "0.000000017205789375929972");
+        testAppendDoubleOnce(1.000000459754255, "1.000000459754255");
+        testAppendDoubleOnce(1.0000004597542552, "1.0000004597542552");
+        testAppendDoubleOnce(-0.0042633243189823394, "-0.0042633243189823394");
+        // too high
+        testAppendDoubleOnce(4.3634067645459027E-4, "0.00043634067645459027");
+        testAppendDoubleOnce(-4.8378951079402273E-4, "-0.00048378951079402273");
+        testAppendDoubleOnce(3.8098893793449994E-4, "0.00038098893793449994");
+        testAppendDoubleOnce(-0.0036980489197619678, "-0.0036980489197619678");
+
+        // FIXED
+        testAppendDoubleOnce(1.1777536373898703E-7, "0.00000011777536373898703");
+        testAppendDoubleOnce(8.577881719106565E-8, "0.00000008577881719106565");
+        testAppendDoubleOnce(1.1709707236415293E-7, "0.00000011709707236415293");
+        testAppendDoubleOnce(1.0272238286878982E-7, "0.00000010272238286878982");
+        testAppendDoubleOnce(9.077547054210796E-8, "0.00000009077547054210796");
+        testAppendDoubleOnce(-1.1914407211387385E-7, "-0.00000011914407211387385");
+//        testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785");
+        testAppendDoubleOnce(8.871684275243539E-4, "0.0008871684275243539");
+        testAppendDoubleOnce(8.807878708605213E-4, "0.0008807878708605213");
+        testAppendDoubleOnce(8.417670165790972E-4, "0.0008417670165790972");
+        testAppendDoubleOnce(0.0013292726996348332, "0.0013292726996348332");
+        testAppendDoubleOnce(2.4192540417349368E-4, "0.00024192540417349368");
+        testAppendDoubleOnce(1.9283711356548258E-4, "0.00019283711356548258");
+        testAppendDoubleOnce(-8.299137873077923E-5, "-0.00008299137873077923");
+
+        // OK
+        testAppendDoubleOnce(0, "0.0");
+        testAppendDoubleOnce(0.001, "0.001");
+        testAppendDoubleOnce(0.0001, "0.0001");
+        testAppendDoubleOnce(0.000001, "0.000001");
+        testAppendDoubleOnce(0.0000001, "0.0000001");
+        testAppendDoubleOnce(0.00000001, "0.00000001");
+        testAppendDoubleOnce(0.000000001, "0.000000001");
+        testAppendDoubleOnce(0.009, "0.009");
+        testAppendDoubleOnce(0.0009, "0.0009");
+        testAppendDoubleOnce(0.00009, "0.00009");
+        testAppendDoubleOnce(0.000009, "0.000009");
+        testAppendDoubleOnce(0.0000009, "0.0000009");
+        testAppendDoubleOnce(0.00000009, "0.00000009");
+        testAppendDoubleOnce(0.000000009, "0.000000009");
+        testAppendDoubleOnce(Double.NaN, "NaN");
+        testAppendDoubleOnce(Double.POSITIVE_INFINITY, "Infinity");
+        testAppendDoubleOnce(Double.NEGATIVE_INFINITY, "-Infinity");
+        testAppendDoubleOnce(0.1, "0.1");
+        testAppendDoubleOnce(12.0, "12.0");
+        testAppendDoubleOnce(12.1, "12.1");
+        testAppendDoubleOnce(12.00000001, "12.00000001");
+        testAppendDoubleOnce(1e-6 + Math.ulp(1e-6), "0.0000010000000000000002");
+        testAppendDoubleOnce(1e-7 + Math.ulp(1e-7), "0.00000010000000000000001");
+        testAppendDoubleOnce(1e-8 + Math.ulp(1e-8), "0.000000010000000000000002");
+        testAppendDoubleOnce(1e-9 + Math.ulp(1e-9), "0.0000000010000000000000003");
+        testAppendDoubleOnce(1e-10 + Math.ulp(1e-10), "0.00000000010000000000000002");
+        // TODO FIX
+//        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "1.0E-11");
+        testAppendDoubleOnce(1e-12 + Math.ulp(1e-12), "0.0000000000010000000000000002");
+
+        double d = -1e30;
+        testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000002E30");
+        d = -1e31;
+        // TODO FIX
+        // testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000001E31");
+        d = -1e32;
+        testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000002E32");
+    }
+
+    @Test
     public void testAppendReallySmallDouble() {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
@@ -1179,6 +1264,18 @@ public class BytesTest extends BytesTestCommon {
             }
         } finally {
             postTest(a);
+        }
+    }
+
+    private void testAppendDoubleOnce(double value, String expected) {
+        @NotNull Bytes<?> a = alloc1.elasticBytes(32);
+        try {
+            a.append(value);
+            String actual = a.toString();
+            assertEquals(value, a.parseDouble(), 0.0);
+            assertEquals(expected, actual);
+        } finally {
+            a.releaseLast();
         }
     }
 }
