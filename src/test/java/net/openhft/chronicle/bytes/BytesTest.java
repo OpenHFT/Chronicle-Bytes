@@ -1076,13 +1076,30 @@ public class BytesTest extends BytesTestCommon {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
-        for (double d = 1; d >= 1e-19; d *= 0.99) {
+        for (double d = 1; d >= 1e-40; d *= 0.99) {
             bytes.clear();
             bytes.append(d);
+            // ok for not easily decimalised
             double err = d > 2.3e-10 ? 0
                     : d > 2.0e-13 ? Math.ulp(d)
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
+        }
+    }
+
+
+    @Test
+    public void testAppendReallyBigDouble() {
+        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+
+        for (double d = 1e6; d <= 1e39; d *= 1.01) {
+            bytes.clear();
+            bytes.append(d);
+            // ok for not easily decimalised
+            double err = d < 1.3e12 ? 0 : Math.ulp(d);
+            double actual = bytes.parseDouble();
+            assertEquals(d, actual, err);
         }
     }
 
@@ -1091,12 +1108,25 @@ public class BytesTest extends BytesTestCommon {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
         Bytes<?> bytes = alloc1.elasticBytes(32);
 
-        for (float f = 1; f >= 1e-19; f *= 0.99f) {
+        for (float f = 1; f > Float.MIN_NORMAL; f *= 0.99f) {
             bytes.clear();
             bytes.append(f);
-            float err = f > 1.2e-4 ? 0
-                    : Math.ulp(f);
+            // ok for not easily decimalised
+            float err = f > 1.2e-4 ? 0 : Math.ulp(f);
             assertEquals(f, bytes.parseFloat(), err);
+        }
+    }
+
+
+    @Test
+    public void testAppendReallyBigFloat() {
+        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
+        Bytes<?> bytes = alloc1.elasticBytes(32);
+
+        for (float f = 1e6f; f < Float.POSITIVE_INFINITY; f *= 1.01f) {
+            bytes.clear();
+            bytes.append(f);
+            assertEquals(f, bytes.parseFloat(), 0.0f);
         }
     }
 
