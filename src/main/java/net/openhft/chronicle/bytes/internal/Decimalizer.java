@@ -64,7 +64,7 @@ public interface Decimalizer {
     class Instance implements Decimalizer {
 
         public static final double LARGEST_POW10_IN_LONG = 1e18;
-        public static final double INV_LARGEST_POWRE10_IN_LONG = 1e-18;
+        public static final double INV_LARGEST_POWRE10_IN_LONG = Jvm.isArm() ? 1e-17 : 1e-18;
 
         @Override
         public void toDecimal(double value, DecimalAppender decimalAppender) {

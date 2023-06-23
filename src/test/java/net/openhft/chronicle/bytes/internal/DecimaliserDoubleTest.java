@@ -17,8 +17,11 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.Maths;
 import org.junit.jupiter.api.Test;
 
+import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
 import static org.junit.Assert.*;
@@ -161,17 +164,19 @@ class DecimaliserDoubleTest {
             @Override
             public void append(boolean negative, long mantissa, int exponent) {
                 assertTrue(0 <= exponent);
-                assertTrue(exponent <= 18);
+                if (exponent> 18)
+                    assertTrue("exponent: " + exponent, exponent <= 18);
             }
 
             @Override
             public void appendHighPrecision(double d) {
-                assertFalse("Unexpected " + d, 1e-18 <= d && d < 1e18);
+                double lower = Jvm.isArm() ? 1e-17 : 1e-18;
+                assertFalse("Unexpected " + d, lower <= d && d < 1e18);
             }
         };
-        LongStream.range(-325, 309)
+        IntStream.range(-325, 309)
                 .forEach(x -> {
-                    double d = Math.pow(10, x);
+                    double d = (-18 < x && x < -1) ? 1.0 / Maths.tens(-x) : Math.pow(10, x);
                     Decimalizer.INSTANCE.toDecimal(d, check);
                 });
     }
