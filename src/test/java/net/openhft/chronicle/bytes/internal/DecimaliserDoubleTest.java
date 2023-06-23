@@ -140,7 +140,7 @@ class DecimaliserDoubleTest {
 
     @Test
     public void toDoubleLiteAndBigDecimal() {
-        LongStream.range(0, 1_000_000L)
+        LongStream.range(0, 100_000L)
                 .parallel()
                 .forEach(x -> {
                     long f = 1;

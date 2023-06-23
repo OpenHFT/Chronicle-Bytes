@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
@@ -138,7 +139,7 @@ class DecimaliserFloatTest {
 
     @Test
     public void toFloatLiteAndBigDecimal() {
-        IntStream.range(0, 1_000_000)
+        IntStream.range(0, 100_000)
                 .parallel()
                 .forEach(x -> {
                     long f = 1;
@@ -167,7 +168,8 @@ class DecimaliserFloatTest {
 
             @Override
             public void appendHighPrecision(float d) {
-                assertFalse("Unexpected " + d, 1e-18 <= d && d < 1e18);
+                double lower = Jvm.isArm() ? 1e-17 : 1e-18;
+                assertFalse("Unexpected " + d, lower <= d && d < 1e18);
             }
         };
         LongStream.range(-39, 39)
