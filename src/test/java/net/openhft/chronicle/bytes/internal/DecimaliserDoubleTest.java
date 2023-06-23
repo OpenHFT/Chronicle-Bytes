@@ -28,114 +28,63 @@ import static org.junit.Assert.*;
 
 class DecimaliserDoubleTest {
 
-    public static final DecimalAppender CHECK_OK = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            // ok
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
+        // ok
     };
-    public static final DecimalAppender CHECK_NEG314 = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            assertTrue(negative);
-            assertEquals(314, mantissa);
-            assertEquals(2, exponent);
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_NEG314 = (negative, mantissa, exponent) -> {
+        assertTrue(negative);
+        assertEquals(314, mantissa);
+        assertEquals(2, exponent);
     };
-    public static final DecimalAppender CHECK_123456789_012345 = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            assertFalse(negative);
-            assertEquals(123456789012345L, mantissa);
-            assertEquals(6, exponent);
-            assertEquals(123456789.012345, mantissa / 1e6, 0.0);
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_123456789_012345 = (negative, mantissa, exponent) -> {
+        assertFalse(negative);
+        assertEquals(123456789012345L, mantissa);
+        assertEquals(6, exponent);
+        assertEquals(123456789.012345, mantissa / 1e6, 0.0);
     };
-    public static final DecimalAppender CHECK_NEG_PI = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            assertTrue(negative);
-            assertEquals(3141592653589793L, mantissa);
-            assertEquals(15, exponent);
-            assertEquals(Math.PI, mantissa / 1e15, 0.0);
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_NEG_PI = (negative, mantissa, exponent) -> {
+        assertTrue(negative);
+        assertEquals(3141592653589793L, mantissa);
+        assertEquals(15, exponent);
+        assertEquals(Math.PI, mantissa / 1e15, 0.0);
     };
-    public static final DecimalAppender CHECK_ZERO = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            assertFalse(negative);
-            assertEquals(0, mantissa);
-            if (exponent != 0)
-                assertEquals(1, exponent);
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_ZERO = (negative, mantissa, exponent) -> {
+        assertFalse(negative);
+        assertEquals(0, mantissa);
+        if (exponent != 0)
+            assertEquals(1, exponent);
     };
-    public static final DecimalAppender CHECK_NEG_ZERO = new DecimalAppender() {
-        @Override
-        public void append(boolean negative, long mantissa, int exponent) {
-            assertTrue(negative);
-            assertEquals(0, mantissa);
-            if (exponent != 0)
-                assertEquals(1, exponent);
-        }
-
-        @Override
-        public void appendHighPrecision(double d) {
-            fail("Unable to decimalise " + d);
-        }
+    public static final DecimalAppender CHECK_NEG_ZERO = (negative, mantissa, exponent) -> {
+        assertTrue(negative);
+        assertEquals(0, mantissa);
+        if (exponent != 0)
+            assertEquals(1, exponent);
     };
     public static final double HARD_TO_DECIMALISE = 4.8846945805332034E-12;
 
     @Test
     public void toDoubleTestTest() {
-        try {
-            Decimalizer.LITE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK);
-            fail("Test the test failed");
-        } catch (AssertionError e) {
-            assertEquals("Unable to decimalise " + HARD_TO_DECIMALISE, e.getMessage());
-        }
+        assertFalse(Decimalizer.LITE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
     }
 
     @Test
     public void toDoubleTest() {
-        DecimalAppender check = new DecimalAppender() {
-            @Override
-            public void append(boolean negative, long mantissa, int exponent) {
-                assertFalse(negative);
-                assertEquals(48846945805332034L, mantissa);
-                assertEquals(28, exponent);
-            }
-
-            @Override
-            public void appendHighPrecision(double d) {
-                fail("Unable to decimalise " + d);
-            }
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(48846945805332034L, mantissa);
+            assertEquals(28, exponent);
         };
-        Decimalizer.INSTANCE.toDecimal(HARD_TO_DECIMALISE, check);
+        assertTrue(Decimalizer.INSTANCE.toDecimal(HARD_TO_DECIMALISE, check));
+    }
+
+    @Test
+    public void toDoubleTest1e_6() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(6, exponent);
+        };
+        assertTrue(Decimalizer.INSTANCE.toDecimal(1e-6, check));
     }
 
     @Test
@@ -147,12 +96,12 @@ class DecimaliserDoubleTest {
                     for (int i = 0; i <= 18; i++) {
                         // simple decimal is ok
                         double d = (double) x / f;
-                        Decimalizer.LITE.toDecimal(d, CHECK_OK);
+                        assertTrue(Decimalizer.LITE.toDecimal(d, CHECK_OK));
 
                         // probably requires more precision
                         long l = Double.doubleToLongBits(d);
                         double d2 = Double.longBitsToDouble(l + x);
-                        Decimalizer.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK);
+                        assertTrue(Decimalizer.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
                         f *= 10;
                     }
                 });
@@ -160,24 +109,17 @@ class DecimaliserDoubleTest {
 
     @Test
     public void toDoubleLarge() {
-        DecimalAppender check = new DecimalAppender() {
-            @Override
-            public void append(boolean negative, long mantissa, int exponent) {
-                assertTrue(0 <= exponent);
-                if (exponent> 18)
-                    assertTrue("exponent: " + exponent, exponent <= 18);
-            }
-
-            @Override
-            public void appendHighPrecision(double d) {
-                double lower = Jvm.isArm() ? 1e-17 : 1e-18;
-                assertFalse("Unexpected " + d, lower <= d && d < 1e18);
-            }
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertTrue(0 <= exponent);
+            assertTrue("exponent: " + exponent, exponent <= 18);
         };
         IntStream.range(-325, 309)
                 .forEach(x -> {
                     double d = (-18 < x && x < -1) ? 1.0 / Maths.tens(-x) : Math.pow(10, x);
-                    Decimalizer.INSTANCE.toDecimal(d, check);
+                    double lower = Jvm.isArm() ? 1e-17 : 1e-18;
+                    assertEquals("x: " + x,
+                            d == 0.0 || (lower <= d && d <= 1e18),
+                            Decimalizer.LITE.toDecimal(d, check));
                 });
     }
 
@@ -223,37 +165,12 @@ class DecimaliserDoubleTest {
 
     @Test
     public void testNegLongMinValueBD() {
-        DecimalAppender check = new DecimalAppender() {
-            @Override
-            public void append(boolean negative, long mantissa, int exponent) {
-                // -9223372036854775808
-                assertTrue(negative);
-                assertEquals(9223372036854776L, mantissa);
-                assertEquals(-3, exponent);
-            }
-
-            @Override
-            public void appendHighPrecision(double d) {
-                fail("Unable to decimalise " + d);
-            }
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            // -9223372036854775808
+            assertTrue(negative);
+            assertEquals(9223372036854776L, mantissa);
+            assertEquals(-3, exponent);
         };
-        Decimalizer.USES_BIG_DECIMAL.toDecimal((double) Long.MIN_VALUE, check);
-    }
-
-    @Test
-    public void testVerySmallValue() {
-        DecimalAppender check = new DecimalAppender() {
-            @Override
-            public void append(boolean negative, long mantissa, int exponent) {
-                fail("Expected high precision, but received normal precision.");
-            }
-
-            @Override
-            public void appendHighPrecision(double d) {
-                // ok, expecting high precision call
-                assertEquals(1e-20, d, 0.0);
-            }
-        };
-        Decimalizer.INSTANCE.toDecimal(1e-20, check);
+        assertTrue(Decimalizer.USES_BIG_DECIMAL.toDecimal((double) Long.MIN_VALUE, check));
     }
 }

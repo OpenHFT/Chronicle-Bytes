@@ -235,24 +235,53 @@ public abstract class AbstractBytes<U>
         writeCheckOffset(offset, Long.BYTES);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
-
+    /**
+     * Appends the string representation of the given double value to the bytes.
+     * First, it tries to convert the double value using the Decimalizer instance. If that fails,
+     * it falls back to converting the double to a String and appending it.
+     *
+     * @param d the double value to append.
+     * @return this Bytes instance.
+     * @throws BufferOverflowException if there is not enough space to write the double.
+     * @throws IllegalStateException if this buffer is closed.
+     */
     @Override
-    public @NotNull AbstractBytes<U> append(double d)
+    public @NotNull Bytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
-        Decimalizer.INSTANCE.toDecimal(d, this);
+        if (!Decimalizer.INSTANCE.toDecimal(d, this))
+            append(Double.toString(d));
         return this;
     }
 
+    /**
+     * Appends the string representation of the given float value to the bytes.
+     * First, it tries to convert the float value using the Decimalizer instance. If that fails,
+     * it falls back to converting the float to a String and appending it.
+     *
+     * @param f the float value to append.
+     * @return this Bytes instance.
+     * @throws BufferOverflowException if there is not enough space to write the float.
+     * @throws IllegalStateException if this buffer is closed.
+     */
     @Override
-    public @NotNull AbstractBytes<U> append(float f)
+    public @NotNull Bytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
-        Decimalizer.INSTANCE.toDecimal(f, this);
+        if (!Decimalizer.INSTANCE.toDecimal(f, this))
+            append(Float.toString(f));
         return this;
     }
 
+    /**
+     * Appends a numeric value in decimal form with the specified mantissa and exponent,
+     * handling negative values and decimal point placement.
+     *
+     * @param negative indicates if the number is negative.
+     * @param mantissa the mantissa of the number to append.
+     * @param exponent the exponent indicating the position of the decimal point.
+     */
     @Override
     public void append(boolean negative, long mantissa, int exponent) {
-        ensureCapacity(32);
+        ensureCapacity(48);
         if (negative)
             rawWriteByte((byte) '-');
         long pos = writePosition();
@@ -284,16 +313,6 @@ public abstract class AbstractBytes<U>
             pos++;
             pos2--;
         }
-    }
-
-    @Override
-    public void appendHighPrecision(double d) {
-        append(Double.toString(d));
-    }
-
-    @Override
-    public void appendHighPrecision(float d) {
-        append(Float.toString(d));
     }
 
     @Override

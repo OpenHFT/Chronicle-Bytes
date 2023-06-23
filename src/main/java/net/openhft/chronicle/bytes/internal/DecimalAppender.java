@@ -17,40 +17,22 @@
  */
 package net.openhft.chronicle.bytes.internal;
 /**
- * Interface representing a handler for decimal numbers, allowing for the appending of decimal values in various forms.
- * Implementations may decide how to handle the components of the decimal number (sign, mantissa, and exponent).
- * Additionally, there is support for handling high-precision numbers separately.
+ * This interface represents a handler for decimal numbers, and defines how they should be appended in various forms.
+ * Implementations of this interface should provide strategies for handling the individual components of a decimal number,
+ * including its sign, mantissa, and exponent.
+ * <p>
+ * A decimal number can be represented as: <code>decimal = (isNegative ? -1 : +1) * mantissa * 10^-exponent</code>, where mantissa contains the
+ * significant digits and the exponent scales the number by a power of ten. The sign denotes whether the decimal is positive or negative.
  */
+@FunctionalInterface
 public interface DecimalAppender {
 
     /**
-     * Appends a decimal number represented by its sign, mantissa, and exponent components.
+     * Appends a decimal number represented by its sign, mantissa, and exponent to a target.
      *
-     * @param isNegative Whether the number is negative; true if negative, false if positive.
-     * @param mantissa   The significant digits of the decimal number.
-     * @param exponent   The power of 10 by which the mantissa should be multiplied to obtain the actual number.
+     * @param isNegative Whether the number is negative; true indicates that the number is negative, false indicates positive.
+     * @param mantissa   The significant digits of the decimal number, represented as a long.
+     * @param exponent   The exponent to which 10 must be raised and then multiplied with the mantissa to obtain the actual decimal number.
      */
     void append(boolean isNegative, long mantissa, int exponent);
-
-    /**
-     * Appends a high-precision double value. This method should be overridden if high-precision handling is required.
-     * It is called when the Decimalizer fails to convert the double into sign, mantissa, and exponent components.
-     *
-     * @param value The high-precision double value to be appended.
-     * @throws UnsupportedOperationException if this operation is not supported by the implementing class.
-     */
-    default void appendHighPrecision(double value) {
-        throw new UnsupportedOperationException("High-precision double appending is not supported. Value: " + value);
-    }
-
-    /**
-     * Appends a high-precision float value. This method should be overridden if high-precision handling is required.
-     * It is called when the Decimalizer fails to convert the float into sign, mantissa, and exponent components.
-     *
-     * @param value The high-precision float value to be appended.
-     * @throws UnsupportedOperationException if this operation is not supported by the implementing class.
-     */
-    default void appendHighPrecision(float value) {
-        throw new UnsupportedOperationException("High-precision float appending is not supported. Value: " + value);
-    }
 }

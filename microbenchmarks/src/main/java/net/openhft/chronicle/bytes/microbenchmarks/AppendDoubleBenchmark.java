@@ -34,8 +34,8 @@ AppendDoubleBenchmark.appendFloat   avgt    5  121.027 ±  2.328  ns/op
 
 = After optimisation
 Benchmark                           Mode  Cnt   Score   Error  Units
-AppendDoubleBenchmark.appendDouble  avgt    5  47.477 ± 0.270  ns/op
-AppendDoubleBenchmark.appendFloat   avgt    5  37.610 ± 0.327  ns/op
+AppendDoubleBenchmark.appendDouble  avgt    5  50.598 ± 0.185  ns/op
+AppendDoubleBenchmark.appendFloat   avgt    5  43.135 ± 4.113  ns/op
  */
 
 @Warmup(iterations = 3, time = 1)
@@ -60,6 +60,7 @@ public class AppendDoubleBenchmark {
     @Setup
     public void setUp() {
         bytes = Bytes.allocateElasticDirect(32);
+        count = 0;
     }
 
     @Benchmark
@@ -74,11 +75,11 @@ public class AppendDoubleBenchmark {
 
     @Benchmark
     public void appendFloat() {
-        float d = count++ / 1e5f;
-        if (d > 10)
+        float f = count++ / 1e5f;
+        if (f > 10)
             count = 0;
 
         bytes.clear();
-        bytes.append(d);
+        bytes.append(f);
     }
 }

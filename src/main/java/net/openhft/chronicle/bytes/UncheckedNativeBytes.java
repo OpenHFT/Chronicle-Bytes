@@ -917,7 +917,8 @@ public class UncheckedNativeBytes<U>
     @Override
     public @NotNull UncheckedNativeBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
-        Decimalizer.INSTANCE.toDecimal(d, this);
+        if (!Decimalizer.INSTANCE.toDecimal(d, this))
+            append(Double.toString(d));
         return this;
     }
 
@@ -925,13 +926,14 @@ public class UncheckedNativeBytes<U>
     @Override
     public @NotNull UncheckedNativeBytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
-        Decimalizer.INSTANCE.toDecimal(f, this);
+        if (!Decimalizer.INSTANCE.toDecimal(f, this))
+            append(Float.toString(f));
         return this;
     }
 
     @Override
     public void append(boolean negative, long mantissa, int exponent) {
-        ensureCapacity(32);
+        ensureCapacity(48);
         if (negative)
             rawWriteByte((byte) '-');
         long pos = writePosition();
@@ -963,16 +965,6 @@ public class UncheckedNativeBytes<U>
             pos++;
             pos2--;
         }
-    }
-
-    @Override
-    public void appendHighPrecision(double d) {
-        append(Double.toString(d));
-    }
-
-    @Override
-    public void appendHighPrecision(float d) {
-        append(Float.toString(d));
     }
 
     @Override

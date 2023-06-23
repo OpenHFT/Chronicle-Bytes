@@ -23,115 +23,79 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 
 /**
- * Interface for converting double values to their decimal representation.
+ * Interface for converting floating-point values (double and float) into a decimal representation
+ * which is suitable for appending. Multiple strategies are provided for the conversion process
+ * including a light-weight and a BigDecimal based implementation.
  */
 public interface Decimalizer {
 
     /**
-     * Default instance of Decimalizer.
+     * Default instance of Decimalizer which combines both the light-weight and BigDecimal-based strategies.
      */
     Decimalizer INSTANCE = new Instance();
 
     /**
-     * Light-weight instance of Decimalizer.
+     * Light-weight instance of Decimalizer, which uses a simple rounding approach for the conversion.
      */
     Decimalizer LITE = new Decimalizer.Lite();
 
     /**
-     * Decimalizer instance that utilizes BigDecimal for conversion.
+     * Decimalizer instance that utilizes BigDecimal for higher precision conversion.
      */
     Decimalizer USES_BIG_DECIMAL = new Decimalizer.UsesBigDecimal();
 
     /**
-     * Converts a double value to its decimal representation.
+     * Converts a double value to its decimal representation and appends it using the provided DecimalAppender.
      *
      * @param value           the double value to be converted.
-     * @param decimalAppender the appender used to store the converted decimal value.
+     * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+     * @return true if the conversion and appending was successful, false otherwise.
      */
-    void toDecimal(double value, DecimalAppender decimalAppender);
+    boolean toDecimal(double value, DecimalAppender decimalAppender);
 
     /**
-     * Converts a float value to its decimal representation.
+     * Converts a float value to its decimal representation and appends it using the provided DecimalAppender.
      *
      * @param value           the float value to be converted.
-     * @param decimalAppender the appender used to store the converted decimal value.
+     * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+     * @return true if the conversion and appending was successful, false otherwise.
      */
-    void toDecimal(float value, DecimalAppender decimalAppender);
+    boolean toDecimal(float value, DecimalAppender decimalAppender);
 
     /**
-     * Default implementation of Decimalizer.
+     * The default implementation of Decimalizer which attempts the conversion using the light-weight strategy first,
+     * falling back to the BigDecimal-based strategy if necessary.
      */
     class Instance implements Decimalizer {
-
-        public static final double LARGEST_POW10_IN_LONG = 1e18;
-        public static final double INV_LARGEST_POWRE10_IN_LONG = Jvm.isArm() ? 1e-17 : 1e-18;
-
         @Override
-        public void toDecimal(double value, DecimalAppender decimalAppender) {
-            double abs = Math.abs(value);
-
-            // Revert to fail-safe writing for very large or small values.
-            if (!(INV_LARGEST_POWRE10_IN_LONG <= abs && abs < LARGEST_POW10_IN_LONG)) {
-                decimalAppender.appendHighPrecision(value);
-                return;
-            }
-
-            // assume it's probably easily decimalized
-            LITE.toDecimal(value, new DecimalAppender() {
-                @Override
-                public void append(boolean negative, long mantissa, int exponent) {
-                    decimalAppender.append(negative, mantissa, exponent);
-                }
-
-                @Override
-                public void appendHighPrecision(double d) {
-                    // or try using BigDecimal
-                    USES_BIG_DECIMAL.toDecimal(d, decimalAppender);
-                }
-            });
+        public boolean toDecimal(double value, DecimalAppender decimalAppender) {
+            return LITE.toDecimal(value, decimalAppender)
+                    || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
         }
 
 
         @Override
-        public void toDecimal(float value, DecimalAppender decimalAppender) {
-            float abs = Math.abs(value);
-
-            // Revert to fail-safe writing for very large or small values.
-            if (!(INV_LARGEST_POWRE10_IN_LONG <= abs && abs < LARGEST_POW10_IN_LONG)) {
-                decimalAppender.appendHighPrecision(value);
-                return;
-            }
-
-            // assume it's probably easily decimalized
-            LITE.toDecimal(value, new DecimalAppender() {
-                @Override
-                public void append(boolean negative, long mantissa, int exponent) {
-                    decimalAppender.append(negative, mantissa, exponent);
-                }
-
-                @Override
-                public void appendHighPrecision(float f) {
-                    // or try using BigDecimal
-                    USES_BIG_DECIMAL.toDecimal(f, decimalAppender);
-                }
-            });
+        public boolean toDecimal(float value, DecimalAppender decimalAppender) {
+            return LITE.toDecimal(value, decimalAppender)
+                    || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
         }
     }
 
     /**
-     * Light-weight implementation of Decimalizer.
+     * Light-weight implementation of Decimalizer, which uses a simple rounding approach for conversion.
      */
     class Lite implements Decimalizer {
 
         public static final int LARGEST_EXPONENT_IN_LONG = 18;
 
         /**
-         * Converts a double value to its decimal representation using a simple rounding approach.
+         * Converts a double value to its decimal representation using a simple rounding approach and appends it.
          *
          * @param value           the double value to be converted.
-         * @param decimalAppender the appender used to store the converted decimal value.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
          */
-        public void toDecimal(double value, DecimalAppender decimalAppender) {
+        public boolean toDecimal(double value, DecimalAppender decimalAppender) {
             boolean isNegative = Double.doubleToLongBits(value) < 0;
             double absValue = Math.abs(value);
 
@@ -140,20 +104,21 @@ public interface Decimalizer {
                 long mantissa = Math.round(absValue * factor);
                 if ((double) mantissa / factor == absValue) {
                     decimalAppender.append(isNegative, mantissa, exponent);
-                    return;
+                    return true;
                 }
                 factor *= 10;
             }
-            decimalAppender.appendHighPrecision(value);
+            return false;
         }
 
         /**
-         * Converts a float value to its decimal representation using a simple rounding approach.
+         * Converts a float value to its decimal representation using a simple rounding approach and appends it.
          *
-         * @param value           the double value to be converted.
-         * @param decimalAppender the appender used to store the converted decimal value.
+         * @param value           the float value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
          */
-        public void toDecimal(float value, DecimalAppender decimalAppender) {
+        public boolean toDecimal(float value, DecimalAppender decimalAppender) {
             boolean sign = Double.doubleToLongBits(value) < 0;
             float absValue = Math.abs(value);
 
@@ -162,16 +127,16 @@ public interface Decimalizer {
                 long mantissa = Math.round(absValue * (double) factor);
                 if ((float) mantissa / factor == absValue) {
                     decimalAppender.append(sign, mantissa, exponent);
-                    return;
+                    return true;
                 }
                 factor *= 10;
             }
-            decimalAppender.appendHighPrecision(value);
+            return false;
         }
     }
 
     /**
-     * BigDecimal based implementation of Decimalizer.
+     * BigDecimal-based implementation of Decimalizer for higher precision conversions.
      */
     class UsesBigDecimal implements Decimalizer {
 
@@ -181,12 +146,16 @@ public interface Decimalizer {
         static final java.lang.reflect.Field INT_COMPACT = Jvm.getFieldOrNull(BigDecimal.class, "intCompact");
 
         /**
-         * Converts a double value to its decimal representation using BigDecimal.
+         * Converts a double value to its decimal representation using BigDecimal and appends it.
          *
          * @param value           the double value to be converted.
-         * @param decimalAppender the appender used to store the converted decimal value.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
          */
-        public void toDecimal(double value, DecimalAppender decimalAppender) {
+        public boolean toDecimal(double value, DecimalAppender decimalAppender) {
+            double abs = Math.abs(value);
+            if (!Double.isFinite(value) || abs < 1e-30 || abs > 1e46)
+                return false;
             BigDecimal bd = BigDecimal.valueOf(value);
             int exp = bd.scale();
             try {
@@ -195,25 +164,31 @@ public interface Decimalizer {
                     BigInteger bi = bd.unscaledValue();
                     long l = bi.longValueExact();
                     decimalAppender.append(l < 0, Math.abs(l), exp);
+                    return true;
+
                 } else {
                     long l = INT_COMPACT.getLong(bd);
-                    if (l == Long.MIN_VALUE)
-                        decimalAppender.appendHighPrecision(value); // appendHighPrecision(double)
-                    else
+                    if (l != Long.MIN_VALUE) {
                         decimalAppender.append(l < 0, Math.abs(l), exp);
+                        return true;
+                    }
                 }
             } catch (ArithmeticException | IllegalAccessException ae) {
-                decimalAppender.appendHighPrecision(value);
+                // fall back
             }
+            return false;
         }
 
         /**
-         * Converts a float value to its decimal representation using BigDecimal.
+         * Converts a float value to its decimal representation using BigDecimal and appends it.
          *
-         * @param value           the double value to be converted.
-         * @param decimalAppender the appender used to store the converted decimal value.
+         * @param value           the float value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
          */
-        public void toDecimal(float value, DecimalAppender decimalAppender) {
+        public boolean toDecimal(float value, DecimalAppender decimalAppender) {
+            if (!Float.isFinite(value))
+                return false;
             BigDecimal bd = new BigDecimal(Float.toString(value));
             int exp = bd.scale();
             try {
@@ -222,16 +197,20 @@ public interface Decimalizer {
                     BigInteger bi = bd.unscaledValue();
                     long l = bi.longValueExact();
                     decimalAppender.append(l < 0, Math.abs(l), exp);
+                    return true;
+
                 } else {
                     long l = INT_COMPACT.getLong(bd);
-                    if (l == Long.MIN_VALUE)
-                        decimalAppender.appendHighPrecision(value); // appendHighPrecision(float)
-                    else
+                    if (l != Long.MIN_VALUE) {
                         decimalAppender.append(l < 0, Math.abs(l), exp);
+                        return true;
+                    }
+
                 }
             } catch (ArithmeticException | IllegalAccessException ae) {
-                decimalAppender.appendHighPrecision(value);
+                // fall back
             }
+            return false;
         }
     }
 

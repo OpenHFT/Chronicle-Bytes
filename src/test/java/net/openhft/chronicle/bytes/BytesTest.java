@@ -882,7 +882,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testParseDoubleReadLimit() {
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(32);
+        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(48);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);
@@ -1144,27 +1144,22 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(1e-8 + Math.ulp(1e-8), "0.000000010000000000000002");
         testAppendDoubleOnce(1e-9 + Math.ulp(1e-9), "0.0000000010000000000000003");
         testAppendDoubleOnce(1e-10 + Math.ulp(1e-10), "0.00000000010000000000000002");
-        // TODO FIX
-//        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "1.0E-11");
+        // TODO FIX parseDouble()
+//        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.000000000010000000000000001");
         testAppendDoubleOnce(1e-12 + Math.ulp(1e-12), "0.0000000000010000000000000002");
-
-        double d = -1e30;
-        testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000002E30");
-        d = -1e31;
-        // TODO FIX
-        // testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000001E31");
-        d = -1e32;
-        testAppendDoubleOnce(d - Math.ulp(d), "-1.0000000000000002E32");
     }
 
     @Test
     public void testAppendReallySmallDouble() {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
-        Bytes<?> bytes = alloc1.elasticBytes(32);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
-        for (double d = 1; d >= 1e-40; d *= 0.99) {
+        for (double d = 1; d >= Double.MIN_NORMAL; d *= 0.99) {
+            bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
+            assertEquals("d: " + d, 0, bytes.readLong(size));
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             double err = d > 2.3e-10 ? 0
@@ -1174,18 +1169,22 @@ public class BytesTest extends BytesTestCommon {
         }
     }
 
-
     @Test
     public void testAppendReallyBigDouble() {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
-        Bytes<?> bytes = alloc1.elasticBytes(32);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
-        for (double d = 1e6; d <= 1e39; d *= 1.01) {
+        for (double d = 1; d < Double.POSITIVE_INFINITY; d *= 1.01) {
+            bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
+            assertEquals("d: " + d, 0, bytes.readLong(size));
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
-            double err = d < 1.3e12 ? 0 : Math.ulp(d);
+            double err = d < 1.3e12 ? 0
+                    : d < 9e46 ? Math.ulp(d)
+                    : 2 * Math.ulp(d);
             double actual = bytes.parseDouble();
             assertEquals(d, actual, err);
         }
@@ -1194,11 +1193,14 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testAppendReallySmallFloat() {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
-        Bytes<?> bytes = alloc1.elasticBytes(32);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
         for (float f = 1; f > Float.MIN_NORMAL; f *= 0.99f) {
+            bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(f);
+            assertEquals("f: " + f, 0, bytes.readLong(size));
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
             float err = f > 1.2e-4 ? 0 : Math.ulp(f);
@@ -1210,11 +1212,14 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void testAppendReallyBigFloat() {
         assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
-        Bytes<?> bytes = alloc1.elasticBytes(32);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
-        for (float f = 1e6f; f < Float.POSITIVE_INFINITY; f *= 1.01f) {
+        for (float f = 1; f < Float.POSITIVE_INFINITY; f *= 1.01f) {
+            bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(f);
+            assertEquals("f: " + f, 0, bytes.readLong(size));
             assertEquals(f, bytes.parseFloat(), 0.0f);
         }
     }
@@ -1268,12 +1273,13 @@ public class BytesTest extends BytesTestCommon {
     }
 
     private void testAppendDoubleOnce(double value, String expected) {
-        @NotNull Bytes<?> a = alloc1.elasticBytes(32);
+        @NotNull Bytes<?> a = alloc1.elasticBytes(48);
         try {
             a.append(value);
             String actual = a.toString();
-            assertEquals(value, a.parseDouble(), 0.0);
+            double actualParsed = a.parseDouble();
             assertEquals(expected, actual);
+            assertEquals(value, actualParsed, 0.0);
         } finally {
             a.releaseLast();
         }
