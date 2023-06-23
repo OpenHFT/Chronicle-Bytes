@@ -381,7 +381,6 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnlySingle()
             throws Exception {
-        assumeFalse(OS.isWindows());
         checkShouldNotBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10));
     }
 
@@ -404,6 +403,7 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnlySingleFileReadWrite()
             throws Exception {
+        assumeFalse(OS.isWindows());
         checkShouldBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10, true));
     }
 
