@@ -1175,15 +1175,15 @@ public class BytesTest extends BytesTestCommon {
         int size = 48;
         Bytes<?> bytes = alloc1.elasticBytes(size + 8);
 
-        for (double d = 1; d < Double.POSITIVE_INFINITY; d *= 1.01) {
+        for (double d = -1; d > Double.NEGATIVE_INFINITY; d *= 1.01) {
             bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
             assertEquals("d: " + d, 0, bytes.readLong(size));
             // Determine expected precision error based on magnitude of value
             // ok for not easily decimalised
-            double err = d < 1.3e12 ? 0
-                    : d < 9e46 ? Math.ulp(d)
+            double err = d > -1.3e12 ? 0
+                    : d > -1e45 ? Math.ulp(d)
                     : 2 * Math.ulp(d);
             double actual = bytes.parseDouble();
             assertEquals(d, actual, err);
