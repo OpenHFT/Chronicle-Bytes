@@ -41,8 +41,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * <p>
  * This class is intended for working with large files that can be read from and written to as if they were a part of the program's memory.
- * 
- *
  * <p>
  * <b>WARNING:</b> This class assumes that the caller will correctly handle bounds checking. Incorrect handling can lead to {@link IndexOutOfBoundsException}.
  * Misuse of this class can cause hard-to-diagnose memory access errors and data corruption.

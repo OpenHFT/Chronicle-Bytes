@@ -43,10 +43,10 @@ import java.nio.BufferOverflowException;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
     /**
-     * Constructs a new {@link BytesRingBuffer} instance with the provided {@link BytesStore}.
+     * Constructs a new  instance with the provided {@link BytesStore}.
      *
      * @param bytesStore the {@link BytesStore} to be used for the ring buffer.
-     * @return a new instance of {@link BytesRingBuffer}.
+     * @return a new instance of .
      */
     @NotNull
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {

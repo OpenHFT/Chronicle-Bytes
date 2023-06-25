@@ -33,7 +33,6 @@ public interface StopCharsTester {
      * <p>
      * For safety reasons, it is advised that a byte of value 0 should either be defined as a stop character
      * or should throw an IllegalStateException to prevent issues with null-terminated strings.
-     * 
      *
      * @param ch  the character to test. If this is 0, it should return true or throw an exception.
      * @param peekNextCh the next character that would be parsed after 'ch'. It can be used for context aware stopping, like identifying escape sequences.
@@ -42,11 +41,11 @@ public interface StopCharsTester {
     boolean isStopChar(int ch, int peekNextCh);
 
     /**
-     * Creates a new {@link StopCharsTester} that respects escape characters in the string parsing operation.
+     * Creates a new  that respects escape characters in the string parsing operation.
      * This allows for more complex string parsing scenarios where certain stop characters may need to be ignored
      * if they are escaped.
      *
-     * @return A new {@link StopCharsTester} that respects escape characters.
+     * @return A new  that respects escape characters.
      */
     @NotNull
     default StopCharsTester escaping() {

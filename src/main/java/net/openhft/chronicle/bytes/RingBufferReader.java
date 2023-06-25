@@ -23,7 +23,7 @@ import net.openhft.chronicle.core.io.Closeable;
  * An interface for a reader on a Ring Buffer, providing methods to read and navigate through the buffer.
  * The reader supports a read-once-and-discard paradigm which makes it suitable for situations where
  * high throughput is required and old data is irrelevant.
- *
+ * <p>
  * This interface also extends {@link RingBufferReaderStats}, which provides statistics
  * about the Ring Buffer's usage, and {@link Closeable} for closing the reader when it's no longer needed.
  */

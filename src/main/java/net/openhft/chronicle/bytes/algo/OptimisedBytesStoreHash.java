@@ -28,7 +28,12 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
-
+/**
+ * Optimized hashing algorithm for BytesStore.
+ * <p>
+ * This enumeration implements BytesStoreHash for optimized hashing of BytesStore
+ * depending on the size of the data and architecture of the system.
+ */
 @SuppressWarnings("rawtypes")
 public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     INSTANCE;
@@ -37,11 +42,29 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     public static final boolean IS_LITTLE_ENDIAN = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN;
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
+    /**
+     * Hash BytesStore contents of length between 1 and 7 bytes inclusive.
+     *
+     * @param store     the BytesStore to hash.
+     * @param remaining the length of content in bytes.
+     * @return hash value.
+     * @throws IllegalStateException      if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows during reading.
+     */
     static long applyAsLong1to7(@NotNull BytesStore store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
 
         return hash(readIncompleteLong(address, remaining));
     }
+
+    /**
+     * Hash BytesStore contents of length 8 bytes.
+     *
+     * @param store     the BytesStore to hash.
+     * @return hash value.
+     * @throws IllegalStateException      if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows during reading.
+     */
 
     static long applyAsLong8(@NotNull BytesStore store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -49,6 +72,12 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
         return hash0(MEMORY.readLong(address), MEMORY.readInt(address + TOP_BYTES));
     }
 
+    /**
+     * Hash long values.
+     *
+     * @param l long value to be hashed.
+     * @return hash value.
+     */
     public static long hash(long l) {
         return hash0(l, l >> 32);
     }
@@ -145,6 +174,15 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
+    /**
+     * Computes the hash of the provided byte store by performing
+     * an optimized hashing function.
+     *
+     * @param store      the {@link BytesStore} object whose contents are to be hashed.
+     * @param remaining  the number of remaining bytes to consider in the hash calculation.
+     * @return the hash value as a {@code long}.
+     * @throws BufferUnderflowException if an attempt is made to read past the end of the buffer.
+     */
     public static long applyAsLongAny(@NotNull BytesStore store, @NonNegative long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
@@ -222,6 +260,16 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
+
+    /**
+     * Reads a long from the given address. If the length is less than 8,
+     * it reads as many bytes as specified and converts them to a long.
+     * Endianness is considered for reading bytes.
+     *
+     * @param address the starting address of the memory to read from.
+     * @param len     the number of bytes to read (between 1 and 7, inclusive).
+     * @return the value read from memory converted to a {@code long}.
+     */
     static long readIncompleteLong(long address, @NonNegative int len) {
         switch (len) {
             case 1:
@@ -251,6 +299,12 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
         }
     }
 
+    /**
+     * Hashes a BytesStore. This is an implementation of the BytesStoreHash interface.
+     *
+     * @param store the BytesStore to hash.
+     * @return the hash value.
+     */
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
         final int remaining = Math.toIntExact(store.realReadRemaining());
@@ -261,6 +315,15 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
         }
     }
 
+    /**
+     * Hashes a BytesStore of the given length. This is an implementation of the BytesStoreHash interface.
+     *
+     * @param store     the BytesStore to hash.
+     * @param remaining the length of content in BytesStore to hash.
+     * @return the hash value.
+     * @throws IllegalStateException      if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows during reading.
+     */
     @Override
     public long applyAsLong(@NotNull BytesStore store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
         if (remaining <= 16) {

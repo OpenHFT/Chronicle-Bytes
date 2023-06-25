@@ -478,6 +478,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param adding value to add, can be 1
      * @return the sum
      * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
+     * @throws IllegalStateException    if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.26 */)
     default float addAndGetFloat(@NonNegative long offset, float adding)
@@ -507,6 +508,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
+     * @throws IllegalStateException    if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
@@ -523,6 +525,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
+     * @throws IllegalStateException    if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
@@ -535,6 +538,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
+     * @throws IllegalStateException    if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
@@ -549,6 +553,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
+     * @throws IllegalStateException    if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)

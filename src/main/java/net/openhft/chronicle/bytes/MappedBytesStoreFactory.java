@@ -23,7 +23,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A functional interface that serves as a factory for creating instances of {@link MappedBytesStore}.
- *
+ * <p>
  * This interface is meant to be implemented by classes that can create MappedBytesStore instances based on provided parameters.
  */
 @FunctionalInterface

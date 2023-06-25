@@ -142,6 +142,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    /**
+     * Appends the base 16 (hexadecimal) representation of the specified long value.
+     *
+     * @param value the long value to be converted to base 16 and appended
+     * @return this
+     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException if the specified argument is illegal
+     * @throws IllegalStateException    if the underlying buffer was released
+     */
     @NotNull
     default B appendBase16(long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -149,6 +158,17 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    /**
+     * Appends the base 16 (hexadecimal) representation of the specified long value,
+     * padding with leading zeroes if the number of digits is less than minDigits.
+     *
+     * @param value     the long value to be converted to base 16 and appended
+     * @param minDigits the minimum number of digits to be appended
+     * @return this
+     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException if the specified argument is illegal
+     * @throws IllegalStateException    if the underlying buffer was released
+     */
     @NotNull
     default B appendBase16(long value, int minDigits)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -263,11 +283,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         }
     }
 
+
     /**
-     * Appends a BytesStore to this in ISO-8859-1.
+     * Appends the ISO-8859-1 representation of the specified BytesStore.
      *
-     * @param bs the specified BytesStore to append
-     * @return   this
+     * @param bs the BytesStore to append
+     * @return this
      * @throws BufferOverflowException  if the BytesStore is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IllegalStateException    if the BytesStore is closed
@@ -282,9 +303,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a string to this Bytes in ISO-8859-1 format.
+     * Appends the ISO-8859-1 representation of the specified String.
      *
-     * @param cs the specified string to append
+     * @param cs the String to append
      * @return   this
      * @throws BufferOverflowException if the string is too large to write in the capacity available
      * @throws IllegalStateException if the underlying BytesStore is closed

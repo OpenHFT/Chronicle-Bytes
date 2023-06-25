@@ -28,19 +28,12 @@ import static net.openhft.chronicle.bytes.BinaryWireCode.*;
 /**
  * <p>
  * This class extends the {@link NativeBytes} class and provides an additional layer of safety by tracking the raw primitives written to the byte buffer.
- * 
- *
  * <p>
  * The purpose of this class is to facilitate the detection of inconsistencies during testing. When inconsistencies are detected, they can be corrected before the code is moved into production.
- * 
- *
  * <p>
  * GuardedNativeBytes records the type of each primitive written into the bytes buffer (byte, short, int, long, float, double). This tracking enables validation of the consistency of data written and read, which is critical for data integrity.
- * 
- *
  * <p>
  * Please note that while this class is very useful for ensuring data consistency during testing, it may introduce a performance overhead and thus not recommended to be used in a production environment.
- * 
  *
  * @param <U> The type of the object that this byte buffer is bound to.
  */

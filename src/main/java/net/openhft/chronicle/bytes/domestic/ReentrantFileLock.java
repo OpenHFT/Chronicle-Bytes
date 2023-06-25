@@ -29,6 +29,8 @@ import java.util.HashMap;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
+
+
 /**
  * A way of acquiring exclusive locks on files in a re-entrant fashion.
  * <p>
@@ -41,14 +43,38 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  */
 public final class ReentrantFileLock extends FileLock {
 
+    /**
+     * Thread-local storage for file locks held by the current thread.
+     */
     private static final ThreadLocal<HashMap<String, ReentrantFileLock>> heldLocks =
             CleaningThreadLocal.withCleanup(HashMap::new, h -> closeQuietly(h.values()));
 
+    /**
+     * Canonical path of the file being locked.
+     */
     private final String canonicalPath;
+
+    /**
+     * The actual FileLock delegate that does the locking.
+     */
     private final FileLock delegate;
+
+    /**
+     * ID of the thread owning this lock.
+     */
     private final long owningThreadId;
+
+    /**
+     * Counter for re-entrance.
+     */
     private int counter;
 
+    /**
+     * Constructs a ReentrantFileLock.
+     *
+     * @param canonicalPath The canonical path of the file to be locked.
+     * @param fileLock      The delegate FileLock.
+     */
     public ReentrantFileLock(String canonicalPath, FileLock fileLock) {
         super(fileLock.channel(), fileLock.position(), fileLock.size(), fileLock.isShared());
         this.canonicalPath = canonicalPath;
@@ -57,18 +83,33 @@ public final class ReentrantFileLock extends FileLock {
         this.counter = 1;
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Ensures that only the owning thread accesses the delegate FileLock.
+     */
     @Override
     public Channel acquiredBy() {
         checkThreadAccess();
         return delegate.acquiredBy();
     }
 
+    /**
+     * {@inheritDoc}
+     * <p>
+     * Ensures that only the owning thread accesses the delegate FileLock.
+     */
     @Override
     public boolean isValid() {
         checkThreadAccess();
         return delegate.isValid();
     }
 
+    /**
+     * Releases the lock.
+     *
+     * @throws IOException If an I/O error occurs.
+     */
     @Override
     public void release() throws IOException {
         checkThreadAccess();
@@ -81,6 +122,11 @@ public final class ReentrantFileLock extends FileLock {
         }
     }
 
+    /**
+     * Increments the counter for re-entrance and returns the lock.
+     *
+     * @return this lock instance
+     */
     private ReentrantFileLock incrementCounter() {
         checkThreadAccess();
         counter++;
@@ -93,7 +139,7 @@ public final class ReentrantFileLock extends FileLock {
      * @param file        The file to lock
      * @param fileChannel An open {@link FileChannel to the file}
      * @return the lock if it was acquired, or null if it could not be acquired
-     * @throws IOException
+     * @throws IOException If an I/O error occurs.
      */
     @Nullable
     public static ReentrantFileLock tryLock(File file, FileChannel fileChannel) throws IOException {
@@ -118,7 +164,7 @@ public final class ReentrantFileLock extends FileLock {
      * @param file        The file to lock
      * @param fileChannel An open {@link FileChannel to the file}
      * @return the lock if it was acquired, or null if it could not be acquired
-     * @throws IOException
+     * @throws IOException If an I/O error occurs.
      */
     public static ReentrantFileLock lock(File file, FileChannel fileChannel) throws IOException {
         final String canonicalPath = CanonicalPathUtil.of(file);

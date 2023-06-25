@@ -548,7 +548,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * {@inheritDoc}
      *
      * <br>
-     * This method constructs a new {@link BytesStore}, memory storage type (heap or native) is preserved.
+     * This method constructs a new , memory storage type (heap or native) is preserved.
      */
     @NotNull
     @Override

@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * A BytesStore that points to arbitrary memory.
- *
+ * <p>
  * This class represents a view of Bytes over an arbitrary area of memory. It provides methods to set and
  * interact with this area of memory.
  *

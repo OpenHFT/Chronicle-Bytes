@@ -46,21 +46,21 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * The StreamingDataInput interface represents a data stream for reading in binary data.
  * It provides a range of read methods to retrieve different types of data from the stream,
  * such as integers, longs, floating-point numbers, strings, byte arrays, etc.
- *
+ * <p>
  * Reading methods in this interface are usually expected to advance the read position by the
  * number of bytes read. This allows consecutive calls to the read methods to sequentially
  * read chunks of data from the stream.
- *
+ * <p>
  * Additionally, StreamingDataInput provides support for leniency and conversion of data into
  * BigInteger or BigDecimal objects. When lenient mode is enabled, methods will return default
  * values when there's no more data to read, instead of throwing exceptions.
- *
+ * <p>
  * The interface includes methods for handling exceptions and managing the state of the stream,
  * such as checking the remaining bytes or throwing an exception if the stream has been previously released.
- *
+ * <p>
  * Defines a data input interface that supports setting and getting positions and limits.
  * Implementing classes can be used to read data from a data source, typically a byte stream or byte buffer.
- *
+ * <p>
  * Note: Implementations of this interface may choose to handle the actual reading of data
  * in various ways, such as through direct memory access or other optimized mechanisms.
  *
@@ -447,6 +447,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
 
     /**
      * @return a long using the bytes remaining
+     * @throws IllegalStateException    if released
      */
     default long readIncompleteLong()
             throws IllegalStateException {
@@ -523,7 +524,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * This method is similar to {@code readUtf8()}, except it populates a provided appendable instead of creating a new string.
      *
      * @param sb the appendable to which the read string will be appended
-     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException if an IO error occurs
      * @throws BufferUnderflowException if there's not enough data to read
      * @throws ArithmeticException if numeric overflow or underflow occurs
@@ -553,7 +554,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * This method is similar to {@code readUtf8()}, except it populates a provided Bytes instance instead of creating a new string.
      *
      * @param sb the Bytes instance to which the read string will be appended
-     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException if an IO error occurs
      * @throws BufferUnderflowException if there's not enough data to read
      * @throws ArithmeticException if numeric overflow or underflow occurs
@@ -578,7 +579,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * This method is similar to {@code readUtf8()}, except it populates a provided StringBuilder instead of creating a new string.
      *
      * @param sb the StringBuilder to which the read string will be appended
-     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException if an IO error occurs
      * @throws BufferUnderflowException if there's not enough data to read
      * @throws ArithmeticException if numeric overflow or underflow occurs
@@ -602,7 +603,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Reads an 8-bit encoded string from the input stream and appends it to the provided Bytes.
      *
      * @param b the Bytes instance to which the read string will be appended
-     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws BufferUnderflowException if there's not enough data to read
      * @throws IllegalStateException if a required state for this operation is not met
      * @throws ArithmeticException if numeric overflow or underflow occurs
@@ -637,7 +638,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * Reads an 8-bit encoded string from the input stream and appends it to the provided StringBuilder.
      *
      * @param sb the StringBuilder to which the read string will be appended
-     * @return {@code true} if there was a String, or {@code false} if it was <code>null</code>
+     * @return {@code true} if there was a String, or {@code false} if it was {@code null}
      * @throws IORuntimeException if an IO error occurs
      * @throws BufferUnderflowException if there's not enough data to read
      * @throws ArithmeticException if numeric overflow or underflow occurs

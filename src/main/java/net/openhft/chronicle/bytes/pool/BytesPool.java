@@ -21,10 +21,30 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A pool for {@link Bytes} instances to avoid creating new instances frequently.
+ * <p>
+ * This pool uses a {@link ThreadLocal} to store instances of {@link Bytes} for reuse.
+ * When an instance is requested, it returns a thread-local {@link Bytes} instance if available,
+ * or creates a new one if not.
+ * </p>
+ */
 @SuppressWarnings("rawtypes")
 public class BytesPool {
+
+    /**
+     * ThreadLocal storage for Bytes instances.
+     */
     final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
 
+    /**
+     * Acquires a {@link Bytes} instance from the pool. If a {@link Bytes} instance is already
+     * available in the ThreadLocal storage for the current thread, it is reused.
+     * Otherwise, a new {@link Bytes} instance is created, stored in the ThreadLocal storage,
+     * and returned.
+     *
+     * @return A {@link Bytes} instance.
+     */
     public Bytes<?> acquireBytes() {
         Bytes<?> bytes = bytesTL.get();
         if (bytes != null) {
@@ -40,6 +60,12 @@ public class BytesPool {
         return bytes;
     }
 
+    /**
+     * Creates a new {@link Bytes} instance. This method is called if there is no available
+     * {@link Bytes} instance in the ThreadLocal storage for the current thread.
+     *
+     * @return A new {@link Bytes} instance.
+     */
     @NotNull
     protected Bytes<?> createBytes() {
         Bytes<?> bbb = Bytes.allocateElasticDirect(256);

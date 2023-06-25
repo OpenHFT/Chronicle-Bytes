@@ -449,7 +449,7 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new {@link Bytes} object containing the given {@code text} encoded in ISO-8859-1 character set.
+     * Creates and returns a new  object containing the given {@code text} encoded in ISO-8859-1 character set.
      * <p>
      * The returned {@code Bytes} object is allocated on the heap and is ready for reading.
      * <p>
@@ -466,7 +466,7 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns an empty, fixed-size, immutable {@link Bytes} object.
+     * Creates and returns an empty, fixed-size, immutable  object.
      *
      * @return An empty {@code Bytes} object with fixed size and immutable contents.
      */
@@ -480,7 +480,7 @@ public interface Bytes<U> extends
      * This method is functionally equivalent to {@link #from(String)} and is primarily intended for invocation through reflection mechanisms.
      *
      * <p>
-     * It creates and returns a new {@link Bytes} object containing the given {@code text}, encoded in the ISO-8859-1 character set.
+     * It creates and returns a new  object containing the given {@code text}, encoded in the ISO-8859-1 character set.
      *
      * @param text A non-null String to be converted into bytes using ISO-8859-1 encoding and wrapped in a {@code Bytes} object.
      * @return A new {@code Bytes} object containing the text, encoded using the ISO-8859-1 character set.
@@ -813,11 +813,6 @@ public interface Bytes<U> extends
         return false;
     }
 
-    /**
-     * @inheritDoc <P>
-     * If this Bytes {@link #isElastic()} the {@link #safeLimit()} can be
-     * lower than the point it can safely write.
-     */
     @Override
     default long safeLimit() {
         return bytesStore().safeLimit();

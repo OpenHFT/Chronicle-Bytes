@@ -22,12 +22,26 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+/**
+ * Represents two 64-bit long references in binary form.
+ */
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
+
+    /**
+     * Returns the maximum size of this reference in bytes (16 bytes for two 64-bit longs).
+     *
+     * @return the maximum size in bytes
+     */
     @Override
     public long maxSize() {
-        return 2 * 8L;
+        return 2 * Long.BYTES;
     }
 
+    /**
+     * Returns a string representation of this BinaryTwoLongReference.
+     *
+     * @return a string representation
+     */
     @NotNull
     @Override
     public String toString() {
@@ -38,6 +52,12 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Retrieves the second 64-bit long value from the BytesStore.
+     *
+     * @return the second 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long getValue2()
             throws IllegalStateException {
@@ -51,6 +71,12 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Sets the second 64-bit long value in the BytesStore.
+     *
+     * @param value the second 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setValue2(long value)
             throws IllegalStateException {
@@ -64,6 +90,12 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Retrieves the second 64-bit long value using volatile memory semantics.
+     *
+     * @return the second 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long getVolatileValue2()
             throws IllegalStateException {
@@ -75,9 +107,14 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
-
     }
 
+    /**
+     * Sets the second 64-bit long value using volatile memory semantics.
+     *
+     * @param value the second 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setVolatileValue2(long value)
             throws IllegalStateException {
@@ -91,6 +128,12 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Sets the second 64-bit long value using ordered or lazy set memory semantics.
+     *
+     * @param value the second 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setOrderedValue2(long value)
             throws IllegalStateException {
@@ -104,6 +147,13 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Adds a delta to the second 64-bit long value and returns the result.
+     *
+     * @param delta the value to add
+     * @return the resulting second 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long addValue2(long delta)
             throws IllegalStateException {
@@ -117,6 +167,13 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Atomically adds a delta to the second 64-bit long value and returns the result.
+     *
+     * @param delta the value to add
+     * @return the resulting second 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long addAtomicValue2(long delta)
             throws IllegalStateException {
@@ -128,6 +185,15 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         }
     }
 
+    /**
+     * Atomically sets the second 64-bit long value to the given updated value if the current value is
+     * equal to the expected value.
+     *
+     * @param expected the expected second 64-bit long value
+     * @param value    the new second 64-bit long value
+     * @return true if successful, false otherwise
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public boolean compareAndSwapValue2(long expected, long value)
             throws IllegalStateException {

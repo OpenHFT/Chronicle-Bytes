@@ -111,6 +111,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if the new position calculated by the skip operation falls
      *                                 outside the limits of the data buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeSkip(long bytesToSkip)
@@ -148,6 +149,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param x The long value to be written to the data stream.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeStopBit(long x)
@@ -163,6 +165,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param x The char value to be written to the data stream.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeStopBit(char x)
@@ -179,6 +182,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param d The double value to be written to the data stream.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeStopBit(double d)
@@ -194,6 +198,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param d The double value to be written to the data stream.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeStopBitDecimal(double d)
@@ -235,6 +240,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param text The string to be written. Can be null.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUtf8(@Nullable CharSequence text)
@@ -250,6 +256,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param text The string to be written. Can be null.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUtf8(@Nullable String text)
@@ -267,6 +274,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param text The CharSequence to be written. Can be null.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S write8bit(final @Nullable CharSequence text)
@@ -303,6 +311,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param length The number of chars from the CharSequence to write.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S write8bit(@NotNull CharSequence text, @NonNegative int start, @NonNegative int length)
@@ -385,6 +394,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param s The String to be written. Can be null.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S write8bit(@Nullable String s)
@@ -410,6 +420,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i8 The byte to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeByte(byte i8)
@@ -421,6 +432,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i8 The byte to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     default S rawWriteByte(byte i8)
             throws BufferOverflowException, IllegalStateException {
@@ -434,6 +446,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written as an unsigned byte.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUnsignedByte(int i)
@@ -447,6 +460,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param ch The char to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeChar(char ch)
@@ -460,6 +474,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i16 The short integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeShort(short i16)
@@ -472,6 +487,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param u16 The integer to be written as an unsigned short.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUnsignedShort(int u16)
@@ -485,6 +501,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeInt24(int i)
@@ -499,6 +516,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUnsignedInt24(int i)
@@ -513,6 +531,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeInt(int i)
@@ -524,6 +543,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     default S rawWriteInt(int i)
             throws BufferOverflowException, IllegalStateException {
@@ -537,6 +557,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param advance The number of bytes to advance the write position after the integer has been written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeIntAdv(int i, @NonNegative int advance)
@@ -549,6 +570,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The long to be written as an unsigned integer.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default S writeUnsignedInt(long i)
@@ -562,7 +584,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i64 The long integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeLong(long i64)
@@ -574,7 +596,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The long integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     default S rawWriteLong(long i)
             throws BufferOverflowException, IllegalStateException {
@@ -588,7 +610,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param advance The number of bytes to advance the write position after the long integer has been written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeLongAdv(long i64, @NonNegative int advance)
@@ -600,7 +622,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param f The floating-point number to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeFloat(float f)
@@ -612,7 +634,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param d The double-precision floating-point number to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeDouble(double d)
@@ -625,7 +647,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param i The integer to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      */
     @NotNull
     S writeDoubleAndInt(double d, int i)
@@ -640,7 +662,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return The current StreamingDataOutput instance.
      * @throws IllegalArgumentException if the provided {@code bytes} is {@code null}.
      * @throws BufferOverflowException  if there is not enough space left in the output stream.
-     * @throws IllegalStateException    if the buffer is in an invalid state.
+     * @throws IllegalStateException    if released
      */
     @NotNull
     default S write(@NotNull RandomDataInput bytes)
@@ -665,7 +687,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param bytes the {@code BytesStore} from which data is read.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is not enough space left in the output stream.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      * @see StreamingDataInput#read(Bytes)
      */
     default S write(@NotNull BytesStore<?, ?> bytes)
@@ -687,7 +709,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * {@link DecoratedBufferOverflowException} will be thrown.
      *
      * @param desiredCapacity the required capacity.
-     * @throws IllegalStateException            if the buffer is closed and needs to be resized.
+     * @throws IllegalStateException            if released
      * @throws DecoratedBufferOverflowException if the buffer is not elastic and lacks sufficient space, or
      *                                          if the provided {@code desiredCapacity} is negative.
      */
@@ -721,7 +743,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      *
      * @param bytes the {@code Bytes} object from which data is read.
      * @return The current StreamingDataOutput instance.
-     * @throws IllegalStateException if the buffer is in an invalid state.
+     * @throws IllegalStateException if released
      * @deprecated use write(bytes) instead and alter the bytes as you intended
      */
     @Deprecated(/* to be removed in x.25 */)
@@ -757,7 +779,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException  if there is not enough space left in the output stream.
      * @throws BufferUnderflowException if there is not enough data available in the input.
-     * @throws IllegalStateException    if the buffer is in an invalid state.
+     * @throws IllegalStateException    if released
      * @throws IllegalArgumentException if the {@code readOffset} or {@code length} are invalid.
      */
     @NotNull
@@ -779,7 +801,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException  if there is not enough space left in the output stream.
      * @throws BufferUnderflowException if there is not enough data available in the input.
-     * @throws IllegalStateException    if the buffer is in an invalid state.
+     * @throws IllegalStateException    if released
      * @throws IllegalArgumentException if the {@code readOffset} or {@code length} are invalid.
      * @throws NullPointerException     if the provided {@code bytes} object is {@code null}.
      */
@@ -802,7 +824,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param byteArray the array of bytes to be written.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException if there is not enough space left in the output stream.
-     * @throws IllegalStateException   if the buffer is in an invalid state.
+     * @throws IllegalStateException   if released
      * @throws NullPointerException    if the provided {@code byteArray } is {@code null}.
      */
     @NotNull
@@ -826,7 +848,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @param length    the number of bytes to write.
      * @return The current StreamingDataOutput instance.
      * @throws BufferOverflowException        if there is not enough space left in the output stream.
-     * @throws IllegalStateException          if the buffer is in an invalid state.
+     * @throws IllegalStateException          if released
      * @throws IllegalArgumentException       if the provided {@code offset} or {@code length} is negative
      * @throws NullPointerException           if the provided {@code byteArray} is {@code null}
      * @throws ArrayIndexOutOfBoundsException if the provided {@code offset} and {@code length} combination is invalid.
@@ -1003,7 +1025,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     /**
      * Appends a UTF-8 encoded CharSequence to this output stream from a specific offset and length.
      *
-     * @param cs     The CharSequence to be appended.
+     * @param chars  The CharSequence to be appended.
      * @param offset The offset from which to start writing the CharSequence.
      * @param length The number of characters from the CharSequence to write.
      * @return The current StreamingDataOutput instance.

@@ -20,10 +20,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
 /**
  * Functional interface defining a format for appending offset information to a byte sequence.
- *
+ * <p>
  * This interface provides a standardized way to append offset information to {@link Bytes},
  * allowing different implementations to provide different formatting strategies.
- *
+ * <p>
  * Implementations should define the {@link #append(long, Bytes)} method to handle the formatting and appending operation.
  */
 @FunctionalInterface
@@ -31,7 +31,7 @@ public interface OffsetFormat {
 
     /**
      * Appends the given offset to the provided {@link Bytes} instance.
-     *
+     * <p>
      * This method allows the implementation to decide how the offset information should be formatted
      * and appended to the {@link Bytes} instance.
      *

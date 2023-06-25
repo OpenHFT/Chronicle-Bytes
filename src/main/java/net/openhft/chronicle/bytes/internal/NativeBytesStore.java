@@ -954,7 +954,7 @@ public class NativeBytesStore<U>
 
     private final class Finalizer {
         @Override
-        /**
+        /*
          * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
          */
         protected void finalize()

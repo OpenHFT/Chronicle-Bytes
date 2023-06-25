@@ -28,8 +28,20 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 import java.nio.BufferOverflowException;
 
+/**
+ * Provides an interface for compressing and uncompressing data using various algorithms.
+ */
 public interface Compression {
 
+    /**
+     * Compresses the input uncompressed data into the output compressed data using the specified algorithm.
+     *
+     * @param cs           The compression algorithm to be used (e.g. "lzw", "gzip").
+     * @param uncompressed The input data to be compressed.
+     * @param compressed   The output to write the compressed data.
+     * @throws IllegalStateException     if the compression algorithm fails.
+     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     */
     static void compress(@NotNull CharSequence cs, @NotNull Bytes<?> uncompressed, @NotNull Bytes<?> compressed)
             throws IllegalStateException, BufferOverflowException {
         switch (cs.charAt(0)) {
@@ -51,6 +63,17 @@ public interface Compression {
         Compressions.Binary.compress(uncompressed, compressed);
     }
 
+    /**
+     * Uncompresses the input compressed data into the output uncompressed data using the specified algorithm.
+     *
+     * @param cs   The compression algorithm to be used (e.g. "lzw", "gzip").
+     * @param from The input compressed data.
+     * @param to   The output to write the uncompressed data.
+     * @throws IORuntimeException        if an I/O error occurs.
+     * @throws IllegalArgumentException   if the algorithm is unsupported.
+     * @throws IllegalStateException      if the uncompression algorithm fails.
+     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     */
     static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalArgumentException, IllegalStateException, BufferOverflowException {
         switch (cs.charAt(0)) {
@@ -75,6 +98,15 @@ public interface Compression {
         }
     }
 
+    /**
+     * Uncompresses data using the specified algorithm and a custom function to read bytes.
+     *
+     * @param cs    The compression algorithm to be used (e.g. "lzw", "gzip").
+     * @param t     The input data.
+     * @param bytes A function to read bytes from the input data.
+     * @return The uncompressed data as byte array.
+     * @throws IORuntimeException if an I/O error occurs.
+     */
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {
         switch (cs.charAt(0)) {
@@ -97,6 +129,12 @@ public interface Compression {
         return null;
     }
 
+    /**
+     * Compresses a byte array.
+     *
+     * @param bytes The input byte array to compress.
+     * @return The compressed data as byte array.
+     */
     default byte[] compress(byte[] bytes) {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (OutputStream output = compressingStream(baos)) {
@@ -108,6 +146,14 @@ public interface Compression {
         return baos.toByteArray();
     }
 
+    /**
+     * Compresses data from the input to the output using the implementing compression algorithm.
+     *
+     * @param from The input data to be compressed.
+     * @param to   The output to write the compressed data.
+     * @throws IllegalStateException     if the compression algorithm fails.
+     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     */
     default void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
         try (OutputStream output = compressingStream(to.outputStream())) {
             from.copyTo(output);
@@ -117,6 +163,13 @@ public interface Compression {
         }
     }
 
+    /**
+     * Uncompresses a byte array.
+     *
+     * @param bytes The input compressed data as byte array.
+     * @return The uncompressed data as byte array.
+     * @throws IORuntimeException if an I/O error occurs.
+     */
     default byte[] uncompress(byte[] bytes)
             throws IORuntimeException {
         @NotNull ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -131,6 +184,15 @@ public interface Compression {
         return baos.toByteArray();
     }
 
+    /**
+     * Uncompresses data from the input to the output using the implementing uncompression algorithm.
+     *
+     * @param from The input compressed data.
+     * @param to   The output to write the uncompressed data.
+     * @throws IORuntimeException       if an I/O error occurs.
+     * @throws IllegalStateException    if the uncompression algorithm fails.
+     * @throws BufferOverflowException if there is not enough space in the output buffer.
+     */
     default void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalStateException, BufferOverflowException {
         try (InputStream input = decompressingStream(from.inputStream())) {
