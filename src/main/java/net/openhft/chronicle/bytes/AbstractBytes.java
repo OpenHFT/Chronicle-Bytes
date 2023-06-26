@@ -246,7 +246,7 @@ public abstract class AbstractBytes<U>
      * @throws IllegalStateException if this buffer is closed.
      */
     @Override
-    public @NotNull Bytes<U> append(double d)
+    public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
         if (!Decimalizer.INSTANCE.toDecimal(d, this))
             append(Double.toString(d));
