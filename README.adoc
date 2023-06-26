@@ -16,100 +16,117 @@ image::images/Bytes_line.png[width=20%]
 
 toc::[]
 
-== About
+== Introduction
 
-Chronicle Bytes contains all the low level memory access wrappers. It is built on Chronicle Core's direct memory and OS system call access.
+Chronicle Bytes is a comprehensive library dedicated to providing low-level memory access wrappers. It is constructed on the foundations of Chronicle Core, taking advantage of its direct memory and Operating System (OS) system call access.
 
-Chronicle Bytes has a similar purpose to Java NIO's ByteBuffer with some extensions.
+In essence, Chronicle Bytes serves a similar purpose to Java's Non-blocking I/O (NIO) ByteBuffer, but with several additional features. The API offers:
 
-The API supports.
+- Support for 63-bit sizes.
+- Encoding for UTF-8 and ISO-8859-1 strings.
+- Thread-safe operations for off-heap memory.
+- Deterministic resource release through reference counting.
+- Compression for data types such as stop bit encoding.
+- Elastic ByteBuffer wrappers that resize as needed.
+- Direct parsing and writing of text to off-heap bytes.
 
-- 63-bit sizes
-- UTF-8 and ISO-8859-1 encoded strings.
-- thread safe off heap memory operations.
-- deterministic release of resources via reference counting.
-- compressed data types such as stop bit encoding.
-- elastic ByteBuffer wrappers which resize as required.
-- parsing text and writing text directly to off heap bytes.
+=== Supported Data Types
 
-=== Data types supported
-
-|===
-| operation    | Indexed or streaming    | binary    | text
-| read/write binary primitives    | both    | float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong    | double, int, long, char, double with precision
-| read/write text    | both    | 8-bit/UTF-8 string with length or limit    | 8-bit/UTF-8 string
-| read/write other    | streaming    | histogram, named enum    | bigdecimal, biginteger, date/time/zone, UUID, hexadecimal
-| data driven tests    | from files    | no    | yes
-| CAS    | indexed    | int, long    |
-| volatile read/write    | indexed    | byte, short, int, long, float, double    |
-| peek    | both    | unsigned byte    |
-| stop bit compression    | streaming    | int,long, double, float, char    |
-| search    | from start    | indexOf string, findByte    |
-| addAndGet    | indexed    | float, double, int, long    |
-| copy    | from start    | write, copy    |
-| hash    | from start    | byteSum, fastHash    |
-| bytes marshallable    | streaming    | nested data structures, expected types only.    |
-|===
-
-=== Data types explained
+The following table outlines the operations and data types supported by Chronicle Bytes:
 
 |===
-| operation    |  explained |
-| read/write binary primitives    |  to read an write primitive data stuctures stored in a binary from |
-| read/write text    | to read an write text data |
-| read/write other    | to read an write other data |
-| data driven tests    | https://en.wikipedia.org/wiki/Data-driven_testing |
-| CAS    | an atomic instruction used in multithreading to achieve synchronization. It compares the contents of a memory location with a given value and, only if they are the same, modifies the contents of that memory location to a new given value. |
-| volatile read/write    |  http://tutorials.jenkov.com/java-concurrency/volatile.html |
-| peek    |  peek is an operation which returns the value of the bytes without effecting its read position |
-| stop bit compression    |  https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding |
-| search    |  is any algorithm which solves the search problem, namely, to retrieve information stored within some data structure |
-| addAndGet    | atomically adds the given value to the current value. |
-| copy    | to transfer data from one structure to another |
-| hash    |  https://en.wikipedia.org/wiki/Hash_function    |
-| bytes marshallable    |  a serialization function    |
+| Operation | Indexed or Streaming | Binary | Text
+| Read/Write Binary Primitives | Both | float, double, boolean and unsigned/signed byte, short, 24-bit int, int, long, incompleteLong    | double, int, long, char, double with precision
+| Read/Write Text | Both | 8-bit/UTF-8 String with Length or Limit | 8-bit/UTF-8 String
+| Read/Write Other | Streaming | Histogram, Named Enum | BigDecimal, BigInteger, Date/Time/Zone, UUID, Hexadecimal
+| Data Driven Tests | From Files | No | Yes
+| CAS (Compare-and-Swap) | Indexed | int, long    |
+| Volatile Read/Write | Indexed | byte, short, int, long, float, double    |
+| Peek    | Both    | unsigned byte    |
+| Stop Bit Compression    | Streaming    | int, long, double, float, char    |
+| Search    | From Start    | indexOf String, findByte    |
+| addAndGet    | Indexed    | float, double, int, long    |
+| copy    | From Start    | write, copy    |
+| hash    | From Start    | byteSum, fastHash    |
+| BytesMarshallable    | Streaming    | Nested Data Structures, Expected Types Only.    |
 |===
 
-=== Creating Bytes
+=== Explanation of Data Types
+
+Here is an explanation for each operation supported by Chronicle Bytes:
+
+|===
+| Read/Write Binary Primitives | Reading and writing of primitive data structures stored in binary form
+| Read/Write Text | Reading and writing of text data
+| Read/Write Other | Reading and writing of other data types
+| Data Driven Tests | Refer to https://en.wikipedia.org/wiki/Data-driven_testing[Data-Driven Testing]
+| CAS (Compare-and-Swap) | An atomic instruction used in multithreading for synchronization. It compares the contents of a memory location with a given value and, only if they match, updates the contents of that memory location to a new given value
+| Volatile Read/Write | Refer to http://tutorials.jenkov.com/java-concurrency/volatile.html[Volatile Variables]
+| Peek | An operation that retrieves the value of the bytes without affecting its read position
+| Stop Bit Compression | Refer to https://github.com/OpenHFT/RFC/tree/master/Stop-Bit-Encoding[Stop Bit Encoding]
+| Search | Any algorithm that addresses the search problem i.e., retrieving information stored within a data structure
+| AddAndGet | An operation that atomically adds a given value to the current value
+| Copy | Transferring data from one structure to another
+| Hash | Refer to https://en.wikipedia.org/wiki/Hash_function[Hash Function]
+| Bytes Marshallable | A serialization function
+|===
+
+=== Creating Bytes Instances
+
+This section provides examples of how to create `Bytes` instances with different types of underlying data structures.
+
+* Creating a `Bytes` instance which wraps an on heap byte array:
 
 .Bytes which wraps an on heap byte[]
 [source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap();
-byte[] = bytes.underlyingObject();
+byte[] underlyingBytes = bytes.underlyingObject();
 ----
+
+* Creating a `Bytes` instance which wraps a pre-sized on heap byte array:
 
 .Bytes which wraps an on heap byte[] pre-sized
 [source,Java]
 ----
 Bytes<byte[]> bytes = Bytes.allocateElasticOnHeap(64);
-byte[] = bytes.underlyingObject();
+byte[] underlyingBytes = bytes.underlyingObject();
 ----
+
+* Creating a `Bytes` instance which wraps an on heap ByteBuffer:
 
 .Bytes which wraps an on heap ByteBuffer
 [source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
-ByteBuffer bb = bytes.underlyingObject();
+ByteBuffer underlyingByteBuffer = bytes.underlyingObject();
 ----
+
+* Creating a `Bytes` instance which wraps a direct ByteBuffer:
 
 .Bytes which wraps a direct ByteBuffer
 [source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticByteBuffer(64);
-ByteBuffer bb = bytes.underlyingObject();
+ByteBuffer underlyingByteBuffer = bytes.underlyingObject();
 
-bytes.releaseLast(); // when it can be freed.
+// The memory can be freed deterministically when it is no longer needed.
+bytes.releaseLast();
 ----
+
+* Creating a `Bytes` instance which wraps some native memory:
 
 .Bytes which wraps some native memory
 [source,Java]
 ----
 Bytes bytes = Bytes.allocateElasticDirect(64);
-long address = bytes.address
+long memoryAddress = bytes.address();
 
-bytes.releaseLast(); // when it can be freed.
+// The memory can be freed when it is no longer needed.
+bytes.releaseLast();
 ----
+
+* Creating a `Bytes` instance which will wrap some native memory when used:
 
 .Bytes which will wrap some native memory when used
 [source,Java]
@@ -117,29 +134,28 @@ bytes.releaseLast(); // when it can be freed.
 Bytes bytes = Bytes.allocateElasticDirect();
 // use the bytes
 
-bytes.releaseLast(); // when it can be freed.
+// The memory can be freed when it is no longer needed.
+bytes.releaseLast();
 ----
 
-=== Bytes capacity, read/write position and limit
+=== Understanding Bytes Capacity, Read/Write Position and Limit
 
-A Bytes buffer provides the following cursors.
+A `Bytes` buffer provides the following properties:
 
-- start: The smallest index in the buffer which is '0L'.
-- capacity: The largest possible capacity for the buffer which is usually 2147483632 (it can be more) for a Bytes buffer.
-- realCapacity: The current capacity of the buffer.
-Bytes are extended when it is required.
-- readLimit: The largest index that can be read from.
-- writeLimit: The largest index that can be written to.
-- readPosition: The index to read from.
-This index should be always smaller than writePosition.
-- writePosition: The index to write to.
+- *start*: The smallest index in the buffer. This is always '0L' for most implementations. For Memory Mappings it is the offset within the file.
+- *capacity*: The maximum possible capacity for the buffer, which is usually 2147483632 (or more) for a `Bytes` buffer.
+- *realCapacity*: The current capacity of the buffer. This value is dynamically extended as required.
+- *readLimit*: The maximum index that can be read from.
+- *writeLimit*: The maximum index that can be written to.
+- *readPosition*: The index from which to read. This value should always be less than `writePosition`.
+- *writePosition*: The index at which to write.
 
 [#img-Bytes]
-.An illustration of a Bytes buffer with its read/write position cursors.
+.The diagram below illustrates a `Bytes` buffer with its read/write position markers.
 image::docs/images/Figure1.png[450,450]
 
-Figure 1 illustrates a Bytes buffer with read/write cursors. `readPosition` should always be
-less than `writePosition` and greater than or equal to `start`.
+In the illustration above, note that `readPosition()` should always be less than or equals to `writePosition()` and greater than or equal to `start()`.
+Also, `readLimit()` should always be less than or equals to `writeLimit()` and greater than or equal to `start()`.
 
 === BytesStore
 BytesStore is a block of memory with fixed size into which you can write data and later read.
@@ -868,7 +884,9 @@ class MyByteable implements BytesMarshallable {
     float f;
     long l;
     double d;
-....
+// rest of class
+}
+
 class MyScalars implements BytesMarshallable {
     String s;
     BigInteger bi;
@@ -878,11 +896,14 @@ class MyScalars implements BytesMarshallable {
     LocalDateTime dateTime;
     ZonedDateTime zonedDateTime;
     UUID uuid;
-....
+// rest of class
+}
+
 class MyNested implements BytesMarshallable {
     MyByteable byteable;
     MyScalars scalars;
-....
+// rest of class
+}
 ----
 
 The implementation needs to take it's output interface and implement the input interface
@@ -1008,120 +1029,121 @@ NOTE: Creating and maintain such tests can be an overhead you don't need. In thi
 === Comparison of access to native memory
 
 |===
-| Access | ByteBuffer | Netty IOBuffer  | Aeron UnsafeBuffer | Chronicle Bytes
+| Feature | ByteBuffer | Netty IOBuffer | Aeron UnsafeBuffer | Chronicle Bytes
 
 | Read/write primitives in native memory
-| yes
-| yes
-| yes
-| yes
+| Yes
+| Yes
+| Yes
+| Yes
 
-| Separate Mutable interfaces
-| run time check
-| run time check
-|  yes
-|  yes
+| Separate mutable interfaces
+| Runtime check
+| Runtime check
+| Yes
+| Yes
 
-| Read/Write UTF8 strings
-|  no
-|   no
-| String
-|  any CharSequence + Appendable
+| Read/Write UTF-8 strings
+| No
+| No
+| Limited to Strings
+| Supports any CharSequence + Appendable
 
 | Read/Write ISO-8859-1 strings
-| no
-| no
+| No
+| No
 | ?
-| any CharSequence + Appendable
+| Supports any CharSequence + Appendable
 
 | Support Endianness
-| Big and Little
-| Big and Little
-| Big and Little
-| Native only
+| Supports both Big and Little
+| Supports both Big and Little
+| Supports both Big and Little
+| Supports Native only
 
 | Size of buffer
-| 31-bit
-| 31-bit
-| 31-bit
-| 63-bit
+| Limited to 31-bit
+| Limited to 31-bit
+| Limited to 31-bit
+| Supports up to 63-bit
 
 | Elastic ByteBuffers
-| no
-| yes
-| no
-| yes
+| No
+| Yes
+| No
+| Yes
 
 | Disable bounds checks
-| no
-| no
-| set globally
-| by buffer
+| No
+| No
+| Can be set globally
+| Can be set per buffer
 
 | Wrap an address
-| no
-| no
-| yes
-| yes
+| No
+| No
+| Yes
+| Yes
 
-| Thread safe read/write, CAS and atomic add operations
-| no
-| no
-| int; long
-| int; long; float and double
+| Thread-safe read/write, CAS, and atomic add operations
+| No
+| No
+| Supports int and long
+| Supports int, long, float, and double
 
 | Streaming access
-| yes
-| yes
-| no
-| yes
+| Yes
+| Yes
+| No
+| Yes
 
 | Deterministic release of memory
-| Internal API
-| Internal API
+| Via internal API
+| Via internal API
 | Caller's responsibility
-| yes
+| Yes, supported natively
 
 | Separate read and write position
-| no
-| yes
-| na
-| yes
+| No
+| Yes
+| Not applicable
+| Yes
 
-| Sync to disk of memory mapped files
-| no
-| no
-| no
-| MS_ASYNC and MS_SYNC
+| Sync to disk of memory-mapped files
+| No
+| No
+| No
+| Supports both MS_ASYNC and MS_SYNC
 |===
 
-== Memory mapped files
+The above table provides a clear comparison of the various memory access features supported by ByteBuffer, Netty IOBuffer, Aeron UnsafeBuffer, and Chronicle Bytes.
 
-Memory mapped files act as Bytes, growing as needed.
-A chunk size is set to determine how much to grow by as more of the Bytes are used.
-A `syncMode` can be set to flush data as each chunk is released.
+== Utilizing Memory Mapped Files
+
+Memory mapped files function like Bytes instances, expanding as required. A specific chunk size determines the growth rate as more Bytes are employed. A `syncMode` can be set to ensure data is flushed as each chunk is released.
+
+Below is an example of opening two MappedBytes for the same memory region:
 
 .Open two MappedBytes for the same region of memory
 [source,java]
 ----
-// set the file name, chunk size, and overlap size of each chunk
+// Specify the file name, chunk size, and overlap size of each chunk
 try (MappedBytes bytesW = MappedBytes.mappedBytes(file, 64 << 10, 16 << 10);
-        MappedBytes bytesR = MappedBytes.mappedBytes(file,  64 << 10, 16 << 10))
-    {
-        bytesW.syncMode(SyncMode.ASYNC); // asynchronously flush each chunk to disk
+        MappedBytes bytesR = MappedBytes.mappedBytes(file,  64 << 10, 16 << 10)) {
+        bytesW.syncMode(SyncMode.ASYNC); // Asynchronously flush each chunk to disk
     }
 ----
 
-Memory mapped files ware used by Chronicle Map and Chronicle Queue.
+Memory mapped files are commonly used by Chronicle Map and Chronicle Queue.
 
-== View Chronicle-Bytes in the debugger
+== Debugging Chronicle-Bytes
 
-When using IntelliJ Idea, you can set up a custom renderer to view the bytes, see the images below :
+When utilizing IntelliJ IDEA, you can configure a custom renderer to view the bytes. Please refer to the images below for guidance on setting this up:
 
 image::/docs/images/customize-data-views-menu.jpg[]
 
 image::/docs/images/customize-data-views.png[]
 
-=== Performing code coverage
+=== Note on Code Coverage
 
-When performing code coverage, you might want to exclude `AbstractBytes` as this significantly slows down the running of unit tests.
+When conducting code coverage, it may be beneficial to exclude `AbstractBytes` as it can significantly reduce the execution speed of unit tests.
