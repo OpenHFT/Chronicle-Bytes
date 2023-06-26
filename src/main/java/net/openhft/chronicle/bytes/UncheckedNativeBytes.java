@@ -918,7 +918,7 @@ public class UncheckedNativeBytes<U>
     public @NotNull UncheckedNativeBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
         if (!Decimalizer.INSTANCE.toDecimal(d, this))
-            append(Double.toString(d));
+            append8bit(Double.toString(d));
         return this;
     }
 
@@ -927,7 +927,7 @@ public class UncheckedNativeBytes<U>
     public @NotNull UncheckedNativeBytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
         if (!Decimalizer.INSTANCE.toDecimal(f, this))
-            append(Float.toString(f));
+            append8bit(Float.toString(f));
         return this;
     }
 

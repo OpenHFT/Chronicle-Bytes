@@ -249,7 +249,7 @@ public abstract class AbstractBytes<U>
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
         if (!Decimalizer.INSTANCE.toDecimal(d, this))
-            append(Double.toString(d));
+            append8bit(Double.toString(d));
         return this;
     }
 
@@ -267,7 +267,7 @@ public abstract class AbstractBytes<U>
     public @NotNull Bytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
         if (!Decimalizer.INSTANCE.toDecimal(f, this))
-            append(Float.toString(f));
+            append8bit(Float.toString(f));
         return this;
     }
 

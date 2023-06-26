@@ -51,8 +51,8 @@ AppendDoubleBenchmark.appendFloat                avgt    5   33.567 ± 0.395  ns
 AppendDoubleBenchmark.appendFloatHeap            avgt    5   50.290 ± 6.359  ns/op
 AppendDoubleBenchmark.appendFloatUnchecked       avgt    5   39.253 ± 0.223  ns/op
 AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5   50.138 ± 5.663  ns/op
-AppendDoubleBenchmark.Double_toString            avgt    5  104.016 ± 5.564  ns/op
-AppendDoubleBenchmark.Float_toString             avgt    5  101.021 ± 0.269  ns/op
+AppendDoubleBenchmark.Double_toString            avgt    5   78.941 ± 4.836  ns/op
+AppendDoubleBenchmark.Float_toString             avgt    5   71.858 ± 0.609  ns/op
 */
 
 @Warmup(iterations = 3, time = 1)
@@ -119,7 +119,7 @@ public class AppendDoubleBenchmark {
             count = 0;
         return f;
     }
-
+/*
     @Benchmark
     public void appendDouble() {
         double d = nextDouble(bytes);
@@ -175,17 +175,17 @@ public class AppendDoubleBenchmark {
         float f = nextFloat(uncheckedBytes2);
 
         uncheckedBytes2.append(f);
-    }
+    }*/
 
     @Benchmark
     public void Double_toString() {
         double d = nextDouble(uncheckedBytes);
-        uncheckedBytes.append(Double.toString(d));
+        uncheckedBytes.append8bit(Double.toString(d));
     }
 
     @Benchmark
     public void Float_toString() {
         float f = nextFloat(uncheckedBytes);
-        uncheckedBytes.append(Float.toString(f));
+        uncheckedBytes.append8bit(Float.toString(f));
     }
 }
