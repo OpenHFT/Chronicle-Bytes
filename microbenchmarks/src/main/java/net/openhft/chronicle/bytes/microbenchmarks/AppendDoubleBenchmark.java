@@ -119,7 +119,7 @@ public class AppendDoubleBenchmark {
             count = 0;
         return f;
     }
-/*
+
     @Benchmark
     public void appendDouble() {
         double d = nextDouble(bytes);
@@ -175,7 +175,7 @@ public class AppendDoubleBenchmark {
         float f = nextFloat(uncheckedBytes2);
 
         uncheckedBytes2.append(f);
-    }*/
+    }
 
     @Benchmark
     public void Double_toString() {
