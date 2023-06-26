@@ -523,7 +523,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     double addAndGetDouble(@NonNegative long offset, double adding);
 
-    long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent);
+    default long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+        throw new UnsupportedOperationException();
+    }
 
     @Deprecated(/* to be removed in x.26 */)
     // internal method to cache a byte[]
