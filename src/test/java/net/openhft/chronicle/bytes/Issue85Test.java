@@ -125,7 +125,17 @@ public class Issue85Test extends BytesTestCommon {
     public void loseTrainingZeros() {
         double d = -541098.2421;
         Assert.assertEquals("" + d,
-                ((Bytes<byte[]>) Bytes.allocateElasticOnHeap(64))
+                Bytes.allocateElasticDirect()
+                        .append(d)
+                        .toString());
+
+    }
+
+    @Test
+    public void loseTrainingZerosHeap() {
+        double d = -541098.2421;
+        Assert.assertEquals("" + d,
+                Bytes.allocateElasticOnHeap()
                         .append(d)
                         .toString());
 

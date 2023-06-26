@@ -214,6 +214,11 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public byte readByte(@NonNegative long offset) {
         throw throwBUE(offset);
     }

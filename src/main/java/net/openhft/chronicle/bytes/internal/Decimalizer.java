@@ -119,7 +119,7 @@ public interface Decimalizer {
          * @return true if the conversion and appending was successful, false otherwise.
          */
         public boolean toDecimal(float value, DecimalAppender decimalAppender) {
-            boolean sign = Double.doubleToLongBits(value) < 0;
+            boolean sign = Float.floatToRawIntBits(value) < 0;
             float absValue = Math.abs(value);
 
             long factor = 1;

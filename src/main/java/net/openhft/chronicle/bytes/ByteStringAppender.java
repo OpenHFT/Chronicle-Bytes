@@ -395,5 +395,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     // internal method to cache a byte[]
+    @Deprecated(/* to be removed in x.26 */)
     byte[] internalNumberBuffer();
 }

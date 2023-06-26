@@ -1440,6 +1440,11 @@ public class HexDumpBytes
     }
 
     @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public @NotNull Bytes<Void> append(@NotNull CharSequence cs, int start, int end) throws IndexOutOfBoundsException {
         long pos = base.writePosition();
         try {

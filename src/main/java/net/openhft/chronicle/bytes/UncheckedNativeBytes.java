@@ -933,38 +933,14 @@ public class UncheckedNativeBytes<U>
 
     @Override
     public void append(boolean negative, long mantissa, int exponent) {
-        ensureCapacity(48);
-        if (negative)
-            rawWriteByte((byte) '-');
-        long pos = writePosition();
-        if (exponent <= 0) {
-            rawWriteByte((byte) '0');
-            rawWriteByte((byte) '.');
-            while (exponent++ < 0)
-                rawWriteByte((byte) '0');
-            exponent = -1;
-        }
-
-        do {
-            if (exponent-- == 0)
-                rawWriteByte((byte) '.');
-            long base = mantissa % 10;
-            mantissa /= 10;
-            rawWriteByte((byte) ('0' + base));
-        } while (mantissa > 0 || exponent >= 0);
-        reverseBytesFrom(pos);
+        ensureCapacity(writePosition() + 48);
+        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent);
+        writeSkip(length);
     }
 
-    protected void reverseBytesFrom(long pos) {
-        long pos2 = writePosition()-1;
-        while (pos2 > pos) {
-            byte b1 = bytesStore.readByte(pos);
-            byte b2 = bytesStore.readByte(pos2);
-            bytesStore.writeByte(pos, b2);
-            bytesStore.writeByte(pos2, b1);
-            pos++;
-            pos2--;
-        }
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent);
     }
 
     @Override

@@ -90,7 +90,7 @@ class DecimaliserDoubleTest {
     @Test
     public void toDoubleLiteAndBigDecimal() {
         LongStream.range(0, 100_000L)
-                .parallel()
+//                .parallel()
                 .forEach(x -> {
                     long f = 1;
                     for (int i = 0; i <= 18; i++) {
@@ -101,7 +101,9 @@ class DecimaliserDoubleTest {
                         // probably requires more precision
                         long l = Double.doubleToLongBits(d);
                         double d2 = Double.longBitsToDouble(l + x);
-                        assertTrue(Decimalizer.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
+                        boolean decimal = Decimalizer.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK);
+                        boolean notZero = d > 0; // BigDecimal doesn't handle negative 0
+                        assertEquals("d: " + d, notZero, decimal);
                         f *= 10;
                     }
                 });

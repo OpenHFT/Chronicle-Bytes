@@ -657,4 +657,54 @@ public class HeapBytesStore<U>
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
+
+
+    @Override
+    public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent) {
+        long start = writePosition;
+        long addr = writePosition;
+        try {
+            throwExceptionIfReleased();
+            if (exponent <= 0) {
+                addr = rawWriteByte(addr, (byte) '0');
+                addr = rawWriteByte(addr, (byte) '.');
+                while (exponent++ < 0)
+                    addr = rawWriteByte(addr, (byte) '0');
+                exponent = -1;
+            }
+
+            do {
+                if (exponent-- == 0)
+                    addr = rawWriteByte(addr, (byte) '.');
+                long base = mantissa % 10;
+                mantissa /= 10;
+                addr = rawWriteByte(addr, (byte) ('0' + base));
+
+            } while (mantissa > 0 || exponent >= 0);
+            if (negative) {
+                addr = rawWriteByte(addr, (byte) '-');
+            }
+            reverseBytesFrom(start, addr);
+            return addr - start;
+        } catch (NullPointerException ifReleased) {
+            throwExceptionIfReleased();
+            throw ifReleased;
+        }
+    }
+
+    private long rawWriteByte(long addr, byte b) {
+        memory.writeByte(realUnderlyingObject, dataOffset + addr++, b);
+        return addr;
+    }
+
+    protected void reverseBytesFrom(long start, long end) {
+        while (end > start) {
+            end--;
+            byte b1 = memory.readByte(realUnderlyingObject, dataOffset + start);
+            byte b2 = memory.readByte(realUnderlyingObject, dataOffset + end);
+            memory.writeByte(realUnderlyingObject, dataOffset + start, b2);
+            memory.writeByte(realUnderlyingObject, dataOffset + end, b1);
+            start++;
+        }
+    }
 }

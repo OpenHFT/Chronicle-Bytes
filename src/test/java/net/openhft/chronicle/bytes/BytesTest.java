@@ -882,7 +882,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testParseDoubleReadLimit() {
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(48);
+        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(52);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);
