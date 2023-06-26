@@ -999,6 +999,15 @@ public class NativeBytesStore<U>
         }
     }
 
+    private final class Finalizer {
+        @Override
+        protected void finalize()
+                throws Throwable {
+            super.finalize();
+            warnAndReleaseIfNotReleased();
+        }
+    }
+
     private static final class NoDeallocator extends SimpleCleaner {
         private NoDeallocator() {
             super(null);
@@ -1009,14 +1018,5 @@ public class NativeBytesStore<U>
             // No-op.
         }
 
-    }
-
-    private final class Finalizer {
-        @Override
-        protected void finalize()
-                throws Throwable {
-            super.finalize();
-            warnAndReleaseIfNotReleased();
-        }
     }
 }
