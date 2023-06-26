@@ -26,10 +26,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.core.io.AbstractReferenceCounted;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.SingleThreadedChecked;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -56,6 +53,10 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
+
+    // if you need to reserve the behaviour of append(double) in x.23
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double");
 
     // used for debugging
     @UsedViaReflection
@@ -248,6 +249,21 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
+        if (X_23_APPEND_DOUBLE) {
+            boolean fits = canWriteDirect(32);
+            if (fits) {
+                long address = addressForWrite(writePosition());
+                long address2 = UnsafeText.appendDouble(address, d);
+                writeSkip(address2 - address);
+                return this;
+            } else {
+                Bytes<?> bytes = BytesInternal.acquireBytes();
+                assert this != bytes;
+                bytes.append(d);
+                append(bytes);
+            }
+            return this;
+        }
         if (!Decimalizer.INSTANCE.toDecimal(d, this))
             append8bit(Double.toString(d));
         return this;
