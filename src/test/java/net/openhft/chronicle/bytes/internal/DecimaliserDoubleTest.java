@@ -118,7 +118,7 @@ class DecimaliserDoubleTest {
         IntStream.range(-325, 309)
                 .forEach(x -> {
                     double d = (-18 < x && x < -1) ? 1.0 / Maths.tens(-x) : Math.pow(10, x);
-                    double lower = Jvm.isArm() ? 1e-17 : 1e-18;
+                    double lower = 1e-18;
                     assertEquals("x: " + x,
                             d == 0.0 || (lower <= d && d <= 1e18),
                             Decimalizer.LITE.toDecimal(d, check));

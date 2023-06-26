@@ -105,8 +105,8 @@ class DecimaliserFloatTest {
         LongStream.range(-46, 39)
                 .forEach(x -> {
                     float f = (float) Math.pow(10, x);
-                    float lower = Jvm.isArm() ? 1e-17f : 1e-18f;
-                    assertEquals(
+                    float lower = 1e-18f;
+                    assertEquals("x: " + x,
                             f == 0 || (lower <= f && f < 1e18),
                             Decimalizer.LITE.toDecimal(f, check));
                 });
