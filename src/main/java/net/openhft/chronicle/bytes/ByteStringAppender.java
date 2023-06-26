@@ -85,6 +85,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(boolean flag)
@@ -99,6 +100,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return      this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(int value)
@@ -114,6 +116,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return      this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(long value)
@@ -184,6 +187,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return              this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B appendDecimal(long value, int decimalPlaces)
@@ -219,6 +223,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(double d)
@@ -239,6 +244,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(double d, int decimalPlaces)
@@ -272,6 +278,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return   this
      * @throws BufferOverflowException  if the string is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
@@ -329,6 +336,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws BufferOverflowException if the string is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {

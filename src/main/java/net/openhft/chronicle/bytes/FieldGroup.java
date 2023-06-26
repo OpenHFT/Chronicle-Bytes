@@ -50,6 +50,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
 public @interface FieldGroup {
+    /**
+     * Special FieldGroup that if it is present, must be at the start but is ignored.
+     */
     String HEADER = "header";
 
     /**
