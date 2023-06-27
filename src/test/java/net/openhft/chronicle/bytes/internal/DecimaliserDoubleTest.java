@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import org.junit.jupiter.api.Test;
 
@@ -68,6 +67,16 @@ class DecimaliserDoubleTest {
     }
 
     @Test
+    public void toDoubleLimitedTestTest() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(48847, mantissa);
+            assertEquals(16, exponent);
+        };
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(16).toDecimal(HARD_TO_DECIMALISE, check));
+    }
+
+    @Test
     public void toDoubleTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
@@ -85,6 +94,27 @@ class DecimaliserDoubleTest {
             assertEquals(6, exponent);
         };
         assertTrue(Decimalizer.INSTANCE.toDecimal(1e-6, check));
+
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(7).toDecimal(1e-6, check));
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(6).toDecimal(1e-6, check));
+        DecimalAppender check0 = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(0, mantissa);
+            assertEquals(1, exponent);
+        };
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(5).toDecimal(1e-6, check));
+    }
+
+    @Test
+    public void toDoubleTestRounding() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(0, exponent);
+        };
+        Decimalizer.MaximumPrecisionOnly lp7 = new Decimalizer.MaximumPrecisionOnly(7);
+        assertTrue(lp7.toDecimal(1.000000004, check));
+        assertTrue(lp7.toDecimal(0.999999996, check));
     }
 
     @Test

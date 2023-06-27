@@ -53,10 +53,18 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
+    private static final int BYTES_APPEND_PRECISION = Integer.getInteger("bytes.append.precision", Integer.MAX_VALUE);
 
     // if you need to reserve the behaviour of append(double) in x.23
     @Deprecated(/* to be removed in x.26 */)
     private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double");
+    public static final Decimalizer INSTANCE;
+
+    static {
+        INSTANCE = 0 <= BYTES_APPEND_PRECISION && BYTES_APPEND_PRECISION <= 18
+                ? new Decimalizer.MaximumPrecision(BYTES_APPEND_PRECISION)
+                : Decimalizer.INSTANCE;
+    }
 
     // used for debugging
     @UsedViaReflection
@@ -236,6 +244,7 @@ public abstract class AbstractBytes<U>
         writeCheckOffset(offset, Long.BYTES);
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
+
     /**
      * Appends the string representation of the given double value to the bytes.
      * First, it tries to convert the double value using the Decimalizer instance. If that fails,
@@ -244,7 +253,7 @@ public abstract class AbstractBytes<U>
      * @param d the double value to append.
      * @return this Bytes instance.
      * @throws BufferOverflowException if there is not enough space to write the double.
-     * @throws IllegalStateException if this buffer is closed.
+     * @throws IllegalStateException   if this buffer is closed.
      */
     @Override
     public @NotNull AbstractBytes<U> append(double d)
@@ -264,7 +273,7 @@ public abstract class AbstractBytes<U>
             }
             return this;
         }
-        if (!Decimalizer.INSTANCE.toDecimal(d, this))
+        if (!INSTANCE.toDecimal(d, this))
             append8bit(Double.toString(d));
         return this;
     }
@@ -277,12 +286,12 @@ public abstract class AbstractBytes<U>
      * @param f the float value to append.
      * @return this Bytes instance.
      * @throws BufferOverflowException if there is not enough space to write the float.
-     * @throws IllegalStateException if this buffer is closed.
+     * @throws IllegalStateException   if this buffer is closed.
      */
     @Override
     public @NotNull Bytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
-        if (!Decimalizer.INSTANCE.toDecimal(f, this))
+        if (!INSTANCE.toDecimal(f, this))
             append8bit(Float.toString(f));
         return this;
     }

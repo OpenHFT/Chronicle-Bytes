@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.core.Jvm;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
@@ -67,6 +66,16 @@ class DecimaliserFloatTest {
     }
 
     @Test
+    public void toFloatLimitedTestTest() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(48847, mantissa);
+            assertEquals(16, exponent);
+        };
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(16).toDecimal((float) HARD_TO_DECIMALISE, check));
+    }
+
+    @Test
     public void toFloatTest() {
         DecimalAppender check = (negative, mantissa, exponent) -> {
             assertFalse(negative);
@@ -74,6 +83,37 @@ class DecimaliserFloatTest {
             assertEquals(19, exponent);
         };
         assertTrue(Decimalizer.INSTANCE.toDecimal(HARD_TO_DECIMALISE, check));
+    }
+
+    @Test
+    public void toFloatTest1e_6() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(6, exponent);
+        };
+        assertTrue(Decimalizer.INSTANCE.toDecimal(1e-6f, check));
+
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(7).toDecimal(1e-6f, check));
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(6).toDecimal(1e-6f, check));
+        DecimalAppender check0 = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(0, mantissa);
+            assertEquals(1, exponent);
+        };
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(5).toDecimal(1e-6f, check));
+    }
+
+    @Test
+    public void toFloatTestRounding() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(1, mantissa);
+            assertEquals(0, exponent);
+        };
+        Decimalizer.MaximumPrecisionOnly lp5 = new Decimalizer.MaximumPrecisionOnly(5);
+        assertTrue(lp5.toDecimal(1.0000004, check));
+        assertTrue(lp5.toDecimal(0.9999996, check));
     }
 
     @Test

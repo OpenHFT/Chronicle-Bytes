@@ -67,17 +67,162 @@ public interface Decimalizer {
      * falling back to the BigDecimal-based strategy if necessary.
      */
     class Instance implements Decimalizer {
+
+        /**
+         * Converts a double value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the double value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
+         */
         @Override
         public boolean toDecimal(double value, DecimalAppender decimalAppender) {
             return LITE.toDecimal(value, decimalAppender)
                     || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
         }
 
-
+        /**
+         * Converts a float value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the float value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
+         */
         @Override
         public boolean toDecimal(float value, DecimalAppender decimalAppender) {
             return LITE.toDecimal(value, decimalAppender)
                     || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
+        }
+    }
+
+    /**
+     * A Decimalizer implementation that maintains a maximum precision during the conversion.
+     */
+    class MaximumPrecision implements Decimalizer {
+        final MaximumPrecisionOnly maximumPrecisionOnly;
+
+        /**
+         * Constructs a new MaximumPrecision object with the specified precision.
+         *
+         * @param precision the maximum number of decimal places to be used in the conversion.
+         */
+        public MaximumPrecision(int precision) {
+            maximumPrecisionOnly = new MaximumPrecisionOnly(precision);
+        }
+
+        /**
+         * Converts a double value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the double value to be converted.
+        * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+        * @return true if the conversion and appending was successful, false otherwise.
+        */
+        @Override
+        public boolean toDecimal(double value, DecimalAppender decimalAppender) {
+            return maximumPrecisionOnly.toDecimal(value, decimalAppender)
+                    || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
+        }
+
+        /**
+         * Converts a float value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the float value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
+         */
+        @Override
+        public boolean toDecimal(float value, DecimalAppender decimalAppender) {
+            return maximumPrecisionOnly.toDecimal(value, decimalAppender)
+                    || USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
+        }
+    }
+
+    /**
+     * A Decimalizer implementation that maintains a maximum precision during the conversion, using only that precision.
+     */
+    class MaximumPrecisionOnly implements Decimalizer {
+        private final int precision;
+
+        /**
+         * Constructs a new MaximumPrecisionOnly object with the specified precision.
+         *
+         * @param precision the maximum number of decimal places to be used in the conversion.
+         * @throws IllegalArgumentException if the precision is not between 0 and 18.
+         */
+        public MaximumPrecisionOnly(int precision) {
+            if (0 > precision || precision > 18)
+                throw new IllegalArgumentException("precision must be between 0 and 18");
+            this.precision = precision;
+        }
+
+        /**
+         * Converts a double value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the double value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
+         * @throws AssertionError if the conversion fails unexpectedly.
+         */
+        @Override
+        public boolean toDecimal(double value, DecimalAppender decimalAppender) {
+            boolean isNegative = Double.doubleToLongBits(value) < 0;
+            double absValue = Math.abs(value);
+
+            if (!(absValue <= 1e18)) {
+                return false;
+            }
+            long factor = 1;
+            for (int exponent = 0; exponent <= precision; exponent++) {
+                long mantissa = Math.round(absValue * factor);
+                if ((double) mantissa / factor == absValue) {
+                    decimalAppender.append(isNegative, mantissa, exponent);
+                    return true;
+                }
+                if (mantissa >= Long.MAX_VALUE / 10 || exponent == precision) {
+                    while (exponent > 0) {
+                        if (mantissa % 10 == 0) {
+                            mantissa /= 10;
+                            exponent--;
+                        } else {
+                            break;
+                        }
+                    }
+                    decimalAppender.append(isNegative, mantissa, exponent);
+                    return true;
+                }
+                factor *= 10;
+            }
+            throw new AssertionError();
+        }
+
+        /**
+         * Converts a float value to its decimal representation and appends it using the provided DecimalAppender.
+         *
+         * @param value           the float value to be converted.
+         * @param decimalAppender the DecimalAppender used to store the converted decimal value.
+         * @return true if the conversion and appending was successful, false otherwise.
+         * @throws AssertionError if the conversion fails unexpectedly.
+         */
+        @Override
+        public boolean toDecimal(float value, DecimalAppender decimalAppender) {
+            boolean isNegative = Double.doubleToLongBits(value) < 0;
+            float absValue = Math.abs(value);
+
+            if (absValue > 1e18) {
+                return false;
+            }
+            long factor = 1;
+            for (int exponent = 0; exponent <= precision; exponent++) {
+                long mantissa = Math.round(absValue * factor);
+                if ((float) ((double) mantissa / factor) == absValue
+                        || mantissa >= Long.MAX_VALUE / 10
+                        || exponent == precision) {
+                    decimalAppender.append(isNegative, mantissa, exponent);
+                    return true;
+                }
+                factor *= 10;
+            }
+            throw new AssertionError();
         }
     }
 

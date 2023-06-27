@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.internal.DecimalAppender;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -49,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes
-        implements Bytes<Void> {
+        implements Bytes<Void>, DecimalAppender {
 
     public static final long MASK = 0xFFFFFFFFL;
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
@@ -1437,6 +1438,16 @@ public class HexDumpBytes
             copyToText(pos);
         }
         return this;
+    }
+
+    @Override
+    public void append(boolean isNegative, long mantissa, int exponent) {
+        long pos = base.writePosition();
+        try {
+            ((DecimalAppender) base).append(isNegative, mantissa, exponent);
+        } finally {
+            copyToText(pos);
+        }
     }
 
     @Override
