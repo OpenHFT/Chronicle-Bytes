@@ -1074,12 +1074,22 @@ public class BytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
+    boolean parseDouble;
     @Test
     public void testAppendDouble() {
 
+        parseDouble = false;
+        // TODO FIX parseDouble()
+        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.000000000010000000000000001", "0.00000000001", "0.0");
+        testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785", "0.00000000010626477", "0.0");
+        testAppendDoubleOnce(1e-18-Math.ulp(1e-18), "0.0000000000000000009999999999999999", "0.000000000000000001", "0.0");
+        testAppendDoubleOnce(1e45, "1.0E45", "Infinity", "");
+        testAppendDoubleOnce(1e45+Math.ulp(1e45), "1.0000000000000001E45", "Infinity", "");
+
+        parseDouble = true;
+        // ok
         testAppendDoubleOnce(-145344868913.80002, "-145344868913.80002", "-145344872448.0", "-145344868913.80002");
 
-        // ok
         testAppendDoubleOnce(-1.4778838950354771E-9, "-0.0000000014778838950354771", "-0.000000001477883926", "-0.000000001");
 
         testAppendDoubleOnce(1.4753448053710411E-8, "0.000000014753448053710411", "0.000000014753448", "0.000000015");
@@ -1142,13 +1152,16 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(1e-8 + Math.ulp(1e-8), "0.000000010000000000000002", "0.00000001", "0.00000001");
         testAppendDoubleOnce(1e-9 + Math.ulp(1e-9), "0.0000000010000000000000003", "0.000000001", "0.000000001");
         testAppendDoubleOnce(1e-10 + Math.ulp(1e-10), "0.00000000010000000000000002", "0.0000000001", "0.0");
-        // TODO FIX parseDouble()
-        // testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.000000000010000000000000001", "0.00000000001", "0.0");
         testAppendDoubleOnce(1e-12 + Math.ulp(1e-12), "0.0000000000010000000000000002", "0.000000000001", "0.0");
 
-        // TODO FIX parseDouble()
-//        testAppendDoubleOnce(1.0626477603237785E-10, "0.00000000010626477603237785", "0.00000000010626478", "0.0");
-        testAppendDoubleOnce(1.0626477603237786E-11, "0.000000000010626477603237786", "0.000000000010626478", "0.0");}
+        testAppendDoubleOnce(1.0626477603237786E-11, "0.000000000010626477603237786", "0.000000000010626478", "0.0");
+
+        // limits
+        testAppendDoubleOnce(1e-18, "0.000000000000000001", "0.000000000000000001", "0.0");
+        testAppendDoubleOnce(1e-29, "0.000000000000000000000000000010", "0.000000000000000000000000000010", "0.0");
+        testAppendDoubleOnce(1e-29-Math.ulp(1e-29), "9.999999999999998E-30", "0.000000000000000000000000000010", "0.0");
+        testAppendDoubleOnce(1e45-Math.ulp(1e45), "999999999999999800000000000000000000000000000.0", "Infinity", "");
+    }
 
     @Test
     public void testAppendReallySmallDouble() {
@@ -1278,15 +1291,19 @@ public class BytesTest extends BytesTestCommon {
         try {
             a.append(value);
             String actual = a.toString();
-            double actualParsed = a.parseDouble();
             assertEquals(expected, actual);
-            assertEquals(value, actualParsed, 0.0);
+
+            double actualParsed = a.parseDouble();
+            if (parseDouble)
+                assertEquals(value, actualParsed, 0.0);
             a.clear();
             a.append((float) value);
             String actual2 = a.toString();
             assertEquals(expectedFloat, actual2);
             a.clear();
-            new Decimalizer.MaximumPrecisionOnly(9).toDecimal(value, (DecimalAppender) a);
+            // if empty don't expect it to be translated
+            assertEquals(!expectedDecimal9.isEmpty(),
+                    new Decimalizer.MaximumPrecisionOnly(9).toDecimal(value, (DecimalAppender) a));
             String actual3 = a.toString();
             assertEquals(expectedDecimal9, actual3);
 
