@@ -309,7 +309,7 @@ public interface Decimalizer {
          */
         public boolean toDecimal(double value, DecimalAppender decimalAppender) {
             double abs = Math.abs(value);
-            if (!Double.isFinite(value) || abs < 1e-29 || abs > 1e45)
+            if (!Double.isFinite(value) || abs < 1e-29 || abs >= 1e45)
                 return false;
             BigDecimal bd = BigDecimal.valueOf(value);
             int exp = bd.scale();
