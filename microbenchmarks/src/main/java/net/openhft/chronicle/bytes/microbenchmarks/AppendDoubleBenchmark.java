@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.microbenchmarks;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.internal.Decimalizer;
 import net.openhft.chronicle.core.Jvm;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;
@@ -43,6 +44,9 @@ AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5  221.035 ±  0.972  n
 
 = After optimisation
 Benchmark                                        Mode  Cnt   Score   Error  Units
+AppendDoubleBenchmark.Double_toString            avgt    5   78.941 ± 4.836  ns/op
+AppendDoubleBenchmark.Float_toString             avgt    5   71.858 ± 0.609  ns/op
+AppendDoubleBenchmark.String_format_f            avgt    5  621.266 ± 15.797  ns/op
 AppendDoubleBenchmark.appendDouble               avgt    5   37.314 ± 0.436  ns/op
 AppendDoubleBenchmark.appendDoubleHeap           avgt    5   48.061 ± 3.128  ns/op
 AppendDoubleBenchmark.appendDoubleUnchecked      avgt    5   36.062 ± 0.430  ns/op
@@ -51,8 +55,20 @@ AppendDoubleBenchmark.appendFloat                avgt    5   33.567 ± 0.395  ns
 AppendDoubleBenchmark.appendFloatHeap            avgt    5   50.290 ± 6.359  ns/op
 AppendDoubleBenchmark.appendFloatUnchecked       avgt    5   39.253 ± 0.223  ns/op
 AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5   50.138 ± 5.663  ns/op
-AppendDoubleBenchmark.Double_toString            avgt    5   78.941 ± 4.836  ns/op
-AppendDoubleBenchmark.Float_toString             avgt    5   71.858 ± 0.609  ns/op
+
+= -Dbytes.append.precision=6
+Benchmark                                        Mode  Cnt    Score    Error  Units
+AppendDoubleBenchmark.Double_toString            avgt    5   76.975 ±  4.495  ns/op
+AppendDoubleBenchmark.Float_toString             avgt    5   72.073 ±  0.510  ns/op
+AppendDoubleBenchmark.String_format_f            avgt    5  619.485 ± 17.634  ns/op
+AppendDoubleBenchmark.appendDouble               avgt    5   35.363 ±  0.730  ns/op
+AppendDoubleBenchmark.appendDoubleHeap           avgt    5   43.337 ±  3.828  ns/op
+AppendDoubleBenchmark.appendDoubleUnchecked      avgt    5   36.248 ±  0.434  ns/op
+AppendDoubleBenchmark.appendDoubleUncheckedHeap  avgt    5   43.805 ±  2.317  ns/op
+AppendDoubleBenchmark.appendFloat                avgt    5   49.950 ±  0.740  ns/op
+AppendDoubleBenchmark.appendFloatHeap            avgt    5   57.400 ±  0.463  ns/op
+AppendDoubleBenchmark.appendFloatUnchecked       avgt    5   31.680 ±  0.233  ns/op
+AppendDoubleBenchmark.appendFloatUncheckedHeap   avgt    5   52.645 ±  0.512  ns/op
 */
 
 @Warmup(iterations = 3, time = 1)
@@ -62,6 +78,9 @@ AppendDoubleBenchmark.Float_toString             avgt    5   71.858 ± 0.609  ns
 @OutputTimeUnit(TimeUnit.NANOSECONDS)
 @State(Scope.Benchmark)
 public class AppendDoubleBenchmark {
+    static {
+//        System.setProperty("bytes.append.precision", "6");
+    }
 
     static final double[] SIZES = {1, 1e1, 1e2, 1e3, 1e4, 1e6, 1e8}; // 7 sizes
     static final float[] SIZES_F = {1f, 1e1f, 1e2f, 1e3f, 1e4f, 1e6f, 1e8f}; // 7 sizes
@@ -187,5 +206,11 @@ public class AppendDoubleBenchmark {
     public void Float_toString() {
         float f = nextFloat(uncheckedBytes);
         uncheckedBytes.append8bit(Float.toString(f));
+    }
+
+    @Benchmark
+    public void String_format_f() {
+        double d = nextDouble(uncheckedBytes);
+        uncheckedBytes.append8bit(String.format("%f" , d));
     }
 }

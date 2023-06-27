@@ -213,10 +213,20 @@ public interface Decimalizer {
             }
             long factor = 1;
             for (int exponent = 0; exponent <= precision; exponent++) {
-                long mantissa = Math.round(absValue * factor);
-                if ((float) ((double) mantissa / factor) == absValue
-                        || mantissa >= Long.MAX_VALUE / 10
-                        || exponent == precision) {
+                long mantissa = Math.round((double) absValue * factor);
+                if ((float) ((double) mantissa / factor) == absValue) {
+                    decimalAppender.append(isNegative, mantissa, exponent);
+                    return true;
+                }
+                if (mantissa >= Long.MAX_VALUE / 10 || exponent == precision) {
+                    while (exponent > 0) {
+                        if (mantissa % 10 == 0) {
+                            mantissa /= 10;
+                            exponent--;
+                        } else {
+                            break;
+                        }
+                    }
                     decimalAppender.append(isNegative, mantissa, exponent);
                     return true;
                 }

@@ -100,9 +100,9 @@ class DecimaliserDoubleTest {
         DecimalAppender check0 = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(0, mantissa);
-            assertEquals(1, exponent);
+            assertEquals(0, exponent);
         };
-        assertTrue(new Decimalizer.MaximumPrecisionOnly(5).toDecimal(1e-6, check));
+        assertTrue(new Decimalizer.MaximumPrecisionOnly(5).toDecimal(1e-6, check0));
     }
 
     @Test
