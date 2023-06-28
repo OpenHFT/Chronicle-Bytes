@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.render.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.stream.IntStream;
@@ -62,7 +63,7 @@ class DecimaliserFloatTest {
 
     @Test
     public void toFloatTestTest() {
-        assertFalse(Decimalizer.LITE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
+        assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(HARD_TO_DECIMALISE, CHECK_OK));
     }
 
     @Test
@@ -72,7 +73,7 @@ class DecimaliserFloatTest {
             assertEquals(48847, mantissa);
             assertEquals(16, exponent);
         };
-        assertTrue(new Decimalizer.MaximumPrecisionOnly(16).toDecimal((float) HARD_TO_DECIMALISE, check));
+        assertTrue(new MaximumPrecision(16).toDecimal((float) HARD_TO_DECIMALISE, check));
     }
 
     @Test
@@ -82,7 +83,7 @@ class DecimaliserFloatTest {
             assertEquals(48846946, mantissa);
             assertEquals(19, exponent);
         };
-        assertTrue(Decimalizer.INSTANCE.toDecimal(HARD_TO_DECIMALISE, check));
+        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(HARD_TO_DECIMALISE, check));
     }
 
     @Test
@@ -92,16 +93,16 @@ class DecimaliserFloatTest {
             assertEquals(1, mantissa);
             assertEquals(6, exponent);
         };
-        assertTrue(Decimalizer.INSTANCE.toDecimal(1e-6f, check));
+        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(1e-6f, check));
 
-        assertTrue(new Decimalizer.MaximumPrecisionOnly(7).toDecimal(1e-6f, check));
-        assertTrue(new Decimalizer.MaximumPrecisionOnly(6).toDecimal(1e-6f, check));
+        assertTrue(new MaximumPrecision(7).toDecimal(1e-6f, check));
+        assertTrue(new MaximumPrecision(6).toDecimal(1e-6f, check));
         DecimalAppender check0 = (negative, mantissa, exponent) -> {
             assertFalse(negative);
             assertEquals(0, mantissa);
             assertEquals(0, exponent);
         };
-        assertTrue(new Decimalizer.MaximumPrecisionOnly(5).toDecimal(1e-6f, check0));
+        assertTrue(new MaximumPrecision(5).toDecimal(1e-6f, check0));
     }
 
     @Test
@@ -111,7 +112,7 @@ class DecimaliserFloatTest {
             assertEquals(1, mantissa);
             assertEquals(0, exponent);
         };
-        Decimalizer.MaximumPrecisionOnly lp5 = new Decimalizer.MaximumPrecisionOnly(5);
+        MaximumPrecision lp5 = new MaximumPrecision(5);
         assertTrue(lp5.toDecimal(1.0000004, check));
         assertTrue(lp5.toDecimal(0.9999996, check));
     }
@@ -125,12 +126,12 @@ class DecimaliserFloatTest {
                     for (int i = 0; i <= 18; i++) {
                         // simple decimal is ok
                         float d = (float) x / f;
-                        assertTrue(Decimalizer.LITE.toDecimal(d, CHECK_OK));
+                        assertTrue(SimpleDecimaliser.SIMPLE.toDecimal(d, CHECK_OK));
 
                         // probably requires more precision
                         int l = Float.floatToRawIntBits(d);
                         float d2 = Float.intBitsToFloat(l + x);
-                        assertTrue(Decimalizer.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
+                        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(d2, CHECK_OK));
                         f *= 10;
                     }
                 });
@@ -148,48 +149,48 @@ class DecimaliserFloatTest {
                     float lower = 1e-18f;
                     assertEquals("x: " + x,
                             f == 0 || (lower <= f && f < 1e18),
-                            Decimalizer.LITE.toDecimal(f, check));
+                            SimpleDecimaliser.SIMPLE.toDecimal(f, check));
                 });
     }
 
     @Test
     public void testNegativeValue() {
-        Decimalizer.LITE.toDecimal(-3.14f, CHECK_NEG314);
+        SimpleDecimaliser.SIMPLE.toDecimal(-3.14f, CHECK_NEG314);
     }
 
     @Test
     public void testPositive() {
-        Decimalizer.LITE.toDecimal(123456.789f, CHECK_123456_789);
+        SimpleDecimaliser.SIMPLE.toDecimal(123456.789f, CHECK_123456_789);
     }
 
     @Test
     public void testPositiveBD() {
-        Decimalizer.USES_BIG_DECIMAL.toDecimal(123456.789f, CHECK_123456_789);
+        UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(123456.789f, CHECK_123456_789);
     }
 
     @Test
     public void testNegativePI() {
-        Decimalizer.LITE.toDecimal((float) -Math.PI, CHECK_NEG_PI);
+        SimpleDecimaliser.SIMPLE.toDecimal((float) -Math.PI, CHECK_NEG_PI);
     }
 
     @Test
     public void testNegativePIBD() {
-        Decimalizer.USES_BIG_DECIMAL.toDecimal((float) -Math.PI, CHECK_NEG_PI);
+        UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) -Math.PI, CHECK_NEG_PI);
     }
 
     @Test
     public void testZero() {
-        Decimalizer.LITE.toDecimal(0.0f, CHECK_ZERO);
+        SimpleDecimaliser.SIMPLE.toDecimal(0.0f, CHECK_ZERO);
     }
 
     @Test
     public void testZeroBD() {
-        Decimalizer.USES_BIG_DECIMAL.toDecimal(0.0f, CHECK_ZERO);
+        UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(0.0f, CHECK_ZERO);
     }
 
     @Test
     public void testNegZero() {
-        Decimalizer.LITE.toDecimal(-0.0f, CHECK_NEG_ZERO);
+        SimpleDecimaliser.SIMPLE.toDecimal(-0.0f, CHECK_NEG_ZERO);
     }
 
     @Test
@@ -200,6 +201,6 @@ class DecimaliserFloatTest {
             assertEquals(9223372L, mantissa);
             assertEquals(-12, exponent);
         };
-        assertTrue(Decimalizer.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
+        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
     }
 }

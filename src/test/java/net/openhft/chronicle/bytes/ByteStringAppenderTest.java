@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -220,6 +221,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void tens() {
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
         for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
             bytes.clear();
             {

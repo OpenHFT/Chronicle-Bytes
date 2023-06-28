@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
+import net.openhft.chronicle.bytes.render.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -53,19 +54,10 @@ public abstract class AbstractBytes<U>
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
-    private static final int BYTES_APPEND_PRECISION = Integer.getInteger("bytes.append.precision", Integer.MAX_VALUE);
 
     // if you need to reserve the behaviour of append(double) in x.23
     @Deprecated(/* to be removed in x.26 */)
     private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double");
-    public static final Decimalizer INSTANCE;
-
-    static {
-        INSTANCE = 0 <= BYTES_APPEND_PRECISION && BYTES_APPEND_PRECISION <= 18
-                ? new Decimalizer.MaximumPrecision(BYTES_APPEND_PRECISION)
-                : Decimalizer.INSTANCE;
-    }
-
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -79,6 +71,7 @@ public abstract class AbstractBytes<U>
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
+    private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
             throws IllegalStateException {
@@ -259,22 +252,27 @@ public abstract class AbstractBytes<U>
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
         if (X_23_APPEND_DOUBLE) {
-            boolean fits = canWriteDirect(32);
-            if (fits) {
-                long address = addressForWrite(writePosition());
-                long address2 = UnsafeText.appendDouble(address, d);
-                writeSkip(address2 - address);
-                return this;
-            } else {
-                Bytes<?> bytes = BytesInternal.acquireBytes();
-                assert this != bytes;
-                bytes.append(d);
-                append(bytes);
-            }
-            return this;
+            return appendX23(d);
         }
-        if (!INSTANCE.toDecimal(d, this))
+        if (!decimaliser().toDecimal(d, this))
             append8bit(Double.toString(d));
+        return this;
+    }
+
+    @NotNull
+    private AbstractBytes<U> appendX23(double d) {
+        boolean fits = canWriteDirect(32);
+        if (fits) {
+            long address = addressForWrite(writePosition());
+            long address2 = UnsafeText.appendDouble(address, d);
+            writeSkip(address2 - address);
+            return this;
+        } else {
+            Bytes<?> bytes = BytesInternal.acquireBytes();
+            assert this != bytes;
+            bytes.append(d);
+            append(bytes);
+        }
         return this;
     }
 
@@ -291,8 +289,19 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull Bytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
-        if (!INSTANCE.toDecimal(f, this))
+        if (!decimaliser().toDecimal(f, this))
             append8bit(Float.toString(f));
+        return this;
+    }
+
+    @Override
+    public Decimaliser decimaliser() {
+        return decimaliser;
+    }
+
+    @Override
+    public Bytes<U> decimaliser(Decimaliser decimaliser) {
+        this.decimaliser = decimaliser;
         return this;
     }
 
@@ -306,7 +315,7 @@ public abstract class AbstractBytes<U>
      */
     @Override
     public void append(boolean negative, long mantissa, int exponent) {
-        ensureCapacity(writePosition() + 48);
+        ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
         long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent);
         writeSkip(length);
     }

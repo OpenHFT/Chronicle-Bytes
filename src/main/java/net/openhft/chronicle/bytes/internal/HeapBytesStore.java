@@ -665,20 +665,18 @@ public class HeapBytesStore<U>
         long addr = writePosition;
         try {
             throwExceptionIfReleased();
-            if (exponent <= 0) {
-                addr = rawWriteByte(addr, (byte) '0');
-                addr = rawWriteByte(addr, (byte) '.');
+            if (exponent < 0) {
                 while (exponent++ < 0)
                     addr = rawWriteByte(addr, (byte) '0');
                 exponent = -1;
             }
 
             do {
-                if (exponent-- == 0)
-                    addr = rawWriteByte(addr, (byte) '.');
                 long base = mantissa % 10;
                 mantissa /= 10;
                 addr = rawWriteByte(addr, (byte) ('0' + base));
+                if (--exponent == 0)
+                    addr = rawWriteByte(addr, (byte) '.');
 
             } while (mantissa > 0 || exponent >= 0);
             if (negative) {

@@ -933,7 +933,7 @@ public class NativeBytesStore<U>
 
     @Override
     public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
-        if (writePosition + 48 > capacity())
+        if (writePosition + BytesInternal.digitsForExponent(exponent) > capacity())
             throw new IllegalArgumentException();
         throwExceptionIfReleased();
         try {
@@ -941,19 +941,17 @@ public class NativeBytesStore<U>
             long addr = start;
 
             if (exponent <= 0) {
-                memory.writeByte(addr++, (byte) '0');
-                memory.writeByte(addr++, (byte) '.');
                 while (exponent++ < 0)
                     memory.writeByte(addr++, (byte) '0');
                 exponent = -1;
             }
 
             do {
-                if (exponent-- == 0)
-                    memory.writeByte(addr++, (byte) '.');
                 long base = mantissa % 10;
                 mantissa /= 10;
                 memory.writeByte(addr++, (byte) ('0' + base));
+                if (--exponent == 0)
+                    memory.writeByte(addr++, (byte) '.');
             } while (mantissa > 0 || exponent >= 0);
             if (negative)
                 memory.writeByte(addr++, (byte) '-');

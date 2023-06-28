@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes.microbenchmarks;
 
 import net.openhft.chronicle.bytes.Bytes;
-import net.openhft.chronicle.bytes.internal.Decimalizer;
 import net.openhft.chronicle.core.Jvm;
 import org.openjdk.jmh.annotations.*;
 import org.openjdk.jmh.runner.Runner;

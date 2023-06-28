@@ -19,6 +19,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.Decimaliser;
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -57,6 +61,7 @@ public class UncheckedNativeBytes<U>
     protected long writeLimit;
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
+    private Decimaliser decimaliser= StandardDecimaliser.STANDARD;
 
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
@@ -917,7 +922,7 @@ public class UncheckedNativeBytes<U>
     @Override
     public @NotNull UncheckedNativeBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
-        if (!Decimalizer.INSTANCE.toDecimal(d, this))
+        if (!decimaliser.toDecimal(d, this))
             append8bit(Double.toString(d));
         return this;
     }
@@ -926,14 +931,25 @@ public class UncheckedNativeBytes<U>
     @Override
     public @NotNull UncheckedNativeBytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
-        if (!Decimalizer.INSTANCE.toDecimal(f, this))
+        if (!decimaliser.toDecimal(f, this))
             append8bit(Float.toString(f));
         return this;
     }
 
     @Override
+    public Decimaliser decimaliser() {
+        return decimaliser;
+    }
+
+    @Override
+    public Bytes<U> decimaliser(Decimaliser decimaliser) {
+        this.decimaliser = decimaliser;
+        return this;
+    }
+
+    @Override
     public void append(boolean negative, long mantissa, int exponent) {
-        ensureCapacity(writePosition() + 48);
+        ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
         long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent);
         writeSkip(length);
     }

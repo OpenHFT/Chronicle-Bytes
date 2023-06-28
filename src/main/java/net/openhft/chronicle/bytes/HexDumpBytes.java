@@ -17,9 +17,10 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.DecimalAppender;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
@@ -1437,6 +1438,17 @@ public class HexDumpBytes
         } finally {
             copyToText(pos);
         }
+        return this;
+    }
+
+    @Override
+    public Decimaliser decimaliser() {
+        return base.decimaliser();
+    }
+
+    @Override
+    public Bytes<Void> decimaliser(Decimaliser decimaliser) {
+        base.decimaliser(decimaliser);
         return this;
     }
 

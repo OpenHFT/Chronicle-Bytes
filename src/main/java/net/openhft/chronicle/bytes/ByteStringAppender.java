@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.ByteStringWriter;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -30,13 +31,18 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Methods to append text to a Bytes. This extends the Appendable interface.
+ * This interface provides methods for appending different types of data to an underlying buffer. The data is appended in the form of bytes.
+ * The interface also extends the StreamingDataOutput and Appendable interfaces, thus inheriting their methods.
+ *
+ * @param <B> the type that extends ByteStringAppender
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface ByteStringAppender<B extends ByteStringAppender<B>> extends StreamingDataOutput<B>, Appendable {
 
     /**
-     * @return these Bytes as a Writer
+     * Returns the current ByteStringAppender instance as a Writer.
+     *
+     * @return Writer object representing the ByteStringAppender
      */
     @NotNull
     default Writer writer() {
@@ -44,12 +50,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a char in UTF-8.
+     * Appends a UTF-8 encoded character to the buffer.
      *
      * @param ch the character to append
-     * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalStateException   if the underlying Bytes is closed
+     * @return the ByteStringAppender instance with the appended character
+     * @throws BufferOverflowException if the append operation exceeds the buffer's capacity
+     * @throws IllegalStateException if the underlying ByteStringAppender is closed
      */
     @Override
     @NotNull
@@ -208,6 +214,23 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         append(bytes);
         return (B) this;
     }
+    /**
+     * Gets the Decimaliser currently associated with this ByteStringAppender.
+     *
+     * @return The Decimaliser currently associated with this ByteStringAppender.
+     */
+    Decimaliser decimaliser();
+
+    /**
+     * Associates a Decimaliser with this ByteStringAppender.
+     *
+     * <p>The Decimaliser is an interface which can be implemented to provide custom logic
+     * for rendering decimal numbers in this ByteStringAppender.</p>
+     *
+     * @param decimaliser The Decimaliser to be associated with this ByteStringAppender.
+     * @return The ByteStringAppender instance with the Decimaliser set.
+     */
+    B decimaliser(Decimaliser decimaliser);
 
     /**
      * Appends a double in decimal notation to a specific number of decimal places. Trailing zeros are not truncated.
