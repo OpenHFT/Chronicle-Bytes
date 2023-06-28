@@ -931,6 +931,9 @@ public class NativeBytesStore<U>
         return super.equals(obj);
     }
 
+    @Deprecated(/* to be removed in x.26 */)
+    static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
     @Override
     public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
         if (writePosition + BytesInternal.digitsForExponent(exponent) > capacity())
@@ -941,6 +944,10 @@ public class NativeBytesStore<U>
             long addr = start;
 
             if (exponent <= 0) {
+                if (APPEND_0) {
+                    memory.writeByte(addr++, (byte) '0');
+                    memory.writeByte(addr++, (byte) '.');
+                }
                 while (exponent++ < 0)
                     memory.writeByte(addr++, (byte) '0');
                 exponent = -1;

@@ -658,6 +658,8 @@ public class HeapBytesStore<U>
         return super.equals(obj);
     }
 
+    @Deprecated(/* to be removed in x.26 */)
+    static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     @Override
     public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent) {
@@ -665,7 +667,11 @@ public class HeapBytesStore<U>
         long addr = writePosition;
         try {
             throwExceptionIfReleased();
-            if (exponent < 0) {
+            if (exponent <= 0) {
+                if (APPEND_0) {
+                    addr = rawWriteByte(addr, (byte) '0');
+                    addr = rawWriteByte(addr, (byte) '.');
+                }
                 while (exponent++ < 0)
                     addr = rawWriteByte(addr, (byte) '0');
                 exponent = -1;
