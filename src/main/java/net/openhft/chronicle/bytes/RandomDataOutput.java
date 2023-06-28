@@ -527,7 +527,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
         throw new UnsupportedOperationException();
     }
 
-    @Deprecated(/* to be removed in x.26 */)
+    @Deprecated(/* to be removed in x.25 */)
     // internal method to cache a byte[]
     byte[] internalNumberBuffer();
 }

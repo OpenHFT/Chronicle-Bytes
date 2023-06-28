@@ -17,9 +17,14 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.*;
+import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
-import net.openhft.chronicle.bytes.render.*;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.Decimaliser;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -36,6 +41,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -57,7 +63,8 @@ public abstract class AbstractBytes<U>
 
     // if you need to reserve the behaviour of append(double) in x.23
     @Deprecated(/* to be removed in x.26 */)
-    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double");
+    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", true);
+    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -291,6 +298,21 @@ public abstract class AbstractBytes<U>
             throws BufferOverflowException, IllegalStateException {
         if (!decimaliser().toDecimal(f, this))
             append8bit(Float.toString(f));
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        append(value < 0, Math.abs((long) value), 0);
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(long value) throws BufferOverflowException, IllegalStateException {
+        if (value == Long.MIN_VALUE)
+            write(MIN_VALUE_TEXT);
+        else
+            append(value < 0, Math.abs(value), 0);
         return this;
     }
 
@@ -1470,6 +1492,7 @@ public abstract class AbstractBytes<U>
         return (int) read(readPosition(), bytes, 0, bytes.length);
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         if (isElastic() && bytesStore.capacity() < 20)

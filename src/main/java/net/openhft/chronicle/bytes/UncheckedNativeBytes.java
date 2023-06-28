@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
-import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
@@ -37,6 +36,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -50,6 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
+    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     protected final long capacity;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
@@ -61,7 +62,7 @@ public class UncheckedNativeBytes<U>
     protected long writeLimit;
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
-    private Decimaliser decimaliser= StandardDecimaliser.STANDARD;
+    private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
 
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
@@ -927,12 +928,26 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
-
     @Override
     public @NotNull UncheckedNativeBytes<U> append(float f)
             throws BufferOverflowException, IllegalStateException {
         if (!decimaliser.toDecimal(f, this))
             append8bit(Float.toString(f));
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        append(value < 0, Math.abs((long) value), 0);
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(long value) throws BufferOverflowException, IllegalStateException {
+        if (value == Long.MIN_VALUE)
+            write(MIN_VALUE_TEXT);
+        else
+            append(value < 0, Math.abs(value), 0);
         return this;
     }
 
@@ -1034,6 +1049,7 @@ public class UncheckedNativeBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         return bytesStore.internalNumberBuffer();

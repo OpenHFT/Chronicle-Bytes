@@ -2045,6 +2045,7 @@ public class HexDumpBytes
         }
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         return internalNumberBuffer;

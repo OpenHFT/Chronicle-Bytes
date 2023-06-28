@@ -61,11 +61,6 @@ public class Issue523Test {
                                 int l = (int) bytes.readRemaining();
                                 if (l > 2 + e)
                                     return d + ": " + bytes + " too long";
-/*
-                                for (int ii = 0; ii < l; ii++)
-                                    if ("0123456789.".indexOf(bytes.readByte(ii)) < 0)
-                                        return d + ": " + bytes + " notation";
-*/
                                 if (bytes.parseDouble() != d) {
                                     bytes.readPosition(0);
                                     return d + " != " + bytes;

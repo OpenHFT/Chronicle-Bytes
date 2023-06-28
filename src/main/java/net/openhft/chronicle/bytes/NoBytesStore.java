@@ -357,6 +357,7 @@ public enum NoBytesStore implements BytesStore {
         throw new UnsupportedOperationException();
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         throw new UnsupportedOperationException();

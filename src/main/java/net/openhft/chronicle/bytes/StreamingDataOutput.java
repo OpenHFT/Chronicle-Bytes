@@ -746,6 +746,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     // internal buffer for a byte[]
-    @Deprecated(/* to be removed in x.26 */)
+    @Deprecated(/* to be removed in x.25 */)
     byte[] internalNumberBuffer();
 }

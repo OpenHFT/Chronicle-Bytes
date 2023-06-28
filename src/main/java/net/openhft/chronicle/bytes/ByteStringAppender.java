@@ -144,7 +144,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B appendBase(long value, int base)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
-        BytesInternal.append(this, value, base);
+        if (base == 10)
+            append(value);
+        else
+            BytesInternal.append(this, value, base);
         return (B) this;
     }
 
@@ -418,6 +421,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     // internal method to cache a byte[]
-    @Deprecated(/* to be removed in x.26 */)
+    @Deprecated(/* to be removed in x.25 */)
     byte[] internalNumberBuffer();
 }
