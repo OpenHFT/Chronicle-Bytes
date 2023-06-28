@@ -85,6 +85,7 @@ public class BytesTest extends BytesTestCommon {
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
         assertEquals(data.read8bit(), "Test me again");
+        data.releaseLast();
     }
 
     @Test
@@ -1188,6 +1189,7 @@ public class BytesTest extends BytesTestCommon {
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
         }
+        bytes.releaseLast();
     }
 
     @Test
@@ -1210,6 +1212,7 @@ public class BytesTest extends BytesTestCommon {
             double actual = bytes.parseDouble();
             assertEquals(d, actual, err);
         }
+        bytes.releaseLast();
     }
 
     @Test
@@ -1229,6 +1232,7 @@ public class BytesTest extends BytesTestCommon {
             float err = f > 1.2e-4 ? 0 : Math.ulp(f);
             assertEquals(f, bytes.parseFloat(), err);
         }
+        bytes.releaseLast();
     }
 
 
@@ -1244,6 +1248,7 @@ public class BytesTest extends BytesTestCommon {
             assertEquals("f: " + f, 0, bytes.readLong(size));
             assertEquals(f, bytes.parseFloat(), 0.0f);
         }
+        bytes.releaseLast();
     }
 
     @Test
@@ -1257,6 +1262,7 @@ public class BytesTest extends BytesTestCommon {
         ba[1] = '1';
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
         assertEquals("01ello", new String(ba));
+        bytes.releaseLast();
     }
 
     @Test
