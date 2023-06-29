@@ -3397,7 +3397,7 @@ enum BytesInternal {
             MEMORY.writeByte(addressForWrite + i, bs.readByte(i));
     }
 
-    public static long digitsForExponent(int exponent) {
+    public static int digitsForExponent(int exponent) {
         return 21 + Math.abs(exponent);
     }
 
