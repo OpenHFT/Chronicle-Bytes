@@ -236,6 +236,17 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     B decimaliser(Decimaliser decimaliser);
 
     /**
+     * @return whether floating point add .0 to indicate it is a floating point even if redundant.
+     */
+    boolean fpAppend0();
+
+    /**
+     * @param append0 Does floating point add .0 to indicate it is a floating point even if redundant.
+     * @return this
+     */
+    B fpAppend0(boolean append0);
+
+    /**
      * Appends a double in decimal notation to a specific number of decimal places. Trailing zeros are not truncated.
      * <p>
      * If the number would normally be printed with more decimal places, the number is rounded.

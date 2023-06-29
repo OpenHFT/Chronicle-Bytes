@@ -353,7 +353,7 @@ public enum NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         throw new UnsupportedOperationException();
     }
 

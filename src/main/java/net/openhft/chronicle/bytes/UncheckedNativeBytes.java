@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.bytes.render.StandardDecimaliser;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -51,6 +52,9 @@ public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
     protected final long capacity;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
@@ -63,6 +67,7 @@ public class UncheckedNativeBytes<U>
     private int lastDecimalPlaces = 0;
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
+    private boolean append0 = APPEND_0;
 
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
@@ -963,15 +968,26 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
+    public boolean fpAppend0() {
+        return append0;
+    }
+
+    @Override
+    public Bytes<U> fpAppend0(boolean append0) {
+        this.append0 = append0;
+        return this;
+    }
+
+    @Override
     public void append(boolean negative, long mantissa, int exponent) {
         ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
-        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent);
+        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent, fpAppend0());
         writeSkip(length);
     }
 
     @Override
-    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
-        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent);
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent, append0);
     }
 
     @Override

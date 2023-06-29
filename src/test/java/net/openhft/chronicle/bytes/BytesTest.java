@@ -1166,6 +1166,13 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(-Double.MIN_VALUE, "-0", "-0", "-4.9E-324", "-0");
         testAppendDoubleOnce(-Float.MIN_VALUE, "-0", "-0", "-1.401298464324817E-45", "-0");
 
+        testAppendDoubleOnce(0.0, "0.0", "0.0", "0.0", "0.0", true);
+        testAppendDoubleOnce(-Double.MIN_VALUE, "-0.0", "-0.0", "-4.9E-324", "-0.0", true);
+        testAppendDoubleOnce(-Float.MIN_VALUE, "-0.0", "-0.0", "-1.401298464324817E-45", "-0.0", true);
+        testAppendDoubleOnce(12.0, "12.0", "12.0", "12.0", "12.0", true);
+        testAppendDoubleOnce(Long.MIN_VALUE, "-9223372036854776000.0", "-9223372000000000000.0", "-9223372036854775807.0", "", true);
+        testAppendDoubleOnce(Long.MAX_VALUE, "9223372036854776000.0", "9223372000000000000.0", "9223372036854775807.0", "", true);
+
         assumeFalse(alloc1 == HEAP_EMBEDDED || alloc1 == HEAP_UNCHECKED);
         testAppendDoubleOnce(-Double.MAX_VALUE, "-179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "-Infinity", "-1.7976931348623157E308", "");
     }
@@ -1301,8 +1308,13 @@ public class BytesTest extends BytesTestCommon {
     }
 
     private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9) {
-        @NotNull Bytes<?> a = alloc1.elasticBytes(255);
-        a.decimaliser(StandardDecimaliser.STANDARD);
+        testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
+    }
+
+    private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
+        @NotNull Bytes<?> a = alloc1.elasticBytes(255)
+                .fpAppend0(append0)
+                .decimaliser(StandardDecimaliser.STANDARD);
         try {
             a.append(value);
             String actual = a.toString();

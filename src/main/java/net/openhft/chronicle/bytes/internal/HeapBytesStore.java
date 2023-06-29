@@ -662,13 +662,13 @@ public class HeapBytesStore<U>
     static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     @Override
-    public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent) {
+    public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         long start = writePosition;
         long addr = writePosition;
         try {
             throwExceptionIfReleased();
             if (exponent <= 0) {
-                if (APPEND_0) {
+                if (append0) {
                     addr = rawWriteByte(addr, (byte) '0');
                     addr = rawWriteByte(addr, (byte) '.');
                 }

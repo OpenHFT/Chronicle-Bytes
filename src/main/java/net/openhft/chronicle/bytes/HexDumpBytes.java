@@ -1453,6 +1453,17 @@ public class HexDumpBytes
     }
 
     @Override
+    public boolean fpAppend0() {
+        return base.fpAppend0();
+    }
+
+    @Override
+    public Bytes<Void> fpAppend0(boolean append0) {
+        base.fpAppend0(append0);
+        return this;
+    }
+
+    @Override
     public void append(boolean isNegative, long mantissa, int exponent) {
         long pos = base.writePosition();
         try {
@@ -1463,7 +1474,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         throw new UnsupportedOperationException();
     }
 

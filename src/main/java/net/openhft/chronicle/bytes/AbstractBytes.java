@@ -64,6 +64,9 @@ public abstract class AbstractBytes<U>
     // if you need to reserve the behaviour of append(double) in x.23
     @Deprecated(/* to be removed in x.26 */)
     private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", true);
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     // used for debugging
     @UsedViaReflection
@@ -79,6 +82,7 @@ public abstract class AbstractBytes<U>
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
+    private boolean append0 = APPEND_0;
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
             throws IllegalStateException {
@@ -303,17 +307,24 @@ public abstract class AbstractBytes<U>
 
     @Override
     public @NotNull Bytes<U> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
-        append(value < 0, Math.abs((long) value), 0);
+        appendLong(value);
         return this;
     }
 
     @Override
     public @NotNull Bytes<U> append(long value) throws BufferOverflowException, IllegalStateException {
-        if (value == Long.MIN_VALUE)
+        if (value == Long.MIN_VALUE) {
             write(MIN_VALUE_TEXT);
-        else
-            append(value < 0, Math.abs(value), 0);
+        } else {
+            appendLong(value);
+        }
         return this;
+    }
+
+    private void appendLong(long value) {
+        ensureCapacity(writePosition() + 21);
+        long length = bytesStore().appendAndReturnLength(writePosition(), value < 0, Math.abs(value), 0, false);
+        writeSkip(length);
     }
 
     @Override
@@ -324,6 +335,17 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> decimaliser(Decimaliser decimaliser) {
         this.decimaliser = decimaliser;
+        return this;
+    }
+
+    @Override
+    public boolean fpAppend0() {
+        return append0;
+    }
+
+    @Override
+    public Bytes<U> fpAppend0(boolean append0) {
+        this.append0 = append0;
         return this;
     }
 
@@ -338,13 +360,13 @@ public abstract class AbstractBytes<U>
     @Override
     public void append(boolean negative, long mantissa, int exponent) {
         ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
-        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent);
+        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent, fpAppend0());
         writeSkip(length);
     }
 
     @Override
-    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent) {
-        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent);
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent, append0);
     }
 
     @Override
