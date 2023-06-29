@@ -1079,7 +1079,7 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendDouble() {
+    public void testAppendDoubleWithoutParseDouble() {
 
         parseDouble = false;
         // TODO FIX parseDouble()
@@ -1090,6 +1090,10 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(1e45 + Math.ulp(1e45), "1000000000000000100000000000000000000000000000", "Infinity", "1.0000000000000001E45", "");
         testAppendDoubleOnce(-Float.MAX_VALUE, "-340282346638528860000000000000000000000", "-340282350000000000000000000000000000000", "-340282346638528860000000000000000000000", "");
         testAppendDoubleOnce(-Double.MIN_NORMAL, "-0", "-0", "-2.2250738585072014E-308", "-0");
+    }
+
+    @Test
+    public void testAppendDoubleRandom() {
 
         parseDouble = true;
 
@@ -1125,7 +1129,11 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(2.4192540417349368E-4, "0.000241925404173494", "0.0002419254", "0.00024192540417349368", "0.000241925");
         testAppendDoubleOnce(1.9283711356548258E-4, "0.000192837113565483", "0.00019283712", "0.00019283711356548258", "0.000192837");
         testAppendDoubleOnce(-8.299137873077923E-5, "-0.000082991378730779", "-0.00008299138", "-0.00008299137873077923", "-0.000082991");
+    }
 
+    @Test
+    public void testAppendDoublePowersOfTen() {
+        parseDouble = true;
         // OK
         testAppendDoubleOnce(0.0, "0", "0", "0", "0");
         testAppendDoubleOnce(0.001, "0.001", "0.001", "0.001", "0.001");
@@ -1141,7 +1149,11 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(9.0E-7, "0.0000009", "0.0000009", "0.0000009", "0.0000009");
         testAppendDoubleOnce(9.0E-8, "0.00000009", "0.00000009", "0.00000009", "0.00000009");
         testAppendDoubleOnce(9.0E-9, "0.000000009", "0.000000009", "0.000000009", "0.000000009");
+    }
 
+    @Test
+    public void testAppendDoubleEdgeCases() {
+        parseDouble = true;
         testAppendDoubleOnce(Double.NaN, "NaN", "NaN", "NaN", "");
         testAppendDoubleOnce(Double.POSITIVE_INFINITY, "Infinity", "Infinity", "Infinity", "");
         testAppendDoubleOnce(Double.NEGATIVE_INFINITY, "-Infinity", "-Infinity", "-Infinity", "");
@@ -1157,7 +1169,10 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(1e-10 + Math.ulp(1e-10), "0.0000000001", "0.0000000001", "0.00000000010000000000000002", "0");
         testAppendDoubleOnce(1e-12 + Math.ulp(1e-12), "0.000000000001", "0.000000000001", "0.0000000000010000000000000002", "0");
         testAppendDoubleOnce(1.0626477603237786E-11, "0.000000000010626478", "0.000000000010626478", "0.000000000010626477603237786", "0");
+    }
 
+    @Test
+    public void testAppendDoubleLimits() {
         // limits
         testAppendDoubleOnce(1.0E-18, "0.000000000000000001", "0.000000000000000001", "0.000000000000000001", "0");
         testAppendDoubleOnce(1.0E-29, "0", "0", "0.000000000000000000000000000010", "0");
