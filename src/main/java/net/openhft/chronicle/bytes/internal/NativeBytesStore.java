@@ -113,6 +113,7 @@ public class NativeBytesStore<U>
     /**
      * @param bb ByteBuffer
      * @return BytesStore
+     * @see BytesStore#wrap(ByteBuffer)
      */
     @NotNull
     public static NativeBytesStore<ByteBuffer> wrap(@NotNull ByteBuffer bb) {
@@ -906,6 +907,55 @@ public class NativeBytesStore<U>
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
+    }
+
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        if (writePosition + BytesInternal.digitsForExponent(exponent) > capacity())
+            throw new IllegalArgumentException();
+        throwExceptionIfReleased();
+        try {
+            long start = address + translate(writePosition);
+            long addr = start;
+
+            if (exponent <= 0) {
+                if (append0) {
+                    memory.writeByte(addr++, (byte) '0');
+                    memory.writeByte(addr++, (byte) '.');
+                }
+                while (exponent++ < 0)
+                    memory.writeByte(addr++, (byte) '0');
+                exponent = -1;
+            }
+
+            do {
+                long base = mantissa % 10;
+                mantissa /= 10;
+                memory.writeByte(addr++, (byte) ('0' + base));
+                if (--exponent == 0)
+                    memory.writeByte(addr++, (byte) '.');
+            } while (mantissa > 0 || exponent >= 0);
+            if (negative)
+                memory.writeByte(addr++, (byte) '-');
+
+            reverseBytesFrom(start, addr);
+            return addr - start;
+
+        } catch (NullPointerException npe) {
+            throwExceptionIfReleased();
+            throw npe;
+        }
+    }
+
+    protected void reverseBytesFrom(long start, long end) {
+        while (end > start) {
+            end--;
+            byte b1 = memory.readByte(start);
+            byte b2 = memory.readByte(end);
+            memory.writeByte(start, b2);
+            memory.writeByte(end, b1);
+            start++;
+        }
     }
 
     static final class Deallocator implements Runnable {

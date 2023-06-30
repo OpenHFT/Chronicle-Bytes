@@ -212,6 +212,7 @@ public enum NoBytesStore implements BytesStore {
         return this;
     }
 
+
     @Override
     public byte readByte(@NonNegative long offset) {
         throw new UnsupportedOperationException();
@@ -348,6 +349,11 @@ public enum NoBytesStore implements BytesStore {
 
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         throw new UnsupportedOperationException();
     }
 
