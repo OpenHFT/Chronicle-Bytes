@@ -3397,6 +3397,10 @@ enum BytesInternal {
             MEMORY.writeByte(addressForWrite + i, bs.readByte(i));
     }
 
+    public static int digitsForExponent(int exponent) {
+        return 21 + Math.abs(exponent);
+    }
+
     static class DateCache {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd");
         private long lastDay = Long.MIN_VALUE;
