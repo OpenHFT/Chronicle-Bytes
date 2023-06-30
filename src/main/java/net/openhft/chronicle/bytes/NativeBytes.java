@@ -201,7 +201,6 @@ public class NativeBytes<U>
         writeCheckOffset(desiredCapacity, 0);
     }
 
-
     private void checkResize(@NonNegative final long endOfBuffer)
             throws BufferOverflowException, IllegalStateException {
         if (isElastic())

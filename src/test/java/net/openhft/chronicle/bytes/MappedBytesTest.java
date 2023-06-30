@@ -383,10 +383,16 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void shouldNotBeReadOnlySingle()
             throws Exception {
-        try (MappedBytes bytes = MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10)) {
-            assertFalse(bytes.isBackingFileReadOnly());
-            bytes.writeUtf8(null); // used to blow up.
-            assertNull(bytes.readUtf8());
+        checkShouldNotBeReadOnly(MappedBytes.singleMappedBytes(File.createTempFile("mapped", "bytes"), 64 << 10));
+    }
+
+    private void checkShouldNotBeReadOnly(MappedBytes mappedBytes) {
+        try {
+            assertFalse(mappedBytes.isBackingFileReadOnly());
+            mappedBytes.writeUtf8(null); // used to blow up.
+            assertNull(mappedBytes.readUtf8());
+        } finally {
+            mappedBytes.close();
         }
     }
 

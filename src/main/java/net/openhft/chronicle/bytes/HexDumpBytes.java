@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceChangeListener;
@@ -48,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class HexDumpBytes
-        implements Bytes<Void> {
+        implements Bytes<Void>, DecimalAppender {
 
     public static final long MASK = 0xFFFFFFFFL;
     private static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
@@ -1328,6 +1330,277 @@ public class HexDumpBytes
     }
 
     @Override
+    public @NotNull Bytes<Void> append(char ch) throws IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(ch);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(@NotNull CharSequence cs) {
+        long pos = base.writePosition();
+        try {
+            base.append(cs);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(boolean flag) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(flag);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(value);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(long value) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(value);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> appendBase(long value, int base) throws BufferOverflowException, IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
+        long pos = this.base.writePosition();
+        try {
+            this.base.appendBase(value, base);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> appendBase16(long value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.appendBase16(value);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> appendBase16(long value, int minDigits) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.appendBase16(value, minDigits);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> appendDecimal(long value, int decimalPlaces) throws BufferOverflowException, IllegalStateException, ArithmeticException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.appendDecimal(value, decimalPlaces);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(double d, int decimalPlaces) throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
+        long pos = base.writePosition();
+        try {
+            base.append(d, decimalPlaces);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public Decimaliser decimaliser() {
+        return base.decimaliser();
+    }
+
+    @Override
+    public Bytes<Void> decimaliser(Decimaliser decimaliser) {
+        base.decimaliser(decimaliser);
+        return this;
+    }
+
+    @Override
+    public boolean fpAppend0() {
+        return base.fpAppend0();
+    }
+
+    @Override
+    public Bytes<Void> fpAppend0(boolean append0) {
+        base.fpAppend0(append0);
+        return this;
+    }
+
+    @Override
+    public void append(boolean isNegative, long mantissa, int exponent) {
+        long pos = base.writePosition();
+        try {
+            ((DecimalAppender) base).append(isNegative, mantissa, exponent);
+        } finally {
+            copyToText(pos);
+        }
+    }
+
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(@NotNull CharSequence cs, int start, int end) throws IndexOutOfBoundsException {
+        long pos = base.writePosition();
+        try {
+            base.append(cs, start, end);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append8bit(@NotNull CharSequence cs) throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append8bit(cs);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> append8bit(@NotNull BytesStore bs) throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append8bit(bs);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> append8bit(@NotNull String cs) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append8bit(cs);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> append8bit(@NotNull CharSequence cs, int start, int end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append8bit(cs, start, end);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public Bytes<Void> append8bit(@NotNull BytesStore bs, long start, long end) throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append8bit(bs, start, end);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> appendDateMillis(long dateInMillis) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.appendDateMillis(dateInMillis);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> appendTimeMillis(long timeOfDayInMillis) throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
+        long pos = base.writePosition();
+        try {
+            base.appendTimeMillis(timeOfDayInMillis);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @NotNull
+    @Override
+    public Bytes<Void> append(@NotNull BigDecimal bigDecimal) {
+        long pos = base.writePosition();
+        try {
+            base.append(bigDecimal);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(float f) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(f);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<Void> append(double d) throws BufferOverflowException, IllegalStateException {
+        long pos = base.writePosition();
+        try {
+            base.append(d);
+        } finally {
+            copyToText(pos);
+        }
+        return this;
+    }
+
+    @Override
     public void writeMarshallableLength16(@NotNull WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         long pos = base.writePosition();
@@ -1816,4 +2089,5 @@ public class HexDumpBytes
         base.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
         text.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
     }
+
 }

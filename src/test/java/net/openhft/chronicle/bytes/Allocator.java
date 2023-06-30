@@ -132,7 +132,7 @@ public enum Allocator {
     HEAP_EMBEDDED {
         @Override
         @NotNull Bytes<?> elasticBytes(int capacity) {
-            return fixedBytes(Math.max(capacity, 127));
+            return fixedBytes(Math.max(capacity, 255));
         }
 
         @Override
@@ -142,7 +142,7 @@ public enum Allocator {
 
         @Override
         Bytes<?> fixedBytes(int capacity) {
-            if (capacity >= 128)
+            if (capacity >= 256)
                 throw new IllegalArgumentException();
             Padding padding = new Padding();
             return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
@@ -183,5 +183,7 @@ public enum Allocator {
         @FieldGroup("p")
         // 128 bytes
         transient long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15;
+        @FieldGroup("p")
+        transient long q0, q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15;
     }
 }

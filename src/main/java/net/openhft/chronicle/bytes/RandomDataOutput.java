@@ -523,4 +523,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     double addAndGetDouble(@NonNegative long offset, double adding);
 
+    default long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        throw new UnsupportedOperationException();
+    }
 }

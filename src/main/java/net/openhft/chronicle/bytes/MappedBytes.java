@@ -35,7 +35,7 @@ import java.io.FileNotFoundException;
  * <p>
  * Memory is grouped in chunks of 64 MB by default.
  * The chunk size can be increased greatly if the OS.isSparseFileSupported()
- * e.g. blockSize(512 << 30)
+ * e.g. blockSize(512 &lt;&lt; 30)
  * <p>
  * The chunk containing the most recent accessed memory is reserved and the previous chunk is released.
  * For random access, you can reserve a chunk by obtaining the bytesStore() and using reserve(owner) on it,

@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
@@ -58,7 +59,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         Bytes<?> hello = Bytes.from("hello");
         Bytes<?> hello1 = ObjectUtils.convertTo(Bytes.class, "hello");
         assertTrue(hello.contentEquals(hello1));
-        VanillaBytes<Void> bytes = Bytes.allocateDirect(2);
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect(2);
         Bytes<?> one = ObjectUtils.convertTo(Bytes.class, 1);
         assertTrue(bytes.append(1).contentEquals(one));
         one.releaseLast();
@@ -220,6 +221,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
 
     @Test
     public void tens() {
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
         for (int i = 0; i <= (int) Math.log10(Double.MAX_VALUE); i++) {
             bytes.clear();
             {
@@ -227,7 +229,7 @@ public class ByteStringAppenderTest extends BytesTestCommon {
                 bytes.append(d).append(' ');
                 String s = bytes.toString();
                 double d2 = bytes.parseDouble();
-                double ulp = i < 31 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
+                double ulp = i < 23 ? 0 : i < 235 ? Math.ulp(d) : Math.ulp(d) * 2;
                 assertEquals(s, d, d2, ulp);
             }
             {
