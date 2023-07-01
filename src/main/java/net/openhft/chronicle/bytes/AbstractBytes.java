@@ -63,7 +63,7 @@ public abstract class AbstractBytes<U>
 
     // if you need to reserve the behaviour of append(double) in x.23
     @Deprecated(/* to be removed in x.26 */)
-    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", true);
+    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", false);
     @Deprecated(/* to be removed in x.26 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
