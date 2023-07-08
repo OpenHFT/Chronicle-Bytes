@@ -29,12 +29,17 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+
 /**
- * TextLongArrayReference is an implementation of ByteableLongArrayValues that stores long arrays
- * in text format, keeping track of array capacity and values.
+ * TextLongArrayReference is an implementation of a reference to a long array, represented
+ * in text wire format. It extends AbstractReference and implements ByteableLongArrayValues.
+ * The text representation is formatted to resemble a JSON-like content for an array of long values with a lock indicator.
  * <p>
- * The text format for a long array is as follows:
- * { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
+ * The format of the text representation is:
+ * {@code { capacity: 12345678901234567890, used: 00000000000000000000, values: [ 12345678901234567890, ... ] }}
+ * </p>
+ *
+ * @author Peter Lawrey
  */
  @SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
@@ -57,15 +62,16 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     private long length = VALUES;
 
     /**
-     * Write an initial state of an array with the given capacity to the provided bytes store.
+     * Writes the initial structure of a long array to the specified {@link Bytes} instance
+     * in text wire format, with the given capacity.
      *
-     * @param bytes    The byte store where the array state will be written.
-     * @param capacity The capacity of the array.
-     * @throws IllegalArgumentException  if the provided capacity is not valid.
-     * @throws IllegalStateException     if the state of the byte store is invalid.
-     * @throws BufferOverflowException   if writing exceeds the buffer's limit.
-     * @throws ArithmeticException       if integer overflow occurs.
-     * @throws BufferUnderflowException  if the buffer position is negative.
+     * @param bytes    the Bytes instance to write to.
+     * @param capacity the capacity of the long array to be written.
+     * @throws IllegalArgumentException  if an illegal argument is provided.
+     * @throws IllegalStateException     if an invalid state is encountered.
+     * @throws BufferOverflowException   if there's not enough space in the buffer to write the array.
+     * @throws ArithmeticException       if numeric overflow occurs.
+     * @throws BufferUnderflowException  if there's not enough data available to read.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
@@ -87,13 +93,14 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
     }
 
     /**
-     * Determines the length in bytes needed for an array based on the provided bytes store and offset.
+     * Estimates the length of the text wire format structure for the long array
+     * based on the current state of the given {@link BytesStore}.
      *
-     * @param bytes  The byte store containing the array.
-     * @param offset The offset of the array within the byte store.
-     * @return The length in bytes.
-     * @throws IllegalStateException     if the state of the byte store is invalid.
-     * @throws BufferUnderflowException  if reading exceeds the buffer's limit.
+     * @param bytes  the BytesStore containing the structure.
+     * @param offset the position in bytes where the structure starts.
+     * @return the estimated length in bytes.
+     * @throws IllegalStateException    if an invalid state is encountered.
+     * @throws BufferUnderflowException if there's not enough data available to read.
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
@@ -116,8 +123,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -128,8 +133,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -152,8 +155,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalStateException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -182,8 +183,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
 
     }
@@ -196,8 +195,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -245,8 +242,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
 
     }

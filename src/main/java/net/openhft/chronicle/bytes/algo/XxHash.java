@@ -28,8 +28,6 @@ import java.nio.BufferUnderflowException;
  *
  * <p>Migrated from Zero-Allocation-Hashing.</p>
  *
- * @author [Your Name]
- * @version 1.0
  * @see BytesStoreHash
  * @see BytesStore
  */
@@ -51,9 +49,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
     private final long seed;
 
     /**
-     * Initializes an instance of XxHash with the given seed.
+     * Constructs a new instance of XxHash with the specified seed.
      *
-     * @param seed the seed for the hash function.
+     * @param seed the seed for hash computation.
      */
     public XxHash(long seed) {
         this.seed = seed;
@@ -122,21 +120,17 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      */
     @Override
     public long applyAsLong(BytesStore bytes) {
-        try {
-            return applyAsLong(bytes, bytes.readRemaining());
-        } catch (IllegalStateException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+       return applyAsLong(bytes, bytes.readRemaining());
     }
 
     /**
-     * Calculates the hash code of the given byte store with specified length.
+     * Computes a hash value for the given byte store with a specified length.
      *
-     * @param bytes  the byte store to be hashed.
-     * @param length the length to be considered for hashing.
-     * @return the hash code.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @param bytes    the byte store.
+     * @param length   the number of bytes to hash.
+     * @return the hash value.
+     * @throws IllegalStateException     If the state is illegal.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {

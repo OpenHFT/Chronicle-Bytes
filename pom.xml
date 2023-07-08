@@ -58,6 +58,11 @@
                 <scope>import</scope>
             </dependency>
 
+            <dependency>
+                <groupId>net.openhft</groupId>
+                <artifactId>chronicle-analytics</artifactId>
+                <version>0.EMPTY</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

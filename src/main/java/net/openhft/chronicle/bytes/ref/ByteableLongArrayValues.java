@@ -23,31 +23,39 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 /**
- * Represents an interface for byteable long array values,
- * extending LongArrayValues, Byteable, and DynamicallySized interfaces.
- * This interface allows for handling long array values that are byteable
- * and dynamically sized.
+ * Represents an array of long integer values, where each long integer in the array is byteable and dynamically sized.
+ * <p>
+ * Implementations of this interface should provide means to manage the array of long integers, with
+ * support for resizing the array dynamically. It is meant to be used where direct, low-level access
+ * to the bytes representing the long integer values is needed.
+ * </p>
+ *
+ * @see LongArrayValues
+ * @see Byteable
+ * @see DynamicallySized
  */
 @SuppressWarnings("rawtypes")
 public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {
 
     /**
-     * Returns the size in bytes for the given number of elements.
+     * Calculates the size in bytes needed to store the given number of long integers.
      *
-     * @param sizeInBytes The number of elements.
-     * @return The size in bytes needed to store the given number of elements.
-     * @throws IllegalStateException If an illegal state occurs during the operation.
+     * @param sizeInBytes the number of long integers to be stored.
+     * @return the size in bytes needed to store the specified number of long integers.
+     * @throws IllegalStateException if the size cannot be determined.
      */
     @Override
     long sizeInBytes(@NonNegative long sizeInBytes)
             throws IllegalStateException;
 
     /**
-     * Sets the capacity of the long array values.
+     * Sets the capacity of the array, in terms of the number of long integers it can hold.
      *
-     * @param arrayLength The desired capacity of the long array values.
-     * @return The instance of ByteableLongArrayValues with the set capacity.
-     * @throws IllegalStateException If an illegal state occurs during the operation.
+     * @param arrayLength the desired array capacity, in number of long integers.
+     * @return this {@code ByteableLongArrayValues} instance.
+     * @throws IllegalStateException if the capacity cannot be set, for example, due to insufficient memory.
      */
-    ByteableLongArrayValues capacity(@NonNegative long arrayLength) throws IllegalStateException;
+
+    ByteableLongArrayValues capacity(@NonNegative long arrayLength)
+            throws IllegalStateException;
 }

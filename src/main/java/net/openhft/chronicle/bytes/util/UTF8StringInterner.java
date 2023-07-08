@@ -40,10 +40,10 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**
-     * Constructs a UTF8StringInterner with the specified capacity.
+     * Constructs a new UTF8StringInterner with the specified capacity.
      *
-     * @param capacity the capacity of the interner
-     * @throws IllegalArgumentException if the capacity is negative
+     * @param capacity the maximum number of items that the interner can hold.
+     * @throws IllegalArgumentException if the capacity is non-positive.
      */
     public UTF8StringInterner(@NonNegative int capacity)
             throws IllegalArgumentException {

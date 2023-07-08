@@ -23,31 +23,38 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.IntArrayValues;
 
 /**
- * Interface for a resizable array of integer values that can be represented as bytes.
- * This provides methods to get and set values, as well as to query and modify the size of the array.
- * It extends the {@link IntArrayValues}, {@link Byteable}, and {@link DynamicallySized} interfaces.
+ * Represents an array of integer values, where each integer in the array is byteable and dynamically sized.
+ * <p>
+ * Implementations of this interface should provide means to manage the array of integers, with
+ * support for resizing the array dynamically. It is meant to be used where direct, low-level access
+ * to the bytes representing the integer values is needed.
+ *
+ * @see IntArrayValues
+ * @see Byteable
+ * @see DynamicallySized
  */
 @SuppressWarnings("rawtypes")
 public interface ByteableIntArrayValues extends IntArrayValues, Byteable, DynamicallySized {
 
     /**
-     * Returns the size in bytes of the array for a given number of elements.
+     * Calculates the size in bytes needed to store the given number of integers.
      *
-     * @param sizeInBytes The number of elements for which to compute the size in bytes.
-     * @return The size in bytes for the given number of elements.
-     * @throws IllegalStateException if the array is closed.
+     * @param sizeInBytes the number of integers to be stored.
+     * @return the size in bytes needed to store the specified number of integers.
+     * @throws IllegalStateException if the size cannot be determined.
      */
     @Override
     long sizeInBytes(@NonNegative long sizeInBytes)
             throws IllegalStateException;
 
     /**
-     * Adjusts the capacity of the array.
+     * Sets the capacity of the array, in terms of the number of integers it can hold.
      *
-     * @param arrayLength The new capacity of the array.
-     * @return The current instance, adjusted to the new capacity.
-     * @throws IllegalStateException if the array is closed.
+     * @param arrayLength the desired array capacity, in number of integers.
+     * @return this {@code ByteableIntArrayValues} instance.
+     * @throws IllegalStateException if the capacity cannot be set, for example, due to insufficient memory.
      */
+
     ByteableIntArrayValues capacity(@NonNegative long arrayLength)
             throws IllegalStateException;
 }

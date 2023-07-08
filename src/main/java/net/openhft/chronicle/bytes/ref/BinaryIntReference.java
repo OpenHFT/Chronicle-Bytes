@@ -29,7 +29,30 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * This class acts as a Binary 32-bit in values. c.f. TextIntReference
+ * Represents a 32-bit integer in binary form, backed by a {@link BytesStore}.
+ * <p>
+ * This class provides various operations to access and manipulate a single integer in binary form.
+ * The integer is stored in a BytesStore, and this class provides methods for atomic operations,
+ * reading/writing the value, and managing its state.
+ * <p>
+ * The class also supports volatile reads, ordered writes, and compare-and-swap operations.
+ * The maximum size of the backing storage is 4 bytes, corresponding to a 32-bit integer.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
+ * try (BinaryIntReference ref = new BinaryIntReference()) {
+ *     ref.bytesStore(bytesStore, 16, 4);
+ *     ref.setValue(10);
+ *     int value = ref.getVolatileValue();
+ * }
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @see BytesStore
+ * @see IntValue
  */
 public class BinaryIntReference extends AbstractReference implements IntValue {
     public static final int INT_NOT_COMPLETE = Integer.MIN_VALUE;

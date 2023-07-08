@@ -46,7 +46,7 @@ public class SimpleDecimaliser implements Decimaliser {
      *
      * @param value           The double value to be converted.
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.
@@ -81,7 +81,7 @@ public class SimpleDecimaliser implements Decimaliser {
      *
      * @param value           The float value to be converted.
      * @param decimalAppender The {@link DecimalAppender} used to store and append the converted decimal value.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
         // Determine if the input value is negative.

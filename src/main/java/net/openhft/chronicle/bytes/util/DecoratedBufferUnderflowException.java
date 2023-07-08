@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.util;
 import java.nio.BufferUnderflowException;
 
 /**
- * A specialized {@link BufferUnderflowException} that allows for custom messages.
+ * Customized {@link BufferUnderflowException} with a descriptive message.
+ * This exception is thrown to indicate that there is an attempt to read
+ * data from a buffer beyond its limit.
  */
 public final class DecoratedBufferUnderflowException extends BufferUnderflowException {
 
@@ -30,18 +32,18 @@ public final class DecoratedBufferUnderflowException extends BufferUnderflowExce
     private final String message;
 
     /**
-     * Constructs a DecoratedBufferUnderflowException with the specified detail message.
+     * Constructs a new exception with the specified detail message.
      *
-     * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method)
+     * @param message the detail message
      */
     public DecoratedBufferUnderflowException(final String message) {
         this.message = message;
     }
 
     /**
-     * Returns the detail message string of this exception.
+     * Returns the detail message of this exception.
      *
-     * @return the detail message string of this exception
+     * @return the detail message
      */
     @Override
     public String getMessage() {

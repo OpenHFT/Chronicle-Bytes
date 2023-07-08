@@ -29,7 +29,8 @@ import java.io.*;
 import java.nio.BufferOverflowException;
 
 /**
- * Provides an interface for compressing and uncompressing data using various algorithms.
+ * Interface for providing compression and decompression functionality
+ * to various types of input data.
  */
 public interface Compression {
 
@@ -203,11 +204,29 @@ public interface Compression {
         }
     }
 
+    /**
+     * Returns an InputStream that will decompress data read from it.
+     *
+     * @param input the underlying InputStream to read compressed data from.
+     * @return a decompressing InputStream.
+     * @throws IORuntimeException if an I/O error occurs.
+     */
     InputStream decompressingStream(InputStream input)
             throws IORuntimeException;
 
+    /**
+     * Returns an OutputStream that will compress data written to it.
+     *
+     * @param output the underlying OutputStream to write compressed data to.
+     * @return a compressing OutputStream.
+     */
     OutputStream compressingStream(OutputStream output);
 
+    /**
+     * Indicates whether compression/decompression is available.
+     *
+     * @return true if available, false otherwise.
+     */
     default boolean available() {
         return true;
     }

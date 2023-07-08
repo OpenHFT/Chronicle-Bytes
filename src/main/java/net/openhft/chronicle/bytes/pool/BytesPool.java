@@ -22,26 +22,27 @@ import net.openhft.chronicle.core.io.IOTools;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * A pool for {@link Bytes} instances to avoid creating new instances frequently.
+ * A thread-local pool of reusable {@link Bytes} instances.
  * <p>
- * This pool uses a {@link ThreadLocal} to store instances of {@link Bytes} for reuse.
- * When an instance is requested, it returns a thread-local {@link Bytes} instance if available,
- * or creates a new one if not.
- * </p>
+ * This class uses a {@link ThreadLocal} to store a single {@link Bytes} instance per thread,
+ * which can be reused to avoid the overhead of creating a new instance every time bytes are
+ * needed for operations.
+ * <p>
+ * This class is primarily meant to be used in high-performance environments where reducing
+ * object creation is crucial.
  */
 @SuppressWarnings("rawtypes")
 public class BytesPool {
 
     /**
-     * ThreadLocal storage for Bytes instances.
+     * Thread-local variable that holds the {@link Bytes} instance for each thread.
      */
     final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
 
     /**
-     * Acquires a {@link Bytes} instance from the pool. If a {@link Bytes} instance is already
-     * available in the ThreadLocal storage for the current thread, it is reused.
-     * Otherwise, a new {@link Bytes} instance is created, stored in the ThreadLocal storage,
-     * and returned.
+     * Acquires a {@link Bytes} instance from the thread-local pool. If the pool does not
+     * contain a {@link Bytes} instance for the current thread, a new one is created and
+     * added to the pool.
      *
      * @return A {@link Bytes} instance.
      */
@@ -61,10 +62,12 @@ public class BytesPool {
     }
 
     /**
-     * Creates a new {@link Bytes} instance. This method is called if there is no available
-     * {@link Bytes} instance in the ThreadLocal storage for the current thread.
+     * Creates a new {@link Bytes} instance.
+     * <p>
+     * This method is called internally when there is no {@link Bytes} instance available
+     * in the thread-local pool for the current thread.
      *
-     * @return A new {@link Bytes} instance.
+     * @return A newly created {@link Bytes} instance.
      */
     @NotNull
     protected Bytes<?> createBytes() {

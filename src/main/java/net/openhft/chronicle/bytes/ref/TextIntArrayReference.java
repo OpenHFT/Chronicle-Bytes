@@ -30,9 +30,16 @@ import java.nio.BufferUnderflowException;
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
 /**
- * Represents a reference to an integer array formatted in text.
- * The format for a long array in text is:
- * { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
+ * TextIntArrayReference is an implementation of a reference to an array of integers, represented
+ * in a text format. It extends AbstractReference and implements ByteableIntArrayValues. This class
+ * facilitates the serialization and deserialization of an array of integers in a custom textual
+ * representation. The text representation is structured as JSON-like content.
+ * <p>
+ * The format of the text representation of an integer array is:
+ * {@code { capacity: 00000001234, used: 0000000128, values: [ 1234567890, ... ] }}
+ * </p>
+ *
+ * @author [Your Name]
  */
 @SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
@@ -55,12 +62,12 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     private long length = VALUES;
 
     /**
-     * Writes the provided capacity to the given Bytes.
+     * Writes an array of integers to the specified {@link Bytes} instance in a text format.
      *
-     * @param bytes    The bytes to write the capacity to.
-     * @param capacity The capacity to write.
-     * @throws IllegalStateException   If an illegal state occurs during the operation.
-     * @throws BufferOverflowException If a buffer overflow occurs during the operation.
+     * @param bytes    the Bytes instance to write to.
+     * @param capacity the capacity of the array to be written.
+     * @throws IllegalStateException       if an invalid state is encountered.
+     * @throws BufferOverflowException     if there's not enough space in the buffer to write the array.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {
@@ -68,22 +75,14 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         bytes.write(SECTION1);
         bytes.append(capacity);
         while (bytes.writePosition() - start < CAPACITY + DIGITS) {
-            try {
-                bytes.writeUnsignedByte(' ');
-            } catch (ArithmeticException e) {
-                throw new AssertionError(e);
-            }
+            bytes.writeUnsignedByte(' ');
         }
         bytes.write(SECTION2);
         bytes.write(ZERO);
         bytes.write(SECTION3);
         for (long i = 0; i < capacity; i++) {
             if (i > 0) {
-                try {
-                    bytes.appendUtf8(", ");
-                } catch (BufferUnderflowException e) {
-                    throw new AssertionError(e);
-                }
+                bytes.appendUtf8(", ");
             }
             bytes.write(ZERO);
         }
@@ -91,22 +90,18 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     }
 
     /**
-     * Returns the length of the data based on the given BytesStore.
+     * Determines the length of the array in the text format represented in the given {@link BytesStore}.
      *
-     * @param bytes  The BytesStore containing the data.
-     * @param offset The offset to start reading from.
-     * @return The length of the data.
-     * @throws IllegalStateException If an illegal state occurs during the operation.
+     * @param bytes  the BytesStore containing the text representation.
+     * @param offset the offset at which the text representation starts.
+     * @return the length of the array in text format.
+     * @throws IllegalStateException if an invalid state is encountered.
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException {
         //todo check this, I think there could be a bug here
-        try {
-            return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
-                    + VALUES + SECTION4.length;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
+                + VALUES + SECTION4.length;
     }
 
     @Override
@@ -117,8 +112,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -129,8 +122,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -153,8 +144,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -183,8 +172,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
 
     }
@@ -197,8 +184,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -240,8 +225,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
 
     }

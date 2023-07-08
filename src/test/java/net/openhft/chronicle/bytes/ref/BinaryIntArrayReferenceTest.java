@@ -27,21 +27,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assume.assumeFalse;
 
 public class BinaryIntArrayReferenceTest extends BytesTestCommon {
+    private static final long CAPACITY = 128;
+
     @Test
     public void getSetValues() {
-        final int length = 128 * 4 + 2 * 8;
+        final long length = CAPACITY * 4 + 2 * 8;
         final Bytes<?> bytes = Bytes.allocateDirect(length);
         try {
-            BinaryIntArrayReference.write(bytes, 128);
+            BinaryIntArrayReference.write(bytes, CAPACITY);
 
             try (BinaryIntArrayReference array = new BinaryIntArrayReference()) {
                 array.bytesStore(bytes, 0, length);
 
-                assertEquals(128, array.getCapacity());
-                for (int i = 0; i < 128; i++)
+                assertEquals(CAPACITY, array.getCapacity());
+                for (int i = 0; i < CAPACITY; i++)
                     array.setValueAt(i, i + 1);
 
-                for (int i = 0; i < 128; i++)
+                for (int i = 0; i < CAPACITY; i++)
                     assertEquals(i + 1, array.getValueAt(i));
             }
         } finally {

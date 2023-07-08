@@ -38,8 +38,23 @@ import java.util.stream.Stream;
  * The main usage is to reduce the amount of memory used by creating new objects when the same byte sequence is
  * repeatedly decoded into an object.
  *
+ * This cache only guarantees it will provide a String which matches the decoded bytes.
+ * <p>
+ * It doesn't guarantee it will always return the same object,
+ * nor that different threads will return the same object,
+ * though the contents should always be the same.
+ * <p>
+ * While not technically thread safe, it should still behave correctly.
+ *
+ * Abstract base class for implementing an interning mechanism, which helps
+ * in reusing instances of immutable objects. This class is designed to store objects
+ * and return previously stored instances that are equal to the required instance.
+ * <p>
+ * Note: The interning cache may not always return the same object instance, but
+ * the contents of the instances will be equal.
+ * *
+ * @param <T> the type of the object being interned
  * @author peter.lawrey
- * @param <T> the type of object to be interned
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
@@ -55,13 +70,23 @@ public abstract class AbstractInterner<T> {
      * @param capacity the desired capacity for the intern cache
      * @throws IllegalArgumentException if the calculated capacity exceeds the maximum possible array size
      */
-    protected AbstractInterner(@NonNegative int capacity) {
+    protected AbstractInterner(@NonNegative int capacity)
+            throws IllegalArgumentException {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = new InternerEntry[n];
         mask = n - 1;
     }
 
+    /**
+     * Returns the 32-bit hash code of the given bytes store and length.
+     *
+     * @param bs the bytes store
+     * @param length the length
+     * @return the 32-bit hash code
+     * @throws IllegalStateException if the bytes cannot be accessed
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     */
     private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
@@ -151,28 +176,55 @@ public abstract class AbstractInterner<T> {
         return t;
     }
 
+    /**
+     * Retrieves the value corresponding to the bytes store and length.
+     * This method must be implemented by subclasses.
+     *
+     * @param bs the bytes store
+     * @param length the length of the data in the bytes store
+     * @return the value corresponding to the given bytes store and length
+     * @throws IORuntimeException if an IO error occurs
+     * @throws IllegalStateException if the bytes cannot be accessed
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     */
     @NotNull
     protected abstract T getValue(BytesStore bs, @NonNegative int length)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException;
 
+    /**
+     * Toggles the internal toggle state and returns its new value.
+     *
+     * @return the new state of the toggle
+     */
     protected boolean toggle() {
         toggle = !toggle;
         return toggle;
     }
 
     /**
-     * Returns the number of interned values in the cache.
+     * Returns the number of non-null values in the interner entries.
      *
-     * @return the number of interned values
+     * @return the count of non-null values
      */
     public int valueCount() {
         return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }
 
+    /**
+     * Represents an entry in the interner.
+     *
+     * @param <T> the type of the object being interned
+     */
     private static final class InternerEntry<T> {
         final BytesStore bytes;
         final T t;
 
+        /**
+         * Constructs an InternerEntry with the given bytes store and value.
+         *
+         * @param bytes the bytes store
+         * @param t the value
+         */
         InternerEntry(BytesStore bytes, T t) {
             this.bytes = bytes;
             this.t = t;

@@ -53,10 +53,10 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
     /**
-     * Agitates the given long value.
+     * Agitates the given long value to generate a hash value.
      *
-     * @param l the input value.
-     * @return the agitated value.
+     * @param l The input value.
+     * @return The agitated hash value.
      */
     public static long agitate(long l) {
         l ^= Long.rotateLeft(l, 26);
@@ -65,12 +65,12 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Calculates the hash code of the given byte store.
+     * Computes a 64-bit hash value for the given BytesStore.
      *
-     * @param store the byte store to be hashed.
-     * @return the hash code.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @param store The {@link BytesStore} to compute the hash for.
+     * @return A 64-bit hash value.
+     * @throws IllegalStateException     If the state is illegal.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
@@ -83,13 +83,13 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Calculates the hash code of the given byte store with specified length.
+     * Computes a 64-bit hash value for the given BytesStore.
      *
-     * @param bytes  the byte store to be hashed.
-     * @param length the length to be considered for hashing.
-     * @return the hash code.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @param bytes  The {@link BytesStore} to compute the hash for.
+     * @param length The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws IllegalStateException     If the state is illegal.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {

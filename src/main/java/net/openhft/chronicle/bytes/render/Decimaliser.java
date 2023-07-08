@@ -36,7 +36,7 @@ public interface Decimaliser {
      *
      * @param value           The double value to be converted.
      * @param decimalAppender The DecimalAppender used to store and append the converted decimal value.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     boolean toDecimal(double value, DecimalAppender decimalAppender);
 
@@ -48,7 +48,7 @@ public interface Decimaliser {
      *
      * @param value           The float value to be converted.
      * @param decimalAppender The DecimalAppender used to store and append the converted decimal value.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     boolean toDecimal(float value, DecimalAppender decimalAppender);
 
