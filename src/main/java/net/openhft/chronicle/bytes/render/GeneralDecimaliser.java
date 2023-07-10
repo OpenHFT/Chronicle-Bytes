@@ -48,7 +48,7 @@ public class GeneralDecimaliser implements Decimaliser {
      *
      * @param value           The double value to be converted.
      * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
@@ -74,7 +74,7 @@ public class GeneralDecimaliser implements Decimaliser {
      *
      * @param value           The float value to be converted.
      * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return <code>true</code> if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
      */
     @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
