@@ -378,11 +378,8 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @deprecated as per https://github.com/OpenHFT/Chronicle-Bytes/issues/348
+     * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
-    @Deprecated(/* To be removed in 2.25 */)
     @Override
     protected void finalize()
             throws Throwable {

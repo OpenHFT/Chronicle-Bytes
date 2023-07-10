@@ -70,7 +70,7 @@ public class SingleMappedFile extends MappedFile {
 
             resizeRafIfTooSmall(capacity);
             final long address = OS.map(fileChannel, mode, 0, capacity);
-            final MappedBytesStore mbs2 = MAPPED_BYTES_STORE_FACTORY.create(this, this, 0, address, capacity, capacity);
+            final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, capacity, capacity);
             mbs2.syncMode(DEFAULT_SYNC_MODE);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -247,6 +247,9 @@ public class SingleMappedFile extends MappedFile {
         return raf;
     }
 
+    /**
+     * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
+     */
     @Override
     protected void finalize()
             throws Throwable {

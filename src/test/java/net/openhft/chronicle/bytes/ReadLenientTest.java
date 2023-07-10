@@ -37,7 +37,6 @@ public class ReadLenientTest extends BytesTestCommon {
         doTest(Bytes.from(""));
     }
 
-    @SuppressWarnings("rawtypes")
     private void doTest(Bytes<?> bytes)
             throws BufferUnderflowException, ArithmeticException, IllegalArgumentException {
         bytes.lenient(true);

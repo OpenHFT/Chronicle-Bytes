@@ -19,6 +19,10 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.Decimaliser;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
@@ -33,31 +37,61 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Fast unchecked version of AbstractBytes
+ * An optimized extension of AbstractBytes that performs unchecked read and write operations
+ * on a Bytes instance that is backed by native memory.
+ * The class bypasses bounds checking to provide high-performance access to the underlying data.
  *
- * @param <U> Underlying type
+ * <p>This class is intended for use in performance-critical scenarios where the client can
+ * ensure that all operations stay within valid bounds, thus avoiding the overhead of bounds checking.
+ *
+ * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown,
+ * corruption of data, JVM crashes, or other undefined behavior.
+ *
+ * @param <U> The type of the object this Bytes can point to.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
-        implements Bytes<U>, HasUncheckedRandomDataInput {
+        implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
+    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
+    // The real capacity of the BytesStore this UncheckedNativeBytes operates on
     protected final long capacity;
+    // An instance of UncheckedRandomDataInput for accessing data without bounds checking
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
+    // The Bytes instance this UncheckedNativeBytes operates on
     @NotNull
     private final Bytes<U> underlyingBytes;
+    // The BytesStore that the underlying Bytes operates on
     @NotNull
     protected BytesStore<?, U> bytesStore;
+    // The position of the next byte to be read
     protected long readPosition;
+    // The position of the next byte to be written
     protected long writePosition;
+    // The limit of the write buffer
     protected long writeLimit;
+    // Tracks the number of decimal places in the last number read
     private int lastDecimalPlaces = 0;
+    // Tracks if the last number read had any digits
     private boolean lastNumberHadDigits = false;
+    private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
+    private boolean append0 = APPEND_0;
 
+    /**
+     * Constructs an UncheckedNativeBytes instance by wrapping around the provided Bytes object.
+     *
+     * @param underlyingBytes the Bytes object to wrap around
+     * @throws IllegalStateException if the underlyingBytes instance is not valid
+     */
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
@@ -445,6 +479,12 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
+    @Override
+    public Bytes<U> rawWriteByte(byte i8) throws BufferOverflowException, IllegalStateException {
+        bytesStore.writeByte(writePosition++, i8);
+        return this;
+    }
+
     @NotNull
     @Override
     public Bytes<U> writeShort(@NonNegative long offset, short i)
@@ -574,7 +614,7 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
-    void writeCheckOffset(long offset, long adding)
+    void writeCheckOffset(@NonNegative long offset, long adding)
             throws BufferOverflowException {
         // Do nothing
     }
@@ -909,6 +949,71 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
+    public @NotNull UncheckedNativeBytes<U> append(double d)
+            throws BufferOverflowException, IllegalStateException {
+        if (!decimaliser.toDecimal(d, this))
+            append8bit(Double.toString(d));
+        return this;
+    }
+
+    @Override
+    public @NotNull UncheckedNativeBytes<U> append(float f)
+            throws BufferOverflowException, IllegalStateException {
+        if (!decimaliser.toDecimal(f, this))
+            append8bit(Float.toString(f));
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        append(value < 0, Math.abs((long) value), 0);
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(long value) throws BufferOverflowException, IllegalStateException {
+        if (value == Long.MIN_VALUE)
+            write(MIN_VALUE_TEXT);
+        else
+            append(value < 0, Math.abs(value), 0);
+        return this;
+    }
+
+    @Override
+    public Decimaliser decimaliser() {
+        return decimaliser;
+    }
+
+    @Override
+    public Bytes<U> decimaliser(Decimaliser decimaliser) {
+        this.decimaliser = decimaliser;
+        return this;
+    }
+
+    @Override
+    public boolean fpAppend0() {
+        return append0;
+    }
+
+    @Override
+    public Bytes<U> fpAppend0(boolean append0) {
+        this.append0 = append0;
+        return this;
+    }
+
+    @Override
+    public void append(boolean negative, long mantissa, int exponent) {
+        ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
+        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent, fpAppend0());
+        writeSkip(length);
+    }
+
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent, append0);
+    }
+
+    @Override
     public int lastDecimalPlaces() {
         return lastDecimalPlaces;
     }
@@ -983,6 +1088,7 @@ public class UncheckedNativeBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         return bytesStore.internalNumberBuffer();

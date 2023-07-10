@@ -22,26 +22,50 @@ import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 
 import java.nio.BufferUnderflowException;
 
+/**
+ * Interface defining the required operations for a method reader.
+ * <p>
+ * A method reader is responsible for reading serialized method calls, typically from a queue or a stream,
+ * and then dispatching those method calls to their intended target.
+ * <p>
+ * The reader provides a means to intercept method calls and control whether the underlying input should be closed
+ * when the reader itself is closed.
+ * <p>
+ * This interface extends {@link java.io.Closeable}, so any class implementing this interface can also be safely closed.
+ */
 public interface MethodReader extends Closeable {
     String HISTORY = "history";
     int MESSAGE_HISTORY_METHOD_ID = -1;
 
+    /**
+     * Returns a MethodReaderInterceptorReturns instance which can be used to control the flow of method calls.
+     *
+     * @return a MethodReaderInterceptorReturns instance
+     */
     MethodReaderInterceptorReturns methodReaderInterceptorReturns();
 
     /**
-     * Moves the queue to read a message if there is one.
-     * If there is an exception in the dispatching mechanics then this should be caught and Jvm.warn'd.
-     * If there is an exception in the invocation then this is wrapped in a {@link InvocationTargetRuntimeException}
-     * and thrown.
+     * Attempts to read a single message from the input, if one is available.
+     * <p>
+     * If an exception is thrown while dispatching the method call, this should be caught and logged.
+     * If an exception is thrown by the target method itself, this is wrapped in an {@link InvocationTargetRuntimeException} and rethrown.
      *
-     * @return true if there was a message, false if no more messages.
-     * @throws InvocationTargetRuntimeException if the receiver (target method) throws
+     * @return {@code true} if a message was successfully read, {@code false} if no more messages are available
+     * @throws InvocationTargetRuntimeException if an exception is thrown by the target method
+     * @throws IllegalStateException if this method is invoked at an inappropriate time
+     * @throws BufferUnderflowException if there is not enough data available in the buffer to read the next message
      */
     boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException;
 
     /**
-     * Call close on the input when closed
+     * Determines whether the underlying input should be closed when the MethodReader is closed.
+     * <p>
+     * If {@code closeIn} is set to {@code true}, closing the MethodReader will also close the underlying input.
+     * If {@code closeIn} is set to {@code false}, the underlying input will remain open after the MethodReader is closed.
+     *
+     * @param closeIn {@code true} to close the input when this reader is closed, {@code false} otherwise
+     * @return the MethodReader itself, for method chaining
      */
     MethodReader closeIn(boolean closeIn);
 }

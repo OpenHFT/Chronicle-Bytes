@@ -22,6 +22,9 @@ import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.Decimaliser;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.core.Jvm;
@@ -38,6 +41,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -51,11 +55,19 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 public abstract class AbstractBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>,
-        HasUncheckedRandomDataInput {
+        HasUncheckedRandomDataInput,
+        DecimalAppender {
     @Deprecated(/* remove in x.25 */)
     protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
+    // if you need to reserve the behaviour of append(double) in x.23
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", false);
+    @Deprecated(/* to be removed in x.26 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
+
+    private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -69,6 +81,8 @@ public abstract class AbstractBytes<U>
     private int lastDecimalPlaces = 0;
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
+    private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
+    private boolean append0 = APPEND_0;
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
             throws IllegalStateException {
@@ -235,9 +249,29 @@ public abstract class AbstractBytes<U>
         return bytesStore.compareAndSwapLong(offset, expected, value);
     }
 
+    /**
+     * Appends the string representation of the given double value to the bytes.
+     * First, it tries to convert the double value using the Decimalizer instance. If that fails,
+     * it falls back to converting the double to a String and appending it.
+     *
+     * @param d the double value to append.
+     * @return this Bytes instance.
+     * @throws BufferOverflowException if there is not enough space to write the double.
+     * @throws IllegalStateException   if this buffer is closed.
+     */
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, IllegalStateException {
+        if (X_23_APPEND_DOUBLE) {
+            return appendX23(d);
+        }
+        if (!decimaliser().toDecimal(d, this))
+            append8bit(Double.toString(d));
+        return this;
+    }
+
+    @NotNull
+    private AbstractBytes<U> appendX23(double d) {
         boolean fits = canWriteDirect(32);
         if (fits) {
             long address = addressForWrite(writePosition());
@@ -251,6 +285,88 @@ public abstract class AbstractBytes<U>
             append(bytes);
         }
         return this;
+    }
+
+    /**
+     * Appends the string representation of the given float value to the bytes.
+     * First, it tries to convert the float value using the Decimalizer instance. If that fails,
+     * it falls back to converting the float to a String and appending it.
+     *
+     * @param f the float value to append.
+     * @return this Bytes instance.
+     * @throws BufferOverflowException if there is not enough space to write the float.
+     * @throws IllegalStateException   if this buffer is closed.
+     */
+    @Override
+    public @NotNull Bytes<U> append(float f)
+            throws BufferOverflowException, IllegalStateException {
+        if (!decimaliser().toDecimal(f, this))
+            append8bit(Float.toString(f));
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(int value) throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        appendLong(value);
+        return this;
+    }
+
+    @Override
+    public @NotNull Bytes<U> append(long value) throws BufferOverflowException, IllegalStateException {
+        if (value == Long.MIN_VALUE) {
+            write(MIN_VALUE_TEXT);
+        } else {
+            appendLong(value);
+        }
+        return this;
+    }
+
+    private void appendLong(long value) {
+        ensureCapacity(writePosition() + 21);
+        long length = bytesStore().appendAndReturnLength(writePosition(), value < 0, Math.abs(value), 0, false);
+        writeSkip(length);
+    }
+
+    @Override
+    public Decimaliser decimaliser() {
+        return decimaliser;
+    }
+
+    @Override
+    public Bytes<U> decimaliser(Decimaliser decimaliser) {
+        this.decimaliser = decimaliser;
+        return this;
+    }
+
+    @Override
+    public boolean fpAppend0() {
+        return append0;
+    }
+
+    @Override
+    public Bytes<U> fpAppend0(boolean append0) {
+        this.append0 = append0;
+        return this;
+    }
+
+    /**
+     * Appends a numeric value in decimal form with the specified mantissa and exponent,
+     * handling negative values and decimal point placement.
+     *
+     * @param negative indicates if the number is negative.
+     * @param mantissa the mantissa of the number to append.
+     * @param exponent the exponent indicating the position of the decimal point.
+     */
+    @Override
+    public void append(boolean negative, long mantissa, int exponent) {
+        ensureCapacity(writePosition() + BytesInternal.digitsForExponent(exponent));
+        long length = bytesStore().appendAndReturnLength(writePosition(), negative, mantissa, exponent, fpAppend0());
+        writeSkip(length);
+    }
+
+    @Override
+    public long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
+        return bytesStore().appendAndReturnLength(writePosition, negative, mantissa, exponent, append0);
     }
 
     @Override
@@ -1378,6 +1494,15 @@ public abstract class AbstractBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    /**
+     * Returns the bytes sum between the specified indexes; start (inclusive) and end (exclusive).
+     *
+     * @param start the index of the first byte to sum
+     * @param end   the index of the last byte to sum
+     * @return unsigned bytes sum
+     * @throws BufferUnderflowException if the specified indexes are outside the limits of the BytesStore
+     * @throws IllegalStateException    if the BytesStore has been released
+     */
     public int byteCheckSum(@NonNegative int start, @NonNegative int end)
             throws BufferUnderflowException, IllegalStateException {
         int sum = 0;
@@ -1398,6 +1523,7 @@ public abstract class AbstractBytes<U>
         return (int) read(readPosition(), bytes, 0, bytes.length);
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         if (isElastic() && bytesStore.capacity() < 20)

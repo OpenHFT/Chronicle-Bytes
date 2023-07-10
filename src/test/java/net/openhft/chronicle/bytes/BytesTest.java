@@ -20,8 +20,13 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
+import net.openhft.chronicle.bytes.render.MaximumPrecision;
+import net.openhft.chronicle.bytes.render.StandardDecimaliser;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.UTF8StringInterner;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -54,6 +59,7 @@ import static org.junit.Assume.assumeTrue;
 public class BytesTest extends BytesTestCommon {
 
     private final Allocator alloc1;
+    boolean parseDouble;
 
     public BytesTest(String ignored, Allocator alloc1) {
         this.alloc1 = alloc1;
@@ -79,6 +85,7 @@ public class BytesTest extends BytesTestCommon {
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
         assertEquals(data.read8bit(), "Test me again");
+        data.releaseLast();
     }
 
     @Test
@@ -881,7 +888,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testParseDoubleReadLimit() {
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(32);
+        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(52);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);
@@ -1072,18 +1079,198 @@ public class BytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testAppendReallySmallDouble() {
-        assumeFalse(alloc1 == NATIVE || alloc1 == NATIVE_ADDRESS);
-        Bytes<?> bytes = alloc1.elasticBytes(32);
+    public void testAppendDoubleWithoutParseDouble() {
 
-        for (double d = 1; d >= 1e-19; d *= 0.99) {
+        parseDouble = false;
+        // TODO FIX parseDouble()
+        testAppendDoubleOnce(1e-11 + Math.ulp(1e-11), "0.00000000001", "0.00000000001", "0.000000000010000000000000001", "0");
+        testAppendDoubleOnce(1.0626477603237785E-10, "0.000000000106264776", "0.000000000106264775", "0.00000000010626477603237785", "0");
+        testAppendDoubleOnce(1e-18 - Math.ulp(1e-18), "0.000000000000000001", "0.000000000000000001", "0.0000000000000000009999999999999999", "0");
+        testAppendDoubleOnce(1e45, "1000000000000000000000000000000000000000000000", "Infinity", "1.0E45", "");
+        testAppendDoubleOnce(1e45 + Math.ulp(1e45), "1000000000000000100000000000000000000000000000", "Infinity", "1.0000000000000001E45", "");
+        testAppendDoubleOnce(-Float.MAX_VALUE, "-340282346638528860000000000000000000000", "-340282350000000000000000000000000000000", "-340282346638528860000000000000000000000", "");
+        testAppendDoubleOnce(-Double.MIN_NORMAL, "-0", "-0", "-2.2250738585072014E-308", "-0");
+    }
+
+    @Test
+    public void testAppendDoubleRandom() {
+
+        parseDouble = true;
+
+        // ok
+        testAppendDoubleOnce(-145344868913.80002, "-145344868913.80002", "-145344872448", "-145344868913.80002", "-145344868913.80002");
+
+        testAppendDoubleOnce(-1.4778838950354771E-9, "-0.000000001477883895", "-0.0000000014778839", "-0.0000000014778838950354771", "-0.000000001");
+        testAppendDoubleOnce(1.4753448053710411E-8, "0.000000014753448054", "0.000000014753448", "0.000000014753448053710411", "0.000000015");
+        testAppendDoubleOnce(4.731428525883379E-10, "0.000000000473142853", "0.00000000047314286", "0.0000000004731428525883379", "0");
+        testAppendDoubleOnce(1.0E-5, "0.00001", "0.00001", "0.00001", "0.00001");
+        testAppendDoubleOnce(5.7270847085938394E-9, "0.000000005727084709", "0.0000000057270846", "0.0000000057270847085938394", "0.000000006");
+        testAppendDoubleOnce(-3.5627763205104632E-9, "-0.000000003562776321", "-0.0000000035627763", "-0.0000000035627763205104632", "-0.000000004");
+        testAppendDoubleOnce(3.4363211797092447E-10, "0.000000000343632118", "0.00000000034363212", "0.00000000034363211797092447", "0");
+        testAppendDoubleOnce(0.7205789375929972, "0.7205789375929972", "0.7205789", "0.7205789375929972", "0.720578938");
+        testAppendDoubleOnce(1.7205789375929972E-8, "0.000000017205789376", "0.000000017205789", "0.000000017205789375929972", "0.000000017");
+        testAppendDoubleOnce(1.000000459754255, "1.000000459754255", "1.0000005", "1.000000459754255", "1.00000046");
+        testAppendDoubleOnce(1.0000004597542551, "1.0000004597542552", "1.0000005", "1.0000004597542552", "1.00000046");
+        testAppendDoubleOnce(-0.0042633243189823394, "-0.00426332431898234", "-0.004263324", "-0.0042633243189823394", "-0.004263324");
+        testAppendDoubleOnce(4.3634067645459027E-4, "0.00043634067645459", "0.00043634066", "0.00043634067645459027", "0.000436341");
+        testAppendDoubleOnce(-4.8378951079402273E-4, "-0.000483789510794023", "-0.0004837895", "-0.00048378951079402273", "-0.00048379");
+        testAppendDoubleOnce(3.8098893793449994E-4, "0.0003809889379345", "0.00038098893", "0.00038098893793449994", "0.000380989");
+        testAppendDoubleOnce(-0.0036980489197619678, "-0.003698048919761968", "-0.0036980489", "-0.0036980489197619678", "-0.003698049");
+        testAppendDoubleOnce(1.1777536373898703E-7, "0.000000117775363739", "0.000000117775365", "0.00000011777536373898703", "0.000000118");
+        testAppendDoubleOnce(8.577881719106565E-8, "0.000000085778817191", "0.000000085778815", "0.00000008577881719106565", "0.000000086");
+        testAppendDoubleOnce(1.1709707236415293E-7, "0.000000117097072364", "0.00000011709707", "0.00000011709707236415293", "0.000000117");
+        testAppendDoubleOnce(1.0272238286878982E-7, "0.000000102722382869", "0.00000010272238", "0.00000010272238286878982", "0.000000103");
+        testAppendDoubleOnce(9.077547054210796E-8, "0.000000090775470542", "0.00000009077547", "0.00000009077547054210796", "0.000000091");
+        testAppendDoubleOnce(-1.1914407211387385E-7, "-0.000000119144072114", "-0.00000011914407", "-0.00000011914407211387385", "-0.000000119");
+        testAppendDoubleOnce(8.871684275243539E-4, "0.000887168427524354", "0.00088716845", "0.0008871684275243539", "0.000887168");
+        testAppendDoubleOnce(8.807878708605213E-4, "0.000880787870860521", "0.00088078785", "0.0008807878708605213", "0.000880788");
+        testAppendDoubleOnce(8.417670165790972E-4, "0.000841767016579097", "0.000841767", "0.0008417670165790972", "0.000841767");
+        testAppendDoubleOnce(0.0013292726996348332, "0.001329272699634833", "0.0013292728", "0.0013292726996348332", "0.001329273");
+        testAppendDoubleOnce(2.4192540417349368E-4, "0.000241925404173494", "0.0002419254", "0.00024192540417349368", "0.000241925");
+        testAppendDoubleOnce(1.9283711356548258E-4, "0.000192837113565483", "0.00019283712", "0.00019283711356548258", "0.000192837");
+        testAppendDoubleOnce(-8.299137873077923E-5, "-0.000082991378730779", "-0.00008299138", "-0.00008299137873077923", "-0.000082991");
+    }
+
+    @Test
+    public void testAppendDoublePowersOfTen() {
+        parseDouble = true;
+        // OK
+        testAppendDoubleOnce(0.0, "0", "0", "0", "0");
+        testAppendDoubleOnce(0.001, "0.001", "0.001", "0.001", "0.001");
+        testAppendDoubleOnce(1.0E-4, "0.0001", "0.0001", "0.0001", "0.0001");
+        testAppendDoubleOnce(1.0E-6, "0.000001", "0.000001", "0.000001", "0.000001");
+        testAppendDoubleOnce(1.0E-7, "0.0000001", "0.0000001", "0.0000001", "0.0000001");
+        testAppendDoubleOnce(1.0E-8, "0.00000001", "0.00000001", "0.00000001", "0.00000001");
+        testAppendDoubleOnce(1.0E-9, "0.000000001", "0.000000001", "0.000000001", "0.000000001");
+        testAppendDoubleOnce(0.009, "0.009", "0.009", "0.009", "0.009");
+        testAppendDoubleOnce(9.0E-4, "0.0009", "0.0009", "0.0009", "0.0009");
+        testAppendDoubleOnce(9.0E-5, "0.00009", "0.00009", "0.00009", "0.00009");
+        testAppendDoubleOnce(9.0E-6, "0.000009", "0.000009", "0.000009", "0.000009");
+        testAppendDoubleOnce(9.0E-7, "0.0000009", "0.0000009", "0.0000009", "0.0000009");
+        testAppendDoubleOnce(9.0E-8, "0.00000009", "0.00000009", "0.00000009", "0.00000009");
+        testAppendDoubleOnce(9.0E-9, "0.000000009", "0.000000009", "0.000000009", "0.000000009");
+    }
+
+    @Test
+    public void testAppendDoubleEdgeCases() {
+        parseDouble = true;
+        testAppendDoubleOnce(Double.NaN, "NaN", "NaN", "NaN", "");
+        testAppendDoubleOnce(Double.POSITIVE_INFINITY, "Infinity", "Infinity", "Infinity", "");
+        testAppendDoubleOnce(Double.NEGATIVE_INFINITY, "-Infinity", "-Infinity", "-Infinity", "");
+        testAppendDoubleOnce(0.1, "0.1", "0.1", "0.1", "0.1");
+        testAppendDoubleOnce(12.0, "12", "12", "12", "12");
+        testAppendDoubleOnce(12.1, "12.1", "12.1", "12.1", "12.1");
+        testAppendDoubleOnce(12.00000001, "12.00000001", "12", "12.00000001", "12.00000001");
+
+        testAppendDoubleOnce(1e-6 + Math.ulp(1e-6), "0.000001", "0.000001", "0.0000010000000000000002", "0.000001");
+        testAppendDoubleOnce(1e-7 + Math.ulp(1e-7), "0.0000001", "0.0000001", "0.00000010000000000000001", "0.0000001");
+        testAppendDoubleOnce(1e-8 + Math.ulp(1e-8), "0.00000001", "0.00000001", "0.000000010000000000000002", "0.00000001");
+        testAppendDoubleOnce(1e-9 + Math.ulp(1e-9), "0.000000001", "0.000000001", "0.0000000010000000000000003", "0.000000001");
+        testAppendDoubleOnce(1e-10 + Math.ulp(1e-10), "0.0000000001", "0.0000000001", "0.00000000010000000000000002", "0");
+        testAppendDoubleOnce(1e-12 + Math.ulp(1e-12), "0.000000000001", "0.000000000001", "0.0000000000010000000000000002", "0");
+        testAppendDoubleOnce(1.0626477603237786E-11, "0.000000000010626478", "0.000000000010626478", "0.000000000010626477603237786", "0");
+    }
+
+    @Test
+    public void testAppendDoubleLimits() {
+        // limits
+        testAppendDoubleOnce(1.0E-18, "0.000000000000000001", "0.000000000000000001", "0.000000000000000001", "0");
+        testAppendDoubleOnce(1.0E-29, "0", "0", "0.000000000000000000000000000010", "0");
+        testAppendDoubleOnce(1e-29 - Math.ulp(1e-29), "0", "0", "9.999999999999998E-30", "0");
+        testAppendDoubleOnce(1e45 - Math.ulp(1e45), "999999999999999800000000000000000000000000000", "Infinity", "999999999999999800000000000000000000000000000", "");
+        testAppendDoubleOnce(-Double.MIN_VALUE, "-0", "-0", "-4.9E-324", "-0");
+        testAppendDoubleOnce(-Float.MIN_VALUE, "-0", "-0", "-1.401298464324817E-45", "-0");
+
+        testAppendDoubleOnce(0.0, "0.0", "0.0", "0.0", "0.0", true);
+        testAppendDoubleOnce(-Double.MIN_VALUE, "-0.0", "-0.0", "-4.9E-324", "-0.0", true);
+        testAppendDoubleOnce(-Float.MIN_VALUE, "-0.0", "-0.0", "-1.401298464324817E-45", "-0.0", true);
+        testAppendDoubleOnce(12.0, "12.0", "12.0", "12.0", "12.0", true);
+        testAppendDoubleOnce(Long.MIN_VALUE, "-9223372036854776000.0", "-9223372000000000000.0", "-9223372036854775807.0", "", true);
+        testAppendDoubleOnce(Long.MAX_VALUE, "9223372036854776000.0", "9223372000000000000.0", "9223372036854775807.0", "", true);
+
+        assumeFalse(alloc1 == HEAP_EMBEDDED || alloc1 == HEAP_UNCHECKED);
+        testAppendDoubleOnce(-Double.MAX_VALUE, "-179769313486231570000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "-Infinity", "-1.7976931348623157E308", "");
+    }
+
+    @Test
+    public void testAppendReallySmallDouble() {
+        assumeFalse(alloc1 == HEAP_UNCHECKED);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
+
+        for (double d = 1; d >= Double.MIN_NORMAL; d *= 0.99) {
+            bytes.writeLong(size, 0);
             bytes.clear();
             bytes.append(d);
-            double err = d > 4.3e-10 ? 0
-                    : d > 2.14e-13 ? Math.ulp(d)
+            assertEquals("d: " + d, 0, bytes.readLong(size));
+            // Determine expected precision error based on magnitude of value
+            // ok for not easily decimalised
+            double err = d > 2.3e-10 ? 0
+                    : d > 2.0e-13 && !Jvm.isArm() ? Math.ulp(d)
                     : 2 * Math.ulp(d);
             assertEquals(d, bytes.parseDouble(), err);
         }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testAppendReallyBigDouble() {
+        assumeFalse(alloc1 == HEAP_UNCHECKED);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
+
+        for (double d = -1; d > Double.NEGATIVE_INFINITY; d *= 1.01) {
+            bytes.writeLong(size, 0);
+            bytes.clear();
+            bytes.append(d);
+            assertEquals("d: " + d, 0, bytes.readLong(size));
+            // Determine expected precision error based on magnitude of value
+            // ok for not easily decimalised
+            double err = d > -1.3e12 ? 0
+                    : d > -1e39 ? Math.ulp(d)
+                    : 2 * Math.ulp(d);
+            double actual = bytes.parseDouble();
+            assertEquals(d, actual, err);
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void testAppendReallySmallFloat() {
+        assumeFalse(alloc1 == HEAP_UNCHECKED);
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
+
+        for (float f = 1; f > Float.MIN_NORMAL; f *= 0.99f) {
+            bytes.writeLong(size, 0);
+            bytes.clear();
+            bytes.append(f);
+            assertEquals("f: " + f, 0, bytes.readLong(size));
+            // Determine expected precision error based on magnitude of value
+            // ok for not easily decimalised
+            float err = f > 1.2e-4 ? 0 : Math.ulp(f);
+            assertEquals(f, bytes.parseFloat(), err);
+        }
+        bytes.releaseLast();
+    }
+
+
+    @Test
+    public void testAppendReallyBigFloat() {
+        int size = 48;
+        Bytes<?> bytes = alloc1.elasticBytes(size + 8);
+
+        for (float f = 1; f < Float.POSITIVE_INFINITY; f *= 1.01f) {
+            bytes.writeLong(size, 0);
+            bytes.clear();
+            bytes.append(f);
+            assertEquals("f: " + f, 0, bytes.readLong(size));
+            assertEquals(f, bytes.parseFloat(), 0.0f);
+        }
+        bytes.releaseLast();
     }
 
     @Test
@@ -1097,6 +1284,7 @@ public class BytesTest extends BytesTestCommon {
         ba[1] = '1';
         bytes.read(offsetInRDI, ba, offset, bytes.length() - offsetInRDI);
         assertEquals("01ello", new String(ba));
+        bytes.releaseLast();
     }
 
     @Test
@@ -1131,6 +1319,46 @@ public class BytesTest extends BytesTestCommon {
             }
         } finally {
             postTest(a);
+        }
+    }
+
+    private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9) {
+        testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
+    }
+
+    private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
+        @NotNull Bytes<?> a = alloc1.elasticBytes(255)
+                .fpAppend0(append0)
+                .decimaliser(StandardDecimaliser.STANDARD);
+        try {
+            a.append(value);
+            String actual = a.toString();
+            assertEquals(standard, actual);
+
+            a.clear();
+            a.append((float) value);
+            String actual2 = a.toString();
+            assertEquals(standardFloat, actual2);
+
+            a.decimaliser(GeneralDecimaliser.GENERAL);
+            a.clear();
+            a.append(value);
+            String actualg = a.toString();
+            double actualParsed = a.parseDouble();
+            if (parseDouble)
+                assertEquals("parseDouble", value, actualParsed, 0.0);
+            assertEquals(general, actualg);
+
+            a.clear();
+            // if empty don't expect it to be translated
+            boolean decimal = new MaximumPrecision(9).toDecimal(value, (DecimalAppender) a);
+            assertEquals(!expectedDecimal9.isEmpty(), decimal);
+            String actual3 = a.toString();
+            assertEquals(expectedDecimal9, actual3);
+//            System.out.println("testAppendDoubleOnce(" + value + ", \"" + actual + "\", \"" + actual2 + "\", \"" + actualg + "\", \"" + actual3 + "\");");
+
+        } finally {
+            a.releaseLast();
         }
     }
 }

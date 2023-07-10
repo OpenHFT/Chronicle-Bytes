@@ -26,14 +26,40 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
 
+/**
+ * This interface represents a ring buffer data structure capable of reading and writing
+ * Bytes (binary data). The BytesRingBuffer interface extends {@link BytesRingBufferStats},
+ * {@link BytesConsumer}, and {@link Closeable} to provide statistics about the ring buffer,
+ * consume bytes from the buffer and close the buffer when it's no longer needed.
+ *
+ * <p>This interface also includes methods for creating instances of ring buffer, determining the size,
+ * checking for emptiness, and offering or reading bytes to/from the buffer.</p>
+ *
+ * <p>Note that some methods in this interface are expected to be implemented in commercial versions
+ * and would need unlocking for use.</p>
+ *
+ * <p>This interface is not meant to be implemented by user code.</p>
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
-
+    /**
+     * Constructs a new  instance with the provided {@link BytesStore}.
+     *
+     * @param bytesStore the {@link BytesStore} to be used for the ring buffer.
+     * @return a new instance of .
+     */
     @NotNull
     static BytesRingBuffer newInstance(@NotNull BytesStore<?, Void> bytesStore) {
         return newInstance(bytesStore, 1);
     }
 
+    /**
+     * Constructs a new {@link MultiReaderBytesRingBuffer} instance with the provided {@link BytesStore} and a given number of readers.
+     *
+     * @param bytesStore the {@link BytesStore} to be used for the ring buffer.
+     * @param numReaders the number of readers for the ring buffer.
+     * @return a new instance of {@link MultiReaderBytesRingBuffer}.
+     */
     @NotNull
     static MultiReaderBytesRingBuffer newInstance(
             @NotNull BytesStore<?, Void> bytesStore,
@@ -53,6 +79,12 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
         }
     }
 
+    /**
+     * Returns the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
+     *
+     * @return the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
+     * @throws ClassNotFoundException if the class "software.chronicle.enterprise.ring.EnterpriseRingBuffer" is not found.
+     */
     @NotNull
     static Class<MultiReaderBytesRingBuffer> clazz()
             throws ClassNotFoundException {
@@ -60,10 +92,23 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
                 "software.chronicle.enterprise.ring.EnterpriseRingBuffer");
     }
 
+    /**
+     * Calculates the required size for the ring buffer with a given capacity.
+     *
+     * @param capacity the capacity of the ring buffer.
+     * @return the required size for the ring buffer.
+     */
     static long sizeFor(@NonNegative long capacity) {
         return sizeFor(capacity, 1);
     }
 
+    /**
+     * Calculates the required size for the ring buffer with a given capacity and a specific number of readers.
+     *
+     * @param capacity   the capacity of the ring buffer.
+     * @param numReaders the number of readers for the ring buffer.
+     * @return the required size for the ring buffer.
+     */
     static long sizeFor(@NonNegative long capacity, @NonNegative int numReaders) {
         try {
             final Method sizeFor = Class.forName(

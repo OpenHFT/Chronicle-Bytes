@@ -51,7 +51,6 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         return BytesStoreHash.hash32(this);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
@@ -82,6 +81,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         return isDirectMemory();
     }
 
+    @Deprecated(/* to be removed in x.25 */)
     @Override
     public byte[] internalNumberBuffer() {
         return internalNumberBuffer;

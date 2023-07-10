@@ -177,7 +177,7 @@ enum BytesInternal {
      * @param left  the byte on the left
      * @param right the byte on the right
      * @return true if the content are equal
-     * see https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924
+     * see <a href="https://bugs.java.com/bugdatabase/view_bug.do?bug_id=8136924">...</a>
      * JDK-8033148 will add methods to Arrays for array equals, compare and mismatch.
      * The implementations of equals, compare and mismatch can be reimplemented using underlying mismatch methods that in turn defer to a single method, vectorizedMismatch, that accesses the memory contents of arrays using Unsafe.getLongUnaligned.
      * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
@@ -544,7 +544,7 @@ enum BytesInternal {
     }
 
     public static void parseUtf8(
-            @NotNull RandomDataInput input, long offset, Appendable appendable, boolean utf, @NonNegative int length)
+            @NotNull RandomDataInput input, @NonNegative long offset, Appendable appendable, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
 
         assert utf;
@@ -724,7 +724,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parseUtf81(@NotNull RandomDataInput input, long offset,
+    public static void parseUtf81(@NotNull RandomDataInput input, @NonNegative long offset,
                                   @NotNull Appendable appendable, int utflen)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(input);
@@ -784,7 +784,7 @@ enum BytesInternal {
         }
     }
 
-    public static void parse8bit1(long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
+    public static void parse8bit1(@NonNegative long offset, @NotNull RandomDataInput bytes, @NotNull Appendable appendable, @NonNegative int utflen)
             throws BufferUnderflowException, IllegalStateException, IOException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
@@ -2914,7 +2914,7 @@ enum BytesInternal {
         return num;
     }
 
-    public static long parseLong(@NotNull RandomDataInput in, long offset)
+    public static long parseLong(@NotNull RandomDataInput in, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         long num = 0;
         boolean negative = false;
@@ -2999,15 +2999,34 @@ enum BytesInternal {
     }
 
     /**
-     * display the hex data of Bytes from the position() to the limit()
+     * Converts the content of the provided Bytes buffer to a hexadecimal string representation
+     * along with comments describing the meaning of the bytes.
+     * <p>
+     * The method reads the data from the offset with maxLength of the given bytes. Each line of the
+     * output string contains hexadecimal representation of 16 bytes, followed by comments describing
+     * the meaning of those bytes.
+     * <p>
+     * For example, a buffer containing bytes representing the ASCII string "VMH" would produce an
+     * output like this:
+     * <pre>
+     * c3 76 6d 68                                     # vmh:
+     * b6 03 56 4d 48                                  # VMH
+     * </pre>
      *
-     * @param bytes the buffer you wish to toString()
-     * @return hex representation of the buffer, from example [0D ,OA, FF]
+     * @param bytes The buffer whose content is to be converted to a hexadecimal string.
+     *              Must not be null.
+     * @param offset The starting offset within the buffer to begin the hexadecimal conversion.
+     * @param maxLength The number of bytes to convert from the buffer.
+     * @return A hexadecimal representation of the buffer content with comments describing the bytes.
+     *         Each line of the string contains the hexadecimal representation of 16 bytes.
+     * @throws BufferUnderflowException if there is not enough data in the buffer.
+     * @throws IllegalStateException if there is a problem with the buffer's state.
+     * @throws IllegalArgumentException if the provided offset or maxLength are negative.
      */
-    public static String toHexString(@NotNull final Bytes<?> bytes, @NonNegative long offset, @NonNegative long len)
+    public static String toHexString(@NotNull final Bytes<?> bytes, @NonNegative long offset, @NonNegative long maxLength)
             throws BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
-        if (len == 0)
+        if (maxLength == 0)
             return "";
 
         int width = 16;
@@ -3017,17 +3036,17 @@ enum BytesInternal {
         long limit = bytes.readLimit();
 
         try {
-            bytes.readPositionRemaining(offset, len);
+            bytes.readPositionRemaining(offset, maxLength);
 
             @NotNull final StringBuilder builder = new StringBuilder();
             long start = offset / width * width;
-            long end = (offset + len + width - 1) / width * width;
+            long end = (offset + maxLength + width - 1) / width * width;
             for (long i = start; i < end; i += width) {
                 // check for duplicate rows
                 if (i + width < end) {
                     boolean same = true;
 
-                    for (int j = 0; j < width && i + j < offset + len; j++) {
+                    for (int j = 0; j < width && i + j < offset + maxLength; j++) {
                         int ch = bytes.readUnsignedByte(i + j);
                         same &= (ch == lastLine[j]);
                         lastLine[j] = ch;
@@ -3046,7 +3065,7 @@ enum BytesInternal {
                 for (int j = 0; j < width; j++) {
                     if (j == width / 2)
                         builder.append(' ');
-                    if (i + j < offset || i + j >= offset + len) {
+                    if (i + j < offset || i + j >= offset + maxLength) {
                         builder.append("   ");
 
                     } else {
@@ -3060,7 +3079,7 @@ enum BytesInternal {
                 for (int j = 0; j < width; j++) {
                     if (j == width / 2)
                         builder.append(' ');
-                    if (i + j < offset || i + j >= offset + len) {
+                    if (i + j < offset || i + j >= offset + maxLength) {
                         builder.append(' ');
 
                     } else {
@@ -3395,6 +3414,10 @@ enum BytesInternal {
             MEMORY.writeLong(addressForWrite + i, bs.readLong(i));
         for (; i < length0; i++)
             MEMORY.writeByte(addressForWrite + i, bs.readByte(i));
+    }
+
+    public static int digitsForExponent(int exponent) {
+        return 21 + Math.abs(exponent);
     }
 
     static class DateCache {

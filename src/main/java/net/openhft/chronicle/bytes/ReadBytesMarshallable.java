@@ -24,19 +24,41 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Read data directly as Bytes.
+ * Functional interface to facilitate the reading of data directly as Bytes. Primarily designed to
+ * be used where a lambda or a method reference can simplify code when reading objects or data from
+ * {@link BytesIn} instances.
+ *
+ * <p>The interface also implements {@link CommonMarshallable}, a common parent for classes and
+ * interfaces that provides marshalling and unmarshalling methods for converting objects to bytes
+ * and bytes to objects.
+ *
+ * <p>Implementations of this interface are expected to handle their own validation logic and may
+ * need to call {@link net.openhft.chronicle.core.io.Validatable#validate()} as necessary.
+ *
+ * @see WriteBytesMarshallable
+ * @see BytesIn
+ * @see BytesOut
  */
 @FunctionalInterface
 @DontChain
 public interface ReadBytesMarshallable extends CommonMarshallable {
     /**
-     * Bytes to read.  This can be used as a method to implement or as a lambda.
-     * <p>
-     *     This method is responsible for calling net.openhft.chronicle.core.io.Validatable#validate() as needed
-     * </p>
-     * @param bytes to read.
+     * Reads data from the provided {@link BytesIn} object. Implementations of this method are
+     * responsible for handling their own data reading logic based on the structure of the data
+     * they expect to read.
+     *
+     * <p>Note: Implementations are also responsible for calling
+     * {@link net.openhft.chronicle.core.io.Validatable#validate()} when necessary.
+     *
+     * @param bytes The {@link BytesIn} instance to read data from.
+     *
+     * @throws IORuntimeException If an I/O error occurs during reading.
+     * @throws BufferUnderflowException If there is not enough data in the buffer to read.
+     * @throws IllegalStateException If the buffer has been released or the method is called
+     *                               in an inappropriate context.
+     * @throws InvalidMarshallableException If there is a problem with marshalling data,
+     *                                      such as incorrect format or type.
      */
-    @SuppressWarnings("rawtypes")
     void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException;
 }

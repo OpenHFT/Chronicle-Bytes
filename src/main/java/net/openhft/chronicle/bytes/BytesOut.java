@@ -28,7 +28,17 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
-
+/**
+ * This interface represents an output stream for writing data to bytes.
+ * It extends {@link StreamingDataOutput}, {@link ByteStringAppender},
+ * {@link BytesPrepender}, and {@link HexDumpBytesDescription}, thus providing a
+ * wide range of operations for handling byte data, including appending, prepending,
+ * and producing a hex dump description.
+ *
+ * <p>Note: This interface suppresses rawtypes and unchecked warnings.</p>
+ *
+ * @param <U> the type of the BytesOut
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesOut<U> extends
         StreamingDataOutput<Bytes<U>>,
@@ -37,12 +47,13 @@ public interface BytesOut<U> extends
         HexDumpBytesDescription<BytesOut<U>> {
 
     /**
-     * Proxy an interface so each message called is written to a file for replay.
+     * Creates a proxy for the provided interface(s), such that each method invocation on the proxy
+     * is written to this {@code BytesOut} instance for replay.
      *
-     * @param tClass     primary interface
-     * @param additional any additional interfaces
-     * @return a proxy which implements the primary interface (additional interfaces have to be
-     * cast)
+     * @param tClass the primary interface to be proxied.
+     * @param additional any additional interfaces to be proxied.
+     * @return a proxy implementing the provided interfaces.
+     * @throws IllegalArgumentException if an argument is inappropriate
      * @throws NullPointerException if the provided {@code tClass} is {@code null}
      * @throws ClosedIllegalStateException if this BytesOut has been previously released
      */
@@ -57,14 +68,31 @@ public interface BytesOut<U> extends
                 new BinaryBytesMethodWriterInvocationHandler(tClass, MethodEncoderLookup.BY_ANNOTATION, this));
     }
 
+    /**
+     * Writes a {@link WriteBytesMarshallable} to this {@code BytesOut} instance.
+     *
+     * @param marshallable the object to be written.
+     * @throws IllegalArgumentException if a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException if there is not enough space in the buffer.
+     * @throws IllegalStateException if there is an error in the internal state.
+     * @throws BufferUnderflowException if there is not enough data available in the buffer.
+     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
+     */
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
             throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException;
 
     /**
-     * Write a limit set of writeObject types.
+     * Writes an object of a given type to this {@code BytesOut} instance.
+     * This method supports a limited set of writeObject types.
      *
-     * @param componentType expected.
-     * @param obj           of componentType
+     * @param componentType the expected type of the object.
+     * @param obj the object to be written.
+     * @throws IllegalArgumentException if a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException if there is not enough space in the buffer.
+     * @throws ArithmeticException if there is an arithmetic error.
+     * @throws IllegalStateException if there is an error in the internal state.
+     * @throws BufferUnderflowException if there is not enough data available in the buffer.
+     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
      */
     default void writeObject(Class componentType, Object obj)
             throws IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException {

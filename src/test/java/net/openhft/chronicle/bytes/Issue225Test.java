@@ -26,12 +26,19 @@ public class Issue225Test extends BytesTestCommon {
     public void testTrailingZeros() {
         for (int i = 1000; i < 10_000; i++) {
             double value = i / 1000.0;
-            final String valueStr = "" + value;
+            final String valueStr;
+            if ((long) value == value)
+                valueStr = "" + (long) value;
+            else
+                valueStr = "" + value;
             Bytes<?> bytes = Bytes.elasticByteBuffer();
             byte[] rbytes = new byte[24];
             bytes.append(value);
             assertEquals(value, bytes.parseDouble(), 0.0);
-            assertEquals(valueStr.length() - 2, bytes.lastDecimalPlaces());
+            if ((long) value == value)
+                assertEquals(0, bytes.lastDecimalPlaces());
+            else
+                assertEquals(valueStr.length() - 2, bytes.lastDecimalPlaces());
             bytes.readPosition(0);
             int length = bytes.read(rbytes);
             assertEquals(valueStr.length(), length);

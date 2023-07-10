@@ -24,9 +24,18 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
-
+/**
+ * This enum provides hashing functionality for byte stores.
+ * Hashing is a process of converting data of arbitrary size to fixed-size values.
+ *
+ * @see BytesStoreHash
+ * @see BytesStore
+ */
 @SuppressWarnings("rawtypes")
 public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
+    /**
+     * Singleton instance of VanillaBytesStoreHash.
+     */
     INSTANCE;
 
     public static final int K0 = 0x6d0f27bd;
@@ -37,14 +46,32 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
     public static final int M1 = 0xea7585d7;
     public static final int M2 = 0x7a646e19;
     public static final int M3 = 0x855dd4db;
+
+    /**
+     * Constant indicating the byte order for reading multi-byte values.
+     */
     private static final int HI_BYTES = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 4 : 0;
 
+    /**
+     * Agitates the given long value.
+     *
+     * @param l the input value.
+     * @return the agitated value.
+     */
     public static long agitate(long l) {
         l ^= Long.rotateLeft(l, 26);
         l ^= Long.rotateRight(l, 17);
         return l;
     }
 
+    /**
+     * Calculates the hash code of the given byte store.
+     *
+     * @param store the byte store to be hashed.
+     * @return the hash code.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
         int remaining = Math.toIntExact(store.realReadRemaining());
@@ -55,6 +82,15 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
         }
     }
 
+    /**
+     * Calculates the hash code of the given byte store with specified length.
+     *
+     * @param bytes  the byte store to be hashed.
+     * @param length the length to be considered for hashing.
+     * @return the hash code.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long start = bytes.readPosition();

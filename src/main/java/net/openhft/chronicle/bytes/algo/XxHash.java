@@ -22,6 +22,17 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 
 import java.nio.BufferUnderflowException;
 
+/**
+ * This class implements the xxHash algorithm for hashing byte stores.
+ * xxHash is a non-cryptographic hash function known for its speed.
+ *
+ * <p>Migrated from Zero-Allocation-Hashing.</p>
+ *
+ * @author [Your Name]
+ * @version 1.0
+ * @see BytesStoreHash
+ * @see BytesStore
+ */
 // Migration of XxHash from Zero-Allocation-Hashing
 @SuppressWarnings("rawtypes")
 public class XxHash implements BytesStoreHash<BytesStore> {
@@ -30,14 +41,30 @@ public class XxHash implements BytesStoreHash<BytesStore> {
     private static final long P2 = -4417276706812531889L;
     private static final long P3 = 1609587929392839161L;
     private static final long P4 = -8796714831421723037L;
-    public static final XxHash INSTANCE = new XxHash(P4);
     private static final long P5 = 2870177450012600261L;
+
+    /**
+     * Singleton instance of XxHash with seed P4.
+     */
+    public static final XxHash INSTANCE = new XxHash(P4);
+
     private final long seed;
 
+    /**
+     * Initializes an instance of XxHash with the given seed.
+     *
+     * @param seed the seed for the hash function.
+     */
     public XxHash(long seed) {
         this.seed = seed;
     }
 
+    /**
+     * Finalizes the hash calculation.
+     *
+     * @param hash the hash to finalize.
+     * @return the finalized hash.
+     */
     private static long finishUp(long hash) {
         hash ^= hash >>> 33;
         hash *= P2;
@@ -47,20 +74,52 @@ public class XxHash implements BytesStoreHash<BytesStore> {
         return hash;
     }
 
+    /**
+     * Fetches 64 bits from the byte store at the given offset.
+     *
+     * @param bytes the byte store.
+     * @param off the offset.
+     * @return the fetched 64 bits.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     long fetch64(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readLong(off);
     }
 
-    // long because of unsigned nature of original algorithm
+    /**
+     * Fetches 32 bits from the byte store at the given offset.
+     *
+     * @param bytes the byte store.
+     * @param off the offset.
+     * @return the fetched 32 bits.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     long fetch32(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedInt(off);
     }
 
-    // int because of unsigned nature of original algorithm
+    /**
+     * Fetches 8 bits from the byte store at the given offset.
+     *
+     * @param bytes the byte store.
+     * @param off the offset.
+     * @return the fetched 8 bits.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     long fetch8(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedByte(off);
     }
 
+    /**
+     * Calculates the hash code of the given byte store.
+     *
+     * @param bytes the byte store to be hashed.
+     * @return the hash code.
+     * @throws AssertionError if there is an issue with reading data from the byte store.
+     */
     @Override
     public long applyAsLong(BytesStore bytes) {
         try {
@@ -70,6 +129,15 @@ public class XxHash implements BytesStoreHash<BytesStore> {
         }
     }
 
+    /**
+     * Calculates the hash code of the given byte store with specified length.
+     *
+     * @param bytes  the byte store to be hashed.
+     * @param length the length to be considered for hashing.
+     * @return the hash code.
+     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
+     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long hash;

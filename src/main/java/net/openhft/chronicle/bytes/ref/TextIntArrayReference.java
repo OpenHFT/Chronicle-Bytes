@@ -29,9 +29,10 @@ import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 
-/*
-The format for a long array in text is
-{ capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
+/**
+ * Represents a reference to an integer array formatted in text.
+ * The format for a long array in text is:
+ * { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
 @SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {
@@ -53,6 +54,14 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
 
     private long length = VALUES;
 
+    /**
+     * Writes the provided capacity to the given Bytes.
+     *
+     * @param bytes    The bytes to write the capacity to.
+     * @param capacity The capacity to write.
+     * @throws IllegalStateException   If an illegal state occurs during the operation.
+     * @throws BufferOverflowException If a buffer overflow occurs during the operation.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {
         long start = bytes.writePosition();
@@ -81,6 +90,14 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         bytes.write(SECTION4);
     }
 
+    /**
+     * Returns the length of the data based on the given BytesStore.
+     *
+     * @param bytes  The BytesStore containing the data.
+     * @param offset The offset to start reading from.
+     * @return The length of the data.
+     * @throws IllegalStateException If an illegal state occurs during the operation.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException {
         //todo check this, I think there could be a bug here
@@ -260,6 +277,11 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         return length;
     }
 
+    /**
+     * Returns a String representation of this TextIntArrayReference.
+     *
+     * @return A String representation.
+     */
     @NotNull
     @Override
     public String toString() {
@@ -278,6 +300,12 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         }
     }
 
+    /**
+     * Calculates the size in bytes needed for storing an array with the specified capacity.
+     *
+     * @param capacity The capacity of the array.
+     * @return The size in bytes needed to store the array.
+     */
     @Override
     public long sizeInBytes(@NonNegative long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;

@@ -24,6 +24,17 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.util.function.Function;
 
+/**
+ * Enum singleton that implements Function interface to lookup and return a {@link MethodEncoder} for a given method.
+ * It applies the {@link MethodId} annotation found on the method to create the encoder.
+ * If the method does not have the {@link MethodId} annotation, it will return null.
+ * <p>
+ * The returned encoder can then be used to encode method calls into {@link BytesOut} and decode method calls from {@link BytesIn},
+ * which can be used for serialization or for sending method calls over a network for example.
+ * The encoder supports objects that are instances of {@link BytesMarshallable}.
+ * <p>
+ * This enum is primarily used for encoding and decoding methods annotated with {@link MethodId} for efficient method representation.
+ */
 public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
     BY_ANNOTATION;
 
@@ -38,7 +49,6 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
                 return messageId;
             }
 
-            @SuppressWarnings("rawtypes")
             @Override
             public void encode(Object[] objects, BytesOut<?> out)
                     throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
@@ -51,7 +61,6 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
                 }
             }
 
-            @SuppressWarnings("rawtypes")
             @Override
             public Object[] decode(Object[] lastObjects, BytesIn<?> in)
                     throws BufferUnderflowException, IllegalStateException {

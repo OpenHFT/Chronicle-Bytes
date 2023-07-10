@@ -30,15 +30,16 @@ import java.util.Objects;
 import java.util.stream.Stream;
 
 /**
- * This cache only guarantees it will provide a String which matches the decoded bytes.
+ * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
+ * guarantee the return of the same object across different invocations or from different threads, but it
+ * guarantees that the contents will be the same. Although not strictly thread-safe, it behaves correctly
+ * under concurrent access.
  * <p>
- * It doesn't guarantee it will always return the same object,
- * nor that different threads will return the same object,
- * though the contents should always be the same.
- * <p>
- * While not technically thread safe, it should still behave correctly.
+ * The main usage is to reduce the amount of memory used by creating new objects when the same byte sequence is
+ * repeatedly decoded into an object.
  *
  * @author peter.lawrey
+ * @param <T> the type of object to be interned
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public abstract class AbstractInterner<T> {
@@ -47,8 +48,14 @@ public abstract class AbstractInterner<T> {
     protected final int shift;
     protected boolean toggle = false;
 
-    protected AbstractInterner(@NonNegative int capacity)
-            throws IllegalArgumentException {
+    /**
+     * Constructor for creating an intern cache with the given capacity. The capacity will be adjusted to the next
+     * power of 2 if it is not already a power of 2.
+     *
+     * @param capacity the desired capacity for the intern cache
+     * @throws IllegalArgumentException if the calculated capacity exceeds the maximum possible array size
+     */
+    protected AbstractInterner(@NonNegative int capacity) {
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = new InternerEntry[n];
@@ -58,22 +65,68 @@ public abstract class AbstractInterner<T> {
     private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
-
+    /**
+     * Interns the specified Bytes object. If the Bytes object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
+     * and returns the newly cached instance. The length of Bytes object for interning is determined
+     * by the remaining readable bytes.
+     *
+     * @param cs the Bytes object to intern
+     * @return the interned instance
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws IllegalStateException if the buffer is in an unusable state
+     */
     public T intern(@NotNull Bytes<?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, (int) cs.readRemaining());
     }
 
+    /**
+     * Interns the specified BytesStore object. If the BytesStore object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the BytesStore object to the cache
+     * and returns the newly cached instance. The length of BytesStore object for interning is determined
+     * by the remaining readable bytes.
+     *
+     * @param cs the BytesStore object to intern
+     * @return the interned instance
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws IllegalStateException if the buffer is in an unusable state
+     */
     public T intern(@NotNull BytesStore cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern(cs, (int) cs.readRemaining());
     }
 
+    /**
+     * Interns the specified Bytes object of a given length. If the Bytes object is already in the cache,
+     * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
+     * and returns the newly cached instance.
+     *
+     * @param cs the Bytes object to intern
+     * @param length the length of the Bytes object to intern
+     * @return the interned instance
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws IllegalStateException if the buffer is in an unusable state
+     */
     public T intern(@NotNull Bytes<?> cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         return intern((BytesStore) cs, length);
     }
 
+    /**
+     * Interns the specified Bytes. If the Bytes are already in the cache, this method returns the cached instance;
+     * otherwise, it adds the Bytes to the cache and returns the newly cached instance.
+     *
+     * @param cs the Bytes to intern
+     * @param length of bytes to read
+     * @return the interned instance
+     * @throws IORuntimeException if an I/O error occurs
+     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws IllegalStateException if the buffer is in an unusable state
+     */
     public T intern(@NotNull BytesStore cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
         if (length > entries.length)
@@ -107,6 +160,11 @@ public abstract class AbstractInterner<T> {
         return toggle;
     }
 
+    /**
+     * Returns the number of interned values in the cache.
+     *
+     * @return the number of interned values
+     */
     public int valueCount() {
         return (int) Stream.of(entries).filter(Objects::nonNull).count();
     }

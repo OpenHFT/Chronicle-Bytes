@@ -27,10 +27,30 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+/**
+ * Provides a reference to a 64-bit long value that is not subject to bound checks.
+ *
+ * <p>The {@code UncheckedLongReference} class provides low-level access to a referenced long
+ * value, optimizing for performance by bypassing safety checks for bounds and state.</p>
+ *
+ * <p>It's recommended to use this class with caution as it can result in undefined behavior if
+ * misused. Typically, this class is used in scenarios where performance is critical and the
+ * application guarantees safety through other means.</p>
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
+
     private BytesStore bytes;
 
+    /**
+     * Creates a new instance of LongReference backed by the given BytesStore.
+     *
+     * @param bytesStore the BytesStore to back this reference.
+     * @param offset     the offset of the long value within the BytesStore.
+     * @param size       the number of bytes to use (should be 8 for a long).
+     * @return a LongReference instance.
+     * @throws IllegalStateException    if released
+     */
     @NotNull
     public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
