@@ -28,17 +28,29 @@ import java.io.Writer;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * A Writer for an underlying Bytes.  This moves the writePosition() up to the writeLimit();
+ * A Writer for an underlying Bytes. This moves the writePosition() up to the writeLimit().
  */
 @SuppressWarnings("rawtypes")
 public class ByteStringWriter extends Writer {
     private final ByteStringAppender out;
 
+    /**
+     * Constructs a new ByteStringWriter with the provided ByteStringAppender.
+     *
+     * @param out The ByteStringAppender to be used.
+     * @throws IllegalStateException if the input ByteStringAppender is released.
+     */
     public ByteStringWriter(ByteStringAppender out) {
         throwExceptionIfReleased(out);
         this.out = out;
     }
 
+    /**
+     * Writes a single character.
+     *
+     * @param c int specifying a character to be written.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void write(int c)
             throws IOException {
@@ -50,18 +62,39 @@ public class ByteStringWriter extends Writer {
         }
     }
 
+    /**
+     * Writes a string.
+     *
+     * @param str String to be written.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void write(@NotNull String str)
             throws IOException {
         out.append(str);
     }
 
+    /**
+     * Writes a portion of a string.
+     *
+     * @param str String to be written.
+     * @param off Offset from which to start reading characters.
+     * @param len Number of characters to be written.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void write(@NotNull String str, @NonNegative int off, @NonNegative int len)
             throws IOException {
         out.append(str, off, off + len);
     }
 
+    /**
+     * Appends a character sequence.
+     *
+     * @param csq The character sequence to append.
+     * @return This writer
+     * @throws IOException if an I/O error occurs.
+     */
     @NotNull
     @Override
     public Writer append(@NotNull CharSequence csq)
@@ -70,6 +103,14 @@ public class ByteStringWriter extends Writer {
         return this;
     }
 
+    /**
+     * Appends a portion of a character sequence.
+     *
+     * @param csq The character sequence to append.
+     * @param start The index of the first character to append.
+     * @param end The index of the character following the last character to append.
+     * @return This writer
+     */
     @NotNull
     @Override
     public Writer append(@NotNull CharSequence csq, @NonNegative int start, @NonNegative int end) {
@@ -77,6 +118,12 @@ public class ByteStringWriter extends Writer {
         return this;
     }
 
+    /**
+     * Appends a single character.
+     *
+     * @param c The character to append.
+     * @return This writer
+     */
     @NotNull
     @Override
     public Writer append(char c) {
@@ -88,16 +135,30 @@ public class ByteStringWriter extends Writer {
         return this;
     }
 
+    /**
+     * Flushes the stream. If the stream has saved any characters from the various write() methods in a buffer, write them immediately to their intended destination.
+     */
     @Override
     public void flush() {
         // Do nothing
     }
 
+    /**
+     * Closes the writer, flushing it first. Once a writer has been closed, further write() invocations will cause an IOException to be thrown.
+     */
     @Override
     public void close() {
         // Do nothing
     }
 
+    /**
+     * Writes a portion of an array of characters.
+     *
+     * @param cbuf Array of characters.
+     * @param off Offset from which to start reading characters.
+     * @param len Number of characters to be written.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public void write(char[] cbuf, @NonNegative int off, @NonNegative int len)
             throws IOException {

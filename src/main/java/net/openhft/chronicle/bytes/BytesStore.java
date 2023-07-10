@@ -602,6 +602,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param bytesStore the BytesStore to match against
      * @param length     the length to match
      * @return {@code true} if the bytes up to min(length, this.length(), bytesStore.length()) matched.
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -616,6 +617,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Returns the bytes sum of the readable bytes in this BytesStore.
      *
      * @return unsigned bytes sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws IllegalStateException if the BytesStore has been released
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
@@ -723,6 +725,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset to add and get
      * @param adding value to add, can be 1
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @return the sum
      */
     default int addAndGetUnsignedByteNotAtomic(@NonNegative long offset, int adding)
@@ -742,6 +745,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -762,6 +766,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -782,6 +787,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -802,6 +808,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -834,6 +841,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset  the offset to write to
      * @param atLeast the long value that is to be written at offset if it is not less than the current value at offset
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -858,6 +866,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset  the offset to write to
      * @param atLeast the int value that is to be written at offset if it is not less than the current value at offset
+     * @throws BufferUnderflowException if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */

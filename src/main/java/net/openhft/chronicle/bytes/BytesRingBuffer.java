@@ -149,9 +149,25 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
     @Override
     boolean read(@NotNull BytesOut<?> using);
 
+    /**
+     * Retrieves the number of bytes that can be read from this buffer.
+     *
+     * @return the number of bytes that can be read
+     */
     long readRemaining();
 
+    /**
+     * Checks if the buffer is empty. A buffer is considered empty if there are no readable bytes.
+     *
+     * @return {@code true} if the buffer is empty, {@code false} otherwise
+     */
     boolean isEmpty();
 
+    /**
+     * Retrieves the BytesStore that backs this buffer. The returned BytesStore
+     * provides access to the bytes contained within the buffer, allowing them to be read or written.
+     *
+     * @return the BytesStore backing this buffer
+     */
     BytesStore bytesStore();
 }

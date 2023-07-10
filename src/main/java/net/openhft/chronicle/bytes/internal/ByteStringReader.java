@@ -27,17 +27,28 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
 /**
- * A Reader wrapper for Bytes.  This Reader moves the readPosition() of the underlying Bytes up to the readLimit()
+ * A Reader wrapper for Bytes. This Reader moves the readPosition() of the underlying Bytes up to the readLimit().
  */
 @SuppressWarnings("rawtypes")
 public class ByteStringReader extends Reader {
     private final ByteStringParser in;
 
+    /**
+     * Constructs a new ByteStringReader with the provided ByteStringParser.
+     *
+     * @param in The ByteStringParser to be used.
+     * @throws IllegalStateException if the input ByteStringParser is released.
+     */
     public ByteStringReader(ByteStringParser in) {
         throwExceptionIfReleased(in);
         this.in = in;
     }
 
+    /**
+     * Reads a single byte from the underlying ByteStringParser.
+     *
+     * @return The next byte of data, or -1 if the end of the stream is reached.
+     */
     @Override
     public int read() {
         try {
@@ -47,6 +58,13 @@ public class ByteStringReader extends Reader {
         }
     }
 
+    /**
+     * Skips over and discards n bytes of data from this input stream.
+     *
+     * @param n The number of bytes to be skipped.
+     * @return The actual number of bytes skipped.
+     * @throws IOException if an I/O error occurs.
+     */
     @Override
     public long skip(long n)
             throws IOException {
@@ -60,6 +78,15 @@ public class ByteStringReader extends Reader {
         return len;
     }
 
+    /**
+     * Reads characters into a portion of an array.
+     *
+     * @param cbuf Destination buffer.
+     * @param off  Offset at which to start storing characters.
+     * @param len  Maximum number of characters to read.
+     * @return The number of characters read, or -1 if the end of the stream has been reached.
+     * @throws IOException If an I/O error occurs.
+     */
     @Override
     public int read(char[] cbuf, @NonNegative int off, @NonNegative int len)
             throws IOException {
@@ -71,6 +98,9 @@ public class ByteStringReader extends Reader {
         }
     }
 
+    /**
+     * Closes the reader and releases any system resources associated with it.
+     */
     @Override
     public void close() {
         // Do nothing
