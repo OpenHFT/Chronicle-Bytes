@@ -24,39 +24,81 @@ import net.openhft.chronicle.core.util.IgnoresEverything;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 
-public class BytesMethodReaderBuilder implements MethodReaderBuilder {
+/**
+ * Concrete implementation of MethodReaderBuilder for constructing BytesMethodReader instances.
+ * This builder offers several methods for customizing the creation of a BytesMethodReader,
+ * including setting the methodEncoderLookup function, the default BytesParselet,
+ * and the level of logging for unknown methods.
+ */
+ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     private final BytesIn<?> in;
     private BytesParselet defaultParselet;
     private MethodEncoderLookup methodEncoderLookup = MethodEncoderLookup.BY_ANNOTATION;
     private ExceptionHandler exceptionHandlerOnUnknownMethod = Jvm.debug();
 
+/**
+ * Constructor for BytesMethodReaderBuilder.
+ *
+ * @param in the BytesIn object from which serialized method calls are read.
+ * @throws IllegalStateException if the provided BytesIn object is released
+ */
     public BytesMethodReaderBuilder(BytesIn<?> in) {
         throwExceptionIfReleased(in);
         this.in = in;
     }
 
+/**
+ * Sets the ExceptionHandler instance to use when an unknown method is encountered.
+ * This instance controls how the builder handles unknown methods.
+ *
+ * @param exceptionHandler the ExceptionHandler instance
+ * @return the builder instance for method chaining
+ */
     @Override
     public MethodReaderBuilder exceptionHandlerOnUnknownMethod(ExceptionHandler exceptionHandler) {
         this.exceptionHandlerOnUnknownMethod = exceptionHandler;
         return this;
     }
 
-    @Deprecated(/* remove in x.25 */)
+/**
+ * Sets the level of logging for unknown methods.
+ * <p>
+ * This method is deprecated and will always return {@code this}, effectively making it a no-op.
+ *
+ * @param warnMissing if {@code true}, warnings will be logged for unknown methods;
+ *                    if {@code false}, debug-level messages will be logged instead
+ * @return the builder instance for method chaining
+ */
     @Override
     public MethodReaderBuilder warnMissing(boolean warnMissing) {
         // always true
         return this;
     }
 
+/**
+ * Returns the current MethodEncoderLookup function.
+ *
+ * @return the current MethodEncoderLookup function
+ */
     public MethodEncoderLookup methodEncoderLookup() {
         return methodEncoderLookup;
     }
-
+/**
+ * Sets the MethodEncoderLookup function for this builder.
+ *
+ * @param methodEncoderLookup the MethodEncoderLookup function
+ * @return the builder instance for method chaining
+ */
     public BytesMethodReaderBuilder methodEncoderLookup(MethodEncoderLookup methodEncoderLookup) {
         this.methodEncoderLookup = methodEncoderLookup;
         return this;
     }
-
+/**
+ * Returns the default BytesParselet for this builder.
+ * If not set, a default BytesParselet is initialized.
+ *
+ * @return the default BytesParselet
+ */
     public BytesParselet defaultParselet() {
         if (defaultParselet == null)
             initDefaultParselet();
@@ -73,22 +115,48 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
                 exceptionHandlerOnUnknownMethod.on(getClass(), "Unknown message type " + msg + " " + bytes.toHexString());
             };
     }
-
+/**
+ * Sets the default BytesParselet for this builder.
+ *
+ * @param defaultParselet the default BytesParselet
+ * @return the builder instance for method chaining
+ */
     public BytesMethodReaderBuilder defaultParselet(BytesParselet defaultParselet) {
         this.defaultParselet = defaultParselet;
         return this;
     }
 
+/**
+ * Throws an UnsupportedOperationException when called.
+ * This method is required to fulfill the MethodReaderBuilder interface, but it is not supported
+ * in the BytesMethodReaderBuilder class.
+ *
+ * @return nothing
+ * @throws UnsupportedOperationException always
+ */
     @Override
     public MethodReaderBuilder methodReaderInterceptorReturns(MethodReaderInterceptorReturns methodReaderInterceptorReturns) {
         throw new UnsupportedOperationException();
     }
-
+/**
+ * Throws an UnsupportedOperationException when called.
+ * This method is required to fulfill the MethodReaderBuilder interface, but it is not supported
+ * in the BytesMethodReaderBuilder class.
+ *
+ * @return nothing
+ * @throws UnsupportedOperationException always
+ */
     @Override
     public MethodReaderBuilder metaDataHandler(Object... components) {
         throw new UnsupportedOperationException();
     }
 
+/**
+ * Constructs the BytesMethodReader instance with the specified components.
+ *
+ * @param objects the components for the BytesMethodReader
+ * @return the built BytesMethodReader instance
+ */
     public BytesMethodReader build(Object... objects) {
         return new BytesMethodReader(in, defaultParselet(), methodEncoderLookup, objects);
     }

@@ -124,7 +124,18 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         this.bytes = bytes;
         this.bytes.reserve(this);
     }
-
+    /**
+     * Writes to the provided Bytes object with the given capacity.
+     * The method asserts that the write position is correctly aligned,
+     * then writes the capacity, followed by a long value of 0 (representing the "used" space),
+     * and finally zeros out the subsequent space defined by the capacity.
+     *
+     * @param bytes    the Bytes object to write to.
+     * @param capacity the capacity to be written and used for subsequent zeroing.
+     * @throws BufferOverflowException    if there is insufficient space in the buffer.
+     * @throws IllegalArgumentException    if arguments violate precondition constraints.
+     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -135,7 +146,16 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.zeroOut(start, start + (capacity << SHIFT));
         bytes.writeSkip(capacity << SHIFT);
     }
-
+    /**
+     * Lazily writes to the provided Bytes object with the given capacity.
+     * Unlike the write method, this method does not zero out the subsequent space.
+     * It just updates the write position after writing the capacity and "used" space.
+     *
+     * @param bytes    the Bytes object to write to.
+     * @param capacity the capacity to be written.
+     * @throws BufferOverflowException    if there is insufficient space in the buffer.
+     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -145,6 +165,16 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    /**
+     * Returns the capacity from the BytesStore object and adding the fixed values size to get a length.
+     * It asserts that the capacity is greater than 0.
+     *
+     * @param bytes  the BytesStore object to read from.
+     * @param offset the offset at which to start reading.
+     * @throws BufferUnderflowException   if there is not enough remaining data.
+     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     * @return the calculated peak length.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);
@@ -152,6 +182,19 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         return (capacity << SHIFT) + VALUES;
     }
 
+    /**
+     * Returns the capacity from the BytesStore object, adding the fixed values size to get a length
+     * If the read capacity is 0, the method writes the capacityHint at the offset and
+     * updates the capacity with the capacityHint.
+     * It asserts that the capacity is greater than 0.
+     *
+     * @param bytes        the BytesStore object to read from.
+     * @param offset       the offset at which to start reading.
+     * @param capacityHint the capacity to be used if the initial capacity is 0.
+     * @throws BufferUnderflowException   if there is not enough remaining data.
+     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     * @return the calculated peak length.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);

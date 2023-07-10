@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * <p>
  * The main usage is to reduce the amount of memory used by creating new objects when the same byte sequence is
  * repeatedly decoded into an object.
- *
+ * <p>
  * This cache only guarantees it will provide a String which matches the decoded bytes.
  * <p>
  * It doesn't guarantee it will always return the same object,
@@ -45,7 +45,7 @@ import java.util.stream.Stream;
  * though the contents should always be the same.
  * <p>
  * While not technically thread safe, it should still behave correctly.
- *
+ * <p>
  * Abstract base class for implementing an interning mechanism, which helps
  * in reusing instances of immutable objects. This class is designed to store objects
  * and return previously stored instances that are equal to the required instance.

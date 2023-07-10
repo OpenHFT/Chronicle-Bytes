@@ -178,6 +178,7 @@ public enum AppendableUtil {
      * @param bytes      the StreamingDataInput to read from
      * @param appendable the Appendable to append to
      * @param tester     the StopCharsTester defining the stop character
+     * @throws BufferUnderflowException if the StreamingDataInput is exhausted
      * @throws IllegalStateException if the StreamingDataInput is closed
      */
     public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
@@ -427,6 +428,12 @@ public enum AppendableUtil {
         return utflen;
     }
 
+    /**
+     * Calculates the length of a byte array in UTF-8 format.
+     *
+     * @param chars the byte array to calculate the length of
+     * @return the length of the byte array in UTF-8
+     */
     @Java9
     public static long findUtf8Length(byte[] chars) {
         int strlen = chars.length;
