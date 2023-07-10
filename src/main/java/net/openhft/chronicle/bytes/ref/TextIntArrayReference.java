@@ -68,22 +68,14 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         bytes.write(SECTION1);
         bytes.append(capacity);
         while (bytes.writePosition() - start < CAPACITY + DIGITS) {
-            try {
-                bytes.writeUnsignedByte(' ');
-            } catch (ArithmeticException e) {
-                throw new AssertionError(e);
-            }
+            bytes.writeUnsignedByte(' ');
         }
         bytes.write(SECTION2);
         bytes.write(ZERO);
         bytes.write(SECTION3);
         for (long i = 0; i < capacity; i++) {
             if (i > 0) {
-                try {
-                    bytes.appendUtf8(", ");
-                } catch (BufferUnderflowException e) {
-                    throw new AssertionError(e);
-                }
+                bytes.appendUtf8(", ");
             }
             bytes.write(ZERO);
         }
@@ -101,12 +93,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException {
         //todo check this, I think there could be a bug here
-        try {
-            return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
-                    + VALUES + SECTION4.length;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return (bytes.parseLong(offset + CAPACITY) * VALUE_SIZE) - SEP.length
+                + VALUES + SECTION4.length;
     }
 
     @Override
@@ -117,8 +105,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -129,8 +115,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -153,8 +137,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -183,8 +165,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
 
     }
@@ -197,8 +177,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -240,8 +218,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
 
     }

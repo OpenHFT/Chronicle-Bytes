@@ -56,11 +56,7 @@ public enum AppendableUtil {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setCharAt(index, ch);
         else if (sb instanceof Bytes)
-            try {
-                ((Bytes) sb).writeByte(index, ch);
-            } catch (ArithmeticException | IllegalStateException e) {
-                throw new AssertionError(e);
-            }
+            ((Bytes) sb).writeByte(index, ch);
         else
             throw new IllegalArgumentException(String.valueOf(sb.getClass()));
     }

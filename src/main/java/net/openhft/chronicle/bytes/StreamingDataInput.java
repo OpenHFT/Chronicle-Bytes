@@ -452,20 +452,16 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default long readIncompleteLong()
             throws IllegalStateException {
         long left = readRemaining();
-        try {
-            if (left >= 8)
-                return readLong();
-            if (left == 4)
-                return readInt();
-            long l = 0;
-            for (int i = 0, remaining = (int) left; i < remaining; i++) {
-                l |= (long) readUnsignedByte() << (i * 8);
-            }
-            return l;
-
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        if (left >= 8)
+            return readLong();
+        if (left == 4)
+            return readInt();
+        long l = 0;
+        for (int i = 0, remaining = (int) left; i < remaining; i++) {
+            l |= (long) readUnsignedByte() << (i * 8);
         }
+        return l;
+
     }
 
     /**
@@ -533,11 +529,8 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default <C extends Appendable & CharSequence> boolean readUtf8(@NotNull C sb)
             throws IORuntimeException, BufferUnderflowException, ArithmeticException, IllegalStateException, IllegalArgumentException {
-        try {
-            AppendableUtil.setLength(sb, 0);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        AppendableUtil.setLength(sb, 0);
+
         if (readRemaining() <= 0)
             return true;
         long len0 = readStopBit();
@@ -624,14 +617,11 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
         } else {
             len0 = BytesInternal.readStopBit0(this, b1);
         }
-        try {
-            int len = Maths.toUInt31(len0);
-            b.write((BytesStore) this, readPosition(), len);
-            readSkip(len);
-            return true;
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+
+        int len = Maths.toUInt31(len0);
+        b.write((BytesStore) this, readPosition(), len);
+        readSkip(len);
+        return true;
     }
 
     /**

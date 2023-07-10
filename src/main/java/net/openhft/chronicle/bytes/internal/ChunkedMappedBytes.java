@@ -156,19 +156,15 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         final long limit = position + remaining;
         acquireNextByteStore(position, true);
 
-        try {
-            if (writeLimit < limit)
-                writeLimit(limit);
+        if (writeLimit < limit)
+            writeLimit(limit);
 
-            if (Jvm.isAssertEnabled())
-                readLimit(limit);
-            else
-                uncheckedWritePosition(limit);
+        if (Jvm.isAssertEnabled())
+            readLimit(limit);
+        else
+            uncheckedWritePosition(limit);
 
-            return readPosition(position);
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        return readPosition(position);
     }
 
     @NotNull
@@ -346,14 +342,10 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             throw new IORuntimeException(e);
         }
         if (set) {
-            try {
-                if (writeLimit() < readPosition)
-                    writeLimit(readPosition);
-                if (readLimit() < readPosition)
-                    readLimit(readPosition);
-            } catch (BufferUnderflowException | BufferOverflowException e) {
-                throw new AssertionError(e);
-            }
+            if (writeLimit() < readPosition)
+                writeLimit(readPosition);
+            if (readLimit() < readPosition)
+                readLimit(readPosition);
             readPosition = offset;
         }
         return newBS;

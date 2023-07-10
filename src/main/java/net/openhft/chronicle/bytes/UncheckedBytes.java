@@ -286,24 +286,20 @@ public class UncheckedBytes<U>
             return this;
         }
 
-        try {
-            if (Jvm.isJava9Plus()) {
-                byte[] strBytes = extractBytes(text);
-                byte coder = StringUtils.getStringCoder(text);
-                long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
-                writeStopBit(utfLength);
-                appendUtf8(strBytes, 0, text.length(), coder);
-            } else {
-                char[] chars = extractChars(text);
-                long utfLength = AppendableUtil.findUtf8Length(chars);
-                writeStopBit(utfLength);
-                if (utfLength == chars.length)
-                    append8bit(chars);
-                else
-                    appendUtf8(chars, 0, chars.length);
-            }
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
+        if (Jvm.isJava9Plus()) {
+            byte[] strBytes = extractBytes(text);
+            byte coder = StringUtils.getStringCoder(text);
+            long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
+            writeStopBit(utfLength);
+            appendUtf8(strBytes, 0, text.length(), coder);
+        } else {
+            char[] chars = extractChars(text);
+            long utfLength = AppendableUtil.findUtf8Length(chars);
+            writeStopBit(utfLength);
+            if (utfLength == chars.length)
+                append8bit(chars);
+            else
+                appendUtf8(chars, 0, chars.length);
         }
         return this;
     }

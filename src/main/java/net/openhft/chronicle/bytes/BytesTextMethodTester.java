@@ -122,11 +122,7 @@ public class BytesTextMethodTester<T> {
 
     private void unknownMessageId(long id, BytesIn<?> b) {
         Jvm.warn().on(getClass(), "Unknown message id " + Long.toHexString(id));
-        try {
-            b.readPosition(b.readLimit());
-        } catch (BufferUnderflowException | IllegalStateException e) {
-            throw new AssertionError(e);
-        }
+        b.readPosition(b.readLimit());
     }
 
     public String expected() {

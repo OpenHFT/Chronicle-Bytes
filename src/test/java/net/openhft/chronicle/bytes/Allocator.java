@@ -75,16 +75,12 @@ public enum Allocator {
 
             BytesStore<?, ByteBuffer> bs = new NativeBytesStore<>(byteBuffer, false, byteBuffer.capacity());
             try {
-                try {
-                    Bytes<ByteBuffer> bbb = bs.bytesForWrite();
-                    bbb.writePosition(byteBuffer.position());
-                    bbb.writeLimit(byteBuffer.limit());
-                    return bbb;
-                } finally {
-                    bs.release(ReferenceOwner.INIT);
-                }
-            } catch (IllegalStateException | BufferOverflowException ise) {
-                throw new AssertionError(ise);
+                Bytes<ByteBuffer> bbb = bs.bytesForWrite();
+                bbb.writePosition(byteBuffer.position());
+                bbb.writeLimit(byteBuffer.limit());
+                return bbb;
+            } finally {
+                bs.release(ReferenceOwner.INIT);
             }
         }
     },

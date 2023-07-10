@@ -50,12 +50,27 @@ public class VanillaBytes<U>
      * using its write position and write limit.
      *
      * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
-     * @throws IllegalStateException if bytesStore is released.
+     * @throws IllegalStateException    if bytesStore is released.
      * @throws IllegalArgumentException if the write limit of bytesStore is negative.
      */
     protected VanillaBytes(@NotNull BytesStore bytesStore)
             throws IllegalStateException, IllegalArgumentException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
+    }
+
+    /**
+     * Constructor for creating an instance of VanillaBytes with the given BytesStore,
+     * write position, and write limit.
+     *
+     * @param bytesStore    the BytesStore to be wrapped by the VanillaBytes.
+     * @param writePosition the position at which the next write will occur.
+     * @param writeLimit    the maximum limit up to which writing can occur.
+     * @throws IllegalStateException    if bytesStore is released.
+     * @throws IllegalArgumentException if the write limit is negative.
+     */
+    protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
+            throws IllegalStateException, IllegalArgumentException {
+        super(bytesStore, writePosition, writeLimit);
     }
 
     /**
@@ -69,21 +84,6 @@ public class VanillaBytes<U>
     }
 
     /**
-     * Constructor for creating an instance of VanillaBytes with the given BytesStore,
-     * write position, and write limit.
-     *
-     * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
-     * @param writePosition the position at which the next write will occur.
-     * @param writeLimit the maximum limit up to which writing can occur.
-     * @throws IllegalStateException if bytesStore is released.
-     * @throws IllegalArgumentException if the write limit is negative.
-     */
-    protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
-            throws IllegalStateException, IllegalArgumentException {
-        super(bytesStore, writePosition, writeLimit);
-    }
-
-    /**
      * Factory method for creating an instance of VanillaBytes with no initial ByteStore.
      * This can be used in scenarios where the ByteStore is to be replaced or provided at a later point.
      *
@@ -91,12 +91,7 @@ public class VanillaBytes<U>
      */
     @NotNull
     public static VanillaBytes<Void> vanillaBytes() {
-        try {
-            return new NativeBytes<>(BytesStore.empty());
-
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return new NativeBytes<>(BytesStore.empty());
     }
 
     @Java9
@@ -197,11 +192,7 @@ public class VanillaBytes<U>
         // assume its read-only
         readLimit(offset + length);
         readPosition(offset);
-        try {
-            writeLimit(offset + length);
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        writeLimit(offset + length);
     }
 
     private void setBytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore)
@@ -235,13 +226,9 @@ public class VanillaBytes<U>
     public Bytes<U> bytesForRead()
             throws IllegalStateException {
         throwExceptionIfReleased();
-        try {
-            return isClear()
-                    ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
-                    : new SubBytes<>(bytesStore, readPosition(), readLimit());
-        } catch (IllegalArgumentException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return isClear()
+                ? new VanillaBytes<>(bytesStore, writePosition(), bytesStore.writeLimit())
+                : new SubBytes<>(bytesStore, readPosition(), readLimit());
     }
 
     @Override
@@ -251,31 +238,28 @@ public class VanillaBytes<U>
         ReportUnoptimised.reportOnce();
 
         long realLength = realReadRemaining();
-        try {
-            if (Jvm.isJava9Plus()) {
-                byte[] bytes = StringUtils.extractBytes(other);
-                byte coder = StringUtils.getStringCoder(other);
-                if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
-                    @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
-                    long address = bs.addressForRead(readPosition);
-                    return isEqual0(bytes, coder, bs, address);
 
-                } else {
-                    return isEqual1(bytes, coder, bytesStore, readPosition);
-                }
+        if (Jvm.isJava9Plus()) {
+            byte[] bytes = StringUtils.extractBytes(other);
+            byte coder = StringUtils.getStringCoder(other);
+            if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
+                @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+                long address = bs.addressForRead(readPosition);
+                return isEqual0(bytes, coder, bs, address);
+
             } else {
-                char[] chars = StringUtils.extractChars(other);
-                if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
-                    @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
-                    long address = bs.addressForRead(readPosition);
-                    return isEqual0(chars, bs, address);
-
-                } else {
-                    return isEqual1(chars, bytesStore, readPosition);
-                }
+                return isEqual1(bytes, coder, bytesStore, readPosition);
             }
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        } else {
+            char[] chars = StringUtils.extractChars(other);
+            if (bytesStore instanceof NativeBytesStore && realLength == readRemaining()) {
+                @NotNull NativeBytesStore bs = (NativeBytesStore) this.bytesStore;
+                long address = bs.addressForRead(readPosition);
+                return isEqual0(chars, bs, address);
+
+            } else {
+                return isEqual1(chars, bytesStore, readPosition);
+            }
         }
     }
 
@@ -302,18 +286,14 @@ public class VanillaBytes<U>
         ReportUnoptimised.reportOnce();
 
         if (bytesStore.underlyingObject() instanceof ByteBuffer) {
-            try {
-                ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
-                @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
-                ByteBuffer slice = bbu.slice();
-                slice.position((int) readPosition());
-                slice.limit((int) readLimit());
-                bb.put(slice);
-                bb.clear();
-                return (BytesStore) BytesStore.wrap(bb);
-            } catch (ArithmeticException e) {
-                throw new AssertionError(e);
-            }
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(readRemaining()));
+            @NotNull ByteBuffer bbu = (ByteBuffer) bytesStore.underlyingObject();
+            ByteBuffer slice = bbu.slice();
+            slice.position((int) readPosition());
+            slice.limit((int) readLimit());
+            bb.put(slice);
+            bb.clear();
+            return (BytesStore) BytesStore.wrap(bb);
         } else {
             return (BytesStore) BytesUtil.copyOf(this);
         }
@@ -716,11 +696,7 @@ public class VanillaBytes<U>
         if (bytesStore instanceof NativeBytesStore) {
             @Nullable NativeBytesStore nbs = (NativeBytesStore) this.bytesStore;
             long len2 = nbs.read(readPosition(), bytes, 0, len);
-            try {
-                readSkip(len2);
-            } catch (BufferUnderflowException e) {
-                throw new AssertionError(e);
-            }
+            readSkip(len2);
             return (int) (len2);
         }
         return super.read(bytes);

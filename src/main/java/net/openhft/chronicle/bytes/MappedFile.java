@@ -105,8 +105,8 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * Logs information about the allocation of a new chunk.
      *
-     * @param filename   The name of the file for which the chunk was allocated.
-     * @param chunk      The size of the chunk.
+     * @param filename    The name of the file for which the chunk was allocated.
+     * @param chunk       The size of the chunk.
      * @param delayMicros The delay in microseconds it took to allocate the chunk.
      */
     static void logNewChunk(final String filename,
@@ -123,6 +123,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                 .toString();
         Jvm.perf().on(ChunkedMappedFile.class, message);
     }
+
     /**
      * Creates and returns a MappedFile instance with the specified file, chunk size, overlap size,
      * and read-only mode.
@@ -194,6 +195,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             throws FileNotFoundException {
         return mappedFile(filename, chunkSize, OS.pageSize());
     }
+
     /**
      * Creates and returns a MappedFile instance for the specified file with the given chunk size and overlap size.
      *
@@ -269,6 +271,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         }
         return MappedFile.of(file, chunkSize, overlapSize, true);
     }
+
     /**
      * Creates and returns a MappedFile instance with the specified file, capacity, chunk size,
      * overlap size, and read-only mode.
@@ -327,9 +330,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the byte store.
      * @param position The position at which the byte store should be acquired.
      * @return A MappedBytesStore object.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException              If an I/O error occurs.
      * @throws IllegalArgumentException If the position is negative.
-     * @throws IllegalStateException If the MappedFile is closed.
+     * @throws IllegalStateException    If the MappedFile is closed.
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -338,6 +341,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             throws IOException, IllegalArgumentException, IllegalStateException {
         return acquireByteStore(owner, position, null, MappedBytesStore::new);
     }
+
     /**
      * Acquires a byte store at the specified position with the ability to re-use an existing byte store.
      *
@@ -354,23 +358,19 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             @NonNegative final long position,
             BytesStore oldByteStore)
             throws IOException, IllegalStateException {
-        try {
-            return acquireByteStore(owner, position, oldByteStore, MappedBytesStore::new);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return acquireByteStore(owner, position, oldByteStore, MappedBytesStore::new);
     }
 
     /**
      * Acquires a byte store at the specified position with the ability to re-use an existing byte store,
      * and specify a custom byte store factory.
      *
-     * @param owner                 The owner of the byte store.
-     * @param position              The position at which the byte store should be acquired.
-     * @param oldByteStore          The old byte store that can be re-used, or null if not available.
+     * @param owner                   The owner of the byte store.
+     * @param position                The position at which the byte store should be acquired.
+     * @param oldByteStore            The old byte store that can be re-used, or null if not available.
      * @param mappedBytesStoreFactory The factory to use for creating the MappedBytesStore.
      * @return A MappedBytesStore object.
-     * @throws IOException           If an I/O error occurs.
+     * @throws IOException              If an I/O error occurs.
      * @throws IllegalArgumentException If an illegal argument is provided.
      * @throws IllegalStateException    If the MappedFile is closed.
      */
@@ -390,9 +390,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired.
      * @return A Bytes object ready for read.
-     * @throws IOException               If an I/O error occurs.
-     * @throws IllegalStateException      If the MappedFile is closed.
-     * @throws BufferUnderflowException  If the position is beyond the limit.
+     * @throws IOException              If an I/O error occurs.
+     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws BufferUnderflowException If the position is beyond the limit.
      */
     @NotNull
     public Bytes<?> acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
@@ -406,17 +406,18 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         mbs.release(owner);
         return bytes;
     }
+
     /**
      * Acquires bytes for read at the specified position and stores them in the provided VanillaBytes object.
      *
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired.
      * @param bytes    The VanillaBytes object to store the acquired bytes.
-     * @throws IOException                  If an I/O error occurs.
-     * @throws IllegalStateException         If the MappedFile is closed.
-     * @throws IllegalArgumentException      If an illegal argument is provided.
-     * @throws BufferUnderflowException     If there is not enough data available.
-     * @throws BufferOverflowException      If there is too much data.
+     * @throws IOException              If an I/O error occurs.
+     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws BufferUnderflowException If there is not enough data available.
+     * @throws BufferOverflowException  If there is too much data.
      */
     public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
@@ -432,10 +433,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired for write.
      * @return A Bytes object ready for write.
-     * @throws IOException                  If an I/O error occurs.
-     * @throws IllegalStateException         If the MappedFile is closed.
-     * @throws IllegalArgumentException      If an illegal argument is provided.
-     * @throws BufferOverflowException      If there is too much data.
+     * @throws IOException              If an I/O error occurs.
+     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws BufferOverflowException  If there is too much data.
      */
     @NotNull
     public Bytes<?> acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
@@ -456,11 +457,11 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired for write.
      * @param bytes    The VanillaBytes object to store the acquired bytes.
-     * @throws IOException                  If an I/O error occurs.
-     * @throws IllegalStateException         If the MappedFile is closed.
-     * @throws IllegalArgumentException      If an illegal argument is provided.
-     * @throws BufferUnderflowException     If there is not enough data available.
-     * @throws BufferOverflowException      If there is too much data.
+     * @throws IOException              If an I/O error occurs.
+     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws BufferUnderflowException If there is not enough data available.
+     * @throws BufferOverflowException  If there is too much data.
      */
     public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
             throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
@@ -481,6 +482,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         // don't perform the close in the background as that just sets a flag. This does the real work.
         return true;
     }
+
     /**
      * Returns a string representation of the reference counts for the underlying mapped byte stores.
      *
@@ -554,6 +556,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
         warnAndReleaseIfNotReleased();
         super.finalize();
     }
+
     /**
      * Performs a thread safety check on the component.
      *

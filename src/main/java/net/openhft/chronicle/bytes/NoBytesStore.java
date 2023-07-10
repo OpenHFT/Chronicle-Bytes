@@ -35,6 +35,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
  * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
+ *
  * @deprecated from the public API for removal in x.25. Use {@link BytesStore#empty()} } instead.
  */
 @Deprecated(/* to be removed in x.25 */)
@@ -48,19 +49,14 @@ public enum NoBytesStore implements BytesStore {
     public static final Bytes<?> NO_BYTES;
 
     static {
-        try {
-            NO_PAGE = OS.memory().allocate(OS.pageSize());
-            NO_BYTES = new NativeBytes<>(noBytesStore());
-            IOTools.unmonitor(NO_BYTES);
-
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        NO_PAGE = OS.memory().allocate(OS.pageSize());
+        NO_BYTES = new NativeBytes<>(noBytesStore());
+        IOTools.unmonitor(NO_BYTES);
     }
 
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
-        return (BytesStore<B, T>)NO_BYTES_STORE;
+        return (BytesStore<B, T>) NO_BYTES_STORE;
     }
 
     @Override

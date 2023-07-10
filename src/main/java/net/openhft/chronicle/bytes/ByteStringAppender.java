@@ -61,12 +61,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(char ch)
             throws IllegalStateException {
-        try {
             BytesInternal.appendUtf8Char(this, ch);
             return (B) this;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -320,11 +316,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
-        try {
             return append8bit(cs, 0, cs.length());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
 
@@ -339,11 +331,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull BytesStore bs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        try {
             return write(bs, 0L, bs.readRemaining());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -356,11 +344,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull String cs)
             throws BufferOverflowException, IllegalStateException {
-        try {
             return append8bit(cs, 0, cs.length());
-        } catch (IllegalArgumentException | IndexOutOfBoundsException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**

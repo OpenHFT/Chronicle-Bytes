@@ -93,11 +93,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long getValue()
             throws IllegalStateException {
-        try {
-            return bytes == null ? 0L : bytes.readLong(offset);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return bytes == null ? 0L : bytes.readLong(offset);
     }
 
     /**
@@ -114,8 +110,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -133,8 +127,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -152,8 +144,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -171,8 +161,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -191,8 +179,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -226,8 +212,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 }

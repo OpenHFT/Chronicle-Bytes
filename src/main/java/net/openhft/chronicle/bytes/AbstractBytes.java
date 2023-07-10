@@ -130,16 +130,12 @@ public abstract class AbstractBytes<U>
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
         long readRemaining = readRemaining();
-        try {
-            if ((readRemaining > 0) && (start < readPosition)) {
-                bytesStore.move(readPosition, start, readRemaining);
-                readPosition = start;
-                uncheckedWritePosition(readPosition + readRemaining);
-            }
-            return this;
-        } catch (BufferUnderflowException | ArithmeticException e) {
-            throw new AssertionError(e);
+        if ((readRemaining > 0) && (start < readPosition)) {
+            bytesStore.move(readPosition, start, readRemaining);
+            readPosition = start;
+            uncheckedWritePosition(readPosition + readRemaining);
         }
+        return this;
     }
 
     @Override
@@ -833,11 +829,7 @@ public abstract class AbstractBytes<U>
             throws IllegalStateException, BufferOverflowException {
         assert bytes != this : "you should not write to yourself !";
 
-        try {
-            return write(bytes, bytes.readPosition(), Math.min(writeLimit() - writePosition(), bytes.readRemaining()));
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return write(bytes, bytes.readPosition(), Math.min(writeLimit() - writePosition(), bytes.readRemaining()));
     }
 
     public Bytes<U> write(@NotNull BytesStore<?, ?> bytes)
@@ -847,11 +839,7 @@ public abstract class AbstractBytes<U>
 
         if (bytes.readRemaining() > writeRemaining())
             throw new BufferOverflowException();
-        try {
-            return write(bytes, bytes.readPosition(), bytes.readRemaining());
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     @Override

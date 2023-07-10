@@ -195,13 +195,9 @@ public class NativeBytesStore<U>
 
     @NotNull
     public static NativeBytesStore from(byte[] bytes) {
-        try {
-            @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
-            nbs.write(0, bytes);
-            return nbs;
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new AssertionError(e);
-        }
+        @NotNull NativeBytesStore nbs = nativeStoreWithFixedCapacity(bytes.length);
+        nbs.write(0, bytes);
+        return nbs;
     }
 
     @Override
@@ -266,23 +262,19 @@ public class NativeBytesStore<U>
     @Override
     public BytesStore<NativeBytesStore<U>, U> copy()
             throws IllegalStateException {
-        try {
-            if (underlyingObject == null) {
-                @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
-                memoryCopyMemory(address, copy.address, capacity());
-                return (BytesStore) copy;
+        if (underlyingObject == null) {
+            @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
+            memoryCopyMemory(address, copy.address, capacity());
+            return (BytesStore) copy;
 
-            } else if (underlyingObject instanceof ByteBuffer) {
-                ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
-                bb.put((ByteBuffer) underlyingObject);
-                bb.clear();
-                return (BytesStore) wrap(bb);
+        } else if (underlyingObject instanceof ByteBuffer) {
+            ByteBuffer bb = ByteBuffer.allocateDirect(Maths.toInt32(capacity()));
+            bb.put((ByteBuffer) underlyingObject);
+            bb.clear();
+            return (BytesStore) wrap(bb);
 
-            } else {
-                throw new UnsupportedOperationException();
-            }
-        } catch (IllegalArgumentException | ArithmeticException e) {
-            throw new AssertionError(e);
+        } else {
+            throw new UnsupportedOperationException();
         }
     }
 
@@ -290,13 +282,9 @@ public class NativeBytesStore<U>
     @Override
     public VanillaBytes<U> bytesForWrite()
             throws IllegalStateException {
-        try {
-            return elastic
-                    ? NativeBytes.wrapWithNativeBytes(this, this.capacity())
-                    : new NativeBytes<>(this);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return elastic
+                ? NativeBytes.wrapWithNativeBytes(this, this.capacity())
+                : new NativeBytes<>(this);
     }
 
     @Override
@@ -799,13 +787,9 @@ public class NativeBytesStore<U>
             throws IllegalStateException {
         long toCopy = Math.min(limit, store.safeLimit());
         if (toCopy > 0) {
-            try {
-                long addr = address;
-                long addr2 = store.addressForWrite(0);
-                memoryCopyMemory(addr, addr2, toCopy);
-            } catch (BufferOverflowException e) {
-                throw new AssertionError(e);
-            }
+            long addr = address;
+            long addr2 = store.addressForWrite(0);
+            memoryCopyMemory(addr, addr2, toCopy);
         }
         return toCopy;
     }

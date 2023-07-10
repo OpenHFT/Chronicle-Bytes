@@ -116,8 +116,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -128,8 +126,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -152,8 +148,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalStateException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -182,8 +176,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
 
     }
@@ -196,8 +188,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -245,8 +235,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
 
     }

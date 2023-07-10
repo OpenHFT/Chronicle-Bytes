@@ -176,13 +176,9 @@ public interface Bytes<U> extends
 
         @NotNull BytesStore<?, ByteBuffer> bs = BytesStore.elasticByteBuffer(initialCapacity, maxCapacity);
         try {
-            try {
-                return bs.bytesForWrite();
-            } finally {
-                bs.release(ReferenceOwner.INIT);
-            }
-        } catch (IllegalStateException ise) {
-            throw new AssertionError(ise);
+            return bs.bytesForWrite();
+        } finally {
+            bs.release(ReferenceOwner.INIT);
         }
     }
 
@@ -207,8 +203,6 @@ public interface Bytes<U> extends
         @NotNull BytesStore<?, ByteBuffer> bs = BytesStore.wrap(ByteBuffer.allocate(initialCapacity));
         try {
             return NativeBytes.wrapWithNativeBytes(bs, Bytes.MAX_HEAP_CAPACITY);
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new AssertionError(e);
         } finally {
             bs.release(INIT);
         }
@@ -268,8 +262,6 @@ public interface Bytes<U> extends
         try {
             final EmbeddedBytes<T> bytes = EmbeddedBytes.wrap(bs);
             return bytes.writeLimit(bs.writeLimit());
-        } catch (IllegalArgumentException | IllegalStateException e) {
-            throw new AssertionError(e);
         } finally {
             bs.release(INIT);
         }
@@ -297,16 +289,12 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            try {
-                Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
-                bytesForRead.readLimit(byteBuffer.limit());
-                bytesForRead.readPosition(byteBuffer.position());
-                return bytesForRead;
-            } finally {
-                bs.release(INIT);
-            }
-        } catch (IllegalStateException | BufferUnderflowException ise) {
-            throw new AssertionError(ise);
+            Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
+            bytesForRead.readLimit(byteBuffer.limit());
+            bytesForRead.readPosition(byteBuffer.position());
+            return bytesForRead;
+        } finally {
+            bs.release(INIT);
         }
     }
 
@@ -330,16 +318,12 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            try {
-                Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
-                bytesForWrite.writePosition(byteBuffer.position());
-                bytesForWrite.writeLimit(byteBuffer.limit());
-                return bytesForWrite;
-            } finally {
-                bs.release(INIT);
-            }
-        } catch (IllegalStateException | BufferOverflowException ise) {
-            throw new AssertionError(ise);
+            Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
+            bytesForWrite.writePosition(byteBuffer.position());
+            bytesForWrite.writeLimit(byteBuffer.limit());
+            return bytesForWrite;
+        } finally {
+            bs.release(INIT);
         }
     }
 
@@ -361,13 +345,9 @@ public interface Bytes<U> extends
         requireNonNull(byteArray);
         @NotNull BytesStore<?, byte[]> bs = BytesStore.wrap(byteArray);
         try {
-            try {
-                return bs.bytesForRead();
-            } finally {
-                bs.release(INIT);
-            }
-        } catch (IllegalStateException ise) {
-            throw new AssertionError(ise);
+            return bs.bytesForRead();
+        } finally {
+            bs.release(INIT);
         }
     }
 
@@ -387,15 +367,11 @@ public interface Bytes<U> extends
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
         requireNonNull(byteArray);
         final BytesStore bs = BytesStore.wrap(byteArray);
-        try {
             try {
                 return bs.bytesForWrite();
             } finally {
                 bs.release(INIT);
             }
-        } catch (IllegalStateException ise) {
-            throw new AssertionError(ise);
-        }
     }
 
     /**
@@ -437,15 +413,11 @@ public interface Bytes<U> extends
     @NotNull
     static Bytes<byte[]> directFrom(@NotNull String text) {
         BytesStore<?, byte[]> from = BytesStore.from(text);
-        try {
             try {
                 return from.bytesForRead();
             } finally {
                 from.release(INIT);
             }
-        } catch (IllegalStateException ise) {
-            throw new AssertionError(ise);
-        }
     }
 
     /**
@@ -506,15 +478,11 @@ public interface Bytes<U> extends
     static VanillaBytes<Void> allocateDirect(@NonNegative long capacity)
             throws IllegalArgumentException {
         @NotNull BytesStore<?, Void> bs = BytesStore.nativeStoreWithFixedCapacity(requireNonNegative(capacity));
-        try {
             try {
                 return new NativeBytes<>(bs);
             } finally {
                 bs.release(INIT);
             }
-        } catch (IllegalStateException ise) {
-            throw new AssertionError(ise);
-        }
     }
 
     /**
@@ -585,15 +553,11 @@ public interface Bytes<U> extends
     static OnHeapBytes allocateElasticOnHeap(@NonNegative int initialCapacity) {
         requireNonNegative(initialCapacity);
         BytesStore<?, byte[]> wrap = BytesStore.wrap(new byte[initialCapacity]);
-        try {
             try {
                 return new OnHeapBytes(wrap, true);
             } finally {
                 wrap.release(INIT);
             }
-        } catch (IllegalStateException | IllegalArgumentException ise) {
-            throw new AssertionError(ise);
-        }
     }
 
     /**
@@ -738,11 +702,7 @@ public interface Bytes<U> extends
     @NotNull
     static VanillaBytes allocateDirect(byte[] bytes) {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
-        try {
             result.write(bytes);
-        } catch (BufferOverflowException | IllegalStateException e) {
-            throw new AssertionError(e);
-        }
         return result;
     }
 
@@ -975,7 +935,6 @@ public interface Bytes<U> extends
             throws IllegalStateException {
         throwExceptionIfReleased(this);
 
-        try {
             BytesStore bytesStore = bytesStore();
 
             assert bytesStore != null : "bytesStore is null";
@@ -983,9 +942,6 @@ public interface Bytes<U> extends
             return isClear()
                     ? bytesStore.bytesForRead()
                     : new SubBytes<>(bytesStore, readPosition(), readLimit() + start());
-        } catch (IllegalArgumentException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -1004,15 +960,11 @@ public interface Bytes<U> extends
             throws IllegalStateException {
         throwExceptionIfReleased(this);
 
-        try {
             BytesStore bytesStore = bytesStore();
 
             assert bytesStore != null : "bytesStore is null";
 
             return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -1177,7 +1129,7 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return 0;
         }
-        try {
+
             byte firstByte = source.readByte(otherOffset);
             long max = sourceOffset + (sourceCount - otherCount);
 
@@ -1202,9 +1154,6 @@ public interface Bytes<U> extends
                 }
             }
             return -1;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -1245,7 +1194,7 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return fromIndex;
         }
-        try {
+
             byte firstByte = source.readByte(otherOffset);
             long max = sourceOffset + (sourceCount - otherCount);
 
@@ -1270,9 +1219,6 @@ public interface Bytes<U> extends
                 }
             }
             return -1;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 /**
  * Clears the content of this Bytes object and resets its state.
@@ -1392,16 +1338,12 @@ public interface Bytes<U> extends
         requireNonNull(marshallable);
         long position = writePosition();
         ValidatableUtil.validate(marshallable);
-        try {
             writeUnsignedShort(0);
             marshallable.writeMarshallable(this);
             long length = lengthWritten(position) - 2;
             if (length >= 1 << 16)
                 throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
             writeUnsignedShort(position, (int) length);
-        } catch (ArithmeticException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**

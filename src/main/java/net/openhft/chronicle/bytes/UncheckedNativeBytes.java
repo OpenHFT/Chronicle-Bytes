@@ -149,8 +149,6 @@ public class UncheckedNativeBytes<U>
                 writePosition = readPosition + readRemaining;
             }
             return this;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         } catch (IllegalStateException ignored) {
             return this;
         }
@@ -1039,11 +1037,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalStateException {
         assert bytes != this : "you should not write to yourself !";
 
-        try {
-            return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
-        } catch (BufferOverflowException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return write(bytes, bytes.readPosition(), Math.min(writeRemaining(), bytes.readRemaining()));
     }
 
     @Override
@@ -1064,11 +1058,7 @@ public class UncheckedNativeBytes<U>
             final long offset = bs.readPosition();
             final long readRemaining = Math.min(writeRemaining(), bs.readLimit() - offset);
             writeStopBit(readRemaining);
-            try {
-                write(bs, offset, readRemaining);
-            } catch (IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            write(bs, offset, readRemaining);
         }
         return this;
     }

@@ -319,12 +319,8 @@ public enum BytesUtil {
 
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
-        try {
-            BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
-                    .writeMarshallable(marshallable, bytes);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
+                .writeMarshallable(marshallable, bytes);
     }
 
     static String asString(String s, Throwable t) {
@@ -450,13 +446,9 @@ public enum BytesUtil {
             return BytesStore.empty();
         final long position = bytes.readPosition();
 
-        try {
-            final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
-            bytes2.write(bytes, position, remaining);
-            return bytes2;
-        } catch (IllegalArgumentException | BufferOverflowException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
+        bytes2.write(bytes, position, remaining);
+        return bytes2;
     }
 
     static final class WarnUncheckedElasticBytes {

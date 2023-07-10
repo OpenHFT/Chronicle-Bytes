@@ -52,12 +52,8 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         this.elastic = elastic;
         this.capacity = elastic ? MAX_CAPACITY : bytesStore.capacity();
 
-        try {
-            writePosition(0);
-            writeLimit(capacity());
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        writePosition(0);
+        writeLimit(capacity());
     }
 
     @Override

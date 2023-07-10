@@ -17,9 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
@@ -69,22 +69,18 @@ public class HexDumpBytes
     private final NativeBytes<Void> base;
     private final Bytes<byte[]> text;
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
+    private final byte[] internalNumberBuffer = new byte[20];
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
     private int indent = 0;
     private int numberWrap = 16;
-    private final byte[] internalNumberBuffer = new byte[20];
 
     /**
      * Constructs a HexDumpBytes instance with default settings.
      */
     public HexDumpBytes() {
-        try {
-            base = Bytes.allocateElasticDirect(256);
-            text = Bytes.allocateElasticOnHeap(1024);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        base = Bytes.allocateElasticDirect(256);
+        text = Bytes.allocateElasticOnHeap(1024);
     }
 
     /**
@@ -94,15 +90,11 @@ public class HexDumpBytes
      * @param text BytesStore instance representing text data.
      */
     HexDumpBytes(@NotNull NativeBytes<Void> base, @NotNull BytesStore text) {
-        try {
-            final long size = base.readRemaining();
-            this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
-            this.base.write(base);
-            this.text = Bytes.allocateElasticOnHeap((int) text.readRemaining());
-            this.text.write(text);
-        } catch (BufferOverflowException | IllegalStateException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        final long size = base.readRemaining();
+        this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
+        this.base.write(base);
+        this.text = Bytes.allocateElasticOnHeap((int) text.readRemaining());
+        this.text.write(text);
     }
 
     /**
@@ -120,8 +112,6 @@ public class HexDumpBytes
                 if (sc.hasNext(HEX_PATTERN)) tb.base.rawWriteByte((byte) Integer.parseInt(sc.next(), 16));
                 else sc.nextLine(); // assume it's a comment
             }
-        } catch (BufferOverflowException | IllegalStateException e) {
-            throw new AssertionError(e);
         }
         return tb;
     }
@@ -949,25 +939,16 @@ public class HexDumpBytes
     }
 
     private void appendBase16(int value) {
-        try {
-            text.appendBase16(value, 2);
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        text.appendBase16(value, 2);
     }
 
     private void copyToText(long pos, long tpos, int length) throws IllegalStateException {
-        try {
-            if (tpos > 0 && text.readUnsignedByte(tpos) <= ' ') tpos++;
-            while (length-- > 0) {
-                int value = base.readUnsignedByte(pos++);
-                text.writeUnsignedByte(tpos++, HEXADECIMAL[value >> 4]);
-                text.writeUnsignedByte(tpos++, HEXADECIMAL[value & 0xF]);
-                if (length > 0) text.writeUnsignedByte(tpos++, ' ');
-            }
-        } catch (BufferUnderflowException | BufferOverflowException | IllegalArgumentException |
-                 ArithmeticException e) {
-            throw new AssertionError(e);
+        if (tpos > 0 && text.readUnsignedByte(tpos) <= ' ') tpos++;
+        while (length-- > 0) {
+            int value = base.readUnsignedByte(pos++);
+            text.writeUnsignedByte(tpos++, HEXADECIMAL[value >> 4]);
+            text.writeUnsignedByte(tpos++, HEXADECIMAL[value & 0xF]);
+            if (length > 0) text.writeUnsignedByte(tpos++, ' ');
         }
     }
 
@@ -1614,8 +1595,6 @@ public class HexDumpBytes
             base.writeUtf8(text);
             return this;
 
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         } finally {
             copyToText(pos);
         }
@@ -1629,8 +1608,6 @@ public class HexDumpBytes
             base.writeUtf8(text);
             return this;
 
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
         } finally {
             copyToText(pos);
         }
@@ -1722,11 +1699,7 @@ public class HexDumpBytes
                 long offset = bs.readPosition();
                 long readRemaining = Math.min(base.writeRemaining(), bs.readLimit() - offset);
                 base.writeStopBit(readRemaining);
-                try {
-                    base.write(bs, offset, readRemaining);
-                } catch (BufferUnderflowException | IllegalArgumentException e) {
-                    throw new AssertionError(e);
-                }
+                base.write(bs, offset, readRemaining);
             }
             return this;
         } finally {
@@ -1960,6 +1933,18 @@ public class HexDumpBytes
         return internalNumberBuffer;
     }
 
+    @Override
+    public void singleThreadedCheckReset() {
+        base.singleThreadedCheckReset();
+        text.singleThreadedCheckReset();
+    }
+
+    @Override
+    public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
+        base.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+        text.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
+    }
+
     private static class TextBytesReader extends Reader {
         private final Reader reader;
         private final Bytes<?> base;
@@ -1980,18 +1965,6 @@ public class HexDumpBytes
         public void close() throws IOException {
             reader.close();
         }
-    }
-
-    @Override
-    public void singleThreadedCheckReset() {
-        base.singleThreadedCheckReset();
-        text.singleThreadedCheckReset();
-    }
-
-    @Override
-    public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {
-        base.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
-        text.singleThreadedCheckDisabled(singleThreadedCheckDisabled);
     }
 
 }

@@ -66,8 +66,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -85,8 +83,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -104,8 +100,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -123,8 +117,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -142,8 +134,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -162,8 +152,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
         }
     }
 
@@ -202,8 +190,6 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
         }
     }
 }
