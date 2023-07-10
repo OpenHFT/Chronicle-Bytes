@@ -30,15 +30,16 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.BytesUtil.toCharArray;
 
 /**
- * A specialized {@link StringInterner} to intern strings represented in {@link Bytes}.
+ * String interner optimized for Bytes. This class extends {@link StringInterner} and is specifically
+ * designed to handle interning of strings represented in {@link Bytes} objects.
  */
 public class StringInternerBytes extends StringInterner {
 
     /**
-     * Constructs a StringInternerBytes with the specified capacity.
+     * Constructs a new {@code StringInternerBytes} instance with the specified capacity.
      *
-     * @param capacity the capacity of the interner
-     * @throws IllegalArgumentException if the capacity is negative
+     * @param capacity the number of strings that can be stored in the interner.
+     * @throws IllegalArgumentException if the specified capacity is negative.
      */
     public StringInternerBytes(@NonNegative int capacity)
             throws IllegalArgumentException {
@@ -46,13 +47,14 @@ public class StringInternerBytes extends StringInterner {
     }
 
     /**
-     * Interns the string represented in the provided bytes.
+     * Interns the string representation of the given bytes. The length of the string
+     * is automatically determined based on the remaining bytes to read.
      *
-     * @param bytes the bytes representing the string to be interned
-     * @return the interned string
-     * @throws ArithmeticException        if the length overflows integer size
-     * @throws IllegalStateException      if the underlying data structure is invalid
-     * @throws BufferUnderflowException   if the buffer's limits are exceeded
+     * @param bytes the bytes to be converted and interned as a string.
+     * @return the interned string representation of the bytes.
+     * @throws ArithmeticException if there is an integer overflow when calculating the length.
+     * @throws IllegalStateException if the underlying bytes store is not readable.
+     * @throws BufferUnderflowException if there are not enough bytes remaining to read.
      */
     public String intern(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
@@ -60,16 +62,17 @@ public class StringInternerBytes extends StringInterner {
     }
 
     /**
-     * Interns the string represented in the provided bytes up to the specified length.
-     * <p>
-     * The bytes are converted to an ISO-8859-1 string. If a string equivalent to the bytes is
-     * already in the pool, that string is returned; otherwise, the new string is added to the pool.
+     * Converts the given bytes to an ISO-8859-1 encoded string, and interns it. The string ends
+     * either at the byte limit or the specified length, whichever comes first. If the string is
+     * already in the pool, the pooled instance is returned. Otherwise, the string is added to the
+     * pool.
      *
-     * @param bytes  the bytes representing the string to be interned
-     * @param length the length up to which to parse the string
-     * @return the interned string made from bytes
-     * @throws IllegalStateException      if the underlying data structure is invalid
-     * @throws BufferUnderflowException   if the buffer's limits are exceeded
+     * @param bytes  the bytes to convert to a string.
+     * @param length specifies the maximum number of bytes to be converted, must be non-negative.
+     * @return the interned string representation of the bytes.
+     * @throws IllegalArgumentException if length is negative.
+     * @throws IllegalStateException if the underlying bytes store is not readable.
+     * @throws BufferUnderflowException if there are not enough bytes remaining to read.
      */
     public String intern(@NotNull final Bytes<?> bytes, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {

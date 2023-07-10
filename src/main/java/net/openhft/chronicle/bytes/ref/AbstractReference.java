@@ -33,11 +33,15 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * This abstract class represents a reference to a byte store. It is designed
- * to be extended by classes that need to provide byte store operations and
- * lifecycle management.
+ * Represents an abstract reference to a {@link BytesStore}.
  *
- * @author peter.lawrey
+ * <p>This class provides an abstraction for managing a reference to a BytesStore. It provides
+ * functionality to read and write data from/to the BytesStore, manage a reference count, and lock
+ * resources.</p>
+ *
+ * @see BytesStore
+ * @see Byteable
+ * @see Closeable
  */
 @SuppressWarnings("rawtypes")
 public abstract class AbstractReference extends AbstractCloseable implements Byteable, Closeable {
@@ -53,17 +57,23 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      */
     protected long offset;
 
+    /**
+     * Constructor initializes the reference assuming thread safety.
+     */
     protected AbstractReference() {
         // assume thread safe.
         singleThreadedCheckDisabled(true);
     }
 
     /**
-     * Sets the BytesStore and the offset within the store for this reference.
+     * Sets the underlying BytesStore to work with, along with the offset and length.
      *
-     * @param bytes  the BytesStore
-     * @param offset the offset within the BytesStore
-     * @throws IllegalStateException if this reference has been closed
+     * @param bytes  the BytesStore to set
+     * @param offset the offset to set
+     * @param length the length to set
+     * @throws IllegalStateException        if the state is invalid
+     * @throws IllegalArgumentException     if the arguments are invalid
+     * @throws BufferOverflowException     if the provided buffer is too small
      */
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative final long offset, @NonNegative final long length)
@@ -112,8 +122,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
 
     /**
      * Closes this reference, releasing any associated BytesStore
-     *
-     * @throws IllegalStateException if this reference has already been closed
      */
     @Override
     protected void performClose() {
@@ -130,8 +138,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * @return the address of the start of this reference in the BytesStore
-     * @throws IllegalStateException if this reference has been closed
+     * Retrieves the memory address for reading.
+     *
+     * @return the memory address
+     * @throws IllegalStateException if the state is invalid
+     * @throws BufferUnderflowException if the buffer does not have enough content
      */
     @Override
     public long address()
@@ -142,10 +153,10 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * Acquires a file lock on this reference.
+     * Attempts to lock a region in the file in either shared or exclusive mode.
      *
-     * @param shared if the lock is shared
-     * @return the FileLock acquired
+     * @param shared if true the lock will be shared, otherwise it will be exclusive.
+     * @return a FileLock object representing the locked region
      * @throws IOException if an I/O error occurs
      */
     @Override
@@ -158,10 +169,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     }
 
     /**
-     * Attempts to acquire a file lock on this reference.
+     * Attempts to lock a region in the file in either shared or exclusive mode,
+     * but does not block waiting for the lock.
      *
-     * @param shared if the lock is shared
-     * @return the FileLock acquired, or null if the lock could not be acquired
+     * @param shared if true the lock will be shared, otherwise it will be exclusive.
+     * @return a FileLock object representing the locked region or null if the lock could not be acquired
      * @throws IOException if an I/O error occurs
      */
     @Override

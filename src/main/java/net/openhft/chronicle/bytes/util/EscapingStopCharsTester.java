@@ -20,9 +20,9 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.StopCharsTester;
 
 /**
- * This class implements a stop character tester that supports escape characters.
- * It decorates another {@link StopCharsTester} by allowing characters to be escaped
- * using the backslash character ('\\').
+ * A custom implementation of {@link StopCharsTester} that considers escape characters.
+ * This tester allows escaping of characters using the backslash "\\" and will not treat
+ * an escaped character as a stop character.
  */
 public class EscapingStopCharsTester implements StopCharsTester {
 

@@ -35,16 +35,37 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLETE;
 
 /**
- * This class represents a binary array of 64-bit integer values, which can be accessed and manipulated.
- * It supports features such as reading and writing to the binary array, and handling of reference counts.
+ * Represents a binary array of integers, backed by a {@link BytesStore}.
+ * <p>
+ * This class provides operations to access and manipulate an array of integers in binary form.
+ * The integers are stored in a BytesStore, and this class provides various methods to perform
+ * atomic operations, read/write values, and manage the state of the array.
+ * <p>
+ * The BinaryIntArrayReference class also contains the ability to throw exceptions in cases
+ * of buffer underflows or illegal states, and to read the array in a volatile fashion,
+ * ensuring a happens-before relationship between threads.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = ...
+ * BinaryIntArrayReference arrayRef = new BinaryIntArrayReference();
+ * arrayRef.bytesStore(bytesStore, 0, bytesStore.capacity());
+ * arrayRef.setOrderedValueAt(5, 12345);
+ * int value = arrayRef.getValueAt(5);
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe, and external synchronization may be necessary if instances
+ * are shared between threads. The data referenced is thread safe when the appropriate methods are used.
  */
 @SuppressWarnings("rawtypes")
 public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
+
     public static final int SHIFT = 2;
     private static final long CAPACITY = 0;
     private static final long USED = CAPACITY + Long.BYTES;
     private static final long VALUES = USED + Long.BYTES;
     private static final int MAX_TO_STRING = 1024;
+
     @Nullable
     private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
     private long length;
@@ -57,26 +78,26 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Constructor initializes the BinaryIntArrayReference with a specified default capacity.
+     * Constructs a new BinaryIntArrayReference with the specified default capacity.
      *
-     * @param defaultCapacity the default capacity of the binary array.
+     * @param defaultCapacity the default capacity of the array.
      */
     public BinaryIntArrayReference(long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
     }
 
     /**
-     * Initializes the internal set used to collect BinaryIntArrayReferences.
+     * Initializes the collection that keeps references to BinaryIntArrayReference instances.
      */
     public static void startCollecting() {
         binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
     /**
-     * Forces all BinaryIntArrayReferences to an incomplete state.
+     * Forces all BinaryIntArrayReferences to a not complete state.
      *
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferOverflowException     if buffer overflow occurs.
+     * @throws IllegalStateException   if an illegal state is encountered.
+     * @throws BufferOverflowException if buffer overflows.
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
@@ -94,13 +115,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Writes the specified number of bytes to the provided BytesStore.
+     * Initializes the binary data in the provided Bytes object with the given capacity.
      *
-     * @param bytes    the BytesStore to write to.
-     * @param capacity the number of bytes to be written.
-     * @throws BufferOverflowException     if buffer overflow occurs.
-     * @throws IllegalArgumentException    if an illegal argument is provided.
-     * @throws IllegalStateException       if an illegal state occurs.
+     * @param bytes    the Bytes object to be written.
+     * @param capacity the capacity to be set.
+     * @throws BufferOverflowException  if buffer overflows.
+     * @throws IllegalArgumentException if an illegal argument is encountered.
+     * @throws IllegalStateException    if an illegal state is encountered.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -113,6 +134,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    /**
+     * Lazily initializes the binary data in the provided Bytes object with the given capacity.
+     *
+     * @param bytes    the Bytes object to be written.
+     * @param capacity the capacity to be set.
+     * @throws BufferOverflowException if buffer overflows.
+     * @throws IllegalStateException   if an illegal state is encountered.
+     */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -122,6 +151,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    /**
+     * Calculates and returns the peak length from the BytesStore at the given offset.
+     *
+     * @param bytes  the BytesStore object to read from.
+     * @param offset the offset in the BytesStore to start reading from.
+     * @return the peak length.
+     * @throws BufferUnderflowException if buffer underflows.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         final long capacity = bytes.readLong(offset + CAPACITY);
@@ -129,6 +167,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return (capacity << SHIFT) + VALUES;
     }
 
+    /**
+     * Assigns a new BytesStore to this BinaryIntArrayReference.
+     *
+     * @param bytes the new BytesStore to be assigned.
+     * @throws IllegalStateException if an illegal state is encountered.
+     */
     @Override
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {
@@ -139,6 +183,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         this.bytes.reserve(this);
     }
 
+    /**
+     * Gets the capacity of the array.
+     *
+     * @return the capacity.
+     * @throws IllegalStateException if an illegal state is encountered.
+     */
     @Override
     public long getCapacity()
             throws IllegalStateException {
@@ -147,6 +197,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return (length - VALUES) >>> SHIFT;
     }
 
+    /**
+     * Gets the number of used elements in the array.
+     *
+     * @return the number of used elements.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows.
+     */
     @Override
     public long getUsed()
             throws IllegalStateException, BufferUnderflowException {
@@ -156,11 +213,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Sets the maximum value used in the array.
+     * Sets the maximum number of used elements in the array.
      *
-     * @param usedAtLeast the maximum value to be set.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferUnderflowException    if buffer underflow occurs.
+     * @param usedAtLeast the number of used elements to be set.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows.
      */
     @Override
     public void setMaxUsed(long usedAtLeast)
@@ -171,12 +228,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns the integer value at the specified index.
+     * Gets the value at the specified index.
      *
-     * @param index the index of the value to retrieve.
+     * @param index the index to retrieve the value from.
      * @return the value at the specified index.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferUnderflowException    if buffer underflow occurs.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows.
      */
     @Override
     public int getValueAt(@NonNegative long index)
@@ -187,12 +244,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Sets the integer value at the specified index.
+     * Sets the value at the specified index.
      *
-     * @param index the index at which the value is to be set.
+     * @param index the index to set the value at.
      * @param value the value to be set.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferOverflowException     if buffer overflow occurs.
+     * @throws IllegalStateException   if an illegal state is encountered.
+     * @throws BufferOverflowException if buffer overflows.
      */
     @Override
     public void setValueAt(@NonNegative long index, int value)
@@ -203,12 +260,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns the volatile integer value at the specified index.
+     * Retrieves the value at the specified index with volatile semantics.
      *
-     * @param index the index of the value to retrieve.
+     * @param index the index to retrieve the value from.
      * @return the value at the specified index.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferUnderflowException    if buffer underflow occurs.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferUnderflowException if buffer underflows.
      */
     @Override
     public int getVolatileValueAt(@NonNegative long index)
@@ -218,6 +275,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return bytes.readVolatileInt(VALUES + offset + (index << SHIFT));
     }
 
+    /**
+     * Binds the value at the specified index to the provided IntValue.
+     *
+     * @param index the index to bind the value at.
+     * @param value the IntValue to be bound.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferOverflowException  if buffer overflows.
+     * @throws IllegalArgumentException if the arguments are invalid.
+     */
     @Override
     public void bindValueAt(@NonNegative long index, @NotNull IntValue value)
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
@@ -227,12 +293,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Sets the integer value at the specified index in an ordered or atomic manner.
+     * Sets the value at the specified index with ordered semantics.
      *
-     * @param index the index at which the value is to be set.
+     * @param index the index to set the value at.
      * @param value the value to be set.
-     * @throws BufferOverflowException if buffer overflow occurs.
-     * @throws IllegalStateException   if an illegal state occurs.
+     * @throws BufferOverflowException if buffer overflows.
+     * @throws IllegalStateException   if an illegal state is encountered.
      */
     @Override
     public void setOrderedValueAt(@NonNegative long index, int value)
@@ -243,22 +309,21 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Stores the given bytes from the specified offset for a specified length.
+     * Stores a bytes sequence into the BinaryIntArrayReference.
      *
-     * @param bytes  the BytesStore to write to.
-     * @param offset the offset at which to start writing.
-     * @param length the number of bytes to be written.
-     * @throws IllegalArgumentException    if an illegal argument is provided.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferOverflowException     if buffer overflow occurs.
+     * @param bytes  the bytes sequence to store.
+     * @param offset the starting position.
+     * @param length the length of bytes sequence.
+     * @throws IllegalArgumentException if the length does not match the peak length.
+     * @throws IllegalStateException    if an illegal state is encountered.
+     * @throws BufferOverflowException  if buffer overflows.
      */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        long peakLength;
-        peakLength = peakLength(bytes, offset);
+        long peakLength = peakLength(bytes, offset);
         if (length != peakLength)
             throw new IllegalArgumentException(length + " != " + peakLength);
         if (bytes instanceof HexDumpBytes) {
@@ -356,9 +421,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns the BytesStore instance associated with this object.
+     * Retrieves the BytesStore.
      *
-     * @return the BytesStore instance.
+     * @return the BytesStore, or null if not set.
      */
     @Nullable
     @Override
@@ -367,9 +432,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns the offset where the data is stored.
+     * Retrieves the offset position.
      *
-     * @return the offset.
+     * @return the offset position.
      */
     @Override
     public long offset() {
@@ -377,7 +442,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns the maximum size of the data that can be stored.
+     * Retrieves the maximum size.
      *
      * @return the maximum size.
      */
@@ -387,9 +452,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Returns a string representation of the object.
+     * Returns a string representation of the BinaryIntArrayReference.
      *
-     * @return a string representation of the object.
+     * @return a string representation.
      */
     @NotNull
     @Override
@@ -410,6 +475,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         }
     }
 
+    /**
+     * Appends the contents to the provided StringBuilder.
+     *
+     * @param sb   the StringBuilder to append to.
+     * @param used the number of used elements.
+     */
     private void appendContents(@NotNull StringBuilder sb, long used) {
         String sep = "";
         try {
@@ -429,11 +500,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Calculates the size in bytes based on the provided capacity.
+     * Calculates the size in bytes of the array with the given capacity.
      *
-     * @param capacity the capacity.
+     * @param capacity the capacity of the array.
      * @return the size in bytes.
-     * @throws IllegalStateException if an illegal state occurs.
+     * @throws IllegalStateException if an illegal state is encountered.
      */
     @Override
     public long sizeInBytes(@NonNegative long capacity)
@@ -444,11 +515,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     }
 
     /**
-     * Sets the capacity of the ByteableIntArrayValues.
+     * Sets the capacity of the BinaryIntArrayReference.
      *
-     * @param arrayLength the length of the array.
-     * @return the updated ByteableIntArrayValues.
-     * @throws IllegalStateException if an illegal state occurs.
+     * @param arrayLength the desired capacity.
+     * @return this BinaryIntArrayReference with the updated capacity.
+     * @throws IllegalStateException if an illegal state is encountered.
      */
     @Override
     public ByteableIntArrayValues capacity(long arrayLength)

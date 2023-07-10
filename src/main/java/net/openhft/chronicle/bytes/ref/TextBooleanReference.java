@@ -26,9 +26,13 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Implementation of a reference to a boolean value in text wire format.
- * Textual representations of boolean values are written and read from a {@link BytesStore} instance.
- * " true" and "false" are the textual representations used for boolean values.
+ * TextBooleanReference is an implementation of a reference to a boolean value,
+ * represented in text wire format. The class enables the efficient serialization
+ * and deserialization of boolean values using a text-based representation.
+ * <p>
+ * The boolean values ' true' and 'false' are represented internally as
+ * 32-bit integers in a specific format. The class also provides methods for
+ * writing the boolean values into {@link BytesStore} objects.
  */
 public class TextBooleanReference extends AbstractReference implements BooleanValue {
 
@@ -36,14 +40,14 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     private static final int TRUE = ' ' | ('t' << 8) | ('r' << 16) | ('u' << 24);
 
     /**
-     * Write a boolean value to a {@link BytesStore} at a given offset.
-     * The value is written as a string (" true" or "false").
+     * Writes a boolean value to the specified {@link BytesStore} at the given offset
+     * in text wire format.
      *
-     * @param value the boolean value to write.
-     * @param bytes the {@link BytesStore} to write to.
-     * @param offset the position at which to start writing in the {@link BytesStore}.
-     * @throws IllegalStateException if the underlying bytes store is closed.
-     * @throws BufferOverflowException if there isn't enough space in the {@link BytesStore} to write the value.
+     * @param value  the boolean value to write.
+     * @param bytes  the BytesStore to write to.
+     * @param offset the offset at which to write the value.
+     * @throws IllegalStateException       if an invalid state is encountered.
+     * @throws BufferOverflowException     if there's not enough space in the buffer to write the value.
      */
     @SuppressWarnings("rawtypes")
     public static void write(final boolean value, final BytesStore bytes, @NonNegative long offset)
@@ -53,9 +57,9 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     }
 
     /**
-     * Get the maximum size in bytes that this object can be serialized to. Always returns 5, the length of the strings "true" and "false".
+     * Returns the maximum size of the text representation of the boolean value in bytes.
      *
-     * @return the maximum size in bytes this object can be serialized to.
+     * @return the maximum size in bytes.
      */
     @Override
     public long maxSize() {
@@ -63,9 +67,10 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
     }
 
     /**
-     * Provides a String representation of the current value of this reference.
+     * Returns a string representation of this TextBooleanReference object,
+     * displaying the value it represents.
      *
-     * @return a string representation of the current value.
+     * @return a string representation of this object.
      */
     @NotNull
     @Override

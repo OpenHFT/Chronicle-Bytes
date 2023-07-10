@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.util;
 import java.nio.BufferOverflowException;
 
 /**
- * A specialized {@link BufferOverflowException} that allows for custom messages.
+ * Customized {@link BufferOverflowException} with a descriptive message.
+ * This exception is thrown to indicate that there is an attempt to write
+ * data into a buffer beyond its capacity.
  */
 public final class DecoratedBufferOverflowException extends BufferOverflowException {
 
@@ -30,16 +32,16 @@ public final class DecoratedBufferOverflowException extends BufferOverflowExcept
     private final String message;
 
     /**
-     * Constructs a DecoratedBufferOverflowException with the specified detail message.
+     * Constructs a new exception with the specified detail message.
      *
-     * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method)
+     * @param message the detail message
      */
     public DecoratedBufferOverflowException(final String message) {
         this.message = message;
     }
 
     /**
-     * Returns the detail message string of this exception.
+     * Returns the detail message of this exception.
      *
      * @return the detail message string of this exception
      */

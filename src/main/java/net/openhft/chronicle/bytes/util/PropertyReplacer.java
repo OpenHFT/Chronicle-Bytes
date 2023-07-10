@@ -25,7 +25,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * A utility class to replace tokens within a string based on the values of properties.
+ * Utility class for replacing tokens in strings with their corresponding property values.
+ * <p>
+ * The class provides methods to replace tokens in the format {@code ${property}} within strings,
+ * with the corresponding property values from system properties or a given {@link Properties} object.
  */
 public enum PropertyReplacer {
     ; // No instances
@@ -34,11 +37,12 @@ public enum PropertyReplacer {
     private static final Pattern EXPRESSION_PATTERN = Pattern.compile("\\$\\{\\s*+([^}\\s]*+)\\s*+}");
 
     /**
-     * Replaces tokens within the given string based on system properties.
+     * Replaces tokens of the format {@code ${property}} in the given expression with their corresponding
+     * system property values.
      *
-     * @param expression the input string that may contain tokens
-     * @return the string with tokens replaced by corresponding system properties
-     * @throws IllegalArgumentException if a token does not have a corresponding system property
+     * @param expression the input string containing tokens to be replaced.
+     * @return a new string with tokens replaced by their corresponding system property values.
+     * @throws IllegalArgumentException if a token does not have a corresponding system property.
      */
     public static String replaceTokensWithProperties(String expression) throws IllegalArgumentException {
         StringBuilder result = new StringBuilder(expression.length());
@@ -66,12 +70,13 @@ public enum PropertyReplacer {
     }
 
     /**
-     * Replaces tokens within the given string based on properties provided.
+     * Replaces tokens of the format {@code ${property}} in the given expression with their corresponding
+     * values from the provided {@link Properties} object.
      *
-     * @param expression the input string that may contain tokens
-     * @param properties the properties to use for replacement
-     * @return the string with tokens replaced by corresponding properties
-     * @throws IllegalArgumentException if a token does not have a corresponding property
+     * @param expression the input string containing tokens to be replaced.
+     * @param properties the Properties object to retrieve property values from.
+     * @return a new string with tokens replaced by their corresponding property values from the given Properties object.
+     * @throws IllegalArgumentException if a token does not have a corresponding property in the given Properties object.
      */
     public static String replaceTokensWithProperties(String expression, Properties properties) throws IllegalArgumentException {
         StringBuilder result = new StringBuilder(expression.length());
@@ -99,10 +104,10 @@ public enum PropertyReplacer {
     }
 
     /**
-     * Converts an InputStream to a String.
+     * Converts the content of an {@link java.io.InputStream} to a String.
      *
-     * @param is the input stream to convert
-     * @return the content of the input stream as a string
+     * @param is the InputStream to be converted.
+     * @return the content of the InputStream as a String.
      */
     @NotNull
     private static String convertStreamToString(@NotNull java.io.InputStream is) {

@@ -289,10 +289,10 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
-            bytesForRead.readLimit(byteBuffer.limit());
-            bytesForRead.readPosition(byteBuffer.position());
-            return bytesForRead;
+                Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
+                bytesForRead.readLimit(byteBuffer.limit());
+                bytesForRead.readPosition(byteBuffer.position());
+                return bytesForRead;
         } finally {
             bs.release(INIT);
         }
@@ -318,10 +318,10 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-            Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
-            bytesForWrite.writePosition(byteBuffer.position());
-            bytesForWrite.writeLimit(byteBuffer.limit());
-            return bytesForWrite;
+                Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
+                bytesForWrite.writePosition(byteBuffer.position());
+                bytesForWrite.writeLimit(byteBuffer.limit());
+                return bytesForWrite;
         } finally {
             bs.release(INIT);
         }
@@ -368,10 +368,10 @@ public interface Bytes<U> extends
         requireNonNull(byteArray);
         final BytesStore bs = BytesStore.wrap(byteArray);
             try {
-                return bs.bytesForWrite();
-            } finally {
-                bs.release(INIT);
-            }
+            return bs.bytesForWrite();
+        } finally {
+            bs.release(INIT);
+        }
     }
 
     /**
@@ -414,10 +414,10 @@ public interface Bytes<U> extends
     static Bytes<byte[]> directFrom(@NotNull String text) {
         BytesStore<?, byte[]> from = BytesStore.from(text);
             try {
-                return from.bytesForRead();
-            } finally {
-                from.release(INIT);
-            }
+            return from.bytesForRead();
+        } finally {
+            from.release(INIT);
+        }
     }
 
     /**
@@ -478,11 +478,11 @@ public interface Bytes<U> extends
     static VanillaBytes<Void> allocateDirect(@NonNegative long capacity)
             throws IllegalArgumentException {
         @NotNull BytesStore<?, Void> bs = BytesStore.nativeStoreWithFixedCapacity(requireNonNegative(capacity));
-            try {
-                return new NativeBytes<>(bs);
-            } finally {
-                bs.release(INIT);
-            }
+        try {
+            return new NativeBytes<>(bs);
+        } finally {
+            bs.release(INIT);
+        }
     }
 
     /**
@@ -553,11 +553,11 @@ public interface Bytes<U> extends
     static OnHeapBytes allocateElasticOnHeap(@NonNegative int initialCapacity) {
         requireNonNegative(initialCapacity);
         BytesStore<?, byte[]> wrap = BytesStore.wrap(new byte[initialCapacity]);
-            try {
-                return new OnHeapBytes(wrap, true);
-            } finally {
-                wrap.release(INIT);
-            }
+        try {
+            return new OnHeapBytes(wrap, true);
+        } finally {
+            wrap.release(INIT);
+        }
     }
 
     /**
@@ -702,7 +702,7 @@ public interface Bytes<U> extends
     @NotNull
     static VanillaBytes allocateDirect(byte[] bytes) {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
-            result.write(bytes);
+        result.write(bytes);
         return result;
     }
 
@@ -935,13 +935,11 @@ public interface Bytes<U> extends
             throws IllegalStateException {
         throwExceptionIfReleased(this);
 
-            BytesStore bytesStore = bytesStore();
-
-            assert bytesStore != null : "bytesStore is null";
-
-            return isClear()
-                    ? bytesStore.bytesForRead()
-                    : new SubBytes<>(bytesStore, readPosition(), readLimit() + start());
+        BytesStore bytesStore = bytesStore();
+        assert bytesStore != null : "bytesStore is null";
+        return isClear()
+                ? bytesStore.bytesForRead()
+                : new SubBytes<>(bytesStore, readPosition(), readLimit() + start());
     }
 
     /**
@@ -960,11 +958,9 @@ public interface Bytes<U> extends
             throws IllegalStateException {
         throwExceptionIfReleased(this);
 
-            BytesStore bytesStore = bytesStore();
-
-            assert bytesStore != null : "bytesStore is null";
-
-            return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
+        BytesStore bytesStore = bytesStore();
+        assert bytesStore != null : "bytesStore is null";
+        return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
     }
 
     /**
@@ -1129,31 +1125,30 @@ public interface Bytes<U> extends
         if (otherCount == 0) {
             return 0;
         }
+        byte firstByte = source.readByte(otherOffset);
+        long max = sourceOffset + (sourceCount - otherCount);
 
-            byte firstByte = source.readByte(otherOffset);
-            long max = sourceOffset + (sourceCount - otherCount);
+        for (long i = sourceOffset; i <= max; i++) {
+            /* Look for first character. */
+            if (readByte(i) != firstByte) {
+                while (++i <= max && readByte(i) != firstByte) ;
+            }
 
-            for (long i = sourceOffset; i <= max; i++) {
-                /* Look for first character. */
-                if (readByte(i) != firstByte) {
-                    while (++i <= max && readByte(i) != firstByte) ;
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                long j = i + 1;
+                long end = j + otherCount - 1;
+                for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
+                    // Do nothing
                 }
 
-                /* Found first character, now look at the rest of v2 */
-                if (i <= max) {
-                    long j = i + 1;
-                    long end = j + otherCount - 1;
-                    for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                        // Do nothing
-                    }
-
-                    if (j == end) {
-                        /* Found whole string. */
-                        return Math.toIntExact(i - sourceOffset);
-                    }
+                if (j == end) {
+                    /* Found whole string. */
+                    return Math.toIntExact(i - sourceOffset);
                 }
             }
-            return -1;
+        }
+        return -1;
     }
 
     /**
@@ -1195,30 +1190,30 @@ public interface Bytes<U> extends
             return fromIndex;
         }
 
-            byte firstByte = source.readByte(otherOffset);
-            long max = sourceOffset + (sourceCount - otherCount);
+        byte firstByte = source.readByte(otherOffset);
+        long max = sourceOffset + (sourceCount - otherCount);
 
-            for (long i = sourceOffset + fromIndex; i <= max; i++) {
-                /* Look for first character. */
-                if (readByte(i) != firstByte) {
-                    while (++i <= max && readByte(i) != firstByte) ;
+        for (long i = sourceOffset + fromIndex; i <= max; i++) {
+            /* Look for first character. */
+            if (readByte(i) != firstByte) {
+                while (++i <= max && readByte(i) != firstByte) ;
+            }
+
+            /* Found first character, now look at the rest of v2 */
+            if (i <= max) {
+                long j = i + 1;
+                long end = j + otherCount - 1;
+                for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
+                    // Do nothing
                 }
 
-                /* Found first character, now look at the rest of v2 */
-                if (i <= max) {
-                    long j = i + 1;
-                    long end = j + otherCount - 1;
-                    for (long k = otherOffset + 1; j < end && readByte(j) == source.readByte(k); j++, k++) {
-                        // Do nothing
-                    }
-
-                    if (j == end) {
-                        /* Found whole string. */
-                        return Math.toIntExact(i - sourceOffset);
-                    }
+                if (j == end) {
+                    /* Found whole string. */
+                    return Math.toIntExact(i - sourceOffset);
                 }
             }
-            return -1;
+        }
+        return -1;
     }
 /**
  * Clears the content of this Bytes object and resets its state.
@@ -1338,12 +1333,12 @@ public interface Bytes<U> extends
         requireNonNull(marshallable);
         long position = writePosition();
         ValidatableUtil.validate(marshallable);
-            writeUnsignedShort(0);
-            marshallable.writeMarshallable(this);
-            long length = lengthWritten(position) - 2;
-            if (length >= 1 << 16)
-                throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
-            writeUnsignedShort(position, (int) length);
+        writeUnsignedShort(0);
+        marshallable.writeMarshallable(this);
+        long length = lengthWritten(position) - 2;
+        if (length >= 1 << 16)
+            throw new IllegalStateException("Marshallable " + marshallable.getClass() + " too long was " + length);
+        writeUnsignedShort(position, (int) length);
     }
 
     /**

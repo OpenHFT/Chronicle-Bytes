@@ -21,17 +21,40 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.core.values.TwoLongValue;
 
 /**
- * Represents a reference to two contiguous 64-bit long values, which is both {@link Byteable} and {@link TwoLongValue}.
+ * Represents a reference to two {@code long} values stored in bytes, providing mechanisms for getting, setting,
+ * and manipulating them with various memory ordering effects.
+ * <p>
+ * This interface extends {@link net.openhft.chronicle.core.values.TwoLongValue} to add the ability to back
+ * the two long values with a {@link net.openhft.chronicle.bytes.Bytes} store. This is used for off-heap memory
+ * or memory-mapped file storage.
+ * <p>
+ * Concrete implementations of this interface are responsible for managing the storage and retrieval mechanisms
+ * of the two {@code long} values in byte format.
+ * <p>
+ * Notable methods inherited from {@link net.openhft.chronicle.core.values.TwoLongValue} include:
+ * <ul>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#getValue2()} - Retrieves the second {@code long} value.</li>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#setValue2(long)} - Sets the second {@code long} value.</li>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#getVolatileValue2()} - Retrieves the second {@code long} value with volatile semantics.</li>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#setVolatileValue2(long)} - Sets the second {@code long} value with volatile semantics.</li>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#addValue2(long)} - Atomically adds the given amount to the second {@code long} value.</li>
+ *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#compareAndSwapValue2(long, long)} - Atomically sets the second {@code long} value if it is equal to the expected value.</li>
+ * </ul>
+ * <p>
+ * Additionally, as an implementation of {@link Byteable}, the classes implementing this interface must provide
+ * mechanisms to back the two long values with byte storage.
+ * <p>
+ * Implementations can also include additional behaviors or optimizations not specified in this interface.
  *
- * <p>The {@code TwoLongReference} interface provides a contract for classes that need to represent
- * a reference to a pair of long values which can be read from or written to a {@link net.openhft.chronicle.bytes.BytesStore}.
- * This interface is particularly useful for memory-mapped values, where changes to the values are reflected in memory.</p>
+ * @apiNote The {@link net.openhft.chronicle.core.values.TwoLongValue#getValue()} and {@link net.openhft.chronicle.core.values.TwoLongValue#setValue(long)} methods
+ * inherited from {@link net.openhft.chronicle.core.values.LongValue} are applicable to the first {@code long} value.
  *
- * <p>Classes implementing this interface are expected to provide efficient, low-level access
- * to the underlying bytes of the referenced long values.</p>
+ * @implSpec Implementations must ensure that all methods are thread-safe and that changes to the values are correctly
+ * synchronized across threads.
  *
- * @see Byteable
- * @see TwoLongValue
+ * @see net.openhft.chronicle.bytes.Byteable
+ * @see net.openhft.chronicle.core.values.TwoLongValue
+ * @author Peter Lawrey
  */
 @SuppressWarnings("rawtypes")
 public interface TwoLongReference extends TwoLongValue, Byteable {

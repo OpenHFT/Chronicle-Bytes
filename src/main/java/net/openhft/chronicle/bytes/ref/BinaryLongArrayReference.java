@@ -36,7 +36,25 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
 /**
- * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
+ * Represents a binary array of 64-bit long values backed by a {@link BytesStore}.
+ * <p>
+ * This class provides various operations to access and manipulate an array of 64-bit long integers in binary form.
+ * The long integers are stored in a BytesStore, and this class provides methods for reading and writing values at specific indices.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
+ * BinaryLongArrayReference ref = new BinaryLongArrayReference(4); // Creates an array with 4 longs
+ * ref.bytesStore(bytesStore, 0, ref.maxSize());
+ * ref.setValueAt(0, 1234567890L);
+ * long value = ref.getValueAt(0);
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @see BytesStore
+ * @see BinaryLongReference
  */
 @SuppressWarnings("rawtypes")
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
@@ -49,19 +67,40 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     private long length;
 
+    /**
+     * Constructs a BinaryLongArrayReference with a default capacity of 0.
+     */
     public BinaryLongArrayReference() {
         this(0);
     }
 
+    /**
+     * Constructs a BinaryLongArrayReference with the specified default capacity.
+     *
+     * @param defaultCapacity the initial capacity of the long array in number of elements.
+     */
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
         singleThreadedCheckDisabled(true);
     }
 
+    /**
+     * Enables collection of BinaryLongArrayReference instances.
+     * <p>
+     * This method is used for debugging and monitoring. It should not be used in production environments.
+     */
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
+    /**
+     * Sets all values in the BinaryLongArrayReference instances to the "not complete" state.
+     * <p>
+     * This method is used for debugging and monitoring. It should not be used in production environments.
+     *
+     * @throws IllegalStateException    if the BinaryLongArrayReference is in an invalid state.
+     * @throws BufferOverflowException  if the bytes cannot be written.
+     */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryLongArrayReferences == null)

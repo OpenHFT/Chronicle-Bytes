@@ -26,21 +26,46 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
+
 /**
- * Represents a 64-bit long reference in binary form.
+ * Represents a 64-bit long integer in binary form, backed by a {@link BytesStore}.
+ * <p>
+ * This class provides various operations to access and manipulate a single long integer in binary form.
+ * The long integer is stored in a BytesStore, and this class provides methods for atomic operations,
+ * reading/writing the value, and managing its state.
+ * <p>
+ * The class also supports volatile reads, ordered writes, and compare-and-swap operations.
+ * The maximum size of the backing storage is 8 bytes, corresponding to a 64-bit long integer.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
+ * try (BinaryLongReference ref = new BinaryLongReference()) {
+ *     ref.bytesStore(bytesStore, 16, 8);
+ *     ref.setValue(1234567890L);
+ *     long value = ref.getVolatileValue();
+ * }
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @author [Your Name]
+ * @see BytesStore
+ * @see LongReference
  */
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
 
     /**
-     * Sets the BytesStore which this reference points to.
+     * Stores bytes from the given BytesStore into this BinaryLongReference.
      *
-     * @param bytes  the BytesStore
-     * @param offset the offset within the BytesStore
-     * @param length the length of the value
-     * @throws IllegalStateException       if closed
-     * @throws IllegalArgumentException    if the length is not equal to maxSize
-     * @throws BufferOverflowException    if the offset is too large
+     * @param bytes  The BytesStore from which bytes will be stored.
+     * @param offset The starting point in bytes from where the value will be stored.
+     * @param length The number of bytes that should be stored.
+     * @throws IllegalStateException    If the BinaryLongReference is in an invalid state.
+     * @throws IllegalArgumentException If the length provided is not equal to 8.
+     * @throws BufferOverflowException  If the bytes cannot be written.
      */
     @SuppressWarnings("rawtypes")
     @Override

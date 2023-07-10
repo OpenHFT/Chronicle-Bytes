@@ -23,7 +23,25 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Represents two 64-bit long references in binary form.
+ * Represents a binary reference containing two 64-bit long values.
+ * <p>
+ * This class extends {@link BinaryLongReference} and allows access to two 64-bit long values in a binary form,
+ * which are contiguous in memory.
+ * </p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(16); // 16 bytes for two long values.
+ * BinaryTwoLongReference ref = new BinaryTwoLongReference();
+ * ref.bytesStore(bytesStore, 0, ref.maxSize());
+ * ref.setValue(1234567890L); // set the first long value
+ * ref.setValue2(9876543210L); // set the second long value
+ * </pre>
+ *
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @author [Your Name]
+ * @see BinaryLongReference
  */
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
 
@@ -53,10 +71,10 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
     }
 
     /**
-     * Retrieves the second 64-bit long value from the BytesStore.
+     * Gets the second long value from the BinaryTwoLongReference.
      *
-     * @return the second 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @return the second long value.
+     * @throws IllegalStateException if an error occurs while reading the value.
      */
     @Override
     public long getValue2()

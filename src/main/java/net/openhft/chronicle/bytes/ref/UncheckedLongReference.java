@@ -28,14 +28,23 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Provides a reference to a 64-bit long value that is not subject to bound checks.
+ * Represents a reference to a long value stored in bytes. This reference does not perform bounds checks
+ * for performance reasons and should be used carefully.
+ * <p>
+ * This class is useful when operating with off-heap memory or memory-mapped file storage, where it is critical
+ * to avoid unnecessary bounds checking for performance reasons.
+ * <p>
+ * This class extends {@link UnsafeCloseable} to provide functionality for safely closing resources.
  *
- * <p>The {@code UncheckedLongReference} class provides low-level access to a referenced long
- * value, optimizing for performance by bypassing safety checks for bounds and state.</p>
- *
- * <p>It's recommended to use this class with caution as it can result in undefined behavior if
- * misused. Typically, this class is used in scenarios where performance is critical and the
- * application guarantees safety through other means.</p>
+ * @implSpec Implementations must ensure that all methods are thread-safe.
+ * @implNote When Jvm debugging is enabled, an instance of {@link BinaryLongReference} is returned by
+ * {@link #create(BytesStore, long, int)} for additional safety. Otherwise, an instance of {@link UncheckedLongReference}
+ * is returned for performance.
+ * @see LongReference
+ * @see ReferenceOwner
+ * @see UnsafeCloseable
+ * @see BytesStore
+ * @see BinaryLongReference
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
@@ -43,13 +52,16 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     private BytesStore bytes;
 
     /**
-     * Creates a new instance of LongReference backed by the given BytesStore.
+     * Creates an {@code UncheckedLongReference} or {@code BinaryLongReference} depending on JVM debug status.
      *
-     * @param bytesStore the BytesStore to back this reference.
-     * @param offset     the offset of the long value within the BytesStore.
-     * @param size       the number of bytes to use (should be 8 for a long).
-     * @return a LongReference instance.
-     * @throws IllegalStateException    if released
+     * @param bytesStore the {@code BytesStore} to be used for storing the long value.
+     * @param offset     the offset at which the long value is stored.
+     * @param size       the size of the long value in bytes.
+     * @return a new {@code LongReference} instance.
+     * @throws IllegalArgumentException    if the size does not match the expected size.
+     * @throws BufferOverflowException     if the operation exceeds the bounds of the buffer.
+     * @throws BufferUnderflowException    if the operation exceeds the bounds of the buffer.
+     * @throws IllegalStateException       if the object is not in a valid state for the operation.
      */
     @NotNull
     public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
@@ -59,6 +71,16 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
         return ref;
     }
 
+    /**
+     * Stores the bytes of the long value reference.
+     *
+     * @param bytes  the {@code BytesStore} containing the bytes.
+     * @param offset the offset at which the long value is stored.
+     * @param length the length of the bytes in the {@code BytesStore}.
+     * @throws IllegalStateException       if the object is not in a valid state for the operation.
+     * @throws IllegalArgumentException    if the length does not match the expected size.
+     * @throws BufferUnderflowException    if the operation exceeds the bounds of the buffer.
+     */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
