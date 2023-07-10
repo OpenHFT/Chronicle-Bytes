@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.bytes.render.GeneralDecimaliser;
 import net.openhft.chronicle.core.Maths;
 import org.junit.Assert;
 import org.junit.Test;
@@ -82,6 +83,7 @@ public class Issue85Test extends BytesTestCommon {
     @Test
     public void bytesParseDouble_Issue85_Many0() {
         Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
+        bytes.decimaliser(GeneralDecimaliser.GENERAL);
         assumeFalse(NativeBytes.areNewGuarded());
         int max = 100, count = 0;
         for (double d0 = 1e15; d0 >= 1e-8; d0 /= 10) {
@@ -124,7 +126,17 @@ public class Issue85Test extends BytesTestCommon {
     public void loseTrainingZeros() {
         double d = -541098.2421;
         Assert.assertEquals("" + d,
-                ((Bytes<byte[]>) Bytes.allocateElasticOnHeap(64))
+                Bytes.allocateElasticDirect()
+                        .append(d)
+                        .toString());
+
+    }
+
+    @Test
+    public void loseTrainingZerosHeap() {
+        double d = -541098.2421;
+        Assert.assertEquals("" + d,
+                Bytes.allocateElasticOnHeap()
                         .append(d)
                         .toString());
 

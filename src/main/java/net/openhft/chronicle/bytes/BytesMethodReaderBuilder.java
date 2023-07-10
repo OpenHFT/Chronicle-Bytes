@@ -41,6 +41,13 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
         return this;
     }
 
+    @Deprecated(/* remove in x.25 */)
+    @Override
+    public MethodReaderBuilder warnMissing(boolean warnMissing) {
+        // always true
+        return this;
+    }
+
     public MethodEncoderLookup methodEncoderLookup() {
         return methodEncoderLookup;
     }
