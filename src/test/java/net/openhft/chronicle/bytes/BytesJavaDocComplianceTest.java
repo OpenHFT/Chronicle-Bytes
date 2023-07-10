@@ -130,7 +130,16 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 (args, bytes, nc) -> {
                     final String name = createCommand(args) + "->" + bytes(args).getClass().getSimpleName() + "." + nc.name();
 
-                    assertThrows(NullPointerException.class, () -> nc.accept(bytes), name);
+                    assertThrows(NullPointerException.class, () -> {
+                        try {
+                            nc.accept(bytes);
+                        } catch (IllegalArgumentException e) {
+                            // @NotNull annotation processing might have been applied.
+                            if (e.getMessage().endsWith("must not be null"))
+                                throw new NullPointerException(e.getMessage());
+                            throw e;
+                        }
+                    }, name);
 
                     if (isReadWrite(args)) {
                         if (!(ChunkedMappedBytes.class.isInstance(bytes))) {
