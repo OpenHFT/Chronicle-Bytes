@@ -20,9 +20,11 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.core.internal.SafeMemory;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -477,6 +479,8 @@ public interface Bytes<U> extends
     @NotNull
     static VanillaBytes<Void> allocateDirect(@NonNegative long capacity)
             throws IllegalArgumentException {
+        if (OS.memory() instanceof SafeMemory)
+            return (VanillaBytes) elasticByteBuffer(Math.toIntExact(capacity));
         @NotNull BytesStore<?, Void> bs = BytesStore.nativeStoreWithFixedCapacity(requireNonNegative(capacity));
         try {
             return new NativeBytes<>(bs);
@@ -498,6 +502,8 @@ public interface Bytes<U> extends
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
+        if (OS.memory() instanceof SafeMemory)
+            return (NativeBytes) elasticByteBuffer();
         return NativeBytes.nativeBytes();
     }
 
@@ -517,6 +523,8 @@ public interface Bytes<U> extends
     @NotNull
     static NativeBytes<Void> allocateElasticDirect(@NonNegative long initialCapacity)
             throws IllegalArgumentException {
+        if (OS.memory() instanceof SafeMemory)
+            return (NativeBytes) elasticByteBuffer(Math.toIntExact(initialCapacity));
         return NativeBytes.nativeBytes(requireNonNegative(initialCapacity));
     }
 

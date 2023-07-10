@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.internal.SafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -571,8 +572,13 @@ public class VanillaBytes<U>
                 Math.min(Bytes.MAX_HEAP_CAPACITY, realReadRemaining());
         @NotNull char[] chars = new char[length];
         final long address = bytesStore.address + bytesStore.translate(readPosition());
-        for (int i = 0; i < length && i < realCapacity(); i++)
-            chars[i] = (char) (memory.readByte(address + i) & 0xFF);
+        if (memory instanceof SafeMemory) {
+            for (int i = 0; i < length && i < realCapacity(); i++)
+                chars[i] = (char) bytesStore.readUnsignedByte(i);
+        } else {
+            for (int i = 0; i < length && i < realCapacity(); i++)
+                chars[i] = (char) (memory.readByte(address + i) & 0xFF);
+        }
 
         return StringUtils.newString(chars);
     }

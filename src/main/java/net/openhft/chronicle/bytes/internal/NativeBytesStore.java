@@ -22,6 +22,7 @@ import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
+import net.openhft.chronicle.core.internal.SafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.SimpleCleaner;
@@ -380,6 +381,8 @@ public class NativeBytesStore<U>
 
     @Override
     public byte readByte(@NonNegative long offset) {
+        if (memory instanceof SafeMemory)
+            return ((ByteBuffer) underlyingObject).get((int) offset);
         return memory.readByte(address + translate(offset));
     }
 
@@ -440,6 +443,10 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeByte(@NonNegative long offset, byte i8)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).put(Math.toIntExact(offset), i8);
+            return this;
+        }
         memory.writeByte(address + translate(offset), i8);
         return this;
     }
@@ -448,6 +455,10 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeShort(@NonNegative long offset, short i16)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).putShort(Math.toIntExact(offset), i16);
+            return this;
+        }
         memory.writeShort(address + translate(offset), i16);
         return this;
     }
@@ -456,6 +467,10 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeInt(@NonNegative long offset, int i32)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).putInt(Math.toIntExact(offset), i32);
+            return this;
+        }
         try {
             memory.writeInt(address + translate(offset), i32);
             return this;
@@ -477,6 +492,11 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeLong(@NonNegative long offset, long i64)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).putLong(Math.toIntExact(offset), i64);
+            return this;
+        }
+
         memory.writeLong(address + translate(offset), i64);
         return this;
     }
@@ -493,6 +513,10 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeFloat(@NonNegative long offset, float f)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).putFloat(Math.toIntExact(offset), f);
+            return this;
+        }
         memory.writeFloat(address + translate(offset), f);
         return this;
     }
@@ -501,6 +525,10 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> writeDouble(@NonNegative long offset, double d)
             throws IllegalStateException {
+        if (memory instanceof SafeMemory) {
+            ((ByteBuffer) underlyingObject).putDouble(Math.toIntExact(offset), d);
+            return this;
+        }
         memory.writeDouble(address + translate(offset), d);
         return this;
     }

@@ -18,13 +18,14 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceChangeListener;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -39,19 +40,20 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class NoBytesStore implements BytesStore {
     public static final BytesStore NO_BYTES_STORE = new NoBytesStore();
-
     public static final long NO_PAGE;
-
     @NotNull
     public static final Bytes<?> NO_BYTES;
+    private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
     static {
         try {
-            NO_PAGE = OS.memory().allocate(OS.pageSize());
+            Field bbAddress = Jvm.getField(BYTE_BUFFER.getClass(), "address");
+
+            NO_PAGE = bbAddress.getLong(BYTE_BUFFER);
             NO_BYTES = new NativeBytes<>(noBytesStore());
             IOTools.unmonitor(NO_BYTES);
 
-        } catch (IllegalStateException | IllegalArgumentException e) {
+        } catch (IllegalStateException | IllegalArgumentException | IllegalAccessException e) {
             throw new AssertionError(e);
         }
     }
@@ -62,6 +64,11 @@ public final class NoBytesStore implements BytesStore {
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return (BytesStore<B, T>) NO_BYTES_STORE;
+    }
+
+    private static BufferUnderflowException throwBUE(long offset) {
+        requireNonNegative(offset);
+        return new BufferUnderflowException();
     }
 
     @Override
@@ -216,11 +223,6 @@ public final class NoBytesStore implements BytesStore {
     @Override
     public byte readByte(@NonNegative long offset) {
         throw throwBUE(offset);
-    }
-
-    private static BufferUnderflowException throwBUE(@NonNegative long offset) {
-        requireNonNegative(offset);
-        return new BufferUnderflowException();
     }
 
     @Override
