@@ -35,7 +35,8 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryIntReference.INT_NOT_COMPLETE;
 
 /**
- * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
+ * This class represents a binary array of 64-bit integer values, which can be accessed and manipulated.
+ * It supports features such as reading and writing to the binary array, and handling of reference counts.
  */
 @SuppressWarnings("rawtypes")
 public class BinaryIntArrayReference extends AbstractReference implements ByteableIntArrayValues, BytesMarshallable {
@@ -48,18 +49,35 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     private static Set<WeakReference<BinaryIntArrayReference>> binaryIntArrayReferences = null;
     private long length;
 
+    /**
+     * Default constructor initializes the BinaryIntArrayReference with a default capacity of 0.
+     */
     public BinaryIntArrayReference() {
         this(0);
     }
 
+    /**
+     * Constructor initializes the BinaryIntArrayReference with a specified default capacity.
+     *
+     * @param defaultCapacity the default capacity of the binary array.
+     */
     public BinaryIntArrayReference(long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
     }
 
+    /**
+     * Initializes the internal set used to collect BinaryIntArrayReferences.
+     */
     public static void startCollecting() {
         binaryIntArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
+    /**
+     * Forces all BinaryIntArrayReferences to an incomplete state.
+     *
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferOverflowException     if buffer overflow occurs.
+     */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryIntArrayReferences == null)
@@ -75,6 +93,15 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         binaryIntArrayReferences = null;
     }
 
+    /**
+     * Writes the specified number of bytes to the provided BytesStore.
+     *
+     * @param bytes    the BytesStore to write to.
+     * @param capacity the number of bytes to be written.
+     * @throws BufferOverflowException     if buffer overflow occurs.
+     * @throws IllegalArgumentException    if an illegal argument is provided.
+     * @throws IllegalStateException       if an illegal state occurs.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -128,6 +155,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return bytes.readVolatileInt(offset + USED);
     }
 
+    /**
+     * Sets the maximum value used in the array.
+     *
+     * @param usedAtLeast the maximum value to be set.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferUnderflowException    if buffer underflow occurs.
+     */
     @Override
     public void setMaxUsed(long usedAtLeast)
             throws IllegalStateException, BufferUnderflowException {
@@ -136,6 +170,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeMaxLong(offset + USED, usedAtLeast);
     }
 
+    /**
+     * Returns the integer value at the specified index.
+     *
+     * @param index the index of the value to retrieve.
+     * @return the value at the specified index.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferUnderflowException    if buffer underflow occurs.
+     */
     @Override
     public int getValueAt(@NonNegative long index)
             throws IllegalStateException, BufferUnderflowException {
@@ -144,6 +186,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return bytes.readInt(VALUES + offset + (index << SHIFT));
     }
 
+    /**
+     * Sets the integer value at the specified index.
+     *
+     * @param index the index at which the value is to be set.
+     * @param value the value to be set.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferOverflowException     if buffer overflow occurs.
+     */
     @Override
     public void setValueAt(@NonNegative long index, int value)
             throws IllegalStateException, BufferOverflowException {
@@ -152,6 +202,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeInt(VALUES + offset + (index << SHIFT), value);
     }
 
+    /**
+     * Returns the volatile integer value at the specified index.
+     *
+     * @param index the index of the value to retrieve.
+     * @return the value at the specified index.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferUnderflowException    if buffer underflow occurs.
+     */
     @Override
     public int getVolatileValueAt(@NonNegative long index)
             throws IllegalStateException, BufferUnderflowException {
@@ -168,6 +226,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         ((BinaryIntReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
     }
 
+    /**
+     * Sets the integer value at the specified index in an ordered or atomic manner.
+     *
+     * @param index the index at which the value is to be set.
+     * @param value the value to be set.
+     * @throws BufferOverflowException if buffer overflow occurs.
+     * @throws IllegalStateException   if an illegal state occurs.
+     */
     @Override
     public void setOrderedValueAt(@NonNegative long index, int value)
             throws BufferOverflowException, IllegalStateException {
@@ -176,6 +242,16 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         bytes.writeOrderedInt(VALUES + offset + (index << SHIFT), value);
     }
 
+    /**
+     * Stores the given bytes from the specified offset for a specified length.
+     *
+     * @param bytes  the BytesStore to write to.
+     * @param offset the offset at which to start writing.
+     * @param length the number of bytes to be written.
+     * @throws IllegalArgumentException    if an illegal argument is provided.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferOverflowException     if buffer overflow occurs.
+     */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {
@@ -197,6 +273,14 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         this.length = length;
     }
 
+    /**
+     * Reads and deserializes data from the input stream.
+     *
+     * @param bytes the input stream.
+     * @throws IORuntimeException          if an IO exception occurs.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferUnderflowException    if buffer underflow occurs.
+     */
     @Override
     public void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, IllegalStateException, BufferUnderflowException {
@@ -220,6 +304,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         }
     }
 
+    /**
+     * Serializes and writes data to the output stream.
+     *
+     * @param bytes the output stream.
+     * @throws IllegalStateException       if an illegal state occurs.
+     * @throws BufferOverflowException     if buffer overflow occurs.
+     */
     @Override
     public void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException {
@@ -247,6 +338,12 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         }
     }
 
+    /**
+     * Checks if the instance is null.
+     *
+     * @return true if the instance is null, false otherwise.
+     * @throws IllegalStateException if an illegal state occurs.
+     */
     @Override
     public boolean isNull()
             throws IllegalStateException {
@@ -255,6 +352,11 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return bytes == null;
     }
 
+    /**
+     * Resets the instance to its initial state.
+     *
+     * @throws IllegalStateException if an illegal state occurs.
+     */
     @Override
     public void reset()
             throws IllegalStateException {
@@ -265,22 +367,42 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         length = 0;
     }
 
+    /**
+     * Returns the BytesStore instance associated with this object.
+     *
+     * @return the BytesStore instance.
+     */
     @Nullable
     @Override
     public BytesStore bytesStore() {
         return bytes;
     }
 
+    /**
+     * Returns the offset where the data is stored.
+     *
+     * @return the offset.
+     */
     @Override
     public long offset() {
         return offset;
     }
 
+    /**
+     * Returns the maximum size of the data that can be stored.
+     *
+     * @return the maximum size.
+     */
     @Override
     public long maxSize() {
         return length;
     }
 
+    /**
+     * Returns a string representation of the object.
+     *
+     * @return a string representation of the object.
+     */
     @NotNull
     @Override
     public String toString() {
@@ -318,6 +440,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         }
     }
 
+    /**
+     * Calculates the size in bytes based on the provided capacity.
+     *
+     * @param capacity the capacity.
+     * @return the size in bytes.
+     * @throws IllegalStateException if an illegal state occurs.
+     */
     @Override
     public long sizeInBytes(@NonNegative long capacity)
             throws IllegalStateException {
@@ -326,6 +455,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return (capacity << SHIFT) + VALUES;
     }
 
+    /**
+     * Sets the capacity of the ByteableIntArrayValues.
+     *
+     * @param arrayLength the length of the array.
+     * @return the updated ByteableIntArrayValues.
+     * @throws IllegalStateException if an illegal state occurs.
+     */
     @Override
     public ByteableIntArrayValues capacity(long arrayLength)
             throws IllegalStateException {
@@ -341,6 +477,18 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return this;
     }
 
+    /**
+     * Atomically sets the value at the specified index to the given updated value
+     * if the current value equals the expected value.
+     *
+     * @param index the index of the value to be updated.
+     * @param expected the expected value.
+     * @param value the new value.
+     * @return true if successful. False return indicates that
+     * the actual value was not equal to the expected value.
+     * @throws BufferOverflowException if buffer overflow occurs.
+     * @throws IllegalStateException   if an illegal state occurs.
+     */
     @Override
     public boolean compareAndSet(@NonNegative long index, int expected, int value)
             throws BufferOverflowException, IllegalStateException {

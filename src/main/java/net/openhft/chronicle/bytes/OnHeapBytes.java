@@ -30,15 +30,21 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     private final long capacity;
 
     /**
-     * Creates an OnHeapBytes using the bytes in a BytesStore which can be elastic or not as specified.
+     * Constructs an instance of OnHeapBytes using the provided BytesStore. The elasticity of the created OnHeapBytes instance
+     * is specified by the elastic parameter.
      * <p>
-     * If the OnHeapBytes is specified elastic, its capacity is set to {@code MAX_CAPACITY}, otherwise its capacity will be
-     * set to the BytesStore capacity. Whether the OnHeapBytes is elastic or not it can be read/written using cursors.
+     * OnHeapBytes allows for the manipulation of byte sequences in an on-heap manner, meaning it relies on JVM's garbage
+     * collector for memory management. It can either have a fixed size (not elastic) or allow for dynamic resizing (elastic).
+     * If the OnHeapBytes is set to be elastic, its maximum capacity is specified by {@code MAX_CAPACITY}, else it matches
+     * the capacity of the provided BytesStore. In both elastic and non-elastic states, this instance can be read/written using cursors.
      *
-     * @param bytesStore the specified BytesStore to wrap
-     * @param elastic    if <code>true</code> this OnHeapBytes is elastic
-     * @throws IllegalStateException    if bytesStore has been released
-     * @throws IllegalArgumentException
+     * @param bytesStore the BytesStore instance containing the bytes to be managed.
+     * @param elastic    a boolean value specifying whether this instance of OnHeapBytes is elastic.
+     *                   If {@code true}, the instance is elastic and its capacity can grow up to {@code MAX_CAPACITY}.
+     *                   If {@code false}, the instance has a fixed size that matches the capacity of the provided BytesStore.
+     * @throws IllegalStateException    if the provided BytesStore has been released.
+     * @throws IllegalArgumentException if the arguments provided are not valid, for instance if the BytesStore's
+     *                                  capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
      */
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
             throws IllegalStateException, IllegalArgumentException {

@@ -1494,6 +1494,15 @@ public abstract class AbstractBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    /**
+     * Returns the bytes sum between the specified indexes; start (inclusive) and end (exclusive).
+     *
+     * @param start the index of the first byte to sum
+     * @param end   the index of the last byte to sum
+     * @return unsigned bytes sum
+     * @throws BufferUnderflowException if the specified indexes are outside the limits of the BytesStore
+     * @throws IllegalStateException    if the BytesStore has been released
+     */
     public int byteCheckSum(@NonNegative int start, @NonNegative int end)
             throws BufferUnderflowException, IllegalStateException {
         int sum = 0;

@@ -91,6 +91,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(boolean flag)
@@ -105,6 +106,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return      this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(int value)
@@ -120,6 +122,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return      this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(long value)
@@ -151,6 +154,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    /**
+     * Appends the base 16 (hexadecimal) representation of the specified long value.
+     *
+     * @param value the long value to be converted to base 16 and appended
+     * @return this
+     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException if the specified argument is illegal
+     * @throws IllegalStateException    if the underlying buffer was released
+     */
     @NotNull
     default B appendBase16(long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -158,6 +170,17 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return (B) this;
     }
 
+    /**
+     * Appends the base 16 (hexadecimal) representation of the specified long value,
+     * padding with leading zeroes if the number of digits is less than minDigits.
+     *
+     * @param value     the long value to be converted to base 16 and appended
+     * @param minDigits the minimum number of digits to be appended
+     * @return this
+     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException if the specified argument is illegal
+     * @throws IllegalStateException    if the underlying buffer was released
+     */
     @NotNull
     default B appendBase16(long value, int minDigits)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -173,6 +196,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return              this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B appendDecimal(long value, int decimalPlaces)
@@ -208,6 +232,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(double d)
@@ -256,6 +281,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append(double d, int decimalPlaces)
@@ -289,6 +315,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @return   this
      * @throws BufferOverflowException  if the string is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
@@ -300,11 +327,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         }
     }
 
+
     /**
-     * Appends a BytesStore to this in ISO-8859-1.
+     * Appends the ISO-8859-1 representation of the specified BytesStore.
      *
-     * @param bs the specified BytesStore to append
-     * @return   this
+     * @param bs the BytesStore to append
+     * @return this
      * @throws BufferOverflowException  if the BytesStore is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IllegalStateException    if the BytesStore is closed
@@ -319,9 +347,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     }
 
     /**
-     * Appends a string to this Bytes in ISO-8859-1 format.
+     * Appends the ISO-8859-1 representation of the specified String.
      *
-     * @param cs the specified string to append
+     * @param cs the String to append
      * @return   this
      * @throws BufferOverflowException if the string is too large to write in the capacity available
      * @throws IllegalStateException if the underlying BytesStore is closed
@@ -345,6 +373,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws BufferOverflowException if the string is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
+     * @throws IllegalStateException    if the underlying buffer was released
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {

@@ -22,6 +22,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 
+/**
+ * A {@code SubBytes} object represents a subsection of a {@link BytesStore} from a given start index up to a specified capacity.
+ * This is useful when you want to handle a specific part of the data within a larger BytesStore.
+ *
+ * @param <U> the type of the BytesStore
+ */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SubBytes<U> extends VanillaBytes<U> {
     private final long start;
@@ -31,12 +37,12 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * Class constructor. Creates a SubBytes from the bytes in a specified BytesStore from a specified Offset to
      * a specified index (excluding).
      *
-     * @param bytesStore the specified BytesStore used to create this SubBytes
-     * @param start      the offset of bytesStore
-     * @param capacity   the last index (excluding) of bytesStore to be included in this SubBytes
-     * @throws IllegalStateException if bytesStore is released
-     * @throws BufferUnderflowException if capacity is less than start
-     * @throws IllegalArgumentException
+     * @param bytesStore the parent BytesStore that contains the data
+     * @param start      the start index in the parent BytesStore from which the SubBytes start
+     * @param capacity   the number of elements from the start index that the SubBytes cover
+     * @throws IllegalStateException    if the parent BytesStore is released
+     * @throws BufferUnderflowException if the capacity is less than the start index
+     * @throws IllegalArgumentException  if any other argument issue occurs
      */
     public SubBytes(@NotNull BytesStore bytesStore, @NonNegative long start, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
@@ -47,18 +53,27 @@ public class SubBytes<U> extends VanillaBytes<U> {
         readLimit(writeLimit());
     }
 
+    /**
+     * @return the capacity as a long value
+     */
     @NonNegative
     @Override
     public long capacity() {
         return capacity;
     }
 
+    /**
+     * @return the start index as a long value
+     */
     @NonNegative
     @Override
     public long start() {
         return start;
     }
 
+    /**
+     * @return the capacity as a long value
+     */
     @NonNegative
     @Override
     public long realCapacity() {

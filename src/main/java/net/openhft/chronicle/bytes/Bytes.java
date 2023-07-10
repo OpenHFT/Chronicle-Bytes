@@ -43,24 +43,54 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Bytes is a view of a region of memory within a {@link BytesStore }
- * with 63-bit addressing capability (~8 EiB) and separate read and write cursors.
+ * The {@code Bytes} class is a versatile container for raw byte data, providing rich functionality to read and write
+ * data in various formats including integers, longs, floating-point values, strings, and more. It also supports
+ * advanced operations such as seeking, slicing, and copying.
  * <p>
- * Java's built-in {@link ByteBuffer} can only handle 31-bits addresses and has only a single cursor.
+ * This class serves as an abstraction layer over a ByteBuffer, byte[], POJO, or native memory
+ * </p>
  * <p>
- * A Bytes object can be for a fixed region of memory or an "elastic" buffer which can be resized on demand.
+ * Besides basic primitive types, {@code Bytes} can serialize and deserialize more complex structures,
+ * including custom user-defined objects that implement {@code ReadBytesMarshallable} or {@code WriteBytesMarshallable}.
+ * </p>
  * <p>
- * A Bytes is mutable and not thread-safe.
+ * {@code Bytes} can be used for a variety of purposes such as:
+ * <ul>
+ *     <li>Reading and writing binary data to and from files</li>
+ *     <li>Bytes level serialization and deserialization of objects</li>
+ *     <li>Performing low-level binary manipulation for networking applications</li>
+ *     <li>Temporary storage (in-memory) of binary data</li>
+ *     <li>Shared memory in memory mapped files</li>
+ * </ul>
+ * </p>
  * <p>
- * The cursors consist of a write-position and read-position which must follow these constraints
- * <p> {@code start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()}
- * <p>Also {@code readLimit() == writePosition() && readPosition() <= safeLimit()}
+ * {@code Bytes} is essentially a view of a region within a {@link BytesStore} and is equipped with separate read and
+ * write cursors, boasting a 63-bit addressing capacity (approximately 8 EiB), as opposed to Java's built-in
+ * {@link ByteBuffer}, which only supports 31-bit addressing with a single cursor.
+ * </p>
  * <p>
- * Generally, a Bytes object is a resource that is ReferenceCounted and certain operations invoked on a Bytes
- * object that has been released, might result in an {@link IllegalStateException} being thrown.
+ * A {@code Bytes} instance can represent either a fixed region of memory or an elastic buffer that dynamically
+ * resizes as needed. It is mutable and designed for single-threaded use as it is not thread-safe.
+ * </p>
+ * <p>
+ * The cursors within Bytes consist of a write-position and a read-position, which must adhere to these constraints:
+ * <ul>
+ *     <li>{@code start() <= readPosition() <= writePosition() <= writeLimit() <= capacity()}</li>
+ *     <li>{@code readLimit() == writePosition() && readPosition() <= safeLimit()}</li>
+ * </ul>
+ * <p>
+ * It is important to note that a Bytes object is a resource that is ReferenceCounted. Operations on a Bytes
+ * object that has been released may result in an {@link IllegalStateException}.
+ * <p>
+ * Note: Some operations on {@code Bytes} may throw {@code IllegalStateException} if the underlying storage has been released.
+ * Always ensure proper release of resources when finished with a {@code Bytes} instance, especially if it's backed by system resources
+ * like file handles or network sockets.
+ * </p>
  *
- * @param <U> Underlying type
+ * @param <U> The type of the {@link BytesStore} that backs this {@code Bytes} instance.
  * @see BytesStore
+ * @see ReadBytesMarshallable
+ * @see WriteBytesMarshallable
  */
 @SingleThreaded
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -71,25 +101,30 @@ public interface Bytes<U> extends
         SingleThreadedChecked {
 
     /**
-     * The max capacity a Bytes can ever have.
+     * The maximum capacity a Bytes object can have, approximately 8 EiB (Exbibytes) minus 16 bytes.
      */
-    long MAX_CAPACITY = Long.MAX_VALUE & ~0xF; // 8 EiB - 16
+    long MAX_CAPACITY = Long.MAX_VALUE & ~0xF;
 
     /**
-     * The max capacity a Bytes can ever have if it is allocated on heap.
+     * The maximum capacity a Bytes object can have if it is allocated on the heap, which is 2 GiB (Gibibytes) minus 16 bytes.
      */
-    int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;  // 2 GiB - 16
+    int MAX_HEAP_CAPACITY = Integer.MAX_VALUE & ~0xF;
 
     /**
-     * The default initial size of an elastic Bytes backed by a ByteBuffer
+     * The default initial size of an elastic Bytes object backed by a ByteBuffer, which is 256 bytes.
      */
     int DEFAULT_BYTE_BUFFER_CAPACITY = 256;
 
     /**
-     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity
-     * which will be resized as required.
+     * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with a default capacity,
+     * which can be resized as needed. The default capacity is determined by the value of {@code DEFAULT_BYTE_BUFFER_CAPACITY}.
+     * <p>
+     * The memory for the returned Bytes object is allocated off-heap, meaning it's not under the JVM's garbage collector's
+     * immediate purview. It's crucial to conscientiously release these resources when they're no longer required to ensure
+     * timely memory deallocation. If these resources are not manually released, they will still eventually be reclaimed by
+     * the garbage collector, but possibly with a delay.
      *
-     * @return a new elastic wrapper
+     * @return a new elastic wrapper for an off-heap ByteBuffer with default capacity
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer() {
@@ -99,10 +134,15 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
      * the given {@code initialCapacity} which will be resized as required.
+     * <p>
+     * The memory for the returned Bytes object is allocated off-heap, meaning it's not under the JVM's garbage collector's
+     * immediate purview. It's crucial to conscientiously release these resources when they're no longer required to ensure
+     * timely memory deallocation. If these resources are not manually released, they will still eventually be reclaimed by
+     * the garbage collector, but possibly with a delay.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper
-     * @throws IllegalArgumentException if the provided {@code initialCapacity} negative.
+     * @return a new elastic wrapper for an off-heap ByteBuffer with the specified initial capacity
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(@NonNegative int initialCapacity) {
@@ -112,12 +152,21 @@ public interface Bytes<U> extends
     /**
      * Creates and returns a new elastic wrapper for a direct (off-heap) ByteBuffer with
      * the given {@code initialCapacity} which will be resized as required up
-     * to the given {@code maxSize}.
+     * to the given {@code maxCapacity}.
+     * <p>
+     * The memory for the returned Bytes object is allocated off-heap, meaning it's not under the JVM's garbage collector's
+     * immediate purview. It's crucial to conscientiously release these resources when they're no longer required to ensure
+     * timely memory deallocation. If these resources are not manually released, they will still eventually be reclaimed by
+     * the garbage collector, but possibly with a delay.
+     * <p>
+     * This method allows for fine-tuned control over the buffer's capacity, enabling performance optimization
+     * and resource management.
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
-     * @param maxCapacity     the max capacity given in bytes equal or greater than initialCapacity
-     * @return a new elastic wrapper
-     * @throws IllegalArgumentException if the provided {@code initialCapacity} or provided {@code maxCapacity} is negative.
+     * @param maxCapacity     the maximum capacity given in bytes; must be non-negative and at least as large as {@code initialCapacity}
+     * @return a new elastic wrapper for an off-heap ByteBuffer with the specified initial capacity and maximum capacity
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} or {@code maxCapacity} is negative,
+     *                                  or if {@code maxCapacity} is less than {@code initialCapacity}.
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(@NonNegative final int initialCapacity,
@@ -138,13 +187,19 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for a heap ByteBuffer with
-     * the given {@code initialCapacity} which will be resized as required.
+     * Creates and returns a new elastic wrapper for a heap ByteBuffer, with the provided {@code initialCapacity},
+     * that can dynamically resize as required.
+     * <p>
+     * The returned Bytes object utilizes heap memory, which is managed by the JVM's garbage collector.
+     * This is suitable for scenarios where the buffer size may change, and the application requires
+     * the flexibility of automatic memory management.
+     * <p>
+     * Please note that, since this is heap memory, the garbage collector will manage the memory deallocation.
      *
-     * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper
-     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
-     * @throws IllegalStateException    if the underlying resource has already been freed.
+     * @param initialCapacity the initial capacity of the buffer in bytes; must be non-negative
+     * @return a new elastic wrapper for a heap ByteBuffer
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
+     * @throws IllegalStateException    if the underlying resource has already been released
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(@NonNegative int initialCapacity) {
@@ -160,10 +215,15 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for a heap ByteBuffer with
-     * the {@code initialCapacity} 128 bytes which will be resized as required.
+     * Creates and returns a new elastic wrapper for a heap ByteBuffer with a default {@code initialCapacity}
+     * of 128 bytes, that can dynamically resize as required.
+     * <p>
+     * This is a convenience method that behaves similarly to {@code elasticHeapByteBuffer(int initialCapacity)},
+     * but with a preset default initial capacity.
+     * <p>
+     * The returned Bytes object utilizes heap memory, which is managed by the JVM's garbage collector.
      *
-     * @return a new elastic wrapper
+     * @return a new elastic wrapper for a heap ByteBuffer with default initial capacity of 128 bytes
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer() {
@@ -171,10 +231,12 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes view of fields in the provided {@code object} in a {@link FieldGroup} named as
-     * the provided {@code groupName} effectively turning the groups of fields into a memory segment.
-     * <p>
-     * Here is an example of field groups:
+     * Creates and returns a new Bytes view that maps to a group of fields within the provided {@code object}.
+     * The group of fields is identified by the {@link FieldGroup} annotation with a name specified by {@code groupName}.
+     * This method effectively turns the group of fields into a contiguous memory segment that can be accessed and manipulated
+     * as a single entity using the returned Bytes object.
+     *
+     * <p>Example of using {@link FieldGroup} to group fields:</p>
      * <pre>{@code
      *     static class Padding extends Parent {
      *         {@literal @}FieldGroup("p")
@@ -182,17 +244,21 @@ public interface Bytes<U> extends
      *         transient long p0, p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12, p13, p14, p15;
      *     }
      * }</pre>
-     * <p>
-     *  NOTE: the length of the data has to be recorded at the start as an unsigned byte.
-     *  This consumes one byte and limits it's maximum size to 255 usable bytes.
-     *  </p>
      *
+     * <p>Example of creating a Bytes view for a field group:</p>
+     * <pre>{@code
+     *     Padding example = new Padding();
+     *     Bytes<Padding> bytes = Bytes.forFieldGroup(example, "p");
+     * }</pre>
+     * <p><b>Note:</b> The data in the resulting Bytes view is preceded by the length of the data encoded as an unsigned byte.
+     * This consumes one byte of storage and limits the maximum size of the data in the view to 255 usable bytes.</p>
      *
-     * @param object    non-null object whose fields are to be reflected
-     * @param groupName of the field group, non-null
-     * @return a new Bytes view of fields
-     * @throws NullPointerException  if the provided {@code object} or the provided {@code groupName} is {@code null}
-     * @throws IllegalStateException if the underlying resource has already been freed.
+     * @param <T>       The type of the underlying object
+     * @param object    The non-null object containing the fields to be mapped
+     * @param groupName The non-null name of the field group as specified in {@link FieldGroup}
+     * @return A new Bytes view mapping to the specified field group within the provided object
+     * @throws NullPointerException  If the provided {@code object} or the provided {@code groupName} is {@code null}
+     * @throws IllegalStateException If the underlying resource has already been freed or if the field group does not exist
      */
     static <T> Bytes<T> forFieldGroup(@NotNull final T object,
                                       @NotNull final String groupName) {
@@ -210,58 +276,21 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes wrapping the provided {@code byteBuffer}.
-     * <p>
-     * The returned Bytes is ready for reading.
-     * <p>
-     * Method for convenience only - might not be ideal for performance (creates garbage).
-     * To avoid garbage, use something like this example:
-     * <pre>{@code
-     * import net.openhft.chronicle.bytes.Bytes;
-     * import java.nio.ByteBuffer;
+     * Creates and returns a new Bytes instance that wraps the provided {@code byteBuffer}.
+     * The returned Bytes instance is configured for reading from the current position of the
+     * {@code byteBuffer} up to its limit.
      *
-     * public class ChronicleBytesWithByteBufferExampleTest {
-     *     private static final String HELLO_WORLD = "hello world";
+     * <p>This method is provided for convenience. However, it's important to note that this method
+     * may create intermediate objects, which might not be ideal for performance-sensitive applications
+     * that require minimizing garbage creation. To avoid creating intermediate objects, consider using
+     * a different approach as demonstrated in the example below.</p>
      *
-     *     public static void main(String[] args)
-     * throws InterruptedException {
-     *         //setup Bytes and ByteBuffer to write from
-     *         Bytes b = Bytes.elasticByteBuffer();
-     *         ByteBuffer toWriteFrom = ByteBuffer.allocate(HELLO_WORLD.length());
-     *         toWriteFrom.put(HELLO_WORLD.getBytes(), 0, HELLO_WORLD.length());
-     *         toWriteFrom.flip();
-     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
-     *
-     *         doWrite(b, toWriteFrom);
-     *         ByteBuffer byteBuffer = doRead(b);
-     *
-     *         //check result
-     *         final StringBuilder sb = new StringBuilder();
-     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
-     *             sb.append((char) byteBuffer.get());
-     *         }
-     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
-     *     }
-     *
-     *     private static void doWrite(Bytes b, ByteBuffer toWrite) {
-     *         //no garbage when writing to Bytes from ByteBuffer
-     *         b.clear();
-     *         b.write(b.writePosition(), toWrite, toWrite.position(), toWrite.limit());
-     *     }
-     *
-     *     private static ByteBuffer doRead(Bytes b) {
-     *         //no garbage when getting the underlying ByteBuffer
-     *         assert b.underlyingObject() instanceof ByteBuffer;
-     *         ByteBuffer byteBuffer = (ByteBuffer) b.underlyingObject();
-     *         return byteBuffer;
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param byteBuffer to wrap, non-null
-     * @return a new Bytes wrapping the provided {@code byteBuffer}
-     * @throws NullPointerException    if the provided {@code byteBuffer} is {@code null}
-     * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
+     * @param byteBuffer The ByteBuffer to wrap. Must be non-null and must not be read-only.
+     * @return A new Bytes instance wrapping the provided {@code byteBuffer}, ready for reading.
+     * @throws NullPointerException     If the provided {@code byteBuffer} is {@code null}.
+     * @throws ReadOnlyBufferException  If the provided {@code byteBuffer} is read-only.
+     * @throws BufferUnderflowException If there is not enough data in the buffer.
+     * @throws IllegalStateException    If the buffer is in an inconsistent state.
      */
     @NotNull
     static Bytes<ByteBuffer> wrapForRead(@NotNull final ByteBuffer byteBuffer) {
@@ -269,10 +298,10 @@ public interface Bytes<U> extends
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             try {
-                Bytes<ByteBuffer> bbb = bs.bytesForRead();
-                bbb.readLimit(byteBuffer.limit());
-                bbb.readPosition(byteBuffer.position());
-                return bbb;
+                Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
+                bytesForRead.readLimit(byteBuffer.limit());
+                bytesForRead.readPosition(byteBuffer.position());
+                return bytesForRead;
             } finally {
                 bs.release(INIT);
             }
@@ -282,59 +311,19 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes wrapping the provided {@code byteBuffer}.
-     * <p>
-     * The returned Bytes is ready for writing. When that Bytes instance is closed, direct {@code byteBuffer} will be
-     * deallocated and should no longer be used.
-     * <p>
-     * Method for convenience only - might not be ideal for performance (creates garbage).
-     * To avoid garbage, use something like this example:
-     * <pre>{@code
-     * import net.openhft.chronicle.bytes.Bytes;
-     * import java.nio.ByteBuffer;
+     * Creates and returns a new Bytes instance that wraps the provided {@code byteBuffer}.
+     * The returned Bytes instance is configured for writing, starting at the current position of the
+     * {@code byteBuffer} up to its limit.
      *
-     * public class ChronicleBytesWithByteBufferExampleTest {
-     *     private static final String HELLO_WORLD = "hello world";
+     * <p>Important Note: When the returned Bytes instance is closed, any direct {@code byteBuffer} will be deallocated
+     * and should no longer be used.
      *
-     *     public static void main(String[] args)
-     * throws InterruptedException {
-     *         //setup Bytes and ByteBuffer to write from
-     *         Bytes b = Bytes.elasticByteBuffer();
-     *         ByteBuffer toWriteFrom = ByteBuffer.allocate(HELLO_WORLD.length());
-     *         toWriteFrom.put(HELLO_WORLD.getBytes(), 0, HELLO_WORLD.length());
-     *         toWriteFrom.flip();
-     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
-     *
-     *         doWrite(b, toWriteFrom);
-     *         ByteBuffer byteBuffer = doRead(b);
-     *
-     *         //check result
-     *         final StringBuilder sb = new StringBuilder();
-     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
-     *             sb.append((char) byteBuffer.get());
-     *         }
-     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
-     *     }
-     *
-     *     private static void doWrite(Bytes b, ByteBuffer toWrite) {
-     *         //no garbage when writing to Bytes from ByteBuffer
-     *         b.clear();
-     *         b.write(b.writePosition(), toWrite, toWrite.position(), toWrite.limit());
-     *     }
-     *
-     *     private static ByteBuffer doRead(Bytes b) {
-     *         //no garbage when getting the underlying ByteBuffer
-     *         assert b.underlyingObject() instanceof ByteBuffer;
-     *         ByteBuffer byteBuffer = (ByteBuffer) b.underlyingObject();
-     *         return byteBuffer;
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param byteBuffer to wrap, non-null
-     * @return a new Bytes wrapping the provided {@code byteBuffer}
-     * @throws NullPointerException    if the provided {@code byteBuffer} is {@code null}
-     * @throws ReadOnlyBufferException if the provided {@code byteBuffer} is read-only
+     * @param byteBuffer The ByteBuffer to wrap. Must be non-null and must not be read-only.
+     * @return A new Bytes instance wrapping the provided {@code byteBuffer}, ready for writing.
+     * @throws NullPointerException    If the provided {@code byteBuffer} is {@code null}.
+     * @throws ReadOnlyBufferException If the provided {@code byteBuffer} is read-only.
+     * @throws BufferOverflowException If there is not enough space in the buffer.
+     * @throws IllegalStateException   If the buffer is in an inconsistent state.
      */
     @NotNull
     static Bytes<ByteBuffer> wrapForWrite(@NotNull final ByteBuffer byteBuffer) {
@@ -342,10 +331,10 @@ public interface Bytes<U> extends
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
             try {
-                Bytes<ByteBuffer> bbb = bs.bytesForWrite();
-                bbb.writePosition(byteBuffer.position());
-                bbb.writeLimit(byteBuffer.limit());
-                return bbb;
+                Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
+                bytesForWrite.writePosition(byteBuffer.position());
+                bytesForWrite.writeLimit(byteBuffer.limit());
+                return bytesForWrite;
             } finally {
                 bs.release(INIT);
             }
@@ -355,54 +344,17 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes wrapping the provided {@code byteArray}.
-     * <p>
-     * The returned Bytes is ready for reading. When that Bytes instance is closed, direct {@code byteBuffer} will be
-     * deallocated and should no longer be used.
-     * <p>
-     * Method for convenience only - might not be ideal for performance (creates garbage).
-     * To avoid garbage, use something like this example:
-     * <pre>{@code
-     * import net.openhft.chronicle.bytes.Bytes;
-     * import java.nio.charset.Charset;
+     * Creates and returns a new Bytes instance that wraps the provided {@code byteArray}.
+     * The returned Bytes instance is configured for reading, starting from the beginning of the
+     * {@code byteArray} up to its length.
      *
-     * public class ChronicleBytesWithPrimByteArrayExampleTest {
-     *     private static final Charset ISO_8859 = Charset.forName("ISO-8859-1");
-     *     private static final String HELLO_WORLD = "hello world";
+     * <p>Important Note: This method creates intermediate objects and might not be ideal for performance-sensitive applications
+     * due to garbage creation.
      *
-     *     public static void main(String[] args) {
-     *         //setup Bytes and byte[]s to write from and read to
-     *         Bytes b = Bytes.elasticByteBuffer();
-     *         byte[] toWriteFrom = HELLO_WORLD.getBytes(ISO_8859);
-     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
-     *
-     *         doWrite(b, toWriteFrom);
-     *         doRead(b, toReadTo);
-     *
-     *         //check result
-     *         final StringBuilder sb = new StringBuilder();
-     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
-     *             sb.append((char) toReadTo[i]);
-     *         }
-     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
-     *     }
-     *
-     *     private static void doWrite(Bytes b, byte[] toWrite) {
-     *         //no garbage when writing to Bytes from byte[]
-     *         b.clear();
-     *         b.write(toWrite);
-     *     }
-     *
-     *     private static void doRead(Bytes b, byte[] toReadTo) {
-     *         //no garbage when reading from Bytes into byte[]
-     *         b.read( toReadTo, 0, HELLO_WORLD.length());
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param byteArray to wrap, non-null
-     * @return a new Bytes wrapping the provided {@code byteArray}
-     * @throws IllegalStateException if the provided {@code byteArray} is {@code null}
+     * @param byteArray The byte array to wrap. Must be non-null.
+     * @return A new Bytes instance wrapping the provided {@code byteArray}, ready for reading.
+     * @throws NullPointerException  If the provided {@code byteArray} is {@code null}.
+     * @throws IllegalStateException If the buffer is in an inconsistent state.
      */
     @NotNull
     static Bytes<byte[]> wrapForRead(byte[] byteArray) {
@@ -420,53 +372,16 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new Bytes wrapping the provided {@code byteArray}.
-     * <p>
-     * The returned Bytes is ready for writing.
-     * <p>
-     * Method for convenience only - might not be ideal for performance (creates garbage).
-     * To avoid garbage, use something like this example:
-     * <pre>{@code
-     * import net.openhft.chronicle.bytes.Bytes;
-     * import java.nio.charset.Charset;
+     * Creates and returns a new Bytes instance that wraps the provided {@code byteArray} and
+     * is ready for writing operations.
      *
-     * public class ChronicleBytesWithPrimByteArrayExampleTest {
-     *     private static final Charset ISO_8859 = Charset.forName("ISO-8859-1");
-     *     private static final String HELLO_WORLD = "hello world";
+     * <p>Important Note: This method is intended for convenience, but might not be optimal for performance-sensitive scenarios
+     * as it creates intermediate objects which might lead to garbage collection overhead.
      *
-     *     public static void main(String[] args) {
-     *         //setup Bytes and byte[]s to write from and read to
-     *         Bytes b = Bytes.elasticByteBuffer();
-     *         byte[] toWriteFrom = HELLO_WORLD.getBytes(ISO_8859);
-     *         byte[] toReadTo = new byte[HELLO_WORLD.length()];
-     *
-     *         doWrite(b, toWriteFrom);
-     *         doRead(b, toReadTo);
-     *
-     *         //check result
-     *         final StringBuilder sb = new StringBuilder();
-     *         for (int i = 0; i < HELLO_WORLD.length(); i++) {
-     *             sb.append((char) toReadTo[i]);
-     *         }
-     *         assert sb.toString().equals(HELLO_WORLD): "Failed - strings not equal!";
-     *     }
-     *
-     *     private static void doWrite(Bytes b, byte[] toWrite) {
-     *         //no garbage when writing to Bytes from byte[]
-     *         b.clear();
-     *         b.write(toWrite);
-     *     }
-     *
-     *     private static void doRead(Bytes b, byte[] toReadTo) {
-     *         //no garbage when reading from Bytes into byte[]
-     *         b.read( toReadTo, 0, HELLO_WORLD.length());
-     *     }
-     * }
-     * }</pre>
-     *
-     * @param byteArray to wrap, non-null
-     * @return Creates and returns a new Bytes wrapping the provided {@code byteArray}
-     * @throws NullPointerException if the provided {@code byteArray} is {@code null}
+     * @param byteArray The byte array to wrap for writing operations. Must be non-null.
+     * @return A new Bytes instance wrapping the provided {@code byteArray}, ready for writing.
+     * @throws NullPointerException  If the provided {@code byteArray} is {@code null}.
+     * @throws IllegalStateException If the buffer is in an inconsistent state.
      */
     @NotNull
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
@@ -484,15 +399,12 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
-     * <p>
-     * The returned Bytes is ready for reading.
-     * <p>
-     * The returned Bytes is allocated on the heap.
+     * Constructs and returns a new Bytes instance which contains the provided {@code text} encoded in ISO-8859-1.
+     * The returned Bytes instance is ready for reading and is allocated on the heap.
      *
-     * @param text non-null text to convert
-     * @return a new Bytes containing text
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @param text The non-null text to be converted and wrapped in a Bytes instance.
+     * @return A new Bytes instance containing the provided text encoded in ISO-8859-1.
+     * @throws NullPointerException if the provided {@code text} is {@code null}.
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull CharSequence text) {
@@ -501,15 +413,12 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
-     * <p>
-     * The returned Bytes is ready for reading.
-     * <p>
-     * The returned Bytes is allocated using native memory.
+     * Constructs and returns a new Bytes instance which contains the provided {@code text} encoded in ISO-8859-1.
+     * The returned Bytes instance is ready for reading and is allocated using native memory.
      *
-     * @param text non-null text to convert
-     * @return a new Bytes containing text
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @param text The non-null text to be converted and wrapped in a Bytes instance.
+     * @return A new Bytes instance containing the provided text encoded in ISO-8859-1.
+     * @throws NullPointerException if the provided {@code text} is {@code null}.
      */
     static Bytes<Void> fromDirect(@NotNull CharSequence text) {
         requireNonNull(text);
@@ -517,19 +426,17 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
-     * <p>
-     * The returned Bytes is ready for reading.
-     * <p>
-     * The returned Bytes is allocated using native memory.
+     * Constructs and returns a new Bytes instance which contains the provided {@code text} encoded in ISO-8859-1.
+     * The returned Bytes instance is ready for reading and is allocated using native memory.
      *
-     * @param text non-null text to convert
-     * @return a new Bytes containing text
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @param text The non-null text to be converted and wrapped in a Bytes instance.
+     * @return A new Bytes instance containing the provided text encoded in ISO-8859-1.
+     * @throws NullPointerException  if the provided {@code text} is {@code null}.
+     * @throws IllegalStateException if the buffer is in an inconsistent state.
      */
     @NotNull
     static Bytes<byte[]> directFrom(@NotNull String text) {
-        BytesStore from = BytesStore.from(text);
+        BytesStore<?, byte[]> from = BytesStore.from(text);
         try {
             try {
                 return from.bytesForRead();
@@ -542,15 +449,16 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new ISO-8859-1 coded Bytes object from the {@code text}.
+     * Creates and returns a new  object containing the given {@code text} encoded in ISO-8859-1 character set.
      * <p>
-     * The returned Bytes is ready for reading.
+     * The returned {@code Bytes} object is allocated on the heap and is ready for reading.
      * <p>
-     * The returned Bytes is allocated on the heap.
+     * The ISO-8859-1 encoding is used because it is a single-byte encoding that supports the first 256 Unicode characters,
+     * making it well-suited for encoding texts that primarily consist of Western European characters.
      *
-     * @param text non-null text to convert
-     * @return a new Bytes containing text
-     * @throws NullPointerException if the provided {@code text} is {@code null}
+     * @param text A non-null String to be converted into bytes using ISO-8859-1 encoding and wrapped in a {@code Bytes} object.
+     * @return A new {@code Bytes} object containing the text, encoded using the ISO-8859-1 character set.
+     * @throws NullPointerException if the provided {@code text} is {@code null}.
      */
     @NotNull
     static Bytes<byte[]> from(@NotNull String text) {
@@ -558,24 +466,41 @@ public interface Bytes<U> extends
     }
 
     /**
-     * @return an empty, fixed-sized immutable BytesStore.
+     * Creates and returns an empty, fixed-size, immutable  object.
+     *
+     * @return An empty {@code Bytes} object with fixed size and immutable contents.
      */
     static Bytes<?> empty() {
         return BytesStore.empty().bytesForRead();
     }
+
+    /**
+     * A reflection-friendly alias for the {@link #from(String)} method.
+     * <p>
+     * This method is functionally equivalent to {@link #from(String)} and is primarily intended for invocation through reflection mechanisms.
+     *
+     * <p>
+     * It creates and returns a new  object containing the given {@code text}, encoded in the ISO-8859-1 character set.
+     *
+     * @param text A non-null String to be converted into bytes using ISO-8859-1 encoding and wrapped in a {@code Bytes} object.
+     * @return A new {@code Bytes} object containing the text, encoded using the ISO-8859-1 character set.
+     * @throws NullPointerException if the provided {@code text} is {@code null}.
+     */
     @UsedViaReflection
     static Bytes<byte[]> valueOf(String text) {
         return from(text);
     }
 
     /**
-     * Creates and returns a new fix sized wrapper for native (64-bit address)
-     * memory with the provided {@code capacity}.
+     * Creates and returns a new {@link VanillaBytes} object that is a fixed-size wrapper for native memory
+     * (accessible via 64-bit addresses) with the specified {@code capacity}.
      * <p>
+     * This method is used to allocate a fixed amount of native memory, which can be useful for performance-sensitive applications.
      *
-     * @param capacity the non-negative capacity given in bytes
-     * @return a new fix sized wrapper
+     * @param capacity The non-negative capacity of the native memory to be allocated, measured in bytes.
+     * @return A new {@code VanillaBytes} object that wraps the allocated native memory.
      * @throws IllegalArgumentException if the provided {@code capacity} is negative.
+     * @throws IllegalStateException    if the buffer is in an inconsistent state.
      */
     @NotNull
     static VanillaBytes<Void> allocateDirect(@NonNegative long capacity)
@@ -593,10 +518,15 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for native (64-bit address)
-     * memory with zero initial capacity which will be resized as required.
+     * Creates and returns a new elastic wrapper for native memory (accessible via 64-bit addresses)
+     * with an initial capacity of zero bytes. The capacity of the wrapper will be automatically
+     * resized as needed.
+     * <p>
+     * Native memory allocation can be faster and is not subject to Java's garbage collection,
+     * making it suitable for performance-sensitive applications.
+     * </p>
      *
-     * @return a new elastic wrapper
+     * @return A new {@code NativeBytes} object representing an elastic wrapper for native memory.
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect() {
@@ -604,12 +534,17 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for native (64-bit address)
-     * memory with the given {@code initialCapacity} which will be resized as required.
+     * Creates and returns a new elastic wrapper for native memory (accessible via 64-bit addresses)
+     * with the given {@code initialCapacity}. The capacity of the wrapper will be automatically
+     * resized as needed.
+     * <p>
+     * Native memory allocation can be faster and is not subject to Java's garbage collection,
+     * making it suitable for performance-sensitive applications.
+     * </p>
      *
-     * @param initialCapacity the initial non-negative capacity given in bytes
-     * @return a new elastic wrapper
-     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
+     * @param initialCapacity The initial non-negative capacity of the wrapper in bytes.
+     * @return A new {@code NativeBytes} object representing an elastic wrapper for native memory.
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
     static NativeBytes<Void> allocateElasticDirect(@NonNegative long initialCapacity)
@@ -618,10 +553,15 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for on heap memory with the
-     * {@code initialCapacity} 32 bytes which will be resized as required.
+     * Creates and returns a new elastic wrapper for memory allocated on the heap,
+     * with an initial capacity of 32 bytes. The capacity of the wrapper will be
+     * automatically resized as needed.
+     * <p>
+     * Heap memory allocation is managed by the Java Virtual Machine and is subject
+     * to garbage collection.
+     * </p>
      *
-     * @return a new elastic wrapper
+     * @return A new {@code OnHeapBytes} object representing an elastic wrapper for heap memory.
      */
     @NotNull
     static OnHeapBytes allocateElasticOnHeap() {
@@ -629,12 +569,17 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new elastic wrapper for on heap memory with the provided
-     * {@code initialCapacity} which will be resized as required.
+     * Creates and returns a new elastic wrapper for memory allocated on the heap,
+     * with the specified {@code initialCapacity}. The capacity of the wrapper will
+     * be automatically resized as needed.
+     * <p>
+     * Heap memory allocation is managed by the Java Virtual Machine and is subject
+     * to garbage collection.
+     * </p>
      *
-     * @param initialCapacity the initial capacity of the wrapper in bytes
-     * @return a new elastic wrapper
-     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
+     * @param initialCapacity The initial non-negative capacity of the wrapper in bytes.
+     * @return A new {@code OnHeapBytes} object representing an elastic wrapper for heap memory.
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
     static OnHeapBytes allocateElasticOnHeap(@NonNegative int initialCapacity) {
@@ -652,14 +597,21 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a String extracted from the provided {@code buffer }
-     * staring from the provided {@code readPosition} to the
-     * provided {@code readLimit}. The buffer is not modified by this call.
+     * Creates and returns a substring from the provided {@code buffer} between its current
+     * {@code readPosition} and {@code readLimit}.
+     * The buffer's state remains unchanged by this method.
+     * <p>
+     * If the length of the extracted substring is greater than {@code maxLen},
+     * an ellipsis "..." is appended to the resulting string. Note that in this case, the
+     * length of the returned string will be {@code maxLen + 3}.
+     * </p>
      *
-     * @param buffer the non-null buffer to use
-     * @return a String extracted from the buffer
-     * provided {@code readLimit}
-     * @throws NullPointerException if the provided {@code buffer} is {@code null}
+     * @param buffer The buffer to extract the string from. Must not be {@code null}.
+     * @return A string extracted from the buffer, possibly truncated and appended with an ellipsis.
+     * @throws BufferUnderflowException If there is not enough data in the buffer.
+     * @throws IllegalStateException    If this Bytes object or the provided {@code bytesOut} has been previously released.
+     * @throws IllegalArgumentException If {@code maxLen} is negative.
+     * @throws NullPointerException     If the provided {@code buffer} is {@code null}.
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer)
@@ -668,16 +620,22 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a string from the {@code readPosition} to the {@code readLimit} with a specified maximum length, The buffer is not modified
-     * by this call.
+     * Creates and returns a substring from the provided {@code buffer} between its current
+     * {@code readPosition} and {@code readLimit}, truncated to the specified maximum length.
+     * The buffer's state remains unchanged by this method.
      * <p>
-     * If the length of the string between {@code readPosition} to {@code readLimit} is greater than the specified maximum length,
-     * the "..." will be appended to the resulting string; in this case the length of the resulting string will be the specified maximum length+3.
+     * If the length of the extracted substring is greater than {@code maxLen},
+     * an ellipsis "..." is appended to the resulting string. Note that in this case, the
+     * length of the returned string will be {@code maxLen + 3}.
+     * </p>
      *
-     * @param buffer the non-null buffer to use
-     * @param maxLen the maximum length from the buffer, used to create a new string
-     * @return a string extracted from the buffer
-     * @throws NullPointerException if the provided {@code buffer} is {@code null} or if the provided {@code maxLen} is negative
+     * @param buffer The buffer to extract the string from. Must not be {@code null}.
+     * @param maxLen The maximum length of the string to be extracted.
+     * @return A string extracted from the buffer, possibly truncated and appended with an ellipsis.
+     * @throws BufferUnderflowException If there is not enough data in the buffer.
+     * @throws IllegalStateException    If this Bytes object or the provided {@code bytesOut} has been previously released.
+     * @throws IllegalArgumentException If {@code maxLen} is negative.
+     * @throws NullPointerException     If the provided {@code buffer} is {@code null}.
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
@@ -722,17 +680,20 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a String from the bytes of the provided {@code buffer} with the provided {@code length }
-     * staring from the provided {@code offset}.
+     * Extracts a string from the provided {@code buffer} starting at the specified {@code position},
+     * and spanning for the specified {@code length} number of characters. The buffer's state
+     * remains unchanged by this method.
      * <p>
-     * The buffer is not modified by this call.
+     * The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
+     * and constructs a string from these bytes.
+     * </p>
      *
-     * @param buffer   the non-null buffer to use
-     * @param position the offset position to create the string from
-     * @param length   the number of characters to include in the string
-     * @return a String extracted from the buffer
-     * @throws NullPointerException     if the provided {@code buffer} is {@code null} or
-     * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
+     * @param buffer   The buffer to extract the string from. Must not be {@code null}.
+     * @param position The position in the buffer to start extracting the string from.
+     * @param length   The number of characters to include in the extracted string.
+     * @return A string extracted from the buffer.
+     * @throws IllegalArgumentException If the provided {@code position} or {@code length} is negative.
+     * @throws NullPointerException     If the provided {@code buffer} is {@code null}.
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
@@ -775,8 +736,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException if the provided {@code bytes} is {@code null}
      */
     @NotNull
-    static VanillaBytes allocateDirect(byte[] bytes)
-            throws IllegalArgumentException {
+    static VanillaBytes allocateDirect(byte[] bytes) {
         VanillaBytes<Void> result = allocateDirect(bytes.length);
         try {
             result.write(bytes);
@@ -786,6 +746,28 @@ public interface Bytes<U> extends
         return result;
     }
 
+    /**
+     * Converts a hexadecimal string, generated by one of the {@code toHexString} methods, back into a {@code Bytes} object.
+     * <p>
+     * This method takes a string that represents hexadecimal data along with comments (which describe the meaning of
+     * the bytes), and converts it back into a {@code Bytes} object. The input string should have been generated by the
+     * {@code toHexString} method. It can contain hexadecimal values, spaces, and comments. The method is able to
+     * correctly parse and ignore spaces and comments during conversion.
+     * <p>
+     * For example, given the string:
+     * <pre>
+     * "c3 76 6d 68                                     # vmh:
+     *  b6 03 56 4d 48                                  # VMH"
+     * </pre>
+     * This method would convert it to a {@code Bytes} object representing the original bytes before they were converted
+     * to the hexadecimal representation.
+     *
+     * @param s the hexadecimal string to convert, which must have been generated by the {@code toHexString} method.
+     *          This parameter must not be {@code null}.
+     * @return a {@code Bytes} object representing the original byte values of the provided hexadecimal string.
+     * @throws IllegalArgumentException if the provided string is not in the valid format produced by the {@code toHexString}
+     *                                  method.
+     */
     @NotNull
     static Bytes<?> fromHexString(@NotNull String s) {
         return BytesInternal.fromHexString(s);
@@ -795,7 +777,7 @@ public interface Bytes<U> extends
      * Creates and returns a new Bytes which is optionally unchecked as indicated by the provided {@code unchecked}.
      * <p>
      * This allows bounds checks to be turned off.
-     * Note: this means that the result is no longer elastic, even if <code>this</code> is elastic.
+     * Note: this means that the result is no longer elastic, even if {@code this} is elastic.
      * Note: It is only possible to go from a checked Bytes to an unchecked bytes and not vice versa.
      *
      * @param unchecked if true, minimal bounds checks will be performed
@@ -819,21 +801,18 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns if this Bytes object is unchecked.
+ * Checks whether this Bytes object operates in an unchecked mode.
      * <p>
-     * An unchecked Bytes object performs little or no bounds checking
+ * When a Bytes object is unchecked, it performs minimal or no bounds checking on read and write operations.
+ * This can improve performance but may result in undefined behavior if attempting to access out-of-bounds elements.
+ * </p>
      *
-     * @return if this Bytes object is unchecked
+ * @return {@code true} if this Bytes object operates in unchecked mode; {@code false} otherwise.
      */
     default boolean unchecked() {
         return false;
     }
 
-    /**
-     * @inheritDoc <P>
-     * If this Bytes {@link #isElastic()} the {@link #safeLimit()} can be
-     * lower than the point it can safely write.
-     */
     @Override
     default long safeLimit() {
         return bytesStore().safeLimit();
@@ -855,20 +834,36 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new copy of this Bytes object from {@link RandomCommon#readPosition()}
-     * to {@link RandomCommon#readLimit()}.
+ * Creates and returns a deep copy of this Bytes object, including the data between
+ * {@link RandomCommon#readPosition()} and {@link RandomCommon#readLimit()}.
+ * <p>
+ * The copy will have its own separate storage and state, and modifications to the copy will not affect the original
+ * Bytes object, and vice versa.
+ * </p>
      *
-     * @return a copy of this Bytes object
+ * @return A new Bytes object that is a copy of this object.
+ * @throws IllegalStateException If this Bytes object is in an illegal state for copying.
      */
     @Override
     BytesStore<Bytes<U>, U> copy()
             throws IllegalStateException;
 
     /**
-     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form encoding
-     * at most 1024 bytes.
+     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form,
+     * with comments describing the meaning of the bytes. The representation starts at the {@code readPosition()}
+     * and encodes at most 1024 bytes.
+     * <p>
+     * Each line of the output string contains hexadecimal representation of 16 bytes, followed by comments
+     * describing the meaning of those bytes.
+     * <p>
+     * For example, if the Bytes object contains bytes representing the ASCII string "VMH",
+     * the output would be similar to this:
+     * <pre>
+     * c3 76 6d 68                                     # vmh:
+     * b6 03 56 4d 48                                  # VMH
+     * </pre>
      *
-     * @return a new hex String
+     * @return A new hexadecimal String representing the content with comments describing the bytes.
      */
     @NotNull
     default String toHexString() {
@@ -876,13 +871,22 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form encoding
-     * at most the provided {@code maxLength } bytes.
+     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form,
+     * with comments describing the meaning of the bytes. The representation starts at the {@code readPosition()}
+     * and encodes at most the provided {@code maxLength} bytes.
      * <p>
-     * Displays the hex data of {@link Bytes} from the {@code readPosition} up to the specified length.
+     * Each line of the output string contains hexadecimal representation of 16 bytes, followed by comments
+     * describing the meaning of those bytes.
+     * <p>
+     * For example, if the Bytes object contains bytes representing the ASCII string "VMH", and maxLength is
+     * large enough, the output would be similar to this:
+     * <pre>
+     * c3 76 6d 68                                     # vmh:
+     * b6 03 56 4d 48                                  # VMH
+     * </pre>
      *
-     * @param maxLength limit the number of bytes to be dumped
-     * @return a new hex String
+     * @param maxLength Limit the number of bytes to be encoded.
+     * @return A new hexadecimal String representing the content with comments describing the bytes.
      * @throws IllegalArgumentException if the provided {@code maxLength} is negative.
      */
     @NotNull
@@ -891,13 +895,27 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form
-     * starting at the provided {@code offset} encoding at most the provided {@code maxLength } bytes.
+     * Creates and returns a new String representing the contents of this Bytes object in hexadecimal form,
+     * with comments describing the meaning of the bytes. The representation starts at the provided {@code offset}
+     * and encodes at most the provided {@code maxLength} bytes.
+     * <p>
+     * The method reads data starting from the specified offset. Each line of the output string contains
+     * hexadecimal representation of 16 bytes, followed by comments describing the meaning of those bytes.
+     * If the number of bytes from the offset to the end exceeds {@code maxLength}, the output string
+     * will be suffixed with "... truncated".
+     * <p>
+     * For example, if the Bytes object contains bytes representing the ASCII string "VMH", and offset is 0,
+     * and maxLength is large enough, the output would be similar to this:
+     * <pre>
+     * c3 76 6d 68                                     # vmh:
+     * b6 03 56 4d 48                                  # VMH
+     * </pre>
      *
-     * @param offset    the specified offset to start from
-     * @param maxLength limit the number of bytes to be encoded
-     * @return a new hex String
-     * @throws IllegalArgumentException if the provided {@code maxLength}  or provided {@code maxLength} is negative.
+     * @param offset    The starting offset within the Bytes object to begin the hexadecimal conversion.
+     * @param maxLength Limit the number of bytes to be encoded. If the number of bytes exceeds maxLength,
+     *                  the output will be suffixed with "... truncated".
+     * @return A new hexadecimal String representing the content with comments describing the bytes.
+     * @throws IllegalArgumentException if the provided {@code offset} or {@code maxLength} is negative.
      */
     @NotNull
     default String toHexString(@NonNegative long offset, @NonNegative long maxLength) {
@@ -910,37 +928,46 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns if this Bytes object is elastic. I.e. it can resize when more data is written
-     * than it's {@link #realCapacity()}.
+ * Checks if this Bytes object is elastic, meaning it can dynamically resize when more data is written
+ * than its current {@link #realCapacity()}.
+ * <p>
+ * Elastic Bytes objects can automatically grow to accommodate additional data, whereas
+ * non-elastic ones have a fixed capacity.
+ * </p>
      *
-     * @return if this Bytes object is elastic
+ * @return {@code true} if this Bytes object is elastic; {@code false} otherwise.
      */
     boolean isElastic();
 
     /**
-     * Grows the buffer if the buffer is elastic, if the buffer is not elastic and there is not
-     * enough capacity then this method will throw an {@link DecoratedBufferOverflowException}
+ * Ensures that this Bytes object has the capacity to accommodate the specified amount of data.
+ * <p>
+ * If this Bytes object is elastic and doesn't have enough capacity, it will be resized. If it is not
+ * elastic and doesn't have enough capacity, a {@link DecoratedBufferOverflowException} will be thrown.
+ * </p>
      *
-     * @param desiredCapacity the capacity that you required
-     * @throws IllegalStateException if closed and it needs a resize
-     * @throws DecoratedBufferOverflowException if the buffer is not elastic and there is not enough space or if the
-     *                                  provided {@code desiredCapacity} is negative;
+ * @param desiredCapacity The minimum capacity, in bytes, that is required.
+ * @throws IllegalStateException            If the Bytes object is closed and needs to be resized.
+ * @throws DecoratedBufferOverflowException If the Bytes object is not elastic and there isn't enough space
+ *                                          or if the provided {@code desiredCapacity} is negative.
      */
     default void ensureCapacity(@NonNegative long desiredCapacity)
             throws DecoratedBufferOverflowException, IllegalStateException {
         requireNonNegative(desiredCapacity);
         if (desiredCapacity > capacity())
-            throw new DecoratedBufferOverflowException(isElastic() ? "todo" : "not elastic");
+        throw new DecoratedBufferOverflowException(isElastic() ? "Resizing required" : "Buffer is not elastic");
     }
 
     /**
-     * Creates and returns a new slice of this Bytes object whereby the start is moved to the readPosition and the
-     * current limit determines the capacity.
+ * Creates and returns a new slice of this Bytes object with its start position set to the current
+ * read position and its capacity determined by the current limit.
      * <p>
-     * As a sub-section of a Bytes, it cannot be elastic.
+ * Note that the slice is a subsection of this Bytes object and will not be elastic regardless of
+ * the elasticity of the parent Bytes object.
+ * </p>
      *
-     * @return a new slice of this current Bytes object.
-     * @throws IllegalStateException if the underlying BytesStore has been released
+ * @return A new slice of this Bytes object.
+ * @throws IllegalStateException if the underlying BytesStore has been released.
      */
     @NotNull
     @Override
@@ -962,12 +989,14 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns a Bytes that wraps this Bytes object's bytesStore from the {@code start} to the {@code realCapacity}.
+ * Creates and returns a Bytes object that wraps the bytesStore of this Bytes object,
+ * ranging from the {@code start} position to the {@code realCapacity}.
      * <p>
-     * The returned Bytes is not elastic and can be both read and written using cursors.
+ * The returned Bytes object is non-elastic and supports both read and write operations using cursors.
+ * </p>
      *
-     * @return a Bytes that wraps this BytesStore
-     * @throws IllegalStateException if this BytesStore has been released
+ * @return A Bytes object wrapping the bytesStore of this Bytes object.
+ * @throws IllegalStateException if the underlying BytesStore has been released.
      */
     @Override
     @NotNull
@@ -987,20 +1016,29 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns the backing ByteStore this Bytes object wraps, or null.
+ * Returns the backing BytesStore that this Bytes object wraps. If this Bytes object doesn't have
+ * a backing BytesStore, this method returns null.
+ * <p>
+ * The BytesStore represents the underlying storage of bytes that the Bytes object is manipulating.
+ * </p>
      *
-     * @return the backing ByteStore
+ * @return The backing BytesStore, or null if there isn't one.
      */
     @Override
     @Nullable
     BytesStore bytesStore();
 
     /**
-     * Returns if this Bytes object contents equals the provided {@code other}.
+ * Compares the contents of this Bytes object with the provided {@code other} string for equality.
+ * <p>
+ * This method returns {@code true} if the contents of this Bytes object is equal to the contents
+ * of the {@code other} string. Otherwise, it returns {@code false}.
+ * </p>
      *
-     * @param other to test for equality, nullable
-     * @return if this Bytes object contents equals the provided {@code other}
-     * @throws IllegalStateException if this Bytes object has been previously released
+ * @param other The string to compare with the contents of this Bytes object, can be null.
+ * @return {@code true} if the contents of this Bytes object equals the contents of the provided
+ * {@code other} string; {@code false} otherwise.
+ * @throws IllegalStateException if this Bytes object has been previously released.
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {
@@ -1008,21 +1046,30 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Compact these Bytes by moving the readPosition to the start.
+ * Compacts this Bytes object by moving the read position to the start.
+ * <p>
+ * This operation is useful to free up space for writing by discarding bytes that have already
+ * been read.
+ * </p>
      *
-     * @return this Bytes object
-     * @throws IllegalStateException if this Bytes object has been previously released
+ * @return This Bytes object, for method chaining.
+ * @throws IllegalStateException if this Bytes object has been previously released.
      */
     @NotNull
     Bytes<U> compact()
             throws IllegalStateException;
 
     /**
-     * Copies bytes from this Bytes object to another provided {@code targetByteStore}.
+ * Copies bytes from this Bytes object into the provided {@code targetByteStore}.
+ * <p>
+ * The number of bytes copied is the minimum of the remaining bytes in this Bytes object and the
+ * remaining capacity in the {@code targetByteStore}.
+ * </p>
      *
-     * @param targetByteStore the non-null BytesStore to copy to
-     * @return the actual number of bytes copied
-     * @throws NullPointerException if the provided {@code targetByteStore} is {@code null}
+ * @param targetByteStore The target BytesStore to copy bytes into, must not be null.
+ * @return The actual number of bytes that were copied.
+ * @throws NullPointerException  if the provided {@code targetByteStore} is null.
+ * @throws IllegalStateException if this Bytes object has been previously released.
      */
     @Override
     default long copyTo(@NotNull final BytesStore targetByteStore)
@@ -1032,11 +1079,15 @@ public interface Bytes<U> extends
 
     /**
      * Copies bytes from this Bytes object to the provided {@code outputStream}.
+ * <p>
+ * Bytes are written from the current read position up to the limit of this Bytes object.
+ * </p>
      *
-     * @param outputStream the specified non-null OutputStream that this Bytes object is copied to
-     * @throws IllegalStateException if this Bytes object has been previously released
-     * @throws IOException           if an I/O error occurs writing to the provided {@code outputStream}
-     * @throws NullPointerException  if the provided {@code outputStream } is {@code null}
+ * @param outputStream The OutputStream to write the bytes to, must not be null.
+ * @throws IllegalStateException if this Bytes object has been previously released.
+ * @throws IOException           if an I/O error occurs while writing to the provided
+ *                               {@code outputStream}.
+ * @throws NullPointerException  if the provided {@code outputStream} is null.
      */
     @Override
     default void copyTo(@NotNull OutputStream outputStream)
@@ -1045,12 +1096,15 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns if this Bytes object is using memory that can be shared across processes.
+ * Determines whether this Bytes object is backed by memory that can be shared across multiple
+ * processes.
      * <p>
-     * A Bytes object that is backed by a memory mapped file can be shared whereas a Bytes object that
-     * is backed by heap memory cannot be shared across processes.
+ * A Bytes object backed by a memory-mapped file, for example, can be shared among processes,
+ * whereas a Bytes object backed by heap memory cannot be shared in this way.
+ * </p>
      *
-     * @return if this Bytes object is using memory that can be shared across processes
+ * @return {@code true} if this Bytes object uses memory that can be shared across processes,
+ *         {@code false} otherwise.
      */
     @Override
     default boolean sharedMemory() {
@@ -1058,12 +1112,19 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Will un-write a specified number of bytes from an offset from this Bytes object.
+ * Removes a specified number of bytes starting from a given offset within this Bytes object.
      * <p>
-     * Calling this method will update the cursors of this Bytes object.
+ * This method effectively removes {@code count} bytes beginning at the specified {@code fromOffset},
+ * shifting any subsequent bytes to the left (reduces their index).
+ * The write position is adjusted accordingly, and the capacity remains unchanged.
+ * </p>
      *
-     * @param fromOffset the offset from the target bytes
-     * @param count      the number of bytes to un-write
+ * @param fromOffset The offset from which to start removing bytes.
+ * @param count      The number of bytes to remove.
+ * @throws BufferUnderflowException if {@code fromOffset} is negative or greater than the
+ *                                  write position.
+ * @throws BufferOverflowException  if there isn't enough space to perform the unwrite operation.
+ * @throws IllegalStateException    if this Bytes object has been previously released.
      */
     default void unwrite(@NonNegative long fromOffset, @NonNegative int count)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
@@ -1077,24 +1138,32 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Returns the lowest index value for which the contents of this Bytes object equals the provided {@code source },
-     * or -1 if no such index value exists.
+ * Returns the index within this Bytes object of the first occurrence of the specified
+ * sub-bytes represented by the {@code source} Bytes object.
      * <p>
-     * On other words, returns the index within this Bytes object of the first occurrence of the
-     * provided {@code source}
+ * The method returns the lowest index {@code k} at which the contents of this Bytes object
+ * equals the provided {@code source} Bytes object. If no such sequence exists, then {@code -1}
+ * is returned.
+ * </p>
      * <p>
-     * The returned index is the smallest value <i>k</i> for which:
+ * Formally, the method returns the lowest index {@code k} such that:
+ * </p>
      * <blockquote><pre>
-     * this.startsWith(bytes, <i>k</i>)
+ * this.startsWith(source, k)
      * </pre></blockquote>
-     * If no such value of <i>k</i> exists, then {@code -1} is returned.
+ * <p>
+ * If no such value of {@code k} exists, then {@code -1} is returned.
+ * </p>
      *
-     * @param source the non-null sub-bytes to search for.
-     * @return index of equal contents or -1
-     * @throws NullPointerException if the provided {@code source} is {@code null}
+ * @param source The sub-bytes to search for within this Bytes object, must not be null.
+ * @return The index of the first occurrence of the specified sub-bytes, or {@code -1} if there
+ *         is no such occurrence.
+ * @throws NullPointerException  if the provided {@code source} is null.
+ * @throws IllegalStateException if this Bytes object has been previously released.
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
+        // TODO use indexOf(Bytes, long);
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
@@ -1154,10 +1223,12 @@ public interface Bytes<U> extends
      * @param source    the non-null sub-bytes to search for.
      * @param fromIndex to start searching from
      * @return index of equal contents or -1
-     * @throws NullPointerException if the provided {@code source } is {@code null}
+     * @throws NullPointerException  if the provided {@code source } is {@code null}
+     * @throws IllegalStateException if this Bytes object or the provided {@code bytesOut} has been previously released.
      */
     default int indexOf(@NotNull BytesStore source, @NonNegative int fromIndex)
             throws IllegalStateException {
+        // TODO shouldn't fromIndex be absolute instead of relative
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(source);
         long sourceOffset = readPosition();
@@ -1203,31 +1274,41 @@ public interface Bytes<U> extends
             throw new AssertionError(e);
         }
     }
-
+/**
+ * Clears the content of this Bytes object and resets its state.
+ *
+ * @return This Bytes object.
+ * @throws IllegalStateException if this Bytes object has been previously released.
+ */
     @Override
     @NotNull
     Bytes<U> clear()
             throws IllegalStateException;
 
+/**
+ * Checks if this Bytes object supports both reading and writing.
+ *
+ * @return {@code true} if this Bytes object supports both reading and writing, {@code false} otherwise.
+ */
     @Override
     default boolean readWrite() {
         return bytesStore().readWrite();
     }
 
     /**
-     * Writes the content of this Bytes object into the provided {@code bytesOut} writing the provided
-     * {@code length } bytes.
+ * Writes the specified number of bytes from this Bytes object into the provided {@code bytesOut}.
      * <p>
-     * The readLimit and readPosition is not affected by this operation.
+ * This operation does not affect the readLimit or readPosition of this Bytes object.
+ * </p>
      *
-     * @param length   indicating the number of bytes to write
-     * @param bytesOut non-null target to write the content of this Bytes object to
-     * @throws BufferUnderflowException if the provided {@code length} is greater than the remaining bytes readable.
-     * @throws IORuntimeException       if there is an error reading or writing data
-     * @throws BufferOverflowException  if the provided {@code bytesOut} cannot hold the bytes to be written
+ * @param length   The number of bytes to write. Must be non-negative.
+ * @param bytesOut The target BytesOut object to write to. Must not be null.
+ * @throws BufferUnderflowException if the specified {@code length} is greater than the number of bytes available for reading from this Bytes object.
+ * @throws IORuntimeException       if an error occurs while reading from this Bytes object or writing to {@code bytesOut}.
+ * @throws BufferOverflowException  if {@code bytesOut} does not have enough capacity to hold the bytes being written.
      * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released.
-     * @throws IllegalArgumentException if the provided {@code length} is negative.
-     * @throws NullPointerException     if the provided {@code bytesOut} is {@code null}.
+ * @throws IllegalArgumentException if the specified {@code length} is negative.
+ * @throws NullPointerException     if the provided {@code bytesOut} is null.
      */
     default void readWithLength(@NonNegative long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
@@ -1249,19 +1330,22 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Reads the content of this Bytes object converting it to an object of the provided {@code clazz} using the
-     * provided {@code using}, or if {@code null} is provided for {@code using}, creates a new object, eventually
-     * returning whichever object was updated.
+ * Reads the content of this Bytes object and converts it into an instance of the specified class.
+ * Optionally updates the provided instance if not null. The content is assumed to have a
+ * 16-bit length indicator preceding the actual object data.
      * <p>
-     * The content of this Bytes object is assumed to have a 16-bit length indicator preceding the actual object.
+ * If the {@code using} parameter is not null, this method will update its state with the read content.
+ * Otherwise, it will create a new instance of the specified class.
+ * </p>
      *
-     * @param clazz non-null type to read
-     * @param using to update, nullable
-     * @param <T>   type of the provided using
-     * @return An object that was read from this Bytes object
-     * @throws BufferUnderflowException if the content of this Bytes object is insufficient.
-     * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released.
-     * @throws NullPointerException     if the provided {@code clazz} is {@code null}
+ * @param clazz The class of the object to be read. Must not be null.
+ * @param using An optional instance to update with the read content. Can be null.
+ * @param <T>   The type of the object being read.
+ * @return The object that was read from this Bytes object, or the updated instance if {@code using} was provided.
+ * @throws BufferUnderflowException     if there are not enough bytes in this Bytes object to read the content.
+ * @throws IllegalStateException        if this Bytes object has been previously released.
+ * @throws InvalidMarshallableException if the data in this Bytes object cannot be converted into an instance of the specified class.
+ * @throws NullPointerException         if the provided {@code clazz} is null.
      * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
@@ -1289,16 +1373,18 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Writes the content of the provided {@code marshallable} to this Bytes object converting from an object
-     * to a number of bytes.
+ * Writes the content of the provided {@code marshallable} into this Bytes object, including a 16-bit length indicator
+ * preceding the actual object data. The length indicator denotes the number of bytes taken up by the object data.
      * <p>
-     * The content of this Bytes object will have a 16-bit length indicator preceding the actual object.
+ * This method is useful for serialization, as it writes not only the content of the {@code marshallable} object
+ * but also information about its size.
+ * </p>
      *
-     * @param marshallable non-null object to write to this Bytes object
-     * @throws BufferOverflowException if the capacity of this Bytes object is insufficient.
-     * @throws IllegalStateException   if this Bytes object or the provided {@code bytesOut} has been previously released
-     *                                 or if the contents of this Bytes object cannot fit under 16-bit addressing
-     * @throws NullPointerException    if the provided {@code marshallable} is {@code null}
+ * @param marshallable The object to be serialized and written to this Bytes object. Must not be null.
+ * @throws BufferOverflowException if there is not enough capacity in this Bytes object to store the serialized data.
+ * @throws IllegalStateException   if this Bytes object has been previously released, or if the serialized data
+ *                                 cannot be addressed with 16-bits.
+ * @throws NullPointerException    if the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
@@ -1319,14 +1405,18 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Writes the contents of the provided `inputStream` to the contents of this Bytes object.
+ * Writes the contents of the provided {@code inputStream} into this Bytes object. Continues reading from the
+ * {@code inputStream} and writing into this Bytes object until the end of the stream is reached.
+ * <p>
+ * Note: This method does not close the provided {@code inputStream}.
+ * </p>
      *
-     * @param inputStream non-null to read from
-     * @return this Bytes object
-     * @throws IOException             if an I/O error occur on the inputStream
-     * @throws BufferOverflowException if this Bytes object lacks capacity to write the entire provided {@code inputStream }
-     * @throws IllegalStateException   if this Bytes object or the provided {@code bytesOut} has been previously released
-     * @throws NullPointerException    if the provided {@code InputStream} is {@code null}.
+ * @param inputStream The input stream from which data is to be read. Must not be null.
+ * @return This Bytes object.
+ * @throws IOException             if an I/O error occurs when reading from the {@code inputStream}.
+ * @throws BufferOverflowException if there is not enough capacity in this Bytes object to write the data read from the input stream.
+ * @throws IllegalStateException   if this Bytes object has been previously released.
+ * @throws NullPointerException    if the provided {@code inputStream} is null.
      */
     default Bytes write(@NotNull final InputStream inputStream)
             throws IOException, BufferOverflowException, IllegalStateException {

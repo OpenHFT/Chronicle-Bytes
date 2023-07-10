@@ -20,6 +20,21 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.core.values.TwoLongValue;
 
+/**
+ * Represents a reference to two contiguous 64-bit long values, which is both {@link Byteable} and {@link TwoLongValue}.
+ *
+ * <p>The {@code TwoLongReference} interface provides a contract for classes that need to represent
+ * a reference to a pair of long values which can be read from or written to a {@link net.openhft.chronicle.bytes.BytesStore}.
+ * This interface is particularly useful for memory-mapped values, where changes to the values are reflected in memory.</p>
+ *
+ * <p>Classes implementing this interface are expected to provide efficient, low-level access
+ * to the underlying bytes of the referenced long values.</p>
+ *
+ * @see Byteable
+ * @see TwoLongValue
+ */
 @SuppressWarnings("rawtypes")
 public interface TwoLongReference extends TwoLongValue, Byteable {
+    // This interface combines TwoLongValue and Byteable
+    // Specific method declarations are not necessary here as they are inherited
 }

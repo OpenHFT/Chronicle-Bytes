@@ -31,7 +31,12 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
- * Implementation of a reference to a 32-bit in in text wire format.
+ * Implementation of a reference to a 32-bit integer in text wire format.
+ *
+ * <p>Allows for the manipulation of 32-bit integer values stored in a Text wire format.
+ * It provides methods to read, write, and perform atomic operations on the stored values.</p>
+ *
+ * <p>Text wire format is a human-readable data serialization format used to represent structured data.</p>
  */
 public class TextIntReference extends AbstractReference implements IntValue {
     private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
@@ -44,7 +49,14 @@ public class TextIntReference extends AbstractReference implements IntValue {
     private static final int VALUE = 34;
     private static final int DIGITS = 10;
 
-    @SuppressWarnings("rawtypes")
+    /**
+     * Writes the provided 32-bit integer value into the given Bytes instance in Text wire format.
+     *
+     * @param bytes the Bytes instance to write to.
+     * @param value the 32-bit integer value to be written.
+     * @throws BufferOverflowException if there is insufficient space.
+     * @throws IllegalStateException    if an error occurs during writing.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {
         long position = bytes.writePosition();
@@ -56,6 +68,13 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }
     }
 
+    /**
+     * Executes the provided operation with the lock held.
+     *
+     * @param call the operation to execute with the lock held.
+     * @return the result of the operation.
+     * @throws IllegalStateException if the operation fails.
+     */
     private int withLock(@NotNull ThrowingIntSupplier<Exception> call)
             throws IllegalStateException {
         try {
@@ -78,6 +97,12 @@ public class TextIntReference extends AbstractReference implements IntValue {
         }
     }
 
+    /**
+     * Retrieves the 32-bit integer value from the Text wire format.
+     *
+     * @return the 32-bit integer value.
+     * @throws IllegalStateException if the operation fails.
+     */
     @Override
     public int getValue()
             throws IllegalStateException {
@@ -86,6 +111,12 @@ public class TextIntReference extends AbstractReference implements IntValue {
         return withLock(() -> (int) bytes.parseLong(offset + VALUE));
     }
 
+    /**
+     * Sets the 32-bit integer value in the Text wire format.
+     *
+     * @param value the 32-bit integer value to be set.
+     * @throws IllegalStateException if the operation fails.
+     */
     @Override
     public void setValue(int value)
             throws IllegalStateException {
@@ -177,6 +208,11 @@ public class TextIntReference extends AbstractReference implements IntValue {
         return template.length;
     }
 
+    /**
+     * Returns the string representation of the TextIntReference.
+     *
+     * @return a string representing the value contained in the TextIntReference.
+     */
     @NotNull
     @Override
     public String toString() {

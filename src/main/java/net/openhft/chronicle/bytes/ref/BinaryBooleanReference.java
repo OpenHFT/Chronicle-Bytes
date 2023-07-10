@@ -28,11 +28,24 @@ import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
+/**
+ * BinaryBooleanReference is a concrete implementation of the BooleanValue interface.
+ * It provides methods to read and write boolean values from and to a BytesStore in binary format.
+ */
 public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
     private static final byte FALSE = (byte) 0xB0;
     private static final byte TRUE = (byte) 0xB1;
 
+    /**
+     * Defines how to write to the bytes store.
+     * @param bytes  The byte store where the data should be written
+     * @param offset The position in the byte store where the write should start
+     * @param length The number of bytes that should be written
+     * @throws IllegalStateException      If an illegal condition has occurred
+     * @throws IllegalArgumentException  If an illegal argument was provided
+     * @throws BufferOverflowException If the data cannot fit in the target buffer
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative final long length)
@@ -47,11 +60,21 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
         super.bytesStore(bytes, offset, length);
     }
 
+    /**
+     * Returns the maximum size of the byte representation of a boolean value.
+     * @return The maximum size of a boolean in bytes
+     */
     @Override
     public long maxSize() {
         return 1;
     }
 
+    /**
+     * Reads a boolean value from the bytes store.
+     * @return The read boolean value
+     * @throws IllegalStateException      If an illegal condition has occurred
+     * @throws BufferUnderflowException If the bytes store contains insufficient data
+     */
     @Override
     public boolean getValue()
             throws IllegalStateException, BufferUnderflowException {
@@ -67,6 +90,11 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     }
 
+    /**
+     * Writes a boolean value to the bytes store.
+     * @param flag The boolean value to write
+     * @throws IllegalStateException If an illegal condition has occurred
+     */
     @Override
     public void setValue(final boolean flag)
             throws IllegalStateException {

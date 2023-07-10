@@ -19,13 +19,30 @@ package net.openhft.chronicle.bytes.util;
 
 import java.nio.BufferUnderflowException;
 
+/**
+ * A specialized {@link BufferUnderflowException} that allows for custom messages.
+ */
 public final class DecoratedBufferUnderflowException extends BufferUnderflowException {
+
+    /**
+     * The custom message describing this exception.
+     */
     private final String message;
 
+    /**
+     * Constructs a DecoratedBufferUnderflowException with the specified detail message.
+     *
+     * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method)
+     */
     public DecoratedBufferUnderflowException(final String message) {
         this.message = message;
     }
 
+    /**
+     * Returns the detail message string of this exception.
+     *
+     * @return the detail message string of this exception
+     */
     @Override
     public String getMessage() {
         return message;

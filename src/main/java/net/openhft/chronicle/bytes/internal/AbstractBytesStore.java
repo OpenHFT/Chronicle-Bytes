@@ -51,7 +51,6 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         return BytesStoreHash.hash32(this);
     }
 
-    @SuppressWarnings("rawtypes")
     @Override
     public boolean equals(Object obj) {
         return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);

@@ -30,13 +30,30 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Supports parsing bytes as text.  You can parse them as special or white space terminated text.
+ * An interface that provides support for parsing bytes as text. This interface is designed to facilitate
+ * the reading and parsing of textual data that is encoded within a byte stream. It supports parsing
+ * various data types including booleans, integers, floats, doubles, and decimal numbers,
+ * and provides utility methods for dealing with character encoding such as UTF-8 and ISO-8859-1.
+ *
+ * <p>The {@code ByteStringParser} extends {@link StreamingDataInput}, inheriting the capabilities
+ * of reading and manipulating streams of binary data.</p>
+ *
+ * <p>This interface is especially useful for reading and converting bytes into human-readable text
+ * or numerical representations. It includes methods for parsing numbers with flexible formatting,
+ * reading text with specified character encoding, and utilities for dealing with character
+ * termination conditions.</p>
+ *
+ * <p>Example use cases include reading and parsing data from binary communication protocols,
+ * files, or any other source where bytes need to be interpreted as text or numbers.</p>
+ *
+ * @param <B> the type of {@code ByteStringParser} which extends itself, allowing for method chaining.
  */
 public interface ByteStringParser<B extends ByteStringParser<B>> extends StreamingDataInput<B> {
     /**
-     * Access these bytes as an ISO-8859-1 encoded Reader
+     * Creates a new {@code Reader} from the byte string, assuming the byte string is
+     * ISO-8859-1 encoded.
      *
-     * @return as a Reader
+     * @return a new {@code Reader} instance that can be used to read the bytes as characters.
      */
     @NotNull
     default Reader reader() {
@@ -44,15 +61,17 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Return <code>true</code> or false, or null if it could not be detected
-     * as <code>true</code> or false.  Case is not important
+     * Attempts to parse the next series of characters in the byte string as a boolean value.
+     * It uses the provided {@code tester} to detect the end of the text. The parsing is case-insensitive.
      * <p>
-     * <p>false: f, false, n, no, 0
-     * <p>
-     * <p>true: t, true, y, yes, 1
+     * False can be: "f", "false", "n", "no", "0".
+     * True can be: "t", "true", "y", "yes", "1".
      *
-     * @param tester to detect the end of the text.
-     * @return true, false, or null if neither.
+     * @param tester a {@code StopCharTester} used to detect the end of the boolean text.
+     * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
      */
     @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester)
@@ -60,6 +79,18 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         return BytesInternal.parseBoolean(this, tester);
     }
 
+    /**
+     * Attempts to parse the next series of characters in the byte string as a boolean value.
+     * It uses a default {@code StopCharTester} to detect non-alpha-numeric characters.
+     * <p>
+     * False can be: "f", "false", "n", "no", "0".
+     * True can be: "t", "true", "y", "yes", "1".
+     *
+     * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
+     */
     @Nullable
     default Boolean parseBoolean()
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -67,10 +98,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with UTF-8 decoding as character terminated.
+     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharTester}
+     * detects an end condition.
      *
-     * @param stopCharTester to check if the end has been reached.
-     * @return the text as a String.
+     * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
+     * @return the parsed text as a {@code String}.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
      */
     @NotNull
     default String parseUtf8(@NotNull StopCharTester stopCharTester)
@@ -79,10 +113,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with UTF-8 decoding as character terminated.
+     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
      *
-     * @param buffer         to populate
-     * @param stopCharTester to check if the end has been reached.
+     * @param buffer         the {@code Appendable} to append the parsed string to.
+     * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -90,10 +128,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with UTF-8 decoding as one or two character terminated.
+     * Parses a UTF-8 encoded string from the byte string until the provided {@code stopCharsTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
      *
-     * @param buffer          to populate
-     * @param stopCharsTester to check if the end has been reached.
+     * @param buffer          the {@code Appendable} to append the parsed string to.
+     * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IORuntimeException if an I/O error occurs.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
@@ -101,12 +143,16 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with ISO-8859-1 decoding as character terminated.
+     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
      *
-     * @param buffer         to populate
-     * @param stopCharTester to check if the end has been reached.
+     * @param buffer         the {@code Appendable} to append the parsed string to.
+     * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws BufferOverflowException if the buffer's capacity was exceeded.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
      */
-    @SuppressWarnings("rawtypes")
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)
@@ -116,9 +162,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with ISO-8859-1 decoding as character terminated.
+     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharTester}
+     * detects an end condition.
      *
-     * @param stopCharTester to check if the end has been reached.
+     * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
+     * @return the parsed text as a {@code String}.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default String parse8bit(@NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, IllegalStateException {
@@ -126,12 +176,16 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text with ISO-8859-1 decoding as character terminated.
+     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
      *
-     * @param buffer          to populate
-     * @param stopCharsTester to check if the end has been reached.
+     * @param buffer          the {@code Appendable} to append the parsed string to.
+     * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws BufferOverflowException if the buffer's capacity was exceeded.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
      */
-    @SuppressWarnings("rawtypes")
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         if (buffer instanceof StringBuilder)
@@ -140,20 +194,42 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
             BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
     }
 
+    /**
+     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     *
+     * @param buffer          the {@code Bytes} object to append the parsed string to.
+     * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws BufferOverflowException if the buffer's capacity was exceeded.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numeric overflow occurs.
+     */
     default void parse8bit(Bytes<?> buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
+    /**
+     * Parses an ISO-8859-1 encoded string from the byte string until the provided {@code stopCharsTester}
+     * detects an end condition. The parsed string is appended to the provided {@code buffer}.
+     *
+     * @param buffer          the {@code StringBuilder} to append the parsed string to.
+     * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     */
     default void parse8bit(StringBuilder buffer, @NotNull StopCharsTester stopCharsTester)
             throws IllegalStateException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
     /**
-     * parse text as an int. The terminating character is consumed.
+     * Parses text from the byte string as an integer. The terminating character is consumed.
      *
-     * @return an int.
+     * @return the parsed integer.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default int parseInt()
             throws BufferUnderflowException, ArithmeticException, IllegalStateException {
@@ -161,9 +237,11 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text as a long integer. The terminating character is consumed.
+     * Parses text from the byte string as a long integer. The terminating character is consumed.
      *
-     * @return a long.
+     * @return the parsed long.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default long parseLong()
             throws BufferUnderflowException, IllegalStateException {
@@ -171,12 +249,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parses a long in regular or scientific format.
-     * In case text corresponds to a valid long value, returns it without precision errors
-     * (unlike result of {@link #parseDouble()} casted to long).
+     * Parses a long integer from the byte string in either standard or scientific notation. If the parsed value
+     * corresponds to a valid long, it returns the value without any precision errors (unlike casting the result
+     * of {@link #parseDouble()} to long).
      *
-     * @throws IORuntimeException if text parses to a fractional number or to a number outside of the long's range.
-     * @return a long.
+     * @return the parsed long.
+     * @throws IORuntimeException if the parsed value corresponds to a fractional number or to a number outside the long's range.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default long parseFlexibleLong()
             throws BufferUnderflowException, IllegalStateException, IORuntimeException {
@@ -184,11 +264,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text as a float decimal. The terminating character is consumed.
-     * <p>
-     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     * Parses text from the byte string as a floating-point number. The terminating character is consumed.
+     * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
-     * @return a float  or -0.0 if there were no digits present
+     * @return the parsed float, or -0.0 if there were no digits.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default float parseFloat()
             throws BufferUnderflowException, IllegalStateException {
@@ -196,11 +277,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * parse text as a double decimal. The terminating character is consumed.
-     * <p>
-     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     * Parses text from the byte string as a double-precision floating-point number. The terminating character is consumed.
+     * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
-     * @return a double or -0.0 if there were no digits present
+     * @return the parsed double, or -0.0 if there were no digits.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default double parseDouble()
             throws BufferUnderflowException, IllegalStateException {
@@ -208,11 +290,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * Parse the significant digits of a decimal number.
-     * <p>
-     * The number of decimal places can be retrieved with  lastDecimalPlaces()
+     * Parses the significant digits of a decimal number from the byte string.
+     * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
-     * @return the significant digits
+     * @return the significant digits as a long.
+     * @throws BufferUnderflowException if there is insufficient data.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default long parseLongDecimal()
             throws BufferUnderflowException, IllegalStateException {
@@ -220,38 +303,54 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
     }
 
     /**
-     * @return the last number of decimal places for parseDouble or parseLongDecimal
+     * Returns the number of decimal places in the last parsed floating-point number
+     * (from the {@link #parseDouble()} or {@link #parseLongDecimal()} methods).
+     *
+     * @return the number of decimal places in the last parsed number.
      */
     int lastDecimalPlaces();
 
     /**
-     * Store the last number of decimal places. If
+     * Sets the number of decimal places in the last parsed number. If the given value is positive,
+     * it is directly set; otherwise, the decimal place count is set to 0.
      *
-     * @param lastDecimalPlaces set the number of decimal places if positive, otherwise 0.
+     * @param lastDecimalPlaces the number of decimal places to set, if positive; otherwise 0.
      */
     void lastDecimalPlaces(int lastDecimalPlaces);
 
     /**
-     * @return the last number had digits
+     * Returns whether the last parsed number had any digits.
+     *
+     * @return true if the last parsed number had digits, false otherwise.
      */
     boolean lastNumberHadDigits();
 
     /**
-     * @param lastNumberHadDigits set the last number had digits
+     * Sets whether the last parsed number had any digits.
+     *
+     * @param lastNumberHadDigits the new value to set, true if the last parsed number had digits, false otherwise.
      */
     void lastNumberHadDigits(boolean lastNumberHadDigits);
 
     /**
-     * Skip text until a terminating character is reached.
+     * Skips over characters in the byte string until a terminating character is encountered.
      *
-     * @param tester to stop at
+     * @param tester the StopCharTester instance to use for determining the terminating character.
      * @return true if a terminating character was found, false if the end of the buffer was reached.
+     * @throws IllegalStateException if this operation cannot be performed currently.
      */
     default boolean skipTo(@NotNull StopCharTester tester)
             throws IllegalStateException {
         return BytesInternal.skipTo(this, tester);
     }
 
+    /**
+     * Parses text from the byte string as a BigDecimal.
+     *
+     * @return the parsed BigDecimal.
+     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException if a numerical overflow occurs during the operation.
+     */
     @NotNull
     default BigDecimal parseBigDecimal()
             throws IllegalStateException, ArithmeticException {

@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -27,57 +28,78 @@ import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
 /**
- * This Interface allows a reference to off heap memory to be reassigned.
- * <p></p>
- * A reference to off heap memory is a proxy for some memory which sits outside the heap.
+ * An interface for a reference to off-heap memory, acting as a proxy for memory residing outside the heap.
+ * This allows the reference to be reassigned, facilitating dynamic memory management.
  *
- * @param <B> Bytes type
- * @param <U> Underlying type
+ * @param <B> the BytesStore type
+ * @param <U> the underlying type that the BytesStore manages
  */
 public interface Byteable<B extends BytesStore<B, U>, U> {
     /**
-     * This setter for a data type which points to an underlying ByteStore.
-     *  @param bytesStore the fix point ByteStore
-     * @param offset     the offset within the ByteStore
-     * @param length     the length in the ByteStore
+     * Sets the reference to a data type that points to the underlying ByteStore.
+     *
+     * @param bytesStore the fixed-point ByteStore
+     * @param offset     the offset within the ByteStore, indicating the starting point of the memory section
+     * @param length     the length of the memory section within the ByteStore
+     * @throws ClosedIllegalStateException if it is closed
+     * @throws IllegalArgumentException if the provided arguments are invalid
+     * @throws BufferOverflowException if the new memory section extends beyond the end of the ByteStore
+     * @throws BufferUnderflowException if the new memory section starts before the start of the ByteStore
      */
     void bytesStore(@NotNull BytesStore<B, U> bytesStore, @NonNegative long offset, @NonNegative long length)
-            throws IllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
+            throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
 
+    /**
+     * Returns the ByteStore to which this object currently points.
+     *
+     * @return the ByteStore or null if it's not set
+     */
     @Nullable
     BytesStore<B, U> bytesStore();
 
     /**
-     * @return The offset within the BytesStore (not the address)
+     * Returns the offset within the ByteStore to which this object currently points.
+     *
+     * @return the offset within the ByteStore (not the physical memory address)
      */
     long offset();
 
     /**
-     * @return The absolute address
-     * @throws UnsupportedOperationException if not set ot the underlying byteStore isn't native.
+     * Returns the absolute address in the memory to which this object currently points.
+     *
+     * @return the absolute address in the memory
+     * @throws UnsupportedOperationException if the address is not set or the underlying ByteStore isn't native
      */
     default long address() throws UnsupportedOperationException {
         return bytesStore().addressForRead(offset());
     }
 
     /**
-     * @return the maximum size in byte for this reference.
+     * Returns the maximum size in bytes that this reference can point to.
+     *
+     * @return the maximum size in bytes for this reference
      */
     long maxSize();
 
     /**
-     * Calls lock on the underlying file
-     * @param shared if the lock is shared or not.
-     * @return the FileLock
+     * Locks the underlying file.
+     *
+     * @param shared true if the lock is shared, false if it's exclusive
+     * @return the FileLock object representing the lock
+     * @throws IOException if an error occurs while locking the file
+     * @throws UnsupportedOperationException if the underlying implementation does not support file locking
      */
     default FileLock lock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();
     }
 
     /**
-     * Calls lock on the underlying file
-     * @param shared if the lock is shared or not.
-     * @return the FileLock
+     * Attempts to lock the underlying file without blocking.
+     *
+     * @param shared true if the lock is shared, false if it's exclusive
+     * @return the FileLock object if the lock was acquired successfully; null otherwise
+     * @throws IOException if an error occurs while trying to lock the file
+     * @throws UnsupportedOperationException if the underlying implementation does not support file locking
      */
     default FileLock tryLock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();

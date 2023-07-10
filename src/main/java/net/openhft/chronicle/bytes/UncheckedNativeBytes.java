@@ -43,9 +43,17 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Fast unchecked version of AbstractBytes
+ * An optimized extension of AbstractBytes that performs unchecked read and write operations
+ * on a Bytes instance that is backed by native memory.
+ * The class bypasses bounds checking to provide high-performance access to the underlying data.
  *
- * @param <U> Underlying type
+ * <p>This class is intended for use in performance-critical scenarios where the client can
+ * ensure that all operations stay within valid bounds, thus avoiding the overhead of bounds checking.
+ *
+ * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown,
+ * corruption of data, JVM crashes, or other undefined behavior.
+ *
+ * @param <U> The type of the object this Bytes can point to.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class UncheckedNativeBytes<U>
@@ -55,20 +63,35 @@ public class UncheckedNativeBytes<U>
     @Deprecated(/* to be removed in x.26 */)
     private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
+    // The real capacity of the BytesStore this UncheckedNativeBytes operates on
     protected final long capacity;
+    // An instance of UncheckedRandomDataInput for accessing data without bounds checking
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
+    // The Bytes instance this UncheckedNativeBytes operates on
     @NotNull
     private final Bytes<U> underlyingBytes;
+    // The BytesStore that the underlying Bytes operates on
     @NotNull
     protected BytesStore<?, U> bytesStore;
+    // The position of the next byte to be read
     protected long readPosition;
+    // The position of the next byte to be written
     protected long writePosition;
+    // The limit of the write buffer
     protected long writeLimit;
+    // Tracks the number of decimal places in the last number read
     private int lastDecimalPlaces = 0;
+    // Tracks if the last number read had any digits
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
     private boolean append0 = APPEND_0;
 
+    /**
+     * Constructs an UncheckedNativeBytes instance by wrapping around the provided Bytes object.
+     *
+     * @param underlyingBytes the Bytes object to wrap around
+     * @throws IllegalStateException if the underlyingBytes instance is not valid
+     */
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
@@ -591,7 +614,7 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
-    void writeCheckOffset(long offset, long adding)
+    void writeCheckOffset(@NonNegative long offset, long adding)
             throws BufferOverflowException {
         // Do nothing
     }

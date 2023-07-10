@@ -24,18 +24,29 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Write data directly as Bytes.
+ * An interface defining a contract for serializing data directly to a Bytes instance.
+ * Objects implementing this interface can be marshalled into a sequence of bytes.
+ *
+ * @see net.openhft.chronicle.core.io.Validatable
  */
-@SuppressWarnings("rawtypes")
 @FunctionalInterface
 @DontChain
 public interface WriteBytesMarshallable extends CommonMarshallable {
+
     /**
-     * Write to Bytes.  This can be used as an interface to extend or a lambda
-     * <p>
-     *     This method is responsible for calling net.openhft.chronicle.core.io.Validatable#validate() as needed
-     * </p>
-     * @param bytes to write to.
+     * Serializes this object to the provided Bytes instance.
+     *
+     * <p>This method is responsible for calling
+     * {@link net.openhft.chronicle.core.io.Validatable#validate()} as needed to ensure
+     * the validity of the state of the object before serialization.</p>
+     *
+     * @param bytes the Bytes instance to write to.
+     * @throws IllegalStateException if bytes instance is released or not in a writable state.
+     * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws BufferUnderflowException if there is not enough data available to read from the buffer.
+     * @throws IllegalArgumentException if an argument is illegal or inappropriate.
+     * @throws ArithmeticException if numeric overflow or underflow occurs.
+     * @throws InvalidMarshallableException if an object fails validation checks before or during serialization.
      */
     void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException;

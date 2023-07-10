@@ -44,7 +44,6 @@ public class Issue85Test extends BytesTestCommon {
                 DecimalFormatSymbols.getInstance(Locale.ENGLISH));
     }
 
-    @SuppressWarnings("rawtypes")
     static double parseDouble(Bytes<?> bytes) {
         long value = 0;
         int deci = Integer.MIN_VALUE;

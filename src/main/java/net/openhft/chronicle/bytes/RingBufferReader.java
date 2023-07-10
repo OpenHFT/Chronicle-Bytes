@@ -19,52 +19,83 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
-
+/**
+ * An interface for a reader on a Ring Buffer, providing methods to read and navigate through the buffer.
+ * The reader supports a read-once-and-discard paradigm which makes it suitable for situations where
+ * high throughput is required and old data is irrelevant.
+ * <p>
+ * This interface also extends {@link RingBufferReaderStats}, which provides statistics
+ * about the Ring Buffer's usage, and {@link Closeable} for closing the reader when it's no longer needed.
+ */
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
+
+    /**
+     * Represents an undefined or unknown index within the ring buffer.
+     */
     long UNKNOWN_INDEX = -1;
 
+    /**
+     * @return true if the Ring Buffer is empty, false otherwise.
+     */
     boolean isEmpty();
 
+    /**
+     * @return true if the Ring Buffer reader has been stopped, false otherwise.
+     */
     boolean isStopped();
 
     /**
-     * stop the reader. After being stopped, the reader will not block writers.
-     * After being stopped the reader can be re-opened
+     * Stops the reader. After being stopped, the reader will not block writers. The reader can be re-opened after being stopped.
      */
     void stop();
 
     /**
-     * the readPosition and readLimit will be adjusted so that the client can read the data
+     * Prepares the reader to read data from the Ring Buffer. This method adjusts the read position and read limit
+     * in the provided {@link Bytes} object, allowing the client to read the data.
      *
-     * @param bytes who's byteStore must be the ring buffer,
-     * @return nextReadPosition which should be passed to {@link RingBufferReader#afterRead(long)}
+     * @param bytes The {@link Bytes} instance backed by the Ring Buffer.
+     * @return The position from where next read operation should be performed, this should be passed to
+     * {@link RingBufferReader#afterRead(long)} after the read operation.
      */
-    @SuppressWarnings("rawtypes")
     @NonNegative
     long beforeRead(Bytes<?> bytes);
 
+    /**
+     * Updates the reader's state after a read operation. The parameter is usually the return value of the preceding {@link #beforeRead(Bytes)} call.
+     *
+     * @param next The position after the last read operation.
+     */
     void afterRead(@NonNegative long next);
 
+    /**
+     * Overloaded method of {@link #afterRead(long)} providing additional details about the read operation.
+     *
+     * @param next The position after the last read operation.
+     * @param payloadStart The starting position of the payload that was read.
+     * @param underlyingIndex The index in the underlying data structure from where the data was read.
+     */
     void afterRead(@NonNegative long next, long payloadStart, long underlyingIndex);
 
+    /**
+     * @return The index in the underlying data structure where the last read operation was performed.
+     */
     long underlyingIndex();
 
     /**
-     * Convenience method calls both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}
+     * A convenience method that reads data from the Ring Buffer by internally calling both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}.
      *
-     * @return whether read succeeded
+     * @return True if the read operation succeeded, false otherwise.
      */
-    @SuppressWarnings("rawtypes")
     boolean read(BytesOut<?> bytes);
 
     /**
-     * @return the byteStore which backs the ring buffer
+     * @return The {@link BytesStore} instance which backs the Ring Buffer.
      */
     @SuppressWarnings("rawtypes")
     BytesStore byteStore();
 
     /**
-     * Take reader to just past the end of the RB
+     * Adjusts the reader's position to just past the end of the Ring Buffer, effectively making it read any new data that gets written.
      */
     void toEnd();
 }

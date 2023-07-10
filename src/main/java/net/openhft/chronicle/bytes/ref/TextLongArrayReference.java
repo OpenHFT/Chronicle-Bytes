@@ -29,12 +29,14 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
-
-/*
-The format for a long array in text is
-{ capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
+/**
+ * TextLongArrayReference is an implementation of ByteableLongArrayValues that stores long arrays
+ * in text format, keeping track of array capacity and values.
+ * <p>
+ * The text format for a long array is as follows:
+ * { capacity: 12345678901234567890, values: [ 12345678901234567890, ... ] }
  */
-@SuppressWarnings("rawtypes")
+ @SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
@@ -54,6 +56,17 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
 
     private long length = VALUES;
 
+    /**
+     * Write an initial state of an array with the given capacity to the provided bytes store.
+     *
+     * @param bytes    The byte store where the array state will be written.
+     * @param capacity The capacity of the array.
+     * @throws IllegalArgumentException  if the provided capacity is not valid.
+     * @throws IllegalStateException     if the state of the byte store is invalid.
+     * @throws BufferOverflowException   if writing exceeds the buffer's limit.
+     * @throws ArithmeticException       if integer overflow occurs.
+     * @throws BufferUnderflowException  if the buffer position is negative.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
         long start = bytes.writePosition();
@@ -73,6 +86,15 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         bytes.write(SECTION4);
     }
 
+    /**
+     * Determines the length in bytes needed for an array based on the provided bytes store and offset.
+     *
+     * @param bytes  The byte store containing the array.
+     * @param offset The offset of the array within the byte store.
+     * @return The length in bytes.
+     * @throws IllegalStateException     if the state of the byte store is invalid.
+     * @throws BufferUnderflowException  if reading exceeds the buffer's limit.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
         //todo check this, I think there could be a bug here
@@ -80,6 +102,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
                 + VALUES + SECTION4.length;
     }
 
+    /**
+     * Get the number of elements that have been set in the array.
+     *
+     * @return The number of elements in use.
+     * @throws IllegalStateException if the underlying bytes store is in an invalid state.
+     */
     @Override
     public long getUsed()
             throws IllegalStateException {
@@ -173,7 +201,13 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
     }
 
-    @Override
+    /**
+     * Binds an external {@link LongValue} to a specific index in this array.
+     *
+     * @param index The index at which the value should be bound.
+     * @param value The LongValue to be bound.
+     * @throws UnsupportedOperationException as this operation is not supported.
+     */    @Override
     public void bindValueAt(@NonNegative long index, LongValue value) {
         throw new UnsupportedOperationException("todo");
     }
@@ -254,6 +288,11 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         return length;
     }
 
+    /**
+     * Returns a string representation of the TextLongArrayReference, for debugging purposes.
+     *
+     * @return String representing the state of TextLongArrayReference.
+     */
     @NotNull
     @Override
     public String toString() {
@@ -272,6 +311,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
         }
     }
 
+    /**
+     * Calculates the size in bytes needed for storing an array with the specified capacity.
+     *
+     * @param capacity The capacity of the array.
+     * @return The size in bytes needed to store the array.
+     */
     @Override
     public long sizeInBytes(@NonNegative long capacity) {
         return (capacity * VALUE_SIZE) + VALUES + SECTION3.length - SEP.length;

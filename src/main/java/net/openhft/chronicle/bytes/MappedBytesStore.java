@@ -37,11 +37,16 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * BytesStore to wrap memory mapped data.
+ * A BytesStore implementation that wraps memory-mapped data.
+ *
  * <p>
- * <b>WARNING: Handle with care as this assumes the caller has correct bounds checking</b>
+ * This class is intended for working with large files that can be read from and written to as if they were a part of the program's memory.
+ * <p>
+ * <b>WARNING:</b> This class assumes that the caller will correctly handle bounds checking. Incorrect handling can lead to {@link IndexOutOfBoundsException}.
+ * Misuse of this class can cause hard-to-diagnose memory access errors and data corruption.
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
+    @Deprecated(/* to be removed in x.26 */)
     public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
     protected final Runnable writeCheck;
     private final MappedFile mappedFile;
@@ -50,6 +55,17 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
     private long syncLength = 0;
 
+    /**
+     * Creates a new MappedBytesStore with the given parameters.
+     *
+     * @param owner        The owner of this MappedBytesStore.
+     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @throws IllegalStateException If the MappedFile has already been released.
+     */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity), false);
@@ -61,6 +77,23 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
                 : MappedBytesStore::readWriteOk;
 
         reserveTransfer(INIT, owner);
+    }
+
+    /**
+     * Creates a new MappedBytesStore with the given parameters.
+     *
+     * @param owner        The owner of this MappedBytesStore.
+     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @return the MappedBytesStore
+     * @throws IllegalStateException If the MappedFile has already been released.
+     */
+    public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
+            throws IllegalStateException {
+        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity);
     }
 
     static void throwReadOnly() {
@@ -155,7 +188,15 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Calls lock on the underlying file channel
+     * Acquires a lock on a region of the underlying file.
+     * This method blocks until the lock has been acquired.
+     *
+     * @param position The starting byte position of the region to lock.
+     * @param size     The number of bytes to lock, starting from the position.
+     * @param shared   If {@code true}, the lock will be shared; otherwise, it will be exclusive.
+     * @return A FileLock representing the lock on the specified region.
+     * @throws IOException If an I/O error occurs while locking.
+     * @see MappedFile#lock(long, long, boolean) for details on how the lock is acquired.
      */
     public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
 
@@ -163,7 +204,15 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     }
 
     /**
-     * Calls tryLock on the underlying file channel
+     * Attempts to acquire a lock on a region of the underlying file.
+     * This method does not block and returns immediately, either with a lock or with null if the lock could not be acquired.
+     *
+     * @param position The starting byte position of the region to lock.
+     * @param size     The number of bytes to lock, starting from the position.
+     * @param shared   If {@code true}, the lock will be shared; otherwise, it will be exclusive.
+     * @return A FileLock representing the lock on the specified region or {@code null} if the lock could not be acquired.
+     * @throws IOException If an I/O error occurs while trying to lock.
+     * @see MappedFile#tryLock(long, long, boolean) for details on how the lock is attempted.
      */
     public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return mappedFile.tryLock(position, size, shared);
@@ -358,7 +407,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         super.performRelease();
     }
 
-    private void performMsync(long offset, long length) {
+    private void performMsync(@NonNegative long offset, long length) {
         final SyncMode syncMode = this.syncMode();
         if (syncMode == SyncMode.NONE)
             return;

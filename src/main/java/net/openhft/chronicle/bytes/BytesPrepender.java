@@ -25,29 +25,47 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+/**
+ * An interface defining a prependable buffer of bytes. A BytesPrepender can prepend bytes, byte arrays,
+ * and numeric values to a buffer, making them accessible for reading operations from the front.
+ * <p>
+ * This interface is generic and can be parameterized with any type that extends BytesPrepender.
+ * <p>
+ * Note: For all prepend and prewrite operations, the read position (but not the write position or read limit)
+ * is moved backward.
+ * <p>
+ * BufferOverflowException can occur if the capacity of the underlying
+ * buffer is exceeded during operation execution.
+ *
+ * @param <B> the type of BytesPrepender. This is a self-referential generic type parameter.
+ *
+ * @see BufferOverflowException
+ * @see IllegalStateException
+ */
 public interface BytesPrepender<B extends BytesPrepender<B>> {
 
     /**
-     * Clear a buffer, with a given padding to allow for prepending later. clearAndPad(0) is the same as clear()
+     * Clears the buffer and pads it with a specified length to allow prepending later.
+     * clearAndPad(0) is equivalent to clear().
      *
-     * @param length to pad
-     * @return this
-     * @throws BufferOverflowException if the length &gt; capacity() - start()
+     * @param length the padding length
+     * @return this instance, after clearing and padding
+     * @throws BufferOverflowException if the length is greater than the difference of capacity() and start()
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B clearAndPad(@NonNegative long length)
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Prepends a long in decimal, this method moves the readPosition() backwards.
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Prepends a long value as a decimal text. This operation moves the readPosition() backward.
+     * <p>Note: The operation shifts the readPosition, but not the writePosition or readLimit</p>
      *
-     * @param value to prepend as text.
-     * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @param value the long value to prepend as text
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
-    @SuppressWarnings("unchecked")
     @NotNull
     default B prepend(long value)
             throws BufferOverflowException, IllegalStateException {
@@ -56,20 +74,24 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
     }
 
     /**
-     * Write backward in binary a byte
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes a byte array backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param bytes to prepend to.
+     * @param bytes the byte array to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B prewrite(byte[] bytes)
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Write backward in binary a byte
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes a BytesStore instance backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param bytes to prepend to.
+     * @param bytes the BytesStore to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -77,40 +99,48 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Write backward in binary a byte
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes a byte backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param b byte to prepend to.
+     * @param b the byte to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B prewriteByte(byte b)
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Write backward in binary a 2 byte int
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes a short (2-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param i short to prepend to.
+     * @param i the short to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B prewriteShort(short i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Write backward in binary a 4 byte int
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes an int (4-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param i integer to prepend to.
+     * @param i the int to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B prewriteInt(int i)
             throws BufferOverflowException, IllegalStateException;
 
     /**
-     * Write backward in binary an 8 byte long
-     * <p>Note: it moves the readPosition not the writePosition / readLimit</p>
+     * Writes a long (8-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
-     * @param l long to prepend to.
+     * @param l the long to prepend
+     * @return this instance, after the operation
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IllegalStateException if the buffer is in an invalid state
      */
     @NotNull
     B prewriteLong(long l)

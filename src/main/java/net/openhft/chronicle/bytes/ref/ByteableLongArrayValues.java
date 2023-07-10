@@ -22,12 +22,32 @@ import net.openhft.chronicle.bytes.DynamicallySized;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
+/**
+ * Represents an interface for byteable long array values,
+ * extending LongArrayValues, Byteable, and DynamicallySized interfaces.
+ * This interface allows for handling long array values that are byteable
+ * and dynamically sized.
+ */
 @SuppressWarnings("rawtypes")
 public interface ByteableLongArrayValues extends LongArrayValues, Byteable, DynamicallySized {
+
+    /**
+     * Returns the size in bytes for the given number of elements.
+     *
+     * @param sizeInBytes The number of elements.
+     * @return The size in bytes needed to store the given number of elements.
+     * @throws IllegalStateException If an illegal state occurs during the operation.
+     */
     @Override
     long sizeInBytes(@NonNegative long sizeInBytes)
             throws IllegalStateException;
 
-    ByteableLongArrayValues capacity(@NonNegative long arrayLength)
-            throws IllegalStateException;
+    /**
+     * Sets the capacity of the long array values.
+     *
+     * @param arrayLength The desired capacity of the long array values.
+     * @return The instance of ByteableLongArrayValues with the set capacity.
+     * @throws IllegalStateException If an illegal state occurs during the operation.
+     */
+    ByteableLongArrayValues capacity(@NonNegative long arrayLength) throws IllegalStateException;
 }

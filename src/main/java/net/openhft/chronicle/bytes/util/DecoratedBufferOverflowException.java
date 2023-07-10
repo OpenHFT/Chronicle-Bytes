@@ -19,13 +19,30 @@ package net.openhft.chronicle.bytes.util;
 
 import java.nio.BufferOverflowException;
 
+/**
+ * A specialized {@link BufferOverflowException} that allows for custom messages.
+ */
 public final class DecoratedBufferOverflowException extends BufferOverflowException {
+
+    /**
+     * The custom message describing this exception.
+     */
     private final String message;
 
+    /**
+     * Constructs a DecoratedBufferOverflowException with the specified detail message.
+     *
+     * @param message the detail message (which is saved for later retrieval by the {@link #getMessage()} method)
+     */
     public DecoratedBufferOverflowException(final String message) {
         this.message = message;
     }
 
+    /**
+     * Returns the detail message string of this exception.
+     *
+     * @return the detail message string of this exception
+     */
     @Override
     public String getMessage() {
         return message;

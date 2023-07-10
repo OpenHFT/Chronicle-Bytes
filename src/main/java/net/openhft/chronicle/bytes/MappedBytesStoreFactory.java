@@ -21,8 +21,26 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ * A functional interface that serves as a factory for creating instances of {@link MappedBytesStore}.
+ * <p>
+ * This interface is meant to be implemented by classes that can create MappedBytesStore instances based on provided parameters.
+ */
 @FunctionalInterface
 public interface MappedBytesStoreFactory {
+
+    /**
+     * Creates a {@link MappedBytesStore} instance with the given parameters.
+     *
+     * @param owner        The owner of the MappedBytesStore to be created.
+     * @param mappedFile   The MappedFile to be wrapped by the created BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @return The created MappedBytesStore instance.
+     * @throws IllegalStateException If the MappedFile has already been released.
+     */
     @NotNull
     MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws IllegalStateException;

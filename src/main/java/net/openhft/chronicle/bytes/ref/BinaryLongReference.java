@@ -26,10 +26,22 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
-
+/**
+ * Represents a 64-bit long reference in binary form.
+ */
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
 
+    /**
+     * Sets the BytesStore which this reference points to.
+     *
+     * @param bytes  the BytesStore
+     * @param offset the offset within the BytesStore
+     * @param length the length of the value
+     * @throws IllegalStateException       if closed
+     * @throws IllegalArgumentException    if the length is not equal to maxSize
+     * @throws BufferOverflowException    if the offset is too large
+     */
     @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative final long length)
@@ -46,11 +58,21 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         super.bytesStore(bytes, offset, length);
     }
 
+    /**
+     * Returns the maximum size of this reference in bytes (8 bytes for a 64-bit long).
+     *
+     * @return the maximum size in bytes
+     */
     @Override
     public long maxSize() {
-        return 8;
+        return Long.BYTES;
     }
 
+    /**
+     * Returns a string representation of this BinaryLongReference.
+     *
+     * @return a string representation
+     */
     @NotNull
     @Override
     public String toString() {
@@ -62,6 +84,12 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         }
     }
 
+    /**
+     * Retrieves the 64-bit long value from the BytesStore.
+     *
+     * @return the 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long getValue()
             throws IllegalStateException {
@@ -72,6 +100,12 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         }
     }
 
+    /**
+     * Sets the 64-bit long value in the BytesStore.
+     *
+     * @param value the 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setValue(long value)
             throws IllegalStateException {
@@ -85,6 +119,12 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
         }
     }
 
+    /**
+     * Retrieves the 64-bit long value using volatile memory semantics.
+     *
+     * @return the 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long getVolatileValue()
             throws IllegalStateException {
@@ -92,13 +132,18 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytes.readVolatileLong(offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-
             throw e;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
     }
 
+    /**
+     * Sets the 64-bit long value using volatile memory semantics.
+     *
+     * @param value the 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setVolatileValue(long value)
             throws IllegalStateException {
@@ -106,13 +151,18 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             bytes.writeVolatileLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-
             throw e;
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
         }
     }
 
+    /**
+     * Sets the 64-bit long value using ordered or lazy set memory semantics.
+     *
+     * @param value the 64-bit long value to set
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public void setOrderedValue(long value)
             throws IllegalStateException {
@@ -120,13 +170,19 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             bytes.writeOrderedLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-
             throw e;
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
         }
     }
 
+    /**
+     * Adds a delta to the current 64-bit long value and returns the result.
+     *
+     * @param delta the value to add
+     * @return the resulting 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long addValue(long delta)
             throws IllegalStateException {
@@ -134,19 +190,34 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytes.addAndGetLong(offset, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-
             throw e;
         } catch (BufferUnderflowException e) {
             throw new AssertionError(e);
         }
     }
 
+    /**
+     * Adds a delta to the current 64-bit long value atomically and returns the result.
+     *
+     * @param delta the value to add
+     * @return the resulting 64-bit long value
+     * @throws IllegalStateException      if closed
+     */
     @Override
     public long addAtomicValue(long delta)
             throws IllegalStateException {
         return addValue(delta);
     }
 
+    /**
+     * Atomically sets the 64-bit long value to the given updated value if the current value is
+     * equal to the expected value.
+     *
+     * @param expected the expected 64-bit long value
+     * @param value    the new 64-bit long value
+     * @return true if successful, false otherwise
+     * @throws IllegalStateException    if closed
+     */
     @Override
     public boolean compareAndSwapValue(long expected, long value)
             throws IllegalStateException {
@@ -154,7 +225,6 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
             return bytes.compareAndSwapLong(offset, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
-
             throw e;
         } catch (BufferOverflowException e) {
             throw new AssertionError(e);
