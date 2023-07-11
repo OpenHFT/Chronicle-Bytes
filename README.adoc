@@ -18,9 +18,11 @@ toc::[]
 
 == Introduction
 
-Chronicle Bytes is a comprehensive library dedicated to providing low-level memory access wrappers. It is constructed on the foundations of Chronicle Core, taking advantage of its direct memory and Operating System (OS) system call access.
+Chronicle Bytes is a comprehensive library dedicated to providing low-level memory access wrappers.
+It is constructed on the foundations of Chronicle Core, taking advantage of its direct memory and Operating System (OS) system call access.
 
-In essence, Chronicle Bytes serves a similar purpose to Java's Non-blocking I/O (NIO) ByteBuffer, but with several additional features. The API offers:
+In essence, Chronicle Bytes serves a similar purpose to Java's Non-blocking I/O (NIO) ByteBuffer, but with several additional features.
+The API offers:
 
 - Support for 63-bit sizes.
 - Encoding for UTF-8 and ISO-8859-1 strings.
@@ -142,12 +144,16 @@ bytes.releaseLast();
 
 A `Bytes` buffer provides the following properties:
 
-- *start*: The smallest index in the buffer. This is always '0L' for most implementations. For Memory Mappings it is the offset within the file.
+- *start*: The smallest index in the buffer.
+This is always '0L' for most implementations.
+For Memory Mappings it is the offset within the file.
 - *capacity*: The maximum possible capacity for the buffer, which is usually 2147483632 (or more) for a `Bytes` buffer.
-- *realCapacity*: The current capacity of the buffer. This value is dynamically extended as required.
+- *realCapacity*: The current capacity of the buffer.
+This value is dynamically extended as required.
 - *readLimit*: The maximum index that can be read from.
 - *writeLimit*: The maximum index that can be written to.
-- *readPosition*: The index from which to read. This value should always be less than `writePosition`.
+- *readPosition*: The index from which to read.
+This value should always be less than `writePosition`.
 - *writePosition*: The index at which to write.
 
 [#img-Bytes]
@@ -158,9 +164,9 @@ In the illustration above, note that `readPosition()` should always be less than
 Also, `readLimit()` should always be less than or equals to `writeLimit()` and greater than or equal to `start()`.
 
 === BytesStore
+
 BytesStore is a block of memory with fixed size into which you can write data and later read.
-You can create a BytesStore using the bytes in a CharSequence, String, ByteBuffer or another
-BytesStore.
+You can create a BytesStore using the bytes in a CharSequence, String, ByteBuffer or another BytesStore.
 
 [source,Java]
 ----
@@ -173,6 +179,7 @@ BytesStore bs = BytesStore.from("This is an example");
 ByteBuffer buf = ByteBuffer.allocate(20);
 BytesStore bs2 = BytesStore.wrap(buf);
 ----
+
 You can see the buffer cursors of bs.
 
 [source,Java]
@@ -199,12 +206,11 @@ capacity 18
 realCapacity 18
 start 0
 ----
-You can write into a BytesStore from an offset, however if your data is larger than the
-capacity of BytesStore, the ByteStore will not extend.
 
-NOTE: The returned object (BytesStore) is unchecked in terms of memory access, therefore the user code
-must make every effort not to exceed the underlying memory segment limit. Otherwise, the result is
-unspecified side effects including silently writing over other memory segments, and crashing the JVM.
+You can write into a BytesStore from an offset, however if your data is larger than the capacity of BytesStore, the ByteStore will not extend.
+
+NOTE: The returned object (BytesStore) is unchecked in terms of memory access, therefore the user code must make every effort not to exceed the underlying memory segment limit.
+Otherwise, the result is unspecified side effects including silently writing over other memory segments, and crashing the JVM.
 
 [source,Java]
 ----
@@ -216,8 +222,8 @@ System.out.println( bs.to8bitString());
 ----
 
 ==== Bytes versus BytesStore
-- In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the
-realCapacity of the Bytes.
+
+- In contrast to a BytesStore, a Bytes extends if you write data into it which is larger than the realCapacity of the Bytes.
 
 [source,Java]
 ----
@@ -226,6 +232,7 @@ realCapacity of the Bytes.
 Bytes<byte[]> bb = Bytes.allocateElasticOnHeap(14);
 bb.write("This is an example");
 ----
+
 The realCapacity of bb extends to 4096. Now, the cursors of bb Bytes are:
 
 [source,text]
@@ -238,8 +245,9 @@ capacity 2147483632
 realCapacity 4096
 start 0
 ----
-- Bytes gives you access to the cursors, thus you can use them to read/write from/into a
-desired index. In contrast, you cannot use the cursors with a BytesStore.
+
+- Bytes gives you access to the cursors, thus you can use them to read/write from/into a desired index.
+In contrast, you cannot use the cursors with a BytesStore.
 
 [source,Java]
 ----
@@ -258,11 +266,12 @@ String st = bb.to8bitString();
 System.out.println(st);
 ----
 
-- In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced
-data is accessed in a thread-safe manner.
+- In contrast to Bytes, BytesStore can be shared safely across threads provided that the referenced data is accessed in a thread-safe manner.
 
 === bytesForRead() and bytesForWrite()
-The `bytesForRead()` and `bytesForWrite()` methods can be used to create Bytes from a section of a BytesStore or a Bytes. The size of the new Bytes depends on the `limit` and `position` cursors of the original Object.
+
+The `bytesForRead()` and `bytesForWrite()` methods can be used to create Bytes from a section of a BytesStore or a Bytes.
+The size of the new Bytes depends on the `limit` and `position` cursors of the original Object.
 
 - Create bytesForRead/Write From BytesStore:
 
@@ -283,7 +292,9 @@ Bytes bfr = bs.bytesForRead();
 //Create a Bytes from bs using bytesForwrite().
 Bytes bfw = bs.bytesForWrite();
 ----
+
 The cursors of bs:
+
 [source,text]
 ----
 readLimit  18
@@ -307,6 +318,7 @@ capacity 18
 realCapacity 18
 start 0
 ----
+
 The cursors of bfw:
 
 [source,text]
@@ -326,6 +338,7 @@ start 0
 . When you use bytesForRead() `readPosition` is set to `start`, and `writeLimit` is set to `realCapacity` and the new Bytes is *not* elastic.
 
 Regardless if bytesForRead() or bytesForWrite() is used, you can both read and write from/into the new Bytes using cursors.
+
 [source,Java]
 ----
 //Create a Bytes bb with default size (256 bytes) and write a text into it.
@@ -351,6 +364,7 @@ capacity 2147483632
 realCapacity 256
 start 0
 ----
+
 The cursors of bfr2:
 
 [source,text]
@@ -363,6 +377,7 @@ capacity 2147483632
 realCapacity 256
 start 0
 ----
+
 The cursors of bfw2:
 
 [source,text]
@@ -390,7 +405,7 @@ Writing to a hexadecimal dump is useful for documenting the format for messages 
 We have used the hexadecimal dump here.
 
 .Writing primitives as binary and dumping
-[source, java]
+[source,java]
 ----
 // only used for documentation
 HexDumpBytes bytes = new HexDumpBytes();
@@ -432,7 +447,7 @@ prints
 to read this data you can use
 
 .Reading the primitive values above
-[source, java]
+[source,java]
 ----
 boolean flag = bytes.readBoolean();
 byte s8 = bytes.readByte();
@@ -454,7 +469,7 @@ double f64 = bytes.readDouble();
 Instead of streaming the data, sometimes you need to control the placement of data, possibly at random.
 
 .Write and read primitive by offset
-[source, Java]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 bytes.writeBoolean(0, true);
@@ -504,7 +519,7 @@ NOTE: write ordered doesn't stall the pipeline to wait for the write to occur, m
 You can also write and read text to Bytes for low level, direct to native memory text processing.
 
 .Writing primitives as text
-[source, Java]
+[source,Java]
 ----
 Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
 bytes.append(true).append('\n');
@@ -526,7 +541,7 @@ prints
 ----
 
 .Reading primitives as text
-[source, Java]
+[source,Java]
 ----
 boolean flag = bytes.parseBoolean();
 int s32 = bytes.parseInt();
@@ -545,7 +560,7 @@ Chronicle Bytes supports two encodings, ISO-8859-1 and UTF-8.
 It also supports writing these as binary with a length prefix, and a string which should be terminated.
 Bytes expects Strings to be read to a buffer for further processing, possibly with a String pool.
 
-[source, Java]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 bytes.comment("write8bit").write8bit("£ 1");
@@ -565,7 +580,7 @@ a3 20 31 0a                                     # append8bit
 c2 a3 20 31 0a                                  # appendUtf8
 ----
 
-[source, Java]
+[source,Java]
 ----
 String a = bytes.read8bit();
 String b = bytes.readUtf8();
@@ -575,7 +590,7 @@ String d = bytes.parseUtf8(StopCharTesters.CONTROL_STOP);
 
 Binary strings are prefixed with a https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoded] length.
 
-[source, Java]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 bytes.comment("write8bit").write8bit((String) null);
@@ -603,7 +618,7 @@ NOTE: `80 00` is the stop bit encoding for `-1` or `~0`
 In binary, you can atomically replace an `int` or `long` on condition that it is an expected value.
 
 .Write two fields, remember where the `int` and `long` are
-[source, Java]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 
@@ -626,7 +641,7 @@ prints
 ----
 
 .CAS two fields
-[source, Java]
+[source,Java]
 ----
 assertTrue(bytes.compareAndSwapInt(s32, 0, Integer.MAX_VALUE));
 assertTrue(bytes.compareAndSwapLong(s64, 0, Long.MAX_VALUE));
@@ -641,16 +656,18 @@ prints
 03 73 36 34 ff ff ff ff ff ff ff 7f             # s64
 ----
 
-INFO: You might wonder, how is the hex dump updated as well as the binary? The `readPosition` actually holds the write position for both, which is why it has to be computed in this case.
+INFO: You might wonder, how is the hex dump updated as well as the binary?
+The `readPosition` actually holds the write position for both, which is why it has to be computed in this case.
 
 === Stop bit compression
 
-Stop Bit encoding is one form of simple compression.  For each 7 bits set, a byte is used with the high bit set when there is another byte to write.
+Stop Bit encoding is one form of simple compression.
+For each 7 bits set, a byte is used with the high bit set when there is another byte to write.
 
 See https://github.com/OpenHFT/RFC/blob/master/Stop-Bit-Encoding/Stop-Bit-Encoding-1.0.adoc[Stop Bit Encoding RFC] for more details
 
 .Writing with stop bit encoding
-[source, Java]
+[source,Java]
 ----
 HexDumpBytes bytes = new HexDumpBytes();
 
@@ -715,9 +732,10 @@ To read these you need either `long x = bytes.readStopBit()` or `double d = byte
 
 === BytesMarshallable objects
 
-Chronicle Bytes supports serializing simple objects where the type is not stored.  This is similar to`RawWire` in Chronicle Wire.
+Chronicle Bytes supports serializing simple objects where the type is not stored.
+This is similar to`RawWire` in Chronicle Wire.
 
-[source, Java]
+[source,Java]
 ----
 @NotNull MyByteable mb1 = new MyByteable(false, (byte) 1, (short) 2, '3', 4, 5.5f, 6, 7.7);
 @NotNull MyByteable mb2 = new MyByteable(true, (byte) 11, (short) 22, 'T', 44, 5.555f, 66, 77.77);
@@ -736,7 +754,7 @@ mn2.writeMarshallable(bytes);
 ----
 
 .MyByteable data structure
-[source, Java]
+[source,Java]
 ----
 class MyByteable implements BytesMarshallable {
     boolean flag;
@@ -761,7 +779,7 @@ class MyByteable implements BytesMarshallable {
 ----
 
 .MyScalars data structure
-[source, Java]
+[source,Java]
 ----
 class MyScalars implements BytesMarshallable {
     String s;
@@ -846,17 +864,19 @@ Once you have your data dumped as hexadecimal, you can create tests using that d
 
 In this context a Lambda function is one which is entirely input driven and produces a list of messages (one or more outputs).
 
-The simplest Lambda function is stateless, however this has limited application. They are useful for message translation.
+The simplest Lambda function is stateless, however this has limited application.
+They are useful for message translation.
 
 If you need a stateful Lambda function, you can consider the input to the function to be every message it has ever consumed.
 Obviously this is inefficient, however with appropriate caches in your lamdba function, you can process and produce result incrementally.
 
 === Data in and out.
 
-We module a Lambda function as having an interface for inputs and another for outputs. These interfaces can be the same.
+We module a Lambda function as having an interface for inputs and another for outputs.
+These interfaces can be the same.
 
 .Sample interface for Lambda function
-[source, Java]
+[source,Java]
 ----
 interface IBytesMethod {
     @MethodId(0x81L) // <1>
@@ -869,11 +889,12 @@ interface IBytesMethod {
     void myNested(MyNested nested);
 }
 ----
+
 <1> assign a unique id to each method to simplify decoding/encoding.
 
 Each method needs a DTO to describe the data for that message.
 
-[source, Java]
+[source,Java]
 ----
 class MyByteable implements BytesMarshallable {
     boolean flag;
@@ -909,7 +930,7 @@ class MyNested implements BytesMarshallable {
 The implementation needs to take it's output interface and implement the input interface
 
 .A simple pass through implementation
-[source, Java]
+[source,Java]
 ----
 static class IBMImpl implements IBytesMethod {
     final IBytesMethod out;
@@ -931,7 +952,7 @@ static class IBMImpl implements IBytesMethod {
 Once we have interfaces, DTOs, and an implementation we can setup a test harness
 
 .Setup a test harness for a Lambda function
-[source, Java]
+[source,Java]
 ----
 protected void btmttTest(String input, String output)
 throws IOException {
@@ -947,7 +968,7 @@ throws IOException {
 
 This allows us to give two files, one for expected inputs and one for expected outputs.
 
-[source, Java]
+[source,Java]
 ----
 @Test
 public void run()
@@ -1024,7 +1045,9 @@ NOTE: In this case the input and outputs are expected to be the same.
 
 In this case, the test calls the methods with the matching method ids which in turn uses the same ids to encode the output.
 
-NOTE: Creating and maintain such tests can be an overhead you don't need. In this case, you can use Chronicle Wire's YAML testing format to check functionality. Wire can be used for most of the tests even if you intend to use Bytes for production.
+NOTE: Creating and maintain such tests can be an overhead you don't need.
+In this case, you can use Chronicle Wire's YAML testing format to check functionality.
+Wire can be used for most of the tests even if you intend to use Bytes for production.
 
 === Comparison of access to native memory
 
@@ -1120,7 +1143,9 @@ The above table provides a clear comparison of the various memory access feature
 
 == Utilizing Memory Mapped Files
 
-Memory mapped files function like Bytes instances, expanding as required. A specific chunk size determines the growth rate as more Bytes are employed. A `syncMode` can be set to ensure data is flushed as each chunk is released.
+Memory mapped files function like Bytes instances, expanding as required.
+A specific chunk size determines the growth rate as more Bytes are employed.
+A `syncMode` can be set to ensure data is flushed as each chunk is released.
 
 Below is an example of opening two MappedBytes for the same memory region:
 
@@ -1138,7 +1163,8 @@ Memory mapped files are commonly used by Chronicle Map and Chronicle Queue.
 
 == Debugging Chronicle-Bytes
 
-When utilizing IntelliJ IDEA, you can configure a custom renderer to view the bytes. Please refer to the images below for guidance on setting this up:
+When utilizing IntelliJ IDEA, you can configure a custom renderer to view the bytes.
+Please refer to the images below for guidance on setting this up:
 
 image::/docs/images/customize-data-views-menu.jpg[]
 
