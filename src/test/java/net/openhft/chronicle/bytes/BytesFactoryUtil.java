@@ -73,7 +73,7 @@ final class BytesFactoryUtil {
                     Arguments.of(MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE), true, "MappedBytes.singleMappedBytes(singleFile, CHUNK_SIZE)"),
                     Arguments.of(MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true), false, "MappedBytes.singleMappedBytes(singleFileRo, CHUNK_SIZE, true)"),
 
-                     Arguments.of(Bytes.forFieldGroup(holder, "a"), true, "Bytes.forFieldGroup(holder, \"a\")"),
+                    Arguments.of(Bytes.forFieldGroup(holder, "a"), true, "Bytes.forFieldGroup(holder, \"a\")"),
 
                     Arguments.of(new UncheckedBytes<>(Bytes.allocateDirect(SIZE)), true, "new UncheckedBytes<>(Bytes.allocateDirect(SIZE))"),
                     Arguments.of(new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE])), true, "new UncheckedBytes<>(Bytes.wrapForWrite(new byte[SIZE]))"),

@@ -46,8 +46,8 @@ public class AllocationRatesTest extends BytesTestCommon {
             long timeDBB = timeDirectByteBufferAllocations();
             long timeDS = timeDirectStoreAllocations();
             if (i == 0)
-            System.out.printf("buffers %d KB took an average of %,d ns for heap ByteBuffer, %,d ns for direct ByteBuffer and %,d for DirectStore%n",
-                    BUFFER_SIZE / 1024, timeHBB / ALLOCATIONS, timeDBB / ALLOCATIONS, timeDS / ALLOCATIONS);
+                System.out.printf("buffers %d KB took an average of %,d ns for heap ByteBuffer, %,d ns for direct ByteBuffer and %,d for DirectStore%n",
+                        BUFFER_SIZE / 1024, timeHBB / ALLOCATIONS, timeDBB / ALLOCATIONS, timeDS / ALLOCATIONS);
         }
     }
 

@@ -28,9 +28,9 @@ import java.nio.ByteBuffer;
  * This enum represents different types of Allocators. Each Allocator provides a way to create elastic bytes and byte buffers.
  */
 public enum Allocator {
-/**
- * NATIVE allocator type uses native (off-heap) memory for both ByteBuffer and elastic Bytes.
- */
+    /**
+     * NATIVE allocator type uses native (off-heap) memory for both ByteBuffer and elastic Bytes.
+     */
     NATIVE {
         @NotNull
         @Override
@@ -45,10 +45,10 @@ public enum Allocator {
         }
     },
 
-/**
- * NATIVE_ADDRESS allocator type uses native (off-heap) memory for ByteBuffer, elastic Bytes, and fixed Bytes.
- * The created fixed Bytes wraps the NativeBytesStore by address without providing the underlying ByteBuffer.
- */
+    /**
+     * NATIVE_ADDRESS allocator type uses native (off-heap) memory for ByteBuffer, elastic Bytes, and fixed Bytes.
+     * The created fixed Bytes wraps the NativeBytesStore by address without providing the underlying ByteBuffer.
+     */
     NATIVE_ADDRESS {
         @NotNull
         @Override
@@ -63,11 +63,11 @@ public enum Allocator {
         }
 
         /**
-     * Creates fixed Bytes using off-heap memory with the specified capacity.
-     * Unlike the base method, this wraps NativeBytesStore by address without providing the underlying ByteBuffer.
-     *
-     * @param capacity the capacity of the Bytes
-     * @return the created Bytes
+         * Creates fixed Bytes using off-heap memory with the specified capacity.
+         * Unlike the base method, this wraps NativeBytesStore by address without providing the underlying ByteBuffer.
+         *
+         * @param capacity the capacity of the Bytes
+         * @return the created Bytes
          */
         @Override
         Bytes<?> fixedBytes(int capacity) {
@@ -84,10 +84,10 @@ public enum Allocator {
             }
         }
     },
- /**
- * HEAP allocator type uses on-heap memory for both ByteBuffer and elastic Bytes.
- */
-   HEAP {
+    /**
+     * HEAP allocator type uses on-heap memory for both ByteBuffer and elastic Bytes.
+     */
+    HEAP {
         @NotNull
         @Override
         Bytes<byte[]> elasticBytes(int capacity) {
@@ -100,9 +100,9 @@ public enum Allocator {
             return ByteBuffer.allocate(capacity);
         }
     },
-/**
- * BYTE_BUFFER allocator type uses on-heap memory for ByteBuffer and elastic Bytes.
- */
+    /**
+     * BYTE_BUFFER allocator type uses on-heap memory for ByteBuffer and elastic Bytes.
+     */
     BYTE_BUFFER {
         @NotNull
         @Override
@@ -116,9 +116,9 @@ public enum Allocator {
             return ByteBuffer.allocate(capacity);
         }
     },
-/**
- * NATIVE_UNCHECKED allocator type uses off-heap memory for both ByteBuffer and elastic Bytes, and it disables bound checks.
- */
+    /**
+     * NATIVE_UNCHECKED allocator type uses off-heap memory for both ByteBuffer and elastic Bytes, and it disables bound checks.
+     */
     NATIVE_UNCHECKED {
         @NotNull
         @Override
@@ -132,9 +132,9 @@ public enum Allocator {
             return ByteBuffer.allocateDirect(capacity);
         }
     },
-/**
- * HEAP_UNCHECKED allocator type uses on-heap memory for both ByteBuffer and elastic Bytes, and it disables bound checks.
- */
+    /**
+     * HEAP_UNCHECKED allocator type uses on-heap memory for both ByteBuffer and elastic Bytes, and it disables bound checks.
+     */
     HEAP_UNCHECKED {
         @NotNull
         @Override
@@ -148,9 +148,9 @@ public enum Allocator {
             return ByteBuffer.allocate(capacity);
         }
     },
-/**
- * HEAP_EMBEDDED allocator type uses on-heap memory and embeds Bytes into an object, doesn't support ByteBuffer creation.
- */
+    /**
+     * HEAP_EMBEDDED allocator type uses on-heap memory and embeds Bytes into an object, doesn't support ByteBuffer creation.
+     */
     HEAP_EMBEDDED {
         @Override
         @NotNull Bytes<?> elasticBytes(int capacity) {
@@ -170,9 +170,9 @@ public enum Allocator {
             return Bytes.forFieldGroup(padding, "p").writeLimit(capacity);
         }
     },
-/**
- * HEX_DUMP allocator type uses HexDumpBytes for both elastic and fixed Bytes, doesn't support ByteBuffer creation.
- */
+    /**
+     * HEX_DUMP allocator type uses HexDumpBytes for both elastic and fixed Bytes, doesn't support ByteBuffer creation.
+     */
     HEX_DUMP {
         @Override
         @NotNull Bytes<?> elasticBytes(int capacity) {

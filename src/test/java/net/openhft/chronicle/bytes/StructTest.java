@@ -48,6 +48,7 @@ public class StructTest extends BytesTestCommon {
 
         /**
          * c++ new - construct with memory owned by self
+         *
          * @param size
          */
         protected Struct(int size) {
@@ -58,6 +59,7 @@ public class StructTest extends BytesTestCommon {
 
         /**
          * c++ placement new - construct at given address
+         *
          * @param size
          * @param address
          */
@@ -73,7 +75,7 @@ public class StructTest extends BytesTestCommon {
          */
         public S copy() {
             S s = construct(0);
-            s.copy((S)this);
+            s.copy((S) this);
             return s;
         }
 
@@ -86,34 +88,37 @@ public class StructTest extends BytesTestCommon {
 
         /**
          * Replace self with a distinct copy of s - c++ operator=
+         *
          * @param s - the instance to copy
          * @return - self
          */
         protected S copy(S s) {
-            if(self == null || s.address != this.address) {
+            if (self == null || s.address != this.address) {
                 allocateAndInitialise();
                 MEMORY.copyMemory(s.address, this.address, size);
             }
-            return (S)this;
+            return (S) this;
         }
 
         /**
          * Replace self with a shared copy of s - c++ pointer=
+         *
          * @param s - the instance to share
          * @return - self
          */
         protected S share(S s) {
-            if(self != null || s.address != this.address) {
+            if (self != null || s.address != this.address) {
                 deallocate();
                 initialise(s.address);
             }
 
-            return (S)this;
+            return (S) this;
         }
 
         /**
          * Fully initialise self at given address
          * Override if struct contains any members which need specific initialisation
+         *
          * @param address
          */
         protected void initialise(final long address) {
@@ -127,19 +132,22 @@ public class StructTest extends BytesTestCommon {
 
         /**
          * Get handle to underlying bytes
+         *
          * @return - the underlying bytes corresponding to this instance's members
          */
-        public Bytes<?> bytes() { return bytes; }
+        public Bytes<?> bytes() {
+            return bytes;
+        }
 
         private void allocateAndInitialise() {
-            if(self == null) {
+            if (self == null) {
                 self = Bytes.allocateDirect(size);
                 initialise(self.addressForWrite(0));
             }
         }
 
         private void deallocate() {
-            if(self != null) {
+            if (self != null) {
                 self.releaseLast();
                 self = null;
             }
@@ -155,28 +163,33 @@ public class StructTest extends BytesTestCommon {
 
     /**
      * Simple helper to wrap/cache a pointer to a Struct
+     *
      * @param <T> - the Struct type wrapped by the pointer
      */
     static class Pointer<T extends Struct<T>> {
         T ptr;
-        Function<Long,T> supplier;
+        Function<Long, T> supplier;
         long address;
 
-        Pointer(Function<Long,T> supplier) {
+        Pointer(Function<Long, T> supplier) {
             this.supplier = supplier;
         }
 
-        void reset() { reset(0); }
+        void reset() {
+            reset(0);
+        }
 
-        void reset(T t) { reset(t.address); }
+        void reset(T t) {
+            reset(t.address);
+        }
 
         void reset(long address) {
-            if(address == 0) {
+            if (address == 0) {
                 this.address = address;
                 return;
             }
 
-            if(this.address != address) {
+            if (this.address != address) {
                 if (ptr == null)
                     ptr = supplier.apply(address);
                 else
@@ -187,7 +200,7 @@ public class StructTest extends BytesTestCommon {
         }
 
         T get() {
-            if(address == 0)
+            if (address == 0)
                 return null;
 
             return ptr;
@@ -218,8 +231,8 @@ public class StructTest extends BytesTestCommon {
                 .append(s3.bytes().toHexString());
         System.out.println(sb0);
 
-        if(Jvm.is64bit()) {
-            assertEquals( "00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
+        if (Jvm.is64bit()) {
+            assertEquals("00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
                     "00000010 74 6f 6d 00 00 00 00 00  00 00 00 00 00 00 00 00 tom····· ········\n" +
                     "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
@@ -243,7 +256,7 @@ public class StructTest extends BytesTestCommon {
                     "........\n" +
                     "00000070 00 00 00 00 00 00 00 00  00 00 00 00             ········ ····    \n", sb0.toString());
         } else {
-            assertEquals( "00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
+            assertEquals("00000000 00 00 00 00 00 00 00 00  54 68 65 20 50 68 61 6e ········ The Phan\n" +
                     "00000010 74 6f 6d 00 00 00 00 00  00 00 00 00 00 00 00 00 tom····· ········\n" +
                     "00000020 00 00 00 00 00 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                     "........\n" +
@@ -274,7 +287,7 @@ public class StructTest extends BytesTestCommon {
 
         // walk the linked list
         StringBuilder sb = new StringBuilder();
-        for( Student s = s1; s != null; s = s.next() ) {
+        for (Student s = s1; s != null; s = s.next()) {
             String line = s.name() + " " + s.gender() + ", born " + s.birth();
             sb.append(line).append("\n");
         }
@@ -432,12 +445,12 @@ public class StructTest extends BytesTestCommon {
             super.initialise(address);
 
             // bespoke controls needed for birth, name, nameStr
-            if(birth == null)
+            if (birth == null)
                 birth = new Date(address + BIRTH);
             else
                 birth.initialise(address + BIRTH);
 
-            if(name == null)
+            if (name == null)
                 name = new NativeBytes<>(new PointerBytesStore(), NAME_SIZE);
 
             ((PointerBytesStore) name.bytesStore()).set(address + NAME, NAME_SIZE);
@@ -568,14 +581,14 @@ public class StructTest extends BytesTestCommon {
 
     @Test
     public void testCopyingVsSharing() {
-        Date d1 = new Date((short)1970, (byte)1, (byte)1);
+        Date d1 = new Date((short) 1970, (byte) 1, (byte) 1);
         Date d2 = d1.copy();
         Date d3 = d1.share();
 
         assertEquals("1970-1-1", d1.toString());
 
-        d2.month((byte)2); // d2 only
-        d3.month((byte)3); // d1 and d3
+        d2.month((byte) 2); // d2 only
+        d3.month((byte) 3); // d1 and d3
 
         assertEquals("1970-3-1", d1.toString());
         assertEquals("1970-3-1", d3.toString());
@@ -587,7 +600,7 @@ public class StructTest extends BytesTestCommon {
         assertEquals("1970-2-1", d3.toString());
 
         // change d2 (and so also d3)
-        d2.month((byte)4);
+        d2.month((byte) 4);
         assertEquals("1970-4-1", d2.toString());
         assertEquals("1970-4-1", d3.toString());
 
@@ -595,7 +608,7 @@ public class StructTest extends BytesTestCommon {
         d3.copy(d2);
 
         // change d2; d3 stays the same
-        d2.month((byte)5);
+        d2.month((byte) 5);
         assertEquals("1970-5-1", d2.toString());
         assertEquals("1970-4-1", d3.toString());
 

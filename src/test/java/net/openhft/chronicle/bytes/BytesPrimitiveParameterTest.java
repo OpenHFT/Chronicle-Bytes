@@ -68,11 +68,11 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
                     try {
                         nc.accept(bytes);
                     } catch (IllegalArgumentException |
-                            BufferOverflowException |
-                            BufferUnderflowException |
-                            AssertionError |
-                            UnsupportedOperationException |
-                            StringIndexOutOfBoundsException accepted) {
+                             BufferOverflowException |
+                             BufferUnderflowException |
+                             AssertionError |
+                             UnsupportedOperationException |
+                             StringIndexOutOfBoundsException accepted) {
                         // Although strictly not correct, we accept these Exceptions/Errors for neg-args
                     } catch (Throwable t) {
                         if (!(t instanceof IOException))
