@@ -69,6 +69,7 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      *                    if {@code false}, debug-level messages will be logged instead
      * @return the builder instance for method chaining
      */
+    @Deprecated(/* remove in x.25 */)
     @Override
     public MethodReaderBuilder warnMissing(boolean warnMissing) {
         // always true
