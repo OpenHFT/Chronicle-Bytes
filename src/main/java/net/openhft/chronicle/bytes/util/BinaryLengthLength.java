@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
+
 /**
  * Enum representing different byte lengths for binary values.
  * It provides methods to get the code associated with each byte length,
@@ -30,9 +31,8 @@ import org.jetbrains.annotations.NotNull;
  * to write the length of the data into the {@link Bytes} object.
  */
 public enum BinaryLengthLength {
-
     /**
-     * Represents an 8-bit length binary value.
+     * Represents an 8-bit length encoding for binary data.
      */
     LENGTH_8BIT {
         /**
@@ -75,9 +75,8 @@ public enum BinaryLengthLength {
             UnsafeMemory.MEMORY.storeFence(); // Ensures that the write is flushed to memory
         }
     },
-
     /**
-     * Represents a 16-bit length binary value.
+     * Represents a 16-bit length encoding for binary data.
      */
     LENGTH_16BIT {
         /**
@@ -120,9 +119,8 @@ public enum BinaryLengthLength {
             UnsafeMemory.MEMORY.storeFence(); // Ensures that the write is flushed to memory
         }
     },
-
     /**
-     * Represents a 32-bit length binary value.
+     * Represents a 32-bit length encoding for binary data.
      */
     LENGTH_32BIT {
         /**
@@ -168,36 +166,36 @@ public enum BinaryLengthLength {
     static final long MASK = 0xFFFFFFFFL;
 
     /**
-     * Throws an IllegalStateException indicating that the length is invalid.
+     * Constructs an IllegalStateException for an invalid length.
      *
-     * @param length The invalid length.
-     * @return IllegalStateException indicating that the length is invalid.
+     * @param length the invalid length
+     * @return the IllegalStateException instance with a message regarding the invalid length
      */
     IllegalStateException invalidLength(@NonNegative final long length) {
         return new IllegalStateException("length: " + length);
     }
 
     /**
-     * Returns the code representing the binary length.
+     * Returns the code representing the length encoding.
      *
-     * @return The code for the binary length.
+     * @return the length encoding code
      */
     public abstract int code();
 
     /**
-     * Initializes a {@link BytesOut} object with the length code.
+     * Initialises the binary data with the appropriate length encoding.
      *
-     * @param bytes The {@link BytesOut} object to initialize.
-     * @return The position within the {@link BytesOut} where the length will be written.
+     * @param bytes the output bytes to write to
+     * @return the position where the length encoding starts
      */
     public abstract long initialise(@NotNull BytesOut<?> bytes);
 
     /**
      * Writes the length of the data into the {@link Bytes} object.
      *
-     * @param bytes                           The {@link Bytes} object to write to.
-     * @param positionReturnedFromInitialise  The position within the {@link Bytes} to write the length.
-     * @param end                             The end position of the data within the {@link Bytes}.
+     * @param bytes                          The {@link Bytes} object to write to.
+     * @param positionReturnedFromInitialise The position within the {@link Bytes} to write the length.
+     * @param end                            The end position of the data within the {@link Bytes}.
      */
     public abstract void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end);
 }

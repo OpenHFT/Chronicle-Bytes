@@ -43,9 +43,9 @@ import java.util.function.Supplier;
  *
  * <p>This class also provides a method for extracting all fields from a class and its
  * superclasses (except transient and static fields). All the fields are made accessible
- * even if they are private, and are then stored in a map for future access.</p>
+ * even if they are private, and are then stored in a map for future access.
  *
- * <p>Note: This class suppresses rawtypes and unchecked warnings.</p>
+ * <p>Note: This class suppresses rawtypes and unchecked warnings.
  *
  * @param <T> the type of the object to be marshaled.
  */

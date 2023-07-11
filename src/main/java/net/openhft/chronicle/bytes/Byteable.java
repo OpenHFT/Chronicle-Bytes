@@ -42,9 +42,9 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @param offset     the offset within the ByteStore, indicating the starting point of the memory section
      * @param length     the length of the memory section within the ByteStore
      * @throws ClosedIllegalStateException if it is closed
-     * @throws IllegalArgumentException if the provided arguments are invalid
-     * @throws BufferOverflowException if the new memory section extends beyond the end of the ByteStore
-     * @throws BufferUnderflowException if the new memory section starts before the start of the ByteStore
+     * @throws IllegalArgumentException    if the provided arguments are invalid
+     * @throws BufferOverflowException     if the new memory section extends beyond the end of the ByteStore
+     * @throws BufferUnderflowException    if the new memory section starts before the start of the ByteStore
      */
     void bytesStore(@NotNull BytesStore<B, U> bytesStore, @NonNegative long offset, @NonNegative long length)
             throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, BufferUnderflowException;
@@ -86,9 +86,10 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      *
      * @param shared true if the lock is shared, false if it's exclusive
      * @return the FileLock object representing the lock
-     * @throws IOException if an error occurs while locking the file
+     * @throws IOException                   if an error occurs while locking the file
      * @throws UnsupportedOperationException if the underlying implementation does not support file locking
      */
+    // TODO move to implementations in x.25
     default FileLock lock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();
     }
@@ -98,9 +99,10 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      *
      * @param shared true if the lock is shared, false if it's exclusive
      * @return the FileLock object if the lock was acquired successfully; null otherwise
-     * @throws IOException if an error occurs while trying to lock the file
+     * @throws IOException                   if an error occurs while trying to lock the file
      * @throws UnsupportedOperationException if the underlying implementation does not support file locking
      */
+    // TODO move to implementations in x.25
     default FileLock tryLock(boolean shared) throws IOException {
         throw new UnsupportedOperationException();
     }

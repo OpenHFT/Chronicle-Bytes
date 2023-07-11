@@ -25,18 +25,20 @@ import java.nio.BufferUnderflowException;
 import java.util.function.ToLongFunction;
 
 /**
- * An interface to compute a hash value for a given {@link BytesStore}.
+ * Represents a function that computes a 64-bit hash value from a {@link BytesStore}.
+ * This interface provides static methods for computing 32-bit and 64-bit hash values,
+ * using either optimized or vanilla implementations.
  *
- * @param <B> Type parameter that extends BytesStore
+ * @param <B> the type of {@link BytesStore} that this function can compute hash values for.
  */
 @SuppressWarnings("rawtypes")
 public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> {
 
     /**
-     * Computes a hash value for the given {@link BytesStore}.
+     * Computes a 64-bit hash value of the given {@link BytesStore}.
      *
-     * @param b the {@link BytesStore} for which the hash is to be computed
-     * @return a long representing the hash value
+     * @param b the {@link BytesStore} to compute the hash for.
+     * @return the 64-bit hash value.
      */
     static long hash(@NotNull BytesStore b) {
         return b.isDirectMemory()
@@ -45,13 +47,13 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     /**
-     * Computes a hash value for the given {@link BytesStore}, considering the specified length.
+     * Computes a 64-bit hash value of the given {@link BytesStore} with a specified length.
      *
-     * @param b      the {@link BytesStore} for which the hash is to be computed
-     * @param length the length to be considered for hashing
-     * @return a long representing the hash value
-     * @throws IllegalStateException    if any state specific exception occurs
-     * @throws BufferUnderflowException if there's less data than expected
+     * @param b      the {@link BytesStore} to compute the hash for.
+     * @param length the number of bytes to include in the hash computation.
+     * @return the 64-bit hash value.
+     * @throws IllegalStateException    if the underlying memory is not readable.
+     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     static long hash(@NotNull BytesStore b, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         return b.isDirectMemory()
@@ -60,10 +62,10 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     /**
-     * Computes a 32-bit hash value for the given {@link BytesStore}.
+     * Computes a 32-bit hash value of the given {@link BytesStore}.
      *
-     * @param b the {@link BytesStore} for which the hash is to be computed
-     * @return an int representing the 32-bit hash value
+     * @param b the {@link BytesStore} to compute the hash for.
+     * @return the 32-bit hash value.
      */
     static int hash32(BytesStore b) {
         long hash = hash(b);
@@ -71,13 +73,13 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     /**
-     * Computes a 32-bit hash value for the given {@link BytesStore}, considering the specified length.
+     * Computes a 32-bit hash value of the given {@link BytesStore} with a specified length.
      *
-     * @param b      the {@link BytesStore} for which the hash is to be computed
-     * @param length the length to be considered for hashing
-     * @return an int representing the 32-bit hash value
-     * @throws IllegalStateException    if any state specific exception occurs
-     * @throws BufferUnderflowException if there's less data than expected
+     * @param b      the {@link BytesStore} to compute the hash for.
+     * @param length the number of bytes to include in the hash computation.
+     * @return the 32-bit hash value.
+     * @throws IllegalStateException    if the underlying memory is not readable.
+     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     static int hash32(@NotNull BytesStore b, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         long hash = hash(b, length);
@@ -85,13 +87,13 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
     }
 
     /**
-     * Applies the hash function to the given {@link BytesStore} with a specified length.
+     * Computes a 64-bit hash value of the given {@link BytesStore} with a specified length.
      *
-     * @param bytes  the {@link BytesStore} for which the hash is to be computed
-     * @param length the length to be considered for hashing
-     * @return a long representing the hash value
-     * @throws IllegalStateException    if any state specific exception occurs
-     * @throws BufferUnderflowException if there's less data than expected
+     * @param bytes  the {@link BytesStore} to compute the hash for.
+     * @param length the number of bytes to include in the hash computation.
+     * @return the 64-bit hash value.
+     * @throws IllegalStateException    if the underlying memory is not readable.
+     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException;
 }

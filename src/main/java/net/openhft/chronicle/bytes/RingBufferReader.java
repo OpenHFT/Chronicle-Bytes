@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
+
 /**
  * An interface for a reader on a Ring Buffer, providing methods to read and navigate through the buffer.
  * The reader supports a read-once-and-discard paradigm which makes it suitable for situations where
@@ -26,20 +27,26 @@ import net.openhft.chronicle.core.io.Closeable;
  * <p>
  * This interface also extends {@link RingBufferReaderStats}, which provides statistics
  * about the Ring Buffer's usage, and {@link Closeable} for closing the reader when it's no longer needed.
+ *
+ * <p> The reader supports concurrent reading and writing operations without blocking the writers, even when stopped.
  */
 public interface RingBufferReader extends RingBufferReaderStats, Closeable {
 
     /**
-     * Represents an undefined or unknown index within the ring buffer.
+     * Constant representing an undefined or unknown index within the ring buffer.
      */
     long UNKNOWN_INDEX = -1;
 
     /**
+     * Checks if the Ring Buffer is empty.
+     *
      * @return true if the Ring Buffer is empty, false otherwise.
      */
     boolean isEmpty();
 
     /**
+     * Checks if the Ring Buffer reader has been stopped.
+     *
      * @return true if the Ring Buffer reader has been stopped, false otherwise.
      */
     boolean isStopped();
@@ -70,26 +77,31 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     /**
      * Overloaded method of {@link #afterRead(long)} providing additional details about the read operation.
      *
-     * @param next The position after the last read operation.
-     * @param payloadStart The starting position of the payload that was read.
+     * @param next            The position after the last read operation.
+     * @param payloadStart    The starting position of the payload that was read.
      * @param underlyingIndex The index in the underlying data structure from where the data was read.
      */
     void afterRead(@NonNegative long next, long payloadStart, long underlyingIndex);
 
     /**
-     * @return The index in the underlying data structure where the last read operation was performed.
+     * Retrieves the index in the underlying data structure where the last read operation occurred.
+     *
+     * @return The index of the last read operation.
      */
     long underlyingIndex();
 
     /**
      * A convenience method that reads data from the Ring Buffer by internally calling both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}.
      *
+     * @param bytes to read a message into
      * @return True if the read operation succeeded, false otherwise.
      */
     boolean read(BytesOut<?> bytes);
 
     /**
-     * @return The {@link BytesStore} instance which backs the Ring Buffer.
+     * Retrieves the {@link BytesStore} instance that backs the Ring Buffer.
+     *
+     * @return The backing {@link BytesStore} instance.
      */
     @SuppressWarnings("rawtypes")
     BytesStore byteStore();

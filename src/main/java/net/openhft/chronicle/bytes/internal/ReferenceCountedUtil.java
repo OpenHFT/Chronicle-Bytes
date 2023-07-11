@@ -22,15 +22,23 @@ import net.openhft.chronicle.core.io.ReferenceCounted;
 
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
+/**
+ * A utility class for handling operations related to {@link ReferenceCounted} instances.
+ * Provides methods to verify whether a {@link ReferenceCounted} instance or any object
+ * that implements {@link ReferenceCounted} has been previously released.
+ *
+ * <p> This class is not intended to be instantiated.
+ */
 public final class ReferenceCountedUtil {
 
+    // Private constructor to prevent instantiation
     private ReferenceCountedUtil() {
     }
 
     /**
      * Checks the provided {@code referenceCounted} throwing a ClosedIllegalStateException if it has been previously released.
      *
-     * @param referenceCounted non-null resource to check
+     * @param referenceCounted the non-null {@link ReferenceCounted} resource to check
      * @throws ClosedIllegalStateException if the provided {@code referenceCounted} is released
      * @throws NullPointerException        if the provided {@code referenceCounted} is {@code null}
      */
@@ -47,7 +55,7 @@ public final class ReferenceCountedUtil {
      * Checks the provided {@code object} throwing a ClosedIllegalStateException if it implements
      * ReferenceCounted AND has been previously released.
      *
-     * @param object non-null resource to check
+     * @param object the non-null object to check
      * @throws ClosedIllegalStateException if the provided {@code object} is released
      * @throws NullPointerException        if the provided {@code object} is {@code null}
      */

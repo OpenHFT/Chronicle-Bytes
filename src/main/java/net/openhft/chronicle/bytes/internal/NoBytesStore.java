@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.io.ReferenceChangeListener;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
+import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -39,11 +40,10 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public final class NoBytesStore implements BytesStore {
     public static final BytesStore NO_BYTES_STORE = new NoBytesStore();
-
     public static final long NO_PAGE;
-
     @NotNull
     public static final Bytes<?> NO_BYTES;
+    private static final ByteBuffer BYTE_BUFFER = ByteBuffer.allocate(4 << 10);
 
     static {
         NO_PAGE = OS.memory().allocate(OS.pageSize());
@@ -57,6 +57,11 @@ public final class NoBytesStore implements BytesStore {
     @NotNull
     public static <T, B extends BytesStore<B, T>> BytesStore<B, T> noBytesStore() {
         return (BytesStore<B, T>) NO_BYTES_STORE;
+    }
+
+    private static BufferUnderflowException throwBUE(long offset) {
+        requireNonNegative(offset);
+        return new BufferUnderflowException();
     }
 
     @Override
@@ -211,11 +216,6 @@ public final class NoBytesStore implements BytesStore {
     @Override
     public byte readByte(@NonNegative long offset) {
         throw throwBUE(offset);
-    }
-
-    private static BufferUnderflowException throwBUE(@NonNegative long offset) {
-        requireNonNegative(offset);
-        return new BufferUnderflowException();
     }
 
     @Override

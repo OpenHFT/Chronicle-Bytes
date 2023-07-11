@@ -41,9 +41,9 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
     /**
      * Create a new invocation handler.
      *
-     * @param tClass    The type of the interface to be handled.
+     * @param tClass     The type of the interface to be handled.
      * @param methodToId A function mapping Methods to corresponding {@link MethodEncoder} instances.
-     * @param out      The output stream to which encoded invocations should be written.
+     * @param out        The output stream to which encoded invocations should be written.
      */
     public BinaryBytesMethodWriterInvocationHandler(Class tClass, Function<Method, MethodEncoder> methodToId, BytesOut<?> out) {
         super(tClass);
@@ -58,11 +58,11 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
      * @param method The method that was invoked.
      * @param args   The arguments provided to the method.
      * @return Always null.
-     * @throws IllegalStateException if the underlying bytes store is closed.
-     * @throws BufferOverflowException if there isn't enough space in the {@link BytesOut} to write the value.
-     * @throws BufferUnderflowException if the underlying bytes store cannot provide enough data.
-     * @throws IllegalArgumentException if the arguments don't match the method's requirements.
-     * @throws ArithmeticException if numeric values overflow or underflow.
+     * @throws IllegalStateException        if the underlying bytes store is closed.
+     * @throws BufferOverflowException      if there isn't enough space in the {@link BytesOut} to write the value.
+     * @throws BufferUnderflowException     if the underlying bytes store cannot provide enough data.
+     * @throws IllegalArgumentException     if the arguments don't match the method's requirements.
+     * @throws ArithmeticException          if numeric values overflow or underflow.
      * @throws InvalidMarshallableException if a marshalling error occurs.
      */
     @Override

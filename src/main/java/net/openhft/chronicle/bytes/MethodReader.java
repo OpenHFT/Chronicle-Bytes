@@ -52,8 +52,8 @@ public interface MethodReader extends Closeable {
      *
      * @return {@code true} if a message was successfully read, {@code false} if no more messages are available
      * @throws InvocationTargetRuntimeException if an exception is thrown by the target method
-     * @throws IllegalStateException if this method is invoked at an inappropriate time
-     * @throws BufferUnderflowException if there is not enough data available in the buffer to read the next message
+     * @throws IllegalStateException            if this method is invoked at an inappropriate time
+     * @throws BufferUnderflowException         if there is not enough data available in the buffer to read the next message
      */
     boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException;

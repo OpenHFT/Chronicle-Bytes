@@ -40,13 +40,11 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     private static final StringBuilderPool SBP = new StringBuilderPool();
 
     /**
-     * Constructs a UTF8StringInterner with the specified capacity.
+     * Constructs a new UTF8StringInterner with the specified capacity.
      *
-     * @param capacity the capacity of the interner
-     * @throws IllegalArgumentException if the capacity is negative
+     * @param capacity the maximum number of items that the interner can hold.
      */
-    public UTF8StringInterner(@NonNegative int capacity)
-            throws IllegalArgumentException {
+    public UTF8StringInterner(@NonNegative int capacity) {
         super(capacity);
     }
 
@@ -58,8 +56,8 @@ public class UTF8StringInterner extends AbstractInterner<String> {
      * @param length the number of bytes to read from the {@link BytesStore}
      * @return the resulting UTF-8 encoded string
      * @throws UTFDataFormatRuntimeException if the bytes are not valid UTF-8 encoded characters
-     * @throws IllegalStateException          if the underlying data structure is invalid
-     * @throws BufferUnderflowException       if the buffer's limits are exceeded
+     * @throws IllegalStateException         if the underlying data structure is invalid
+     * @throws BufferUnderflowException      if the buffer's limits are exceeded
      */
     @SuppressWarnings("rawtypes")
     @Override

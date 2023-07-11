@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
+
 /**
  * Optimized hashing algorithm for BytesStore.
  * <p>
@@ -43,13 +44,13 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     private static final int TOP_BYTES = IS_LITTLE_ENDIAN ? 4 : 0;
 
     /**
-     * Hash BytesStore contents of length between 1 and 7 bytes inclusive.
+     * Computes a 64-bit hash value for the given BytesStore for data sizes between 1 to 7 bytes.
      *
-     * @param store     the BytesStore to hash.
-     * @param remaining the length of content in bytes.
-     * @return hash value.
-     * @throws IllegalStateException      if an illegal state is encountered.
-     * @throws BufferUnderflowException if buffer underflows during reading.
+     * @param store     The {@link BytesStore} to compute the hash for.
+     * @param remaining The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws IllegalStateException    If the underlying memory is not readable.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     static long applyAsLong1to7(@NotNull BytesStore store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -58,14 +59,13 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Hash BytesStore contents of length 8 bytes.
+     * Computes a 64-bit hash value for the given BytesStore for exactly 8 bytes of data.
      *
-     * @param store     the BytesStore to hash.
-     * @return hash value.
-     * @throws IllegalStateException      if an illegal state is encountered.
-     * @throws BufferUnderflowException if buffer underflows during reading.
+     * @param store The {@link BytesStore} to compute the hash for.
+     * @return A 64-bit hash value.
+     * @throws IllegalStateException    If the underlying memory is not readable.
+     * @throws BufferUnderflowException If there is not enough data.
      */
-
     static long applyAsLong8(@NotNull BytesStore store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
 
@@ -73,19 +73,34 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Hash long values.
+     * Performs a hash on a 64-bit long value.
      *
-     * @param l long value to be hashed.
-     * @return hash value.
+     * @param l The long value to hash.
+     * @return A 64-bit hash value.
      */
     public static long hash(long l) {
         return hash0(l, l >> 32);
     }
 
+    /**
+     * Computes a 64-bit hash value using two long integers.
+     *
+     * @param l  The lower 64 bits.
+     * @param hi The upper 64 bits.
+     * @return A 64-bit hash value.
+     */
     static long hash0(long l, long hi) {
         return agitate(l * K0 + hi * K1);
     }
 
+    /**
+     * Computes a 64-bit hash value for the given BytesStore for data sizes between 9 to 16 bytes.
+     *
+     * @param store     The {@link BytesStore} to compute the hash for.
+     * @param remaining The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws BufferUnderflowException If there is not enough data.
+     */
     static long applyAsLong9to16(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
@@ -112,6 +127,14 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
+    /**
+     * Computes a 64-bit hash value for the given BytesStore for data sizes between 17 to 32 bytes.
+     *
+     * @param store     The {@link BytesStore} to compute the hash for.
+     * @param remaining The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws BufferUnderflowException If there is not enough data.
+     */
     static long applyAsLong17to32(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
@@ -138,6 +161,14 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
+    /**
+     * Computes a 64-bit hash value for the given BytesStore for data sizes that are multiple of 32 bytes.
+     *
+     * @param store     The {@link BytesStore} to compute the hash for.
+     * @param remaining The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws BufferUnderflowException If there is not enough data.
+     */
     public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
@@ -175,13 +206,12 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Computes the hash of the provided byte store by performing
-     * an optimized hashing function.
+     * Computes a 64-bit hash value for the given BytesStore for any size of data.
      *
-     * @param store      the {@link BytesStore} object whose contents are to be hashed.
-     * @param remaining  the number of remaining bytes to consider in the hash calculation.
-     * @return the hash value as a {@code long}.
-     * @throws BufferUnderflowException if an attempt is made to read past the end of the buffer.
+     * @param store     The {@link BytesStore} to compute the hash for.
+     * @param remaining The number of bytes to process.
+     * @return A 64-bit hash value.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     public static long applyAsLongAny(@NotNull BytesStore store, @NonNegative long remaining) throws BufferUnderflowException {
         @NotNull final BytesStore bytesStore = store.bytesStore();
@@ -321,7 +351,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param store     the BytesStore to hash.
      * @param remaining the length of content in BytesStore to hash.
      * @return the hash value.
-     * @throws IllegalStateException      if an illegal state is encountered.
+     * @throws IllegalStateException    if an illegal state is encountered.
      * @throws BufferUnderflowException if buffer underflows during reading.
      */
     @Override

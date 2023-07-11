@@ -20,24 +20,20 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.ThrowingLongSupplier;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
- * Provides a reference to an array of 32-bit integer values in Text wire format.
- *
- * <p>The {@code TextLongReference} class allows for the manipulation of long values stored
- * in a Text wire format. It provides methods to read, write and perform atomic operations
- * on the stored values.</p>
- *
- * <p>Text wire format is a human-readable data serialization format used to represent structured data.</p>
+ * Implementation of a reference to an array of 64-bit long values in Text wire format.
+ * The text representation includes an atomic lock flag along with the value.
+ * The format is: {@code !!atomic {  locked: false, value: 00000000000000000000 } }.
  */
 public class TextLongReference extends AbstractReference implements LongReference {
 
@@ -52,11 +48,14 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     private static final int DIGITS = 20;
 
     /**
-     * Writes the provided value into the given Bytes instance in Text wire format.
+     * Writes the initial structure of a 64-bit long value to the specified {@link Bytes} instance
+     * in Text wire format, with the given value.
      *
      * @param bytes the Bytes instance to write to.
-     * @param value the value to be written.
-     * @throws IllegalStateException    if released
+     * @param value the long value to be written.
+     * @throws BufferOverflowException  if there's not enough space in the buffer to write the value.
+     * @throws IllegalArgumentException if an illegal argument is provided.
+     * @throws IllegalStateException    if an invalid state is encountered.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -66,11 +65,11 @@ public class TextLongReference extends AbstractReference implements LongReferenc
     }
 
     /**
-     * Executes a given operation with the lock held.
+     * Executes the given {@link ThrowingLongSupplier} within a lock to ensure thread safety.
      *
-     * @param call the operation to execute with the lock held.
-     * @return the result of the operation.
-     * @throws IllegalStateException if the operation fails.
+     * @param call the ThrowingLongSupplier to be executed.
+     * @return the result of ThrowingLongSupplier.
+     * @throws IllegalStateException if the lock value is invalid or other illegal state is encountered.
      */
     private <T extends Exception> long withLock(@NotNull ThrowingLongSupplier<T> call)
             throws IllegalStateException {
@@ -90,11 +89,22 @@ public class TextLongReference extends AbstractReference implements LongReferenc
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
-        } catch (Exception throwable) {
-            throw new AssertionError(throwable);
+        } catch (Exception e) {
+            throw Jvm.rethrow(e);
         }
     }
 
+    /**
+     * Configures the byte store for this reference.
+     *
+     * @param bytes  the BytesStore instance where the reference is to be stored.
+     * @param offset the offset in the byte store where the reference is to be positioned.
+     * @param length the length of the reference in bytes.
+     * @throws IllegalArgumentException if an illegal argument is provided.
+     * @throws IllegalStateException    if an invalid state is encountered.
+     * @throws BufferOverflowException  if there's not enough space in the buffer to write the reference.
+     */
+    @SuppressWarnings("rawtypes")
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException {

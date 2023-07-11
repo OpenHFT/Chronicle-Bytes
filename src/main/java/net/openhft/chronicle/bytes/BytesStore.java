@@ -76,7 +76,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param cs the source BytesStore
      * @return a new BytesStore that is a copy of the source
      * @throws ClosedIllegalStateException if the source BytesStore has been released
-     * @throws IllegalStateException if the source BytesStore is in an unusable state
+     * @throws IllegalStateException       if the source BytesStore is in an unusable state
      */
     static BytesStore from(@NotNull BytesStore cs)
             throws ClosedIllegalStateException, IllegalStateException {
@@ -96,9 +96,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Provides a BytesStore that allows access to a group of fields in a given object.
      *
-     * @param o the object that contains the fields
+     * @param o         the object that contains the fields
      * @param groupName the group name of the fields
-     * @param padding the padding to be used
+     * @param padding   the padding to be used
      * @return a BytesStore which points to the fields
      */
     static <T> BytesStore<?, T> forFields(Object o, String groupName, int padding) {
@@ -181,7 +181,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Creates a flexible ByteBuffer instance that resides in native memory.
      *
-     * @param size the initial size of the ByteBuffer
+     * @param size    the initial size of the ByteBuffer
      * @param maxSize the maximum allowable size of the ByteBuffer
      * @return a ByteBuffer with the provided initial size and maximum size in native memory
      */
@@ -216,7 +216,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Creates a PointerBytesStore that wraps bytes starting from a specific address in memory.
      *
      * @param address the starting memory address for the PointerBytesStore
-     * @param length the length of the memory segment to be wrapped by the PointerBytesStore
+     * @param length  the length of the memory segment to be wrapped by the PointerBytesStore
      * @return a PointerBytesStore that wraps the specified memory segment
      */
     @NotNull
@@ -239,13 +239,13 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Performs a compare-and-swap operation on the specified float value at the given offset.
      * If the current float value at the offset equals the expected value, it's replaced with the provided new value.
      *
-     * @param offset the position where the float value is stored
+     * @param offset   the position where the float value is stored
      * @param expected the expected current value
-     * @param value the new value to be set if the current value equals the expected value
+     * @param value    the new value to be set if the current value equals the expected value
      * @return true if the compare-and-swap was successful, false otherwise
-     * @throws BufferOverflowException if the offset is out of bounds
+     * @throws BufferOverflowException     if the offset is out of bounds
      * @throws ClosedIllegalStateException if this BytesStore has been closed
-     * @throws IllegalStateException if this BytesStore is in an unusable state
+     * @throws IllegalStateException       if this BytesStore is in an unusable state
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -270,9 +270,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset the position where the integer is stored
      * @param adding the integer to add
      * @return the result of the addition
-     * @throws BufferUnderflowException if the offset is out of bounds
+     * @throws BufferUnderflowException    if the offset is out of bounds
      * @throws ClosedIllegalStateException if this BytesStore has been closed
-     * @throws IllegalStateException if this BytesStore is in an unusable state
+     * @throws IllegalStateException       if this BytesStore is in an unusable state
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -602,7 +602,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param bytesStore the BytesStore to match against
      * @param length     the length to match
      * @return {@code true} if the bytes up to min(length, this.length(), bytesStore.length()) matched.
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -617,8 +617,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Returns the bytes sum of the readable bytes in this BytesStore.
      *
      * @return unsigned bytes sum
-     * @throws BufferUnderflowException if there's not enough data to be moved
-     * @throws IllegalStateException if the BytesStore has been released
+     * @throws BufferUnderflowException    if there's not enough data to be moved
+     * @throws IllegalStateException       if the BytesStore has been released
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -725,8 +725,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset to add and get
      * @param adding value to add, can be 1
-     * @throws BufferUnderflowException if there's not enough data to be moved
      * @return the sum
+     * @throws BufferUnderflowException if there's not enough data to be moved
      */
     default int addAndGetUnsignedByteNotAtomic(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException, IllegalStateException {
@@ -745,7 +745,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -766,7 +766,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -787,7 +787,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -808,7 +808,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -826,12 +826,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Moves a sequence of bytes within this BytesStore from the source to destination index.
      *
-     * @param from the index of the first byte to be moved
-     * @param to the index where the first byte should be moved to
+     * @param from   the index of the first byte to be moved
+     * @param to     the index where the first byte should be moved to
      * @param length the number of bytes to be moved
      * @throws BufferUnderflowException if there's not enough data to be moved
-     * @throws IllegalStateException if the BytesStore is in an unusable state
-     * @throws ArithmeticException if the move would result in an index overflow
+     * @throws IllegalStateException    if the BytesStore is in an unusable state
+     * @throws ArithmeticException      if the move would result in an index overflow
      */
     void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException;
@@ -841,7 +841,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset  the offset to write to
      * @param atLeast the long value that is to be written at offset if it is not less than the current value at offset
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -866,7 +866,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset  the offset to write to
      * @param atLeast the int value that is to be written at offset if it is not less than the current value at offset
-     * @throws BufferUnderflowException if there's not enough data to be moved
+     * @throws BufferUnderflowException    if there's not enough data to be moved
      * @throws ClosedIllegalStateException if this Bytes has been released
      * @throws IllegalStateException       if this Bytes is in an unusable state
      */
@@ -897,12 +897,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Encrypts or decrypts this BytesStore using the provided Cipher and writes the result to the outBytes.
      * It ensures that outBytes has sufficient capacity for the result and restores the original read position of outBytes after operation.
      *
-     * @param cipher the Cipher to use for encryption or decryption
+     * @param cipher   the Cipher to use for encryption or decryption
      * @param outBytes the Bytes object where the result will be written
-     * @param using1 a ByteBuffer to use as temporary buffer during the operation
-     * @param using2 another ByteBuffer to use as temporary buffer during the operation
+     * @param using1   a ByteBuffer to use as temporary buffer during the operation
+     * @param using2   another ByteBuffer to use as temporary buffer during the operation
      * @throws ClosedIllegalStateException if the ByteStore or outBytes has been closed
-     * @throws IllegalStateException if any operation on the ByteStore or outBytes fails
+     * @throws IllegalStateException       if any operation on the ByteStore or outBytes fails
      */
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
             throws ClosedIllegalStateException, IllegalStateException {
@@ -939,10 +939,10 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Convenience method to perform the cipher operation using thread local ByteBuffers for temporary buffers.
      * It encrypts or decrypts this BytesStore using the provided Cipher and writes the result to the outBytes.
      *
-     * @param cipher the Cipher to use for encryption or decryption
+     * @param cipher   the Cipher to use for encryption or decryption
      * @param outBytes the Bytes object where the result will be written
      * @throws ClosedIllegalStateException if the ByteStore or outBytes has been closed
-     * @throws IllegalStateException if any operation on the ByteStore or outBytes fails
+     * @throws IllegalStateException       if any operation on the ByteStore or outBytes fails
      */
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes)
             throws ClosedIllegalStateException, IllegalStateException {

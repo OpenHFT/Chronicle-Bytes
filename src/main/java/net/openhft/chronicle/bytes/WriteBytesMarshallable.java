@@ -38,16 +38,13 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      *
      * <p>This method is responsible for calling
      * {@link net.openhft.chronicle.core.io.Validatable#validate()} as needed to ensure
-     * the validity of the state of the object before serialization.</p>
+     * the validity of the state of the object before serialization.
      *
-     * @param bytes the Bytes instance to write to.
-     * @throws IllegalStateException if bytes instance is released or not in a writable state.
-     * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws BufferUnderflowException if there is not enough data available to read from the buffer.
-     * @throws IllegalArgumentException if an argument is illegal or inappropriate.
-     * @throws ArithmeticException if numeric overflow or underflow occurs.
-     * @throws InvalidMarshallableException if an object fails validation checks before or during serialization.
+     * @param bytes the {@link BytesOut} instance to write the object's state to.
+     * @throws IllegalStateException        if the object is in an inappropriate state for the request.
+     * @throws BufferOverflowException      if there is no more space left to write in the buffer.
+     * @throws InvalidMarshallableException if the object cannot be successfully serialized.
      */
     void writeMarshallable(BytesOut<?> bytes)
-            throws IllegalStateException, BufferOverflowException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, InvalidMarshallableException;
+            throws IllegalStateException, BufferOverflowException, InvalidMarshallableException;
 }

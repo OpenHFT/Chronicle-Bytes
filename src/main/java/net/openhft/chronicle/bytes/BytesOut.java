@@ -28,6 +28,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
+
 /**
  * This interface represents an output stream for writing data to bytes.
  * It extends {@link StreamingDataOutput}, {@link ByteStringAppender},
@@ -35,7 +36,7 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExc
  * wide range of operations for handling byte data, including appending, prepending,
  * and producing a hex dump description.
  *
- * <p>Note: This interface suppresses rawtypes and unchecked warnings.</p>
+ * <p>Note: This interface suppresses rawtypes and unchecked warnings.
  *
  * @param <U> the type of the BytesOut
  */
@@ -50,11 +51,11 @@ public interface BytesOut<U> extends
      * Creates a proxy for the provided interface(s), such that each method invocation on the proxy
      * is written to this {@code BytesOut} instance for replay.
      *
-     * @param tClass the primary interface to be proxied.
+     * @param tClass     the primary interface to be proxied.
      * @param additional any additional interfaces to be proxied.
      * @return a proxy implementing the provided interfaces.
-     * @throws IllegalArgumentException if an argument is inappropriate
-     * @throws NullPointerException if the provided {@code tClass} is {@code null}
+     * @throws IllegalArgumentException    if an argument is inappropriate
+     * @throws NullPointerException        if the provided {@code tClass} is {@code null}
      * @throws ClosedIllegalStateException if this BytesOut has been previously released
      */
     @NotNull
@@ -72,10 +73,10 @@ public interface BytesOut<U> extends
      * Writes a {@link WriteBytesMarshallable} to this {@code BytesOut} instance.
      *
      * @param marshallable the object to be written.
-     * @throws IllegalArgumentException if a method is invoked with an illegal or inappropriate argument.
-     * @throws BufferOverflowException if there is not enough space in the buffer.
-     * @throws IllegalStateException if there is an error in the internal state.
-     * @throws BufferUnderflowException if there is not enough data available in the buffer.
+     * @throws IllegalArgumentException     if a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException      if there is not enough space in the buffer.
+     * @throws IllegalStateException        if there is an error in the internal state.
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
      * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
      */
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
@@ -86,12 +87,12 @@ public interface BytesOut<U> extends
      * This method supports a limited set of writeObject types.
      *
      * @param componentType the expected type of the object.
-     * @param obj the object to be written.
-     * @throws IllegalArgumentException if a method is invoked with an illegal or inappropriate argument.
-     * @throws BufferOverflowException if there is not enough space in the buffer.
-     * @throws ArithmeticException if there is an arithmetic error.
-     * @throws IllegalStateException if there is an error in the internal state.
-     * @throws BufferUnderflowException if there is not enough data available in the buffer.
+     * @param obj           the object to be written.
+     * @throws IllegalArgumentException     if a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException      if there is not enough space in the buffer.
+     * @throws ArithmeticException          if there is an arithmetic error.
+     * @throws IllegalStateException        if there is an error in the internal state.
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
      * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
      */
     default void writeObject(Class componentType, Object obj)

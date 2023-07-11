@@ -21,7 +21,17 @@ import net.openhft.chronicle.core.io.Closeable;
 
 import java.lang.reflect.InvocationHandler;
 
+/**
+ * Interface for an invocation handler that provides a mechanism to handle the closure of resources.
+ * Implementations of this interface must provide a concrete implementation of the onClose method,
+ * which takes a Closeable as a parameter. This interface extends the InvocationHandler interface from the Java Reflection API.
+ */
 public interface BytesMethodWriterInvocationHandler extends InvocationHandler {
 
+    /**
+     * Handles the closure of the provided Closeable resource.
+     *
+     * @param closeable the resource that should be handled upon closure
+     */
     void onClose(Closeable closeable);
 }

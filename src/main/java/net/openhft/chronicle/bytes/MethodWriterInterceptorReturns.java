@@ -35,8 +35,8 @@ public interface MethodWriterInterceptorReturns {
     /**
      * Intercepts a method invocation.
      *
-     * @param method the method that is being invoked
-     * @param args the arguments used for the method call
+     * @param method  the method that is being invoked
+     * @param args    the arguments used for the method call
      * @param invoker a functional interface representing the invocation of the method
      * @return the next object to use if there is any chaining, either this, null if no chaining, or another object.
      */

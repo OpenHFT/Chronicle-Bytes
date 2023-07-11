@@ -28,7 +28,7 @@ import java.nio.BufferUnderflowException;
  * A special kind of InputStream implementation which reads data from a StreamingDataInput instance.
  *
  * <p>This class provides a way to connect APIs expecting an InputStream with data sources
- * encapsulated in StreamingDataInput instances.</p>
+ * encapsulated in StreamingDataInput instances.
  *
  * @see StreamingDataInput
  * @see InputStream

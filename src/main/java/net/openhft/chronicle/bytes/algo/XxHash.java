@@ -26,10 +26,8 @@ import java.nio.BufferUnderflowException;
  * This class implements the xxHash algorithm for hashing byte stores.
  * xxHash is a non-cryptographic hash function known for its speed.
  *
- * <p>Migrated from Zero-Allocation-Hashing.</p>
+ * <p>Migrated from Zero-Allocation-Hashing.
  *
- * @author [Your Name]
- * @version 1.0
  * @see BytesStoreHash
  * @see BytesStore
  */
@@ -51,9 +49,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
     private final long seed;
 
     /**
-     * Initializes an instance of XxHash with the given seed.
+     * Constructs a new instance of XxHash with the specified seed.
      *
-     * @param seed the seed for the hash function.
+     * @param seed the seed for hash computation.
      */
     public XxHash(long seed) {
         this.seed = seed;
@@ -78,7 +76,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 64 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 64 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -91,7 +89,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 32 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 32 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -104,7 +102,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 8 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 8 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -126,13 +124,13 @@ public class XxHash implements BytesStoreHash<BytesStore> {
     }
 
     /**
-     * Calculates the hash code of the given byte store with specified length.
+     * Computes a hash value for the given byte store with a specified length.
      *
-     * @param bytes  the byte store to be hashed.
-     * @param length the length to be considered for hashing.
-     * @return the hash code.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @param bytes  the byte store.
+     * @param length the number of bytes to hash.
+     * @return the hash value.
+     * @throws IllegalStateException    If the state is illegal.
+     * @throws BufferUnderflowException If there is not enough data.
      */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {

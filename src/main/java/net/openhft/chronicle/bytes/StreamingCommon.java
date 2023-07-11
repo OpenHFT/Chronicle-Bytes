@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
+
 /**
  * Represents a streaming interface for handling streaming data with support for random access.
  * The interface is used for managing reading and writing positions within the streaming data.
@@ -33,11 +34,11 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
      * clears any existing data in the buffer and prepares it for new data to be written.
      *
      * <p>This operation is similar to rewinding the tape to the beginning,
-     * and having it ready to record new data over anything that was there before.</p>
+     * and having it ready to record new data over anything that was there before.
      *
      * @return A reference to this object, allowing for method chaining.
      * @throws ClosedIllegalStateException If this buffer has been closed
      */
     @NotNull
-    S clear()            throws ClosedIllegalStateException;
+    S clear() throws ClosedIllegalStateException;
 }

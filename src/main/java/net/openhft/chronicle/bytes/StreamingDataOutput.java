@@ -51,17 +51,17 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * of bytes from other sources like {@link ByteBuffer} and {@link RandomDataInput}. It also provides
  * methods for writing primitive data types and their boxed counterparts. Additionally, it supports
  * writing complex data structures such as {@link BigDecimal}, {@link BigInteger}, {@link Histogram}
- * and objects in unsafe way.</p>
+ * and objects in unsafe way.
  *
  * <p>Not all the methods are expected to be implemented by classes. Default methods are provided for
  * common use cases. Classes that extend this interface can override these methods to provide more
- * efficient or custom implementations.</p>
+ * efficient or custom implementations.
  *
  * <p>Implementations of this interface are expected to handle cases where the buffer may not have
- * enough capacity to handle the write operation. In such cases, methods should throw a {@link BufferOverflowException}.</p>
+ * enough capacity to handle the write operation. In such cases, methods should throw a {@link BufferOverflowException}.
  *
  * <p>Instances of classes implementing StreamingDataOutput are not guaranteed to be thread safe. If multiple
- * threads interact with the same instance, external synchronization should be used.</p>
+ * threads interact with the same instance, external synchronization should be used.
  *
  * @see RandomDataOutput
  * @see ByteBuffer

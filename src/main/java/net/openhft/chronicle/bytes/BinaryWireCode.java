@@ -20,9 +20,28 @@ package net.openhft.chronicle.bytes;
 import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Field;
+
 /**
- * Interface defining constants used in BinaryWire. These constants are used to represent
- * data types or values in a serialized format.
+ * The BinaryWireCode interface contains constants for various types of data expected
+ * in a binary wire protocol. These constants correspond to specific codes or ranges
+ * used in the decoding process.
+ * <p>
+ * The constants are categorized into different types:
+ * BYTES_LENGTH8, BYTES_LENGTH16, and BYTES_LENGTH32 correspond to sequences of length
+ * 0 - 255, 0 - 2^16-1, and 0 - 2^32-1 respectively,
+ * FIELD_ANCHOR, ANCHOR, and UPDATED_ALIAS are used for field anchoring purposes,
+ * U8_ARRAY represents an array of unsigned bytes,
+ * I64_ARRAY represents an array of 64-bit integer values,
+ * PADDING32 and PADDING are used for padding purposes,
+ * FLOAT32, FLOAT64, FLOAT_STOP_2, FLOAT_STOP_4, FLOAT_STOP_6, FLOAT_SET_LOW_0,
+ * FLOAT_SET_LOW_2, FLOAT_SET_LOW_4 are used for various floating point number operations,
+ * UUID, UINT8, UINT16, UINT32, INT8, INT16, INT32, INT64, SET_LOW_INT8, SET_LOW_INT16,
+ * STOP_BIT, INT64_0x are used for various integer operations and UUID representation,
+ * FALSE, TRUE, TIME, DATE, DATE_TIME, ZONED_DATE_TIME, TYPE_PREFIX, FIELD_NAME_ANY,
+ * STRING_ANY, EVENT_NAME, FIELD_NUMBER, NULL, TYPE_LITERAL, EVENT_OBJECT, COMMENT, HINT
+ * are used for various data type representations and operations,
+ * FIELD_NAME0 to FIELD_NAME31 are used to represent field names,
+ * STRING_0 to STRING_31 are used to represent strings.
  */
 public interface BinaryWireCode {
 
@@ -283,6 +302,7 @@ public interface BinaryWireCode {
 
     /**
      * Helper method for generating a text representation all the codes
+     *
      * @param clazz to search for constants to extract
      * @return an array of Strings for each code
      */

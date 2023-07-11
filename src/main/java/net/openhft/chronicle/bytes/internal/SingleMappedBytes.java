@@ -36,19 +36,35 @@ import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
- * Bytes to wrap memory mapped data.
- * <p>
- * NOTE These Bytes are single Threaded as are all Bytes.
+ * A class that extends the {@link CommonMappedBytes} to provide a mechanism to wrap memory-mapped data.
+ * This allows for high-performance file I/O operations by loading file segments into memory for
+ * byte-level manipulations.
+ *
+ * <p> Note: Instances of this class are not safe for use by multiple concurrent threads.
+ *
+ * @see CommonMappedBytes
  */
 @SuppressWarnings({"unchecked"})
 public class SingleMappedBytes extends CommonMappedBytes {
 
-    // assume the mapped file is reserved already.
+    /**
+     * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file.
+     *
+     * @param mappedFile The MappedFile object to be wrapped.
+     * @throws IllegalStateException if an error occurs during initialization.
+     */
     public SingleMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
         this(mappedFile, "");
     }
 
+    /**
+     * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file and associates it with the specified name.
+     *
+     * @param mappedFile The MappedFile object to be wrapped.
+     * @param name       The name to be associated with the SingleMappedBytes object.
+     * @throws IllegalStateException if an error occurs during initialization.
+     */
     protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {
         super(mappedFile, name);

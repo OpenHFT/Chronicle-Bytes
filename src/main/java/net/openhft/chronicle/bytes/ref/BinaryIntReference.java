@@ -29,7 +29,30 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * This class acts as a Binary 32-bit in values. c.f. TextIntReference
+ * Represents a 32-bit integer in binary form, backed by a {@link BytesStore}.
+ * <p>
+ * This class provides various operations to access and manipulate a single integer in binary form.
+ * The integer is stored in a BytesStore, and this class provides methods for atomic operations,
+ * reading/writing the value, and managing its state.
+ * <p>
+ * The class also supports volatile reads, ordered writes, and compare-and-swap operations.
+ * The maximum size of the backing storage is 4 bytes, corresponding to a 32-bit integer.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
+ * try (BinaryIntReference ref = new BinaryIntReference()) {
+ *     ref.bytesStore(bytesStore, 16, 4);
+ *     ref.setValue(10);
+ *     int value = ref.getVolatileValue();
+ * }
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @see BytesStore
+ * @see IntValue
  */
 public class BinaryIntReference extends AbstractReference implements IntValue {
     public static final int INT_NOT_COMPLETE = Integer.MIN_VALUE;
@@ -40,9 +63,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @param bytes  the BytesStore
      * @param offset the offset within the BytesStore
      * @param length the length of the value
-     * @throws IllegalStateException       if closed
-     * @throws IllegalArgumentException    if the length is not equal to maxSize
-     * @throws BufferOverflowException    if the offset is too large
+     * @throws IllegalStateException    if closed
+     * @throws IllegalArgumentException if the length is not equal to maxSize
+     * @throws BufferOverflowException  if the offset is too large
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -89,8 +112,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Retrieves the 32-bit integer value from the BytesStore.
      *
      * @return the 32-bit integer value
-     * @throws IllegalStateException      if closed
-     * @throws BufferUnderflowException  if the offset is too large
+     * @throws IllegalStateException    if closed
+     * @throws BufferUnderflowException if the offset is too large
      */
     @Override
     public int getValue()
@@ -104,7 +127,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Sets the 32-bit integer value in the BytesStore.
      *
      * @param value the 32-bit integer value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException   if closed
      * @throws BufferOverflowException if the offset is too large
      */
     @Override
@@ -119,8 +142,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Retrieves the 32-bit integer value using volatile memory semantics.
      *
      * @return the 32-bit integer value
-     * @throws IllegalStateException      if closed
-     * @throws BufferUnderflowException  if the offset is too large
+     * @throws IllegalStateException    if closed
+     * @throws BufferUnderflowException if the offset is too large
      */
     @Override
     public int getVolatileValue()
@@ -134,7 +157,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Sets the 32-bit integer value using ordered or lazy set memory semantics.
      *
      * @param value the 32-bit integer value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException   if closed
      * @throws BufferOverflowException if the offset is too large
      */
     @Override
@@ -150,8 +173,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      *
      * @param delta the value to add
      * @return the resulting 32-bit integer value
-     * @throws IllegalStateException      if closed
-     * @throws BufferUnderflowException  if the offset is too large
+     * @throws IllegalStateException    if closed
+     * @throws BufferUnderflowException if the offset is too large
      */
     @Override
     public int addValue(int delta)
@@ -166,8 +189,8 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      *
      * @param delta the value to add
      * @return the resulting 32-bit integer value
-     * @throws IllegalStateException      if closed
-     * @throws BufferUnderflowException  if the offset is too large
+     * @throws IllegalStateException    if closed
+     * @throws BufferUnderflowException if the offset is too large
      */
     @Override
     public int addAtomicValue(int delta)
@@ -184,7 +207,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @param expected the expected 32-bit integer value
      * @param value    the new 32-bit integer value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException   if closed
      * @throws BufferOverflowException if the offset is too large
      */
     @Override

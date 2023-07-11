@@ -28,12 +28,12 @@ import java.lang.annotation.Target;
  *
  * <p>The {@link FieldGroup} annotation is retained at runtime and can be used to annotate
  * fields within a class. The name of the group is specified through the 'value' method,
- * allowing multiple fields to be associated with the same group by assigning them the same name.</p>
+ * allowing multiple fields to be associated with the same group by assigning them the same name.
  *
  * <p>One common use case is organizing the memory layout for serialization or memory-mapped
- * objects where fields that are accessed together are placed adjacently in memory.</p>
+ * objects where fields that are accessed together are placed adjacently in memory.
  *
- * <p>Example:</p>
+ * <p>Example:
  * <pre>
  * public class Record {
  *     &#64;FieldGroup("header")

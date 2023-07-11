@@ -20,8 +20,24 @@ package net.openhft.chronicle.bytes;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
+/**
+ * Functional interface representing an invocation of a method.
+ * <p>
+ * This interface is designed to be used with the {@link MethodReaderInterceptorReturns} interface,
+ * providing a flexible way to handle method invocations, such as performing the invocation,
+ * or adding custom behaviors before or after the invocation.
+ */
 @FunctionalInterface
 public interface Invocation {
+    /**
+     * Invokes a method with the specified parameters.
+     *
+     * @param m    the method to be invoked
+     * @param o    the object from which the method is invoked
+     * @param args the arguments to be passed to the method
+     * @return the result of the method invocation
+     * @throws InvocationTargetException if the invoked method throws an exception
+     */
     Object invoke(Method m, Object o, Object[] args)
             throws InvocationTargetException;
 }

@@ -39,7 +39,7 @@ import java.nio.BufferUnderflowException;
  * The $toString method provides a default implementation for creating a string
  * representation of the object in a hexadecimal format.
  *
- * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.</p>
+ * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.
  *
  */
 @DontChain
@@ -60,9 +60,9 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
      * Reads the state of this object from the bytes.
      *
      * @param bytes the BytesIn object to read from.
-     * @throws IORuntimeException if an I/O error occurs.
-     * @throws BufferUnderflowException if there is not enough data available in the buffer.
-     * @throws IllegalStateException if there is an error in the internal state.
+     * @throws IORuntimeException           if an I/O error occurs.
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
+     * @throws IllegalStateException        if there is an error in the internal state.
      * @throws InvalidMarshallableException if the object cannot be read due to invalid data.
      */
     @Override
@@ -76,10 +76,10 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
      * Writes the state of this object to the bytes.
      *
      * @param bytes the BytesOut object to write to.
-     * @throws IllegalStateException if there is an error in the internal state.
-     * @throws BufferOverflowException if there is not enough space in the buffer.
-     * @throws BufferUnderflowException if there is not enough data available in the buffer.
-     * @throws ArithmeticException if there is an arithmetic error.
+     * @throws IllegalStateException        if there is an error in the internal state.
+     * @throws BufferOverflowException      if there is not enough space in the buffer.
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
+     * @throws ArithmeticException          if there is an arithmetic error.
      * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
      */
     @Override

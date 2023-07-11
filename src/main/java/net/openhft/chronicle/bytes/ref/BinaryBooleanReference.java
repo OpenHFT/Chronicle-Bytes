@@ -29,8 +29,13 @@ import java.nio.BufferUnderflowException;
 import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 
 /**
- * BinaryBooleanReference is a concrete implementation of the BooleanValue interface.
- * It provides methods to read and write boolean values from and to a BytesStore in binary format.
+ * Represents a binary reference to a boolean value.
+ *
+ * <p>This class encapsulates a reference to a boolean value stored in binary form. It provides
+ * functionality to read and write a boolean value to/from a {@link BytesStore}.
+ *
+ * @see BytesStore
+ * @see BooleanValue
  */
 public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
@@ -38,13 +43,14 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
     private static final byte TRUE = (byte) 0xB1;
 
     /**
-     * Defines how to write to the bytes store.
-     * @param bytes  The byte store where the data should be written
-     * @param offset The position in the byte store where the write should start
-     * @param length The number of bytes that should be written
-     * @throws IllegalStateException      If an illegal condition has occurred
-     * @throws IllegalArgumentException  If an illegal argument was provided
-     * @throws BufferOverflowException If the data cannot fit in the target buffer
+     * Sets the underlying BytesStore to work with, along with the offset and length.
+     *
+     * @param bytes  the BytesStore to set
+     * @param offset the offset to set
+     * @param length the length to set
+     * @throws IllegalStateException    if the state is invalid
+     * @throws IllegalArgumentException if the arguments are invalid
+     * @throws BufferOverflowException  if the provided buffer is too small
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -62,6 +68,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Returns the maximum size of the byte representation of a boolean value.
+     *
      * @return The maximum size of a boolean in bytes
      */
     @Override
@@ -71,8 +78,9 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Reads a boolean value from the bytes store.
+     *
      * @return The read boolean value
-     * @throws IllegalStateException      If an illegal condition has occurred
+     * @throws IllegalStateException    If an illegal condition has occurred
      * @throws BufferUnderflowException If the bytes store contains insufficient data
      */
     @Override
@@ -87,11 +95,11 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             return true;
 
         throw new IllegalStateException("unexpected code=" + b);
-
     }
 
     /**
      * Writes a boolean value to the bytes store.
+     *
      * @param flag The boolean value to write
      * @throws IllegalStateException If an illegal condition has occurred
      */

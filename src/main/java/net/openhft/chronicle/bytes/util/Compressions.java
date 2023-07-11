@@ -28,15 +28,16 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.BufferOverflowException;
 import java.util.zip.*;
-
 /**
- * Provides different compression algorithms for bytes.
+ * Enum representing different compression algorithms and providing corresponding
+ * compressing and decompressing streams.
  */
 @SuppressWarnings("rawtypes")
 public enum Compressions implements Compression {
 
     /**
-     * Represents a no-operation compression. This does not actually compress data.
+     * Binary compression is a placeholder compression which does not perform any actual
+     * compression. It simply returns the input bytes.
      */
     Binary {
         /**
@@ -58,8 +59,7 @@ public enum Compressions implements Compression {
          * @throws IORuntimeException if an I/O error occurs
          */
         @Override
-        public byte[] uncompress(byte[] bytes)
-                throws IORuntimeException {
+        public byte[] uncompress(byte[] bytes) throws IORuntimeException {
             return bytes;
         }
 
@@ -126,7 +126,7 @@ public enum Compressions implements Compression {
     },
 
     /**
-     * Represents LZW (Lempel–Ziv–Welch) compression.
+     * LZW (Lempel-Ziv-Welch) is a lossless data compression algorithm.
      */
     LZW {
         /**
@@ -155,7 +155,7 @@ public enum Compressions implements Compression {
     },
 
     /**
-     * Represents GZIP compression.
+     * GZIP is a file format and a software application used for file compression and decompression.
      */
     GZIP {
         /**

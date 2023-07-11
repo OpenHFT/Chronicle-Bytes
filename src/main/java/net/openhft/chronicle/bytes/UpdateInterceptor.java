@@ -33,11 +33,11 @@ public interface UpdateInterceptor {
      * the operation that was intercepted.
      *
      * @param methodName the name of the method that was intercepted
-     * @param t the input argument to the method - for a method call with multiple arguments,
-     *           only the last one is passed. This object may be modified by this method.
-     * @throws IllegalArgumentException if {@code t} is an instance of Validatable and its validation fails
+     * @param t          the input argument to the method - for a method call with multiple arguments,
+     *                   only the last one is passed. This object may be modified by this method.
      * @return a boolean value indicating whether to proceed with the operation. If false,
-     *         the operation that was intercepted will not be carried out.
+     * the operation that was intercepted will not be carried out.
+     * @throws IllegalArgumentException if {@code t} is an instance of Validatable and its validation fails
      */
     boolean update(String methodName, Object t) throws IllegalArgumentException;
 

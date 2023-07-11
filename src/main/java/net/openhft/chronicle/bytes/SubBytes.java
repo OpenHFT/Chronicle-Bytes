@@ -42,7 +42,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * @param capacity   the number of elements from the start index that the SubBytes cover
      * @throws IllegalStateException    if the parent BytesStore is released
      * @throws BufferUnderflowException if the capacity is less than the start index
-     * @throws IllegalArgumentException  if any other argument issue occurs
+     * @throws IllegalArgumentException if any other argument issue occurs
      */
     public SubBytes(@NotNull BytesStore bytesStore, @NonNegative long start, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {

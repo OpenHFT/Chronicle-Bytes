@@ -48,7 +48,7 @@ public class GeneralDecimaliser implements Decimaliser {
      *
      * @param value           The double value to be converted.
      * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
     @Override
     public boolean toDecimal(double value, DecimalAppender decimalAppender) {
@@ -58,7 +58,7 @@ public class GeneralDecimaliser implements Decimaliser {
         if (value == 0 || (1e-29 <= absValue && absValue < 1e45)) {
             // First try the lightweight approach, if that fails use the BigDecimal-based approach
             return SimpleDecimaliser.SIMPLE.toDecimal(value, decimalAppender)
-                || UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
+                    || UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
         }
 
         // If the value is outside the valid range, return false
@@ -74,7 +74,7 @@ public class GeneralDecimaliser implements Decimaliser {
      *
      * @param value           The float value to be converted.
      * @param decimalAppender The {@link DecimalAppender} to which the converted decimal value is appended.
-     * @return {@code true} if the conversion and appending were successful, <code>false</code> otherwise.
+     * @return {@code true} if the conversion and appending were successful, {@code false} otherwise.
      */
     @Override
     public boolean toDecimal(float value, DecimalAppender decimalAppender) {
@@ -84,7 +84,7 @@ public class GeneralDecimaliser implements Decimaliser {
         if (value == 0 || 1e-29f <= absValue) {
             // First try the lightweight approach, if that fails use the BigDecimal-based approach
             return SimpleDecimaliser.SIMPLE.toDecimal(value, decimalAppender)
-                || UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
+                    || UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, decimalAppender);
         }
 
         // If the value is smaller than the threshold, return false

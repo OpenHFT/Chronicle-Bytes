@@ -43,12 +43,12 @@ public interface MethodEncoder {
      * Encodes a method call, represented by an array of objects, into a {@link BytesOut} object.
      *
      * @param objects the objects representing a method call
-     * @param out the BytesOut object to write the method call to
-     * @throws IllegalArgumentException if an argument is not valid
-     * @throws BufferUnderflowException if there is not enough data available in the buffer
-     * @throws IllegalStateException if a state-dependent method has been invoked at an inappropriate time
-     * @throws BufferOverflowException if there is not enough space in the buffer
-     * @throws ArithmeticException if numeric overflow occurs
+     * @param out     the BytesOut object to write the method call to
+     * @throws IllegalArgumentException     if an argument is not valid
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer
+     * @throws IllegalStateException        if a state-dependent method has been invoked at an inappropriate time
+     * @throws BufferOverflowException      if there is not enough space in the buffer
+     * @throws ArithmeticException          if numeric overflow occurs
      * @throws InvalidMarshallableException if an object is not correctly marshallable
      */
     void encode(Object[] objects, BytesOut<?> out)
@@ -58,10 +58,10 @@ public interface MethodEncoder {
      * Decodes a method call from a {@link BytesIn} object into an array of objects.
      *
      * @param lastObjects the previous objects used for the method call, can be used for delta encoding
-     * @param in the BytesIn object to read the method call from
+     * @param in          the BytesIn object to read the method call from
      * @return the objects representing a method call
-     * @throws BufferUnderflowException if there is not enough data available in the buffer
-     * @throws IllegalStateException if a state-dependent method has been invoked at an inappropriate time
+     * @throws BufferUnderflowException     if there is not enough data available in the buffer
+     * @throws IllegalStateException        if a state-dependent method has been invoked at an inappropriate time
      * @throws InvalidMarshallableException if an object is not correctly marshallable
      */
     Object[] decode(Object[] lastObjects, BytesIn<?> in)

@@ -392,7 +392,7 @@ public class ByteStringParserTest extends BytesTestCommon {
 
     @Test
     public void testFlexibleLong3() {
-  
+
         bytes.append("0.9").append(' ');
         assertThrows(IORuntimeException.class, () -> bytes.parseFlexibleLong());
 

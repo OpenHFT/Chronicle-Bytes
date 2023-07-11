@@ -19,24 +19,25 @@ package net.openhft.chronicle.bytes.ref;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.util.ThrowingIntSupplier;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
 
 /**
- * Implementation of a reference to a 32-bit integer in text wire format.
- *
- * <p>Allows for the manipulation of 32-bit integer values stored in a Text wire format.
- * It provides methods to read, write, and perform atomic operations on the stored values.</p>
- *
- * <p>Text wire format is a human-readable data serialization format used to represent structured data.</p>
+ * TextIntReference is an implementation of a reference to a 32-bit integer, represented
+ * in text wire format. It extends AbstractReference and implements IntValue. The text representation
+ * is formatted to resemble a JSON-like content for an atomic 32-bit integer with a lock indicator.
+ * <p>
+ * The format of the text representation is:
+ * {@code !!atomic { locked: false, value: 0000000000 }}
+ * 
  */
 public class TextIntReference extends AbstractReference implements IntValue {
     private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
@@ -55,7 +56,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
      * @param bytes the Bytes instance to write to.
      * @param value the 32-bit integer value to be written.
      * @throws BufferOverflowException if there is insufficient space.
-     * @throws IllegalStateException    if an error occurs during writing.
+     * @throws IllegalStateException   if an error occurs during writing.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {
@@ -65,11 +66,11 @@ public class TextIntReference extends AbstractReference implements IntValue {
     }
 
     /**
-     * Executes the provided operation with the lock held.
+     * Executes a callable function with lock to ensure atomicity and consistency.
      *
-     * @param call the operation to execute with the lock held.
-     * @return the result of the operation.
-     * @throws IllegalStateException if the operation fails.
+     * @param call the callable function to execute with lock.
+     * @return the integer value returned by the callable function.
+     * @throws IllegalStateException if an invalid state is encountered.
      */
     private int withLock(@NotNull ThrowingIntSupplier<Exception> call)
             throws IllegalStateException {
@@ -86,10 +87,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
                     return t;
                 }
             }
-        } catch (IllegalStateException e) {
-            throw e;
         } catch (Exception e) {
-            throw new AssertionError(e);
+            throw Jvm.rethrow(e);
         }
     }
 

@@ -36,7 +36,25 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
 import static net.openhft.chronicle.bytes.ref.BinaryLongReference.LONG_NOT_COMPLETE;
 
 /**
- * This class acts a Binary array of 64-bit values. c.f. TextLongArrayReference
+ * Represents a binary array of 64-bit long values backed by a {@link BytesStore}.
+ * <p>
+ * This class provides various operations to access and manipulate an array of 64-bit long integers in binary form.
+ * The long integers are stored in a BytesStore, and this class provides methods for reading and writing values at specific indices.
+ * <p>
+ * Example usage:
+ * <pre>
+ * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(32);
+ * BinaryLongArrayReference ref = new BinaryLongArrayReference(4); // Creates an array with 4 longs
+ * ref.bytesStore(bytesStore, 0, ref.maxSize());
+ * ref.setValueAt(0, 1234567890L);
+ * long value = ref.getValueAt(0);
+ * </pre>
+ * <p>
+ * Note: This class is not thread-safe. External synchronization may be necessary if instances
+ * are shared between threads.
+ *
+ * @see BytesStore
+ * @see BinaryLongReference
  */
 @SuppressWarnings("rawtypes")
 public class BinaryLongArrayReference extends AbstractReference implements ByteableLongArrayValues, BytesMarshallable {
@@ -49,19 +67,40 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
     private static Set<WeakReference<BinaryLongArrayReference>> binaryLongArrayReferences = null;
     private long length;
 
+    /**
+     * Constructs a BinaryLongArrayReference with a default capacity of 0.
+     */
     public BinaryLongArrayReference() {
         this(0);
     }
 
+    /**
+     * Constructs a BinaryLongArrayReference with the specified default capacity.
+     *
+     * @param defaultCapacity the initial capacity of the long array in number of elements.
+     */
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
         singleThreadedCheckDisabled(true);
     }
 
+    /**
+     * Enables collection of BinaryLongArrayReference instances.
+     * <p>
+     * This method is used for debugging and monitoring. It should not be used in production environments.
+     */
     public static void startCollecting() {
         binaryLongArrayReferences = Collections.newSetFromMap(new IdentityHashMap<>());
     }
 
+    /**
+     * Sets all values in the BinaryLongArrayReference instances to the "not complete" state.
+     * <p>
+     * This method is used for debugging and monitoring. It should not be used in production environments.
+     *
+     * @throws IllegalStateException   if the BinaryLongArrayReference is in an invalid state.
+     * @throws BufferOverflowException if the bytes cannot be written.
+     */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
         if (binaryLongArrayReferences == null)
@@ -86,6 +125,18 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         this.bytes.reserve(this);
     }
 
+    /**
+     * Writes to the provided Bytes object with the given capacity.
+     * The method asserts that the write position is correctly aligned,
+     * then writes the capacity, followed by a long value of 0 (representing the "used" space),
+     * and finally zeros out the subsequent space defined by the capacity.
+     *
+     * @param bytes    the Bytes object to write to.
+     * @param capacity the capacity to be written and used for subsequent zeroing.
+     * @throws BufferOverflowException  if there is insufficient space in the buffer.
+     * @throws IllegalArgumentException if arguments violate precondition constraints.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -97,6 +148,16 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    /**
+     * Lazily writes to the provided Bytes object with the given capacity.
+     * Unlike the write method, this method does not zero out the subsequent space.
+     * It just updates the write position after writing the capacity and "used" space.
+     *
+     * @param bytes    the Bytes object to write to.
+     * @param capacity the capacity to be written.
+     * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if the Bytes object is in an incorrect state.
+     */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
         assert (bytes.writePosition() & 0x7) == 0;
@@ -106,6 +167,16 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.writeSkip(capacity << SHIFT);
     }
 
+    /**
+     * Returns the capacity from the BytesStore object and adding the fixed values size to get a length.
+     * It asserts that the capacity is greater than 0.
+     *
+     * @param bytes  the BytesStore object to read from.
+     * @param offset the offset at which to start reading.
+     * @return the calculated peak length.
+     * @throws BufferUnderflowException if there is not enough remaining data.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);
@@ -113,6 +184,19 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         return (capacity << SHIFT) + VALUES;
     }
 
+    /**
+     * Returns the capacity from the BytesStore object, adding the fixed values size to get a length
+     * If the read capacity is 0, the method writes the capacityHint at the offset and
+     * updates the capacity with the capacityHint.
+     * It asserts that the capacity is greater than 0.
+     *
+     * @param bytes        the BytesStore object to read from.
+     * @param offset       the offset at which to start reading.
+     * @param capacityHint the capacity to be used if the initial capacity is 0.
+     * @return the calculated peak length.
+     * @throws BufferUnderflowException if there is not enough remaining data.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {
         long capacity = bytes.readLong(offset + CAPACITY);

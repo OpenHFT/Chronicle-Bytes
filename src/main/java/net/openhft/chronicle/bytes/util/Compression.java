@@ -29,7 +29,8 @@ import java.io.*;
 import java.nio.BufferOverflowException;
 
 /**
- * Provides an interface for compressing and uncompressing data using various algorithms.
+ * Interface for providing compression and decompression functionality
+ * to various types of input data.
  */
 public interface Compression {
 
@@ -39,8 +40,8 @@ public interface Compression {
      * @param cs           The compression algorithm to be used (e.g. "lzw", "gzip").
      * @param uncompressed The input data to be compressed.
      * @param compressed   The output to write the compressed data.
-     * @throws IllegalStateException     if the compression algorithm fails.
-     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     * @throws IllegalStateException   if the compression algorithm fails.
+     * @throws BufferOverflowException if there is not enough space in the output buffer.
      */
     static void compress(@NotNull CharSequence cs, @NotNull Bytes<?> uncompressed, @NotNull Bytes<?> compressed)
             throws IllegalStateException, BufferOverflowException {
@@ -69,10 +70,10 @@ public interface Compression {
      * @param cs   The compression algorithm to be used (e.g. "lzw", "gzip").
      * @param from The input compressed data.
      * @param to   The output to write the uncompressed data.
-     * @throws IORuntimeException        if an I/O error occurs.
-     * @throws IllegalArgumentException   if the algorithm is unsupported.
-     * @throws IllegalStateException      if the uncompression algorithm fails.
-     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     * @throws IORuntimeException       if an I/O error occurs.
+     * @throws IllegalArgumentException if the algorithm is unsupported.
+     * @throws IllegalStateException    if the uncompression algorithm fails.
+     * @throws BufferOverflowException  if there is not enough space in the output buffer.
      */
     static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalArgumentException, IllegalStateException, BufferOverflowException {
@@ -151,8 +152,8 @@ public interface Compression {
      *
      * @param from The input data to be compressed.
      * @param to   The output to write the compressed data.
-     * @throws IllegalStateException     if the compression algorithm fails.
-     * @throws BufferOverflowException   if there is not enough space in the output buffer.
+     * @throws IllegalStateException   if the compression algorithm fails.
+     * @throws BufferOverflowException if there is not enough space in the output buffer.
      */
     default void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
         try (OutputStream output = compressingStream(to.outputStream())) {
@@ -189,8 +190,8 @@ public interface Compression {
      *
      * @param from The input compressed data.
      * @param to   The output to write the uncompressed data.
-     * @throws IORuntimeException       if an I/O error occurs.
-     * @throws IllegalStateException    if the uncompression algorithm fails.
+     * @throws IORuntimeException      if an I/O error occurs.
+     * @throws IllegalStateException   if the uncompression algorithm fails.
      * @throws BufferOverflowException if there is not enough space in the output buffer.
      */
     default void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
@@ -203,11 +204,29 @@ public interface Compression {
         }
     }
 
+    /**
+     * Returns an InputStream that will decompress data read from it.
+     *
+     * @param input the underlying InputStream to read compressed data from.
+     * @return a decompressing InputStream.
+     * @throws IORuntimeException if an I/O error occurs.
+     */
     InputStream decompressingStream(InputStream input)
             throws IORuntimeException;
 
+    /**
+     * Returns an OutputStream that will compress data written to it.
+     *
+     * @param output the underlying OutputStream to write compressed data to.
+     * @return a compressing OutputStream.
+     */
     OutputStream compressingStream(OutputStream output);
 
+    /**
+     * Indicates whether compression/decompression is available.
+     *
+     * @return true if available, false otherwise.
+     */
     default boolean available() {
         return true;
     }

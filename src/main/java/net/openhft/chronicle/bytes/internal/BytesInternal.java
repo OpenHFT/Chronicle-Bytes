@@ -2908,33 +2908,33 @@ enum BytesInternal {
 
     public static double addAndGetDouble(@NotNull BytesStore<?, ?> in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
-            for (; ; ) {
-                long value = in.readVolatileLong(offset);
-                double value1 = Double.longBitsToDouble(value) + adding;
-                long value2 = Double.doubleToRawLongBits(value1);
-                if (in.compareAndSwapLong(offset, value, value2))
-                    return value1;
-            }
+        for (; ; ) {
+            long value = in.readVolatileLong(offset);
+            double value1 = Double.longBitsToDouble(value) + adding;
+            long value2 = Double.doubleToRawLongBits(value1);
+            if (in.compareAndSwapLong(offset, value, value2))
+                return value1;
+        }
     }
 
     public static int addAndGetInt(@NotNull BytesStore<?, ?> in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
-            for (; ; ) {
-                int value = in.readVolatileInt(offset);
-                int value2 = value + adding;
-                if (in.compareAndSwapInt(offset, value, value2))
-                    return value2;
-            }
+        for (; ; ) {
+            int value = in.readVolatileInt(offset);
+            int value2 = value + adding;
+            if (in.compareAndSwapInt(offset, value, value2))
+                return value2;
+        }
     }
 
     public static long addAndGetLong(@NotNull BytesStore<?, ?> in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
-            for (; ; ) {
-                long value = in.readVolatileLong(offset);
-                long value2 = value + adding;
-                if (in.compareAndSwapLong(offset, value, value2))
-                    return value2;
-            }
+        for (; ; ) {
+            long value = in.readVolatileLong(offset);
+            long value2 = value + adding;
+            if (in.compareAndSwapLong(offset, value, value2))
+                return value2;
+        }
     }
 
     /**
@@ -3178,10 +3178,10 @@ enum BytesInternal {
 
     public static void copy(@NotNull InputStream input, @NotNull StreamingDataOutput output)
             throws IOException, BufferOverflowException, IllegalStateException {
-            @NotNull byte[] bytes = new byte[512];
-            for (int len; (len = input.read(bytes)) > 0; ) {
-                output.write(bytes, 0, len);
-            }
+        @NotNull byte[] bytes = new byte[512];
+        for (int len; (len = input.read(bytes)) > 0; ) {
+            output.write(bytes, 0, len);
+        }
     }
 
     public static Boolean parseBoolean(@NotNull ByteStringParser parser, @NotNull StopCharTester tester)
@@ -3215,25 +3215,25 @@ enum BytesInternal {
     @NotNull
     public static BytesStore subBytes(RandomDataInput from, @NonNegative long start, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
-            @NotNull BytesStore ret;
-            if (from.isDirectMemory()) {
-                ret = BytesStore.nativeStore(Math.max(0, length));
-            } else {
-                ret = BytesStore.wrap(new byte[Math.toIntExact(length)]);
-            }
-            ret.write(0L, from, start, length);
-            return ret;
+        @NotNull BytesStore ret;
+        if (from.isDirectMemory()) {
+            ret = BytesStore.nativeStore(Math.max(0, length));
+        } else {
+            ret = BytesStore.wrap(new byte[Math.toIntExact(length)]);
+        }
+        ret.write(0L, from, start, length);
+        return ret;
     }
 
     public static long findByte(@NotNull RandomDataInput bytes, byte stopByte)
             throws IllegalStateException {
-            long start = bytes.readPosition();
-            long remaining = bytes.readRemaining();
-            for (long i = 0; i < remaining; i++) {
-                if (bytes.readByte(start + i) == stopByte)
-                    return i;
-            }
-            return -1;
+        long start = bytes.readPosition();
+        long remaining = bytes.readRemaining();
+        for (long i = 0; i < remaining; i++) {
+            if (bytes.readByte(start + i) == stopByte)
+                return i;
+        }
+        return -1;
     }
 
     @NotNull

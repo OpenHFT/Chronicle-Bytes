@@ -55,21 +55,21 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param ch the character to append
      * @return the ByteStringAppender instance with the appended character
      * @throws BufferOverflowException if the append operation exceeds the buffer's capacity
-     * @throws IllegalStateException if the underlying ByteStringAppender is closed
+     * @throws IllegalStateException   if the underlying ByteStringAppender is closed
      */
     @Override
     @NotNull
     default B append(char ch)
             throws IllegalStateException {
-            BytesInternal.appendUtf8Char(this, ch);
-            return (B) this;
+        BytesInternal.appendUtf8Char(this, ch);
+        return (B) this;
     }
 
     /**
      * Append a characters in UTF-8
      *
      * @param cs the CharSequence to append
-     * @return   this
+     * @return this
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      */
     @Override
@@ -85,9 +85,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param flag to append
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException   if the underlying buffer was released
      */
     @NotNull
     default B append(boolean flag)
@@ -99,10 +99,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Appends an int in decimal to this.
      *
      * @param value the integer value to append
-     * @return      this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @return this
+     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException   if the underlying buffer was released
      */
     @NotNull
     default B append(int value)
@@ -115,10 +115,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Appends a long value in decimal.
      *
      * @param value the long number to append
-     * @return      this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @return this
+     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException   if the underlying buffer was released
      */
     @NotNull
     default B append(long value)
@@ -135,7 +135,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value the number to append
      * @param base  the radix that the specified value should be converted to before append
-     * @return      this
+     * @return this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IllegalArgumentException if the specified arguments are illegal
      * @throws IllegalStateException    if the underlying buffer was released
@@ -189,7 +189,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value         to append
      * @param decimalPlaces to shift the decimal place
-     * @return              this
+     * @return this
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      * @throws IllegalStateException    if the underlying buffer was released
@@ -206,7 +206,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Appends a float in decimal notation
      *
      * @param f the float number to append
-     * @return  this
+     * @return this
      * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
      * @throws IllegalStateException   if the underlying Bytes was closed
      */
@@ -227,9 +227,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param d to append
      * @return this
-     * @throws BufferOverflowException  if the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalStateException   if the underlying buffer was released
      */
     @NotNull
     default B append(double d)
@@ -239,6 +239,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         append(bytes);
         return (B) this;
     }
+
     /**
      * Gets the Decimaliser currently associated with this ByteStringAppender.
      *
@@ -250,7 +251,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Associates a Decimaliser with this ByteStringAppender.
      *
      * <p>The Decimaliser is an interface which can be implemented to provide custom logic
-     * for rendering decimal numbers in this ByteStringAppender.</p>
+     * for rendering decimal numbers in this ByteStringAppender.
      *
      * @param decimaliser The Decimaliser to be associated with this ByteStringAppender.
      * @return The ByteStringAppender instance with the Decimaliser set.
@@ -310,7 +311,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Appends a String to the Bytes in ISO-8859-1.
      *
      * @param cs the CharSequence to append
-     * @return   this
+     * @return this
      * @throws BufferOverflowException  if the string is too large to write in the capacity available
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IllegalStateException    if the underlying buffer was released
@@ -318,7 +319,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-            return append8bit(cs, 0, cs.length());
+        return append8bit(cs, 0, cs.length());
     }
 
 
@@ -333,20 +334,20 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull BytesStore bs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-            return write(bs, 0L, bs.readRemaining());
+        return write(bs, 0L, bs.readRemaining());
     }
 
     /**
      * Appends the ISO-8859-1 representation of the specified String.
      *
      * @param cs the String to append
-     * @return   this
+     * @return this
      * @throws BufferOverflowException if the string is too large to write in the capacity available
-     * @throws IllegalStateException if the underlying BytesStore is closed
+     * @throws IllegalStateException   if the underlying BytesStore is closed
      */
     default B append8bit(@NotNull String cs)
             throws BufferOverflowException, IllegalStateException {
-            return append8bit(cs, 0, cs.length());
+        return append8bit(cs, 0, cs.length());
     }
 
     /**
@@ -355,12 +356,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param cs    the CharSequence to append
      * @param start index of the first char of cs (inclusive) to append
      * @param end   index of the last char of cs (exclusive) to append
-     * @return      this
-     * @throws BufferOverflowException if the string is too large to write in the capacity available
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @return this
+     * @throws BufferOverflowException   if the string is too large to write in the capacity available
+     * @throws BufferUnderflowException  if the capacity of the underlying buffer was exceeded
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
-     * @throws IllegalStateException    if the underlying buffer was released
-     * @throws IllegalArgumentException if the start or end is negative or too large
+     * @throws IllegalStateException     if the underlying buffer was released
+     * @throws IllegalArgumentException  if the start or end is negative or too large
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
@@ -382,7 +383,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param bs    the specified BytesStore that a portion of it will be appended to this
      * @param start the index of first byte (inclusive) of bs to append
      * @param end   the number of bytes of bs to append
-     * @return      this
+     * @return this
      * @throws IllegalArgumentException  if an illegal argument is passed to the method
      * @throws BufferOverflowException   if the relative append operation exceeds the underlying buffer's capacity
      * @throws BufferUnderflowException  if the capacity of the BytesStore was exceeded
@@ -400,7 +401,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * The specified long number represents a point in time that is time milliseconds after January 1, 1970 00:00:00 GMT.
      *
      * @param dateInMillis the specified long to convert to date and append to this
-     * @return             this
+     * @return this
      * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
      * @throws IllegalStateException   if the underlying Bytes is closed
      */
@@ -419,9 +420,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * hour, minute, second and millisecond.
      *
      * @param timeOfDayInMillis the long number that represents time of day in milliseconds
-     * @return                  this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalStateException if the underlying Bytes is closed
+     * @return this
+     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalStateException    if the underlying Bytes is closed
      * @throws IllegalArgumentException if an illegal argument is passed to the method
      */
     @NotNull
@@ -438,8 +439,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * described in {@link BigDecimal#toString()}.
      *
      * @param bigDecimal the specified BigDecimal to append
-     * @return           this
-     * @see              java.math.BigDecimal
+     * @return this
+     * @see java.math.BigDecimal
      */
     @NotNull
     default B append(@NotNull BigDecimal bigDecimal) {

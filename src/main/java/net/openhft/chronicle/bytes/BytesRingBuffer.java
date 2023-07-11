@@ -33,12 +33,12 @@ import java.nio.BufferOverflowException;
  * consume bytes from the buffer and close the buffer when it's no longer needed.
  *
  * <p>This interface also includes methods for creating instances of ring buffer, determining the size,
- * checking for emptiness, and offering or reading bytes to/from the buffer.</p>
+ * checking for emptiness, and offering or reading bytes to/from the buffer.
  *
  * <p>Note that some methods in this interface are expected to be implemented in commercial versions
- * and would need unlocking for use.</p>
+ * and would need unlocking for use.
  *
- * <p>This interface is not meant to be implemented by user code.</p>
+ * <p>This interface is not meant to be implemented by user code.
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
 public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Closeable {
