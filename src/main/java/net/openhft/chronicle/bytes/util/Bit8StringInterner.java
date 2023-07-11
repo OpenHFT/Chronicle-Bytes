@@ -42,10 +42,8 @@ public class Bit8StringInterner extends AbstractInterner<String> {
      * Constructs a new Bit8StringInterner with the specified capacity.
      *
      * @param capacity the initial capacity for the interner
-     * @throws IllegalArgumentException if the specified capacity is negative
      */
-    public Bit8StringInterner(int capacity)
-            throws IllegalArgumentException {
+    public Bit8StringInterner(int capacity) {
         super(capacity);
     }
 

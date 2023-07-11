@@ -43,10 +43,8 @@ public class UTF8StringInterner extends AbstractInterner<String> {
      * Constructs a new UTF8StringInterner with the specified capacity.
      *
      * @param capacity the maximum number of items that the interner can hold.
-     * @throws IllegalArgumentException if the capacity is non-positive.
      */
-    public UTF8StringInterner(@NonNegative int capacity)
-            throws IllegalArgumentException {
+    public UTF8StringInterner(@NonNegative int capacity) {
         super(capacity);
     }
 
