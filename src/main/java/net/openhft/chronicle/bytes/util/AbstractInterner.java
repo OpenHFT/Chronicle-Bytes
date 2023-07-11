@@ -66,13 +66,11 @@ public abstract class AbstractInterner<T> {
 
     /**
      * Constructor for creating an intern cache with the given capacity. The capacity will be adjusted to the next
-     * power of 2 if it is not already a power of 2.
+     * power of 2 if it is not already a power of 2, to a limit of {@code 1 << 30}.
      *
      * @param capacity the desired capacity for the intern cache
-     * @throws IllegalArgumentException if the calculated capacity exceeds the maximum possible array size
      */
-    protected AbstractInterner(@NonNegative int capacity)
-            throws IllegalArgumentException {
+    protected AbstractInterner(@NonNegative int capacity){
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
         entries = new InternerEntry[n];
