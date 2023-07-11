@@ -39,17 +39,41 @@ import static net.openhft.chronicle.bytes.MappedBytesStore.MAPPED_BYTES_STORE_FA
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**
- * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
- * avoid wasting bytes at the end of chunks.
+ * A memory mapped files which can be randomly accessed in a single chunk. It has no overlapping region to
+ * avoid wasting bytes at the end of file.
  */
 @SuppressWarnings({"rawtypes", "unchecked", "restriction"})
 public class SingleMappedFile extends MappedFile {
+    /**
+     * The RandomAccessFile for this mapped file
+     */
     @NotNull
     private final RandomAccessFile raf;
+
+    /**
+     * The FileChannel for this mapped file
+     */
     private final FileChannel fileChannel;
+
+    /**
+     * The MappedBytesStore for this mapped file
+     */
     private final MappedBytesStore store;
+
+    /**
+     * The capacity of this mapped file
+     */
     private final long capacity;
 
+    /**
+     * Constructs a new SingleMappedFile with specified parameters.
+     *
+     * @param file the file to be mapped.
+     * @param raf the RandomAccessFile associated with the file.
+     * @param capacity the capacity of the mapped file.
+     * @param readOnly if the file is read-only.
+     * @throws IORuntimeException if any I/O error occurs.
+     */
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
                             @NonNegative final long capacity,
@@ -92,11 +116,25 @@ public class SingleMappedFile extends MappedFile {
         }
     }
 
+    /**
+     * Sets the synchronization mode for the underlying MappedBytesStore
+     * @param syncMode The synchronization mode to set
+     */
     @Override
     public void syncMode(SyncMode syncMode) {
         store.syncMode(syncMode);
     }
 
+    /**
+     * Acquires the MappedBytesStore at the specified position
+     *
+     * @param owner The owner of the MappedBytesStore
+     * @param position The position to acquire
+     * @param oldByteStore The old byte store
+     * @param mappedBytesStoreFactory The factory to use when creating new MappedBytesStore
+     * @throws IllegalArgumentException If position is not zero
+     * @return The MappedBytesStore at the specified position
+     */
     @NotNull
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
@@ -153,6 +191,10 @@ public class SingleMappedFile extends MappedFile {
         }
     }
 
+    /**
+     * Releases resources held by this mapped file
+     */
+    @Override
     protected void performRelease() {
         try {
             final MappedBytesStore mbs = store;
@@ -171,6 +213,10 @@ public class SingleMappedFile extends MappedFile {
         }
     }
 
+    /**
+     * Returns a string representing the reference counts of this mapped file and its store
+     * @return A string representing the reference counts
+     */
     @NotNull
     public String referenceCounts() {
         @NotNull final StringBuilder sb = new StringBuilder();
@@ -184,14 +230,26 @@ public class SingleMappedFile extends MappedFile {
         return sb.toString();
     }
 
+    /**
+     * Returns the capacity of this mapped file
+     * @return The capacity of this mapped file
+     */
     public long capacity() {
         return capacity;
     }
 
+    /**
+     * Returns the size of chunks in this mapped file
+     * @return The size of chunks in this mapped file
+     */
     public long chunkSize() {
         return capacity;
     }
 
+    /**
+     * Returns the size of overlaps in this mapped file
+     * @return The size of overlaps in this mapped file
+     */
     public long overlapSize() {
         return 0;
     }
@@ -206,6 +264,12 @@ public class SingleMappedFile extends MappedFile {
         this.newChunkListener = listener;
     }
 
+    /**
+     * Returns the actual size of this mapped file
+     * @throws IORuntimeException If an I/O error occurs
+     * @throws IllegalStateException If this file is closed or an interruption occurs
+     * @return The actual size of this mapped file
+     */
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
 
@@ -242,6 +306,10 @@ public class SingleMappedFile extends MappedFile {
         return fileChannel.size();
     }
 
+    /**
+     * Returns the RandomAccessFile of this mapped file
+     * @return The RandomAccessFile of this mapped file
+     */
     @NotNull
     public RandomAccessFile raf() {
         return raf;
@@ -264,27 +332,49 @@ public class SingleMappedFile extends MappedFile {
     }
 
     /**
-     * Calls lock on the underlying file channel
+     * Locks a region of this mapped file
+     * @param position The position at which to start the locked region
+     * @param size The size of the locked region
+     * @param shared Whether the lock is shared
+     * @throws IOException If an I/O error occurs
+     * @return A lock object representing the locked region
      */
     public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
     }
 
     /**
-     * Calls tryLock on the underlying file channel
+     * Attempts to lock a region of this mapped file
+     * @param position The position at which to start the locked region
+     * @param size The size of the locked region
+     * @param shared Whether the lock is shared
+     * @throws IOException If an I/O error occurs
+     * @return A lock object representing the locked region, or null if the region cannot be locked
      */
     public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
     }
 
+    /**
+     * Returns the number of chunks in this mapped file
+     * @return The number of chunks in this mapped file
+     */
     public long chunkCount() {
         return 1;
     }
 
+    /**
+     * Fills the provided array with the number of chunks in this mapped file
+     * @param chunkCount The array to fill
+     */
     public void chunkCount(long[] chunkCount) {
         chunkCount[0] = 1;
     }
 
+    /**
+     * Creates a new SingleMappedBytes for this mapped file
+     * @return A new SingleMappedBytes
+     */
     @Override
     public MappedBytes createBytesFor() {
         return new SingleMappedBytes(this);

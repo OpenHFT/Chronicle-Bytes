@@ -65,7 +65,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     @NotNull
     default R writeByte(@NonNegative long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         return writeByte(offset, Maths.toInt8(i));
     }
 
@@ -81,7 +81,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     @NotNull
     default R writeUnsignedByte(@NonNegative long offset, int i)
-            throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         return writeByte(offset, (byte) Maths.toUInt8(i));
     }
 

@@ -332,6 +332,7 @@ public class VanillaBytes<U>
         }
     }
 
+    // TODO Make private in x.25
     public void write(long position, @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length)
             throws BufferOverflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferUnderflowException {
         requireNonNull(str);

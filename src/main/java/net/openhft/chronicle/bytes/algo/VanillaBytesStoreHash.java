@@ -38,6 +38,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      */
     INSTANCE;
 
+    // TODO Make all private in x.25
     public static final int K0 = 0x6d0f27bd;
     public static final int K1 = 0xc1f3bfc9;
     public static final int K2 = 0x6b192397;

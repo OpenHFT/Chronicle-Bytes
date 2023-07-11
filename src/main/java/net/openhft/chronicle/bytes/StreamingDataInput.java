@@ -376,12 +376,29 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
             throws BufferUnderflowException, IllegalStateException {
         return readShort() & 0xFFFF;
     }
-
+    /**
+     * Reads a 24-bit signed integer value from the input stream.
+     * This is achieved by reading an unsigned short and an unsigned byte, and then
+     * bit-shifting and combining them to form a 24-bit integer.
+     *
+     * @return the 24-bit integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int readInt24()
             throws BufferUnderflowException, IllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 24 >> 8);
     }
 
+    /**
+     * Reads a 24-bit unsigned integer value from the input stream.
+     * This is achieved by reading an unsigned short and an unsigned byte, and then
+     * bit-shifting and combining them to form a 24-bit unsigned integer.
+     *
+     * @return the 24-bit unsigned integer value
+     * @throws BufferUnderflowException if there's not enough data to read
+     * @throws IllegalStateException if a required state for this operation is not met
+     */
     default int readUnsignedInt24()
             throws BufferUnderflowException, IllegalStateException {
         return readUnsignedShort() | (readUnsignedByte() << 16);

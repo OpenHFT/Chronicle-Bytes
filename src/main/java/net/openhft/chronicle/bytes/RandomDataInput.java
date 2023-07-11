@@ -56,6 +56,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * externally.
  */
 public interface RandomDataInput extends RandomCommon {
+    // TODO Move to an internal class in x.25
     String[] charToString = createCharToString();
 
     /**
@@ -63,6 +64,7 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return a lookup table for byte-to-String conversions.
      */
+    // TODO Move to an internal class in x.25
     @NotNull
     static String[] createCharToString() {
         @NotNull String[] charToString = new String[256];

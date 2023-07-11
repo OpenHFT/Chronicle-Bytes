@@ -29,7 +29,6 @@ import java.nio.BufferUnderflowException;
 import java.util.*;
 import java.util.function.Consumer;
 
-@SuppressWarnings("rawtypes")
 /**
  * The BytesMethodReader class provides a concrete implementation of the MethodReader interface.
  * It extends SimpleCloseable and it's capable of reading serialized method calls from a BytesIn object.
@@ -42,6 +41,7 @@ import java.util.function.Consumer;
  * <p>
  * The BytesMethodReader is not thread-safe.
  */
+@SuppressWarnings("rawtypes")
 public class BytesMethodReader extends SimpleCloseable implements MethodReader {
     private final BytesIn<?> in;
     private final BytesParselet defaultParselet;
@@ -178,3 +178,4 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         return this;
     }
 }
+

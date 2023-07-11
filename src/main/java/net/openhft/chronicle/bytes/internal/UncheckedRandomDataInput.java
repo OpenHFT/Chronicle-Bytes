@@ -20,7 +20,14 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.core.annotation.NonNegative;
 
 import java.nio.BufferUnderflowException;
-
+/**
+ * This interface defines methods for reading data of different types (byte, short, int, long) from
+ * a certain offset position. The methods do not necessarily perform boundary checks, so it's
+ * crucial to ensure memory bounds are validated before invoking these methods.
+ * <p>
+ * Note: Calling these methods without proper boundary checks can lead to undefined results
+ * and even JVM crashes.
+ */
 public interface UncheckedRandomDataInput {
 
     /**
@@ -29,10 +36,10 @@ public interface UncheckedRandomDataInput {
      * Memory bounds must be checked before invoking this method or else the result
      * is undefined and may lead to JVM crashes.
      *
-     * @param offset to read
-     * @return the long
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
+     * @param offset Offset position from which the byte is to be read.
+     * @return The byte read from the specified offset.
+     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
+     * @throws IllegalStateException If the data source has been released.
      */
     byte readByte(@NonNegative long offset);
 
@@ -42,10 +49,10 @@ public interface UncheckedRandomDataInput {
      * Memory bounds must be checked before invoking this method or else the result
      * is undefined and may lead to JVM crashes.
      *
-     * @param offset to read
-     * @return the short
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
+     * @param offset Offset position from which the short is to be read.
+     * @return The short read from the specified offset.
+     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
+     * @throws IllegalStateException If the data source has been released.
      */
     short readShort(@NonNegative long offset);
 
@@ -55,10 +62,10 @@ public interface UncheckedRandomDataInput {
      * Memory bounds must be checked before invoking this method or else the result
      * is undefined and may lead to JVM crashes.
      *
-     * @param offset to read
-     * @return the int
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
+     * @param offset Offset position from which the integer is to be read.
+     * @return The integer read from the specified offset.
+     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
+     * @throws IllegalStateException If the data source has been released.
      */
     int readInt(@NonNegative long offset);
 
@@ -68,10 +75,10 @@ public interface UncheckedRandomDataInput {
      * Memory bounds must be checked before invoking this method or else the result
      * is undefined and may lead to JVM crashes.
      *
-     * @param offset to read
-     * @return the long
-     * @throws BufferUnderflowException if the offset is outside the limits of the Bytes
-     * @throws IllegalStateException    if released
+     * @param offset Offset position from which the long is to be read.
+     * @return The long read from the specified offset.
+     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
+     * @throws IllegalStateException If the data source has been released.
      */
     long readLong(@NonNegative long offset);
 
