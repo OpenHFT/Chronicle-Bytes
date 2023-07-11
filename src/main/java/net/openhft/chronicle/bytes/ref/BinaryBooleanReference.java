@@ -32,7 +32,7 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * Represents a binary reference to a boolean value.
  *
  * <p>This class encapsulates a reference to a boolean value stored in binary form. It provides
- * functionality to read and write a boolean value to/from a {@link BytesStore}.</p>
+ * functionality to read and write a boolean value to/from a {@link BytesStore}.
  *
  * @see BytesStore
  * @see BooleanValue

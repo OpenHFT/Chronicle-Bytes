@@ -251,7 +251,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * Associates a Decimaliser with this ByteStringAppender.
      *
      * <p>The Decimaliser is an interface which can be implemented to provide custom logic
-     * for rendering decimal numbers in this ByteStringAppender.</p>
+     * for rendering decimal numbers in this ByteStringAppender.
      *
      * @param decimaliser The Decimaliser to be associated with this ByteStringAppender.
      * @return The ByteStringAppender instance with the Decimaliser set.

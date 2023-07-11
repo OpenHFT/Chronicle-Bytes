@@ -37,7 +37,7 @@ import java.nio.channels.FileLock;
  *
  * <p>This class provides an abstraction for managing a reference to a BytesStore. It provides
  * functionality to read and write data from/to the BytesStore, manage a reference count, and lock
- * resources.</p>
+ * resources.
  *
  * @see BytesStore
  * @see Byteable

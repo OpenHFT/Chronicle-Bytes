@@ -37,7 +37,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * <p>
  * The format of the text representation is:
  * {@code !!atomic { locked: false, value: 0000000000 }}
- * </p>
+ * 
  */
 public class TextIntReference extends AbstractReference implements IntValue {
     private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);

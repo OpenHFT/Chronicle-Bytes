@@ -30,7 +30,7 @@ import org.jetbrains.annotations.NotNull;
  *
  * <p><b>WARNING:</b> It is not recommended to use this in conjunction with ElasticBytes. ElasticBytes, by design,
  * can change its underlying data structure's location, which might invalidate or corrupt the memory view
- * held by this PointerBytesStore.</p>
+ * held by this PointerBytesStore.
  */
 public class PointerBytesStore extends NativeBytesStore<Void> {
 

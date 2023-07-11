@@ -37,7 +37,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * <p>
  * The format of the text representation is:
  * {@code { capacity: 12345678901234567890, used: 00000000000000000000, values: [ 12345678901234567890, ... ] }}
- * </p>
+ * 
  *
  * @author Peter Lawrey
  */

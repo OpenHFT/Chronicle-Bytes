@@ -36,15 +36,15 @@ import java.nio.BufferUnderflowException;
  * and provides utility methods for dealing with character encoding such as UTF-8 and ISO-8859-1.
  *
  * <p>The {@code ByteStringParser} extends {@link StreamingDataInput}, inheriting the capabilities
- * of reading and manipulating streams of binary data.</p>
+ * of reading and manipulating streams of binary data.
  *
  * <p>This interface is especially useful for reading and converting bytes into human-readable text
  * or numerical representations. It includes methods for parsing numbers with flexible formatting,
  * reading text with specified character encoding, and utilities for dealing with character
- * termination conditions.</p>
+ * termination conditions.
  *
  * <p>Example use cases include reading and parsing data from binary communication protocols,
- * files, or any other source where bytes need to be interpreted as text or numbers.</p>
+ * files, or any other source where bytes need to be interpreted as text or numbers.
  *
  * @param <B> the type of {@code ByteStringParser} which extends itself, allowing for method chaining.
  */

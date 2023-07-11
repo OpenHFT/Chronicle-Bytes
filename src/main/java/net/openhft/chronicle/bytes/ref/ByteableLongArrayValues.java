@@ -28,7 +28,7 @@ import net.openhft.chronicle.core.values.LongArrayValues;
  * Implementations of this interface should provide means to manage the array of long integers, with
  * support for resizing the array dynamically. It is meant to be used where direct, low-level access
  * to the bytes representing the long integer values is needed.
- * </p>
+ * 
  *
  * @see LongArrayValues
  * @see Byteable

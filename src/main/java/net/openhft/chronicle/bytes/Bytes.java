@@ -48,11 +48,11 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * advanced operations such as seeking, slicing, and copying.
  * <p>
  * This class serves as an abstraction layer over a ByteBuffer, byte[], POJO, or native memory
- * </p>
+ * 
  * <p>
  * Besides basic primitive types, {@code Bytes} can serialize and deserialize more complex structures,
  * including custom user-defined objects that implement {@code ReadBytesMarshallable} or {@code WriteBytesMarshallable}.
- * </p>
+ * 
  * <p>
  * {@code Bytes} can be used for a variety of purposes such as:
  * <ul>
@@ -62,16 +62,16 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *     <li>Temporary storage (in-memory) of binary data</li>
  *     <li>Shared memory in memory mapped files</li>
  * </ul>
- * </p>
+ * 
  * <p>
  * {@code Bytes} is essentially a view of a region within a {@link BytesStore} and is equipped with separate read and
  * write cursors, boasting a 63-bit addressing capacity (approximately 8 EiB), as opposed to Java's built-in
  * {@link ByteBuffer}, which only supports 31-bit addressing with a single cursor.
- * </p>
+ * 
  * <p>
  * A {@code Bytes} instance can represent either a fixed region of memory or an elastic buffer that dynamically
  * resizes as needed. It is mutable and designed for single-threaded use as it is not thread-safe.
- * </p>
+ * 
  * <p>
  * The cursors within Bytes consist of a write-position and a read-position, which must adhere to these constraints:
  * <ul>
@@ -85,7 +85,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * Note: Some operations on {@code Bytes} may throw {@code IllegalStateException} if the underlying storage has been released.
  * Always ensure proper release of resources when finished with a {@code Bytes} instance, especially if it's backed by system resources
  * like file handles or network sockets.
- * </p>
+ * 
  *
  * @param <U> The type of the {@link BytesStore} that backs this {@code Bytes} instance.
  * @see BytesStore
@@ -230,7 +230,7 @@ public interface Bytes<U> extends
      * This method effectively turns the group of fields into a contiguous memory segment that can be accessed and manipulated
      * as a single entity using the returned Bytes object.
      *
-     * <p>Example of using {@link FieldGroup} to group fields:</p>
+     * <p>Example of using {@link FieldGroup} to group fields:
      * <pre>{@code
      *     static class Padding extends Parent {
      *         {@literal @}FieldGroup("p")
@@ -239,13 +239,13 @@ public interface Bytes<U> extends
      *     }
      * }</pre>
      *
-     * <p>Example of creating a Bytes view for a field group:</p>
+     * <p>Example of creating a Bytes view for a field group:
      * <pre>{@code
      *     Padding example = new Padding();
      *     Bytes<Padding> bytes = Bytes.forFieldGroup(example, "p");
      * }</pre>
      * <p><b>Note:</b> The data in the resulting Bytes view is preceded by the length of the data encoded as an unsigned byte.
-     * This consumes one byte of storage and limits the maximum size of the data in the view to 255 usable bytes.</p>
+     * This consumes one byte of storage and limits the maximum size of the data in the view to 255 usable bytes.
      *
      * @param <T>       The type of the underlying object
      * @param object    The non-null object containing the fields to be mapped
@@ -275,7 +275,7 @@ public interface Bytes<U> extends
      * <p>This method is provided for convenience. However, it's important to note that this method
      * may create intermediate objects, which might not be ideal for performance-sensitive applications
      * that require minimizing garbage creation. To avoid creating intermediate objects, consider using
-     * a different approach as demonstrated in the example below.</p>
+     * a different approach as demonstrated in the example below.
      *
      * @param byteBuffer The ByteBuffer to wrap. Must be non-null and must not be read-only.
      * @return A new Bytes instance wrapping the provided {@code byteBuffer}, ready for reading.
@@ -492,7 +492,7 @@ public interface Bytes<U> extends
      * <p>
      * Native memory allocation can be faster and is not subject to Java's garbage collection,
      * making it suitable for performance-sensitive applications.
-     * </p>
+     * 
      *
      * @return A new {@code NativeBytes} object representing an elastic wrapper for native memory.
      */
@@ -508,7 +508,7 @@ public interface Bytes<U> extends
      * <p>
      * Native memory allocation can be faster and is not subject to Java's garbage collection,
      * making it suitable for performance-sensitive applications.
-     * </p>
+     * 
      *
      * @param initialCapacity The initial non-negative capacity of the wrapper in bytes.
      * @return A new {@code NativeBytes} object representing an elastic wrapper for native memory.
@@ -527,7 +527,7 @@ public interface Bytes<U> extends
      * <p>
      * Heap memory allocation is managed by the Java Virtual Machine and is subject
      * to garbage collection.
-     * </p>
+     * 
      *
      * @return A new {@code OnHeapBytes} object representing an elastic wrapper for heap memory.
      */
@@ -543,7 +543,7 @@ public interface Bytes<U> extends
      * <p>
      * Heap memory allocation is managed by the Java Virtual Machine and is subject
      * to garbage collection.
-     * </p>
+     * 
      *
      * @param initialCapacity The initial non-negative capacity of the wrapper in bytes.
      * @return A new {@code OnHeapBytes} object representing an elastic wrapper for heap memory.
@@ -568,7 +568,7 @@ public interface Bytes<U> extends
      * If the length of the extracted substring is greater than {@code maxLen},
      * an ellipsis "..." is appended to the resulting string. Note that in this case, the
      * length of the returned string will be {@code maxLen + 3}.
-     * </p>
+     * 
      *
      * @param buffer The buffer to extract the string from. Must not be {@code null}.
      * @return A string extracted from the buffer, possibly truncated and appended with an ellipsis.
@@ -591,7 +591,7 @@ public interface Bytes<U> extends
      * If the length of the extracted substring is greater than {@code maxLen},
      * an ellipsis "..." is appended to the resulting string. Note that in this case, the
      * length of the returned string will be {@code maxLen + 3}.
-     * </p>
+     * 
      *
      * @param buffer The buffer to extract the string from. Must not be {@code null}.
      * @param maxLen The maximum length of the string to be extracted.
@@ -650,7 +650,7 @@ public interface Bytes<U> extends
      * <p>
      * The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
      * and constructs a string from these bytes.
-     * </p>
+     * 
      *
      * @param buffer   The buffer to extract the string from. Must not be {@code null}.
      * @param position The position in the buffer to start extracting the string from.
@@ -765,7 +765,7 @@ public interface Bytes<U> extends
      * <p>
      * When a Bytes object is unchecked, it performs minimal or no bounds checking on read and write operations.
      * This can improve performance but may result in undefined behavior if attempting to access out-of-bounds elements.
-     * </p>
+     * 
      *
      * @return {@code true} if this Bytes object operates in unchecked mode; {@code false} otherwise.
      */
@@ -799,7 +799,7 @@ public interface Bytes<U> extends
      * <p>
      * The copy will have its own separate storage and state, and modifications to the copy will not affect the original
      * Bytes object, and vice versa.
-     * </p>
+     * 
      *
      * @return A new Bytes object that is a copy of this object.
      * @throws IllegalStateException If this Bytes object is in an illegal state for copying.
@@ -893,7 +893,7 @@ public interface Bytes<U> extends
      * <p>
      * Elastic Bytes objects can automatically grow to accommodate additional data, whereas
      * non-elastic ones have a fixed capacity.
-     * </p>
+     * 
      *
      * @return {@code true} if this Bytes object is elastic; {@code false} otherwise.
      */
@@ -904,7 +904,7 @@ public interface Bytes<U> extends
      * <p>
      * If this Bytes object is elastic and doesn't have enough capacity, it will be resized. If it is not
      * elastic and doesn't have enough capacity, a {@link DecoratedBufferOverflowException} will be thrown.
-     * </p>
+     * 
      *
      * @param desiredCapacity The minimum capacity, in bytes, that is required.
      * @throws IllegalStateException            If the Bytes object is closed and needs to be resized.
@@ -924,7 +924,7 @@ public interface Bytes<U> extends
      * <p>
      * Note that the slice is a subsection of this Bytes object and will not be elastic regardless of
      * the elasticity of the parent Bytes object.
-     * </p>
+     * 
      *
      * @return A new slice of this Bytes object.
      * @throws IllegalStateException if the underlying BytesStore has been released.
@@ -947,7 +947,7 @@ public interface Bytes<U> extends
      * ranging from the {@code start} position to the {@code realCapacity}.
      * <p>
      * The returned Bytes object is non-elastic and supports both read and write operations using cursors.
-     * </p>
+     * 
      *
      * @return A Bytes object wrapping the bytesStore of this Bytes object.
      * @throws IllegalStateException if the underlying BytesStore has been released.
@@ -968,7 +968,7 @@ public interface Bytes<U> extends
      * a backing BytesStore, this method returns null.
      * <p>
      * The BytesStore represents the underlying storage of bytes that the Bytes object is manipulating.
-     * </p>
+     * 
      *
      * @return The backing BytesStore, or null if there isn't one.
      */
@@ -981,7 +981,7 @@ public interface Bytes<U> extends
      * <p>
      * This method returns {@code true} if the contents of this Bytes object is equal to the contents
      * of the {@code other} string. Otherwise, it returns {@code false}.
-     * </p>
+     * 
      *
      * @param other The string to compare with the contents of this Bytes object, can be null.
      * @return {@code true} if the contents of this Bytes object equals the contents of the provided
@@ -998,7 +998,7 @@ public interface Bytes<U> extends
      * <p>
      * This operation is useful to free up space for writing by discarding bytes that have already
      * been read.
-     * </p>
+     * 
      *
      * @return This Bytes object, for method chaining.
      * @throws IllegalStateException if this Bytes object has been previously released.
@@ -1012,7 +1012,7 @@ public interface Bytes<U> extends
      * <p>
      * The number of bytes copied is the minimum of the remaining bytes in this Bytes object and the
      * remaining capacity in the {@code targetByteStore}.
-     * </p>
+     * 
      *
      * @param targetByteStore The target BytesStore to copy bytes into, must not be null.
      * @return The actual number of bytes that were copied.
@@ -1029,7 +1029,7 @@ public interface Bytes<U> extends
      * Copies bytes from this Bytes object to the provided {@code outputStream}.
      * <p>
      * Bytes are written from the current read position up to the limit of this Bytes object.
-     * </p>
+     * 
      *
      * @param outputStream The OutputStream to write the bytes to, must not be null.
      * @throws IllegalStateException if this Bytes object has been previously released.
@@ -1049,7 +1049,7 @@ public interface Bytes<U> extends
      * <p>
      * A Bytes object backed by a memory-mapped file, for example, can be shared among processes,
      * whereas a Bytes object backed by heap memory cannot be shared in this way.
-     * </p>
+     * 
      *
      * @return {@code true} if this Bytes object uses memory that can be shared across processes,
      * {@code false} otherwise.
@@ -1065,7 +1065,7 @@ public interface Bytes<U> extends
      * This method effectively removes {@code count} bytes beginning at the specified {@code fromOffset},
      * shifting any subsequent bytes to the left (reduces their index).
      * The write position is adjusted accordingly, and the capacity remains unchanged.
-     * </p>
+     * 
      *
      * @param fromOffset The offset from which to start removing bytes.
      * @param count      The number of bytes to remove.
@@ -1092,16 +1092,16 @@ public interface Bytes<U> extends
      * The method returns the lowest index {@code k} at which the contents of this Bytes object
      * equals the provided {@code source} Bytes object. If no such sequence exists, then {@code -1}
      * is returned.
-     * </p>
+     * 
      * <p>
      * Formally, the method returns the lowest index {@code k} such that:
-     * </p>
+     * 
      * <blockquote><pre>
      * this.startsWith(source, k)
      * </pre></blockquote>
      * <p>
      * If no such value of {@code k} exists, then {@code -1} is returned.
-     * </p>
+     * 
      *
      * @param source The sub-bytes to search for within this Bytes object, must not be null.
      * @return The index of the first occurrence of the specified sub-bytes, or {@code -1} if there
@@ -1241,7 +1241,7 @@ public interface Bytes<U> extends
      * Writes the specified number of bytes from this Bytes object into the provided {@code bytesOut}.
      * <p>
      * This operation does not affect the readLimit or readPosition of this Bytes object.
-     * </p>
+     * 
      *
      * @param length   The number of bytes to write. Must be non-negative.
      * @param bytesOut The target BytesOut object to write to. Must not be null.
@@ -1278,7 +1278,7 @@ public interface Bytes<U> extends
      * <p>
      * If the {@code using} parameter is not null, this method will update its state with the read content.
      * Otherwise, it will create a new instance of the specified class.
-     * </p>
+     * 
      *
      * @param clazz The class of the object to be read. Must not be null.
      * @param using An optional instance to update with the read content. Can be null.
@@ -1320,7 +1320,7 @@ public interface Bytes<U> extends
      * <p>
      * This method is useful for serialization, as it writes not only the content of the {@code marshallable} object
      * but also information about its size.
-     * </p>
+     * 
      *
      * @param marshallable The object to be serialized and written to this Bytes object. Must not be null.
      * @throws BufferOverflowException if there is not enough capacity in this Bytes object to store the serialized data.
@@ -1347,7 +1347,7 @@ public interface Bytes<U> extends
      * {@code inputStream} and writing into this Bytes object until the end of the stream is reached.
      * <p>
      * Note: This method does not close the provided {@code inputStream}.
-     * </p>
+     * 
      *
      * @param inputStream The input stream from which data is to be read. Must not be null.
      * @return This Bytes object.

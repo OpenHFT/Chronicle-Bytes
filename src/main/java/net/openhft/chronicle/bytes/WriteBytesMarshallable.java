@@ -38,7 +38,7 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      *
      * <p>This method is responsible for calling
      * {@link net.openhft.chronicle.core.io.Validatable#validate()} as needed to ensure
-     * the validity of the state of the object before serialization.</p>
+     * the validity of the state of the object before serialization.
      *
      * @param bytes the {@link BytesOut} instance to write the object's state to.
      * @throws IllegalStateException        if the object is in an inappropriate state for the request.

@@ -34,7 +34,7 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
      * clears any existing data in the buffer and prepares it for new data to be written.
      *
      * <p>This operation is similar to rewinding the tape to the beginning,
-     * and having it ready to record new data over anything that was there before.</p>
+     * and having it ready to record new data over anything that was there before.
      *
      * @return A reference to this object, allowing for method chaining.
      * @throws ClosedIllegalStateException If this buffer has been closed

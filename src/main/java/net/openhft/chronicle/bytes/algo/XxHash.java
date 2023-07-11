@@ -26,7 +26,7 @@ import java.nio.BufferUnderflowException;
  * This class implements the xxHash algorithm for hashing byte stores.
  * xxHash is a non-cryptographic hash function known for its speed.
  *
- * <p>Migrated from Zero-Allocation-Hashing.</p>
+ * <p>Migrated from Zero-Allocation-Hashing.
  *
  * @see BytesStoreHash
  * @see BytesStore

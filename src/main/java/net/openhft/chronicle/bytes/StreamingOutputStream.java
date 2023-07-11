@@ -28,7 +28,7 @@ import java.nio.BufferOverflowException;
  * A special kind of OutputStream implementation which writes data to a StreamingDataOutput instance.
  *
  * <p>This class provides a way to connect APIs expecting an OutputStream with data destinations
- * encapsulated in StreamingDataOutput instances.</p>
+ * encapsulated in StreamingDataOutput instances.
  *
  * @see StreamingDataOutput
  * @see OutputStream

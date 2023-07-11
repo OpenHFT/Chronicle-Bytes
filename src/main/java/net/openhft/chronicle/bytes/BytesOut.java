@@ -36,7 +36,7 @@ import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExc
  * wide range of operations for handling byte data, including appending, prepending,
  * and producing a hex dump description.
  *
- * <p>Note: This interface suppresses rawtypes and unchecked warnings.</p>
+ * <p>Note: This interface suppresses rawtypes and unchecked warnings.
  *
  * @param <U> the type of the BytesOut
  */

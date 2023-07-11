@@ -4,7 +4,7 @@
  * and offers a selection of Decimaliser implementations that control the conversion of floating-point numbers
  * to their decimal representations.
  *
- * <p>Classes in this package include:</p>
+ * <p>Classes in this package include:
  *
  * <ul>
  *     <li>{@link net.openhft.chronicle.bytes.render.StandardDecimaliser} - An implementation that produces numbers
@@ -26,6 +26,6 @@
  * </ul>
  *
  * <p>These classes are used to convert floating-point numbers into a string representation that is optimized for either
- * performance or precision, depending on the use case requirements.</p>
+ * performance or precision, depending on the use case requirements.
  */
 package net.openhft.chronicle.bytes.render;

@@ -27,7 +27,7 @@ import java.nio.BufferUnderflowException;
  * <p>
  * This class extends {@link BinaryLongReference} and allows access to two 64-bit long values in a binary form,
  * which are contiguous in memory.
- * </p>
+ * 
  * Example usage:
  * <pre>
  * BytesStore bytesStore = BytesStore.nativeStoreWithFixedCapacity(16); // 16 bytes for two long values.

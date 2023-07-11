@@ -58,7 +58,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
 
     /**
      * Prepends a long value as a decimal text. This operation moves the readPosition() backward.
-     * <p>Note: The operation shifts the readPosition, but not the writePosition or readLimit</p>
+     * <p>Note: The operation shifts the readPosition, but not the writePosition or readLimit
      *
      * @param value the long value to prepend as text
      * @return this instance, after the operation

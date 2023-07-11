@@ -4,7 +4,7 @@
  * the Chronicle Bytes library, which offers high-performance byte manipulation
  * and I/O capabilities.
  *
- * <p>Key classes and interfaces included in this package:</p>
+ * <p>Key classes and interfaces included in this package:
  * <ul>
  *     <li>{@link net.openhft.chronicle.bytes.ref.AbstractReference} - A base class representing a reference to a byte store.</li>
  *     <li>{@link net.openhft.chronicle.bytes.ref.BinaryBooleanReference} - A concrete implementation for reading and writing boolean values in binary format.</li>
@@ -27,7 +27,7 @@
  *
  * <p>This package is mainly used when there is a need for efficient low-level manipulation
  * of arrays and values at the byte level, for instance, when working with memory-mapped files
- * or high-performance I/O.</p>
+ * or high-performance I/O.
  *
  * @author OpenHFT
  * @see net.openhft.chronicle.bytes.BytesStore

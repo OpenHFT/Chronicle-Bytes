@@ -39,7 +39,7 @@ import java.nio.BufferUnderflowException;
  * The $toString method provides a default implementation for creating a string
  * representation of the object in a hexadecimal format.
  *
- * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.</p>
+ * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.
  *
  */
 @DontChain
