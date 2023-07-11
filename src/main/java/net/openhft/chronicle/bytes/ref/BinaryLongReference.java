@@ -50,7 +50,6 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * Note: This class is not thread-safe. External synchronization may be necessary if instances
  * are shared between threads.
  *
- * @author [Your Name]
  * @see BytesStore
  * @see LongReference
  */

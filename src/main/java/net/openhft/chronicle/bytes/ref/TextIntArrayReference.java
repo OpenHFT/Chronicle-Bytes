@@ -38,8 +38,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  * The format of the text representation of an integer array is:
  * {@code { capacity: 00000001234, used: 0000000128, values: [ 1234567890, ... ] }}
  * </p>
- *
- * @author [Your Name]
  */
 @SuppressWarnings("rawtypes")
 public class TextIntArrayReference extends AbstractReference implements ByteableIntArrayValues {

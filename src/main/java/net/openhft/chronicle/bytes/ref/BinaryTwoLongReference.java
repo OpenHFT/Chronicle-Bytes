@@ -40,7 +40,6 @@ import java.nio.BufferUnderflowException;
  * Note: This class is not thread-safe. External synchronization may be necessary if instances
  * are shared between threads.
  *
- * @author [Your Name]
  * @see BinaryLongReference
  */
 public class BinaryTwoLongReference extends BinaryLongReference implements TwoLongReference {
