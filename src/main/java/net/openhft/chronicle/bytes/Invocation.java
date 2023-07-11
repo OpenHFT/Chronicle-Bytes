@@ -32,8 +32,8 @@ public interface Invocation {
     /**
      * Invokes a method with the specified parameters.
      *
-     * @param m   the method to be invoked
-     * @param o   the object from which the method is invoked
+     * @param m    the method to be invoked
+     * @param o    the object from which the method is invoked
      * @param args the arguments to be passed to the method
      * @return the result of the method invocation
      * @throws InvocationTargetException if the invoked method throws an exception

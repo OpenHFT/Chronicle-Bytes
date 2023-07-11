@@ -66,8 +66,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      *
      * @param bytes    the Bytes instance to write to.
      * @param capacity the capacity of the array to be written.
-     * @throws IllegalStateException       if an invalid state is encountered.
-     * @throws BufferOverflowException     if there's not enough space in the buffer to write the array.
+     * @throws IllegalStateException   if an invalid state is encountered.
+     * @throws BufferOverflowException if there's not enough space in the buffer to write the array.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {

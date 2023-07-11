@@ -36,7 +36,7 @@ import java.nio.BufferUnderflowException;
  * ref.setValue(1234567890L); // set the first long value
  * ref.setValue2(9876543210L); // set the second long value
  * </pre>
- *
+ * <p>
  * Note: This class is not thread-safe. External synchronization may be necessary if instances
  * are shared between threads.
  *
@@ -91,7 +91,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value in the BytesStore.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setValue2(long value)
@@ -108,7 +108,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Retrieves the second 64-bit long value using volatile memory semantics.
      *
      * @return the second 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long getVolatileValue2()
@@ -125,7 +125,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value using volatile memory semantics.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setVolatileValue2(long value)
@@ -142,7 +142,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value using ordered or lazy set memory semantics.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setOrderedValue2(long value)
@@ -160,7 +160,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      *
      * @param delta the value to add
      * @return the resulting second 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long addValue2(long delta)
@@ -178,7 +178,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      *
      * @param delta the value to add
      * @return the resulting second 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long addAtomicValue2(long delta)
@@ -198,7 +198,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * @param expected the expected second 64-bit long value
      * @param value    the new second 64-bit long value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public boolean compareAndSwapValue2(long expected, long value)

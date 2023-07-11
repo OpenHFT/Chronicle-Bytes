@@ -48,9 +48,9 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
      * @param bytes  the BytesStore to set
      * @param offset the offset to set
      * @param length the length to set
-     * @throws IllegalStateException        if the state is invalid
-     * @throws IllegalArgumentException     if the arguments are invalid
-     * @throws BufferOverflowException     if the provided buffer is too small
+     * @throws IllegalStateException    if the state is invalid
+     * @throws IllegalArgumentException if the arguments are invalid
+     * @throws BufferOverflowException  if the provided buffer is too small
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -68,6 +68,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Returns the maximum size of the byte representation of a boolean value.
+     *
      * @return The maximum size of a boolean in bytes
      */
     @Override
@@ -77,8 +78,9 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Reads a boolean value from the bytes store.
+     *
      * @return The read boolean value
-     * @throws IllegalStateException      If an illegal condition has occurred
+     * @throws IllegalStateException    If an illegal condition has occurred
      * @throws BufferUnderflowException If the bytes store contains insufficient data
      */
     @Override
@@ -97,6 +99,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
 
     /**
      * Writes a boolean value to the bytes store.
+     *
      * @param flag The boolean value to write
      * @throws IllegalStateException If an illegal condition has occurred
      */

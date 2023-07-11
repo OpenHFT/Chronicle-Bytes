@@ -106,9 +106,9 @@ public class ByteStringWriter extends Writer {
     /**
      * Appends a portion of a character sequence.
      *
-     * @param csq The character sequence to append.
+     * @param csq   The character sequence to append.
      * @param start The index of the first character to append.
-     * @param end The index of the character following the last character to append.
+     * @param end   The index of the character following the last character to append.
      * @return This writer
      */
     @NotNull
@@ -155,8 +155,8 @@ public class ByteStringWriter extends Writer {
      * Writes a portion of an array of characters.
      *
      * @param cbuf Array of characters.
-     * @param off Offset from which to start reading characters.
-     * @param len Number of characters to be written.
+     * @param off  Offset from which to start reading characters.
+     * @param len  Number of characters to be written.
      * @throws IOException if an I/O error occurs.
      */
     @Override

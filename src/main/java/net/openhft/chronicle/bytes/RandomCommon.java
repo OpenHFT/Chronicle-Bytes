@@ -28,7 +28,7 @@ import java.nio.ByteOrder;
 /**
  * Interface defining methods for managing random access to a buffer. It extends ReferenceCounted to allow for reference counting features.
  */
- interface RandomCommon extends ReferenceCounted {
+interface RandomCommon extends ReferenceCounted {
     /**
      * @return The smallest position allowed in this buffer.
      */
@@ -141,7 +141,6 @@ import java.nio.ByteOrder;
     }
 
     /**
-     *
      * <p>
      * If the resource is closed, the returned value is unspecified.
      *
@@ -171,7 +170,7 @@ import java.nio.ByteOrder;
      * @return the underlying addressForRead of the buffer
      * @throws UnsupportedOperationException if the underlying buffer is on the heap
      * @throws BufferUnderflowException      if the offset is before the start() or the after the capacity()
-     * @throws IllegalStateException if the buffer has been closed.
+     * @throws IllegalStateException         if the buffer has been closed.
      */
     long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException;
@@ -183,8 +182,8 @@ import java.nio.ByteOrder;
      * @param buffer The buffer index.
      * @return The underlying memory address for reading at the specified offset.
      * @throws UnsupportedOperationException if the underlying buffer is on the heap.
-     * @throws BufferUnderflowException if the offset is before the start or after the capacity.
-     * @throws IllegalStateException if the buffer has been closed.
+     * @throws BufferUnderflowException      if the offset is before the start or after the capacity.
+     * @throws IllegalStateException         if the buffer has been closed.
      */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
@@ -207,8 +206,8 @@ import java.nio.ByteOrder;
      *
      * @return The underlying memory address for writing at the current write position.
      * @throws UnsupportedOperationException if the underlying buffer is on the heap.
-     * @throws BufferOverflowException if the current write position is before the start or after the capacity.
-     * @throws IllegalStateException if the buffer state doesn't allow the operation.
+     * @throws BufferOverflowException       if the current write position is before the start or after the capacity.
+     * @throws IllegalStateException         if the buffer state doesn't allow the operation.
      */
     long addressForWritePosition()
             throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;

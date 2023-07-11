@@ -58,7 +58,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
      * @param bytes the Bytes instance to write to.
      * @param value the 32-bit integer value to be written.
      * @throws BufferOverflowException if there is insufficient space.
-     * @throws IllegalStateException    if an error occurs during writing.
+     * @throws IllegalStateException   if an error occurs during writing.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {

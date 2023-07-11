@@ -52,7 +52,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b      the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 64-bit hash value.
-     * @throws IllegalStateException      if the underlying memory is not readable.
+     * @throws IllegalStateException    if the underlying memory is not readable.
      * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     static long hash(@NotNull BytesStore b, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
@@ -78,7 +78,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b      the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 32-bit hash value.
-     * @throws IllegalStateException      if the underlying memory is not readable.
+     * @throws IllegalStateException    if the underlying memory is not readable.
      * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     static int hash32(@NotNull BytesStore b, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
@@ -92,7 +92,7 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param bytes  the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 64-bit hash value.
-     * @throws IllegalStateException      if the underlying memory is not readable.
+     * @throws IllegalStateException    if the underlying memory is not readable.
      * @throws BufferUnderflowException if the length specified is greater than the available bytes.
      */
     long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException;

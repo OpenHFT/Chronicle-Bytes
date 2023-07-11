@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.Closeable;
+
 /**
  * An interface for a reader on a Ring Buffer, providing methods to read and navigate through the buffer.
  * The reader supports a read-once-and-discard paradigm which makes it suitable for situations where
@@ -76,8 +77,8 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
     /**
      * Overloaded method of {@link #afterRead(long)} providing additional details about the read operation.
      *
-     * @param next The position after the last read operation.
-     * @param payloadStart The starting position of the payload that was read.
+     * @param next            The position after the last read operation.
+     * @param payloadStart    The starting position of the payload that was read.
      * @param underlyingIndex The index in the underlying data structure from where the data was read.
      */
     void afterRead(@NonNegative long next, long payloadStart, long underlyingIndex);
@@ -93,7 +94,6 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      * A convenience method that reads data from the Ring Buffer by internally calling both {@link #beforeRead(Bytes)} and {@link #afterRead(long)}.
      *
      * @param bytes to read a message into
-     *
      * @return True if the read operation succeeded, false otherwise.
      */
     boolean read(BytesOut<?> bytes);

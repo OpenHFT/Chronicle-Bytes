@@ -23,6 +23,7 @@ import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
+
 /**
  * Enum representing different byte lengths for binary values.
  * It provides methods to get the code associated with each byte length,
@@ -192,9 +193,9 @@ public enum BinaryLengthLength {
     /**
      * Writes the length of the data into the {@link Bytes} object.
      *
-     * @param bytes                           The {@link Bytes} object to write to.
-     * @param positionReturnedFromInitialise  The position within the {@link Bytes} to write the length.
-     * @param end                             The end position of the data within the {@link Bytes}.
+     * @param bytes                          The {@link Bytes} object to write to.
+     * @param positionReturnedFromInitialise The position within the {@link Bytes} to write the length.
+     * @param end                            The end position of the data within the {@link Bytes}.
      */
     public abstract void writeLength(@NotNull Bytes<?> bytes, @NonNegative long positionReturnedFromInitialise, @NonNegative long end);
 }

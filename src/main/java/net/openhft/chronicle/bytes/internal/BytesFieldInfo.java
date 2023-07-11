@@ -28,6 +28,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
+
 /**
  * This class holds the metadata information for fields within an object that are annotated with
  * {@link FieldGroup}. It provides utilities for analyzing and grouping the fields based on

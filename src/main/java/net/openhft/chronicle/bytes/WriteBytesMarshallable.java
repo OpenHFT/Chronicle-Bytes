@@ -41,8 +41,8 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      * the validity of the state of the object before serialization.</p>
      *
      * @param bytes the {@link BytesOut} instance to write the object's state to.
-     * @throws IllegalStateException if the object is in an inappropriate state for the request.
-     * @throws BufferOverflowException if there is no more space left to write in the buffer.
+     * @throws IllegalStateException        if the object is in an inappropriate state for the request.
+     * @throws BufferOverflowException      if there is no more space left to write in the buffer.
      * @throws InvalidMarshallableException if the object cannot be successfully serialized.
      */
     void writeMarshallable(BytesOut<?> bytes)

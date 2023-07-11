@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.pool.StringBuilderPool;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
+
 /**
  * This class provides a mechanism for interning Strings with 8-bit characters.
  * Interning is a method of storing only one copy of each distinct String value,
@@ -51,10 +52,10 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     /**
      * Returns a String value from the provided {@link BytesStore} object.
      *
-     * @param cs the BytesStore object from which to get the String value
+     * @param cs     the BytesStore object from which to get the String value
      * @param length the length of the string to be interned
      * @return the interned String value
-     * @throws IllegalStateException if this method is called in an inappropriate state
+     * @throws IllegalStateException    if this method is called in an inappropriate state
      * @throws BufferUnderflowException if the BytesStore doesn't have enough remaining capacity
      */
     @SuppressWarnings("rawtypes")

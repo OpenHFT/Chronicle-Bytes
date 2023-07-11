@@ -98,8 +98,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * <p>
      * This method is used for debugging and monitoring. It should not be used in production environments.
      *
-     * @throws IllegalStateException    if the BinaryLongArrayReference is in an invalid state.
-     * @throws BufferOverflowException  if the bytes cannot be written.
+     * @throws IllegalStateException   if the BinaryLongArrayReference is in an invalid state.
+     * @throws BufferOverflowException if the bytes cannot be written.
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
@@ -124,6 +124,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         this.bytes = bytes;
         this.bytes.reserve(this);
     }
+
     /**
      * Writes to the provided Bytes object with the given capacity.
      * The method asserts that the write position is correctly aligned,
@@ -132,9 +133,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param bytes    the Bytes object to write to.
      * @param capacity the capacity to be written and used for subsequent zeroing.
-     * @throws BufferOverflowException    if there is insufficient space in the buffer.
-     * @throws IllegalArgumentException    if arguments violate precondition constraints.
-     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     * @throws BufferOverflowException  if there is insufficient space in the buffer.
+     * @throws IllegalArgumentException if arguments violate precondition constraints.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -146,6 +147,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         bytes.zeroOut(start, start + (capacity << SHIFT));
         bytes.writeSkip(capacity << SHIFT);
     }
+
     /**
      * Lazily writes to the provided Bytes object with the given capacity.
      * Unlike the write method, this method does not zero out the subsequent space.
@@ -153,8 +155,8 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param bytes    the Bytes object to write to.
      * @param capacity the capacity to be written.
-     * @throws BufferOverflowException    if there is insufficient space in the buffer.
-     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
+     * @throws BufferOverflowException if there is insufficient space in the buffer.
+     * @throws IllegalStateException   if the Bytes object is in an incorrect state.
      */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
@@ -171,9 +173,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param bytes  the BytesStore object to read from.
      * @param offset the offset at which to start reading.
-     * @throws BufferUnderflowException   if there is not enough remaining data.
-     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
      * @return the calculated peak length.
+     * @throws BufferUnderflowException if there is not enough remaining data.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -191,9 +193,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @param bytes        the BytesStore object to read from.
      * @param offset       the offset at which to start reading.
      * @param capacityHint the capacity to be used if the initial capacity is 0.
-     * @throws BufferUnderflowException   if there is not enough remaining data.
-     * @throws IllegalStateException      if the Bytes object is in an incorrect state.
      * @return the calculated peak length.
+     * @throws BufferUnderflowException if there is not enough remaining data.
+     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {

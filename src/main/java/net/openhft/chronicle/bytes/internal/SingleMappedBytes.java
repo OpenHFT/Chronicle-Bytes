@@ -62,7 +62,7 @@ public class SingleMappedBytes extends CommonMappedBytes {
      * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file and associates it with the specified name.
      *
      * @param mappedFile The MappedFile object to be wrapped.
-     * @param name The name to be associated with the SingleMappedBytes object.
+     * @param name       The name to be associated with the SingleMappedBytes object.
      * @throws IllegalStateException if an error occurs during initialization.
      */
     protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)

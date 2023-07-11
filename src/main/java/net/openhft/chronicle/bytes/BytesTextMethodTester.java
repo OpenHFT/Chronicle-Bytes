@@ -48,10 +48,10 @@ public class BytesTextMethodTester<T> {
     /**
      * Constructs a {@code BytesTextMethodTester} instance with the provided parameters.
      *
-     * @param input The input file containing hexadecimal data to feed into the methods of the class under test.
+     * @param input             The input file containing hexadecimal data to feed into the methods of the class under test.
      * @param componentFunction A function that defines how to instantiate or manipulate the object that the class under test needs.
-     * @param outputClass The class of the interface that includes the methods to be tested.
-     * @param output The output file containing the expected hexadecimal results of the tested methods.
+     * @param outputClass       The class of the interface that includes the methods to be tested.
+     * @param output            The output file containing the expected hexadecimal results of the tested methods.
      */
     public BytesTextMethodTester(String input, Function<T, Object> componentFunction, Class<T> outputClass, String output) {
         this.input = input;
@@ -84,11 +84,11 @@ public class BytesTextMethodTester<T> {
      * Runs the methods of the class under test using the hexadecimal data from the input file,
      * then compares the results with the expected output from the output file.
      *
-     * @throws IOException If an I/O error occurs when reading the files or writing the results.
-     * @throws IllegalArgumentException If an illegal argument is used.
-     * @throws IllegalStateException If an illegal state is encountered.
-     * @throws BufferUnderflowException If there is no more data left to read in the buffer.
      * @return The instance of {@code BytesTextMethodTester}, allowing for method chaining.
+     * @throws IOException              If an I/O error occurs when reading the files or writing the results.
+     * @throws IllegalArgumentException If an illegal argument is used.
+     * @throws IllegalStateException    If an illegal state is encountered.
+     * @throws BufferUnderflowException If there is no more data left to read in the buffer.
      */
     @NotNull
     public BytesTextMethodTester run()

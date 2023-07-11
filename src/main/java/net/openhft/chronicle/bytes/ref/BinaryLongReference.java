@@ -113,7 +113,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Retrieves the 64-bit long value from the BytesStore.
      *
      * @return the 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long getValue()
@@ -125,7 +125,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value in the BytesStore.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setValue(long value)
@@ -142,7 +142,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Retrieves the 64-bit long value using volatile memory semantics.
      *
      * @return the 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long getVolatileValue()
@@ -159,7 +159,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value using volatile memory semantics.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setVolatileValue(long value)
@@ -176,7 +176,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value using ordered or lazy set memory semantics.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public void setOrderedValue(long value)
@@ -194,7 +194,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      *
      * @param delta the value to add
      * @return the resulting 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long addValue(long delta)
@@ -212,7 +212,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      *
      * @param delta the value to add
      * @return the resulting 64-bit long value
-     * @throws IllegalStateException      if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public long addAtomicValue(long delta)
@@ -227,7 +227,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * @param expected the expected 64-bit long value
      * @param value    the new 64-bit long value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException    if closed
+     * @throws IllegalStateException if closed
      */
     @Override
     public boolean compareAndSwapValue(long expected, long value)

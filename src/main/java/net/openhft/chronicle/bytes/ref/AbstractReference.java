@@ -71,9 +71,9 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * @param bytes  the BytesStore to set
      * @param offset the offset to set
      * @param length the length to set
-     * @throws IllegalStateException        if the state is invalid
-     * @throws IllegalArgumentException     if the arguments are invalid
-     * @throws BufferOverflowException     if the provided buffer is too small
+     * @throws IllegalStateException    if the state is invalid
+     * @throws IllegalArgumentException if the arguments are invalid
+     * @throws BufferOverflowException  if the provided buffer is too small
      */
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative final long offset, @NonNegative final long length)
@@ -141,7 +141,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * Retrieves the memory address for reading.
      *
      * @return the memory address
-     * @throws IllegalStateException if the state is invalid
+     * @throws IllegalStateException    if the state is invalid
      * @throws BufferUnderflowException if the buffer does not have enough content
      */
     @Override

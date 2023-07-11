@@ -289,10 +289,10 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-                Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
-                bytesForRead.readLimit(byteBuffer.limit());
-                bytesForRead.readPosition(byteBuffer.position());
-                return bytesForRead;
+            Bytes<ByteBuffer> bytesForRead = bs.bytesForRead();
+            bytesForRead.readLimit(byteBuffer.limit());
+            bytesForRead.readPosition(byteBuffer.position());
+            return bytesForRead;
         } finally {
             bs.release(INIT);
         }
@@ -318,10 +318,10 @@ public interface Bytes<U> extends
         requireNonNull(byteBuffer);
         BytesStore<?, ByteBuffer> bs = BytesStore.wrap(byteBuffer);
         try {
-                Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
-                bytesForWrite.writePosition(byteBuffer.position());
-                bytesForWrite.writeLimit(byteBuffer.limit());
-                return bytesForWrite;
+            Bytes<ByteBuffer> bytesForWrite = bs.bytesForWrite();
+            bytesForWrite.writePosition(byteBuffer.position());
+            bytesForWrite.writeLimit(byteBuffer.limit());
+            return bytesForWrite;
         } finally {
             bs.release(INIT);
         }
@@ -367,7 +367,7 @@ public interface Bytes<U> extends
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
         requireNonNull(byteArray);
         final BytesStore bs = BytesStore.wrap(byteArray);
-            try {
+        try {
             return bs.bytesForWrite();
         } finally {
             bs.release(INIT);
@@ -413,7 +413,7 @@ public interface Bytes<U> extends
     @NotNull
     static Bytes<byte[]> directFrom(@NotNull String text) {
         BytesStore<?, byte[]> from = BytesStore.from(text);
-            try {
+        try {
             return from.bytesForRead();
         } finally {
             from.release(INIT);
@@ -761,13 +761,13 @@ public interface Bytes<U> extends
     }
 
     /**
- * Checks whether this Bytes object operates in an unchecked mode.
+     * Checks whether this Bytes object operates in an unchecked mode.
      * <p>
- * When a Bytes object is unchecked, it performs minimal or no bounds checking on read and write operations.
- * This can improve performance but may result in undefined behavior if attempting to access out-of-bounds elements.
- * </p>
+     * When a Bytes object is unchecked, it performs minimal or no bounds checking on read and write operations.
+     * This can improve performance but may result in undefined behavior if attempting to access out-of-bounds elements.
+     * </p>
      *
- * @return {@code true} if this Bytes object operates in unchecked mode; {@code false} otherwise.
+     * @return {@code true} if this Bytes object operates in unchecked mode; {@code false} otherwise.
      */
     default boolean unchecked() {
         return false;
@@ -794,15 +794,15 @@ public interface Bytes<U> extends
     }
 
     /**
- * Creates and returns a deep copy of this Bytes object, including the data between
- * {@link RandomCommon#readPosition()} and {@link RandomCommon#readLimit()}.
- * <p>
- * The copy will have its own separate storage and state, and modifications to the copy will not affect the original
- * Bytes object, and vice versa.
- * </p>
+     * Creates and returns a deep copy of this Bytes object, including the data between
+     * {@link RandomCommon#readPosition()} and {@link RandomCommon#readLimit()}.
+     * <p>
+     * The copy will have its own separate storage and state, and modifications to the copy will not affect the original
+     * Bytes object, and vice versa.
+     * </p>
      *
- * @return A new Bytes object that is a copy of this object.
- * @throws IllegalStateException If this Bytes object is in an illegal state for copying.
+     * @return A new Bytes object that is a copy of this object.
+     * @throws IllegalStateException If this Bytes object is in an illegal state for copying.
      */
     @Override
     BytesStore<Bytes<U>, U> copy()
@@ -888,46 +888,46 @@ public interface Bytes<U> extends
     }
 
     /**
- * Checks if this Bytes object is elastic, meaning it can dynamically resize when more data is written
- * than its current {@link #realCapacity()}.
- * <p>
- * Elastic Bytes objects can automatically grow to accommodate additional data, whereas
- * non-elastic ones have a fixed capacity.
- * </p>
+     * Checks if this Bytes object is elastic, meaning it can dynamically resize when more data is written
+     * than its current {@link #realCapacity()}.
+     * <p>
+     * Elastic Bytes objects can automatically grow to accommodate additional data, whereas
+     * non-elastic ones have a fixed capacity.
+     * </p>
      *
- * @return {@code true} if this Bytes object is elastic; {@code false} otherwise.
+     * @return {@code true} if this Bytes object is elastic; {@code false} otherwise.
      */
     boolean isElastic();
 
     /**
- * Ensures that this Bytes object has the capacity to accommodate the specified amount of data.
- * <p>
- * If this Bytes object is elastic and doesn't have enough capacity, it will be resized. If it is not
- * elastic and doesn't have enough capacity, a {@link DecoratedBufferOverflowException} will be thrown.
- * </p>
+     * Ensures that this Bytes object has the capacity to accommodate the specified amount of data.
+     * <p>
+     * If this Bytes object is elastic and doesn't have enough capacity, it will be resized. If it is not
+     * elastic and doesn't have enough capacity, a {@link DecoratedBufferOverflowException} will be thrown.
+     * </p>
      *
- * @param desiredCapacity The minimum capacity, in bytes, that is required.
- * @throws IllegalStateException            If the Bytes object is closed and needs to be resized.
- * @throws DecoratedBufferOverflowException If the Bytes object is not elastic and there isn't enough space
- *                                          or if the provided {@code desiredCapacity} is negative.
+     * @param desiredCapacity The minimum capacity, in bytes, that is required.
+     * @throws IllegalStateException            If the Bytes object is closed and needs to be resized.
+     * @throws DecoratedBufferOverflowException If the Bytes object is not elastic and there isn't enough space
+     *                                          or if the provided {@code desiredCapacity} is negative.
      */
     default void ensureCapacity(@NonNegative long desiredCapacity)
             throws DecoratedBufferOverflowException, IllegalStateException {
         requireNonNegative(desiredCapacity);
         if (desiredCapacity > capacity())
-        throw new DecoratedBufferOverflowException(isElastic() ? "Resizing required" : "Buffer is not elastic");
+            throw new DecoratedBufferOverflowException(isElastic() ? "Resizing required" : "Buffer is not elastic");
     }
 
     /**
- * Creates and returns a new slice of this Bytes object with its start position set to the current
- * read position and its capacity determined by the current limit.
+     * Creates and returns a new slice of this Bytes object with its start position set to the current
+     * read position and its capacity determined by the current limit.
      * <p>
- * Note that the slice is a subsection of this Bytes object and will not be elastic regardless of
- * the elasticity of the parent Bytes object.
- * </p>
+     * Note that the slice is a subsection of this Bytes object and will not be elastic regardless of
+     * the elasticity of the parent Bytes object.
+     * </p>
      *
- * @return A new slice of this Bytes object.
- * @throws IllegalStateException if the underlying BytesStore has been released.
+     * @return A new slice of this Bytes object.
+     * @throws IllegalStateException if the underlying BytesStore has been released.
      */
     @NotNull
     @Override
@@ -943,14 +943,14 @@ public interface Bytes<U> extends
     }
 
     /**
- * Creates and returns a Bytes object that wraps the bytesStore of this Bytes object,
- * ranging from the {@code start} position to the {@code realCapacity}.
+     * Creates and returns a Bytes object that wraps the bytesStore of this Bytes object,
+     * ranging from the {@code start} position to the {@code realCapacity}.
      * <p>
- * The returned Bytes object is non-elastic and supports both read and write operations using cursors.
- * </p>
+     * The returned Bytes object is non-elastic and supports both read and write operations using cursors.
+     * </p>
      *
- * @return A Bytes object wrapping the bytesStore of this Bytes object.
- * @throws IllegalStateException if the underlying BytesStore has been released.
+     * @return A Bytes object wrapping the bytesStore of this Bytes object.
+     * @throws IllegalStateException if the underlying BytesStore has been released.
      */
     @Override
     @NotNull
@@ -964,29 +964,29 @@ public interface Bytes<U> extends
     }
 
     /**
- * Returns the backing BytesStore that this Bytes object wraps. If this Bytes object doesn't have
- * a backing BytesStore, this method returns null.
- * <p>
- * The BytesStore represents the underlying storage of bytes that the Bytes object is manipulating.
- * </p>
+     * Returns the backing BytesStore that this Bytes object wraps. If this Bytes object doesn't have
+     * a backing BytesStore, this method returns null.
+     * <p>
+     * The BytesStore represents the underlying storage of bytes that the Bytes object is manipulating.
+     * </p>
      *
- * @return The backing BytesStore, or null if there isn't one.
+     * @return The backing BytesStore, or null if there isn't one.
      */
     @Override
     @Nullable
     BytesStore bytesStore();
 
     /**
- * Compares the contents of this Bytes object with the provided {@code other} string for equality.
- * <p>
- * This method returns {@code true} if the contents of this Bytes object is equal to the contents
- * of the {@code other} string. Otherwise, it returns {@code false}.
- * </p>
+     * Compares the contents of this Bytes object with the provided {@code other} string for equality.
+     * <p>
+     * This method returns {@code true} if the contents of this Bytes object is equal to the contents
+     * of the {@code other} string. Otherwise, it returns {@code false}.
+     * </p>
      *
- * @param other The string to compare with the contents of this Bytes object, can be null.
- * @return {@code true} if the contents of this Bytes object equals the contents of the provided
- * {@code other} string; {@code false} otherwise.
- * @throws IllegalStateException if this Bytes object has been previously released.
+     * @param other The string to compare with the contents of this Bytes object, can be null.
+     * @return {@code true} if the contents of this Bytes object equals the contents of the provided
+     * {@code other} string; {@code false} otherwise.
+     * @throws IllegalStateException if this Bytes object has been previously released.
      */
     default boolean isEqual(@Nullable String other)
             throws IllegalStateException {
@@ -994,30 +994,30 @@ public interface Bytes<U> extends
     }
 
     /**
- * Compacts this Bytes object by moving the read position to the start.
- * <p>
- * This operation is useful to free up space for writing by discarding bytes that have already
- * been read.
- * </p>
+     * Compacts this Bytes object by moving the read position to the start.
+     * <p>
+     * This operation is useful to free up space for writing by discarding bytes that have already
+     * been read.
+     * </p>
      *
- * @return This Bytes object, for method chaining.
- * @throws IllegalStateException if this Bytes object has been previously released.
+     * @return This Bytes object, for method chaining.
+     * @throws IllegalStateException if this Bytes object has been previously released.
      */
     @NotNull
     Bytes<U> compact()
             throws IllegalStateException;
 
     /**
- * Copies bytes from this Bytes object into the provided {@code targetByteStore}.
- * <p>
- * The number of bytes copied is the minimum of the remaining bytes in this Bytes object and the
- * remaining capacity in the {@code targetByteStore}.
- * </p>
+     * Copies bytes from this Bytes object into the provided {@code targetByteStore}.
+     * <p>
+     * The number of bytes copied is the minimum of the remaining bytes in this Bytes object and the
+     * remaining capacity in the {@code targetByteStore}.
+     * </p>
      *
- * @param targetByteStore The target BytesStore to copy bytes into, must not be null.
- * @return The actual number of bytes that were copied.
- * @throws NullPointerException  if the provided {@code targetByteStore} is null.
- * @throws IllegalStateException if this Bytes object has been previously released.
+     * @param targetByteStore The target BytesStore to copy bytes into, must not be null.
+     * @return The actual number of bytes that were copied.
+     * @throws NullPointerException  if the provided {@code targetByteStore} is null.
+     * @throws IllegalStateException if this Bytes object has been previously released.
      */
     @Override
     default long copyTo(@NotNull final BytesStore targetByteStore)
@@ -1027,15 +1027,15 @@ public interface Bytes<U> extends
 
     /**
      * Copies bytes from this Bytes object to the provided {@code outputStream}.
- * <p>
- * Bytes are written from the current read position up to the limit of this Bytes object.
- * </p>
+     * <p>
+     * Bytes are written from the current read position up to the limit of this Bytes object.
+     * </p>
      *
- * @param outputStream The OutputStream to write the bytes to, must not be null.
- * @throws IllegalStateException if this Bytes object has been previously released.
- * @throws IOException           if an I/O error occurs while writing to the provided
- *                               {@code outputStream}.
- * @throws NullPointerException  if the provided {@code outputStream} is null.
+     * @param outputStream The OutputStream to write the bytes to, must not be null.
+     * @throws IllegalStateException if this Bytes object has been previously released.
+     * @throws IOException           if an I/O error occurs while writing to the provided
+     *                               {@code outputStream}.
+     * @throws NullPointerException  if the provided {@code outputStream} is null.
      */
     @Override
     default void copyTo(@NotNull OutputStream outputStream)
@@ -1044,15 +1044,15 @@ public interface Bytes<U> extends
     }
 
     /**
- * Determines whether this Bytes object is backed by memory that can be shared across multiple
- * processes.
+     * Determines whether this Bytes object is backed by memory that can be shared across multiple
+     * processes.
      * <p>
- * A Bytes object backed by a memory-mapped file, for example, can be shared among processes,
- * whereas a Bytes object backed by heap memory cannot be shared in this way.
- * </p>
+     * A Bytes object backed by a memory-mapped file, for example, can be shared among processes,
+     * whereas a Bytes object backed by heap memory cannot be shared in this way.
+     * </p>
      *
- * @return {@code true} if this Bytes object uses memory that can be shared across processes,
- *         {@code false} otherwise.
+     * @return {@code true} if this Bytes object uses memory that can be shared across processes,
+     * {@code false} otherwise.
      */
     @Override
     default boolean sharedMemory() {
@@ -1060,19 +1060,19 @@ public interface Bytes<U> extends
     }
 
     /**
- * Removes a specified number of bytes starting from a given offset within this Bytes object.
+     * Removes a specified number of bytes starting from a given offset within this Bytes object.
      * <p>
- * This method effectively removes {@code count} bytes beginning at the specified {@code fromOffset},
- * shifting any subsequent bytes to the left (reduces their index).
- * The write position is adjusted accordingly, and the capacity remains unchanged.
- * </p>
+     * This method effectively removes {@code count} bytes beginning at the specified {@code fromOffset},
+     * shifting any subsequent bytes to the left (reduces their index).
+     * The write position is adjusted accordingly, and the capacity remains unchanged.
+     * </p>
      *
- * @param fromOffset The offset from which to start removing bytes.
- * @param count      The number of bytes to remove.
- * @throws BufferUnderflowException if {@code fromOffset} is negative or greater than the
- *                                  write position.
- * @throws BufferOverflowException  if there isn't enough space to perform the unwrite operation.
- * @throws IllegalStateException    if this Bytes object has been previously released.
+     * @param fromOffset The offset from which to start removing bytes.
+     * @param count      The number of bytes to remove.
+     * @throws BufferUnderflowException if {@code fromOffset} is negative or greater than the
+     *                                  write position.
+     * @throws BufferOverflowException  if there isn't enough space to perform the unwrite operation.
+     * @throws IllegalStateException    if this Bytes object has been previously released.
      */
     default void unwrite(@NonNegative long fromOffset, @NonNegative int count)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
@@ -1086,28 +1086,28 @@ public interface Bytes<U> extends
     }
 
     /**
- * Returns the index within this Bytes object of the first occurrence of the specified
- * sub-bytes represented by the {@code source} Bytes object.
+     * Returns the index within this Bytes object of the first occurrence of the specified
+     * sub-bytes represented by the {@code source} Bytes object.
      * <p>
- * The method returns the lowest index {@code k} at which the contents of this Bytes object
- * equals the provided {@code source} Bytes object. If no such sequence exists, then {@code -1}
- * is returned.
- * </p>
+     * The method returns the lowest index {@code k} at which the contents of this Bytes object
+     * equals the provided {@code source} Bytes object. If no such sequence exists, then {@code -1}
+     * is returned.
+     * </p>
      * <p>
- * Formally, the method returns the lowest index {@code k} such that:
- * </p>
+     * Formally, the method returns the lowest index {@code k} such that:
+     * </p>
      * <blockquote><pre>
- * this.startsWith(source, k)
+     * this.startsWith(source, k)
      * </pre></blockquote>
- * <p>
- * If no such value of {@code k} exists, then {@code -1} is returned.
- * </p>
+     * <p>
+     * If no such value of {@code k} exists, then {@code -1} is returned.
+     * </p>
      *
- * @param source The sub-bytes to search for within this Bytes object, must not be null.
- * @return The index of the first occurrence of the specified sub-bytes, or {@code -1} if there
- *         is no such occurrence.
- * @throws NullPointerException  if the provided {@code source} is null.
- * @throws IllegalStateException if this Bytes object has been previously released.
+     * @param source The sub-bytes to search for within this Bytes object, must not be null.
+     * @return The index of the first occurrence of the specified sub-bytes, or {@code -1} if there
+     * is no such occurrence.
+     * @throws NullPointerException  if the provided {@code source} is null.
+     * @throws IllegalStateException if this Bytes object has been previously released.
      */
     default long indexOf(@NotNull Bytes source)
             throws IllegalStateException {
@@ -1215,41 +1215,42 @@ public interface Bytes<U> extends
         }
         return -1;
     }
-/**
- * Clears the content of this Bytes object and resets its state.
- *
- * @return This Bytes object.
- * @throws IllegalStateException if this Bytes object has been previously released.
- */
+
+    /**
+     * Clears the content of this Bytes object and resets its state.
+     *
+     * @return This Bytes object.
+     * @throws IllegalStateException if this Bytes object has been previously released.
+     */
     @Override
     @NotNull
     Bytes<U> clear()
             throws IllegalStateException;
 
-/**
- * Checks if this Bytes object supports both reading and writing.
- *
- * @return {@code true} if this Bytes object supports both reading and writing, {@code false} otherwise.
- */
+    /**
+     * Checks if this Bytes object supports both reading and writing.
+     *
+     * @return {@code true} if this Bytes object supports both reading and writing, {@code false} otherwise.
+     */
     @Override
     default boolean readWrite() {
         return bytesStore().readWrite();
     }
 
     /**
- * Writes the specified number of bytes from this Bytes object into the provided {@code bytesOut}.
+     * Writes the specified number of bytes from this Bytes object into the provided {@code bytesOut}.
      * <p>
- * This operation does not affect the readLimit or readPosition of this Bytes object.
- * </p>
+     * This operation does not affect the readLimit or readPosition of this Bytes object.
+     * </p>
      *
- * @param length   The number of bytes to write. Must be non-negative.
- * @param bytesOut The target BytesOut object to write to. Must not be null.
- * @throws BufferUnderflowException if the specified {@code length} is greater than the number of bytes available for reading from this Bytes object.
- * @throws IORuntimeException       if an error occurs while reading from this Bytes object or writing to {@code bytesOut}.
- * @throws BufferOverflowException  if {@code bytesOut} does not have enough capacity to hold the bytes being written.
+     * @param length   The number of bytes to write. Must be non-negative.
+     * @param bytesOut The target BytesOut object to write to. Must not be null.
+     * @throws BufferUnderflowException if the specified {@code length} is greater than the number of bytes available for reading from this Bytes object.
+     * @throws IORuntimeException       if an error occurs while reading from this Bytes object or writing to {@code bytesOut}.
+     * @throws BufferOverflowException  if {@code bytesOut} does not have enough capacity to hold the bytes being written.
      * @throws IllegalStateException    if this Bytes object or the provided {@code bytesOut} has been previously released.
- * @throws IllegalArgumentException if the specified {@code length} is negative.
- * @throws NullPointerException     if the provided {@code bytesOut} is null.
+     * @throws IllegalArgumentException if the specified {@code length} is negative.
+     * @throws NullPointerException     if the provided {@code bytesOut} is null.
      */
     default void readWithLength(@NonNegative long length, @NotNull BytesOut<U> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, IllegalStateException {
@@ -1271,22 +1272,22 @@ public interface Bytes<U> extends
     }
 
     /**
- * Reads the content of this Bytes object and converts it into an instance of the specified class.
- * Optionally updates the provided instance if not null. The content is assumed to have a
- * 16-bit length indicator preceding the actual object data.
+     * Reads the content of this Bytes object and converts it into an instance of the specified class.
+     * Optionally updates the provided instance if not null. The content is assumed to have a
+     * 16-bit length indicator preceding the actual object data.
      * <p>
- * If the {@code using} parameter is not null, this method will update its state with the read content.
- * Otherwise, it will create a new instance of the specified class.
- * </p>
+     * If the {@code using} parameter is not null, this method will update its state with the read content.
+     * Otherwise, it will create a new instance of the specified class.
+     * </p>
      *
- * @param clazz The class of the object to be read. Must not be null.
- * @param using An optional instance to update with the read content. Can be null.
- * @param <T>   The type of the object being read.
- * @return The object that was read from this Bytes object, or the updated instance if {@code using} was provided.
- * @throws BufferUnderflowException     if there are not enough bytes in this Bytes object to read the content.
- * @throws IllegalStateException        if this Bytes object has been previously released.
- * @throws InvalidMarshallableException if the data in this Bytes object cannot be converted into an instance of the specified class.
- * @throws NullPointerException         if the provided {@code clazz} is null.
+     * @param clazz The class of the object to be read. Must not be null.
+     * @param using An optional instance to update with the read content. Can be null.
+     * @param <T>   The type of the object being read.
+     * @return The object that was read from this Bytes object, or the updated instance if {@code using} was provided.
+     * @throws BufferUnderflowException     if there are not enough bytes in this Bytes object to read the content.
+     * @throws IllegalStateException        if this Bytes object has been previously released.
+     * @throws InvalidMarshallableException if the data in this Bytes object cannot be converted into an instance of the specified class.
+     * @throws NullPointerException         if the provided {@code clazz} is null.
      * @see #writeMarshallableLength16(WriteBytesMarshallable)
      */
     default <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull final Class<T> clazz,
@@ -1314,18 +1315,18 @@ public interface Bytes<U> extends
     }
 
     /**
- * Writes the content of the provided {@code marshallable} into this Bytes object, including a 16-bit length indicator
- * preceding the actual object data. The length indicator denotes the number of bytes taken up by the object data.
+     * Writes the content of the provided {@code marshallable} into this Bytes object, including a 16-bit length indicator
+     * preceding the actual object data. The length indicator denotes the number of bytes taken up by the object data.
      * <p>
- * This method is useful for serialization, as it writes not only the content of the {@code marshallable} object
- * but also information about its size.
- * </p>
+     * This method is useful for serialization, as it writes not only the content of the {@code marshallable} object
+     * but also information about its size.
+     * </p>
      *
- * @param marshallable The object to be serialized and written to this Bytes object. Must not be null.
- * @throws BufferOverflowException if there is not enough capacity in this Bytes object to store the serialized data.
- * @throws IllegalStateException   if this Bytes object has been previously released, or if the serialized data
- *                                 cannot be addressed with 16-bits.
- * @throws NullPointerException    if the provided {@code marshallable} is null.
+     * @param marshallable The object to be serialized and written to this Bytes object. Must not be null.
+     * @throws BufferOverflowException if there is not enough capacity in this Bytes object to store the serialized data.
+     * @throws IllegalStateException   if this Bytes object has been previously released, or if the serialized data
+     *                                 cannot be addressed with 16-bits.
+     * @throws NullPointerException    if the provided {@code marshallable} is null.
      * @see #readMarshallableLength16(Class, ReadBytesMarshallable)
      */
     default void writeMarshallableLength16(@NotNull final WriteBytesMarshallable marshallable)
@@ -1342,18 +1343,18 @@ public interface Bytes<U> extends
     }
 
     /**
- * Writes the contents of the provided {@code inputStream} into this Bytes object. Continues reading from the
- * {@code inputStream} and writing into this Bytes object until the end of the stream is reached.
- * <p>
- * Note: This method does not close the provided {@code inputStream}.
- * </p>
+     * Writes the contents of the provided {@code inputStream} into this Bytes object. Continues reading from the
+     * {@code inputStream} and writing into this Bytes object until the end of the stream is reached.
+     * <p>
+     * Note: This method does not close the provided {@code inputStream}.
+     * </p>
      *
- * @param inputStream The input stream from which data is to be read. Must not be null.
- * @return This Bytes object.
- * @throws IOException             if an I/O error occurs when reading from the {@code inputStream}.
- * @throws BufferOverflowException if there is not enough capacity in this Bytes object to write the data read from the input stream.
- * @throws IllegalStateException   if this Bytes object has been previously released.
- * @throws NullPointerException    if the provided {@code inputStream} is null.
+     * @param inputStream The input stream from which data is to be read. Must not be null.
+     * @return This Bytes object.
+     * @throws IOException             if an I/O error occurs when reading from the {@code inputStream}.
+     * @throws BufferOverflowException if there is not enough capacity in this Bytes object to write the data read from the input stream.
+     * @throws IllegalStateException   if this Bytes object has been previously released.
+     * @throws NullPointerException    if the provided {@code inputStream} is null.
      */
     default Bytes write(@NotNull final InputStream inputStream)
             throws IOException, BufferOverflowException, IllegalStateException {

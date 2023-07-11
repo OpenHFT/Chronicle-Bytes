@@ -314,7 +314,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
                     memory.writeInt(address, (c3 << 24) | (c2 << 16) | (c1 << 8) | c0);
                 } else {
                     memory.writeInt(address, (c0 << 24) | (c1 << 16) | (c2 << 8) | c3);
-                }                  
+                }
                 address += 4;
             }
             for (; i < length; i++) {

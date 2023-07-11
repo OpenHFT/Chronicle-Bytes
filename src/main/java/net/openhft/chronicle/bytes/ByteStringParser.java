@@ -70,8 +70,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param tester a {@code StopCharTester} used to detect the end of the boolean text.
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester)
@@ -88,8 +88,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     @Nullable
     default Boolean parseBoolean()
@@ -104,7 +104,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
      * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws ArithmeticException   if a numeric overflow occurs.
      */
     @NotNull
     default String parseUtf8(@NotNull StopCharTester stopCharTester)
@@ -119,8 +119,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, IllegalStateException, ArithmeticException {
@@ -134,8 +134,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IORuntimeException if an I/O error occurs.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IORuntimeException       if an I/O error occurs.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, IORuntimeException, IllegalStateException {
@@ -149,9 +149,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException if the buffer's capacity was exceeded.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
@@ -168,7 +168,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default String parse8bit(@NotNull StopCharTester stopCharTester)
             throws BufferUnderflowException, IllegalStateException {
@@ -182,9 +182,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException if the buffer's capacity was exceeded.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
@@ -201,9 +201,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * @param buffer          the {@code Bytes} object to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException if the buffer's capacity was exceeded.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numeric overflow occurs.
+     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
      */
     default void parse8bit(Bytes<?> buffer, @NotNull StopCharsTester stopCharsTester)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
@@ -228,8 +228,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the parsed integer.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws ArithmeticException if a numeric overflow occurs.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default int parseInt()
             throws BufferUnderflowException, ArithmeticException, IllegalStateException {
@@ -241,7 +241,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the parsed long.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default long parseLong()
             throws BufferUnderflowException, IllegalStateException {
@@ -254,9 +254,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * of {@link #parseDouble()} to long).
      *
      * @return the parsed long.
-     * @throws IORuntimeException if the parsed value corresponds to a fractional number or to a number outside the long's range.
+     * @throws IORuntimeException       if the parsed value corresponds to a fractional number or to a number outside the long's range.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default long parseFlexibleLong()
             throws BufferUnderflowException, IllegalStateException, IORuntimeException {
@@ -269,7 +269,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the parsed float, or -0.0 if there were no digits.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default float parseFloat()
             throws BufferUnderflowException, IllegalStateException {
@@ -282,7 +282,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the parsed double, or -0.0 if there were no digits.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default double parseDouble()
             throws BufferUnderflowException, IllegalStateException {
@@ -295,7 +295,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the significant digits as a long.
      * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws IllegalStateException    if this operation cannot be performed currently.
      */
     default long parseLongDecimal()
             throws BufferUnderflowException, IllegalStateException {
@@ -349,7 +349,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @return the parsed BigDecimal.
      * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException if a numerical overflow occurs during the operation.
+     * @throws ArithmeticException   if a numerical overflow occurs during the operation.
      */
     @NotNull
     default BigDecimal parseBigDecimal()

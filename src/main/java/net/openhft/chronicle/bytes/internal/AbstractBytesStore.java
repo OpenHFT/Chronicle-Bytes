@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.io.AbstractReferenceCounted;
 
 /**
  * Abstract BytesStore
+ *
  * @param <B> ByteStore type
  * @param <U> Underlying type
  */
@@ -33,6 +34,7 @@ public abstract class AbstractBytesStore<B extends BytesStore<B, U>, U>
         implements BytesStore<B, U> {
 
     private final byte[] internalNumberBuffer = new byte[20];
+
     protected AbstractBytesStore() {
     }
 

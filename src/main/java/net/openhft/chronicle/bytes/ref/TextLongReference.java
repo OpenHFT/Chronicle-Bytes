@@ -51,11 +51,11 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * Writes the initial structure of a 64-bit long value to the specified {@link Bytes} instance
      * in Text wire format, with the given value.
      *
-     * @param bytes  the Bytes instance to write to.
-     * @param value  the long value to be written.
-     * @throws BufferOverflowException   if there's not enough space in the buffer to write the value.
-     * @throws IllegalArgumentException  if an illegal argument is provided.
-     * @throws IllegalStateException     if an invalid state is encountered.
+     * @param bytes the Bytes instance to write to.
+     * @param value the long value to be written.
+     * @throws BufferOverflowException  if there's not enough space in the buffer to write the value.
+     * @throws IllegalArgumentException if an illegal argument is provided.
+     * @throws IllegalStateException    if an invalid state is encountered.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -100,9 +100,9 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * @param bytes  the BytesStore instance where the reference is to be stored.
      * @param offset the offset in the byte store where the reference is to be positioned.
      * @param length the length of the reference in bytes.
-     * @throws IllegalArgumentException  if an illegal argument is provided.
-     * @throws IllegalStateException     if an invalid state is encountered.
-     * @throws BufferOverflowException   if there's not enough space in the buffer to write the reference.
+     * @throws IllegalArgumentException if an illegal argument is provided.
+     * @throws IllegalStateException    if an invalid state is encountered.
+     * @throws BufferOverflowException  if there's not enough space in the buffer to write the reference.
      */
     @SuppressWarnings("rawtypes")
     @Override

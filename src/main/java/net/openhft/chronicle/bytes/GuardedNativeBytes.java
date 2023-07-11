@@ -51,8 +51,8 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     /**
      * Constructs a new GuardedNativeBytes instance backed by the specified BytesStore and with the specified capacity.
      *
-     * @param store     The backing BytesStore.
-     * @param capacity  The capacity of the new GuardedNativeBytes instance.
+     * @param store    The backing BytesStore.
+     * @param capacity The capacity of the new GuardedNativeBytes instance.
      * @throws IllegalStateException    If the backing store has been released.
      * @throws IllegalArgumentException If the capacity is negative or exceeds the limit of the backing store.
      */

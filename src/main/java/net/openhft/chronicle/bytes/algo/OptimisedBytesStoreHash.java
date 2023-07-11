@@ -28,6 +28,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
+
 /**
  * Optimized hashing algorithm for BytesStore.
  * <p>
@@ -350,7 +351,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param store     the BytesStore to hash.
      * @param remaining the length of content in BytesStore to hash.
      * @return the hash value.
-     * @throws IllegalStateException      if an illegal state is encountered.
+     * @throws IllegalStateException    if an illegal state is encountered.
      * @throws BufferUnderflowException if buffer underflows during reading.
      */
     @Override

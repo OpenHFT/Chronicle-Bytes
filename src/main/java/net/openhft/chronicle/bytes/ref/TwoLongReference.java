@@ -46,15 +46,13 @@ import net.openhft.chronicle.core.values.TwoLongValue;
  * <p>
  * Implementations can also include additional behaviors or optimizations not specified in this interface.
  *
+ * @author Peter Lawrey
  * @apiNote The {@link net.openhft.chronicle.core.values.TwoLongValue#getValue()} and {@link net.openhft.chronicle.core.values.TwoLongValue#setValue(long)} methods
  * inherited from {@link net.openhft.chronicle.core.values.LongValue} are applicable to the first {@code long} value.
- *
  * @implSpec Implementations must ensure that all methods are thread-safe and that changes to the values are correctly
  * synchronized across threads.
- *
  * @see net.openhft.chronicle.bytes.Byteable
  * @see net.openhft.chronicle.core.values.TwoLongValue
- * @author Peter Lawrey
  */
 @SuppressWarnings("rawtypes")
 public interface TwoLongReference extends TwoLongValue, Byteable {

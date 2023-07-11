@@ -76,7 +76,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 64 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 64 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -89,7 +89,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 32 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 32 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -102,7 +102,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * Fetches 8 bits from the byte store at the given offset.
      *
      * @param bytes the byte store.
-     * @param off the offset.
+     * @param off   the offset.
      * @return the fetched 8 bits.
      * @throws IllegalStateException    if there is an issue with reading data from the byte store.
      * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
@@ -120,16 +120,16 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      */
     @Override
     public long applyAsLong(BytesStore bytes) {
-       return applyAsLong(bytes, bytes.readRemaining());
+        return applyAsLong(bytes, bytes.readRemaining());
     }
 
     /**
      * Computes a hash value for the given byte store with a specified length.
      *
-     * @param bytes    the byte store.
-     * @param length   the number of bytes to hash.
+     * @param bytes  the byte store.
+     * @param length the number of bytes to hash.
      * @return the hash value.
-     * @throws IllegalStateException     If the state is illegal.
+     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
      */
     @Override

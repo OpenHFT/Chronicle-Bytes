@@ -65,19 +65,29 @@ import static net.openhft.chronicle.core.io.IOTools.*;
 public enum BytesUtil {
     ; // none
 
-    /** An empty array of integers, for use in various methods. */
+    /**
+     * An empty array of integers, for use in various methods.
+     */
     private static final int[] NO_INTS = {};
 
-    /** Cache for results of {@link #isTriviallyCopyable0(Class)}. */
+    /**
+     * Cache for results of {@link #isTriviallyCopyable0(Class)}.
+     */
     private static final ClassLocal<int[]> TRIVIALLY_COPYABLE = ClassLocal.withInitial(BytesUtil::isTriviallyCopyable0);
 
-    /** The current user's name, retrieved from system properties, default is "unknown" if not set. */
+    /**
+     * The current user's name, retrieved from system properties, default is "unknown" if not set.
+     */
     private static final String USER_NAME = Jvm.getProperty("user.name", "unknown");
 
-    /** The directory for timestamp, retrieved from system properties, defaults to OS temporary directory if not set. */
+    /**
+     * The directory for timestamp, retrieved from system properties, defaults to OS temporary directory if not set.
+     */
     private static final String TIME_STAMP_DIR = Jvm.getProperty("timestamp.dir", OS.TMP);
 
-    /** The path for timestamp file, defaults to a file named .time-stamp.username.dat in timestamp directory. */
+    /**
+     * The path for timestamp file, defaults to a file named .time-stamp.username.dat in timestamp directory.
+     */
     static final String TIME_STAMP_PATH = Jvm.getProperty("timestamp.path", new File(TIME_STAMP_DIR, ".time-stamp." + USER_NAME + ".dat").getAbsolutePath());
 
     /**
@@ -247,7 +257,7 @@ public enum BytesUtil {
     /**
      * Writes the content of a Bytes object to a file specified by name.
      *
-     * @param file The name of the file to write to.
+     * @param file  The name of the file to write to.
      * @param bytes The Bytes object containing the data to write.
      * @throws IOException If an I/O error occurs.
      */
@@ -257,17 +267,18 @@ public enum BytesUtil {
             os.write(bytes.underlyingObject());
         }
     }
+
     /**
      * Compares bytes from two RandomDataInput objects to check if they are equal.
      *
-     * @param a The first RandomDataInput object.
-     * @param offset The starting position in the first object.
-     * @param second The second RandomDataInput object.
+     * @param a            The first RandomDataInput object.
+     * @param offset       The starting position in the first object.
+     * @param second       The second RandomDataInput object.
      * @param secondOffset The starting position in the second object.
-     * @param len The number of bytes to compare.
+     * @param len          The number of bytes to compare.
      * @return true if the bytes are equal, false otherwise.
      * @throws BufferUnderflowException If there is insufficient data.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException    If an illegal state is encountered.
      */
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, @NonNegative long offset,
@@ -297,12 +308,12 @@ public enum BytesUtil {
     /**
      * Compares a CharSequence with bytes from a RandomDataInput object to check if they are equal.
      *
-     * @param cs The CharSequence to compare.
-     * @param bs The RandomDataInput object.
+     * @param cs     The CharSequence to compare.
+     * @param bs     The RandomDataInput object.
      * @param offset The starting position in the RandomDataInput object.
      * @param length The number of bytes to compare.
      * @return true if the bytes are equal to the CharSequence, false otherwise.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
      */
     public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, @NonNegative long offset, @NonNegative int length)
@@ -357,13 +368,14 @@ public enum BytesUtil {
         }
         return BytesInternal.stopBitLength0(n);
     }
+
     /**
      * Converts the bytes from a Bytes object into a character array.
      *
      * @param bytes The Bytes object to convert.
      * @return The character array converted from the bytes.
-     * @throws ArithmeticException If there is an arithmetic error.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws ArithmeticException      If there is an arithmetic error.
+     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
      */
     @NotNull
@@ -380,11 +392,11 @@ public enum BytesUtil {
     /**
      * Converts a specific range of bytes from a Bytes object into a character array.
      *
-     * @param bytes The Bytes object to convert.
+     * @param bytes    The Bytes object to convert.
      * @param position The starting position in the Bytes object.
-     * @param length The number of bytes to convert.
+     * @param length   The number of bytes to convert.
      * @return The character array converted from the bytes.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
      */
     @NotNull
@@ -404,7 +416,7 @@ public enum BytesUtil {
      *
      * @param in The StreamingDataInput to read from.
      * @return The integer read.
-     * @throws IORuntimeException If an IO error occurs.
+     * @throws IORuntimeException    If an IO error occurs.
      * @throws IllegalStateException If an illegal state is encountered.
      */
     public static long readStopBit(@NotNull StreamingDataInput in)
@@ -416,8 +428,8 @@ public enum BytesUtil {
      * Writes a variable-length integer to a StreamingDataOutput using the stop bit encoding.
      *
      * @param out The StreamingDataOutput to write to.
-     * @param n The integer to write.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @param n   The integer to write.
+     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
      */
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
@@ -428,11 +440,11 @@ public enum BytesUtil {
     /**
      * Writes a variable-length integer to a specific position in a BytesStore using the stop bit encoding.
      *
-     * @param bs The BytesStore to write to.
+     * @param bs     The BytesStore to write to.
      * @param offset The position in the BytesStore to start writing.
-     * @param n The integer to write.
+     * @param n      The integer to write.
      * @return The resulting offset after writing.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
      */
     public static long writeStopBit(BytesStore bs, @NonNegative long offset, @NonNegative long n)
@@ -444,9 +456,9 @@ public enum BytesUtil {
      * Writes a variable-length integer to a specific memory address using the stop bit encoding.
      *
      * @param addr The memory address to write to.
-     * @param n The integer to write.
+     * @param n    The integer to write.
      * @return The resulting memory address after writing.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
      */
     public static long writeStopBit(long addr, long n)
@@ -457,12 +469,12 @@ public enum BytesUtil {
     /**
      * Parses a UTF-8 string from a StreamingDataInput and appends it to an Appendable object.
      *
-     * @param in The StreamingDataInput to read from.
+     * @param in         The StreamingDataInput to read from.
      * @param appendable The Appendable to append to.
-     * @param utflen The length of the UTF-8 string.
+     * @param utflen     The length of the UTF-8 string.
      * @throws UTFDataFormatRuntimeException If the UTF-8 format is invalid.
-     * @throws IllegalStateException If an illegal state is encountered.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws IllegalStateException         If an illegal state is encountered.
+     * @throws BufferUnderflowException      If there is insufficient data.
      */
     public static void parseUtf8(
             @NotNull StreamingDataInput in, Appendable appendable, @NonNegative int utflen)
@@ -474,7 +486,7 @@ public enum BytesUtil {
      * Writes a CharSequence as a UTF-8 string to a StreamingDataOutput.
      *
      * @param out The StreamingDataOutput to write to.
-     * @param cs The CharSequence to write.
+     * @param cs  The CharSequence to write.
      * @throws IndexOutOfBoundsException If the CharSequence length is out of bounds.
      */
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs)
@@ -485,9 +497,9 @@ public enum BytesUtil {
     /**
      * Appends bytes from a specified start position of a Bytes object to a StringBuilder.
      *
-     * @param bytes The Bytes object.
+     * @param bytes         The Bytes object.
      * @param startPosition The start position in the Bytes object.
-     * @param sb The StringBuilder to append to.
+     * @param sb            The StringBuilder to append to.
      * @throws IllegalStateException If an illegal state is encountered.
      */
     // used by Chronicle FIX.
@@ -506,7 +518,7 @@ public enum BytesUtil {
      * Reads a Marshallable object from a BytesIn object.
      *
      * @param marshallable The Marshallable object to read.
-     * @param bytes The BytesIn object to read from.
+     * @param bytes        The BytesIn object to read from.
      * @throws InvalidMarshallableException If the Marshallable object is invalid.
      */
     public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) throws InvalidMarshallableException {
@@ -518,11 +530,11 @@ public enum BytesUtil {
      * Writes a Marshallable object to a BytesOut object.
      *
      * @param marshallable The Marshallable object to write.
-     * @param bytes The BytesOut object to write to.
-     * @throws IllegalStateException If an illegal state is encountered.
-     * @throws BufferOverflowException If there is insufficient space.
-     * @throws ArithmeticException If an arithmetic error occurs.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @param bytes        The BytesOut object to write to.
+     * @throws IllegalStateException        If an illegal state is encountered.
+     * @throws BufferOverflowException      If there is insufficient space.
+     * @throws ArithmeticException          If an arithmetic error occurs.
+     * @throws BufferUnderflowException     If there is insufficient data.
      * @throws InvalidMarshallableException If the Marshallable object is invalid.
      */
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
@@ -530,6 +542,7 @@ public enum BytesUtil {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
                 .writeMarshallable(marshallable, bytes);
     }
+
     /**
      * Returns a string representation of a throwable's stack trace prefixed with a given string.
      *
@@ -579,7 +592,7 @@ public enum BytesUtil {
      * Reads padding bytes from a Bytes object to align the read position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
      */
     public static void read8ByteAlignPadding(Bytes<?> bytes)
@@ -592,7 +605,7 @@ public enum BytesUtil {
      *
      * @param bytes The Bytes object.
      * @throws BufferOverflowException If there is insufficient space.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException   If an illegal state is encountered.
      */
     public static void write8ByteAlignPadding(Bytes<?> bytes)
             throws BufferOverflowException, IllegalStateException {
@@ -601,16 +614,17 @@ public enum BytesUtil {
         bytes.writePosition(end);
         bytes.zeroOut(start, end);
     }
+
     /**
      * Returns a debug string representation of a portion of a RandomDataInput object.
      *
-     * @param bytes The RandomDataInput object.
-     * @param start The starting position.
+     * @param bytes     The RandomDataInput object.
+     * @param start     The starting position.
      * @param maxLength The maximum length.
      * @return The debug string.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException If an arithmetic error occurs.
+     * @throws ArithmeticException      If an arithmetic error occurs.
      */
     public static String toDebugString(@NotNull RandomDataInput bytes, @NonNegative long start, @NonNegative long maxLength)
             throws IllegalStateException, BufferUnderflowException, ArithmeticException {
@@ -621,9 +635,9 @@ public enum BytesUtil {
     /**
      * Copies 8-bit data from a BytesStore object to a specified address.
      *
-     * @param bs The BytesStore object.
+     * @param bs              The BytesStore object.
      * @param addressForWrite The address for writing.
-     * @param length The length of data to copy.
+     * @param length          The length of data to copy.
      */
     public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) {
         BytesInternal.copy8bit(bs, addressForWrite, length);
@@ -632,7 +646,7 @@ public enum BytesUtil {
     /**
      * Reverses the contents of a Bytes object from a specified starting position.
      *
-     * @param text The Bytes object.
+     * @param text  The Bytes object.
      * @param start The starting position.
      */
     public static void reverse(Bytes<?> text, @NonNegative int start) {
@@ -650,7 +664,7 @@ public enum BytesUtil {
     /**
      * Rounds up a double value to the nearest multiple of a specified factor.
      *
-     * @param d The value to round up.
+     * @param d      The value to round up.
      * @param factor The factor.
      * @return The rounded value.
      */

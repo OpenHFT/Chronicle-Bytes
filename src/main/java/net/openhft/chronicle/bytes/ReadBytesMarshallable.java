@@ -51,11 +51,10 @@ public interface ReadBytesMarshallable extends CommonMarshallable {
      * {@link net.openhft.chronicle.core.io.Validatable#validate()} when necessary.
      *
      * @param bytes The {@link BytesIn} instance to read data from.
-     *
-     * @throws IORuntimeException If an I/O error occurs during reading.
-     * @throws BufferUnderflowException If there is not enough data in the buffer to read.
-     * @throws IllegalStateException If the buffer has been released or the method is called
-     *                               in an inappropriate context.
+     * @throws IORuntimeException           If an I/O error occurs during reading.
+     * @throws BufferUnderflowException     If there is not enough data in the buffer to read.
+     * @throws IllegalStateException        If the buffer has been released or the method is called
+     *                                      in an inappropriate context.
      * @throws InvalidMarshallableException If there is a problem with marshalling data,
      *                                      such as incorrect format or type.
      */

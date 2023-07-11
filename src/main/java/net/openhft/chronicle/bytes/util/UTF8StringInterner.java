@@ -58,8 +58,8 @@ public class UTF8StringInterner extends AbstractInterner<String> {
      * @param length the number of bytes to read from the {@link BytesStore}
      * @return the resulting UTF-8 encoded string
      * @throws UTFDataFormatRuntimeException if the bytes are not valid UTF-8 encoded characters
-     * @throws IllegalStateException          if the underlying data structure is invalid
-     * @throws BufferUnderflowException       if the buffer's limits are exceeded
+     * @throws IllegalStateException         if the underlying data structure is invalid
+     * @throws BufferUnderflowException      if the buffer's limits are exceeded
      */
     @SuppressWarnings("rawtypes")
     @Override

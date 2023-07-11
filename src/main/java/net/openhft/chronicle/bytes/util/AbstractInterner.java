@@ -53,6 +53,7 @@ import java.util.stream.Stream;
  * Note: The interning cache may not always return the same object instance, but
  * the contents of the instances will be equal.
  * *
+ *
  * @param <T> the type of the object being interned
  * @author peter.lawrey
  */
@@ -81,15 +82,16 @@ public abstract class AbstractInterner<T> {
     /**
      * Returns the 32-bit hash code of the given bytes store and length.
      *
-     * @param bs the bytes store
+     * @param bs     the bytes store
      * @param length the length
      * @return the 32-bit hash code
-     * @throws IllegalStateException if the bytes cannot be accessed
+     * @throws IllegalStateException    if the bytes cannot be accessed
      * @throws BufferUnderflowException if there is not enough data in the buffer
      */
     private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
     }
+
     /**
      * Interns the specified Bytes object. If the Bytes object is already in the cache,
      * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
@@ -98,9 +100,9 @@ public abstract class AbstractInterner<T> {
      *
      * @param cs the Bytes object to intern
      * @return the interned instance
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException       if an I/O error occurs
      * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException if the buffer is in an unusable state
+     * @throws IllegalStateException    if the buffer is in an unusable state
      */
     public T intern(@NotNull Bytes<?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -115,9 +117,9 @@ public abstract class AbstractInterner<T> {
      *
      * @param cs the BytesStore object to intern
      * @return the interned instance
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException       if an I/O error occurs
      * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException if the buffer is in an unusable state
+     * @throws IllegalStateException    if the buffer is in an unusable state
      */
     public T intern(@NotNull BytesStore cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -129,12 +131,12 @@ public abstract class AbstractInterner<T> {
      * this method returns the cached instance; otherwise, it adds the Bytes object to the cache
      * and returns the newly cached instance.
      *
-     * @param cs the Bytes object to intern
+     * @param cs     the Bytes object to intern
      * @param length the length of the Bytes object to intern
      * @return the interned instance
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException       if an I/O error occurs
      * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException if the buffer is in an unusable state
+     * @throws IllegalStateException    if the buffer is in an unusable state
      */
     public T intern(@NotNull Bytes<?> cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -145,12 +147,12 @@ public abstract class AbstractInterner<T> {
      * Interns the specified Bytes. If the Bytes are already in the cache, this method returns the cached instance;
      * otherwise, it adds the Bytes to the cache and returns the newly cached instance.
      *
-     * @param cs the Bytes to intern
+     * @param cs     the Bytes to intern
      * @param length of bytes to read
      * @return the interned instance
-     * @throws IORuntimeException if an I/O error occurs
+     * @throws IORuntimeException       if an I/O error occurs
      * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException if the buffer is in an unusable state
+     * @throws IllegalStateException    if the buffer is in an unusable state
      */
     public T intern(@NotNull BytesStore cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -180,11 +182,11 @@ public abstract class AbstractInterner<T> {
      * Retrieves the value corresponding to the bytes store and length.
      * This method must be implemented by subclasses.
      *
-     * @param bs the bytes store
+     * @param bs     the bytes store
      * @param length the length of the data in the bytes store
      * @return the value corresponding to the given bytes store and length
-     * @throws IORuntimeException if an IO error occurs
-     * @throws IllegalStateException if the bytes cannot be accessed
+     * @throws IORuntimeException       if an IO error occurs
+     * @throws IllegalStateException    if the bytes cannot be accessed
      * @throws BufferUnderflowException if there is not enough data in the buffer
      */
     @NotNull
@@ -223,7 +225,7 @@ public abstract class AbstractInterner<T> {
          * Constructs an InternerEntry with the given bytes store and value.
          *
          * @param bytes the bytes store
-         * @param t the value
+         * @param t     the value
          */
         InternerEntry(BytesStore bytes, T t) {
             this.bytes = bytes;

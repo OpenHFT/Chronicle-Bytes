@@ -302,6 +302,7 @@ public interface BinaryWireCode {
 
     /**
      * Helper method for generating a text representation all the codes
+     *
      * @param clazz to search for constants to extract
      * @return an array of Strings for each code
      */

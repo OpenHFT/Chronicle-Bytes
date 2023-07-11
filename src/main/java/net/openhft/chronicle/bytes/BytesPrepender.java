@@ -38,7 +38,6 @@ import java.nio.BufferUnderflowException;
  * buffer is exceeded during operation execution.
  *
  * @param <B> the type of BytesPrepender. This is a self-referential generic type parameter.
- *
  * @see BufferOverflowException
  * @see IllegalStateException
  */
@@ -51,7 +50,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param length the padding length
      * @return this instance, after clearing and padding
      * @throws BufferOverflowException if the length is greater than the difference of capacity() and start()
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B clearAndPad(@NonNegative long length)
@@ -64,7 +63,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param value the long value to prepend as text
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     default B prepend(long value)
@@ -79,7 +78,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param bytes the byte array to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B prewrite(byte[] bytes)
@@ -91,7 +90,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param bytes the BytesStore to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -104,7 +103,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param b the byte to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B prewriteByte(byte b)
@@ -116,7 +115,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i the short to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B prewriteShort(short i)
@@ -128,7 +127,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param i the int to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B prewriteInt(int i)
@@ -140,7 +139,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param l the long to prepend
      * @return this instance, after the operation
      * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException if the buffer is in an invalid state
+     * @throws IllegalStateException   if the buffer is in an invalid state
      */
     @NotNull
     B prewriteLong(long l)

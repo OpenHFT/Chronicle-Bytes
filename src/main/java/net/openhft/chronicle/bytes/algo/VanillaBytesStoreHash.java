@@ -24,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
 import java.nio.ByteOrder;
+
 /**
  * This enum provides hashing functionality for byte stores.
  * Hashing is a process of converting data of arbitrary size to fixed-size values.
@@ -70,7 +71,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      *
      * @param store The {@link BytesStore} to compute the hash for.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException     If the state is illegal.
+     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
      */
     @Override
@@ -89,7 +90,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param bytes  The {@link BytesStore} to compute the hash for.
      * @param length The number of bytes to process.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException     If the state is illegal.
+     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
      */
     @Override

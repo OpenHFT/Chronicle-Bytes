@@ -68,8 +68,8 @@ public class SingleMappedFile extends MappedFile {
     /**
      * Constructs a new SingleMappedFile with specified parameters.
      *
-     * @param file the file to be mapped.
-     * @param raf the RandomAccessFile associated with the file.
+     * @param file     the file to be mapped.
+     * @param raf      the RandomAccessFile associated with the file.
      * @param capacity the capacity of the mapped file.
      * @param readOnly if the file is read-only.
      * @throws IORuntimeException if any I/O error occurs.
@@ -118,6 +118,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Sets the synchronization mode for the underlying MappedBytesStore
+     *
      * @param syncMode The synchronization mode to set
      */
     @Override
@@ -128,12 +129,12 @@ public class SingleMappedFile extends MappedFile {
     /**
      * Acquires the MappedBytesStore at the specified position
      *
-     * @param owner The owner of the MappedBytesStore
-     * @param position The position to acquire
-     * @param oldByteStore The old byte store
+     * @param owner                   The owner of the MappedBytesStore
+     * @param position                The position to acquire
+     * @param oldByteStore            The old byte store
      * @param mappedBytesStoreFactory The factory to use when creating new MappedBytesStore
-     * @throws IllegalArgumentException If position is not zero
      * @return The MappedBytesStore at the specified position
+     * @throws IllegalArgumentException If position is not zero
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -215,6 +216,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns a string representing the reference counts of this mapped file and its store
+     *
      * @return A string representing the reference counts
      */
     @NotNull
@@ -232,6 +234,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the capacity of this mapped file
+     *
      * @return The capacity of this mapped file
      */
     public long capacity() {
@@ -240,6 +243,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the size of chunks in this mapped file
+     *
      * @return The size of chunks in this mapped file
      */
     public long chunkSize() {
@@ -248,6 +252,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the size of overlaps in this mapped file
+     *
      * @return The size of overlaps in this mapped file
      */
     public long overlapSize() {
@@ -266,9 +271,10 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the actual size of this mapped file
-     * @throws IORuntimeException If an I/O error occurs
-     * @throws IllegalStateException If this file is closed or an interruption occurs
+     *
      * @return The actual size of this mapped file
+     * @throws IORuntimeException    If an I/O error occurs
+     * @throws IllegalStateException If this file is closed or an interruption occurs
      */
     public long actualSize()
             throws IORuntimeException, IllegalStateException {
@@ -308,6 +314,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the RandomAccessFile of this mapped file
+     *
      * @return The RandomAccessFile of this mapped file
      */
     @NotNull
@@ -333,11 +340,12 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Locks a region of this mapped file
+     *
      * @param position The position at which to start the locked region
-     * @param size The size of the locked region
-     * @param shared Whether the lock is shared
-     * @throws IOException If an I/O error occurs
+     * @param size     The size of the locked region
+     * @param shared   Whether the lock is shared
      * @return A lock object representing the locked region
+     * @throws IOException If an I/O error occurs
      */
     public FileLock lock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.lock(position, size, shared);
@@ -345,11 +353,12 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Attempts to lock a region of this mapped file
+     *
      * @param position The position at which to start the locked region
-     * @param size The size of the locked region
-     * @param shared Whether the lock is shared
-     * @throws IOException If an I/O error occurs
+     * @param size     The size of the locked region
+     * @param shared   Whether the lock is shared
      * @return A lock object representing the locked region, or null if the region cannot be locked
+     * @throws IOException If an I/O error occurs
      */
     public FileLock tryLock(@NonNegative long position, @NonNegative long size, boolean shared) throws IOException {
         return fileChannel.tryLock(position, size, shared);
@@ -357,6 +366,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Returns the number of chunks in this mapped file
+     *
      * @return The number of chunks in this mapped file
      */
     public long chunkCount() {
@@ -365,6 +375,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Fills the provided array with the number of chunks in this mapped file
+     *
      * @param chunkCount The array to fill
      */
     public void chunkCount(long[] chunkCount) {
@@ -373,6 +384,7 @@ public class SingleMappedFile extends MappedFile {
 
     /**
      * Creates a new SingleMappedBytes for this mapped file
+     *
      * @return A new SingleMappedBytes
      */
     @Override

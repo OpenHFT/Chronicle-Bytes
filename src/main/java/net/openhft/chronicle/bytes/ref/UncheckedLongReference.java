@@ -58,10 +58,10 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @param offset     the offset at which the long value is stored.
      * @param size       the size of the long value in bytes.
      * @return a new {@code LongReference} instance.
-     * @throws IllegalArgumentException    if the size does not match the expected size.
-     * @throws BufferOverflowException     if the operation exceeds the bounds of the buffer.
-     * @throws BufferUnderflowException    if the operation exceeds the bounds of the buffer.
-     * @throws IllegalStateException       if the object is not in a valid state for the operation.
+     * @throws IllegalArgumentException if the size does not match the expected size.
+     * @throws BufferOverflowException  if the operation exceeds the bounds of the buffer.
+     * @throws BufferUnderflowException if the operation exceeds the bounds of the buffer.
+     * @throws IllegalStateException    if the object is not in a valid state for the operation.
      */
     @NotNull
     public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
@@ -77,9 +77,9 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @param bytes  the {@code BytesStore} containing the bytes.
      * @param offset the offset at which the long value is stored.
      * @param length the length of the bytes in the {@code BytesStore}.
-     * @throws IllegalStateException       if the object is not in a valid state for the operation.
-     * @throws IllegalArgumentException    if the length does not match the expected size.
-     * @throws BufferUnderflowException    if the operation exceeds the bounds of the buffer.
+     * @throws IllegalStateException    if the object is not in a valid state for the operation.
+     * @throws IllegalArgumentException if the length does not match the expected size.
+     * @throws BufferUnderflowException if the operation exceeds the bounds of the buffer.
      */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)

@@ -30,7 +30,7 @@ public interface BytesParselet {
      * to the provided message type.
      *
      * @param messageType a long value representing the type of the message to be processed.
-     * @param in a {@link BytesIn} instance containing the message data in bytes.
+     * @param in          a {@link BytesIn} instance containing the message data in bytes.
      */
     void accept(long messageType, BytesIn<?> in);
 }

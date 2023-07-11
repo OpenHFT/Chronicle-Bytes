@@ -41,7 +41,7 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
  *
  * @author Peter Lawrey
  */
- @SuppressWarnings("rawtypes")
+@SuppressWarnings("rawtypes")
 public class TextLongArrayReference extends AbstractReference implements ByteableLongArrayValues {
     private static final byte[] SECTION1 = "{ locked: false, capacity: ".getBytes(ISO_8859_1);
     private static final byte[] SECTION2 = ", used: ".getBytes(ISO_8859_1);
@@ -67,11 +67,11 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      *
      * @param bytes    the Bytes instance to write to.
      * @param capacity the capacity of the long array to be written.
-     * @throws IllegalArgumentException  if an illegal argument is provided.
-     * @throws IllegalStateException     if an invalid state is encountered.
-     * @throws BufferOverflowException   if there's not enough space in the buffer to write the array.
-     * @throws ArithmeticException       if numeric overflow occurs.
-     * @throws BufferUnderflowException  if there's not enough data available to read.
+     * @throws IllegalArgumentException if an illegal argument is provided.
+     * @throws IllegalStateException    if an invalid state is encountered.
+     * @throws BufferOverflowException  if there's not enough space in the buffer to write the array.
+     * @throws ArithmeticException      if numeric overflow occurs.
+     * @throws BufferUnderflowException if there's not enough data available to read.
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
@@ -204,7 +204,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      * @param index The index at which the value should be bound.
      * @param value The LongValue to be bound.
      * @throws UnsupportedOperationException as this operation is not supported.
-     */    @Override
+     */
+    @Override
     public void bindValueAt(@NonNegative long index, LongValue value) {
         throw new UnsupportedOperationException("todo");
     }

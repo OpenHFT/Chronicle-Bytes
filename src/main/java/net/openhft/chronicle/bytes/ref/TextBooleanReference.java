@@ -46,8 +46,8 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
      * @param value  the boolean value to write.
      * @param bytes  the BytesStore to write to.
      * @param offset the offset at which to write the value.
-     * @throws IllegalStateException       if an invalid state is encountered.
-     * @throws BufferOverflowException     if there's not enough space in the buffer to write the value.
+     * @throws IllegalStateException   if an invalid state is encountered.
+     * @throws BufferOverflowException if there's not enough space in the buffer to write the value.
      */
     @SuppressWarnings("rawtypes")
     public static void write(final boolean value, final BytesStore bytes, @NonNegative long offset)
@@ -86,7 +86,7 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
      * Get the current value of this reference.
      *
      * @return the current value.
-     * @throws IllegalStateException if the underlying bytes store is closed.
+     * @throws IllegalStateException    if the underlying bytes store is closed.
      * @throws BufferUnderflowException if the underlying bytes store cannot provide enough data.
      */
     @Override

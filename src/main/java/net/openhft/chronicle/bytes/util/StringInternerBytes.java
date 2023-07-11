@@ -52,8 +52,8 @@ public class StringInternerBytes extends StringInterner {
      *
      * @param bytes the bytes to be converted and interned as a string.
      * @return the interned string representation of the bytes.
-     * @throws ArithmeticException if there is an integer overflow when calculating the length.
-     * @throws IllegalStateException if the underlying bytes store is not readable.
+     * @throws ArithmeticException      if there is an integer overflow when calculating the length.
+     * @throws IllegalStateException    if the underlying bytes store is not readable.
      * @throws BufferUnderflowException if there are not enough bytes remaining to read.
      */
     public String intern(@NotNull final Bytes<?> bytes)
@@ -71,7 +71,7 @@ public class StringInternerBytes extends StringInterner {
      * @param length specifies the maximum number of bytes to be converted, must be non-negative.
      * @return the interned string representation of the bytes.
      * @throws IllegalArgumentException if length is negative.
-     * @throws IllegalStateException if the underlying bytes store is not readable.
+     * @throws IllegalStateException    if the underlying bytes store is not readable.
      * @throws BufferUnderflowException if there are not enough bytes remaining to read.
      */
     public String intern(@NotNull final Bytes<?> bytes, @NonNegative int length)

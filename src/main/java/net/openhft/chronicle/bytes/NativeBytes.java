@@ -105,25 +105,26 @@ public class NativeBytes<U>
     public static void resetNewGuarded() {
         newGuarded = BYTES_GUARDED;
     }
-/**
- * Creates a new instance of NativeBytes with an empty BytesStore and maximum capacity.
- *
- * @return A new instance of NativeBytes.
- * @throws AssertionError If there's an error during the wrapping process.
- */
+
+    /**
+     * Creates a new instance of NativeBytes with an empty BytesStore and maximum capacity.
+     *
+     * @return A new instance of NativeBytes.
+     * @throws AssertionError If there's an error during the wrapping process.
+     */
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
         return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
     }
 
-/**
- * Creates a new instance of NativeBytes with a specific initial capacity.
- *
- * @param initialCapacity The initial capacity of the NativeBytes instance.
- * @return A new instance of NativeBytes.
- * @throws IllegalArgumentException If the initial capacity is not valid.
- * @throws AssertionError If there's an error during the wrapping process.
- */
+    /**
+     * Creates a new instance of NativeBytes with a specific initial capacity.
+     *
+     * @param initialCapacity The initial capacity of the NativeBytes instance.
+     * @return A new instance of NativeBytes.
+     * @throws IllegalArgumentException If the initial capacity is not valid.
+     * @throws AssertionError           If there's an error during the wrapping process.
+     */
     @NotNull
     public static NativeBytes<Void> nativeBytes(@NonNegative final long initialCapacity)
             throws IllegalArgumentException {
@@ -135,40 +136,40 @@ public class NativeBytes<U>
         }
     }
 
-/**
- * Creates a new copy of the provided Bytes. This method is deprecated and will be removed in version x.26.
- *
- * @param bytes The Bytes to copy.
- * @return A new instance of BytesStore with the copied Bytes.
- * @throws IllegalStateException If the Bytes cannot be copied.
- * @deprecated This method is to be removed in version x.26.
- */
+    /**
+     * Creates a new copy of the provided Bytes. This method is deprecated and will be removed in version x.26.
+     *
+     * @param bytes The Bytes to copy.
+     * @return A new instance of BytesStore with the copied Bytes.
+     * @throws IllegalStateException If the Bytes cannot be copied.
+     * @deprecated This method is to be removed in version x.26.
+     */
     @Deprecated(/* to be removed in x.26 */)
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
             throws IllegalStateException {
         return BytesUtil.copyOf(bytes);
     }
 
-/**
- * Adjusts the provided size to align with the operating system's page size.
- *
- * @param size The original size.
- * @return The size aligned with the page size.
- */
+    /**
+     * Adjusts the provided size to align with the operating system's page size.
+     *
+     * @param size The original size.
+     * @return The size aligned with the page size.
+     */
     private static long alignToPageSize(final long size) {
         final long mask = OS.pageSize() - 1L;
         return (size + mask) & ~mask;
     }
 
-/**
- * Wraps the provided BytesStore with a new instance of NativeBytes with the specified capacity.
- *
- * @param bs The BytesStore to wrap.
- * @param capacity The capacity of the new NativeBytes instance.
- * @return A new instance of NativeBytes.
- * @throws IllegalStateException If the BytesStore cannot be wrapped.
- * @throws IllegalArgumentException If the provided capacity is not valid.
- */
+    /**
+     * Wraps the provided BytesStore with a new instance of NativeBytes with the specified capacity.
+     *
+     * @param bs       The BytesStore to wrap.
+     * @param capacity The capacity of the new NativeBytes instance.
+     * @return A new instance of NativeBytes.
+     * @throws IllegalStateException    If the BytesStore cannot be wrapped.
+     * @throws IllegalArgumentException If the provided capacity is not valid.
+     */
     @NotNull
     public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException {

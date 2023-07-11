@@ -338,9 +338,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Reads and deserializes data from the input stream.
      *
      * @param bytes the input stream.
-     * @throws IORuntimeException          if an IO exception occurs.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferUnderflowException    if buffer underflow occurs.
+     * @throws IORuntimeException       if an IO exception occurs.
+     * @throws IllegalStateException    if an illegal state occurs.
+     * @throws BufferUnderflowException if buffer underflow occurs.
      */
     @Override
     public void readMarshallable(BytesIn<?> bytes)
@@ -365,8 +365,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Serializes and writes data to the output stream.
      *
      * @param bytes the output stream.
-     * @throws IllegalStateException       if an illegal state occurs.
-     * @throws BufferOverflowException     if buffer overflow occurs.
+     * @throws IllegalStateException   if an illegal state occurs.
+     * @throws BufferOverflowException if buffer overflow occurs.
      */
     @Override
     public void writeMarshallable(BytesOut<?> bytes)
@@ -540,9 +540,9 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Atomically sets the value at the specified index to the given updated value
      * if the current value equals the expected value.
      *
-     * @param index the index of the value to be updated.
+     * @param index    the index of the value to be updated.
      * @param expected the expected value.
-     * @param value the new value.
+     * @param value    the new value.
      * @return true if successful. False return indicates that
      * the actual value was not equal to the expected value.
      * @throws BufferOverflowException if buffer overflow occurs.

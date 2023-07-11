@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.core.annotation.NonNegative;
 
 import java.nio.BufferUnderflowException;
+
 /**
  * This interface defines methods for reading data of different types (byte, short, int, long) from
  * a certain offset position. The methods do not necessarily perform boundary checks, so it's
@@ -39,7 +40,7 @@ public interface UncheckedRandomDataInput {
      * @param offset Offset position from which the byte is to be read.
      * @return The byte read from the specified offset.
      * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException If the data source has been released.
+     * @throws IllegalStateException    If the data source has been released.
      */
     byte readByte(@NonNegative long offset);
 
@@ -52,7 +53,7 @@ public interface UncheckedRandomDataInput {
      * @param offset Offset position from which the short is to be read.
      * @return The short read from the specified offset.
      * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException If the data source has been released.
+     * @throws IllegalStateException    If the data source has been released.
      */
     short readShort(@NonNegative long offset);
 
@@ -65,7 +66,7 @@ public interface UncheckedRandomDataInput {
      * @param offset Offset position from which the integer is to be read.
      * @return The integer read from the specified offset.
      * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException If the data source has been released.
+     * @throws IllegalStateException    If the data source has been released.
      */
     int readInt(@NonNegative long offset);
 
@@ -78,7 +79,7 @@ public interface UncheckedRandomDataInput {
      * @param offset Offset position from which the long is to be read.
      * @return The long read from the specified offset.
      * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException If the data source has been released.
+     * @throws IllegalStateException    If the data source has been released.
      */
     long readLong(@NonNegative long offset);
 
