@@ -103,10 +103,6 @@ public class TextBooleanReference extends AbstractReference implements BooleanVa
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        try {
-            write(value, bytes, offset);
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        write(value, bytes, offset);
     }
 }

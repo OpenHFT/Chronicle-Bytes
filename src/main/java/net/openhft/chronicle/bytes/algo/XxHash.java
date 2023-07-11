@@ -122,11 +122,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      */
     @Override
     public long applyAsLong(BytesStore bytes) {
-        try {
-            return applyAsLong(bytes, bytes.readRemaining());
-        } catch (IllegalStateException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return applyAsLong(bytes, bytes.readRemaining());
     }
 
     /**

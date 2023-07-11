@@ -277,30 +277,26 @@ enum BytesInternal {
         final long aPos = a.readPosition();
         final long bPos = b.readPosition();
 
-        try {
-            int i;
-            for (i = 0; i < bLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != b.readLong(bPos + i))
-                    return false;
-            }
-            for (; i < bLength; i++) {
-                if (a.readByte(aPos + i) != b.readByte(bPos + i))
-                    return false;
-            }
-            // check for zeros
-            for (; i < aLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != 0L)
-                    return false;
-            }
-            for (; i < aLength; i++) {
-                if (a.readByte(aPos + i) != 0)
-                    return false;
-            }
-
-            return true;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        int i;
+        for (i = 0; i < bLength - 7; i += 8) {
+            if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                return false;
         }
+        for (; i < bLength; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        // check for zeros
+        for (; i < aLength - 7; i += 8) {
+            if (a.readLong(aPos + i) != 0L)
+                return false;
+        }
+        for (; i < aLength; i++) {
+            if (a.readByte(aPos + i) != 0)
+                return false;
+        }
+
+        return true;
     }
 
     // a >= b here and we also know it is safe to read bLength
@@ -315,29 +311,25 @@ enum BytesInternal {
         final long aPos = a.readPosition();
         final long bPos = b.readPosition();
 
-        try {
-            int i;
-            for (i = 0; i < bLength - 7; i += 8) {
-                if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
-                    return false;
-            }
-            for (; i < bLength; i++) {
-                if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
-                    return false;
-            }
-            // check for zeros
-            for (; i < aLength - 7; i += 8) {
-                if (ua.readLong(aPos + i) != 0L)
-                    return false;
-            }
-            for (; i < aLength; i++) {
-                if (ua.readByte(aPos + i) != 0)
-                    return false;
-            }
-            return true;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        int i;
+        for (i = 0; i < bLength - 7; i += 8) {
+            if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
+                return false;
         }
+        for (; i < bLength; i++) {
+            if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
+                return false;
+        }
+        // check for zeros
+        for (; i < aLength - 7; i += 8) {
+            if (ua.readLong(aPos + i) != 0L)
+                return false;
+        }
+        for (; i < aLength; i++) {
+            if (ua.readByte(aPos + i) != 0)
+                return false;
+        }
+        return true;
     }
 
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
@@ -369,29 +361,26 @@ enum BytesInternal {
         // assume a >= b
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        try {
-            long i;
-            for (i = 0; i < bLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != b.readLong(bPos + i))
-                    return false;
-            }
-            for (; i < bLength; i++) {
-                if (a.readByte(aPos + i) != b.readByte(bPos + i))
-                    return false;
-            }
-            // check for zeros
-            for (; i < aLength - 7; i += 8) {
-                if (a.readLong(aPos + i) != 0L)
-                    return false;
-            }
-            for (; i < aLength; i++) {
-                if (a.readByte(aPos + i) != 0)
-                    return false;
-            }
-            return true;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+
+        long i;
+        for (i = 0; i < bLength - 7; i += 8) {
+            if (a.readLong(aPos + i) != b.readLong(bPos + i))
+                return false;
         }
+        for (; i < bLength; i++) {
+            if (a.readByte(aPos + i) != b.readByte(bPos + i))
+                return false;
+        }
+        // check for zeros
+        for (; i < aLength - 7; i += 8) {
+            if (a.readLong(aPos + i) != 0L)
+                return false;
+        }
+        for (; i < aLength; i++) {
+            if (a.readByte(aPos + i) != 0)
+                return false;
+        }
+        return true;
     }
 
     // a >= b here and we also know it is safe to read bLength
@@ -408,29 +397,26 @@ enum BytesInternal {
         // assume a >= b
         long aPos = a.readPosition();
         long bPos = b.readPosition();
-        try {
-            long i;
-            for (i = 0; i < bLength - 7; i += 8) {
-                if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
-                    return false;
-            }
-            for (; i < bLength; i++) {
-                if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
-                    return false;
-            }
-            // check for zeros
-            for (; i < aLength - 7; i += 8) {
-                if (ua.readLong(aPos + i) != 0L)
-                    return false;
-            }
-            for (; i < aLength; i++) {
-                if (ua.readByte(aPos + i) != 0)
-                    return false;
-            }
-            return true;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+
+        long i;
+        for (i = 0; i < bLength - 7; i += 8) {
+            if (ua.readLong(aPos + i) != ub.readLong(bPos + i))
+                return false;
         }
+        for (; i < bLength; i++) {
+            if (ua.readByte(aPos + i) != ub.readByte(bPos + i))
+                return false;
+        }
+        // check for zeros
+        for (; i < aLength - 7; i += 8) {
+            if (ua.readLong(aPos + i) != 0L)
+                return false;
+        }
+        for (; i < aLength; i++) {
+            if (ua.readByte(aPos + i) != 0)
+                return false;
+        }
+        return true;
     }
 
     public static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b)
@@ -441,11 +427,7 @@ enum BytesInternal {
         if (a.realReadRemaining() < bRealReadRemaining)
             return false;
 
-        try {
-            return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
     }
 
     public static <U extends BytesStore & HasUncheckedRandomDataInput>
@@ -458,19 +440,15 @@ enum BytesInternal {
             return false;
         }
 
-        try {
-            if (b instanceof HasUncheckedRandomDataInput) {
-                // We have hoisted out boundary checks in this path
-                return startsWithUnchecked(a.acquireUncheckedInput(),
-                        ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
-                        a.readPosition(),
-                        b.readPosition(),
-                        bRealReadRemaining);
-            } else {
-                return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
-            }
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        if (b instanceof HasUncheckedRandomDataInput) {
+            // We have hoisted out boundary checks in this path
+            return startsWithUnchecked(a.acquireUncheckedInput(),
+                    ((HasUncheckedRandomDataInput) b).acquireUncheckedInput(),
+                    a.readPosition(),
+                    b.readPosition(),
+                    bRealReadRemaining);
+        } else {
+            return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
         }
     }
 
@@ -1101,26 +1079,22 @@ enum BytesInternal {
             writeOffset = writeStopBit(out, writeOffset, -1);
 
         } else {
-            try {
-                int strLength = str.length();
-                if (strLength < 32) {
-                    long lenOffset = writeOffset;
-                    writeOffset = appendUtf8(out, writeOffset + 1, str, 0, strLength);
-                    long utfLength = writeOffset - lenOffset - 1;
-                    assert utfLength <= 127;
-                    writeStopBit(out, lenOffset, utfLength);
+            int strLength = str.length();
+            if (strLength < 32) {
+                long lenOffset = writeOffset;
+                writeOffset = appendUtf8(out, writeOffset + 1, str, 0, strLength);
+                long utfLength = writeOffset - lenOffset - 1;
+                assert utfLength <= 127;
+                writeStopBit(out, lenOffset, utfLength);
+            } else {
+                long utfLength = AppendableUtil.findUtf8Length(str);
+                writeOffset = writeStopBit(out, writeOffset, utfLength);
+                if (utfLength == strLength) {
+                    append8bit(writeOffset, out, str, 0, strLength);
+                    writeOffset += utfLength;
                 } else {
-                    long utfLength = AppendableUtil.findUtf8Length(str);
-                    writeOffset = writeStopBit(out, writeOffset, utfLength);
-                    if (utfLength == strLength) {
-                        append8bit(writeOffset, out, str, 0, strLength);
-                        writeOffset += utfLength;
-                    } else {
-                        writeOffset = appendUtf8(out, writeOffset, str, 0, strLength);
-                    }
+                    writeOffset = appendUtf8(out, writeOffset, str, 0, strLength);
                 }
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
             }
         }
         return writeOffset;
@@ -1136,23 +1110,19 @@ enum BytesInternal {
             offset = writeStopBit(out, offset, -1);
 
         } else {
-            try {
-                int strLength = str.length();
-                long utfLength = AppendableUtil.findUtf8Length(str);
-                if (utfLength > maxUtf8Len) {
-                    throw new IllegalArgumentException("Attempted to write a char sequence of " +
-                            "utf8 size " + utfLength + ": \"" + str +
-                            "\", when only " + maxUtf8Len + " allowed");
-                }
-                offset = writeStopBit(out, offset, utfLength);
-                if (utfLength == strLength) {
-                    append8bit(offset, out, str, 0, strLength);
-                    offset += utfLength;
-                } else {
-                    offset = appendUtf8(out, offset, str, 0, strLength);
-                }
-            } catch (IllegalArgumentException | BufferUnderflowException e) {
-                throw new AssertionError(e);
+            int strLength = str.length();
+            long utfLength = AppendableUtil.findUtf8Length(str);
+            if (utfLength > maxUtf8Len) {
+                throw new IllegalArgumentException("Attempted to write a char sequence of " +
+                        "utf8 size " + utfLength + ": \"" + str +
+                        "\", when only " + maxUtf8Len + " allowed");
+            }
+            offset = writeStopBit(out, offset, utfLength);
+            if (utfLength == strLength) {
+                append8bit(offset, out, str, 0, strLength);
+                offset += utfLength;
+            } else {
+                offset = appendUtf8(out, offset, str, 0, strLength);
             }
         }
         return offset;
@@ -1921,11 +1891,7 @@ enum BytesInternal {
             int endIndex = appendLong1(numberBuffer, num);
 
             // Bulk copy the digits into the front of the buffer
-            try {
-                out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
-            } catch (IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            out.write(numberBuffer, endIndex, numberBuffer.length - endIndex);
         }
     }
 
@@ -2213,11 +2179,7 @@ enum BytesInternal {
             }
         }
         Bytes<?> bytes = acquireBytes();
-        try {
-            return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
     }
 
     @Nullable
@@ -2225,13 +2187,9 @@ enum BytesInternal {
             throws IllegalStateException, ArithmeticException {
         throwExceptionIfReleased(bytes);
         requireNonNull(tester);
-        try {
-            StringBuilder utfReader = acquireStringBuilder();
-            parseUtf8(bytes, utfReader, tester);
-            return SI.intern(utfReader);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        StringBuilder utfReader = acquireStringBuilder();
+        parseUtf8(bytes, utfReader, tester);
+        return SI.intern(utfReader);
     }
 
     public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder,
@@ -2263,47 +2221,44 @@ enum BytesInternal {
     private static void readUtf8_SB1(
             @NotNull Bytes<?> bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws IOException, IllegalStateException {
-        try {
-            @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
-            int i = 0;
-            final int len = Math.toIntExact(bytes.realReadRemaining());
-            final long address = nb.address + nb.translate(bytes.readPosition());
-            @Nullable final Memory memory = nb.memory;
 
-            if (Jvm.isJava9Plus()) {
-                final int appendableLength = appendable.capacity();
-                for (; i < len && i < appendableLength; i++) {
-                    int c = memory.readByte(address + i);
-                    if (c < 0) // we have hit a non-ASCII character.
-                        break;
-                    if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1L);
-                        StringUtils.setCount(appendable, i);
-                        return;
-                    }
-                    appendable.append((char) c);
+        @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
+        int i = 0;
+        final int len = Math.toIntExact(bytes.realReadRemaining());
+        final long address = nb.address + nb.translate(bytes.readPosition());
+        @Nullable final Memory memory = nb.memory;
+
+        if (Jvm.isJava9Plus()) {
+            final int appendableLength = appendable.capacity();
+            for (; i < len && i < appendableLength; i++) {
+                int c = memory.readByte(address + i);
+                if (c < 0) // we have hit a non-ASCII character.
+                    break;
+                if (tester.isStopChar(c)) {
+                    bytes.readSkip(i + 1L);
+                    StringUtils.setCount(appendable, i);
+                    return;
                 }
-            } else {
-                final char[] chars = StringUtils.extractChars(appendable);
-                for (; i < len && i < chars.length; i++) {
-                    int c = memory.readByte(address + i);
-                    if (c < 0) // we have hit a non-ASCII character.
-                        break;
-                    if (tester.isStopChar(c)) {
-                        bytes.readSkip(i + 1L);
-                        StringUtils.setCount(appendable, i);
-                        return;
-                    }
-                    chars[i] = (char) c;
+                appendable.append((char) c);
+            }
+        } else {
+            final char[] chars = StringUtils.extractChars(appendable);
+            for (; i < len && i < chars.length; i++) {
+                int c = memory.readByte(address + i);
+                if (c < 0) // we have hit a non-ASCII character.
+                    break;
+                if (tester.isStopChar(c)) {
+                    bytes.readSkip(i + 1L);
+                    StringUtils.setCount(appendable, i);
+                    return;
                 }
+                chars[i] = (char) c;
             }
-            StringUtils.setCount(appendable, i);
-            bytes.readSkip(i);
-            if (i < len) {
-                readUtf8_SB2(bytes, appendable, tester);
-            }
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        }
+        StringUtils.setCount(appendable, i);
+        bytes.readSkip(i);
+        if (i < len) {
+            readUtf8_SB2(bytes, appendable, tester);
         }
     }
 
@@ -2942,22 +2897,17 @@ enum BytesInternal {
 
     public static float addAndGetFloat(@NotNull BytesStore<?, ?> in, @NonNegative long offset, float adding)
             throws BufferUnderflowException, IllegalStateException {
-        try {
-            for (; ; ) {
-                int value = in.readVolatileInt(offset);
-                float value1 = Float.intBitsToFloat(value) + adding;
-                int value2 = Float.floatToRawIntBits(value1);
-                if (in.compareAndSwapInt(offset, value, value2))
-                    return value1;
-            }
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
+        for (; ; ) {
+            int value = in.readVolatileInt(offset);
+            float value1 = Float.intBitsToFloat(value) + adding;
+            int value2 = Float.floatToRawIntBits(value1);
+            if (in.compareAndSwapInt(offset, value, value2))
+                return value1;
         }
     }
 
     public static double addAndGetDouble(@NotNull BytesStore<?, ?> in, @NonNegative long offset, double adding)
             throws BufferUnderflowException, IllegalStateException {
-        try {
             for (; ; ) {
                 long value = in.readVolatileLong(offset);
                 double value1 = Double.longBitsToDouble(value) + adding;
@@ -2965,37 +2915,26 @@ enum BytesInternal {
                 if (in.compareAndSwapLong(offset, value, value2))
                     return value1;
             }
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public static int addAndGetInt(@NotNull BytesStore<?, ?> in, @NonNegative long offset, int adding)
             throws BufferUnderflowException, IllegalStateException {
-        try {
             for (; ; ) {
                 int value = in.readVolatileInt(offset);
                 int value2 = value + adding;
                 if (in.compareAndSwapInt(offset, value, value2))
                     return value2;
             }
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public static long addAndGetLong(@NotNull BytesStore<?, ?> in, @NonNegative long offset, long adding)
             throws BufferUnderflowException, IllegalStateException {
-        try {
             for (; ; ) {
                 long value = in.readVolatileLong(offset);
                 long value2 = value + adding;
                 if (in.compareAndSwapLong(offset, value, value2))
                     return value2;
             }
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -3013,14 +2952,14 @@ enum BytesInternal {
      * b6 03 56 4d 48                                  # VMH
      * </pre>
      *
-     * @param bytes The buffer whose content is to be converted to a hexadecimal string.
-     *              Must not be null.
-     * @param offset The starting offset within the buffer to begin the hexadecimal conversion.
+     * @param bytes     The buffer whose content is to be converted to a hexadecimal string.
+     *                  Must not be null.
+     * @param offset    The starting offset within the buffer to begin the hexadecimal conversion.
      * @param maxLength The number of bytes to convert from the buffer.
      * @return A hexadecimal representation of the buffer content with comments describing the bytes.
-     *         Each line of the string contains the hexadecimal representation of 16 bytes.
+     * Each line of the string contains the hexadecimal representation of 16 bytes.
      * @throws BufferUnderflowException if there is not enough data in the buffer.
-     * @throws IllegalStateException if there is a problem with the buffer's state.
+     * @throws IllegalStateException    if there is a problem with the buffer's state.
      * @throws IllegalArgumentException if the provided offset or maxLength are negative.
      */
     public static String toHexString(@NotNull final Bytes<?> bytes, @NonNegative long offset, @NonNegative long maxLength)
@@ -3239,14 +3178,10 @@ enum BytesInternal {
 
     public static void copy(@NotNull InputStream input, @NotNull StreamingDataOutput output)
             throws IOException, BufferOverflowException, IllegalStateException {
-        try {
             @NotNull byte[] bytes = new byte[512];
             for (int len; (len = input.read(bytes)) > 0; ) {
                 output.write(bytes, 0, len);
             }
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public static Boolean parseBoolean(@NotNull ByteStringParser parser, @NotNull StopCharTester tester)
@@ -3280,7 +3215,6 @@ enum BytesInternal {
     @NotNull
     public static BytesStore subBytes(RandomDataInput from, @NonNegative long start, @NonNegative long length)
             throws BufferUnderflowException, IllegalStateException {
-        try {
             @NotNull BytesStore ret;
             if (from.isDirectMemory()) {
                 ret = BytesStore.nativeStore(Math.max(0, length));
@@ -3289,14 +3223,10 @@ enum BytesInternal {
             }
             ret.write(0L, from, start, length);
             return ret;
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     public static long findByte(@NotNull RandomDataInput bytes, byte stopByte)
             throws IllegalStateException {
-        try {
             long start = bytes.readPosition();
             long remaining = bytes.readRemaining();
             for (long i = 0; i < remaining; i++) {
@@ -3304,9 +3234,6 @@ enum BytesInternal {
                     return i;
             }
             return -1;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     @NotNull
@@ -3331,8 +3258,6 @@ enum BytesInternal {
                 in.skipTo(StopCharTesters.CONTROL_STOP);
             }
             return out;
-        } catch (BufferUnderflowException | BufferOverflowException | IllegalStateException e) {
-            throw new AssertionError(e);
         } finally {
             in.releaseLast();
         }

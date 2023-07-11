@@ -61,12 +61,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(char ch)
             throws IllegalStateException {
-        try {
             BytesInternal.appendUtf8Char(this, ch);
             return (B) this;
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -110,7 +106,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append(int value)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         BytesInternal.appendBase10(this, value);
         return (B) this;
     }
@@ -146,7 +142,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B appendBase(long value, int base)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, IndexOutOfBoundsException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         if (base == 10)
             append(value);
         else
@@ -197,10 +193,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      * @throws IllegalStateException    if the underlying buffer was released
+     * @throws IllegalArgumentException if the decimalPlaces is negative or too large
      */
     @NotNull
     default B appendDecimal(long value, int decimalPlaces)
-            throws BufferOverflowException, IllegalStateException, ArithmeticException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
         BytesInternal.appendDecimal(this, value, decimalPlaces);
         return (B) this;
     }
@@ -230,7 +227,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param d to append
      * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws BufferOverflowException  if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      * @throws IllegalStateException    if the underlying buffer was released
      */
@@ -279,13 +276,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param d             to append
      * @param decimalPlaces to always produce
      * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws BufferOverflowException  if the capacity of the underlying buffer was exceeded
      * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
      * @throws IllegalStateException    if the underlying buffer was released
+     * @throws IllegalArgumentException if the decimalPlaces is negative or too large
      */
     @NotNull
     default B append(double d, int decimalPlaces)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         BytesInternal.append(this, d, decimalPlaces);
         return (B) this;
     }
@@ -319,12 +317,8 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
-        try {
+            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
             return append8bit(cs, 0, cs.length());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
 
@@ -339,11 +333,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull BytesStore bs)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
-        try {
             return write(bs, 0L, bs.readRemaining());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -356,11 +346,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      */
     default B append8bit(@NotNull String cs)
             throws BufferOverflowException, IllegalStateException {
-        try {
             return append8bit(cs, 0, cs.length());
-        } catch (IllegalArgumentException | IndexOutOfBoundsException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
     }
 
     /**
@@ -374,6 +360,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
      * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
      * @throws IllegalStateException    if the underlying buffer was released
+     * @throws IllegalArgumentException if the start or end is negative or too large
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {

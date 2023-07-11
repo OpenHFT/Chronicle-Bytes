@@ -109,12 +109,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
 
         super.bytesStore(bytes, newOffset, length);
 
-        try {
-            if (bytes.readLong(newOffset) == UNINITIALIZED)
-                bytes.write(newOffset, template);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        if (bytes.readLong(newOffset) == UNINITIALIZED)
+            bytes.write(newOffset, template);
     }
 
     /**

@@ -46,14 +46,9 @@ public final class NoBytesStore implements BytesStore {
     public static final Bytes<?> NO_BYTES;
 
     static {
-        try {
-            NO_PAGE = OS.memory().allocate(OS.pageSize());
-            NO_BYTES = new NativeBytes<>(noBytesStore());
-            IOTools.unmonitor(NO_BYTES);
-
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        NO_PAGE = OS.memory().allocate(OS.pageSize());
+        NO_BYTES = new NativeBytes<>(noBytesStore());
+        IOTools.unmonitor(NO_BYTES);
     }
 
     private NoBytesStore() {

@@ -90,11 +90,7 @@ public class NativeBytes<U>
 
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
-        try {
-            return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
-        } catch (IllegalStateException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
     }
 
     @NotNull
@@ -102,13 +98,9 @@ public class NativeBytes<U>
             throws IllegalArgumentException {
         @NotNull final BytesStore<?, Void> store = nativeStoreWithFixedCapacity(initialCapacity);
         try {
-            try {
-                return NativeBytes.wrapWithNativeBytes(store, Bytes.MAX_CAPACITY);
-            } finally {
-                store.release(INIT);
-            }
-        } catch (IllegalStateException e) {
-            throw new AssertionError(e);
+            return NativeBytes.wrapWithNativeBytes(store, Bytes.MAX_CAPACITY);
+        } finally {
+            store.release(INIT);
         }
     }
 
@@ -297,11 +289,7 @@ public class NativeBytes<U>
     @NotNull
     private BytesStore allocate(@NonNegative long size) {
         final BytesStore store;
-        try {
-            store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-        } catch (ArithmeticException e) {
-            throw new AssertionError(e);
-        }
+        store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
         return store;
     }
 
@@ -335,24 +323,21 @@ public class NativeBytes<U>
             throws IllegalStateException {
         requireNonNull(bytes);
         ReportUnoptimised.reportOnce();
-        try {
-            long length = Math.min(bytes.readRemaining(), writeRemaining());
-            if (length + writePosition() >= 1 << 20)
-                length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-            final long offset = bytes.readPosition();
-            ensureCapacity(writePosition() + length);
-            optimisedWrite(bytes, offset, length);
-            if (length == bytes.readRemaining()) {
-                bytes.clear();
-            } else {
-                bytes.readSkip(length);
-                if (bytes.writePosition() > bytes.realCapacity() / 2)
-                    bytes.compact();
-            }
-            return this;
-        } catch (IllegalArgumentException | BufferUnderflowException | BufferOverflowException e) {
-            throw new AssertionError(e);
+
+        long length = Math.min(bytes.readRemaining(), writeRemaining());
+        if (length + writePosition() >= 1 << 20)
+            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+        final long offset = bytes.readPosition();
+        ensureCapacity(writePosition() + length);
+        optimisedWrite(bytes, offset, length);
+        if (length == bytes.readRemaining()) {
+            bytes.clear();
+        } else {
+            bytes.readSkip(length);
+            if (bytes.writePosition() > bytes.realCapacity() / 2)
+                bytes.compact();
         }
+        return this;
     }
 
     @Override

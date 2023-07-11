@@ -122,12 +122,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
         requireNonNull(bytes);
         throwExceptionIfClosed();
 
-        try {
-            write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
-            return this;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
+        return this;
     }
 
     @NotNull
@@ -490,23 +486,19 @@ public abstract class CommonMappedBytes extends MappedBytes {
             return this;
         }
 
-        try {
-            if (Jvm.isJava9Plus()) {
-                byte[] strBytes = extractBytes(text);
-                byte coder = getStringCoder(text);
-                long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
-                writeStopBit(utfLength);
-                appendUtf8(strBytes, 0, text.length(), coder);
-            } else {
-                char[] chars = extractChars(text);
-                long utfLength = AppendableUtil.findUtf8Length(chars);
-                writeStopBit(utfLength);
-                appendUtf8(chars, 0, chars.length);
-            }
-            return this;
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
+        if (Jvm.isJava9Plus()) {
+            byte[] strBytes = extractBytes(text);
+            byte coder = getStringCoder(text);
+            long utfLength = AppendableUtil.findUtf8Length(strBytes, coder);
+            writeStopBit(utfLength);
+            appendUtf8(strBytes, 0, text.length(), coder);
+        } else {
+            char[] chars = extractChars(text);
+            long utfLength = AppendableUtil.findUtf8Length(chars);
+            writeStopBit(utfLength);
+            appendUtf8(chars, 0, chars.length);
         }
+        return this;
     }
 
     @Override

@@ -154,19 +154,15 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
         final long limit = position + remaining;
 
-        try {
-            if (writeLimit < limit)
-                writeLimit(limit);
+        if (writeLimit < limit)
+            writeLimit(limit);
 
-            if (Jvm.isAssertEnabled())
-                readLimit(limit);
-            else
-                uncheckedWritePosition(limit);
+        if (Jvm.isAssertEnabled())
+            readLimit(limit);
+        else
+            uncheckedWritePosition(limit);
 
-            return readPosition(position);
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        return readPosition(position);
     }
 
     @Override

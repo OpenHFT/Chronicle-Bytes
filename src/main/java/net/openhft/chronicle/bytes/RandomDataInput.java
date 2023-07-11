@@ -54,7 +54,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>Note: Implementations of this class are typically not thread-safe. If multiple
  * threads interact with a {@code RandomDataInput} instance concurrently, it must be synchronized
  * externally.
- *
  */
 public interface RandomDataInput extends RandomCommon {
     String[] charToString = createCharToString();
@@ -387,7 +386,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param bb the target ByteBuffer to which the data is copied.
      * @return the number of bytes copied.
      * @throws BufferUnderflowException if the read operation encounters end of the byte source.
-     * @throws IllegalStateException if the byte source has been released.
+     * @throws IllegalStateException    if the byte source has been released.
      */
     default int copyTo(@NotNull ByteBuffer bb)
             throws BufferUnderflowException, IllegalStateException {
@@ -417,17 +416,14 @@ public interface RandomDataInput extends RandomCommon {
             throws IllegalStateException {
         long left = readLimit() - offset;
         long l;
-        try {
-            if (left >= 8)
-                return readLong(offset);
-            if (left == 4)
-                return readInt(offset);
-            l = 0;
-            for (int i = 0, remaining = (int) left; i < remaining; i++) {
-                l |= (long) readUnsignedByte(offset + i) << (i * 8);
-            }
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+
+        if (left >= 8)
+            return readLong(offset);
+        if (left == 4)
+            return readInt(offset);
+        l = 0;
+        for (int i = 0, remaining = (int) left; i < remaining; i++) {
+            l |= (long) readUnsignedByte(offset + i) << (i * 8);
         }
         return l;
     }
@@ -508,7 +504,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
@@ -525,7 +521,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
@@ -538,7 +534,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
@@ -553,7 +549,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param expected value
      * @param value    to set
      * @return true, if successful.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException if released
      */
     @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
@@ -568,7 +564,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param length the length of the subsequence.
      * @return a new BytesStore instance containing the specified subsequence.
      * @throws BufferUnderflowException if the start index or length are outside the limits of this byte sequence.
-     * @throws IllegalStateException if the byte source has been released.
+     * @throws IllegalStateException    if the byte source has been released.
      */
     @SuppressWarnings("rawtypes")
     @NotNull
@@ -601,11 +597,11 @@ public interface RandomDataInput extends RandomCommon {
      * @param sb     the buffer to read char sequence into (truncated first)
      * @return offset after the normal read char sequence, or -1 - offset, if char sequence is
      * {@code null}
-     * @throws IORuntimeException if the reading operation encounters an unexpected error.
+     * @throws IORuntimeException       if the reading operation encounters an unexpected error.
      * @throws IllegalArgumentException if the buffer is not a {@code StringBuilder} or {@code Bytes}.
      * @throws BufferUnderflowException if the reading operation encounters the end of the byte source.
-     * @throws ArithmeticException if the calculated length of the UTF-8 encoded string is invalid.
-     * @throws IllegalStateException if the byte source has been released.
+     * @throws ArithmeticException      if the calculated length of the UTF-8 encoded string is invalid.
+     * @throws IllegalStateException    if the byte source has been released.
      * @see RandomDataOutput#writeUtf8(long, CharSequence)
      */
     default <T extends Appendable & CharSequence> long readUtf8(@NonNegative long offset, @NotNull T sb)
@@ -741,23 +737,20 @@ public interface RandomDataInput extends RandomCommon {
      * Reads a sequence of bytes from the specified offset into a byte array.
      *
      * @param offsetInRDI the offset in the byte sequence from which to start reading.
-     * @param bytes the byte array into which the data is read.
-     * @param offset the start offset in the byte array at which the data is written.
-     * @param length the maximum number of bytes to read.
+     * @param bytes       the byte array into which the data is read.
+     * @param offset      the start offset in the byte array at which the data is written.
+     * @param length      the maximum number of bytes to read.
      * @return the actual number of bytes read into the byte array.
      * @throws IllegalStateException if the byte sequence has been released.
      */
     default long read(@NonNegative long offsetInRDI, byte[] bytes, @NonNegative int offset, @NonNegative int length)
             throws IllegalStateException {
         requireNonNull(bytes);
-        try {
-            int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
-            for (int i = 0; i < len; i++)
-                bytes[offset + i] = readByte(offsetInRDI + i);
-            return len;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+
+        int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
+        for (int i = 0; i < len; i++)
+            bytes[offset + i] = readByte(offsetInRDI + i);
+        return len;
     }
 
     /**
@@ -765,21 +758,18 @@ public interface RandomDataInput extends RandomCommon {
      *
      * @return a direct ByteBuffer containing the data of this byte sequence.
      * @throws IllegalArgumentException if the byte sequence cannot be converted into a ByteBuffer.
-     * @throws ArithmeticException if the calculated size of the ByteBuffer is invalid.
-     * @throws IllegalStateException if the byte sequence has been released.
+     * @throws ArithmeticException      if the calculated size of the ByteBuffer is invalid.
+     * @throws IllegalStateException    if the byte sequence has been released.
      */
     default ByteBuffer toTemporaryDirectByteBuffer()
             throws IllegalArgumentException, ArithmeticException, IllegalStateException {
         throwExceptionIfReleased(this);
         int len = Maths.toUInt31(readRemaining());
-        try {
-            ByteBuffer bb = ByteBuffer.allocateDirect(len);
-            copyTo(bb);
-            bb.clear();
-            return bb;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+
+        ByteBuffer bb = ByteBuffer.allocateDirect(len);
+        copyTo(bb);
+        bb.clear();
+        return bb;
     }
 
     /**
@@ -789,7 +779,7 @@ public interface RandomDataInput extends RandomCommon {
      * @param length the length of the sequence of bytes.
      * @return a hash code value for the specified sequence of bytes.
      * @throws BufferUnderflowException if the specified sequence of bytes extends beyond the limits of this byte sequence.
-     * @throws IllegalStateException if the byte sequence has been released.
+     * @throws IllegalStateException    if the byte sequence has been released.
      */
     default int fastHash(@NonNegative long offset, @NonNegative int length)
             throws BufferUnderflowException, IllegalStateException {

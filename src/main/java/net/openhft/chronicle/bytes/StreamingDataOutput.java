@@ -288,11 +288,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
             long offset = ((BytesStore<?, ?>) text).readPosition();
             long readRemaining = Math.min(writeRemaining(), ((BytesStore<?, ?>) text).readLimit() - offset);
             writeStopBit(readRemaining);
-            try {
-                write((BytesStore<?, ?>) text, offset, readRemaining);
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            write((BytesStore<?, ?>) text, offset, readRemaining);
             return (S) this;
         }
 
@@ -399,19 +395,15 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S write8bit(@Nullable String s)
             throws BufferOverflowException, ArithmeticException, IllegalStateException {
-        try {
-            if (s == null)
-                BytesInternal.writeStopBitNeg1(this);
-            else {
-                long rem = writeRemaining();
-                if (rem < 0)
-                    throw new IllegalStateException("rem: " + rem);
-                write8bit(s, 0, s.length());
-            }
-            return (S) this;
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
+        if (s == null)
+            BytesInternal.writeStopBitNeg1(this);
+        else {
+            long rem = writeRemaining();
+            if (rem < 0)
+                throw new IllegalStateException("rem: " + rem);
+            write8bit(s, 0, s.length());
         }
+        return (S) this;
     }
 
     /**
@@ -672,11 +664,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
 
         if (bytes.readRemaining() > writeRemaining())
             throw new BufferOverflowException();
-        try {
-            return write(bytes, bytes.readPosition(), bytes.readRemaining());
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     /**
@@ -696,11 +684,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         requireNonNull(bytes);
 
         ensureCapacity(bytes.readRemaining() + readPosition());
-        try {
-            return write(bytes, bytes.readPosition(), bytes.readRemaining());
-        } catch (BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return write(bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     /**
@@ -750,22 +734,18 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     @NotNull
     default S writeSome(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
-        try {
-            long length = Math.min(bytes.readRemaining(), writeRemaining());
-            if (length + writePosition() >= 1 << 20)
-                length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-            write(bytes, bytes.readPosition(), length);
-            if (length == bytes.readRemaining()) {
-                bytes.clear();
-            } else {
-                bytes.readSkip(length);
-                if (bytes.writePosition() > bytes.realCapacity() / 2)
-                    bytes.compact();
-            }
-            return (S) this;
-        } catch (BufferOverflowException | BufferUnderflowException | IllegalArgumentException e) {
-            throw new AssertionError(e);
+        long length = Math.min(bytes.readRemaining(), writeRemaining());
+        if (length + writePosition() >= 1 << 20)
+            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
+        write(bytes, bytes.readPosition(), length);
+        if (length == bytes.readRemaining()) {
+            bytes.clear();
+        } else {
+            bytes.readSkip(length);
+            if (bytes.writePosition() > bytes.realCapacity() / 2)
+                bytes.compact();
         }
+        return (S) this;
     }
 
     /**
@@ -831,12 +811,8 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     default S write(final byte[] byteArray)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(byteArray);
-        try {
-            write(byteArray, 0, byteArray.length);
-            return (S) this;
-        } catch (IllegalArgumentException | ArrayIndexOutOfBoundsException e) {
-            throw new AssertionError(e);
-        }
+        write(byteArray, 0, byteArray.length);
+        return (S) this;
     }
 
     /**

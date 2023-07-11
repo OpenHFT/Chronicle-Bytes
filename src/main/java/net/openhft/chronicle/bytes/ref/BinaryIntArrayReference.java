@@ -258,11 +258,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         throwExceptionIfClosed();
 
         long peakLength;
-        try {
-            peakLength = peakLength(bytes, offset);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        peakLength = peakLength(bytes, offset);
         if (length != peakLength)
             throw new IllegalArgumentException(length + " != " + peakLength);
         if (bytes instanceof HexDumpBytes) {
@@ -297,11 +293,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
 
         bytes.readSkip(capacity << SHIFT);
         long len = bytes.readPosition() - position;
-        try {
-            bytesStore((Bytes) bytes, position, len);
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        bytesStore((Bytes) bytes, position, len);
     }
 
     /**
@@ -330,11 +322,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
                 bytes.writeHexDumpDescription("values");
             bytes.writeSkip(capacity << SHIFT);
         } else {
-            try {
-                bytes.write(bytesStore, offset, length);
-            } catch (BufferUnderflowException | IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            bytes.write(bytesStore, offset, length);
         }
     }
 
@@ -417,8 +405,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             sb.append(", value: ");
             appendContents(sb, used);
             return sb.toString();
-        } catch (IllegalStateException | BufferUnderflowException e) {
-            throw new AssertionError(e);
+        } catch (Exception e) {
+            return e.toString();
         }
     }
 

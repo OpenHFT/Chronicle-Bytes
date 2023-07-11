@@ -29,7 +29,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.nio.BufferUnderflowException;
 
 /**
  * A specialized implementation of {@link AbstractBytes} that wraps memory-mapped data for efficient random file access.
@@ -69,6 +68,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
                 BytesStore.empty().writeLimit(),
                 name);
     }
+
     /**
      * Creates a MappedBytes instance that wraps a single memory-mapped file.
      *
@@ -87,7 +87,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a single memory-mapped file.
      *
-     * @param file The name of the file to be memory-mapped.
+     * @param file     The name of the file to be memory-mapped.
      * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException if the file does not exist.
@@ -102,7 +102,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a single memory-mapped file.
      *
-     * @param file The name of the file to be memory-mapped.
+     * @param file     The name of the file to be memory-mapped.
      * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
      * @param readOnly read only is true, read-write if false
      * @return A new MappedBytes instance.
@@ -124,7 +124,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
      *
-     * @param filename The name of the file to be memory-mapped.
+     * @param filename  The name of the file to be memory-mapped.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException if the file does not exist.
@@ -139,7 +139,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
      *
-     * @param file The name of the file to be memory-mapped.
+     * @param file      The name of the file to be memory-mapped.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException if the file does not exist.
@@ -154,8 +154,8 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
      *
-     * @param file The name of the file to be memory-mapped.
-     * @param chunkSize The size of each chunk in bytes.
+     * @param file        The name of the file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of overlap of chunks in bytes.
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException if the file does not exist.
@@ -175,10 +175,10 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     /**
      * Creates a MappedBytes instance that wraps a memory-mapped file divided into chunks of a specified size.
      *
-     * @param file The name of the file to be memory-mapped.
-     * @param chunkSize The size of each chunk in bytes.
+     * @param file        The name of the file to be memory-mapped.
+     * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of overlap of chunks in bytes.
-     * @param readOnly read only is true, read-write if false
+     * @param readOnly    read only is true, read-write if false
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException if the file does not exist.
      * @throws IllegalStateException if there is an error while mapping the file.
@@ -200,6 +200,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     /**
      * Create a MappedBytes for a MappedFile
+     *
      * @param rw MappedFile to use
      * @return the MappedBytes
      * @throws IllegalStateException if the MappedFile is closed or unusable.
@@ -222,13 +223,9 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
             throws FileNotFoundException {
         final MappedFile mappedFile = MappedFile.readOnly(file);
         try {
-            try {
-                return new ChunkedMappedBytes(mappedFile);
-            } finally {
-                mappedFile.release(INIT);
-            }
-        } catch (IllegalStateException e) {
-            throw new AssertionError(e);
+            return new ChunkedMappedBytes(mappedFile);
+        } finally {
+            mappedFile.release(INIT);
         }
     }
 
@@ -294,14 +291,10 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
         throwExceptionIfReleased();
 
-        try {
-            // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
-            return isClear()
-                    ? new VanillaBytes(this, writePosition(), bytesStore.writeLimit())
-                    : new SubBytes<>(this, readPosition(), readLimit() + start());
-        } catch (IllegalArgumentException | BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
+        return isClear()
+                ? new VanillaBytes(this, writePosition(), bytesStore.writeLimit())
+                : new SubBytes<>(this, readPosition(), readLimit() + start());
     }
 
     /**
@@ -314,11 +307,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     public @NotNull Bytes<Void> bytesForWrite() throws IllegalStateException {
         throwExceptionIfReleased();
 
-        try {
-            // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
-            return new VanillaBytes(this, writePosition(), writeLimit());
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
+        return new VanillaBytes(this, writePosition(), writeLimit());
     }
 }

@@ -100,10 +100,6 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        try {
-            bytes.writeByte(offset, flag ? TRUE : FALSE);
-        } catch (BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        bytes.writeByte(offset, flag ? TRUE : FALSE);
     }
 }

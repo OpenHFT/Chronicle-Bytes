@@ -92,17 +92,12 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param flag   The boolean value to write. Translates 'true' as 'Y' and 'false' as 'N'.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeBoolean(@NonNegative long offset, boolean flag)
             throws BufferOverflowException, IllegalStateException {
-        try {
-            return writeByte(offset, flag ? 'Y' : 'N');
-
-        } catch (IllegalArgumentException | ArithmeticException e) {
-            throw new AssertionError(e);
-        }
+        return writeByte(offset, flag ? 'Y' : 'N');
     }
 
     /**
@@ -113,7 +108,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
      * @throws ArithmeticException     If the provided integer value cannot be safely cast to an unsigned short without loss of information.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeUnsignedShort(@NonNegative long offset, int i)
@@ -129,7 +124,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
      * @throws ArithmeticException     If the provided long value cannot be safely cast to an unsigned integer without loss of information.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeUnsignedInt(@NonNegative long offset, long i)
@@ -144,7 +139,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i8     The byte value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeByte(@NonNegative long offset, byte i8)
@@ -157,7 +152,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The short integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeShort(@NonNegative long offset, short i)
@@ -171,7 +166,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The integer value to write. Only the lowest 24 bits are used.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset plus two exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeInt24(@NonNegative long offset, int i)
@@ -187,7 +182,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeInt(@NonNegative long offset, int i)
@@ -201,7 +196,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeOrderedInt(@NonNegative long offset, int i)
@@ -215,7 +210,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param f      The float value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeOrderedFloat(@NonNegative long offset, float f)
@@ -230,7 +225,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The long integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeLong(@NonNegative long offset, long i)
@@ -244,7 +239,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i      The long integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeOrderedLong(@NonNegative long offset, long i)
@@ -258,7 +253,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      The double value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeOrderedDouble(@NonNegative long offset, double d)
@@ -273,7 +268,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      The float value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeFloat(@NonNegative long offset, float d)
@@ -286,11 +281,12 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      The double value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeDouble(@NonNegative long offset, double d)
             throws BufferOverflowException, IllegalStateException;
+
     /**
      * Writes a volatile byte at the specified non-negative offset. The write is volatile, ensuring it is not cached and instantly visible to all threads.
      *
@@ -298,7 +294,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i8     The byte value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeVolatileByte(@NonNegative long offset, byte i8)
@@ -311,7 +307,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i16    The short value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeVolatileShort(@NonNegative long offset, short i16)
@@ -324,7 +320,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i32    The integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeVolatileInt(@NonNegative long offset, int i32)
@@ -337,7 +333,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param i64    The long integer value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     R writeVolatileLong(@NonNegative long offset, long i64)
@@ -350,7 +346,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param f      The float value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeVolatileFloat(@NonNegative long offset, float f)
@@ -365,7 +361,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param d      The double value to write.
      * @return Reference to the current instance, allowing for method chaining.
      * @throws BufferOverflowException If the specified offset exceeds the available capacity.
-     * @throws IllegalStateException    if released
+     * @throws IllegalStateException   if released
      */
     @NotNull
     default R writeVolatileDouble(@NonNegative long offset, double d)
@@ -379,9 +375,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param offsetInRDO the non-negative offset within the data output where the byte array should be written.
      * @param bytes       the byte array to be written.
      * @return a reference to this instance.
-     * @throws BufferOverflowException  if the capacity of this data output was exceeded.
-     * @throws IllegalStateException    if this data output has been previously released.
-     * @throws NullPointerException     if the provided byte array is null.
+     * @throws BufferOverflowException if the capacity of this data output was exceeded.
+     * @throws IllegalStateException   if this data output has been previously released.
+     * @throws NullPointerException    if the provided byte array is null.
      */
     @NotNull
     default R write(@NonNegative long offsetInRDO, byte[] bytes)
@@ -433,20 +429,15 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param offsetInRDO the non-negative offset within the data output where the BytesStore content should be written.
      * @param bytes       the BytesStore whose content should be written.
      * @return a reference to this instance.
-     * @throws BufferOverflowException  if the capacity of this data output was exceeded.
-     * @throws IllegalStateException    if this data output has been previously released.
-     * @throws NullPointerException     if the provided BytesStore is null.
+     * @throws BufferOverflowException if the capacity of this data output was exceeded.
+     * @throws IllegalStateException   if this data output has been previously released.
+     * @throws NullPointerException    if the provided BytesStore is null.
      */
     @NotNull
     default R write(@NonNegative long offsetInRDO, @NotNull BytesStore bytes)
             throws BufferOverflowException, IllegalStateException {
         requireNonNull(bytes);
-        try {
-            return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
-
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
     }
 
     /**
@@ -458,9 +449,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param readOffset  the non-negative offset within the source where the segment begins.
      * @param length      the non-negative length of the segment.
      * @return a reference to this instance.
-     * @throws BufferOverflowException if the capacity of this data output was exceeded.
+     * @throws BufferOverflowException  if the capacity of this data output was exceeded.
      * @throws BufferUnderflowException if the source does not have enough data to fill the length.
-     * @throws IllegalStateException if this data output has been previously released.
+     * @throws IllegalStateException    if this data output has been previously released.
      */
     @NotNull
     R write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
@@ -485,9 +476,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param value  the long value to be appended.
      * @param digits the number of digits in the appended string.
      * @return a reference to this instance.
-     * @throws BufferOverflowException if the capacity of this data output was exceeded.
+     * @throws BufferOverflowException  if the capacity of this data output was exceeded.
      * @throws IllegalArgumentException if the number of digits is not compatible with the long value.
-     * @throws IllegalStateException if this data output has been previously released.
+     * @throws IllegalStateException    if this data output has been previously released.
      */
     @NotNull
     default R append(@NonNegative long offset, long value, int digits)
@@ -504,10 +495,10 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param decimalPlaces the number of decimal places in the appended string.
      * @param digits        the total number of digits in the appended string.
      * @return a reference to this instance.
-     * @throws BufferOverflowException if the capacity of this data output was exceeded.
+     * @throws BufferOverflowException  if the capacity of this data output was exceeded.
      * @throws IllegalArgumentException if the number of digits or decimal places is not compatible with the double value.
-     * @throws IllegalStateException if this data output has been previously released.
-     * @throws ArithmeticException if rounding errors occur during the conversion of the double value to string.
+     * @throws IllegalStateException    if this data output has been previously released.
+     * @throws ArithmeticException      if rounding errors occur during the conversion of the double value to string.
      */
     @NotNull
     default R append(@NonNegative long offset, double value, int decimalPlaces, int digits)
@@ -530,7 +521,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param position the position in the BytesStore where data should be written.
      * @param size     the size of the data, in bytes, to be copied from the native memory.
      * @throws BufferOverflowException if the capacity of this BytesStore was exceeded.
-     * @throws IllegalStateException if this BytesStore has been previously released.
+     * @throws IllegalStateException   if this BytesStore has been previously released.
      */
     void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
             throws BufferOverflowException, IllegalStateException;
@@ -543,8 +534,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param text        the CharSequence to write, which can be null.
      * @return the offset after the text has been written.
      * @throws BufferOverflowException if the capacity of this RandomDataOutput was exceeded.
-     * @throws IllegalStateException if this RandomDataOutput has been previously released.
-     * @throws ArithmeticException if errors occur during the conversion of the CharSequence to UTF-8.
+     * @throws IllegalStateException   if this RandomDataOutput has been previously released.
+     * @throws ArithmeticException     if errors occur during the conversion of the CharSequence to UTF-8.
      * @see RandomDataInput#readUtf8(long, Appendable)
      */
     default long writeUtf8(@NonNegative long writeOffset, @Nullable CharSequence text)
@@ -564,9 +555,9 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param maxUtf8Len  the maximum length of the UTF-8 encoded text.
      * @return the offset after the text has been written.
      * @throws IllegalArgumentException if the UTF-8 encoding size of the text exceeds maxUtf8Len.
-     * @throws BufferOverflowException if the capacity of this RandomDataOutput was exceeded.
-     * @throws IllegalStateException if this RandomDataOutput has been previously released.
-     * @throws ArithmeticException if errors occur during the conversion of the CharSequence to UTF-8.
+     * @throws BufferOverflowException  if the capacity of this RandomDataOutput was exceeded.
+     * @throws IllegalStateException    if this RandomDataOutput has been previously released.
+     * @throws ArithmeticException      if errors occur during the conversion of the CharSequence to UTF-8.
      * @see RandomDataInput#readUtf8Limited(long, Appendable, int)
      * @see RandomDataInput#readUtf8Limited(long, int)
      */
@@ -584,6 +575,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @return the offset after the BytesStore has been written.
      */
     long write8bit(@NonNegative long position, @NotNull BytesStore bs);
+
     /**
      * Writes a portion of a string to this RandomDataOutput at the given position.
      * The length of the string is encoded using a stop bit encoding scheme.
@@ -605,7 +597,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param value    the new value to set if the current value matches the expected value.
      * @return true if the CAS operation was successful, false otherwise.
      * @throws BufferOverflowException if the capacity of this RandomDataOutput was exceeded.
-     * @throws IllegalStateException if this RandomDataOutput has been previously released.
+     * @throws IllegalStateException   if this RandomDataOutput has been previously released.
      */
     boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException;
@@ -617,7 +609,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param expected the expected current value.
      * @param value    the new value to set if the current value matches the expected value.
      * @throws BufferOverflowException if the capacity of this RandomDataOutput was exceeded.
-     * @throws IllegalStateException if this RandomDataOutput has been previously released.
+     * @throws IllegalStateException   if this RandomDataOutput has been previously released.
      */
     void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, IllegalStateException;
@@ -631,7 +623,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param value    the new value to set if the current value matches the expected value.
      * @return true if the CAS operation was successful, false otherwise.
      * @throws BufferOverflowException if the capacity of this RandomDataOutput was exceeded.
-     * @throws IllegalStateException if this RandomDataOutput has been previously released.
+     * @throws IllegalStateException   if this RandomDataOutput has been previously released.
      */
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, IllegalStateException;
@@ -647,7 +639,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param value    the new value to set if the current value matches the expected value.
      * @return true if the CAS operation was successful (the value was updated), false otherwise.
      * @throws BufferOverflowException if the offset plus the size of a float exceeds the buffer's capacity.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException   if the buffer has been previously released.
      */
     boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value);
 
@@ -660,7 +652,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param value    the new value to set if the current value matches the expected value.
      * @return true if the CAS operation was successful (the value was updated), false otherwise.
      * @throws BufferOverflowException if the offset plus the size of a double exceeds the buffer's capacity.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException   if the buffer has been previously released.
      */
     boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value);
 
@@ -674,7 +666,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param adding the value to add to the current value at the specified offset.
      * @return the sum of the original value at the specified offset and the value being added.
      * @throws BufferUnderflowException if the specified offset is not within the bounds of the buffer.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException    if the buffer has been previously released.
      */
     int addAndGetInt(@NonNegative long offset, int adding);
 
@@ -688,7 +680,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param adding the value to add to the current value at the specified offset.
      * @return the sum of the original value at the specified offset and the value being added.
      * @throws BufferUnderflowException if the specified offset is not within the bounds of the buffer.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException    if the buffer has been previously released.
      */
     long addAndGetLong(@NonNegative long offset, long adding);
 
@@ -702,7 +694,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param adding the value to add to the current value at the specified offset.
      * @return the sum of the original value at the specified offset and the value being added.
      * @throws BufferUnderflowException if the specified offset is not within the bounds of the buffer.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException    if the buffer has been previously released.
      */
     float addAndGetFloat(@NonNegative long offset, float adding);
 
@@ -716,7 +708,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @param adding the value to add to the current value at the specified offset.
      * @return the sum of the original value at the specified offset and the value being added.
      * @throws BufferUnderflowException if the specified offset is not within the bounds of the buffer.
-     * @throws IllegalStateException if the buffer has been previously released.
+     * @throws IllegalStateException    if the buffer has been previously released.
      */
     double addAndGetDouble(@NonNegative long offset, double adding);
 
@@ -725,6 +717,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     }
 
     @Deprecated(/* to be removed in x.25 */)
-    // internal method to cache a byte[]
+        // internal method to cache a byte[]
     byte[] internalNumberBuffer();
 }

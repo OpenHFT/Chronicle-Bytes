@@ -131,11 +131,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     public VanillaBytes<Void> bytesForWrite()
             throws IllegalStateException {
         writeCheck.run();
-        try {
-            return new NativeBytes<>(this);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        return new NativeBytes<>(this);
     }
 
     @Override

@@ -186,11 +186,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        try {
-            ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        ((BinaryLongReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
     }
 
     @Override
@@ -239,11 +235,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
 
         bytes.readSkip(capacity << SHIFT);
         long len = bytes.readPosition() - position;
-        try {
-            bytesStore((Bytes) bytes, position, len);
-        } catch (IllegalArgumentException | BufferOverflowException e) {
-            throw new AssertionError(e);
-        }
+        bytesStore((Bytes) bytes, position, len);
     }
 
     @Override
@@ -265,11 +257,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
                 bytes.writeHexDumpDescription("values");
             bytes.writeSkip(capacity << SHIFT);
         } else {
-            try {
-                bytes.write(bytesStore, offset, length);
-            } catch (IllegalArgumentException e) {
-                throw new AssertionError(e);
-            }
+            bytes.write(bytesStore, offset, length);
         }
     }
 

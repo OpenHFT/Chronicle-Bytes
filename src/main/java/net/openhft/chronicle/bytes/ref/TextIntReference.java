@@ -61,11 +61,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
             throws BufferOverflowException, IllegalStateException {
         long position = bytes.writePosition();
         bytes.write(template);
-        try {
-            bytes.append(position + VALUE, value, DIGITS);
-        } catch (IllegalArgumentException e) {
-            throw new AssertionError(e);
-        }
+        bytes.append(position + VALUE, value, DIGITS);
     }
 
     /**
@@ -195,12 +191,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
 
         super.bytesStore(bytes, newOffset, length);
 
-        try {
-            if (bytes.readInt(newOffset) == UNINITIALIZED)
-                bytes.write(newOffset, template);
-        } catch (BufferUnderflowException e) {
-            throw new AssertionError(e);
-        }
+        if (bytes.readInt(newOffset) == UNINITIALIZED)
+            bytes.write(newOffset, template);
     }
 
     @Override

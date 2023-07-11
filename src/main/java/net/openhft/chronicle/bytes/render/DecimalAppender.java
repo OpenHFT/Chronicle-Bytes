@@ -21,12 +21,12 @@ package net.openhft.chronicle.bytes.render;
  * Implementations of this interface should provide strategies for handling the individual components of a decimal number,
  * including its sign, mantissa, and exponent.
  * <p>
- * A decimal number is represented as: <code>decimal = sign * mantissa * 10 ^ (-exponent)</code>,
+ * A decimal number is represented as: {@code decimal = sign * mantissa * 10 ^ (-exponent)},
  * where:
  * <ul>
- *   <li><code>sign</code> is -1 if the number is negative, +1 otherwise.</li>
- *   <li><code>mantissa</code> holds the significant digits of the decimal number.</li>
- *   <li><code>exponent</code> denotes the power of 10 by which the mantissa is scaled.</li>
+ *   <li>{@code sign} is -1 if the number is negative, +1 otherwise.</li>
+ *   <li>{@code mantissa} holds the significant digits of the decimal number.</li>
+ *   <li>{@code exponent} denotes the power of 10 by which the mantissa is scaled.</li>
  * </ul>
  * Implementations of this interface should provide strategies to handle these individual components.
  */
@@ -37,8 +37,8 @@ public interface DecimalAppender {
      * Appends a decimal number, represented by its sign, mantissa, and exponent, to a target.
      * The target can be any object that consumes these components, such as a StringBuilder or a file stream.
      *
-     * @param isNegative Whether the number is negative. <code>true</code> indicates a negative number,
-     *                   <code>false</code> indicates a positive number.
+     * @param isNegative Whether the number is negative. {@code true} indicates a negative number,
+     *                   {@code false} indicates a positive number.
      * @param mantissa   The significant digits of the decimal number, represented as a long integer.
      * @param exponent   The power of 10 by which the mantissa is scaled to obtain the actual decimal number.
      */
