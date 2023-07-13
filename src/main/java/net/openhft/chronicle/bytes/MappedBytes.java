@@ -34,7 +34,7 @@ import java.io.FileNotFoundException;
  * A specialized implementation of {@link AbstractBytes} that wraps memory-mapped data for efficient random file access.
  *
  * <p>Memory is grouped in chunks of 64 MB by default. The chunk size can be significantly increased if the
- * OS supports sparse files via the OS.isSparseFileSupported() method, e.g. blockSize(512 << 30).
+ * OS supports sparse files via the {@link OS#isSparseFileSupported()} method, e.g. {@code blockSize(512 << 30)}.
  *
  * <p>Only the most recently accessed memory chunk is reserved, and the previous chunk is released. For random access,
  * a chunk can be manually reserved by obtaining the bytesStore() and using reserve(owner) on it.

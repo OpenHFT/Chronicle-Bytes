@@ -26,11 +26,12 @@ import java.util.List;
  */
 public interface BytesRingBufferStats {
     /**
-     * Gets the minimum number of bytes remaining in the write buffer since the last read.
-     * Calling this method resets the statistics. If no read calls were made since the last
+     * Each time the ring is read, the number of bytes remaining in the write buffer are recorded, and that
+     * number is returned by this method.
+     * Calling this method resets the number. If no read calls were made since the last
      * call to this method, it returns Long.MAX_VALUE.
      *
-     * @return the minimum number of bytes remaining in the write buffer since the last read
+     * @return the number of bytes remaining in the write buffer as at the last read
      * or Long.MAX_VALUE if no reads were performed.
      */
     @NonNegative
@@ -43,18 +44,24 @@ public interface BytesRingBufferStats {
     long capacity();
 
     /**
+     * Calling this method resets the number.
+     *
      * @return the number of write operations performed since the last call to this method.
      */
     @NonNegative
     long getAndClearWriteCount();
 
     /**
+     * Calling this method resets the number.
+     *
      * @return the number of missed write operations since the last call to this method.
      */
     @NonNegative
     long getAndClearMissedWriteCount();
 
     /**
+     * Calling this method resets the number.
+     *
      * @return the number of contentions since the last call to this method.
      */
     @NonNegative
