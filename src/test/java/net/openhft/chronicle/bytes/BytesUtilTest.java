@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;
@@ -133,6 +134,40 @@ public class BytesUtilTest extends BytesTestCommon {
             a.releaseLast();
             b.releaseLast();
         }
+    }
+
+    @Test
+    public void equals_reference() {
+        String a = "a";
+        assertTrue(BytesUtil.equals(a, a));
+    }
+    @Test
+    public void equals_equivalentCharSequences() {
+        Bytes<byte[]> a = Bytes.from("a");
+        Bytes<byte[]> aa = Bytes.from("a");
+        assertTrue(BytesUtil.equals(a, aa));
+    }
+
+    @Test
+    public void equals_equivalentObjects() {
+        // Intentional boxing to create two equivalent but distinct objects
+        assertTrue(BytesUtil.equals(new Integer(1), new Integer(1)));
+    }
+
+    @Test
+    public void toCharArray() {
+        Bytes<byte[]> bytes = Bytes.from("test");
+        char[] charArray = BytesUtil.toCharArray(bytes);
+        for (char c : charArray) {
+            assertEquals(bytes.readChar(), c);
+        }
+    }
+
+    @Test
+    public void reverse() {
+        Bytes<byte[]> test = Bytes.from("test");
+        BytesUtil.reverse(test, 0);
+        assertEquals(Bytes.from("tset"), test);
     }
 
     @Test
