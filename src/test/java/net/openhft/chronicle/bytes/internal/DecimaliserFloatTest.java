@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.bytes.render.*;
 import org.junit.jupiter.api.Test;
 
@@ -26,7 +27,7 @@ import java.util.stream.LongStream;
 import static org.junit.Assert.*;
 
 @SuppressWarnings({"squid:S2699", "squid:S5786"})
-class DecimaliserFloatTest {
+class DecimaliserFloatTest extends BytesTestCommon {
 
     public static final DecimalAppender CHECK_OK = (negative, mantissa, exponent) -> {
         // ok

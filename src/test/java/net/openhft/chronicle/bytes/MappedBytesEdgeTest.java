@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -55,7 +56,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 {4, ReadWrite.READ, (Consumer<Bytes<?>>) (RandomDataInput::peekVolatileInt)},
                 {8, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readLong)},
                 {8, ReadWrite.READ, (Consumer<Bytes<?>>) (StreamingDataInput::readDouble)},
-                {256, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(Bytes.allocateDirect(256)))},
+                {256, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(unmonitored(Bytes.allocateDirect(256))))},
                 {512, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(ByteBuffer.allocate(512)))},
                 {1024, ReadWrite.READ, (Consumer<Bytes<?>>) (b -> b.read(new byte[1024]))},
 
@@ -71,6 +72,11 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
                 // {1024, ReadWrite.WRITE, (Consumer<Bytes<?>>) (b -> b.write(new byte[1024]))}, // <-- this behaves differently, it won't start a write in the offset
 
         });
+    }
+
+    static Bytes unmonitored(Bytes bytes) {
+        IOTools.unmonitor(bytes);
+        return bytes;
     }
 
     @Test

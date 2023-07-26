@@ -31,6 +31,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
         data.write8bit("Test me again");
         data.writeLimit(data.readLimit()); // this breaks the check
         assertEquals(data.read8bit(), "Test me again");
+        data.releaseLast();
     }
 
     @Test
@@ -56,6 +57,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
         pbs.set(NoBytesStore.NO_PAGE, 200);
         wrapper.writeLimit(pbs.capacity());
         assertEquals(pbs.capacity(), wrapper.writeLimit());
+        wrapper.releaseLast();
     }
 
     @Test
@@ -68,7 +70,9 @@ public class PointerBytesStoreTest extends BytesTestCommon {
             final long len = bytesFixed.readRemaining();
             final PointerBytesStore pbs = new PointerBytesStore();
             pbs.set(addr, len);
-            Assertions.assertEquals(pbs.bytesForRead().read8bit(), "some data");
+            Bytes<Void> voidBytes = pbs.bytesForRead();
+            Assertions.assertEquals(voidBytes.read8bit(), "some data");
+            voidBytes.releaseLast();
         } finally {
             bytesFixed.releaseLast();
         }
@@ -104,6 +108,7 @@ public class PointerBytesStoreTest extends BytesTestCommon {
                     "please make sure you do not use PointerBytesStore with ElasticBytes since " +
                     "the address of the underlying store may change once it expands");
             assertFalse(bytes.isElastic());
+            bytes.releaseLast();
         } finally {
             bytesFixed.releaseLast();
 

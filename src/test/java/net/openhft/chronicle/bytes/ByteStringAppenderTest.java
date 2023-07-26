@@ -252,5 +252,6 @@ public class ByteStringAppenderTest extends BytesTestCommon {
         bytes.append8bit(bs, (long)2, 3);
 
         assertEquals("- \n", bytes.toString());
+        bs.releaseLast();
     }
 }

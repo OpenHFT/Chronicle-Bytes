@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,7 +31,15 @@ import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 
-public class Issue523Test {
+public class Issue523Test extends BytesTestCommon {
+
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Test
     public void testAppendDoublesHeap() {
         doTestAppendDoubles(Bytes::allocateElasticOnHeap);

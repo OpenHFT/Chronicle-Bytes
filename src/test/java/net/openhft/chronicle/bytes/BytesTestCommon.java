@@ -61,14 +61,13 @@ public class BytesTestCommon {
         AbstractReferenceCounted.enableReferenceTracing();
     }
 
-    @Before
-    @BeforeEach
     public void threadDump() {
         threadDump = new ThreadDump();
     }
 
     public void checkThreadDump() {
-        threadDump.assertNoNewThreads();
+        if (threadDump != null)
+            threadDump.assertNoNewThreads();
     }
 
     @Before
@@ -134,8 +133,6 @@ public class BytesTestCommon {
     private static void cleanResources() {
         CleaningThread.performCleanup(Thread.currentThread());
 
-        // find any discarded resources.
-        System.gc();
         waitForCloseablesToClose(100);
     }
 

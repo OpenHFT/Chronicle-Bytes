@@ -21,7 +21,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,6 +42,13 @@ public class MappedFileMultiThreadTest extends BytesTestCommon {
     private static final int CORES = Integer.getInteger("cores", Runtime.getRuntime().availableProcessors());
     private static final int RUNTIME_MS = Integer.getInteger("runtimems", 2_000);
     private static final String TMP_FILE = System.getProperty("file", IOTools.createTempFile("testMultiThreadLock").getAbsolutePath());
+
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
+    }
 
     @Test
     public void testMultiThreadLock()

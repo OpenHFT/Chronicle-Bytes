@@ -25,7 +25,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.util.ThreadIndexAssigner;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -36,6 +38,13 @@ import static org.junit.Assume.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class ThreadIndexAssignerTest extends BytesTestCommon {
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
+    }
+
     @Test
     public void assignTwo()
             throws InterruptedException {

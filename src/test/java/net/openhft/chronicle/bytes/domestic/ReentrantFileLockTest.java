@@ -21,7 +21,9 @@ import net.openhft.chronicle.bytes.BytesTestCommon;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.threads.ThreadDump;
 import net.openhft.chronicle.testframework.process.JavaProcessBuilder;
+import org.junit.Before;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -55,6 +57,12 @@ class ReentrantFileLockTest extends BytesTestCommon {
     @BeforeEach
     public void setUp() {
         fileToLock = IOTools.createTempFile("fileToLock");
+    }
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
     }
 
     @AfterEach
