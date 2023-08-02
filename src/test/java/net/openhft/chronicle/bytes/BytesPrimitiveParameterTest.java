@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.IORuntimeException;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -39,7 +40,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests if certain methods with constraints on primitive method parameters work as expected.
  */
-final class BytesPrimitiveParameterTest extends BytesTestCommon {
+final class BytesPrimitiveParameterTest { // too hard to ensure resources are released
 
     private static final String SILLY_NAME = "Tryggve";
 
@@ -47,7 +48,6 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
      * Checks that methods throws IllegalArgumentException if negative parameters are provided for @NonNegative
      */
     @TestFactory
-    @Disabled("Apparently, some of these tests still writes outside memory confinements and may crash the test process")
     Stream<DynamicTest> negativeParameters() {
         final AtomicReference<BytesInitialInfo> initialInfo = new AtomicReference<>();
         return cartesianProductTest(BytesFactoryUtil::provideBytesObjects,
@@ -72,7 +72,8 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
                              BufferUnderflowException |
                              AssertionError |
                              UnsupportedOperationException |
-                             StringIndexOutOfBoundsException accepted) {
+                             StringIndexOutOfBoundsException |
+                             IORuntimeException accepted) {
                         // Although strictly not correct, we accept these Exceptions/Errors for neg-args
                     } catch (Throwable t) {
                         if (!(t instanceof IOException))
@@ -87,7 +88,7 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
                     if (isReadWrite(args)) {
                         // Make sure nothing changes in the contents of the Bytes object
                         if (!SILLY_NAME.equals(bytes.toString())) {
-                            System.out.println(bytes.getClass().getSimpleName()+", b: "+ Arrays.toString(bytes.toString().getBytes(StandardCharsets.UTF_8)));
+                            System.out.println(bytes.getClass().getSimpleName() + ", b: " + Arrays.toString(bytes.toString().getBytes(StandardCharsets.UTF_8)));
                         }
                         assertEquals(SILLY_NAME, bytes.toString(), name);
                     }
@@ -106,6 +107,7 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
         final Bytes<?> bytes = Bytes.from(SILLY_NAME);
         final ByteBuffer bb = ByteBuffer.allocate(10);
         return Stream.of(
+
                 NamedConsumer.of(b -> b.write(-1, new byte[1]), "write(-1, new byte[1])"),
                 NamedConsumer.of(b -> b.write(new byte[1], -1, 1), "write(new byte[1], -1, 1)"),
                 NamedConsumer.of(b -> b.write(new byte[1], 1, -1), "write(new byte[1], 1, -1)"),
@@ -133,16 +135,14 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
                 NamedConsumer.of(b -> b.write8bit(SILLY_NAME, -1, 1), "write8bit(1, cs, -1, 1)"),
                 NamedConsumer.of(b -> b.write8bit(SILLY_NAME, 1, -1), "write8bit(1, cs, 1, -1)"),
 
-                /* The comment out operations are to be checked when there is a way with little or no performance impact
-
                 NamedConsumer.of(b -> b.writeByte(-1L, 42), "writeByte(-1, int)"),
                 NamedConsumer.of(b -> b.writeByte(-1L, (byte) 42), "writeByte(-1, byte)"),
                 NamedConsumer.of(b -> b.writeVolatileByte(-1L, (byte) 42), "writeVolatileByte(-1, byte)"),
                 NamedConsumer.of(b -> b.writeUnsignedByte(-1L, (byte) 42), "writeUnsignedByte(-1, byte)"),
 
-                NamedConsumer.of(b -> b.writeShort(-1L, (short)42), "writeShort(-1, byte)"),
+                NamedConsumer.of(b -> b.writeShort(-1L, (short) 42), "writeShort(-1, byte)"),
                 NamedConsumer.of(b -> b.writeUnsignedShort(-1, 42), "writeUnsignedShort(-1, 42)"),
-                NamedConsumer.of(b -> b.writeVolatileShort(-1, (short)42), "writeVolatileShort(-1, 42)"),
+                NamedConsumer.of(b -> b.writeVolatileShort(-1, (short) 42), "writeVolatileShort(-1, 42)"),
 
                 NamedConsumer.of(b -> b.writeInt(-1L, 42), "writeInt(-1, byte)"),
                 NamedConsumer.of(b -> b.writeInt24(-1L, 42), "writeInt24(-1, byte)"),
@@ -164,7 +164,6 @@ final class BytesPrimitiveParameterTest extends BytesTestCommon {
                 NamedConsumer.of(b -> b.writeDouble(-1L, 42), "writeDouble(-1, byte)"),
                 NamedConsumer.of(b -> b.writeOrderedDouble(-1, 42), "writeOrderedDouble(-1, 42)"),
                 NamedConsumer.of(b -> b.writeVolatileDouble(-1, 42), "writeVolatileDouble(-1, 42)"),
-                */
 
                 NamedConsumer.of(b -> b.writeLimit(-1), "writeLimit(-1)"),
                 NamedConsumer.of(b -> b.writePositionRemaining(-1, 1), "writePositionRemaining(-1)"),

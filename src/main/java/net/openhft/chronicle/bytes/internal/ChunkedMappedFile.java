@@ -160,7 +160,7 @@ public class ChunkedMappedFile extends MappedFile {
         throwExceptionIfClosed();
 
         if (position < 0)
-            throw new IOException("Attempt to access a negative position: " + position);
+            throw new IORuntimeException("Attempt to access a negative position: " + position);
         final int chunk = (int) (position / chunkSize);
 
         final MappedBytesStore mbs;

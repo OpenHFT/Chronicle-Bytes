@@ -1203,6 +1203,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeIntAdv(int i, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException {
+        if (advance < 0) throw new IllegalArgumentException();
         long offset = writeOffsetPositionMoved(Integer.BYTES, advance);
         bytesStore.writeInt(offset, i);
         return this;
@@ -1221,6 +1222,7 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> writeLongAdv(long i64, @NonNegative int advance)
             throws BufferOverflowException, IllegalStateException {
+        if (advance < 0) throw new IllegalArgumentException();
         long offset = writeOffsetPositionMoved(Long.BYTES, advance);
         bytesStore.writeLong(offset, i64);
         return this;
