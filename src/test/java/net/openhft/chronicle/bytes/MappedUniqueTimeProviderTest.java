@@ -21,8 +21,10 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.time.LongTime;
 import net.openhft.chronicle.core.time.TimeProvider;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -32,6 +34,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
+
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
+    }
 
     @BeforeClass
     public static void checks() throws IOException {

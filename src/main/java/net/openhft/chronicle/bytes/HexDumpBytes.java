@@ -22,10 +22,7 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.io.ReferenceChangeListener;
-import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.ThrowingConsumer;
 import net.openhft.chronicle.core.util.ThrowingConsumerNonCapturing;
@@ -80,6 +77,8 @@ public class HexDumpBytes
      */
     public HexDumpBytes() {
         base = Bytes.allocateElasticDirect(256);
+        // as it's use for diagnostics and tests rather than production.
+        IOTools.unmonitor(base);
         text = Bytes.allocateElasticOnHeap(1024);
     }
 
@@ -89,7 +88,7 @@ public class HexDumpBytes
      * @param base NativeBytes instance representing base data.
      * @param text BytesStore instance representing text data.
      */
-    HexDumpBytes(@NotNull NativeBytes<Void> base, @NotNull BytesStore text) {
+    HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore text) {
         final long size = base.readRemaining();
         this.base = NativeBytes.wrapWithNativeBytes(NativeBytesStore.nativeStore(size), size);
         this.base.write(base);

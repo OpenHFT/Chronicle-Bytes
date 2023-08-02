@@ -3242,7 +3242,7 @@ enum BytesInternal {
     public static Bytes<?> fromHexString(@NotNull String s) {
         Bytes<?> in = Bytes.from(s);
         try {
-            Bytes<?> out = Bytes.elasticByteBuffer();
+            Bytes<?> out = Bytes.allocateElasticOnHeap();
             OUTER:
             while (in.readRemaining() > 0) {
                 in.parseHexLong();

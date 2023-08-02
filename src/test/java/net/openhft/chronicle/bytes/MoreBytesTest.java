@@ -332,5 +332,6 @@ public class MoreBytesTest extends BytesTestCommon {
         symbol.clear();
         symbol.append(symbolStr);
         assertTrue(symbol.realCapacity() < 3 * symbolStr.length());
+        symbol.releaseLast();
     }
 }

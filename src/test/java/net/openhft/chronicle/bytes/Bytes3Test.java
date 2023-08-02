@@ -35,6 +35,7 @@ public class Bytes3Test extends BytesTestCommon {
 
     private final Supplier<Bytes<?>> supplier;
     private final boolean forRead;
+    private Bytes<?> bytes;
 
     public Bytes3Test(String testName, Supplier<Bytes<?>> supplier) {
         this.supplier = supplier;
@@ -56,41 +57,48 @@ public class Bytes3Test extends BytesTestCommon {
         });
     }
 
+    @Override
+    public void afterChecks() {
+        if (bytes != null)
+            bytes.releaseLast();
+        super.afterChecks();
+    }
+
     @Test
     public void readPositionAt0() {
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
         assertEquals(0L, bytes.readPosition());
     }
 
     @Test
     public void writePositionAt0() {
         if (forRead) return;
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
         assertEquals(0L, bytes.writePosition());
     }
 
     @Test
     public void isClear() {
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
         assertTrue(bytes.isClear());
     }
 
     @Test
     public void byteOrder() {
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
         assertEquals(ByteOrder.nativeOrder(), bytes.byteOrder());
     }
 
     @Test
     public void writeLimit() {
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
         assertTrue(bytes.writeLimit() >= 260);
     }
 
     @Test
     public void write() {
         if (forRead) return;
-        final Bytes<?> bytes = supplier.get();
+        bytes = supplier.get();
 
         assertEquals(0, bytes.writePosition());
         assertTrue(bytes.isClear());
@@ -99,7 +107,6 @@ public class Bytes3Test extends BytesTestCommon {
         assertFalse(bytes.isClear());
         bytes.clear();
         assertTrue(bytes.isClear());
-        bytes.releaseLast();
     }
 
 }

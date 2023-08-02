@@ -345,7 +345,10 @@ public class BytesInternalTest extends BytesTestCommon {
         final Bytes<byte[]> src = Bytes.from("hello again");
 
         src.readSkip(7);
-        assertEquals(src.copy().toString(), src.toString());
+        BytesStore<Bytes<byte[]>, byte[]> copy = src.copy();
+        assertEquals(copy.toString(), src.toString());
+        // shouldn't need to do this
+        copy.releaseLast();
     }
 
     @Test

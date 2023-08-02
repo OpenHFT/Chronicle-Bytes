@@ -24,7 +24,9 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.After;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -67,6 +69,13 @@ public class MappedBytesTest extends BytesTestCommon {
         }
 
         text = largeTextBuilder.toString();
+    }
+
+
+    @Before
+    @BeforeEach
+    public void threadDump() {
+        super.threadDump();
     }
 
     @Test

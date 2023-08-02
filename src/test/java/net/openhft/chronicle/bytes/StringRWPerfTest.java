@@ -25,6 +25,15 @@ public class StringRWPerfTest extends BytesTestCommon {
 
     public static final String UTF8 = "0123456789£123456789€123456789";
     public static final String ASCII = "012345678901234567890123456789";
+    private Bytes<?> bytes;
+
+
+    @Override
+    public void afterChecks() {
+        if (bytes != null)
+            bytes.releaseLast();
+        super.afterChecks();
+    }
 
     @Test
     public void test8bit() {
@@ -48,13 +57,13 @@ public class StringRWPerfTest extends BytesTestCommon {
 
     @Test
     public void testOnHeapPerf() {
-        final Bytes<?> bytes = Bytes.allocateElasticOnHeap(40);
+        bytes = Bytes.allocateElasticOnHeap(40);
         doTestPerf(bytes);
     }
 
     @Test
     public void testDirectPerf() {
-        final Bytes<?> bytes = Bytes.allocateElasticDirect(40);
+        bytes = Bytes.allocateElasticDirect(40);
         doTestPerf(bytes);
     }
 

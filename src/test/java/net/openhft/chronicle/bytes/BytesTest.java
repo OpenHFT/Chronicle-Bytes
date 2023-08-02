@@ -105,10 +105,11 @@ public class BytesTest extends BytesTestCommon {
     public void testElastic2() {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(2);
-        assumeTrue(bytes.isElastic());
-
-        assertFalse(bytes.realCapacity() >= 1000);
         try {
+            assumeTrue(bytes.isElastic());
+
+            assertFalse(bytes.realCapacity() >= 1000);
+
             bytes.writePosition(1000);
             assertTrue(bytes.realCapacity() >= 1000);
             assertEquals(0L, bytes.readLong());
@@ -433,9 +434,10 @@ public class BytesTest extends BytesTestCommon {
             throws BufferOverflowException, IllegalStateException {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(4);
-        assumeFalse(bytes.unchecked());
 
         try {
+            assumeFalse(bytes.unchecked());
+
             bytes.writeInt(-1, 1);
         } finally {
             postTest(bytes);
@@ -447,9 +449,9 @@ public class BytesTest extends BytesTestCommon {
             throws IllegalStateException, BufferOverflowException {
         assumeFalse(alloc1 == HEX_DUMP);
         Bytes<?> bytes = alloc1.elasticBytes(1);
-        assumeFalse(bytes.unchecked());
 
         try {
+            assumeFalse(bytes.unchecked());
             bytes.writeInt(-1, 1);
         } finally {
             postTest(bytes);
@@ -1067,8 +1069,12 @@ public class BytesTest extends BytesTestCommon {
     @Test
     public void capacityVsWriteLimitInvariant() {
         final Bytes<?> bytes = alloc1.elasticBytes(20);
-        assumeTrue(bytes.isElastic());
-        assertEquals(bytes.capacity(), bytes.writeLimit());
+        try {
+            assumeTrue(bytes.isElastic());
+            assertEquals(bytes.capacity(), bytes.writeLimit());
+        } finally {
+            bytes.releaseLast();
+        }
     }
 
     @Test

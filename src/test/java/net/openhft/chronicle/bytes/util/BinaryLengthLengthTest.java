@@ -29,7 +29,7 @@ import java.util.Collection;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @RunWith(Parameterized.class)
-public class BinaryLengthLengthTest {
+public class BinaryLengthLengthTest extends BytesTestCommon {
 
     private final BinaryLengthLength binaryLengthLength;
     private final int binaryWireCode;
@@ -59,6 +59,7 @@ public class BinaryLengthLengthTest {
         binaryLengthLength.initialise(bytes);
         byte readCode = (byte) bytes.readUnsignedByte();
         assertEquals((byte) binaryWireCode, readCode);
+        bytes.releaseLast();
     }
 
 }

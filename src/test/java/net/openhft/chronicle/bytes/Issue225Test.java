@@ -44,6 +44,7 @@ public class Issue225Test extends BytesTestCommon {
             assertEquals(valueStr.length(), length);
             final String substring = new String(rbytes).substring(0, (int) bytes.writePosition());
             assertEquals(valueStr, substring);
+            bytes.releaseLast();
         }
     }
 }
