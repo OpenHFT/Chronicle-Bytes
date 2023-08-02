@@ -679,9 +679,10 @@ enum BytesInternal {
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
         throwExceptionIfReleased(bytes);
         throwExceptionIfReleased(appendable);
+        if (bytes.readRemaining() < length)
+            throw new IllegalArgumentException();
         try {
             int count = 0;
-            assert bytes.readRemaining() >= length;
             while (count < length) {
                 int c = bytes.readUnsignedByte();
                 if (c >= 128) {
@@ -732,7 +733,8 @@ enum BytesInternal {
     public static void parse8bit1(@NotNull StreamingDataInput bytes, @NotNull StringBuilder sb, @NonNegative int utflen)
             throws IllegalStateException {
         throwExceptionIfReleased(bytes);
-        assert bytes.readRemaining() >= utflen;
+        if (bytes.readRemaining() < utflen)
+            throw new IllegalArgumentException();
         sb.ensureCapacity(utflen);
 
         if (Jvm.isJava9Plus()) {
