@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
-import net.openhft.chronicle.core.onoes.ThreadLocalisedExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

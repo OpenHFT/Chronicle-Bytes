@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.OS;
 import org.junit.Test;
 
 import java.io.File;

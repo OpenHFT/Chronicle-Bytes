@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.jetbrains.annotations.NotNull;
 import org.junit.Test;
 
 import java.io.File;

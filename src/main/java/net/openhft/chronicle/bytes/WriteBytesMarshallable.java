@@ -21,7 +21,6 @@ import net.openhft.chronicle.core.annotation.DontChain;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 /**
  * An interface defining a contract for serializing data directly to a Bytes instance.

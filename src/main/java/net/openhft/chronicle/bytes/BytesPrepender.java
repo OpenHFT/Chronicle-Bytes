@@ -19,11 +19,9 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.IORuntimeException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
 
 /**
  * An interface defining a prependable buffer of bytes. A BytesPrepender can prepend bytes, byte arrays,
