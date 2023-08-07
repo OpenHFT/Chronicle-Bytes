@@ -40,11 +40,15 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
     @Override
     protected void uncheckedWritePosition(@NonNegative long writePosition) {
         super.uncheckedWritePosition(writePosition);
-        bytesStore.writeUnsignedByte(bytesStore.start() - 1, (int) writePosition);
+        bytesStore.writeUnsignedByte(lengthOffset(), (int) writePosition);
     }
 
     @Override
     public @NonNegative long writePosition() {
-        return bytesStore.readUnsignedByte(bytesStore.start() - 1);
+        return bytesStore.readUnsignedByte(lengthOffset());
+    }
+
+    private long lengthOffset() {
+        return bytesStore.start() - 1;
     }
 }
