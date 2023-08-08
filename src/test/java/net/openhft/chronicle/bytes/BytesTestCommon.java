@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.BackgroundResourceReleaser;
 import net.openhft.chronicle.core.onoes.ExceptionKey;
 import net.openhft.chronicle.core.onoes.Slf4jExceptionHandler;
 import net.openhft.chronicle.core.threads.CleaningThread;
@@ -134,13 +135,18 @@ public class BytesTestCommon {
         CleaningThread.performCleanup(Thread.currentThread());
 
         waitForCloseablesToClose(100);
+        BackgroundResourceReleaser.releasePendingResources();
     }
 
     protected static void deleteIfPossible(@NotNull final File file) {
+        if (!file.exists() || file.delete()) {
+            return;
+        }
         cleanResources();
 
-        if (file.exists() && !file.delete()) {
-            Jvm.error().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
+        if (!file.exists() || file.delete()) {
+            return;
         }
+        Jvm.error().on(MappedMemoryTest.class, "Unable to delete " + file.getAbsolutePath());
     }
 }
