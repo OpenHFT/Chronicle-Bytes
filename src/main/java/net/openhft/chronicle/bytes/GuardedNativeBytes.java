@@ -61,6 +61,20 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
         super(store, capacity);
     }
 
+    @Override
+    public BytesOut<U> writeHexDumpDescription(CharSequence comment) throws IllegalStateException {
+        if (bytesStore instanceof HexDumpBytesDescription)
+            ((HexDumpBytesDescription) bytesStore).writeHexDumpDescription(comment);
+        return this;
+    }
+
+    @Override
+    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
+        if (capacity() < bytesStore.capacity())
+            capacity = bytesStore.capacity();
+        this.bytesStore = bytesStore;
+    }
+
     @NotNull
     @Override
     public Bytes<U> writeByte(byte i8)
@@ -220,5 +234,12 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
         if (type != expected && type != expected2)
             throw new IllegalStateException("Expected " + STRING_FOR_CODE[expected & 0xFF]
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
+    }
+
+    @Override
+    public @NotNull String toHexString() {
+        if (bytesStore instanceof Bytes)
+            return ((Bytes<U>) bytesStore).toHexString();
+        return super.toHexString();
     }
 }
