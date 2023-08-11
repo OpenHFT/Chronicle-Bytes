@@ -26,8 +26,6 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
-import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
-
 /**
  * Represents a 32-bit integer in binary form, backed by a {@link BytesStore}.
  * <p>

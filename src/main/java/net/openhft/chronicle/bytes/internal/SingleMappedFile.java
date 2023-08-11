@@ -35,7 +35,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileChannel.MapMode;
 import java.nio.channels.FileLock;
 
-import static net.openhft.chronicle.bytes.MappedBytesStore.MAPPED_BYTES_STORE_FACTORY;
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
 
 /**

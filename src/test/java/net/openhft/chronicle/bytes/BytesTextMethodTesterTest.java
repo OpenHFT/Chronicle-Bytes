@@ -17,9 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import org.junit.Test;
 
 import java.io.IOException;
