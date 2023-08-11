@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
 
 /**

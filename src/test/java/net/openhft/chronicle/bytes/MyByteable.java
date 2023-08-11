@@ -21,9 +21,6 @@ import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.Validatable;
 import org.jetbrains.annotations.NotNull;
 
-import java.nio.BufferOverflowException;
-import java.nio.BufferUnderflowException;
-
 class MyByteable implements BytesMarshallable, Validatable {
     boolean flag;
     byte b;

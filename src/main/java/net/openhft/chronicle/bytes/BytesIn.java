@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
