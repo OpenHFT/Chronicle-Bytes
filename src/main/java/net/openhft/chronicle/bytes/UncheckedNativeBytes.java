@@ -142,11 +142,11 @@ public class UncheckedNativeBytes<U>
         try {
             long start = start();
             long readRemaining = readRemaining();
-            if (readRemaining > 0 && start < readPosition) {
+            if (readRemaining > 0 && start < readPosition)
                 bytesStore.move(readPosition, start, readRemaining);
-                readPosition = start;
-                writePosition = readPosition + readRemaining;
-            }
+            readPosition = start;
+            writePosition = start + Math.max(0, readRemaining);
+
             return this;
         } catch (IllegalStateException ignored) {
             return this;
