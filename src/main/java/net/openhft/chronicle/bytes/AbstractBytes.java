@@ -130,8 +130,9 @@ public abstract class AbstractBytes<U>
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
         long start = start();
         long readRemaining = readRemaining();
-        if ((readRemaining > 0) && (start < readPosition))
+        if ((readRemaining > 0) && (start < readPosition)) {
             bytesStore.move(readPosition, start, readRemaining);
+        }
         readPosition = start;
         uncheckedWritePosition(start + Math.max(0, readRemaining));
 
