@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -46,7 +48,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
      *
      * @param address  the memory address
      * @param capacity the size of the memory to which this PointerBytesStore should point
-     * @throws IllegalArgumentException if the capacity is negative
+     * @throws IllegalArgumentException If the capacity is negative
      */
     public void set(long address, @NonNegative long capacity) throws IllegalArgumentException {
         setAddress(address);
@@ -61,7 +63,8 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
      * Returns a new VanillaBytes for writing to this PointerBytesStore.
      *
      * @return a new VanillaBytes
-     * @throws IllegalStateException if unable to create VanillaBytes due to incorrect state
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     @Override

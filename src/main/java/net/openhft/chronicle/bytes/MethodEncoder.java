@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -44,12 +46,13 @@ public interface MethodEncoder {
      *
      * @param objects the objects representing a method call
      * @param out     the BytesOut object to write the method call to
-     * @throws IllegalArgumentException     if an argument is not valid
-     * @throws BufferUnderflowException     if there is not enough data available in the buffer
-     * @throws IllegalStateException        if a state-dependent method has been invoked at an inappropriate time
-     * @throws BufferOverflowException      if there is not enough space in the buffer
-     * @throws ArithmeticException          if numeric overflow occurs
-     * @throws InvalidMarshallableException if an object is not correctly marshallable
+     * @throws IllegalArgumentException     If an argument is not valid
+     * @throws BufferUnderflowException     If there is not enough data available in the buffer
+     * @throws BufferOverflowException      If there is not enough space in the buffer
+     * @throws ArithmeticException          If numeric overflow occurs
+     * @throws InvalidMarshallableException If an object is not correctly marshallable
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     void encode(Object[] objects, BytesOut<?> out)
             throws IllegalArgumentException, BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException, InvalidMarshallableException;
@@ -60,9 +63,10 @@ public interface MethodEncoder {
      * @param lastObjects the previous objects used for the method call, can be used for delta encoding
      * @param in          the BytesIn object to read the method call from
      * @return the objects representing a method call
-     * @throws BufferUnderflowException     if there is not enough data available in the buffer
-     * @throws IllegalStateException        if a state-dependent method has been invoked at an inappropriate time
-     * @throws InvalidMarshallableException if an object is not correctly marshallable
+     * @throws BufferUnderflowException     If there is not enough data available in the buffer
+     * @throws InvalidMarshallableException If an object is not correctly marshallable
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     Object[] decode(Object[] lastObjects, BytesIn<?> in)
             throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException;

@@ -18,8 +18,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.nio.BufferUnderflowException;
 
@@ -53,10 +55,10 @@ public interface ReadBytesMarshallable extends CommonMarshallable {
      * @param bytes The {@link BytesIn} instance to read data from.
      * @throws IORuntimeException           If an I/O error occurs during reading.
      * @throws BufferUnderflowException     If there is not enough data in the buffer to read.
-     * @throws IllegalStateException        If the buffer has been released or the method is called
-     *                                      in an inappropriate context.
      * @throws InvalidMarshallableException If there is a problem with marshalling data,
      *                                      such as incorrect format or type.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     void readMarshallable(BytesIn<?> bytes)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException;

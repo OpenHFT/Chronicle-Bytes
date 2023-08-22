@@ -37,7 +37,7 @@ public interface OffsetFormat {
      *
      * @param offset the offset to be appended
      * @param bytes  the {@link Bytes} instance where the offset will be appended
-     * @throws IllegalArgumentException if the offset is negative
+     * @throws IllegalArgumentException If the offset is negative
      */
     void append(@NonNegative long offset, Bytes<?> bytes);
 }

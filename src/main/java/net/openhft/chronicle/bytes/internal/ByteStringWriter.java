@@ -38,7 +38,7 @@ public class ByteStringWriter extends Writer {
      * Constructs a new ByteStringWriter with the provided ByteStringAppender.
      *
      * @param out The ByteStringAppender to be used.
-     * @throws IllegalStateException if the input ByteStringAppender is released.
+     * @throws IllegalStateException If the input ByteStringAppender is released.
      */
     public ByteStringWriter(ByteStringAppender out) {
         throwExceptionIfReleased(out);
@@ -49,7 +49,7 @@ public class ByteStringWriter extends Writer {
      * Writes a single character.
      *
      * @param c int specifying a character to be written.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void write(int c)
@@ -66,7 +66,7 @@ public class ByteStringWriter extends Writer {
      * Writes a string.
      *
      * @param str String to be written.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void write(@NotNull String str)
@@ -80,7 +80,7 @@ public class ByteStringWriter extends Writer {
      * @param str String to be written.
      * @param off Offset from which to start reading characters.
      * @param len Number of characters to be written.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void write(@NotNull String str, @NonNegative int off, @NonNegative int len)
@@ -93,7 +93,7 @@ public class ByteStringWriter extends Writer {
      *
      * @param csq The character sequence to append.
      * @return This writer
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @NotNull
     @Override
@@ -157,7 +157,7 @@ public class ByteStringWriter extends Writer {
      * @param cbuf Array of characters.
      * @param off  Offset from which to start reading characters.
      * @param len  Number of characters to be written.
-     * @throws IOException if an I/O error occurs.
+     * @throws IOException If an I/O error occurs.
      */
     @Override
     public void write(char[] cbuf, @NonNegative int off, @NonNegative int len)

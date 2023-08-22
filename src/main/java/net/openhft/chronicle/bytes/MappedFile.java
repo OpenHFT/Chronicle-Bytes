@@ -25,9 +25,7 @@ import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.AbstractCloseableReferenceCounted;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -92,7 +90,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @param file     The file to be memory-mapped.
      * @param readOnly True if the file should be read-only, false otherwise.
-     * @throws IORuntimeException if an I/O error occurs.
+     * @throws IORuntimeException If an I/O error occurs.
      */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)
@@ -330,9 +328,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the byte store.
      * @param position The position at which the byte store should be acquired.
      * @return A MappedBytesStore object.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalArgumentException If the position is negative.
-     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws IllegalArgumentException       If the position is negative.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -349,8 +348,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param position     The position at which the byte store should be acquired.
      * @param oldByteStore The old byte store that can be re-used, or null if not available.
      * @return A MappedBytesStore object.
-     * @throws IOException           If an I/O error occurs.
-     * @throws IllegalStateException If the MappedFile is closed.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -370,9 +370,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param oldByteStore            The old byte store that can be re-used, or null if not available.
      * @param mappedBytesStoreFactory The factory to use for creating the MappedBytesStore.
      * @return A MappedBytesStore object.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalArgumentException If an illegal argument is provided.
-     * @throws IllegalStateException    If the MappedFile is closed.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws IllegalArgumentException       If an illegal argument is provided.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public abstract MappedBytesStore acquireByteStore(
@@ -380,9 +381,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
-            throws IOException,
-            IllegalArgumentException,
-            IllegalStateException;
+            throws IOException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Acquires bytes for read at the specified position, without the need to release the BytesStore.
@@ -390,13 +389,14 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired.
      * @return A Bytes object ready for read.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalStateException    If the MappedFile is closed.
-     * @throws BufferUnderflowException If the position is beyond the limit.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws BufferUnderflowException       If the position is beyond the limit.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public Bytes<?> acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position)
-            throws IOException, IllegalStateException, BufferUnderflowException {
+            throws IOException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -413,14 +413,15 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired.
      * @param bytes    The VanillaBytes object to store the acquired bytes.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalStateException    If the MappedFile is closed.
-     * @throws IllegalArgumentException If an illegal argument is provided.
-     * @throws BufferUnderflowException If there is not enough data available.
-     * @throws BufferOverflowException  If there is too much data.
+     * @throws IOException                 If an I/O error occurs.
+     * @throws IllegalArgumentException    If an illegal argument is provided.
+     * @throws BufferUnderflowException    If there is not enough data available.
+     * @throws BufferOverflowException     If there is too much data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public void acquireBytesForRead(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
-            throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
+            throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -433,14 +434,15 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired for write.
      * @return A Bytes object ready for write.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalStateException    If the MappedFile is closed.
-     * @throws IllegalArgumentException If an illegal argument is provided.
-     * @throws BufferOverflowException  If there is too much data.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws IllegalArgumentException       If an illegal argument is provided.
+     * @throws BufferOverflowException        If there is too much data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public Bytes<?> acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position)
-            throws IOException, IllegalStateException, IllegalArgumentException, BufferOverflowException {
+            throws IOException, ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -457,14 +459,15 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired for write.
      * @param bytes    The VanillaBytes object to store the acquired bytes.
-     * @throws IOException              If an I/O error occurs.
-     * @throws IllegalStateException    If the MappedFile is closed.
-     * @throws IllegalArgumentException If an illegal argument is provided.
-     * @throws BufferUnderflowException If there is not enough data available.
-     * @throws BufferOverflowException  If there is too much data.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws IllegalArgumentException       If an illegal argument is provided.
+     * @throws BufferUnderflowException       If there is not enough data available.
+     * @throws BufferOverflowException        If there is too much data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public void acquireBytesForWrite(ReferenceOwner owner, @NonNegative final long position, @NotNull final VanillaBytes bytes)
-            throws IOException, IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException {
+            throws IOException, ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         @Nullable final MappedBytesStore mbs = acquireByteStore(owner, position, null);
@@ -625,8 +628,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * can be used for reading from and writing to the mapped file.
      *
      * @return A new MappedBytes object associated with this mapped file.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     * @throws IllegalArgumentException    If the write limit is negative.
      */
-    public abstract MappedBytes createBytesFor();
+    public abstract MappedBytes createBytesFor() throws ClosedIllegalStateException;
 
     /**
      * This mode determines whether an MS_ASYNC or MS_SYNC should be performed on a chunk release.

@@ -81,7 +81,7 @@ public class BytesFieldInfo {
             long position = 0;
             int size = 0;
             if (field.getType().isPrimitive()) {
-                FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
+                FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
                 if (fieldGroup != null) {
                     prefix = fieldGroup.value();
                     if (prefix.equals(FieldGroup.HEADER)) {
@@ -205,7 +205,7 @@ public class BytesFieldInfo {
      *
      * @param groupName the name of the group
      * @return the starting memory offset
-     * @throws IllegalArgumentException if no group with the given name is found
+     * @throws IllegalArgumentException If no group with the given name is found
      */
     public long startOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
@@ -219,7 +219,7 @@ public class BytesFieldInfo {
      *
      * @param groupName the name of the group
      * @return the size of the group in bytes
-     * @throws IllegalArgumentException if no group with the given name is found
+     * @throws IllegalArgumentException If no group with the given name is found
      */
     public long lengthOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);

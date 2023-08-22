@@ -22,8 +22,10 @@ import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,7 +73,7 @@ public class SingleMappedFile extends MappedFile {
      * @param raf      the RandomAccessFile associated with the file.
      * @param capacity the capacity of the mapped file.
      * @param readOnly if the file is read-only.
-     * @throws IORuntimeException if any I/O error occurs.
+     * @throws IORuntimeException If any I/O error occurs.
      */
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
@@ -141,7 +143,7 @@ public class SingleMappedFile extends MappedFile {
             @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         if (position != 0)
             throw new IllegalArgumentException();
@@ -203,7 +205,7 @@ public class SingleMappedFile extends MappedFile {
                 // so ensure that it is released
                 try {
                     mbs.release(this);
-                } catch (IllegalStateException e) {
+                } catch (ClosedIllegalStateException e) {
                     Jvm.debug().on(getClass(), e);
                 }
             }
@@ -273,7 +275,8 @@ public class SingleMappedFile extends MappedFile {
      *
      * @return The actual size of this mapped file
      * @throws IORuntimeException    If an I/O error occurs
-     * @throws IllegalStateException If this file is closed or an interruption occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public long actualSize()
             throws IORuntimeException, IllegalStateException {

@@ -18,6 +18,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -40,9 +42,10 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * @param bytesStore the parent BytesStore that contains the data
      * @param start      the start index in the parent BytesStore from which the SubBytes start
      * @param capacity   the number of elements from the start index that the SubBytes cover
-     * @throws IllegalStateException    if the parent BytesStore is released
-     * @throws BufferUnderflowException if the capacity is less than the start index
-     * @throws IllegalArgumentException if any other argument issue occurs
+     * @throws BufferUnderflowException If the capacity is less than the start index
+     * @throws IllegalArgumentException If any other argument issue occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public SubBytes(@NotNull BytesStore bytesStore, @NonNegative long start, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {

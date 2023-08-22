@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -72,27 +74,29 @@ public interface BytesIn<U> extends
      * @param tClass the class of the Marshallable object to be read.
      * @param using  the object to be used for reading, can be null.
      * @return the read Marshallable object.
-     * @throws BufferUnderflowException     if there are not enough bytes left to read.
-     * @throws IllegalStateException        if there is an error in the internal state.
-     * @throws InvalidMarshallableException if the object cannot be read due to invalid data.
+     * @throws BufferUnderflowException     If there are not enough bytes left to read.
+     * @throws InvalidMarshallableException If the object cannot be read due to invalid data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     <T extends ReadBytesMarshallable> T readMarshallableLength16(@NotNull Class<T> tClass, @Nullable T using)
-            throws BufferUnderflowException, IllegalStateException, InvalidMarshallableException;
+            throws BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Reads an object of a specific class from this BytesIn.
      *
      * @param componentType0 the class of the object to be read.
      * @return the read object.
-     * @throws BufferUnderflowException      if there are not enough bytes left to read.
-     * @throws IllegalStateException         if there is an error in the internal state.
-     * @throws ArithmeticException           if there is an arithmetic error.
-     * @throws BufferOverflowException       if there are too many bytes left to read.
-     * @throws InvalidMarshallableException  if the object cannot be read due to invalid data.
-     * @throws UnsupportedOperationException if an unsupported class is specified.
+     * @throws BufferUnderflowException      If there are not enough bytes left to read.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @throws ArithmeticException           If there is an arithmetic error.
+     * @throws BufferOverflowException       If there are too many bytes left to read.
+     * @throws InvalidMarshallableException  If the object cannot be read due to invalid data.
+     * @throws UnsupportedOperationException If an unsupported class is specified.
      */
     default <T> T readObject(@NotNull Class<T> componentType0)
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException, BufferOverflowException, InvalidMarshallableException {
+            throws BufferUnderflowException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException {
         Class<T> componentType = ObjectUtils.implementationToUse(componentType0);
         if (BytesMarshallable.class.isAssignableFrom(componentType)) {
             BytesMarshallable bm = (BytesMarshallable) ObjectUtils.newInstance(componentType);

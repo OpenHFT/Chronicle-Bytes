@@ -24,6 +24,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractCloseable;
 import net.openhft.chronicle.core.io.Closeable;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -71,9 +72,10 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * @param bytes  the BytesStore to set
      * @param offset the offset to set
      * @param length the length to set
-     * @throws IllegalStateException    if the state is invalid
-     * @throws IllegalArgumentException if the arguments are invalid
-     * @throws BufferOverflowException  if the provided buffer is too small
+     * @throws IllegalArgumentException If the arguments are invalid
+     * @throws BufferOverflowException  If the provided buffer is too small
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void bytesStore(final @NotNull BytesStore bytes, @NonNegative final long offset, @NonNegative final long length)
@@ -108,7 +110,8 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * Updates the BytesStore for this reference, releasing any previous BytesStore
      *
      * @param bytes the new BytesStore
-     * @throws IllegalStateException if this reference has been closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
             throws IllegalStateException {
@@ -141,8 +144,9 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      * Retrieves the memory address for reading.
      *
      * @return the memory address
-     * @throws IllegalStateException    if the state is invalid
-     * @throws BufferUnderflowException if the buffer does not have enough content
+     * @throws BufferUnderflowException If the buffer does not have enough content
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long address()
@@ -157,7 +161,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      *
      * @param shared if true the lock will be shared, otherwise it will be exclusive.
      * @return a FileLock object representing the locked region
-     * @throws IOException if an I/O error occurs
+     * @throws IOException If an I/O error occurs
      */
     @Override
     public FileLock lock(boolean shared) throws IOException {
@@ -174,7 +178,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
      *
      * @param shared if true the lock will be shared, otherwise it will be exclusive.
      * @return a FileLock object representing the locked region or null if the lock could not be acquired
-     * @throws IOException if an I/O error occurs
+     * @throws IOException If an I/O error occurs
      */
     @Override
     public FileLock tryLock(boolean shared) throws IOException {

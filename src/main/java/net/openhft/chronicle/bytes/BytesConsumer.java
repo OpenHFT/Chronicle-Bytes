@@ -32,7 +32,7 @@ public interface BytesConsumer {
      *
      * @param bytes the {@code BytesOut} object to read into.
      * @return {@code false} if this queue is empty, {@code true} otherwise.
-     * @throws BufferOverflowException if there is insufficient space left in the buffer.
+     * @throws BufferOverflowException If there is insufficient space left in the buffer.
      */
     boolean read(BytesOut<?> bytes)
             throws BufferOverflowException;

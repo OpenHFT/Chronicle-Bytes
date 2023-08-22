@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -37,8 +38,9 @@ public interface StreamingCommon<S extends StreamingCommon<S>> extends RandomCom
      * and having it ready to record new data over anything that was there before.
      *
      * @return A reference to this object, allowing for method chaining.
-     * @throws ClosedIllegalStateException If this buffer has been closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
-    S clear() throws ClosedIllegalStateException;
+    S clear() throws ClosedIllegalStateException, ThreadingIllegalStateException;
 }

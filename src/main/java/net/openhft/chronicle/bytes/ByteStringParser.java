@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.ByteStringReader;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -69,13 +71,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param tester a {@code StopCharTester} used to detect the end of the boolean text.
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Nullable
     default Boolean parseBoolean(@NotNull StopCharTester tester)
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseBoolean(this, tester);
     }
 
@@ -87,13 +90,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * True can be: "t", "true", "y", "yes", "1".
      *
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Nullable
     default Boolean parseBoolean()
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseBoolean(this, StopCharTesters.NON_ALPHA_DIGIT);
     }
 
@@ -103,12 +107,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException   if a numeric overflow occurs.
+     * @throws ArithmeticException   If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default String parseUtf8(@NotNull StopCharTester stopCharTester)
-            throws IllegalStateException, ArithmeticException {
+            throws ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseUtf8(this, stopCharTester);
     }
 
@@ -118,12 +123,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.parseUtf8(this, buffer, stopCharTester);
     }
 
@@ -133,12 +139,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IORuntimeException       if an I/O error occurs.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws IORuntimeException       If an I/O error occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parseUtf8(@NotNull Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, IORuntimeException, IllegalStateException {
+            throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.parseUtf8(this, buffer, stopCharsTester);
     }
 
@@ -148,13 +155,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
@@ -167,11 +175,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default String parse8bit(@NotNull StopCharTester stopCharTester)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parse8bit(this, stopCharTester);
     }
 
@@ -181,13 +190,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parse8bit(Appendable buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else
@@ -200,13 +210,14 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Bytes} object to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws BufferOverflowException  if the buffer's capacity was exceeded.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
-     * @throws ArithmeticException      if a numeric overflow occurs.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parse8bit(Bytes<?> buffer, @NotNull StopCharsTester stopCharsTester)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException, ArithmeticException {
+            throws BufferUnderflowException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
@@ -216,10 +227,11 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code StringBuilder} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default void parse8bit(StringBuilder buffer, @NotNull StopCharsTester stopCharsTester)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.parse8bit(this, buffer, stopCharsTester);
     }
 
@@ -227,12 +239,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as an integer. The terminating character is consumed.
      *
      * @return the parsed integer.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws ArithmeticException      if a numeric overflow occurs.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default int parseInt()
-            throws BufferUnderflowException, ArithmeticException, IllegalStateException {
+            throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return Maths.toInt32(BytesInternal.parseLong(this));
     }
 
@@ -240,11 +253,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as a long integer. The terminating character is consumed.
      *
      * @return the parsed long.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long parseLong()
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseLong(this);
     }
 
@@ -254,12 +268,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * of {@link #parseDouble()} to long).
      *
      * @return the parsed long.
-     * @throws IORuntimeException       if the parsed value corresponds to a fractional number or to a number outside the long's range.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws IORuntimeException       If the parsed value corresponds to a fractional number or to a number outside the long's range.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long parseFlexibleLong()
-            throws BufferUnderflowException, IllegalStateException, IORuntimeException {
+            throws BufferUnderflowException, IORuntimeException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseFlexibleLong(this);
     }
 
@@ -268,11 +283,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the parsed float, or -0.0 if there were no digits.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default float parseFloat()
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return (float) BytesInternal.parseDouble(this);
     }
 
@@ -281,11 +297,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the parsed double, or -0.0 if there were no digits.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default double parseDouble()
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseDouble(this);
     }
 
@@ -294,11 +311,12 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the significant digits as a long.
-     * @throws BufferUnderflowException if there is insufficient data.
-     * @throws IllegalStateException    if this operation cannot be performed currently.
+     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long parseLongDecimal()
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.parseLongDecimal(this);
     }
 
@@ -337,10 +355,11 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param tester the StopCharTester instance to use for determining the terminating character.
      * @return true if a terminating character was found, false if the end of the buffer was reached.
-     * @throws IllegalStateException if this operation cannot be performed currently.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default boolean skipTo(@NotNull StopCharTester tester)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.skipTo(this, tester);
     }
 
@@ -348,12 +367,13 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as a BigDecimal.
      *
      * @return the parsed BigDecimal.
-     * @throws IllegalStateException if this operation cannot be performed currently.
-     * @throws ArithmeticException   if a numerical overflow occurs during the operation.
+     * @throws ArithmeticException   If a numerical overflow occurs during the operation.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default BigDecimal parseBigDecimal()
-            throws IllegalStateException, ArithmeticException {
+            throws ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return new BigDecimal(parseUtf8(StopCharTesters.NUMBER_END));
     }
 }

@@ -32,7 +32,7 @@ public class MaximumPrecision implements Decimaliser {
      *
      * @param precision the maximum number of decimal places to be used in the conversion.
      *                  Must be between 0 and 18, inclusive.
-     * @throws IllegalArgumentException if the precision is not between 0 and 18.
+     * @throws IllegalArgumentException If the precision is not between 0 and 18.
      */
     public MaximumPrecision(int precision) {
         if (precision < 0 || precision > 18) {

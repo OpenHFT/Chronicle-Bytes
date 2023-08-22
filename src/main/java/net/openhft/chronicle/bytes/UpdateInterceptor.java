@@ -37,7 +37,7 @@ public interface UpdateInterceptor {
      *                   only the last one is passed. This object may be modified by this method.
      * @return a boolean value indicating whether to proceed with the operation. If false,
      * the operation that was intercepted will not be carried out.
-     * @throws IllegalArgumentException if {@code t} is an instance of Validatable and its validation fails
+     * @throws IllegalArgumentException If {@code t} is an instance of Validatable and its validation fails
      */
     boolean update(String methodName, Object t) throws IllegalArgumentException;
 

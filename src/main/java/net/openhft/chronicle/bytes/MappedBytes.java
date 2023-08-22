@@ -22,9 +22,7 @@ import net.openhft.chronicle.bytes.internal.SingleMappedBytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.ManagedCloseable;
-import net.openhft.chronicle.core.io.Syncable;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -57,12 +55,12 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
 
     // assume the mapped file is reserved already.
     protected MappedBytes()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         this("");
     }
 
     protected MappedBytes(final String name)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(BytesStore.empty(),
                 BytesStore.empty().writePosition(),
                 BytesStore.empty().writeLimit(),
@@ -75,8 +73,9 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param filename The name of the file to be memory-mapped.
      * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final String filename, @NonNegative final long capacity)
@@ -90,12 +89,11 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param file     The name of the file to be memory-mapped.
      * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException If the file does not exist.
      */
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull final File file, @NonNegative final long capacity)
-            throws FileNotFoundException, IllegalStateException {
+            throws FileNotFoundException {
         return singleMappedBytes(file, capacity, false);
     }
 
@@ -106,13 +104,12 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param capacity The maximum number of bytes that can be read from or written to the mapped file.
      * @param readOnly read only is true, read-write if false
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException If the file does not exist.
      */
 
     @NotNull
     public static MappedBytes singleMappedBytes(@NotNull File file, @NonNegative long capacity, boolean readOnly)
-            throws FileNotFoundException, IllegalStateException {
+            throws FileNotFoundException {
         final MappedFile rw = MappedFile.ofSingle(file, capacity, readOnly);
         try {
             return new SingleMappedBytes(rw);
@@ -127,12 +124,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param filename  The name of the file to be memory-mapped.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException          If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final String filename, @NonNegative final long chunkSize)
-            throws FileNotFoundException, IllegalStateException {
+            throws FileNotFoundException, ClosedIllegalStateException {
         return mappedBytes(new File(filename), chunkSize);
     }
 
@@ -142,12 +140,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param file      The name of the file to be memory-mapped.
      * @param chunkSize The size of each chunk in bytes.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException          If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file, @NonNegative final long chunkSize)
-            throws FileNotFoundException, IllegalStateException {
+            throws FileNotFoundException, ClosedIllegalStateException {
         return mappedBytes(file, chunkSize, OS.pageSize());
     }
 
@@ -158,12 +157,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of overlap of chunks in bytes.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException          If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file, @NonNegative final long chunkSize, @NonNegative final long overlapSize)
-            throws FileNotFoundException, IllegalStateException {
+            throws FileNotFoundException, ClosedIllegalStateException {
         final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, false);
         try {
             return mappedBytes(rw);
@@ -180,16 +180,16 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param overlapSize The size of overlap of chunks in bytes.
      * @param readOnly    read only is true, read-write if false
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
-     * @throws IllegalStateException if there is an error while mapping the file.
+     * @throws FileNotFoundException          If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final File file,
                                           @NonNegative final long chunkSize,
                                           @NonNegative final long overlapSize,
                                           final boolean readOnly)
-            throws FileNotFoundException,
-            IllegalStateException {
+            throws FileNotFoundException, ClosedIllegalStateException {
         final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, readOnly);
         try {
             return mappedBytes(rw);
@@ -203,11 +203,11 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      *
      * @param rw MappedFile to use
      * @return the MappedBytes
-     * @throws IllegalStateException if the MappedFile is closed or unusable.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     @NotNull
     public static MappedBytes mappedBytes(@NotNull final MappedFile rw)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         return rw.createBytesFor();
     }
 
@@ -216,11 +216,13 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      *
      * @param file The file to be memory-mapped in read-only mode.
      * @return A new MappedBytes instance.
-     * @throws FileNotFoundException if the file does not exist.
+     * @throws FileNotFoundException          If the file does not exist.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static MappedBytes readOnly(@NotNull final File file)
-            throws FileNotFoundException {
+            throws FileNotFoundException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final MappedFile mappedFile = MappedFile.readOnly(file);
         try {
             return new ChunkedMappedBytes(mappedFile);
@@ -285,10 +287,10 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * Provides a bytes object for read operations. This object is backed by the current MappedBytes instance.
      *
      * @return a Bytes instance for read operations.
-     * @throws IllegalStateException if the MappedBytes instance has been released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     @Override
-    public @NotNull Bytes<Void> bytesForRead() throws IllegalStateException {
+    public @NotNull Bytes<Void> bytesForRead() throws ClosedIllegalStateException {
         throwExceptionIfReleased();
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this
@@ -301,10 +303,10 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * Provides a bytes object for write operations. This object is backed by the current MappedBytes instance.
      *
      * @return a Bytes instance for write operations.
-     * @throws IllegalStateException if the MappedBytes instance has been released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     @Override
-    public @NotNull Bytes<Void> bytesForWrite() throws IllegalStateException {
+    public @NotNull Bytes<Void> bytesForWrite() throws ClosedIllegalStateException {
         throwExceptionIfReleased();
 
         // MappedBytes don't have a backing BytesStore so we have to give out bytesForRead|Write backed by this

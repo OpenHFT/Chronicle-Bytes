@@ -112,7 +112,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      *
      * @param hostId The host identifier, must be non-negative.
      * @return A reference to the current DistributedUniqueTimeProvider instance with the updated hostId.
-     * @throws IllegalArgumentException if the provided hostId is negative.
+     * @throws IllegalArgumentException If the provided hostId is negative.
      */
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is
@@ -155,7 +155,8 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      * the lowest two digits of the microseconds is the hostId, ensuring uniqueness across different hosts.
      *
      * @return the timestamps with hostId as a long
-     * @throws IllegalStateException if the underlying resources have been released/closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long currentTimeMicros() throws IllegalStateException {
@@ -200,7 +201,8 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      * The lowest two digits of the nanoseconds is the hostId, providing uniqueness across different hosts.
      *
      * @return the timestamps with hostId as a long
-     * @throws IllegalStateException if the underlying resources have been released/closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long currentTimeNanos() throws IllegalStateException {

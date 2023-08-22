@@ -22,7 +22,9 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.posix.PosixAPI;
 import org.jetbrains.annotations.NotNull;
 
@@ -64,10 +66,10 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param address      The memory address of the mapped data.
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
-     * @throws IllegalStateException If the MappedFile has already been released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity), false);
         this.mappedFile = mappedFile;
         this.start = start;
@@ -89,10 +91,11 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
      * @return the MappedBytesStore
-     * @throws IllegalStateException If the MappedFile has already been released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
-            throws IllegalStateException {
+            throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity);
     }
 
@@ -116,7 +119,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public @NotNull Bytes<Void> bytesForRead()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
             return new NativeBytes<Void>(this)
                     .readLimit(writeLimit())
@@ -129,7 +132,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public VanillaBytes<Void> bytesForWrite()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         return new NativeBytes<>(this);
     }
@@ -224,14 +227,14 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         return super.compareAndSwapInt(offset, expected, value);
     }
 
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         return super.compareAndSwapLong(offset, expected, value);
     }
@@ -239,7 +242,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeByte(@NonNegative long offset, byte i8)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeByte(offset, i8);
         return this;
@@ -248,7 +251,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeShort(@NonNegative long offset, short i16)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeShort(offset, i16);
         return this;
@@ -257,7 +260,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeInt(@NonNegative long offset, int i32)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeInt(offset, i32);
         return this;
@@ -266,7 +269,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeLong(@NonNegative long offset, long i64)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeLong(offset, i64);
         return this;
@@ -275,7 +278,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeOrderedLong(@NonNegative long offset, long i)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeOrderedLong(offset, i);
         return this;
@@ -284,7 +287,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeFloat(@NonNegative long offset, float f)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeFloat(offset, f);
         return this;
@@ -293,7 +296,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeDouble(@NonNegative long offset, double d)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeDouble(offset, d);
         return this;
@@ -302,7 +305,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeVolatileByte(@NonNegative long offset, byte i8)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeVolatileByte(offset, i8);
         return this;
@@ -311,7 +314,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeVolatileShort(@NonNegative long offset, short i16)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeVolatileShort(offset, i16);
         return this;
@@ -320,7 +323,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeVolatileInt(@NonNegative long offset, int i32)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeVolatileInt(offset, i32);
         return this;
@@ -329,7 +332,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore writeVolatileLong(@NonNegative long offset, long i64)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.writeVolatileLong(offset, i64);
         return this;
@@ -340,7 +343,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     public MappedBytesStore write(@NonNegative final long offsetInRDO,
                                   final byte[] byteArray,
                                   @NonNegative final int offset,
-                                  @NonNegative final int length) throws IllegalStateException {
+                                  @NonNegative final int length)
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         // Parameter invariants are checked in the super method
         writeCheck.run();
         super.write(offsetInRDO, byteArray, offset, length);
@@ -349,7 +353,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public void write(@NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();
         super.write(offsetInRDO, bytes, offset, length);
@@ -358,7 +362,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @NotNull
     @Override
     public MappedBytesStore write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+            throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(readOffset);
@@ -371,7 +375,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public void write0(@NonNegative long offsetInRDO, @NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         requireNonNull(bytes);
         writeCheck.run();
         super.write0(offsetInRDO, bytes, offset, length);
@@ -379,14 +383,14 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
 
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         super.nativeWrite(address, position, size);
     }
 
     @Override
     public long appendUtf8(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         writeCheck.run();
         return super.appendUtf8(pos, chars, offset, length);
     }

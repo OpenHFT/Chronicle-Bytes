@@ -36,7 +36,7 @@ public interface Invocation {
      * @param o    the object from which the method is invoked
      * @param args the arguments to be passed to the method
      * @return the result of the method invocation
-     * @throws InvocationTargetException if the invoked method throws an exception
+     * @throws InvocationTargetException If the invoked method throws an exception
      */
     Object invoke(Method m, Object o, Object[] args)
             throws InvocationTargetException;

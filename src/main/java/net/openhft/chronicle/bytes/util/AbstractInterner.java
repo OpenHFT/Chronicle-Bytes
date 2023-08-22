@@ -21,8 +21,10 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -83,8 +85,9 @@ public abstract class AbstractInterner<T> {
      * @param bs     the bytes store
      * @param length the length
      * @return the 32-bit hash code
-     * @throws IllegalStateException    if the bytes cannot be accessed
-     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     private static int hash32(@NotNull BytesStore bs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         return bs.fastHash(bs.readPosition(), length);
@@ -98,9 +101,10 @@ public abstract class AbstractInterner<T> {
      *
      * @param cs the Bytes object to intern
      * @return the interned instance
-     * @throws IORuntimeException       if an I/O error occurs
-     * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException    if the buffer is in an unusable state
+     * @throws IORuntimeException       If an I/O error occurs
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public T intern(@NotNull Bytes<?> cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -115,9 +119,10 @@ public abstract class AbstractInterner<T> {
      *
      * @param cs the BytesStore object to intern
      * @return the interned instance
-     * @throws IORuntimeException       if an I/O error occurs
-     * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException    if the buffer is in an unusable state
+     * @throws IORuntimeException       If an I/O error occurs
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public T intern(@NotNull BytesStore cs)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -132,9 +137,10 @@ public abstract class AbstractInterner<T> {
      * @param cs     the Bytes object to intern
      * @param length the length of the Bytes object to intern
      * @return the interned instance
-     * @throws IORuntimeException       if an I/O error occurs
-     * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException    if the buffer is in an unusable state
+     * @throws IORuntimeException       If an I/O error occurs
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public T intern(@NotNull Bytes<?> cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -148,9 +154,10 @@ public abstract class AbstractInterner<T> {
      * @param cs     the Bytes to intern
      * @param length of bytes to read
      * @return the interned instance
-     * @throws IORuntimeException       if an I/O error occurs
-     * @throws BufferUnderflowException if there is not enough data in the buffer
-     * @throws IllegalStateException    if the buffer is in an unusable state
+     * @throws IORuntimeException       If an I/O error occurs
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public T intern(@NotNull BytesStore cs, @NonNegative int length)
             throws IORuntimeException, BufferUnderflowException, IllegalStateException {
@@ -183,9 +190,10 @@ public abstract class AbstractInterner<T> {
      * @param bs     the bytes store
      * @param length the length of the data in the bytes store
      * @return the value corresponding to the given bytes store and length
-     * @throws IORuntimeException       if an IO error occurs
-     * @throws IllegalStateException    if the bytes cannot be accessed
-     * @throws BufferUnderflowException if there is not enough data in the buffer
+     * @throws IORuntimeException       If an IO error occurs
+     * @throws BufferUnderflowException If there is not enough data in the buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     protected abstract T getValue(BytesStore bs, @NonNegative int length)
