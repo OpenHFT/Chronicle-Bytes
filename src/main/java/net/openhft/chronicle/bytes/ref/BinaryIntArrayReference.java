@@ -163,7 +163,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @param offset the offset in the BytesStore to start reading from.
      * @return the peak length.
      * @throws BufferUnderflowException       If buffer underflows.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
@@ -177,7 +177,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Assigns a new BytesStore to this BinaryIntArrayReference.
      *
      * @param bytes the new BytesStore to be assigned.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -194,7 +194,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Gets the capacity of the array.
      *
      * @return the capacity.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -312,7 +312,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @param index the index to set the value at.
      * @param value the value to be set.
      * @throws BufferOverflowException        If buffer overflows.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -413,7 +413,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * Checks if the instance is null.
      *
      * @return true if the instance is null, false otherwise.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -427,7 +427,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     /**
      * Resets the instance to its initial state.
      *
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -524,7 +524,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      *
      * @param capacity the capacity of the array.
      * @return the size in bytes.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -540,7 +540,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      *
      * @param arrayLength the desired capacity.
      * @return this BinaryIntArrayReference with the updated capacity.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
@@ -568,7 +568,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @return true if successful. False return indicates that
      * the actual value was not equal to the expected value.
      * @throws BufferOverflowException        If buffer overflow occurs.
-     * @throws ClosedIllegalStateException    if the resource has been released or closed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
