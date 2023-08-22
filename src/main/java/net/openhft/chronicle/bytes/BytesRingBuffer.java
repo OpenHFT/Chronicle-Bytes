@@ -83,7 +83,7 @@ public interface BytesRingBuffer extends BytesRingBufferStats, BytesConsumer, Cl
      * Returns the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
      *
      * @return the {@link Class} object for {@link MultiReaderBytesRingBuffer}.
-     * @throws ClassNotFoundException If the class "software.chronicle.enterprise.ring.EnterpriseRingBuffer" is not found.
+     * @throws ClassNotFoundException if the class "software.chronicle.enterprise.ring.EnterpriseRingBuffer" is not found.
      */
     @NotNull
     static Class<MultiReaderBytesRingBuffer> clazz()

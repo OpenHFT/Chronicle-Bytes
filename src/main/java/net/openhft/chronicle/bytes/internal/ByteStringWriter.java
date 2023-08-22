@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.ByteStringAppender;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -38,7 +39,7 @@ public class ByteStringWriter extends Writer {
      * Constructs a new ByteStringWriter with the provided ByteStringAppender.
      *
      * @param out The ByteStringAppender to be used.
-     * @throws IllegalStateException If the input ByteStringAppender is released.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     public ByteStringWriter(ByteStringAppender out) {
         throwExceptionIfReleased(out);
@@ -49,7 +50,7 @@ public class ByteStringWriter extends Writer {
      * Writes a single character.
      *
      * @param c int specifying a character to be written.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
      */
     @Override
     public void write(int c)
@@ -66,7 +67,8 @@ public class ByteStringWriter extends Writer {
      * Writes a string.
      *
      * @param str String to be written.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
     public void write(@NotNull String str)
@@ -80,7 +82,8 @@ public class ByteStringWriter extends Writer {
      * @param str String to be written.
      * @param off Offset from which to start reading characters.
      * @param len Number of characters to be written.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
     public void write(@NotNull String str, @NonNegative int off, @NonNegative int len)
@@ -93,7 +96,8 @@ public class ByteStringWriter extends Writer {
      *
      * @param csq The character sequence to append.
      * @return This writer
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @NotNull
     @Override
@@ -110,6 +114,7 @@ public class ByteStringWriter extends Writer {
      * @param start The index of the first character to append.
      * @param end   The index of the character following the last character to append.
      * @return This writer
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @NotNull
     @Override
@@ -123,15 +128,12 @@ public class ByteStringWriter extends Writer {
      *
      * @param c The character to append.
      * @return This writer
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @NotNull
     @Override
     public Writer append(char c) {
-        try {
-            out.append(c);
-        } catch (IllegalStateException e) {
-            throw Jvm.rethrow(e);
-        }
+        out.append(c);
         return this;
     }
 
@@ -157,16 +159,13 @@ public class ByteStringWriter extends Writer {
      * @param cbuf Array of characters.
      * @param off  Offset from which to start reading characters.
      * @param len  Number of characters to be written.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
+     * @throws ClosedIllegalStateException if the input ByteStringAppender is released.
      */
     @Override
     public void write(char[] cbuf, @NonNegative int off, @NonNegative int len)
             throws IOException {
-        try {
-            for (int i = 0; i < len; i++)
-                out.append(cbuf[i + off]);
-        } catch (IllegalStateException e) {
-            throw Jvm.rethrow(e);
-        }
+        for (int i = 0; i < len; i++)
+            out.append(cbuf[i + off]);
     }
 }

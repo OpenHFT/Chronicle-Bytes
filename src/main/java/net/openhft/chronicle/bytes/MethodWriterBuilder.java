@@ -63,7 +63,7 @@ public interface MethodWriterBuilder<T> extends Supplier<T> {
      *
      * @param updateInterceptor the UpdateInterceptor to use
      * @return this builder, so invocations can be chained
-     * @throws UnsupportedOperationException If the implementation does not support this operation
+     * @throws UnsupportedOperationException if the implementation does not support this operation
      */
     default MethodWriterBuilder<T> updateInterceptor(UpdateInterceptor updateInterceptor) {
         throw new UnsupportedOperationException();

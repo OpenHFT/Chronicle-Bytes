@@ -38,7 +38,6 @@ import java.nio.BufferUnderflowException;
  * representation of the object in a hexadecimal format.
  *
  * <p>Implementations of this interface must not be chained as suggested by the {@code DontChain} annotation.
- *
  */
 @DontChain
 public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMarshallable {
@@ -58,9 +57,9 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
      * Reads the state of this object from the bytes.
      *
      * @param bytes the BytesIn object to read from.
-     * @throws IORuntimeException           If an I/O error occurs.
-     * @throws BufferUnderflowException     If there is not enough data available in the buffer.
-     * @throws InvalidMarshallableException If the object cannot be read due to invalid data.
+     * @throws IORuntimeException             If an I/O error occurs.
+     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
+     * @throws InvalidMarshallableException   If the object cannot be read due to invalid data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -75,10 +74,10 @@ public interface BytesMarshallable extends ReadBytesMarshallable, WriteBytesMars
      * Writes the state of this object to the bytes.
      *
      * @param bytes the BytesOut object to write to.
-     * @throws BufferOverflowException      If there is not enough space in the buffer.
-     * @throws BufferUnderflowException     If there is not enough data available in the buffer.
-     * @throws ArithmeticException          If there is an arithmetic error.
-     * @throws InvalidMarshallableException If the object cannot be written due to invalid data.
+     * @throws BufferOverflowException        If there is not enough space in the buffer.
+     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
+     * @throws ArithmeticException            If there is an arithmetic error.
+     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

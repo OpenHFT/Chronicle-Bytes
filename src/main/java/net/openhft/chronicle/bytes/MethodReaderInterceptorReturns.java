@@ -36,7 +36,7 @@ public interface MethodReaderInterceptorReturns {
      * @param args       the arguments used for the method call
      * @param invocation a functional interface representing the invocation of the method
      * @return the result of the method invocation, which can be the original result or a modified one
-     * @throws InvocationTargetException If the invoked method throws an exception
+     * @throws InvocationTargetException if the invoked method throws an exception
      */
     Object intercept(Method m, Object o, Object[] args, Invocation invocation)
             throws InvocationTargetException;

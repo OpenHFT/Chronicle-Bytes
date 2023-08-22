@@ -141,7 +141,7 @@ public interface Bytes<U> extends
      *
      * @param initialCapacity the initial non-negative capacity given in bytes
      * @return a new elastic wrapper for an off-heap ByteBuffer with the specified initial capacity
-     * @throws IllegalArgumentException If the provided {@code initialCapacity} is negative.
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative.
      */
     @NotNull
     static Bytes<ByteBuffer> elasticByteBuffer(@NonNegative int initialCapacity) {
@@ -164,7 +164,7 @@ public interface Bytes<U> extends
      * @param initialCapacity the initial non-negative capacity given in bytes
      * @param maxCapacity     the maximum capacity given in bytes; must be non-negative and at least as large as {@code initialCapacity}
      * @return a new elastic wrapper for an off-heap ByteBuffer with the specified initial capacity and maximum capacity
-     * @throws IllegalArgumentException If the provided {@code initialCapacity} or {@code maxCapacity} is negative,
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} or {@code maxCapacity} is negative,
      *                                  or if {@code maxCapacity} is less than {@code initialCapacity}.
      */
     @NotNull
@@ -193,7 +193,7 @@ public interface Bytes<U> extends
      *
      * @param initialCapacity the initial capacity of the buffer in bytes; must be non-negative
      * @return a new elastic wrapper for a heap ByteBuffer
-     * @throws IllegalArgumentException If the provided {@code initialCapacity} is negative
+     * @throws IllegalArgumentException if the provided {@code initialCapacity} is negative
      */
     @NotNull
     static Bytes<ByteBuffer> elasticHeapByteBuffer(@NonNegative int initialCapacity) {

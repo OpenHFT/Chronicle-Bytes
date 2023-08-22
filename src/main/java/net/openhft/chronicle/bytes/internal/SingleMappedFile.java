@@ -73,7 +73,7 @@ public class SingleMappedFile extends MappedFile {
      * @param raf      the RandomAccessFile associated with the file.
      * @param capacity the capacity of the mapped file.
      * @param readOnly if the file is read-only.
-     * @throws IORuntimeException If any I/O error occurs.
+     * @throws IORuntimeException if any I/O error occurs.
      */
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
@@ -135,7 +135,9 @@ public class SingleMappedFile extends MappedFile {
      * @param oldByteStore            The old byte store
      * @param mappedBytesStoreFactory The factory to use when creating new MappedBytesStore
      * @return The MappedBytesStore at the specified position
-     * @throws IllegalArgumentException If position is not zero
+     * @throws IllegalArgumentException       If position is not zero
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -274,7 +276,7 @@ public class SingleMappedFile extends MappedFile {
      * Returns the actual size of this mapped file
      *
      * @return The actual size of this mapped file
-     * @throws IORuntimeException    If an I/O error occurs
+     * @throws IORuntimeException             If an I/O error occurs
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

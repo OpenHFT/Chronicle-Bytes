@@ -112,7 +112,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      *
      * @param hostId The host identifier, must be non-negative.
      * @return A reference to the current DistributedUniqueTimeProvider instance with the updated hostId.
-     * @throws IllegalArgumentException If the provided hostId is negative.
+     * @throws IllegalArgumentException if the provided hostId is negative.
      */
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is

@@ -58,12 +58,12 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
      * @param method The method that was invoked.
      * @param args   The arguments provided to the method.
      * @return Always null.
-     * @throws IllegalStateException        If the underlying bytes store is closed.
-     * @throws BufferOverflowException      If there isn't enough space in the {@link BytesOut} to write the value.
-     * @throws BufferUnderflowException     If the underlying bytes store cannot provide enough data.
-     * @throws IllegalArgumentException     If the arguments don't match the method's requirements.
-     * @throws ArithmeticException          If numeric values overflow or underflow.
-     * @throws InvalidMarshallableException If a marshalling error occurs.
+     * @throws IllegalStateException        if the underlying bytes store is closed.
+     * @throws BufferOverflowException      if there isn't enough space in the {@link BytesOut} to write the value.
+     * @throws BufferUnderflowException     if the underlying bytes store cannot provide enough data.
+     * @throws IllegalArgumentException     if the arguments don't match the method's requirements.
+     * @throws ArithmeticException          if numeric values overflow or underflow.
+     * @throws InvalidMarshallableException if a marshalling error occurs.
      */
     @Override
     protected Object doInvoke(Object proxy, Method method, Object[] args)

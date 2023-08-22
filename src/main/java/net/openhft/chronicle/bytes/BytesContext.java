@@ -44,7 +44,7 @@ public interface BytesContext extends Closeable {
      * Checks whether the context is closed.
      *
      * @return {@code true} if the context is closed, {@code false} otherwise.
-     * @throws UnsupportedOperationException If the method is not overridden.
+     * @throws UnsupportedOperationException if the method is not overridden.
      */
     @Override
     default boolean isClosed() {

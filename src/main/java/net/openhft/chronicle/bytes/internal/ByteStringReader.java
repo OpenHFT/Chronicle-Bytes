@@ -66,7 +66,7 @@ public class ByteStringReader extends Reader {
      *
      * @param n The number of bytes to be skipped.
      * @return The actual number of bytes skipped.
-     * @throws IOException If an I/O error occurs.
+     * @throws IOException if an I/O error occurs.
      */
     @Override
     public long skip(long n)

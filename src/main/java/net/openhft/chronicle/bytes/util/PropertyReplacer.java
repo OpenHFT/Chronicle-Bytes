@@ -42,7 +42,7 @@ public enum PropertyReplacer {
      *
      * @param expression the input string containing tokens to be replaced.
      * @return a new string with tokens replaced by their corresponding system property values.
-     * @throws IllegalArgumentException If a token does not have a corresponding system property.
+     * @throws IllegalArgumentException if a token does not have a corresponding system property.
      */
     public static String replaceTokensWithProperties(String expression) throws IllegalArgumentException {
         StringBuilder result = new StringBuilder(expression.length());
@@ -76,7 +76,7 @@ public enum PropertyReplacer {
      * @param expression the input string containing tokens to be replaced.
      * @param properties the Properties object to retrieve property values from.
      * @return a new string with tokens replaced by their corresponding property values from the given Properties object.
-     * @throws IllegalArgumentException If a token does not have a corresponding property in the given Properties object.
+     * @throws IllegalArgumentException if a token does not have a corresponding property in the given Properties object.
      */
     public static String replaceTokensWithProperties(String expression, Properties properties) throws IllegalArgumentException {
         StringBuilder result = new StringBuilder(expression.length());

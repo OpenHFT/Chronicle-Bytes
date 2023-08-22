@@ -39,7 +39,7 @@ public final class ReferenceCountedUtil {
      * Checks the provided {@code referenceCounted} throwing a ClosedIllegalStateException If it has been previously released.
      *
      * @param referenceCounted the non-null {@link ReferenceCounted} resource to check
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws NullPointerException        If the provided {@code referenceCounted} is {@code null}
      */
     public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) throws ClosedIllegalStateException {
@@ -56,7 +56,7 @@ public final class ReferenceCountedUtil {
      * ReferenceCounted AND has been previously released.
      *
      * @param object the non-null object to check
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws NullPointerException        If the provided {@code object} is {@code null}
      */
     public static void throwExceptionIfReleased(final Object object) throws ClosedIllegalStateException {
