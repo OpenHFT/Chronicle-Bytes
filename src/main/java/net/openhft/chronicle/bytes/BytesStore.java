@@ -79,6 +79,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param cs the source BytesStore
      * @return a new BytesStore that is a copy of the source
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     static BytesStore from(@NotNull BytesStore cs)
             throws ClosedIllegalStateException {
@@ -360,6 +361,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return a Bytes that wraps this BytesStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Override
     @NotNull
@@ -449,6 +451,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param store the BytesStore to copy to
      * @return how many bytes were copied
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long copyTo(@NotNull BytesStore store)
             throws ClosedIllegalStateException, IllegalStateException {
@@ -529,6 +532,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * Assume ISO-8859-1 encoding, subclasses can override this.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Override
     default char charAt(@NonNegative int index)
@@ -538,8 +543,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
         } catch (BufferUnderflowException e) {
             throw new IndexOutOfBoundsException((readPosition() + index) + " >= " + readLimit());
-        } catch (ClosedIllegalStateException e) {
-            throw Jvm.rethrow(e);
         }
     }
 
@@ -969,6 +972,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param length the length up to which the hash code is to be computed
      * @return the computed hash code
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long hash(long length) {
         return bytesStore() instanceof NativeBytesStore

@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -87,13 +88,10 @@ public class BytesTextMethodTester<T> {
      *
      * @return The instance of {@code BytesTextMethodTester}, allowing for method chaining.
      * @throws IOException              If an I/O error occurs when reading the files or writing the results.
-     * @throws IllegalArgumentException If an illegal argument is used.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws BufferUnderflowException If there is no more data left to read in the buffer.
      */
     @NotNull
     public BytesTextMethodTester run()
-            throws IOException, IllegalArgumentException, ClosedIllegalStateException, BufferUnderflowException {
+            throws IOException {
 
         Bytes<?> bytes2 = new HexDumpBytes();
         T writer = bytes2.bytesMethodWriter(outputClass);

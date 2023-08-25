@@ -205,7 +205,7 @@ public class BytesFieldInfo {
      *
      * @param groupName the name of the group
      * @return the starting memory offset
-     * @throws IllegalArgumentException If no group with the given name is found
+     * @throws IllegalArgumentException if no group with the given name is found
      */
     public long startOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);
@@ -219,7 +219,7 @@ public class BytesFieldInfo {
      *
      * @param groupName the name of the group
      * @return the size of the group in bytes
-     * @throws IllegalArgumentException If no group with the given name is found
+     * @throws IllegalArgumentException if no group with the given name is found
      */
     public long lengthOf(String groupName) {
         final BFIEntry bfiEntry = groups.get(groupName);

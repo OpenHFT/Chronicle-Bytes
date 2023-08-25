@@ -71,8 +71,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param tester a {@code StopCharTester} used to detect the end of the boolean text.
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -90,8 +90,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * True can be: "t", "true", "y", "yes", "1".
      *
      * @return a {@code Boolean} value if the text could be parsed as boolean; null otherwise.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -107,7 +107,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
-     * @throws ArithmeticException   If a numeric overflow occurs.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -123,8 +123,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -139,8 +139,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws IORuntimeException       If an I/O error occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws IORuntimeException             If an I/O error occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -155,9 +155,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer         the {@code Appendable} to append the parsed string to.
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferOverflowException        If the buffer's capacity was exceeded.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -175,7 +175,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param stopCharTester a {@code StopCharTester} used to detect the end of the string.
      * @return the parsed text as a {@code String}.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -190,9 +190,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Appendable} to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferOverflowException        If the buffer's capacity was exceeded.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -210,9 +210,9 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      *
      * @param buffer          the {@code Bytes} object to append the parsed string to.
      * @param stopCharsTester a {@code StopCharsTester} used to detect the end of the string.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws BufferOverflowException  If the buffer's capacity was exceeded.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws BufferOverflowException        If the buffer's capacity was exceeded.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -239,8 +239,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as an integer. The terminating character is consumed.
      *
      * @return the parsed integer.
-     * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException      If a numeric overflow occurs.
+     * @throws BufferUnderflowException       If there is insufficient data.
+     * @throws ArithmeticException            If a numeric overflow occurs.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -253,7 +253,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as a long integer. The terminating character is consumed.
      *
      * @return the parsed long.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -268,8 +268,8 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * of {@link #parseDouble()} to long).
      *
      * @return the parsed long.
-     * @throws IORuntimeException       If the parsed value corresponds to a fractional number or to a number outside the long's range.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws IORuntimeException             If the parsed value corresponds to a fractional number or to a number outside the long's range.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -283,7 +283,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the parsed float, or -0.0 if there were no digits.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -297,7 +297,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the parsed double, or -0.0 if there were no digits.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -311,7 +311,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * The number of decimal places can be retrieved with {@code lastDecimalPlaces()}.
      *
      * @return the significant digits as a long.
-     * @throws BufferUnderflowException If there is insufficient data.
+     * @throws BufferUnderflowException       If there is insufficient data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -367,7 +367,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
      * Parses text from the byte string as a BigDecimal.
      *
      * @return the parsed BigDecimal.
-     * @throws ArithmeticException   If a numerical overflow occurs during the operation.
+     * @throws ArithmeticException            If a numerical overflow occurs during the operation.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */

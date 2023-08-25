@@ -69,7 +69,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws ClosedIllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity), false);
         this.mappedFile = mappedFile;
         this.start = start;
@@ -92,10 +92,9 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
      * @return the MappedBytesStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
-            throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws ClosedIllegalStateException {
         return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity);
     }
 

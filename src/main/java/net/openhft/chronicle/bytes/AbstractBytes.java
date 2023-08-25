@@ -254,6 +254,7 @@ public abstract class AbstractBytes<U>
      * @return this Bytes instance.
      * @throws BufferOverflowException If there is not enough space to write the double.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Override
     public @NotNull AbstractBytes<U> append(double d)
@@ -292,6 +293,7 @@ public abstract class AbstractBytes<U>
      * @return this Bytes instance.
      * @throws BufferOverflowException If there is not enough space to write the float.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Override
     public @NotNull Bytes<U> append(float f)

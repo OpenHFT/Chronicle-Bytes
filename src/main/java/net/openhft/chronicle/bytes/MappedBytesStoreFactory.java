@@ -41,10 +41,9 @@ public interface MappedBytesStoreFactory {
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
      * @return The created MappedBytesStore instance.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws ClosedIllegalStateException If the MappedFile has already been released.
      */
     @NotNull
     MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException;
+            throws ClosedIllegalStateException;
 }

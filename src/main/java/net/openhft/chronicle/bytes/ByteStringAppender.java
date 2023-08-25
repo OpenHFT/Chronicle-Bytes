@@ -56,7 +56,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param ch the character to append
      * @return the ByteStringAppender instance with the appended character
-     * @throws BufferOverflowException If the append operation exceeds the buffer's capacity
+     * @throws BufferOverflowException        If the append operation exceeds the buffer's capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -73,7 +73,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param cs the CharSequence to append
      * @return this
-     * @throws BufferUnderflowException If the capacity of the underlying buffer was exceeded
+     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     @NotNull

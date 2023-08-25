@@ -50,11 +50,12 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      * @param length the padding length
      * @return this instance, after clearing and padding
      * @throws BufferOverflowException If the length is greater than the difference of capacity() and start()
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     B clearAndPad(@NonNegative long length)
-            throws BufferOverflowException, IllegalStateException, ThreadingIllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Prepends a long value as a decimal text. This operation moves the readPosition() backward.
@@ -68,7 +69,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      */
     @NotNull
     default B prepend(long value)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.prepend(this, value);
         return (B) this;
     }

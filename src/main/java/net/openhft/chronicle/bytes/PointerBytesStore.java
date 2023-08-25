@@ -48,7 +48,7 @@ public class PointerBytesStore extends NativeBytesStore<Void> {
      *
      * @param address  the memory address
      * @param capacity the size of the memory to which this PointerBytesStore should point
-     * @throws IllegalArgumentException If the capacity is negative
+     * @throws IllegalArgumentException if the capacity is negative
      */
     public void set(long address, @NonNegative long capacity) throws IllegalArgumentException {
         setAddress(address);

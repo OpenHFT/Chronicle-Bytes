@@ -42,8 +42,8 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * @param bytesStore the parent BytesStore that contains the data
      * @param start      the start index in the parent BytesStore from which the SubBytes start
      * @param capacity   the number of elements from the start index that the SubBytes cover
-     * @throws BufferUnderflowException If the capacity is less than the start index
-     * @throws IllegalArgumentException If any other argument issue occurs
+     * @throws BufferUnderflowException       If the capacity is less than the start index
+     * @throws IllegalArgumentException       If any other argument issue occurs
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

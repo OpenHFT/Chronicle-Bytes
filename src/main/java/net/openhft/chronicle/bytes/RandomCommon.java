@@ -173,6 +173,7 @@ interface RandomCommon extends ReferenceCounted {
      * @throws UnsupportedOperationException If the underlying buffer is on the heap
      * @throws BufferUnderflowException      If the offset is before the start() or the after the capacity()
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForRead(@NonNegative long offset)
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
@@ -186,6 +187,7 @@ interface RandomCommon extends ReferenceCounted {
      * @throws UnsupportedOperationException If the underlying buffer is on the heap.
      * @throws BufferUnderflowException      If the offset is before the start or after the capacity.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
             throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -200,6 +202,7 @@ interface RandomCommon extends ReferenceCounted {
      * @throws UnsupportedOperationException If the underlying buffer is on the heap
      * @throws BufferOverflowException       If the offset is before the start() or the after the capacity()
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForWrite(@NonNegative long offset)
             throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
@@ -211,6 +214,7 @@ interface RandomCommon extends ReferenceCounted {
      * @throws UnsupportedOperationException If the underlying buffer is on the heap.
      * @throws BufferOverflowException       If the current write position is before the start or after the capacity.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForWritePosition()
             throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException;
@@ -229,6 +233,7 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @return A Bytes object for reading.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     Bytes<?> bytesForRead()
@@ -239,6 +244,7 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @return A Bytes object for writing.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     Bytes<?> bytesForWrite()

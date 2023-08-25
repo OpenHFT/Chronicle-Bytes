@@ -90,7 +90,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      *
      * @param file     The file to be memory-mapped.
      * @param readOnly True if the file should be read-only, false otherwise.
-     * @throws IORuntimeException If an I/O error occurs.
+     * @throws IORuntimeException if an I/O error occurs.
      */
     protected MappedFile(@NotNull final File file,
                          final boolean readOnly)

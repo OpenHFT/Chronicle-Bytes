@@ -44,8 +44,8 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
      * @param elastic    a boolean value specifying whether this instance of OnHeapBytes is elastic.
      *                   If {@code true}, the instance is elastic and its capacity can grow up to {@code MAX_CAPACITY}.
      *                   If {@code false}, the instance has a fixed size that matches the capacity of the provided BytesStore.
-     * @throws IllegalArgumentException If the arguments provided are not valid, for instance if the BytesStore's
-     *                                  capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
+     * @throws IllegalArgumentException       If the arguments provided are not valid, for instance if the BytesStore's
+     *                                        capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -131,23 +131,13 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        BytesStore<Bytes<byte[]>, byte[]> store;
-        try {
-            store = (BytesStore<Bytes<byte[]>, byte[]>) BytesStore.wrap(new byte[size]);
-            store.reserveTransfer(INIT, this);
-        } catch (ClosedIllegalStateException e) {
-            BufferOverflowException boe = new BufferOverflowException();
-            boe.initCause(e);
-            throw boe;
-        }
+        BytesStore<Bytes<byte[]>, byte[]> store =
+                (BytesStore) BytesStore.wrap(new byte[size]);
+        store.reserveTransfer(INIT, this);
 
         BytesStore<Bytes<byte[]>, byte[]> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         this.bytesStore(store);
-        try {
-            tempStore.release(this);
-        } catch (ClosedIllegalStateException e) {
-            Jvm.debug().on(getClass(), e);
-        }
+        tempStore.release(this);
     }
 }
