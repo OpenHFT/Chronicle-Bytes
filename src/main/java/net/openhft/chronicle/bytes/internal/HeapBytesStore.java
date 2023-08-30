@@ -26,7 +26,6 @@ import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import sun.misc.Unsafe;
 
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
@@ -194,7 +193,7 @@ public class HeapBytesStore<U>
         requireNonNegative(length);
         try {
             int len = Maths.toUInt31(Math.min(length, requireNonNegative(readLimit() - offsetInRDI)));
-            memory.copyMemory(realUnderlyingObject, this.dataOffset + offsetInRDI, bytes, Unsafe.ARRAY_BYTE_BASE_OFFSET + offset, len);
+            memory.copyMemory(realUnderlyingObject, this.dataOffset + offsetInRDI, bytes, Jvm.arrayByteBaseOffset() + offset, len);
             return len;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
