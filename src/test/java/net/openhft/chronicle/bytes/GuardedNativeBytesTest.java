@@ -57,7 +57,7 @@ public class GuardedNativeBytesTest {
                     "a7 08 00 00 00 00 00 00 00                      # s64\n" +
                     "90 00 00 10 41                                  # f32\n" +
                     "91 00 00 00 00 00 00 24 40                      # f64\n" +
-                    "ae 05 a4 48 a4 65 a4 6c a4 6c a4 6f             # Utf8\n";
+                    "ae 05 48 65 6c 6c 6f                            # Utf8\n";
 
             final String actual = bytes.toHexString();
 

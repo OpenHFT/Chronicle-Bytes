@@ -1073,11 +1073,12 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         int i;
         ascii:
         {
+            ensureCapacity(length);
             for (i = 0; i < length; i++) {
                 char c = chars[offset + i];
                 if (c > 0x007F)
                     break ascii;
-                writeByte((byte) c);
+                rawWriteByte((byte) c);
             }
             return (S) this;
         }
