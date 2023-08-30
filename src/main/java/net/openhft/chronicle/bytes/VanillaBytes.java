@@ -52,7 +52,7 @@ public class VanillaBytes<U>
      * using its write position and write limit.
      *
      * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
-     * @throws IllegalArgumentException If the write limit of bytesStore is negative.
+     * @throws IllegalArgumentException       If the write limit of bytesStore is negative.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -68,7 +68,7 @@ public class VanillaBytes<U>
      * @param bytesStore    the BytesStore to be wrapped by the VanillaBytes.
      * @param writePosition the position at which the next write will occur.
      * @param writeLimit    the maximum limit up to which writing can occur.
-     * @throws IllegalArgumentException If the write limit is negative.
+     * @throws IllegalArgumentException       If the write limit is negative.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -82,7 +82,7 @@ public class VanillaBytes<U>
      *
      * @param bytesStore the BytesStore to be wrapped by the VanillaBytes.
      * @return a new instance of VanillaBytes that wraps the given BytesStore.
-     * @throws IllegalArgumentException If the write limit is negative.
+     * @throws IllegalArgumentException       If the write limit is negative.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
