@@ -186,8 +186,8 @@ public class HexDumpBytes
     @NotNull
     @Override
     public String toHexString() {
-        throwExceptionIfReleased(this);
         try {
+            throwExceptionIfReleased(this);
             if (lineLength() > 0) newLine();
             return text.toString();
         } catch (Throwable e) {

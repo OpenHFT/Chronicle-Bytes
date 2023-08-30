@@ -247,7 +247,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param value    the new value to be set if the current value equals the expected value
      * @return true if the compare-and-swap was successful, false otherwise
      * @throws BufferOverflowException     If the offset is out of bounds
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -273,7 +273,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param adding the integer to add
      * @return the result of the addition
      * @throws BufferUnderflowException    If the offset is out of bounds
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
     @SuppressWarnings("deprecation")
     @Override
@@ -454,7 +454,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default long copyTo(@NotNull BytesStore store)
-            throws ClosedIllegalStateException, IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(store);
         throwExceptionIfReleased(this);
         throwExceptionIfReleased(store);
@@ -532,6 +532,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * Assume ISO-8859-1 encoding, subclasses can override this.
+     *
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -567,6 +568,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
 
     /**
      * By default the maximum length of data shown is 256 characters. Use {@link #toDebugString(long)} if you want more.
+     * <p>
+     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      *
      * @return this BytesStore as a DebugString
      */
@@ -576,6 +579,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     }
 
     /**
+     * <p>
+     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      * @param maxLength the maximum length of the output
      * @return this BytesStore as a DebugString.
      */
@@ -602,12 +607,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param bytesStore the BytesStore to match against
      * @param length     the length to match
      * @return {@code true} if the bytes up to min(length, this.length(), bytesStore.length()) matched.
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default boolean equalBytes(@NotNull BytesStore bytesStore, @NonNegative long length)
-            throws BufferUnderflowException, ClosedIllegalStateException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
                 : BytesInternal.equalBytesAny(this, bytesStore, length);
@@ -636,7 +641,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param start the index of the first byte to sum
      * @param end   the index of the last byte to sum
      * @return unsigned bytes sum
-     * @throws BufferUnderflowException If the specified indexes are outside the limits of the BytesStore
+     * @throws BufferUnderflowException       If the specified indexes are outside the limits of the BytesStore
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -713,14 +718,13 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Returns the content of this BytesStore in 8bitString format.
      *
      * @return a String from the content of this BytesStore
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
-    default String to8bitString() {
-        try {
-            return BytesInternal.to8bitString(this);
-        } catch (Exception e) {
-            return e.toString();
-        }
+    default String to8bitString()
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
+        return BytesInternal.to8bitString(this);
     }
 
     /**
@@ -730,7 +734,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -751,7 +755,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -772,7 +776,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -793,7 +797,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -814,7 +818,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param offset to add and get
      * @param adding value to add, can be 1
      * @return the sum
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
@@ -841,19 +845,19 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
-            throws BufferUnderflowException, IllegalStateException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException;
+            throws BufferUnderflowException, ArithmeticException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a long value at a specified offset if the value is not smaller than the current value at that offset.
      *
      * @param offset  the offset to write to
      * @param atLeast the long value that is to be written at offset if it is not less than the current value at offset
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void writeMaxLong(@NonNegative long offset, long atLeast)
-            throws BufferUnderflowException, ClosedIllegalStateException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
             for (; ; ) {
                 long v = readVolatileLong(offset);
@@ -873,12 +877,12 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @param offset  the offset to write to
      * @param atLeast the int value that is to be written at offset if it is not less than the current value at offset
-     * @throws BufferUnderflowException    If there's not enough data to be moved
+     * @throws BufferUnderflowException       If there's not enough data to be moved
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void writeMaxInt(@NonNegative long offset, int atLeast)
-            throws BufferUnderflowException, ClosedIllegalStateException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
             for (; ; ) {
                 int v = readVolatileInt(offset);
@@ -912,7 +916,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes, @NotNull ByteBuffer using1, @NotNull ByteBuffer using2)
-            throws ClosedIllegalStateException, IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         final long readPos = outBytes.readPosition();
         try {
             long writePos = outBytes.writePosition();
@@ -934,6 +938,8 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
             assert len == using2.position();
             outBytes.writePosition(writePos + using2.position());
 
+        } catch (IllegalStateException e) {
+            throw e;
         } catch (@NotNull Exception e) {
             throw new IllegalStateException(e);
         } finally {
@@ -952,7 +958,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void cipher(@NotNull Cipher cipher, @NotNull Bytes<?> outBytes)
-            throws ClosedIllegalStateException, IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         cipher(cipher, outBytes, BytesInternal.BYTE_BUFFER_TL.get(), BytesInternal.BYTE_BUFFER2_TL.get());
     }
 

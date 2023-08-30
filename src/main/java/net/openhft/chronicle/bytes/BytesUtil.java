@@ -224,7 +224,7 @@ public enum BytesUtil {
         URL url = null;
         if (!file.exists()) {
             url = urlFor(Thread.currentThread().getContextClassLoader(), name);
-            String file2 = url.getFile()
+            String file2 = url.getFile().replace("%20", " ")
                     .replace("target/test-classes", "src/test/resources");
             file = new File(file2);
         }

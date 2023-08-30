@@ -814,6 +814,8 @@ public interface Bytes<U> extends
      * c3 76 6d 68                                     # vmh:
      * b6 03 56 4d 48                                  # VMH
      * </pre>
+     * <p>
+     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      *
      * @return A new hexadecimal String representing the content with comments describing the bytes.
      */
@@ -836,6 +838,8 @@ public interface Bytes<U> extends
      * c3 76 6d 68                                     # vmh:
      * b6 03 56 4d 48                                  # VMH
      * </pre>
+     * <p>
+     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      *
      * @param maxLength Limit the number of bytes to be encoded.
      * @return A new hexadecimal String representing the content with comments describing the bytes.
@@ -862,6 +866,8 @@ public interface Bytes<U> extends
      * c3 76 6d 68                                     # vmh:
      * b6 03 56 4d 48                                  # VMH
      * </pre>
+     * <p>
+     * This is assumed to be used to print the contents on a best effort basis. If an Error occurs it will be returned in the String.
      *
      * @param offset    The starting offset within the Bytes object to begin the hexadecimal conversion.
      * @param maxLength Limit the number of bytes to be encoded. If the number of bytes exceeds maxLength,

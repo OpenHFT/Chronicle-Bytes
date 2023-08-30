@@ -1385,11 +1385,7 @@ public abstract class AbstractBytes<U>
 
     @Override
     public boolean equals(Object obj) {
-        try {
-            return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
-        } catch (Exception e) {
-            throw new AssertionError(e);
-        }
+        return obj instanceof BytesStore && BytesInternal.contentEqual(this, (BytesStore) obj);
     }
 
     @NotNull
