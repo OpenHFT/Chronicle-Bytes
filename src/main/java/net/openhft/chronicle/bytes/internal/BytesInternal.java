@@ -682,12 +682,9 @@ enum BytesInternal {
         try {
             int count = 0;
             while (count < length) {
-                int c = bytes.readUnsignedByte();
-                if (c >= 128) {
+                int c = bytes.rawReadByte();
+                if (c < 0) {
                     bytes.readSkip(-1);
-                    break;
-
-                } else if (c < 0) {
                     break;
                 }
                 count++;

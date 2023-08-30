@@ -414,6 +414,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeByte(@NonNegative long offset, byte i8) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeByte(i8);
         base.writeByte(offset & MASK, i8);
         copyToText(offset & MASK, offset >>> 32, 1);
         return this;
@@ -422,6 +424,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeShort(@NonNegative long offset, short i) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeShort(i);
         base.writeShort(offset & MASK, i);
         copyToText(offset & MASK, offset >>> 32, 2);
         return this;
@@ -430,6 +434,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeInt24(@NonNegative long offset, int i) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeInt24(i);
         base.writeInt24(offset & MASK, i);
         copyToText(offset & MASK, offset >>> 32, 3);
         return this;
@@ -444,6 +450,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeOrderedInt(@NonNegative long offset, int i) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeOrderedInt(i);
         base.writeOrderedInt(offset & MASK, i);
         copyToText(offset & MASK, offset >>> 32, 4);
         return this;
@@ -458,6 +466,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeOrderedLong(@NonNegative long offset, long i) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeOrderedLong(i);
         base.writeOrderedLong(offset & MASK, i);
         copyToText(offset & MASK, offset >>> 32, 8);
         return this;
@@ -466,6 +476,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeFloat(@NonNegative long offset, float d) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeFloat(d);
         base.writeFloat(offset & MASK, d);
         copyToText(offset & MASK, offset >>> 32, 4);
         return this;
@@ -474,6 +486,8 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeDouble(@NonNegative long offset, double d) throws BufferOverflowException, IllegalStateException {
+        if (offset == base.writePosition())
+            return writeDouble(d);
         base.writeDouble(offset & MASK, d);
         copyToText(offset & MASK, offset >>> 32, 8);
         return this;
@@ -482,24 +496,32 @@ public class HexDumpBytes
     @Override
     @NotNull
     public Bytes<Void> writeVolatileByte(@NonNegative long offset, byte i8) throws BufferOverflowException {
+        if (offset == base.writePosition())
+            return writeByte(i8);
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeVolatileShort(@NonNegative long offset, short i16) throws BufferOverflowException {
+        if (offset == base.writePosition())
+            return writeShort(i16);
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeVolatileInt(@NonNegative long offset, int i32) throws BufferOverflowException {
+        if (offset == base.writePosition())
+            return writeInt(i32);
         throw new UnsupportedOperationException();
     }
 
     @Override
     @NotNull
     public Bytes<Void> writeVolatileLong(@NonNegative long offset, long i64) throws BufferOverflowException {
+        if (offset == base.writePosition())
+            return writeLong(i64);
         throw new UnsupportedOperationException();
     }
 
