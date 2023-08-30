@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.BytesUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.ThrowingLongSupplier;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,9 +55,10 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      *
      * @param bytes the Bytes instance to write to.
      * @param value the long value to be written.
-     * @throws BufferOverflowException  if there's not enough space in the buffer to write the value.
-     * @throws IllegalArgumentException if an illegal argument is provided.
-     * @throws IllegalStateException    if an invalid state is encountered.
+     * @throws BufferOverflowException  If there's not enough space in the buffer to write the value.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long value)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -69,7 +72,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      *
      * @param call the ThrowingLongSupplier to be executed.
      * @return the result of ThrowingLongSupplier.
-     * @throws IllegalStateException if the lock value is invalid or other illegal state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     private <T extends Exception> long withLock(@NotNull ThrowingLongSupplier<T> call)
             throws IllegalStateException {
@@ -100,9 +104,10 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * @param bytes  the BytesStore instance where the reference is to be stored.
      * @param offset the offset in the byte store where the reference is to be positioned.
      * @param length the length of the reference in bytes.
-     * @throws IllegalArgumentException if an illegal argument is provided.
-     * @throws IllegalStateException    if an invalid state is encountered.
-     * @throws BufferOverflowException  if there's not enough space in the buffer to write the reference.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws BufferOverflowException  If there's not enough space in the buffer to write the reference.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -127,7 +132,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * Retrieves the value from the Text wire format.
      *
      * @return the long value.
-     * @throws IllegalStateException if the operation fails.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long getValue()
@@ -139,7 +145,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * Sets the value in the Text wire format.
      *
      * @param value the value to be set.
-     * @throws IllegalStateException if the operation fails.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue(long value)
@@ -182,7 +189,8 @@ public class TextLongReference extends AbstractReference implements LongReferenc
      * @param expected the expected value.
      * @param value    the new value.
      * @return {@code true} if successful, {@code false} otherwise.
-     * @throws IllegalStateException if the operation fails.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public boolean compareAndSwapValue(long expected, long value)

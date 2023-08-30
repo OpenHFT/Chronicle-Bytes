@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.BooleanValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -48,9 +50,10 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
      * @param bytes  the BytesStore to set
      * @param offset the offset to set
      * @param length the length to set
-     * @throws IllegalStateException    if the state is invalid
-     * @throws IllegalArgumentException if the arguments are invalid
-     * @throws BufferOverflowException  if the provided buffer is too small
+     * @throws IllegalArgumentException If the arguments are invalid
+     * @throws BufferOverflowException  If the provided buffer is too small
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -80,8 +83,9 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
      * Reads a boolean value from the bytes store.
      *
      * @return The read boolean value
-     * @throws IllegalStateException    If an illegal condition has occurred
      * @throws BufferUnderflowException If the bytes store contains insufficient data
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public boolean getValue()
@@ -101,7 +105,8 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
      * Writes a boolean value to the bytes store.
      *
      * @param flag The boolean value to write
-     * @throws IllegalStateException If an illegal condition has occurred
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue(final boolean flag)

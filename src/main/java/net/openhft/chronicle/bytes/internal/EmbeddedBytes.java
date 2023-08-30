@@ -20,6 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.VanillaBytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 public class EmbeddedBytes<U> extends VanillaBytes<U> {
@@ -45,7 +46,11 @@ public class EmbeddedBytes<U> extends VanillaBytes<U> {
 
     @Override
     public @NonNegative long writePosition() {
-        return bytesStore.readUnsignedByte(lengthOffset());
+        try {
+            return bytesStore.readUnsignedByte(lengthOffset());
+        } catch (ClosedIllegalStateException ignored) {
+            return 0;
+        }
     }
 
     private long lengthOffset() {

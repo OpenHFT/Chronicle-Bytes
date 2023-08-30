@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.algo.BytesStoreHash;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.pool.StringInterner;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +41,7 @@ public class StringInternerBytes extends StringInterner {
      * Constructs a new {@code StringInternerBytes} instance with the specified capacity.
      *
      * @param capacity the number of strings that can be stored in the interner.
-     * @throws IllegalArgumentException if the specified capacity is negative.
+     * @throws IllegalArgumentException If the specified capacity is negative.
      */
     public StringInternerBytes(@NonNegative int capacity)
             throws IllegalArgumentException {
@@ -52,9 +54,10 @@ public class StringInternerBytes extends StringInterner {
      *
      * @param bytes the bytes to be converted and interned as a string.
      * @return the interned string representation of the bytes.
-     * @throws ArithmeticException      if there is an integer overflow when calculating the length.
-     * @throws IllegalStateException    if the underlying bytes store is not readable.
-     * @throws BufferUnderflowException if there are not enough bytes remaining to read.
+     * @throws ArithmeticException      If there is an integer overflow when calculating the length.
+     * @throws BufferUnderflowException If there are not enough bytes remaining to read.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public String intern(@NotNull final Bytes<?> bytes)
             throws ArithmeticException, IllegalStateException, BufferUnderflowException {
@@ -70,9 +73,10 @@ public class StringInternerBytes extends StringInterner {
      * @param bytes  the bytes to convert to a string.
      * @param length specifies the maximum number of bytes to be converted, must be non-negative.
      * @return the interned string representation of the bytes.
-     * @throws IllegalArgumentException if length is negative.
-     * @throws IllegalStateException    if the underlying bytes store is not readable.
-     * @throws BufferUnderflowException if there are not enough bytes remaining to read.
+     * @throws IllegalArgumentException If length is negative.
+     * @throws BufferUnderflowException If there are not enough bytes remaining to read.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public String intern(@NotNull final Bytes<?> bytes, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {

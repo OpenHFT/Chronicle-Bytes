@@ -17,6 +17,8 @@
  */
 package net.openhft.chronicle.bytes.ref;
 
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -70,7 +72,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Gets the second long value from the BinaryTwoLongReference.
      *
      * @return the second long value.
-     * @throws IllegalStateException if an error occurs while reading the value.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long getValue2()
@@ -87,7 +90,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value in the BytesStore.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue2(long value)
@@ -104,7 +108,7 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Retrieves the second 64-bit long value using volatile memory semantics.
      *
      * @return the second 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws IllegalStateException If closed
      */
     @Override
     public long getVolatileValue2()
@@ -121,7 +125,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value using volatile memory semantics.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setVolatileValue2(long value)
@@ -138,7 +143,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * Sets the second 64-bit long value using ordered or lazy set memory semantics.
      *
      * @param value the second 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setOrderedValue2(long value)
@@ -156,7 +162,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      *
      * @param delta the value to add
      * @return the resulting second 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long addValue2(long delta)
@@ -174,7 +181,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      *
      * @param delta the value to add
      * @return the resulting second 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long addAtomicValue2(long delta)
@@ -194,7 +202,8 @@ public class BinaryTwoLongReference extends BinaryLongReference implements TwoLo
      * @param expected the expected second 64-bit long value
      * @param value    the new second 64-bit long value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public boolean compareAndSwapValue2(long expected, long value)

@@ -22,8 +22,10 @@ import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -133,7 +135,9 @@ public class SingleMappedFile extends MappedFile {
      * @param oldByteStore            The old byte store
      * @param mappedBytesStoreFactory The factory to use when creating new MappedBytesStore
      * @return The MappedBytesStore at the specified position
-     * @throws IllegalArgumentException If position is not zero
+     * @throws IllegalArgumentException       If position is not zero
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public MappedBytesStore acquireByteStore(
@@ -141,7 +145,7 @@ public class SingleMappedFile extends MappedFile {
             @NonNegative final long position,
             BytesStore oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         if (position != 0)
             throw new IllegalArgumentException();
@@ -203,7 +207,7 @@ public class SingleMappedFile extends MappedFile {
                 // so ensure that it is released
                 try {
                     mbs.release(this);
-                } catch (IllegalStateException e) {
+                } catch (ClosedIllegalStateException e) {
                     Jvm.debug().on(getClass(), e);
                 }
             }
@@ -272,8 +276,9 @@ public class SingleMappedFile extends MappedFile {
      * Returns the actual size of this mapped file
      *
      * @return The actual size of this mapped file
-     * @throws IORuntimeException    If an I/O error occurs
-     * @throws IllegalStateException If this file is closed or an interruption occurs
+     * @throws IORuntimeException             If an I/O error occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public long actualSize()
             throws IORuntimeException, IllegalStateException {

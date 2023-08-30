@@ -18,6 +18,8 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.nio.BufferUnderflowException;
 
@@ -39,10 +41,11 @@ public interface UncheckedRandomDataInput {
      *
      * @param offset Offset position from which the byte is to be read.
      * @return The byte read from the specified offset.
-     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException    If the data source has been released.
+     * @throws BufferUnderflowException       If the offset is beyond the boundary of the data source.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    byte readByte(@NonNegative long offset);
+    byte readByte(@NonNegative long offset) throws ClosedIllegalStateException;
 
     /**
      * Read a short at an offset possibly not checking memory bounds.
@@ -52,10 +55,11 @@ public interface UncheckedRandomDataInput {
      *
      * @param offset Offset position from which the short is to be read.
      * @return The short read from the specified offset.
-     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException    If the data source has been released.
+     * @throws BufferUnderflowException       If the offset is beyond the boundary of the data source.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    short readShort(@NonNegative long offset);
+    short readShort(@NonNegative long offset) throws ClosedIllegalStateException;
 
     /**
      * Read an int at an offset possibly not checking memory bounds.
@@ -65,10 +69,11 @@ public interface UncheckedRandomDataInput {
      *
      * @param offset Offset position from which the integer is to be read.
      * @return The integer read from the specified offset.
-     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException    If the data source has been released.
+     * @throws BufferUnderflowException       If the offset is beyond the boundary of the data source.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    int readInt(@NonNegative long offset);
+    int readInt(@NonNegative long offset) throws ClosedIllegalStateException;
 
     /**
      * Read a long at an offset possibly not checking memory bounds.
@@ -78,9 +83,10 @@ public interface UncheckedRandomDataInput {
      *
      * @param offset Offset position from which the long is to be read.
      * @return The long read from the specified offset.
-     * @throws BufferUnderflowException If the offset is beyond the boundary of the data source.
-     * @throws IllegalStateException    If the data source has been released.
+     * @throws BufferUnderflowException       If the offset is beyond the boundary of the data source.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long readLong(@NonNegative long offset);
+    long readLong(@NonNegative long offset) throws ClosedIllegalStateException;
 
 }

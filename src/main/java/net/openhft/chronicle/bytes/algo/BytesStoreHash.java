@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -52,8 +54,9 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b      the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 64-bit hash value.
-     * @throws IllegalStateException    if the underlying memory is not readable.
-     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
+     * @throws BufferUnderflowException If the length specified is greater than the available bytes.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static long hash(@NotNull BytesStore b, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         return b.isDirectMemory()
@@ -78,8 +81,9 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param b      the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 32-bit hash value.
-     * @throws IllegalStateException    if the underlying memory is not readable.
-     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
+     * @throws BufferUnderflowException If the length specified is greater than the available bytes.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static int hash32(@NotNull BytesStore b, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         long hash = hash(b, length);
@@ -92,8 +96,9 @@ public interface BytesStoreHash<B extends BytesStore> extends ToLongFunction<B> 
      * @param bytes  the {@link BytesStore} to compute the hash for.
      * @param length the number of bytes to include in the hash computation.
      * @return the 64-bit hash value.
-     * @throws IllegalStateException    if the underlying memory is not readable.
-     * @throws BufferUnderflowException if the length specified is greater than the available bytes.
+     * @throws BufferUnderflowException If the length specified is greater than the available bytes.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long applyAsLong(BytesStore bytes, long length) throws IllegalStateException, BufferUnderflowException;
 }

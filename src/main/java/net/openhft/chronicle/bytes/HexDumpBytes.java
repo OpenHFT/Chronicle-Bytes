@@ -87,6 +87,8 @@ public class HexDumpBytes
      *
      * @param base NativeBytes instance representing base data.
      * @param text BytesStore instance representing text data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     HexDumpBytes(@NotNull Bytes<?> base, @NotNull BytesStore text) {
         final long size = base.readRemaining();
@@ -184,8 +186,8 @@ public class HexDumpBytes
     @NotNull
     @Override
     public String toHexString() {
-        throwExceptionIfReleased(this);
         try {
+            throwExceptionIfReleased(this);
             if (lineLength() > 0) newLine();
             return text.toString();
         } catch (Throwable e) {

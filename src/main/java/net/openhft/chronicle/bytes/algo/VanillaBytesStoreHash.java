@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes.algo;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -71,8 +73,9 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      *
      * @param store The {@link BytesStore} to compute the hash for.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long applyAsLong(@NotNull BytesStore store) {
@@ -90,8 +93,9 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param bytes  The {@link BytesStore} to compute the hash for.
      * @param length The number of bytes to process.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {

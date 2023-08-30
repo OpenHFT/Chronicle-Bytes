@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.util.Annotations;
 
 import java.lang.reflect.Method;
@@ -40,7 +41,7 @@ public enum MethodEncoderLookup implements Function<Method, MethodEncoder> {
 
     @Override
     public MethodEncoder apply(Method method) {
-        MethodId methodId = Annotations.getAnnotation(method, MethodId.class);
+        MethodId methodId = Jvm.findAnnotation(method, MethodId.class);
         if (methodId == null) return null;
         long messageId = methodId.value();
         return new MethodEncoder() {

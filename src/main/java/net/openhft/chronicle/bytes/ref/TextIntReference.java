@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.ThrowingIntSupplier;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
@@ -55,8 +57,9 @@ public class TextIntReference extends AbstractReference implements IntValue {
      *
      * @param bytes the Bytes instance to write to.
      * @param value the 32-bit integer value to be written.
-     * @throws BufferOverflowException if there is insufficient space.
-     * @throws IllegalStateException   if an error occurs during writing.
+     * @throws BufferOverflowException If there is insufficient space.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative int value)
             throws BufferOverflowException, IllegalStateException {
@@ -70,7 +73,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
      *
      * @param call the callable function to execute with lock.
      * @return the integer value returned by the callable function.
-     * @throws IllegalStateException if an invalid state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     private int withLock(@NotNull ThrowingIntSupplier<Exception> call)
             throws IllegalStateException {
@@ -96,7 +100,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
      * Retrieves the 32-bit integer value from the Text wire format.
      *
      * @return the 32-bit integer value.
-     * @throws IllegalStateException if the operation fails.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public int getValue()
@@ -110,7 +115,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
      * Sets the 32-bit integer value in the Text wire format.
      *
      * @param value the 32-bit integer value to be set.
-     * @throws IllegalStateException if the operation fails.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue(int value)

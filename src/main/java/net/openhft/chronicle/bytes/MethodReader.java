@@ -18,6 +18,8 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.Closeable;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 
 import java.nio.BufferUnderflowException;
@@ -51,9 +53,10 @@ public interface MethodReader extends Closeable {
      * If an exception is thrown by the target method itself, this is wrapped in an {@link InvocationTargetRuntimeException} and rethrown.
      *
      * @return {@code true} if a message was successfully read, {@code false} if no more messages are available
-     * @throws InvocationTargetRuntimeException if an exception is thrown by the target method
-     * @throws IllegalStateException            if this method is invoked at an inappropriate time
-     * @throws BufferUnderflowException         if there is not enough data available in the buffer to read the next message
+     * @throws InvocationTargetRuntimeException If an exception is thrown by the target method
+     * @throws BufferUnderflowException         If there is not enough data available in the buffer to read the next message
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException;

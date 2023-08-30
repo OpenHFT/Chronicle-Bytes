@@ -18,7 +18,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.DontChain;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.nio.BufferOverflowException;
 
@@ -40,9 +42,10 @@ public interface WriteBytesMarshallable extends CommonMarshallable {
      * the validity of the state of the object before serialization.
      *
      * @param bytes the {@link BytesOut} instance to write the object's state to.
-     * @throws IllegalStateException        if the object is in an inappropriate state for the request.
-     * @throws BufferOverflowException      if there is no more space left to write in the buffer.
-     * @throws InvalidMarshallableException if the object cannot be successfully serialized.
+     * @throws BufferOverflowException        If there is no more space left to write in the buffer.
+     * @throws InvalidMarshallableException   If the object cannot be successfully serialized.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     void writeMarshallable(BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, InvalidMarshallableException;

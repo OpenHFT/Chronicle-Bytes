@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.IgnoresEverything;
 
@@ -40,7 +42,8 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
      * Constructor for BytesMethodReaderBuilder.
      *
      * @param in the BytesIn object from which serialized method calls are read.
-     * @throws IllegalStateException if the provided BytesIn object is released
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public BytesMethodReaderBuilder(BytesIn<?> in) {
         throwExceptionIfReleased(in);

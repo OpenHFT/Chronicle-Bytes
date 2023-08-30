@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.ByteStringParser;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -37,7 +39,8 @@ public class ByteStringReader extends Reader {
      * Constructs a new ByteStringReader with the provided ByteStringParser.
      *
      * @param in The ByteStringParser to be used.
-     * @throws IllegalStateException if the input ByteStringParser is released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public ByteStringReader(ByteStringParser in) {
         throwExceptionIfReleased(in);

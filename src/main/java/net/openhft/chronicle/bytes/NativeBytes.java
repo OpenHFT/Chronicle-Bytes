@@ -24,6 +24,8 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.StackTrace;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.AbstractReferenceCounted;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -58,11 +60,11 @@ public class NativeBytes<U>
      *
      * @param store    the BytesStore to be used for the newly constructed instance
      * @param capacity the capacity to be used for the newly constructed instance
-     * @throws IllegalStateException    if an error occurs
-     * @throws IllegalArgumentException if an error occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public NativeBytes(@NotNull final BytesStore store, @NonNegative final long capacity)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, ClosedIllegalStateException {
         super(store, 0, capacity);
         this.capacity = capacity;
     }
@@ -71,11 +73,11 @@ public class NativeBytes<U>
      * Constructs a new instance of NativeBytes with the specified BytesStore and the store's capacity.
      *
      * @param store the BytesStore to be used for the newly constructed instance
-     * @throws IllegalStateException    if an error occurs
-     * @throws IllegalArgumentException if an error occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public NativeBytes(@NotNull final BytesStore store)
-            throws IllegalStateException, IllegalArgumentException {
+            throws IllegalArgumentException, ClosedIllegalStateException {
         this(store, store.capacity());
     }
 
@@ -141,12 +143,13 @@ public class NativeBytes<U>
      *
      * @param bytes The Bytes to copy.
      * @return A new instance of BytesStore with the copied Bytes.
-     * @throws IllegalStateException If the Bytes cannot be copied.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      * @deprecated This method is to be removed in version x.26.
      */
     @Deprecated(/* to be removed in x.26 */)
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         return BytesUtil.copyOf(bytes);
     }
 
@@ -167,12 +170,13 @@ public class NativeBytes<U>
      * @param bs       The BytesStore to wrap.
      * @param capacity The capacity of the new NativeBytes instance.
      * @return A new instance of NativeBytes.
-     * @throws IllegalStateException    If the BytesStore cannot be wrapped.
      * @throws IllegalArgumentException If the provided capacity is not valid.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static <T> NativeBytes<T> wrapWithNativeBytes(@NotNull final BytesStore<?, T> bs, @NonNegative long capacity)
-            throws IllegalStateException, IllegalArgumentException {
+            throws ClosedIllegalStateException, IllegalArgumentException {
         requireNonNull(bs);
         return newGuarded
                 ? new GuardedNativeBytes(bs, capacity)
@@ -193,7 +197,7 @@ public class NativeBytes<U>
 
     @Override
     protected void writeCheckOffset(final @NonNegative long offset, final @NonNegative long adding)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             final long writeEnd = offset + adding;
             // Always resize if we are backed by a SingletonEmptyByteStore as this is shared and does not provide all functionality
@@ -217,7 +221,7 @@ public class NativeBytes<U>
 
     @Override
     void prewriteCheckOffset(@NonNegative long offset, long subtracting)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (offset - subtracting >= bytesStore.start()) {
             if (offset <= bytesStore.safeLimit()) {
                 return; // do nothing.
@@ -232,7 +236,7 @@ public class NativeBytes<U>
 
     @Override
     public void ensureCapacity(final @NonNegative long desiredCapacity)
-            throws IllegalArgumentException, IllegalStateException {
+            throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         if (desiredCapacity < 0) throw new IllegalArgumentException();
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
@@ -240,7 +244,7 @@ public class NativeBytes<U>
     }
 
     private void checkResize(@NonNegative final long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isElastic())
             resize(endOfBuffer);
         else
@@ -259,7 +263,7 @@ public class NativeBytes<U>
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative final long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfReleased();
         if (endOfBuffer < 0)
             throw new DecoratedBufferOverflowException(endOfBuffer + "< 0");
@@ -304,7 +308,7 @@ public class NativeBytes<U>
     }
 
     private void resizeHelper(@NonNegative final long size,
-                              final boolean isByteBufferBacked) {
+                              final boolean isByteBufferBacked) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         final BytesStore store;
         int position = 0;
         try {
@@ -356,7 +360,8 @@ public class NativeBytes<U>
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length) throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length)
+            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException, ClosedIllegalStateException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
@@ -375,7 +380,7 @@ public class NativeBytes<U>
     @Override
     @NotNull
     public NativeBytes writeSome(@NotNull final Bytes<?> bytes)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytes);
         ReportUnoptimised.reportOnce();
 
@@ -397,7 +402,7 @@ public class NativeBytes<U>
 
     @Override
     protected long writeOffsetPositionMoved(final @NonNegative long adding, final @NonNegative long advance)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long oldPosition = writePosition();
         if (writePosition() < bytesStore.start())
             throw new BufferOverflowException();
@@ -418,7 +423,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeByte(final byte i8)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -427,7 +432,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLong(final long i64)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long offset = writeOffsetPositionMoved(8L);
         bytesStore.writeLong(offset, i64);
         return this;

@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -42,12 +44,13 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
      * @param elastic    a boolean value specifying whether this instance of OnHeapBytes is elastic.
      *                   If {@code true}, the instance is elastic and its capacity can grow up to {@code MAX_CAPACITY}.
      *                   If {@code false}, the instance has a fixed size that matches the capacity of the provided BytesStore.
-     * @throws IllegalStateException    if the provided BytesStore has been released.
-     * @throws IllegalArgumentException if the arguments provided are not valid, for instance if the BytesStore's
-     *                                  capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
+     * @throws IllegalArgumentException       If the arguments provided are not valid, for instance if the BytesStore's
+     *                                        capacity exceeds the {@code MAX_CAPACITY} when the elastic parameter is false.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
-            throws IllegalStateException, IllegalArgumentException {
+            throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         super(bytesStore);
         this.elastic = elastic;
         this.capacity = elastic ? MAX_CAPACITY : bytesStore.capacity();
@@ -62,7 +65,8 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     @Override
-    public void ensureCapacity(@NonNegative long desiredCapacity) throws IllegalArgumentException, IllegalStateException {
+    public void ensureCapacity(@NonNegative long desiredCapacity)
+            throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isElastic() && bytesStore.capacity() < desiredCapacity)
             resize(desiredCapacity);
         else
@@ -76,7 +80,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
 
     @Override
     protected void writeCheckOffset(@NonNegative long offset, @NonNegative long adding)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (offset >= bytesStore.start() && offset + adding >= bytesStore.start()) {
             long writeEnd = offset + adding;
             if (writeEnd > writeLimit)
@@ -97,7 +101,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
     }
 
     private void checkResize(@NonNegative long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (isElastic())
             resize(endOfBuffer);
         else
@@ -106,7 +110,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (endOfBuffer < 0)
             throw new BufferOverflowException();
         if (endOfBuffer > capacity())
@@ -127,23 +131,13 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        BytesStore<Bytes<byte[]>, byte[]> store;
-        try {
-            store = (BytesStore<Bytes<byte[]>, byte[]>) BytesStore.wrap(new byte[size]);
-            store.reserveTransfer(INIT, this);
-        } catch (IllegalStateException e) {
-            BufferOverflowException boe = new BufferOverflowException();
-            boe.initCause(e);
-            throw boe;
-        }
+        BytesStore<Bytes<byte[]>, byte[]> store =
+                (BytesStore) BytesStore.wrap(new byte[size]);
+        store.reserveTransfer(INIT, this);
 
         BytesStore<Bytes<byte[]>, byte[]> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         this.bytesStore(store);
-        try {
-            tempStore.release(this);
-        } catch (IllegalStateException e) {
-            Jvm.debug().on(getClass(), e);
-        }
+        tempStore.release(this);
     }
 }

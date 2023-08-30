@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -61,9 +63,10 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @param bytes  the BytesStore
      * @param offset the offset within the BytesStore
      * @param length the length of the value
-     * @throws IllegalStateException    if closed
-     * @throws IllegalArgumentException if the length is not equal to maxSize
-     * @throws BufferOverflowException  if the offset is too large
+     * @throws IllegalArgumentException If the length is not equal to maxSize
+     * @throws BufferOverflowException  If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -110,8 +113,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Retrieves the 32-bit integer value from the BytesStore.
      *
      * @return the 32-bit integer value
-     * @throws IllegalStateException    if closed
-     * @throws BufferUnderflowException if the offset is too large
+     * @throws BufferUnderflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public int getValue()
@@ -125,8 +129,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Sets the 32-bit integer value in the BytesStore.
      *
      * @param value the 32-bit integer value to set
-     * @throws IllegalStateException   if closed
-     * @throws BufferOverflowException if the offset is too large
+     * @throws BufferOverflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue(int value)
@@ -140,8 +145,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Retrieves the 32-bit integer value using volatile memory semantics.
      *
      * @return the 32-bit integer value
-     * @throws IllegalStateException    if closed
-     * @throws BufferUnderflowException if the offset is too large
+     * @throws BufferUnderflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public int getVolatileValue()
@@ -155,8 +161,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * Sets the 32-bit integer value using ordered or lazy set memory semantics.
      *
      * @param value the 32-bit integer value to set
-     * @throws IllegalStateException   if closed
-     * @throws BufferOverflowException if the offset is too large
+     * @throws BufferOverflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setOrderedValue(int value)
@@ -171,8 +178,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      *
      * @param delta the value to add
      * @return the resulting 32-bit integer value
-     * @throws IllegalStateException    if closed
-     * @throws BufferUnderflowException if the offset is too large
+     * @throws BufferUnderflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public int addValue(int delta)
@@ -187,8 +195,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      *
      * @param delta the value to add
      * @return the resulting 32-bit integer value
-     * @throws IllegalStateException    if closed
-     * @throws BufferUnderflowException if the offset is too large
+     * @throws BufferUnderflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public int addAtomicValue(int delta)
@@ -205,8 +214,9 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
      * @param expected the expected 32-bit integer value
      * @param value    the new 32-bit integer value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException   if closed
-     * @throws BufferOverflowException if the offset is too large
+     * @throws BufferOverflowException If the offset is too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public boolean compareAndSwapValue(int expected, int value)

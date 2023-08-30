@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.io.ValidatableUtil;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
@@ -54,13 +55,13 @@ public interface BytesOut<U> extends
      * @param tClass     the primary interface to be proxied.
      * @param additional any additional interfaces to be proxied.
      * @return a proxy implementing the provided interfaces.
-     * @throws IllegalArgumentException    if an argument is inappropriate
-     * @throws NullPointerException        if the provided {@code tClass} is {@code null}
-     * @throws ClosedIllegalStateException if this BytesOut has been previously released
+     * @throws IllegalArgumentException    If an argument is inappropriate
+     * @throws NullPointerException        If the provided {@code tClass} is {@code null}
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     @NotNull
     default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional)
-            throws IllegalArgumentException {
+            throws IllegalArgumentException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
 
@@ -73,14 +74,15 @@ public interface BytesOut<U> extends
      * Writes a {@link WriteBytesMarshallable} to this {@code BytesOut} instance.
      *
      * @param marshallable the object to be written.
-     * @throws IllegalArgumentException     if a method is invoked with an illegal or inappropriate argument.
-     * @throws BufferOverflowException      if there is not enough space in the buffer.
-     * @throws IllegalStateException        if there is an error in the internal state.
-     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
-     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
+     * @throws IllegalArgumentException       If a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException        If there is not enough space in the buffer.
+     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
+     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     void writeMarshallableLength16(WriteBytesMarshallable marshallable)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException;
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, InvalidMarshallableException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes an object of a given type to this {@code BytesOut} instance.
@@ -88,15 +90,16 @@ public interface BytesOut<U> extends
      *
      * @param componentType the expected type of the object.
      * @param obj           the object to be written.
-     * @throws IllegalArgumentException     if a method is invoked with an illegal or inappropriate argument.
-     * @throws BufferOverflowException      if there is not enough space in the buffer.
-     * @throws ArithmeticException          if there is an arithmetic error.
-     * @throws IllegalStateException        if there is an error in the internal state.
-     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
-     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
+     * @throws IllegalArgumentException       If a method is invoked with an illegal or inappropriate argument.
+     * @throws BufferOverflowException        If there is not enough space in the buffer.
+     * @throws ArithmeticException            If there is an arithmetic error.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
+     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
+     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
      */
     default void writeObject(Class componentType, Object obj)
-            throws IllegalArgumentException, BufferOverflowException, ArithmeticException, IllegalStateException, BufferUnderflowException, InvalidMarshallableException {
+            throws IllegalArgumentException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
         if (obj instanceof BytesMarshallable) {

@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.io.UnsafeCloseable;
 import org.jetbrains.annotations.NotNull;
 
@@ -58,10 +60,11 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @param offset     the offset at which the long value is stored.
      * @param size       the size of the long value in bytes.
      * @return a new {@code LongReference} instance.
-     * @throws IllegalArgumentException if the size does not match the expected size.
-     * @throws BufferOverflowException  if the operation exceeds the bounds of the buffer.
-     * @throws BufferUnderflowException if the operation exceeds the bounds of the buffer.
-     * @throws IllegalStateException    if the object is not in a valid state for the operation.
+     * @throws IllegalArgumentException If the size does not match the expected size.
+     * @throws BufferOverflowException  If the operation exceeds the bounds of the buffer.
+     * @throws BufferUnderflowException If the operation exceeds the bounds of the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
@@ -77,9 +80,10 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @param bytes  the {@code BytesStore} containing the bytes.
      * @param offset the offset at which the long value is stored.
      * @param length the length of the bytes in the {@code BytesStore}.
-     * @throws IllegalStateException    if the object is not in a valid state for the operation.
-     * @throws IllegalArgumentException if the length does not match the expected size.
-     * @throws BufferUnderflowException if the operation exceeds the bounds of the buffer.
+     * @throws IllegalArgumentException If the length does not match the expected size.
+     * @throws BufferUnderflowException If the operation exceeds the bounds of the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
