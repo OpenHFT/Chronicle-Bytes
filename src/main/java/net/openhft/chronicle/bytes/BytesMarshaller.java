@@ -21,9 +21,7 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.InvalidMarshallableException;
-import net.openhft.chronicle.core.io.ValidatableUtil;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -95,7 +93,7 @@ public class BytesMarshaller<T> {
      *
      * @param t  the object to read into.
      * @param in the BytesIn from which to read.
-     * @throws InvalidMarshallableException if the object cannot be read due to invalid data.
+     * @throws InvalidMarshallableException If the object cannot be read due to invalid data.
      */
     public void readMarshallable(ReadBytesMarshallable t, BytesIn<?> in) throws InvalidMarshallableException {
         for (@NotNull FieldAccess field : fields) {
@@ -108,15 +106,16 @@ public class BytesMarshaller<T> {
      *
      * @param t   the object to write.
      * @param out the BytesOut to which to write.
-     * @throws IllegalArgumentException     if a method is invoked with an illegal or inappropriate argument.
-     * @throws IllegalStateException        if there is an error in the internal state.
-     * @throws BufferOverflowException      if there is not enough space in the buffer.
-     * @throws BufferUnderflowException     if there is not enough data available in the buffer.
-     * @throws ArithmeticException          if there is an arithmetic error.
-     * @throws InvalidMarshallableException if the object cannot be written due to invalid data.
+     * @throws IllegalArgumentException       If a method is invoked with an illegal or inappropriate argument.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @throws BufferOverflowException        If there is not enough space in the buffer.
+     * @throws BufferUnderflowException       If there is not enough data available in the buffer.
+     * @throws ArithmeticException            If there is an arithmetic error.
+     * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
      */
     public void writeMarshallable(WriteBytesMarshallable t, BytesOut<?> out)
-            throws IllegalArgumentException, IllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException {
+            throws IllegalArgumentException, ClosedIllegalStateException, BufferOverflowException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, ThreadingIllegalStateException {
         out.adjustHexDumpIndentation(+1);
         try {
             for (@NotNull FieldAccess field : fields) {
@@ -209,26 +208,27 @@ public class BytesMarshaller<T> {
         }
 
         void write(Object o, BytesOut<?> write)
-                throws IllegalAccessException, IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
+                throws IllegalAccessException, IllegalArgumentException, ClosedIllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
             write.writeHexDumpDescription(field.getName());
             getValue(o, write);
         }
 
         protected abstract void getValue(Object o, BytesOut<?> write)
-                throws IllegalAccessException, BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException;
+                throws IllegalAccessException, BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, ThreadingIllegalStateException;
 
         void read(Object o, BytesIn<?> read)
                 throws IORuntimeException, InvalidMarshallableException {
             try {
                 setValue(o, read);
-            } catch (BufferUnderflowException | IllegalArgumentException | ArithmeticException | IllegalStateException |
+            } catch (BufferUnderflowException | IllegalArgumentException | ArithmeticException |
+                     ClosedIllegalStateException |
                      BufferOverflowException | IllegalAccessException iae) {
                 throw new IORuntimeException(iae);
             }
         }
 
         protected abstract void setValue(Object o, BytesIn<?> read)
-                throws IllegalAccessException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, IllegalStateException, BufferOverflowException, InvalidMarshallableException;
+                throws IllegalAccessException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, ClosedIllegalStateException, BufferOverflowException, InvalidMarshallableException;
     }
 
     static class ScalarFieldAccess extends FieldAccess {
@@ -238,7 +238,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws BufferOverflowException, IllegalStateException, IllegalAccessException {
+                throws BufferOverflowException, ClosedIllegalStateException, IllegalAccessException {
             Object o2 = field.get(o);
             @Nullable String s = o2 == null ? null : o2.toString();
             write.writeUtf8(s);
@@ -246,7 +246,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException, IllegalArgumentException, IllegalAccessException {
+                throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, ArithmeticException, IllegalArgumentException, IllegalAccessException {
             @Nullable String s = read.readUtf8();
             field.set(o, ObjectUtils.convertTo(field.getType(), s));
         }
@@ -259,7 +259,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut<?> write)
-                throws BufferUnderflowException, IllegalStateException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
+                throws BufferUnderflowException, ClosedIllegalStateException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
             @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             ValidatableUtil.validate(o2);
             assert o2 != null;
@@ -268,7 +268,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, BytesIn<?> read)
-                throws IORuntimeException, BufferUnderflowException, IllegalStateException, InvalidMarshallableException, IllegalAccessException {
+                throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, IllegalAccessException {
             @NotNull BytesMarshallable o2 = (BytesMarshallable) field.get(o);
             if (!field.getType().isInstance(o2)) {
                 o2 = (BytesMarshallable) ObjectUtils.newInstance((Class) field.getType());
@@ -287,7 +287,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException {
             @NotNull BytesStore bytes;
             bytes = (BytesStore) field.get(o);
             if (bytes == null) {
@@ -302,7 +302,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IORuntimeException, IllegalArgumentException, IllegalStateException, ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalAccessException {
+                throws IORuntimeException, IllegalArgumentException, ClosedIllegalStateException, ArithmeticException, BufferUnderflowException, BufferOverflowException, IllegalAccessException {
             @NotNull Bytes<?> bytes = (Bytes) field.get(o);
             long stopBit = read.readStopBit();
             if (stopBit == -1) {
@@ -335,7 +335,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException, ThreadingIllegalStateException {
             Object[] c = (Object[]) field.get(o);
             if (c == null) {
                 BytesInternal.writeStopBitNeg1(write);
@@ -351,7 +351,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, ArithmeticException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
             Object[] c = (Object[]) field.get(o);
             int length = Maths.toInt32(read.readStopBit());
             if (length < 0) {
@@ -403,7 +403,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException, ThreadingIllegalStateException {
             Collection c = (Collection) field.get(o);
             if (c == null) {
                 BytesInternal.writeStopBitNeg1(write);
@@ -425,7 +425,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, BytesIn<?> read)
-                throws IllegalStateException, ArithmeticException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
+                throws ClosedIllegalStateException, ArithmeticException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
             Collection c = (Collection) field.get(o);
             int length = Maths.toInt32(read.readStopBit());
             if (length < 0) {
@@ -476,7 +476,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, BufferUnderflowException, ArithmeticException, InvalidMarshallableException, IllegalAccessException, ThreadingIllegalStateException {
             Map<?, ?> m = (Map) field.get(o);
             if (m == null) {
                 BytesInternal.writeStopBitNeg1(write);
@@ -491,7 +491,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, BytesIn<?> read)
-                throws IllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IllegalAccessException {
             Map m = (Map) field.get(o);
             long length = read.readStopBit();
             if (length < 0) {
@@ -517,14 +517,14 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalArgumentException, BufferOverflowException, IllegalStateException, IllegalAccessException {
+                throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeBoolean(field.getBoolean(o));
 
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalArgumentException, IllegalAccessException {
+                throws IllegalArgumentException, IllegalAccessException, ClosedIllegalStateException {
             field.setBoolean(o, read.readBoolean());
         }
     }
@@ -536,13 +536,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeByte(field.getByte(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, IllegalAccessException {
             field.setByte(o, read.readByte());
         }
     }
@@ -554,7 +554,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             byte[] array = (byte[]) field.get(o);
             if (array == null) {
                 write.writeInt(~0);
@@ -566,7 +566,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
@@ -588,7 +588,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
             char aChar = field.getChar(o);
             if (aChar >= 65536 - 127)
                 write.writeStopBit(aChar - 65536L);
@@ -598,7 +598,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, IllegalArgumentException, BufferUnderflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, IllegalAccessException {
             field.setChar(o, read.readStopBitChar());
         }
     }
@@ -610,13 +610,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalArgumentException, BufferOverflowException, IllegalStateException, IllegalAccessException {
+                throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeShort(field.getShort(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             field.setShort(o, read.readShort());
         }
     }
@@ -628,13 +628,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeInt(field.getInt(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             field.setInt(o, read.readInt());
         }
     }
@@ -646,7 +646,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException, ThreadingIllegalStateException {
             int[] array;
             array = (int[]) field.get(o);
             if (array == null) {
@@ -660,7 +660,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
@@ -683,13 +683,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeFloat(field.getFloat(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             field.setFloat(o, read.readFloat());
         }
     }
@@ -701,7 +701,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             float[] array;
             array = (float[]) field.get(o);
             if (array == null) {
@@ -715,7 +715,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
@@ -738,13 +738,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeLong(field.getLong(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             field.setLong(o, read.readLong());
         }
     }
@@ -756,7 +756,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException, ThreadingIllegalStateException {
             long[] array;
             array = (long[]) field.get(o);
             if (array == null) {
@@ -770,7 +770,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);
@@ -793,13 +793,13 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             write.writeDouble(field.getDouble(o));
         }
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             field.setDouble(o, read.readDouble());
         }
     }
@@ -811,7 +811,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
-                throws IllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException {
+                throws ClosedIllegalStateException, IllegalArgumentException, BufferOverflowException, IllegalAccessException, ThreadingIllegalStateException {
             double[] array;
             array = (double[]) field.get(o);
             if (array == null) {
@@ -825,7 +825,7 @@ public class BytesMarshaller<T> {
 
         @Override
         protected void setValue(Object o, @NotNull BytesIn<?> read)
-                throws IllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
+                throws ClosedIllegalStateException, BufferUnderflowException, IllegalArgumentException, IllegalAccessException {
             int len = read.readInt();
             if (len == ~0) {
                 field.set(o, null);

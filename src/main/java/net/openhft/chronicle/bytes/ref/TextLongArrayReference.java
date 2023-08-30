@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -67,11 +69,12 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      *
      * @param bytes    the Bytes instance to write to.
      * @param capacity the capacity of the long array to be written.
-     * @throws IllegalArgumentException if an illegal argument is provided.
-     * @throws IllegalStateException    if an invalid state is encountered.
-     * @throws BufferOverflowException  if there's not enough space in the buffer to write the array.
-     * @throws ArithmeticException      if numeric overflow occurs.
-     * @throws BufferUnderflowException if there's not enough data available to read.
+     * @throws IllegalArgumentException If an illegal argument is provided.
+     * @throws BufferOverflowException  If there's not enough space in the buffer to write the array.
+     * @throws ArithmeticException      If numeric overflow occurs.
+     * @throws BufferUnderflowException If there's not enough data available to read.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalArgumentException, IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException {
@@ -99,8 +102,9 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      * @param bytes  the BytesStore containing the structure.
      * @param offset the position in bytes where the structure starts.
      * @return the estimated length in bytes.
-     * @throws IllegalStateException    if an invalid state is encountered.
-     * @throws BufferUnderflowException if there's not enough data available to read.
+     * @throws BufferUnderflowException If there's not enough data available to read.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException, BufferUnderflowException {
@@ -113,7 +117,8 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
      * Get the number of elements that have been set in the array.
      *
      * @return The number of elements in use.
-     * @throws IllegalStateException if the underlying bytes store is in an invalid state.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long getUsed()

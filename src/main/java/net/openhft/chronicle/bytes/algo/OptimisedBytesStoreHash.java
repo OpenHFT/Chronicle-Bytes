@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -49,8 +51,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param store     The {@link BytesStore} to compute the hash for.
      * @param remaining The number of bytes to process.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException    If the underlying memory is not readable.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static long applyAsLong1to7(@NotNull BytesStore store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -63,8 +66,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      *
      * @param store The {@link BytesStore} to compute the hash for.
      * @return A 64-bit hash value.
-     * @throws IllegalStateException    If the underlying memory is not readable.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static long applyAsLong8(@NotNull BytesStore store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
@@ -351,8 +355,9 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @param store     the BytesStore to hash.
      * @param remaining the length of content in BytesStore to hash.
      * @return the hash value.
-     * @throws IllegalStateException    if an illegal state is encountered.
-     * @throws BufferUnderflowException if buffer underflows during reading.
+     * @throws BufferUnderflowException If buffer underflows during reading.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long applyAsLong(@NotNull BytesStore store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {

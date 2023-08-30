@@ -23,8 +23,10 @@ import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -83,7 +85,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     public static void warmup() {
-        final List<IOException> errorsDuringWarmup = new ArrayList<>();
+        final List<Exception> errorsDuringWarmup = new ArrayList<>();
         ExceptionHandler error = Jvm.error().defaultHandler();
         ExceptionHandler warn = Jvm.warn().defaultHandler();
         ExceptionHandler debug = Jvm.debug().defaultHandler();
@@ -113,7 +115,7 @@ public class ChunkedMappedFile extends MappedFile {
         }
     }
 
-    private static void warmupChunks(List<IOException> errorsDuringWarmup,
+    private static void warmupChunks(List<Exception> errorsDuringWarmup,
                                      File file,
                                      long mapAlignment,
                                      @NonNegative int chunks) {
@@ -124,14 +126,14 @@ public class ChunkedMappedFile extends MappedFile {
                 }
             }
             Thread.yield();
-        } catch (IOException e) {
+        } catch (Exception e) {
             errorsDuringWarmup.add(e);
         }
     }
 
     private static void warmup0(final long mapAlignment,
                                 @NonNegative final int chunks,
-                                @NotNull final ChunkedMappedFile mappedFile) {
+                                @NotNull final ChunkedMappedFile mappedFile) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
             ReferenceOwner warmup = ReferenceOwner.temporary("warmup");
             for (int i = 0; i < chunks; i++) {
@@ -154,7 +156,7 @@ public class ChunkedMappedFile extends MappedFile {
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
             IllegalArgumentException,
-            IllegalStateException {
+            ClosedIllegalStateException, ThreadingIllegalStateException {
 
         throwExceptionIfClosed();
 
@@ -286,7 +288,7 @@ public class ChunkedMappedFile extends MappedFile {
                         // so ensure that it is released
                         try {
                             mbs.release(this);
-                        } catch (IllegalStateException e) {
+                        } catch (ClosedIllegalStateException e) {
                             Jvm.debug().on(getClass(), e);
                         }
                     }
@@ -415,7 +417,7 @@ public class ChunkedMappedFile extends MappedFile {
     }
 
     @Override
-    public MappedBytes createBytesFor() {
+    public MappedBytes createBytesFor() throws ClosedIllegalStateException {
         return new ChunkedMappedBytes(this);
     }
 }

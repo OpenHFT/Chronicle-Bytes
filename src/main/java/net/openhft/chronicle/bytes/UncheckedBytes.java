@@ -22,6 +22,8 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -53,7 +55,8 @@ public class UncheckedBytes<U>
      * Constructs an UncheckedBytes instance by wrapping around the provided Bytes object.
      *
      * @param underlyingBytes the Bytes object to wrap around
-     * @throws IllegalStateException if the underlyingBytes instance is not valid
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public UncheckedBytes(@NotNull Bytes<?> underlyingBytes)
             throws IllegalStateException {
@@ -72,7 +75,8 @@ public class UncheckedBytes<U>
      * reserves the BytesStore of the new underlying Bytes.
      *
      * @param bytes the new underlying Bytes instance
-     * @throws IllegalStateException if the bytes instance is not valid
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public void setBytes(@NotNull Bytes<?> bytes)
             throws IllegalStateException {

@@ -16,6 +16,10 @@
  * limitations under the License.
  */
 package net.openhft.chronicle.bytes.render;
+
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
+
 /**
  * This interface represents a handler for decimal numbers, and defines how they should be appended in various forms.
  * Implementations of this interface should provide strategies for handling the individual components of a decimal number,
@@ -41,6 +45,9 @@ public interface DecimalAppender {
      *                   {@code false} indicates a positive number.
      * @param mantissa   The significant digits of the decimal number, represented as a long integer.
      * @param exponent   The power of 10 by which the mantissa is scaled to obtain the actual decimal number.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    void append(boolean isNegative, long mantissa, int exponent);
+    void append(boolean isNegative, long mantissa, int exponent)
+            throws ClosedIllegalStateException, ThreadingIllegalStateException;
 }

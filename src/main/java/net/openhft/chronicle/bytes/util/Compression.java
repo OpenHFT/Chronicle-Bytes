@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.StringUtils;
 import net.openhft.chronicle.core.util.ThrowingFunction;
 import org.jetbrains.annotations.NotNull;
@@ -40,8 +42,9 @@ public interface Compression {
      * @param cs           The compression algorithm to be used (e.g. "lzw", "gzip").
      * @param uncompressed The input data to be compressed.
      * @param compressed   The output to write the compressed data.
-     * @throws IllegalStateException   if the compression algorithm fails.
-     * @throws BufferOverflowException if there is not enough space in the output buffer.
+     * @throws BufferOverflowException        If there is not enough space in the output buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static void compress(@NotNull CharSequence cs, @NotNull Bytes<?> uncompressed, @NotNull Bytes<?> compressed)
             throws IllegalStateException, BufferOverflowException {
@@ -70,10 +73,11 @@ public interface Compression {
      * @param cs   The compression algorithm to be used (e.g. "lzw", "gzip").
      * @param from The input compressed data.
      * @param to   The output to write the uncompressed data.
-     * @throws IORuntimeException       if an I/O error occurs.
-     * @throws IllegalArgumentException if the algorithm is unsupported.
-     * @throws IllegalStateException    if the uncompression algorithm fails.
-     * @throws BufferOverflowException  if there is not enough space in the output buffer.
+     * @throws IORuntimeException             If an I/O error occurs.
+     * @throws IllegalArgumentException       If the algorithm is unsupported.
+     * @throws BufferOverflowException        If there is not enough space in the output buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     static void uncompress(@NotNull CharSequence cs, @NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalArgumentException, IllegalStateException, BufferOverflowException {
@@ -106,7 +110,7 @@ public interface Compression {
      * @param t     The input data.
      * @param bytes A function to read bytes from the input data.
      * @return The uncompressed data as byte array.
-     * @throws IORuntimeException if an I/O error occurs.
+     * @throws IORuntimeException If an I/O error occurs.
      */
     static <T> byte[] uncompress(@NotNull CharSequence cs, T t, @NotNull ThrowingFunction<T, byte[], IORuntimeException> bytes)
             throws IORuntimeException {
@@ -152,8 +156,9 @@ public interface Compression {
      *
      * @param from The input data to be compressed.
      * @param to   The output to write the compressed data.
-     * @throws IllegalStateException   if the compression algorithm fails.
-     * @throws BufferOverflowException if there is not enough space in the output buffer.
+     * @throws BufferOverflowException        If there is not enough space in the output buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
         try (OutputStream output = compressingStream(to.outputStream())) {
@@ -169,7 +174,7 @@ public interface Compression {
      *
      * @param bytes The input compressed data as byte array.
      * @return The uncompressed data as byte array.
-     * @throws IORuntimeException if an I/O error occurs.
+     * @throws IORuntimeException If an I/O error occurs.
      */
     default byte[] uncompress(byte[] bytes)
             throws IORuntimeException {
@@ -190,9 +195,10 @@ public interface Compression {
      *
      * @param from The input compressed data.
      * @param to   The output to write the uncompressed data.
-     * @throws IORuntimeException      if an I/O error occurs.
-     * @throws IllegalStateException   if the uncompression algorithm fails.
-     * @throws BufferOverflowException if there is not enough space in the output buffer.
+     * @throws IORuntimeException             If an I/O error occurs.
+     * @throws BufferOverflowException        If there is not enough space in the output buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to)
             throws IORuntimeException, IllegalStateException, BufferOverflowException {
@@ -209,7 +215,7 @@ public interface Compression {
      *
      * @param input the underlying InputStream to read compressed data from.
      * @return a decompressing InputStream.
-     * @throws IORuntimeException if an I/O error occurs.
+     * @throws IORuntimeException If an I/O error occurs.
      */
     InputStream decompressingStream(InputStream input)
             throws IORuntimeException;

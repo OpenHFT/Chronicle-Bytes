@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongValue;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -98,8 +100,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * <p>
      * This method is used for debugging and monitoring. It should not be used in production environments.
      *
-     * @throws IllegalStateException   if the BinaryLongArrayReference is in an invalid state.
-     * @throws BufferOverflowException if the bytes cannot be written.
+     * @throws BufferOverflowException If the bytes cannot be written.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void forceAllToNotCompleteState()
             throws IllegalStateException, BufferOverflowException {
@@ -133,9 +136,10 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param bytes    the Bytes object to write to.
      * @param capacity the capacity to be written and used for subsequent zeroing.
-     * @throws BufferOverflowException  if there is insufficient space in the buffer.
-     * @throws IllegalArgumentException if arguments violate precondition constraints.
-     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     * @throws BufferOverflowException  If there is insufficient space in the buffer.
+     * @throws IllegalArgumentException If arguments violate precondition constraints.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
@@ -155,8 +159,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param bytes    the Bytes object to write to.
      * @param capacity the capacity to be written.
-     * @throws BufferOverflowException if there is insufficient space in the buffer.
-     * @throws IllegalStateException   if the Bytes object is in an incorrect state.
+     * @throws BufferOverflowException If there is insufficient space in the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void lazyWrite(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws BufferOverflowException, IllegalStateException {
@@ -174,8 +179,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @param bytes  the BytesStore object to read from.
      * @param offset the offset at which to start reading.
      * @return the calculated peak length.
-     * @throws BufferUnderflowException if there is not enough remaining data.
-     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     * @throws BufferUnderflowException If there is not enough remaining data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
@@ -194,8 +200,9 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      * @param offset       the offset at which to start reading.
      * @param capacityHint the capacity to be used if the initial capacity is 0.
      * @return the calculated peak length.
-     * @throws BufferUnderflowException if there is not enough remaining data.
-     * @throws IllegalStateException    if the Bytes object is in an incorrect state.
+     * @throws BufferUnderflowException If there is not enough remaining data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset, long capacityHint)
             throws BufferUnderflowException, IllegalStateException {

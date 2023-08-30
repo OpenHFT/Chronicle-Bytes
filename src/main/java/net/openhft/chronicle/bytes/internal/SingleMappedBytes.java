@@ -23,7 +23,9 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -51,7 +53,8 @@ public class SingleMappedBytes extends CommonMappedBytes {
      * Constructs a SingleMappedBytes object wrapping the memory mapped to the specified file.
      *
      * @param mappedFile The MappedFile object to be wrapped.
-     * @throws IllegalStateException if an error occurs during initialization.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public SingleMappedBytes(@NotNull final MappedFile mappedFile)
             throws IllegalStateException {
@@ -63,7 +66,8 @@ public class SingleMappedBytes extends CommonMappedBytes {
      *
      * @param mappedFile The MappedFile object to be wrapped.
      * @param name       The name to be associated with the SingleMappedBytes object.
-     * @throws IllegalStateException if an error occurs during initialization.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     protected SingleMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws IllegalStateException {

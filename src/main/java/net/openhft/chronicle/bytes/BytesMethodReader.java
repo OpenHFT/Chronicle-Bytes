@@ -18,8 +18,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
 import net.openhft.chronicle.core.io.SimpleCloseable;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.InvocationTargetRuntimeException;
 import net.openhft.chronicle.core.util.ObjectUtils;
 
@@ -139,9 +141,10 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
      * If the reader is closed or if there are no more messages to read, the method returns {@code false}.
      *
      * @return {@code true} if a message was successfully read, {@code false} if no more messages are available
-     * @throws InvocationTargetRuntimeException if an exception is thrown by the target method
-     * @throws IllegalStateException            if this method is invoked when the reader is closed
-     * @throws BufferUnderflowException         if there is not enough data available in the buffer to read the next message
+     * @throws InvocationTargetRuntimeException If an exception is thrown by the target method
+     * @throws BufferUnderflowException         If there is not enough data available in the buffer to read the next message
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public boolean readOne()
             throws InvocationTargetRuntimeException, IllegalStateException, BufferUnderflowException {

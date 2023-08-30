@@ -22,8 +22,10 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.InvalidMarshallableException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -131,7 +133,7 @@ public enum BytesUtil {
         int min = 0;
         int max = 0;
         for (Field field : fields) {
-            final FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
+            final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
             if (fieldGroup != null && FieldGroup.HEADER.equals(fieldGroup.value()))
                 continue;
             int start = (int) MEMORY.objectFieldOffset(field);
@@ -222,7 +224,7 @@ public enum BytesUtil {
         URL url = null;
         if (!file.exists()) {
             url = urlFor(Thread.currentThread().getContextClassLoader(), name);
-            String file2 = url.getFile()
+            String file2 = url.getFile().replace("%20", " ")
                     .replace("target/test-classes", "src/test/resources");
             file = new File(file2);
         }
@@ -278,12 +280,13 @@ public enum BytesUtil {
      * @param len          The number of bytes to compare.
      * @return true if the bytes are equal, false otherwise.
      * @throws BufferUnderflowException If there is insufficient data.
-     * @throws IllegalStateException    If an illegal state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static boolean bytesEqual(
             @NotNull RandomDataInput a, @NonNegative long offset,
             @NotNull RandomDataInput second, long secondOffset, long len)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, IllegalStateException, ClosedIllegalStateException {
         long i = 0;
         while (len - i >= 8L) {
             if (a.readLong(offset + i) != second.readLong(secondOffset + i))
@@ -313,8 +316,9 @@ public enum BytesUtil {
      * @param offset The starting position in the RandomDataInput object.
      * @param length The number of bytes to compare.
      * @return true if the bytes are equal to the CharSequence, false otherwise.
-     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static boolean bytesEqual(@Nullable CharSequence cs, @NotNull RandomDataInput bs, @NonNegative long offset, @NonNegative int length)
             throws IllegalStateException, BufferUnderflowException {
@@ -375,8 +379,9 @@ public enum BytesUtil {
      * @param bytes The Bytes object to convert.
      * @return The character array converted from the bytes.
      * @throws ArithmeticException      If there is an arithmetic error.
-     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static char[] toCharArray(@NotNull Bytes<?> bytes)
@@ -396,8 +401,9 @@ public enum BytesUtil {
      * @param position The starting position in the Bytes object.
      * @param length   The number of bytes to convert.
      * @return The character array converted from the bytes.
-     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     public static char[] toCharArray(@NotNull Bytes<?> bytes, @NonNegative long position, @NonNegative int length)
@@ -417,10 +423,11 @@ public enum BytesUtil {
      * @param in The StreamingDataInput to read from.
      * @return The integer read.
      * @throws IORuntimeException    If an IO error occurs.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static long readStopBit(@NotNull StreamingDataInput in)
-            throws IORuntimeException, IllegalStateException {
+            throws IORuntimeException, IllegalStateException, ClosedIllegalStateException {
         return BytesInternal.readStopBit(in);
     }
 
@@ -429,11 +436,12 @@ public enum BytesUtil {
      *
      * @param out The StreamingDataOutput to write to.
      * @param n   The integer to write.
-     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void writeStopBit(@NotNull StreamingDataOutput out, long n)
-            throws IllegalStateException, BufferOverflowException {
+            throws IllegalStateException, BufferOverflowException, ClosedIllegalStateException {
         BytesInternal.writeStopBit(out, n);
     }
 
@@ -444,11 +452,12 @@ public enum BytesUtil {
      * @param offset The position in the BytesStore to start writing.
      * @param n      The integer to write.
      * @return The resulting offset after writing.
-     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static long writeStopBit(BytesStore bs, @NonNegative long offset, @NonNegative long n)
-            throws IllegalStateException, BufferOverflowException {
+            throws IllegalStateException, BufferOverflowException, ClosedIllegalStateException {
         return BytesInternal.writeStopBit(bs, offset, n);
     }
 
@@ -458,11 +467,12 @@ public enum BytesUtil {
      * @param addr The memory address to write to.
      * @param n    The integer to write.
      * @return The resulting memory address after writing.
-     * @throws IllegalStateException   If an illegal state is encountered.
      * @throws BufferOverflowException If there is insufficient space.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static long writeStopBit(long addr, long n)
-            throws IllegalStateException, BufferOverflowException {
+            throws BufferOverflowException {
         return BytesInternal.writeStopBit(addr, n);
     }
 
@@ -473,12 +483,13 @@ public enum BytesUtil {
      * @param appendable The Appendable to append to.
      * @param utflen     The length of the UTF-8 string.
      * @throws UTFDataFormatRuntimeException If the UTF-8 format is invalid.
-     * @throws IllegalStateException         If an illegal state is encountered.
      * @throws BufferUnderflowException      If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void parseUtf8(
             @NotNull StreamingDataInput in, Appendable appendable, @NonNegative int utflen)
-            throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
+            throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException, ClosedIllegalStateException {
         BytesInternal.parseUtf8(in, appendable, true, utflen);
     }
 
@@ -488,9 +499,11 @@ public enum BytesUtil {
      * @param out The StreamingDataOutput to write to.
      * @param cs  The CharSequence to write.
      * @throws IndexOutOfBoundsException If the CharSequence length is out of bounds.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void appendUtf8(@NotNull StreamingDataOutput out, @NotNull CharSequence cs)
-            throws IndexOutOfBoundsException {
+            throws IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.appendUtf8(out, cs, 0, cs.length());
     }
 
@@ -500,7 +513,8 @@ public enum BytesUtil {
      * @param bytes         The Bytes object.
      * @param startPosition The start position in the Bytes object.
      * @param sb            The StringBuilder to append to.
-     * @throws IllegalStateException If an illegal state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     // used by Chronicle FIX.
     public static void appendBytesFromStart(@NotNull Bytes<?> bytes, @NonNegative long startPosition, @NotNull StringBuilder sb)
@@ -520,6 +534,8 @@ public enum BytesUtil {
      * @param marshallable The Marshallable object to read.
      * @param bytes        The BytesIn object to read from.
      * @throws InvalidMarshallableException If the Marshallable object is invalid.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) throws InvalidMarshallableException {
         BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
@@ -531,11 +547,12 @@ public enum BytesUtil {
      *
      * @param marshallable The Marshallable object to write.
      * @param bytes        The BytesOut object to write to.
-     * @throws IllegalStateException        If an illegal state is encountered.
      * @throws BufferOverflowException      If there is insufficient space.
      * @throws ArithmeticException          If an arithmetic error occurs.
      * @throws BufferUnderflowException     If there is insufficient data.
      * @throws InvalidMarshallableException If the Marshallable object is invalid.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
@@ -592,8 +609,9 @@ public enum BytesUtil {
      * Reads padding bytes from a Bytes object to align the read position to the nearest 8-byte boundary.
      *
      * @param bytes The Bytes object.
-     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void read8ByteAlignPadding(Bytes<?> bytes)
             throws IllegalStateException, BufferUnderflowException {
@@ -605,10 +623,11 @@ public enum BytesUtil {
      *
      * @param bytes The Bytes object.
      * @throws BufferOverflowException If there is insufficient space.
-     * @throws IllegalStateException   If an illegal state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void write8ByteAlignPadding(Bytes<?> bytes)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException {
         long start = bytes.writePosition();
         long end = roundUpTo8ByteAlign(start);
         bytes.writePosition(end);
@@ -622,12 +641,10 @@ public enum BytesUtil {
      * @param start     The starting position.
      * @param maxLength The maximum length.
      * @return The debug string.
-     * @throws IllegalStateException    If an illegal state is encountered.
      * @throws BufferUnderflowException If there is insufficient data.
-     * @throws ArithmeticException      If an arithmetic error occurs.
      */
     public static String toDebugString(@NotNull RandomDataInput bytes, @NonNegative long start, @NonNegative long maxLength)
-            throws IllegalStateException, BufferUnderflowException, ArithmeticException {
+            throws IllegalStateException, BufferUnderflowException {
         BytesStore bytes2 = bytes.subBytes(start, maxLength);
         return bytes2.toDebugString(maxLength);
     }
@@ -638,8 +655,10 @@ public enum BytesUtil {
      * @param bs              The BytesStore object.
      * @param addressForWrite The address for writing.
      * @param length          The length of data to copy.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) {
+    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
         BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
@@ -648,8 +667,10 @@ public enum BytesUtil {
      *
      * @param text  The Bytes object.
      * @param start The starting position.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    public static void reverse(Bytes<?> text, @NonNegative int start) {
+    public static void reverse(Bytes<?> text, @NonNegative int start) throws ClosedIllegalStateException {
         long rp = text.readPosition();
         int end = text.length() - 1;
         int mid = (start + end + 1) / 2;
@@ -668,6 +689,7 @@ public enum BytesUtil {
      * @param factor The factor.
      * @return The rounded value.
      */
+    @Deprecated(/* to be removed in x.26 */)
     public static long roundNup(double d, long factor) {
         boolean neg = d < 0;
         d = Math.abs(d);
@@ -698,6 +720,8 @@ public enum BytesUtil {
      * the last character is removed.
      *
      * @param bytes to check and trim as needed.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void combineDoubleNewline(Bytes<?> bytes) {
         long wp = bytes.writePosition();
@@ -749,10 +773,11 @@ public enum BytesUtil {
      *
      * @param bytes The Bytes object to copy.
      * @return A copy of the given Bytes object.
-     * @throws IllegalStateException If the Bytes object has been released.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         final long remaining = bytes.readRemaining();
         if (remaining == 0)

@@ -155,7 +155,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      * the lowest two digits of the microseconds is the hostId, ensuring uniqueness across different hosts.
      *
      * @return the timestamps with hostId as a long
-     * @throws IllegalStateException if the underlying resources have been released/closed
      */
     @Override
     public long currentTimeMicros() throws IllegalStateException {
@@ -200,7 +199,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
      * The lowest two digits of the nanoseconds is the hostId, providing uniqueness across different hosts.
      *
      * @return the timestamps with hostId as a long
-     * @throws IllegalStateException if the underlying resources have been released/closed
      */
     @Override
     public long currentTimeNanos() throws IllegalStateException {
@@ -318,5 +316,4 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             }
         }
     }
-
 }

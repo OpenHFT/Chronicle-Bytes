@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.HexDumpBytes;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -61,9 +63,10 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * @param bytes  The BytesStore from which bytes will be stored.
      * @param offset The starting point in bytes from where the value will be stored.
      * @param length The number of bytes that should be stored.
-     * @throws IllegalStateException    If the BinaryLongReference is in an invalid state.
      * @throws IllegalArgumentException If the length provided is not equal to 8.
      * @throws BufferOverflowException  If the bytes cannot be written.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @SuppressWarnings("rawtypes")
     @Override
@@ -111,7 +114,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Retrieves the 64-bit long value from the BytesStore.
      *
      * @return the 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long getValue()
@@ -123,7 +127,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value in the BytesStore.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setValue(long value)
@@ -140,7 +145,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Retrieves the 64-bit long value using volatile memory semantics.
      *
      * @return the 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long getVolatileValue()
@@ -157,7 +163,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value using volatile memory semantics.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setVolatileValue(long value)
@@ -174,7 +181,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * Sets the 64-bit long value using ordered or lazy set memory semantics.
      *
      * @param value the 64-bit long value to set
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public void setOrderedValue(long value)
@@ -192,7 +200,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      *
      * @param delta the value to add
      * @return the resulting 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long addValue(long delta)
@@ -210,7 +219,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      *
      * @param delta the value to add
      * @return the resulting 64-bit long value
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long addAtomicValue(long delta)
@@ -225,7 +235,8 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
      * @param expected the expected 64-bit long value
      * @param value    the new 64-bit long value
      * @return true if successful, false otherwise
-     * @throws IllegalStateException if closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public boolean compareAndSwapValue(long expected, long value)

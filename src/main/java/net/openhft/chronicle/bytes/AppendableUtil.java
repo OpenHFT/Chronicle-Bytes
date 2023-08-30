@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.Java9;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -48,8 +49,8 @@ public enum AppendableUtil {
      * @param sb    the Appendable to modify
      * @param index the index at which to set the character
      * @param ch    the character to set
-     * @throws IllegalArgumentException if the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException  if the index is larger than the buffer's capacity
+     * @throws IllegalArgumentException If the Appendable is not of type StringBuilder or Bytes
+     * @throws BufferOverflowException  If the index is larger than the buffer's capacity
      */
     public static void setCharAt(@NotNull Appendable sb, @NonNegative int index, char ch)
             throws IllegalArgumentException, BufferOverflowException {
@@ -68,12 +69,12 @@ public enum AppendableUtil {
      * @param sb     the StringBuilder to append to
      * @param utf    whether to parse as UTF-8
      * @param length the length of characters to parse
-     * @throws UTFDataFormatRuntimeException if invalid UTF-8 sequence is encountered
-     * @throws BufferUnderflowException      if the BytesStore doesn't contain enough data
-     * @throws IllegalStateException         if the BytesStore is closed
+     * @throws UTFDataFormatRuntimeException If invalid UTF-8 sequence is encountered
+     * @throws BufferUnderflowException      If the BytesStore doesn't contain enough data
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, @NonNegative int length)
-            throws UTFDataFormatRuntimeException, BufferUnderflowException, IllegalStateException {
+            throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }
 
@@ -82,12 +83,12 @@ public enum AppendableUtil {
      *
      * @param sb        the Appendable to modify
      * @param newLength the new length to set
-     * @throws IllegalArgumentException if the Appendable is not of type StringBuilder or Bytes
-     * @throws IllegalStateException    if the Bytes is closed
-     * @throws BufferUnderflowException if the new length is greater than the Bytes's capacity
+     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws BufferUnderflowException    If the new length is greater than the Bytes's capacity
      */
     public static void setLength(@NotNull Appendable sb, @NonNegative int newLength)
-            throws IllegalArgumentException, IllegalStateException, BufferUnderflowException {
+            throws IllegalArgumentException, ClosedIllegalStateException, BufferUnderflowException {
         requireNonNull(sb);
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).setLength(newLength);
@@ -102,12 +103,12 @@ public enum AppendableUtil {
      *
      * @param sb    the Appendable to append to
      * @param value the double value to append
-     * @throws IllegalArgumentException if the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException  if there is not enough space in the Bytes to append the value
-     * @throws IllegalStateException    if the Bytes is closed
+     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
+     * @throws BufferOverflowException     If there is not enough space in the Bytes to append the value
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void append(@NotNull Appendable sb, double value)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
+            throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -121,12 +122,12 @@ public enum AppendableUtil {
      *
      * @param sb    the Appendable to append to
      * @param value the long value to append
-     * @throws IllegalArgumentException if the Appendable is not of type StringBuilder or Bytes
-     * @throws BufferOverflowException  if there is not enough space in the Bytes to append the value
-     * @throws IllegalStateException    if the Bytes is closed
+     * @throws IllegalArgumentException    If the Appendable is not of type StringBuilder or Bytes
+     * @throws BufferOverflowException     If there is not enough space in the Bytes to append the value
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void append(@NotNull Appendable sb, long value)
-            throws IllegalArgumentException, BufferOverflowException, IllegalStateException {
+            throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
         if (sb instanceof StringBuilder)
             ((StringBuilder) sb).append(value);
         else if (sb instanceof Bytes)
@@ -156,12 +157,12 @@ public enum AppendableUtil {
      * @param bytes      the StreamingDataInput to read from
      * @param appendable the StringBuilder to append to
      * @param tester     the StopCharsTester defining the stop character
-     * @throws IllegalStateException if the StreamingDataInput is closed
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void read8bitAndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull StringBuilder appendable,
                                          @NotNull StopCharsTester tester)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c, bytes.peekUnsignedByte()))
@@ -179,13 +180,13 @@ public enum AppendableUtil {
      * @param bytes      the StreamingDataInput to read from
      * @param appendable the Appendable to append to
      * @param tester     the StopCharsTester defining the stop character
-     * @throws BufferUnderflowException if the StreamingDataInput is exhausted
-     * @throws IllegalStateException    if the StreamingDataInput is closed
+     * @throws BufferUnderflowException    If the StreamingDataInput is exhausted
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void readUTFAndAppend(@NotNull StreamingDataInput bytes,
                                         @NotNull Appendable appendable,
                                         @NotNull StopCharsTester tester)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         try {
             readUtf8AndAppend(bytes, appendable, tester);
         } catch (IOException e) {
@@ -200,14 +201,14 @@ public enum AppendableUtil {
      * @param bytes      the StreamingDataInput to read from
      * @param appendable the Appendable to append to
      * @param tester     the StopCharsTester defining the stop character
-     * @throws BufferUnderflowException if the StreamingDataInput is exhausted
-     * @throws IOException              if an I/O error occurs
-     * @throws IllegalStateException    if the StreamingDataInput is closed
+     * @throws BufferUnderflowException    If the StreamingDataInput is exhausted
+     * @throws IOException                 If an I/O error occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void readUtf8AndAppend(@NotNull StreamingDataInput bytes,
                                          @NotNull Appendable appendable,
                                          @NotNull StopCharsTester tester)
-            throws BufferUnderflowException, IOException, IllegalStateException {
+            throws BufferUnderflowException, IOException, ClosedIllegalStateException {
         while (true) {
             int c = bytes.readUnsignedByte();
             // If the character read is a multi-byte UTF-8 character, rewind and break the loop.
@@ -303,11 +304,11 @@ public enum AppendableUtil {
      * @param bytes  the input Bytes to read from
      * @param sb     the StringBuilder to append the characters to
      * @param length the number of characters to read
-     * @throws BufferUnderflowException if there are not enough characters available in the input
-     * @throws IllegalStateException    if the input is in an invalid state
+     * @throws BufferUnderflowException    If there are not enough characters available in the input
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void parse8bit_SB1(@NotNull Bytes<?> bytes, @NotNull StringBuilder sb, @NonNegative int length)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         if (length > bytes.readRemaining())
             throw new BufferUnderflowException();
         @Nullable NativeBytesStore nbs = (NativeBytesStore) bytes.bytesStore();
@@ -322,12 +323,12 @@ public enum AppendableUtil {
      * @param bytes      the input StreamingDataInput to read from
      * @param appendable the Appendable to append the characters to
      * @param utflen     the number of characters to read
-     * @throws BufferUnderflowException if there are not enough characters available in the input
-     * @throws IOException              if an I/O error occurs
-     * @throws IllegalStateException    if the input is in an invalid state
+     * @throws BufferUnderflowException    If there are not enough characters available in the input
+     * @throws IOException                 If an I/O error occurs
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     public static void parse8bit(@NotNull StreamingDataInput bytes, Appendable appendable, @NonNegative int utflen)
-            throws BufferUnderflowException, IOException, IllegalStateException {
+            throws BufferUnderflowException, IOException, ClosedIllegalStateException {
         if (appendable instanceof StringBuilder) {
             @NotNull final StringBuilder sb = (StringBuilder) appendable;
             if (bytes instanceof Bytes && ((Bytes) bytes).bytesStore() instanceof NativeBytesStore) {
@@ -347,13 +348,13 @@ public enum AppendableUtil {
      * @param cs    the CharSequence to read characters from
      * @param start the starting index of the subsequence
      * @param len   the number of characters in the subsequence
-     * @throws ArithmeticException      if an arithmetic error occurs
-     * @throws BufferUnderflowException if there are not enough characters available in the CharSequence
-     * @throws IllegalStateException    if the Appendable is in an invalid state
-     * @throws BufferOverflowException  if the Appendable cannot accept more characters
+     * @throws ArithmeticException         If an arithmetic error occurs
+     * @throws BufferUnderflowException    If there are not enough characters available in the CharSequence
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws BufferOverflowException     If the Appendable cannot accept more characters
      */
     public static <C extends Appendable & CharSequence> void append(C a, CharSequence cs, @NonNegative long start, @NonNegative long len)
-            throws ArithmeticException, BufferUnderflowException, IllegalStateException, BufferOverflowException {
+            throws ArithmeticException, BufferUnderflowException, ClosedIllegalStateException, BufferOverflowException {
         if (a instanceof StringBuilder) {
             if (cs instanceof Bytes)
                 ((StringBuilder) a).append(Bytes.toString(((Bytes) cs), start, len));
@@ -371,7 +372,7 @@ public enum AppendableUtil {
      *
      * @param str the CharSequence to calculate the length of
      * @return the length of the CharSequence in UTF-8
-     * @throws IndexOutOfBoundsException if the CharSequence has invalid indices
+     * @throws IndexOutOfBoundsException If the CharSequence has invalid indices
      */
     public static long findUtf8Length(@NotNull CharSequence str)
             throws IndexOutOfBoundsException {

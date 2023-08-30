@@ -18,7 +18,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceCounted;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -168,12 +170,13 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
-     * @throws UnsupportedOperationException if the underlying buffer is on the heap
-     * @throws BufferUnderflowException      if the offset is before the start() or the after the capacity()
-     * @throws IllegalStateException         if the buffer has been closed.
+     * @throws UnsupportedOperationException If the underlying buffer is on the heap
+     * @throws BufferUnderflowException      If the offset is before the start() or the after the capacity()
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForRead(@NonNegative long offset)
-            throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException;
+            throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Retrieves the underlying memory address for reading. This is for expert users only.
@@ -181,12 +184,13 @@ interface RandomCommon extends ReferenceCounted {
      * @param offset The offset within this buffer.
      * @param buffer The buffer index.
      * @return The underlying memory address for reading at the specified offset.
-     * @throws UnsupportedOperationException if the underlying buffer is on the heap.
-     * @throws BufferUnderflowException      if the offset is before the start or after the capacity.
-     * @throws IllegalStateException         if the buffer has been closed.
+     * @throws UnsupportedOperationException If the underlying buffer is on the heap.
+     * @throws BufferUnderflowException      If the offset is before the start or after the capacity.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     default long addressForRead(@NonNegative long offset, @NonNegative int buffer)
-            throws UnsupportedOperationException, BufferUnderflowException, IllegalStateException {
+            throws UnsupportedOperationException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return addressForRead(offset);
     }
 
@@ -195,22 +199,25 @@ interface RandomCommon extends ReferenceCounted {
      *
      * @param offset within this buffer. addressForRead(start()) is the actual addressForRead of the first byte.
      * @return the underlying addressForRead of the buffer
-     * @throws UnsupportedOperationException if the underlying buffer is on the heap
-     * @throws BufferOverflowException       if the offset is before the start() or the after the capacity()
+     * @throws UnsupportedOperationException If the underlying buffer is on the heap
+     * @throws BufferOverflowException       If the offset is before the start() or the after the capacity()
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForWrite(@NonNegative long offset)
-            throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
+            throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Retrieves the underlying memory address for writing at the current write position.  This is for expert users only.
      *
      * @return The underlying memory address for writing at the current write position.
-     * @throws UnsupportedOperationException if the underlying buffer is on the heap.
-     * @throws BufferOverflowException       if the current write position is before the start or after the capacity.
-     * @throws IllegalStateException         if the buffer state doesn't allow the operation.
+     * @throws UnsupportedOperationException If the underlying buffer is on the heap.
+     * @throws BufferOverflowException       If the current write position is before the start or after the capacity.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long addressForWritePosition()
-            throws UnsupportedOperationException, BufferOverflowException, IllegalStateException;
+            throws UnsupportedOperationException, BufferOverflowException, ClosedIllegalStateException;
 
     /**
      * Retrieves the byte order used by the buffer.
@@ -225,21 +232,23 @@ interface RandomCommon extends ReferenceCounted {
      * Retrieves a Bytes object for reading.
      *
      * @return A Bytes object for reading.
-     * @throws IllegalStateException if the buffer state doesn't allow the operation.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     Bytes<?> bytesForRead()
-            throws IllegalStateException;
+            throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Retrieves a Bytes object for writing.
      *
      * @return A Bytes object for writing.
-     * @throws IllegalStateException if the buffer state doesn't allow the operation.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     Bytes<?> bytesForWrite()
-            throws IllegalStateException;
+            throws ClosedIllegalStateException;
 
     /**
      * Checks if the Bytes use shared memory.

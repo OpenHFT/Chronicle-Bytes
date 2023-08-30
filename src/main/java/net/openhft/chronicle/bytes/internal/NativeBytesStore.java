@@ -22,7 +22,9 @@ import net.openhft.chronicle.core.*;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.cleaner.CleanerServiceLocator;
 import net.openhft.chronicle.core.cleaner.spi.ByteBufferCleanerService;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.SimpleCleaner;
 import org.jetbrains.annotations.NotNull;
@@ -235,7 +237,7 @@ public class NativeBytesStore<U>
 
     @Override
     public void move(@NonNegative long from, @NonNegative long to, @NonNegative long length)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         if (from < 0 || to < 0) throw new IllegalArgumentException();
         long addr = this.address;
         if (addr == 0) throwException(null);
@@ -243,7 +245,7 @@ public class NativeBytesStore<U>
     }
 
     private void memoryCopyMemory(long fromAddress, long toAddress, @NonNegative long length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         if (length < 0) throw new IllegalArgumentException();
         try {
             memory.copyMemory(fromAddress, toAddress, length);
@@ -253,15 +255,15 @@ public class NativeBytesStore<U>
     }
 
     private void throwException(Throwable ifReleased)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         throwExceptionIfReleased();
-        throw new IllegalStateException(ifReleased);
+        throw new ClosedIllegalStateException("Closed", ifReleased);
     }
 
     @NotNull
     @Override
     public BytesStore<NativeBytesStore<U>, U> copy()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         if (underlyingObject == null) {
             @NotNull NativeBytesStore<Void> copy = of(realCapacity(), false, true);
             memoryCopyMemory(address, copy.address, capacity());
@@ -281,7 +283,7 @@ public class NativeBytesStore<U>
     @NotNull
     @Override
     public VanillaBytes<U> bytesForWrite()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return elastic
                 ? NativeBytes.wrapWithNativeBytes(this, this.capacity())
                 : new NativeBytes<>(this);
@@ -334,19 +336,19 @@ public class NativeBytesStore<U>
 
     @Override
     public boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return memory.compareAndSwapInt(address + translate(offset), expected, value);
     }
 
     @Override
     public void testAndSetInt(@NonNegative long offset, int expected, int value)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         memory.testAndSetInt(address + translate(offset), offset, expected, value);
     }
 
     @Override
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
@@ -426,16 +428,14 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeByte(@NonNegative long offset, byte i8)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeByte(@NonNegative long offset, byte i8) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeByte(address + translate(offset), i8);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeShort(@NonNegative long offset, short i16)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeShort(@NonNegative long offset, short i16) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeShort(address + translate(offset), i16);
         return this;
     }
@@ -443,7 +443,7 @@ public class NativeBytesStore<U>
     @NotNull
     @Override
     public NativeBytesStore<U> writeInt(@NonNegative long offset, int i32)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         try {
             memory.writeInt(address + translate(offset), i32);
             return this;
@@ -455,72 +455,63 @@ public class NativeBytesStore<U>
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedInt(@NonNegative long offset, int i)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeOrderedInt(@NonNegative long offset, int i) {
         memory.writeOrderedInt(address + translate(offset), i);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeLong(@NonNegative long offset, long i64)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeLong(@NonNegative long offset, long i64) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeLong(address + translate(offset), i64);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeOrderedLong(@NonNegative long offset, long i)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeOrderedLong(@NonNegative long offset, long i) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeOrderedLong(address + translate(offset), i);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeFloat(@NonNegative long offset, float f)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeFloat(@NonNegative long offset, float f) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeFloat(address + translate(offset), f);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeDouble(@NonNegative long offset, double d)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeDouble(@NonNegative long offset, double d) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeDouble(address + translate(offset), d);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileByte(@NonNegative long offset, byte i8)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeVolatileByte(@NonNegative long offset, byte i8) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeVolatileByte(address + translate(offset), i8);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileShort(@NonNegative long offset, short i16)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeVolatileShort(@NonNegative long offset, short i16) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeVolatileShort(address + translate(offset), i16);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileInt(@NonNegative long offset, int i32)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeVolatileInt(@NonNegative long offset, int i32) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeVolatileInt(address + translate(offset), i32);
         return this;
     }
 
     @NotNull
     @Override
-    public NativeBytesStore<U> writeVolatileLong(@NonNegative long offset, long i64)
-            throws IllegalStateException {
+    public NativeBytesStore<U> writeVolatileLong(@NonNegative long offset, long i64) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         memory.writeVolatileLong(address + translate(offset), i64);
         return this;
     }
@@ -530,7 +521,7 @@ public class NativeBytesStore<U>
     public NativeBytesStore<U> write(@NonNegative final long offsetInRDO,
                                      final byte[] byteArray,
                                      @NonNegative final int offset,
-                                     @NonNegative final int length) throws IllegalStateException {
+                                     @NonNegative final int length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(offsetInRDO);
         requireNonNull(byteArray);
         Longs.requireNonNegative(offset);
@@ -542,7 +533,7 @@ public class NativeBytesStore<U>
     @Override
     public void write(
             @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (bytes.isDirect()) {
             memoryCopyMemory(Jvm.address(bytes) + offset, address + translate(offsetInRDO), length);
 
@@ -555,7 +546,7 @@ public class NativeBytesStore<U>
     @Override
     public NativeBytesStore<U> write(
             @NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
-            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+            throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(readOffset);
@@ -570,7 +561,7 @@ public class NativeBytesStore<U>
     }
 
     public void write0(@NonNegative long offsetInRDO, @NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8) {
             writeLong(offsetInRDO + i, bytes.readLong(offset + i));
@@ -634,18 +625,18 @@ public class NativeBytesStore<U>
 
     @Override
     public void nativeRead(@NonNegative long position, long address, @NonNegative long size)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         memoryCopyMemory(addressForRead(position), address, size);
     }
 
     @Override
     public void nativeWrite(long address, @NonNegative long position, @NonNegative long size)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         memoryCopyMemory(address, addressForWrite(position), size);
     }
 
     void write8bit(@NonNegative long position, char[] chars, @NonNegative int offset, @NonNegative int length)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         long addr = address + translate(position);
         @Nullable Memory mem = this.memory;
         for (int i = 0; i < length; i++)
@@ -673,7 +664,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) {
+    public long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length) throws ClosedIllegalStateException {
         requireNonNegative(position);
         requireNonNull(s);
         requireNonNegative(start);
@@ -719,7 +710,7 @@ public class NativeBytesStore<U>
     }
 
     public long appendUtf8(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(chars);
         if (pos + length > realCapacity())
             throw new BufferOverflowException();
@@ -755,7 +746,7 @@ public class NativeBytesStore<U>
     }
 
     private long appendUtf8a(@NonNegative long pos, char[] chars, @NonNegative int offset, @NonNegative int length, int i)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         for (; i < length; i++) {
             char c = chars[offset + i];
             if (c <= 0x007F) {
@@ -776,7 +767,7 @@ public class NativeBytesStore<U>
 
     @Override
     public long copyTo(@NotNull BytesStore store)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         if (store.isDirectMemory())
             return copyToDirect(store);
         else
@@ -784,7 +775,7 @@ public class NativeBytesStore<U>
     }
 
     public long copyToDirect(@NotNull BytesStore store)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         long toCopy = Math.min(limit, store.safeLimit());
         if (toCopy > 0) {
             long addr = address;
@@ -865,7 +856,7 @@ public class NativeBytesStore<U>
 
     @Override
     public int fastHash(@NonNegative long offset, @NonNegative int length)
-            throws BufferUnderflowException, IllegalStateException {
+            throws BufferUnderflowException, ClosedIllegalStateException {
         long ret;
         switch (length) {
             case 0:

@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes.ref;
 import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.DynamicallySized;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.LongArrayValues;
 
 /**
@@ -42,7 +44,8 @@ public interface ByteableLongArrayValues extends LongArrayValues, Byteable, Dyna
      *
      * @param sizeInBytes the number of long integers to be stored.
      * @return the size in bytes needed to store the specified number of long integers.
-     * @throws IllegalStateException if the size cannot be determined.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     long sizeInBytes(@NonNegative long sizeInBytes)
@@ -53,7 +56,8 @@ public interface ByteableLongArrayValues extends LongArrayValues, Byteable, Dyna
      *
      * @param arrayLength the desired array capacity, in number of long integers.
      * @return this {@code ByteableLongArrayValues} instance.
-     * @throws IllegalStateException if the capacity cannot be set, for example, due to insufficient memory.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
 
     ByteableLongArrayValues capacity(@NonNegative long arrayLength)

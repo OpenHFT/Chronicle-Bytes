@@ -22,7 +22,9 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.render.Decimaliser;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
@@ -54,8 +56,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param ch the character to append
      * @return the ByteStringAppender instance with the appended character
-     * @throws BufferOverflowException if the append operation exceeds the buffer's capacity
-     * @throws IllegalStateException   if the underlying ByteStringAppender is closed
+     * @throws BufferOverflowException        If the append operation exceeds the buffer's capacity
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     @NotNull
@@ -70,7 +73,9 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param cs the CharSequence to append
      * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
+     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     @NotNull
@@ -85,13 +90,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param flag to append
      * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException   if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(boolean flag)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return append(flag ? 'T' : 'F');
     }
 
@@ -100,13 +106,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value the integer value to append
      * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException   if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(int value)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.appendBase10(this, value);
         return (B) this;
     }
@@ -116,13 +123,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value the long number to append
      * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException   if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(long value)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (value == (int) value)
             BytesInternal.appendBase10(this, (int) value);
         else
@@ -136,13 +144,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param value the number to append
      * @param base  the radix that the specified value should be converted to before append
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalArgumentException if the specified arguments are illegal
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException       If the specified arguments are illegal
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendBase(long value, int base)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+            throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         if (base == 10)
             append(value);
         else
@@ -155,13 +164,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param value the long value to be converted to base 16 and appended
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalArgumentException if the specified argument is illegal
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException       If the specified argument is illegal
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendBase16(long value)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+            throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.appendBase16(this, value, 1);
         return (B) this;
     }
@@ -173,9 +183,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param value     the long value to be converted to base 16 and appended
      * @param minDigits the minimum number of digits to be appended
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalArgumentException if the specified argument is illegal
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException       If the specified argument is illegal
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendBase16(long value, int minDigits)
@@ -190,10 +201,11 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param value         to append
      * @param decimalPlaces to shift the decimal place
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
-     * @throws IllegalArgumentException if the decimalPlaces is negative or too large
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalArgumentException       If the decimalPlaces is negative or too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendDecimal(long value, int decimalPlaces)
@@ -207,12 +219,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param f the float number to append
      * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalStateException   if the underlying Bytes was closed
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(float f)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         float f2 = Math.abs(f);
         if (f2 > 1e6 || f2 < 1e-3) {
             return append(Float.toString(f));
@@ -227,13 +240,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param d to append
      * @return this
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException      if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException   if the underlying buffer was released
+     * @throws BufferOverflowException        If the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(double d)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         Bytes<?> bytes = BytesInternal.acquireBytes();
         bytes.append(d);
         append(bytes);
@@ -277,14 +291,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param d             to append
      * @param decimalPlaces to always produce
      * @return this
-     * @throws BufferOverflowException  if the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
-     * @throws IllegalStateException    if the underlying buffer was released
-     * @throws IllegalArgumentException if the decimalPlaces is negative or too large
+     * @throws BufferOverflowException        If the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalArgumentException       If the decimalPlaces is negative or too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(double d, int decimalPlaces)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+            throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.append(this, d, decimalPlaces);
         return (B) this;
     }
@@ -296,8 +311,10 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start index of the first char inclusive
      * @param end   index of the last char exclusive
      * @return this
-     * @throws BufferOverflowException   if the capacity of the underlying buffer was exceeded
-     * @throws IndexOutOfBoundsException if the specified indexes are out of range
+     * @throws BufferOverflowException        If the capacity of the underlying buffer was exceeded
+     * @throws IndexOutOfBoundsException      If the specified indexes are out of range
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @Override
     @NotNull
@@ -312,13 +329,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param cs the CharSequence to append
      * @return this
-     * @throws BufferOverflowException  if the string is too large to write in the capacity available
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException    if the underlying buffer was released
+     * @throws BufferOverflowException        If the string is too large to write in the capacity available
+     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append8bit(@NotNull CharSequence cs)
-            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+            throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return append8bit(cs, 0, cs.length());
     }
 
@@ -328,12 +346,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param bs the BytesStore to append
      * @return this
-     * @throws BufferOverflowException  if the BytesStore is too large to write in the capacity available
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException    if the BytesStore is closed
+     * @throws BufferOverflowException        If the BytesStore is too large to write in the capacity available
+     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default B append8bit(@NotNull BytesStore bs)
-            throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
+            throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return write(bs, 0L, bs.readRemaining());
     }
 
@@ -342,11 +361,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param cs the String to append
      * @return this
-     * @throws BufferOverflowException if the string is too large to write in the capacity available
-     * @throws IllegalStateException   if the underlying BytesStore is closed
+     * @throws BufferOverflowException        If the string is too large to write in the capacity available
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default B append8bit(@NotNull String cs)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return append8bit(cs, 0, cs.length());
     }
 
@@ -357,14 +377,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start index of the first char of cs (inclusive) to append
      * @param end   index of the last char of cs (exclusive) to append
      * @return this
-     * @throws BufferOverflowException   if the string is too large to write in the capacity available
-     * @throws BufferUnderflowException  if the capacity of the underlying buffer was exceeded
-     * @throws IndexOutOfBoundsException if the start or the end are not valid for the CharSequence
-     * @throws IllegalStateException     if the underlying buffer was released
-     * @throws IllegalArgumentException  if the start or end is negative or too large
+     * @throws BufferOverflowException        If the string is too large to write in the capacity available
+     * @throws BufferUnderflowException       If the capacity of the underlying buffer was exceeded
+     * @throws IndexOutOfBoundsException      If the start or the end are not valid for the CharSequence
+     * @throws IllegalArgumentException       If the start or end is negative or too large
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default B append8bit(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int end)
-            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert end >= start : "end=" + end + ",start=" + start;
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs, (long) start, end - start);
@@ -384,14 +405,15 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param start the index of first byte (inclusive) of bs to append
      * @param end   the number of bytes of bs to append
      * @return this
-     * @throws IllegalArgumentException  if an illegal argument is passed to the method
-     * @throws BufferOverflowException   if the relative append operation exceeds the underlying buffer's capacity
-     * @throws BufferUnderflowException  if the capacity of the BytesStore was exceeded
-     * @throws IndexOutOfBoundsException if the specified indexes for the BytesStore are out of range
-     * @throws IllegalStateException     if the underlying Bytes is closed
+     * @throws IllegalArgumentException       If an illegal argument is passed to the method
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws BufferUnderflowException       If the capacity of the BytesStore was exceeded
+     * @throws IndexOutOfBoundsException      If the specified indexes for the BytesStore are out of range
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     default B append8bit(@NotNull BytesStore bs, @NonNegative long start, @NonNegative long end)
-            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, IllegalStateException {
+            throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert end > start : "end=" + end + ",start=" + start;
         return write(bs, start, end - start);
     }
@@ -402,12 +424,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param dateInMillis the specified long to convert to date and append to this
      * @return this
-     * @throws BufferOverflowException if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalStateException   if the underlying Bytes is closed
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendDateMillis(long dateInMillis)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.appendDateMillis(this, dateInMillis);
         return (B) this;
     }
@@ -421,13 +444,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param timeOfDayInMillis the long number that represents time of day in milliseconds
      * @return this
-     * @throws BufferOverflowException  if the relative append operation exceeds the underlying buffer's capacity
-     * @throws IllegalStateException    if the underlying Bytes is closed
-     * @throws IllegalArgumentException if an illegal argument is passed to the method
+     * @throws BufferOverflowException        If the relative append operation exceeds the underlying buffer's capacity
+     * @throws IllegalArgumentException       If an illegal argument is passed to the method
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B appendTimeMillis(long timeOfDayInMillis)
-            throws BufferOverflowException, IllegalStateException, IllegalArgumentException {
+            throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.appendTimeMillis(this, timeOfDayInMillis % 86400_000L);
         return (B) this;
     }
@@ -440,10 +464,13 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      *
      * @param bigDecimal the specified BigDecimal to append
      * @return this
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      * @see java.math.BigDecimal
      */
     @NotNull
-    default B append(@NotNull BigDecimal bigDecimal) {
+    default B append(@NotNull BigDecimal bigDecimal)
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         append(bigDecimal.toString());
         return (B) this;
     }

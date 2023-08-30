@@ -36,13 +36,13 @@ public final class ReferenceCountedUtil {
     }
 
     /**
-     * Checks the provided {@code referenceCounted} throwing a ClosedIllegalStateException if it has been previously released.
+     * Checks the provided {@code referenceCounted} throwing a ClosedIllegalStateException If it has been previously released.
      *
      * @param referenceCounted the non-null {@link ReferenceCounted} resource to check
-     * @throws ClosedIllegalStateException if the provided {@code referenceCounted} is released
-     * @throws NullPointerException        if the provided {@code referenceCounted} is {@code null}
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     * @throws NullPointerException        If the provided {@code referenceCounted} is {@code null}
      */
-    public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) {
+    public static void throwExceptionIfReleased(final ReferenceCounted referenceCounted) throws ClosedIllegalStateException {
         if (referenceCounted.refCount() <= 0) {
             // Rather than throwing a new ClosedIllegalStateException, we invoke releaseLast() that
             // will provide much more tracing information.
@@ -52,14 +52,14 @@ public final class ReferenceCountedUtil {
     }
 
     /**
-     * Checks the provided {@code object} throwing a ClosedIllegalStateException if it implements
+     * Checks the provided {@code object} throwing a ClosedIllegalStateException If it implements
      * ReferenceCounted AND has been previously released.
      *
      * @param object the non-null object to check
-     * @throws ClosedIllegalStateException if the provided {@code object} is released
-     * @throws NullPointerException        if the provided {@code object} is {@code null}
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     * @throws NullPointerException        If the provided {@code object} is {@code null}
      */
-    public static void throwExceptionIfReleased(final Object object) {
+    public static void throwExceptionIfReleased(final Object object) throws ClosedIllegalStateException {
         if (object instanceof ReferenceCounted) {
             throwExceptionIfReleased((ReferenceCounted) object);
         } else {

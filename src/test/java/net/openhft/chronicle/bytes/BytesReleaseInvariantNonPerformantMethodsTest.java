@@ -58,9 +58,6 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
         final BytesStore<?, ?> bs = BytesStore.from(SILLY_NAME);
         final Bytes<?> bytes = Bytes.from(SILLY_NAME);
         return Stream.of(
-                NamedConsumer.of(Bytes::toHexString, "toHexString()"),
-                NamedConsumer.of(b -> b.toHexString(1), "toHexString(1)"),
-                NamedConsumer.of(b -> b.toHexString(1, 1), "toHexString(1, 1)"),
                 NamedConsumer.of(BytesStore::to8bitString, "to8bitString()"),
                 NamedConsumer.of(RandomDataInput::toByteArray, "toByteArray()"),
                 NamedConsumer.of(RandomDataInput::toTemporaryDirectByteBuffer, "toTemporaryDirectByteBuffer()"),

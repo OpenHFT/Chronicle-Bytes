@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes.algo;
 
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import java.nio.BufferUnderflowException;
 
@@ -78,8 +80,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @param bytes the byte store.
      * @param off   the offset.
      * @return the fetched 64 bits.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @throws BufferUnderflowException If there are not enough bytes remaining in the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long fetch64(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readLong(off);
@@ -91,8 +94,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @param bytes the byte store.
      * @param off   the offset.
      * @return the fetched 32 bits.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @throws BufferUnderflowException If there are not enough bytes remaining in the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long fetch32(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedInt(off);
@@ -104,8 +108,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @param bytes the byte store.
      * @param off   the offset.
      * @return the fetched 8 bits.
-     * @throws IllegalStateException    if there is an issue with reading data from the byte store.
-     * @throws BufferUnderflowException if there are not enough bytes remaining in the buffer.
+     * @throws BufferUnderflowException If there are not enough bytes remaining in the buffer.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     long fetch8(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedByte(off);
@@ -116,7 +121,8 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      *
      * @param bytes the byte store to be hashed.
      * @return the hash code.
-     * @throws AssertionError if there is an issue with reading data from the byte store.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long applyAsLong(BytesStore bytes) {
@@ -129,8 +135,9 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @param bytes  the byte store.
      * @param length the number of bytes to hash.
      * @return the hash value.
-     * @throws IllegalStateException    If the state is illegal.
      * @throws BufferUnderflowException If there is not enough data.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
     public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {

@@ -20,7 +20,9 @@ package net.openhft.chronicle.bytes.util;
 import net.openhft.chronicle.bytes.BytesIn;
 import net.openhft.chronicle.bytes.BytesOut;
 import net.openhft.chronicle.bytes.BytesStore;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -56,7 +58,7 @@ public enum Compressions implements Compression {
          *
          * @param bytes the input bytes
          * @return the same input bytes
-         * @throws IORuntimeException if an I/O error occurs
+         * @throws IORuntimeException If an I/O error occurs
          */
         @Override
         public byte[] uncompress(byte[] bytes) throws IORuntimeException {
@@ -68,8 +70,9 @@ public enum Compressions implements Compression {
          *
          * @param from the input BytesIn
          * @param to   the output BytesOut
-         * @throws IllegalStateException     if the state is not legal for the operation
-         * @throws BufferOverflowException if the buffer overflows
+         * @throws BufferOverflowException If the buffer overflows
+         * @throws ClosedIllegalStateException    If the resource has been released or closed.
+         * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
          */
         @Override
         public void compress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
@@ -81,8 +84,9 @@ public enum Compressions implements Compression {
          *
          * @param from the input BytesIn
          * @param to   the output BytesOut
-         * @throws IllegalStateException     if the state is not legal for the operation
-         * @throws BufferOverflowException if the buffer overflows
+         * @throws BufferOverflowException If the buffer overflows
+         * @throws ClosedIllegalStateException    If the resource has been released or closed.
+         * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
          */
         @Override
         public void uncompress(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
@@ -94,8 +98,9 @@ public enum Compressions implements Compression {
          *
          * @param from the input BytesIn
          * @param to   the output BytesOut
-         * @throws IllegalStateException     if the state is not legal for the operation
-         * @throws BufferOverflowException if the buffer overflows
+         * @throws BufferOverflowException If the buffer overflows
+         * @throws ClosedIllegalStateException    If the resource has been released or closed.
+         * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
          */
         private void copy(@NotNull BytesIn<?> from, @NotNull BytesOut<?> to) throws IllegalStateException, BufferOverflowException {
             long copied = from.copyTo((BytesStore) to);
@@ -163,7 +168,7 @@ public enum Compressions implements Compression {
          *
          * @param input the GZIP-compressed input stream
          * @return the decompressing input stream
-         * @throws IORuntimeException if an I/O error occurs
+         * @throws IORuntimeException If an I/O error occurs
          */
         @NotNull
         @Override

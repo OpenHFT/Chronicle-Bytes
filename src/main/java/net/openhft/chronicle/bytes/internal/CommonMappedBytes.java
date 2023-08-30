@@ -22,10 +22,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.AbstractCloseable;
-import net.openhft.chronicle.core.io.ClosedIllegalStateException;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -49,7 +46,7 @@ import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE
 public abstract class CommonMappedBytes extends MappedBytes {
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override
-        protected void performClose() throws IllegalStateException {
+        protected void performClose() throws ClosedIllegalStateException {
             CommonMappedBytes.this.performClose();
         }
     };
@@ -63,12 +60,12 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     // assume the mapped file is reserved already.
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         this(mappedFile, "");
     }
 
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile, final String name)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         super(name);
 
         assert mappedFile != null;
@@ -90,7 +87,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public @NotNull CommonMappedBytes write(final byte[] byteArray,
                                             @NonNegative final int offset,
                                             @NonNegative final int length)
-            throws IllegalStateException, BufferOverflowException {
+            throws ClosedIllegalStateException, BufferOverflowException {
         requireNonNull(byteArray);
         requireNonNegative(offset);
         requireNonNegative(length);
@@ -104,7 +101,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public CommonMappedBytes write(@NotNull final RandomDataInput bytes)
-            throws IllegalStateException, BufferOverflowException {
+            throws ClosedIllegalStateException, BufferOverflowException {
         requireNonNull(bytes);
         throwExceptionIfClosed();
 
@@ -117,7 +114,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     public CommonMappedBytes write(@NonNegative final long offsetInRDO, @NotNull final RandomDataInput bytes)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException {
         requireNonNegative(offsetInRDO);
         requireNonNull(bytes);
         throwExceptionIfClosed();
@@ -133,7 +130,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public BytesStore<Bytes<Void>, Void> copy()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         return BytesUtil.copyOf(this);
     }
 
@@ -181,14 +178,14 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Nullable
     @Override
     public String read8bit()
-            throws IORuntimeException, BufferUnderflowException, IllegalStateException, ArithmeticException {
+            throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, ArithmeticException {
 
         return BytesInternal.read8bit(this);
     }
 
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         // only check up to 128 bytes are real.
         writeCheckOffset(writePosition(), Math.min(128, bytesToSkip));
         // the rest can be lazily allocated.
@@ -219,7 +216,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public Bytes<Void> clear()
-            throws IllegalStateException {
+            throws ClosedIllegalStateException, ClosedIllegalStateException {
         // Typically, only used at the start of an operation so reject if closed.
         throwExceptionIfClosed();
 
@@ -231,7 +228,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
-    protected void performRelease() {
+    protected void performRelease() throws ClosedIllegalStateException {
         super.performRelease();
         mappedFile.release(this);
     }
@@ -241,7 +238,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     public Bytes<Void> write(@NotNull final RandomDataInput bytes,
                              @NonNegative final long offset,
                              @NonNegative final long length)
-            throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
+            throws BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(bytes);
         requireNonNegative(offset);
         requireNonNegative(length);
@@ -260,7 +257,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public Bytes<Void> append8bit(@NotNull CharSequence text, @NonNegative int start, @NonNegative int end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException,
-            IndexOutOfBoundsException, IllegalStateException {
+            IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(text);
         throwExceptionIfClosed();
 
@@ -276,7 +273,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     @NotNull
     public CommonMappedBytes write8bit(@NotNull CharSequence text, @NonNegative int start, @NonNegative int length)
-            throws IllegalStateException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IndexOutOfBoundsException {
+            throws ClosedIllegalStateException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IndexOutOfBoundsException, ThreadingIllegalStateException {
         requireNonNull(text);
         throwExceptionIfClosed();
 
@@ -296,7 +293,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @NotNull
     private CommonMappedBytes append8bit0(@NotNull String s, @NonNegative int start, @NonNegative int length)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
         requireNonNull(s);
         ensureCapacity(writePosition() + length);
@@ -349,7 +346,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public Bytes<Void> appendUtf8(@NotNull CharSequence cs, @NonNegative int start, @NonNegative int length)
-            throws BufferOverflowException, IllegalStateException, BufferUnderflowException, IndexOutOfBoundsException {
+            throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, IndexOutOfBoundsException, ThreadingIllegalStateException {
         requireNonNull(cs);
         throwExceptionIfClosed();
 
@@ -411,7 +408,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public void release(ReferenceOwner id)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         try {
             super.release(id);
         } catch (ClosedIllegalStateException ignored) {
@@ -424,7 +421,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public void releaseLast(ReferenceOwner id)
-            throws IllegalStateException {
+            throws ClosedIllegalStateException {
         super.releaseLast(id);
         initReleased |= id == INIT;
         closeable.close();
@@ -435,7 +432,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         closeable.close();
     }
 
-    void performClose() {
+    void performClose() throws ClosedIllegalStateException {
         if (!initReleased)
             release(INIT);
     }
@@ -451,14 +448,14 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     @Override
-    public void throwExceptionIfClosed() throws IllegalStateException {
+    public void throwExceptionIfClosed() throws ClosedIllegalStateException, ThreadingIllegalStateException {
         closeable.throwExceptionIfClosed();
     }
 
     @NotNull
     @Override
     public Bytes<Void> writeUtf8(@Nullable CharSequence text)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         if (text instanceof String) {
@@ -478,7 +475,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public @NotNull Bytes<Void> writeUtf8(@Nullable String text)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         if (text == null) {
@@ -503,7 +500,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public long readStopBit()
-            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
+            throws IORuntimeException, ClosedIllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         long offset = readOffsetPositionMoved(1);
@@ -516,7 +513,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public char readStopBitChar()
-            throws IORuntimeException, IllegalStateException, BufferUnderflowException {
+            throws IORuntimeException, ClosedIllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
         long offset = readOffsetPositionMoved(1);
@@ -530,7 +527,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public Bytes<Void> writeStopBit(long n)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         if ((n & ~0x7F) == 0) {
@@ -555,7 +552,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public Bytes<Void> writeStopBit(char n)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfClosed();
 
         if ((n & ~0x7F) == 0) {

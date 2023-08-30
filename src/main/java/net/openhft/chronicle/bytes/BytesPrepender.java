@@ -19,6 +19,8 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -47,12 +49,13 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param length the padding length
      * @return this instance, after clearing and padding
-     * @throws BufferOverflowException if the length is greater than the difference of capacity() and start()
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the length is greater than the difference of capacity() and start()
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     B clearAndPad(@NonNegative long length)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Prepends a long value as a decimal text. This operation moves the readPosition() backward.
@@ -60,12 +63,13 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param value the long value to prepend as text
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
     default B prepend(long value)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         BytesInternal.prepend(this, value);
         return (B) this;
     }
@@ -75,71 +79,77 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      *
      * @param bytes the byte array to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     B prewrite(byte[] bytes)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a BytesStore instance backward in binary format. This operation moves the readPosition() backward.
      *
      * @param bytes the BytesStore to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @SuppressWarnings("rawtypes")
     @NotNull
     B prewrite(BytesStore bytes)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a byte backward in binary format. This operation moves the readPosition() backward.
      *
      * @param b the byte to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     B prewriteByte(byte b)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a short (2-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
      * @param i the short to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     B prewriteShort(short i)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes an int (4-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
      * @param i the int to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     B prewriteInt(int i)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a long (8-byte int) backward in binary format. This operation moves the readPosition() backward.
      *
      * @param l the long to prepend
      * @return this instance, after the operation
-     * @throws BufferOverflowException if the capacity of the underlying buffer was exceeded
-     * @throws IllegalStateException   if the buffer is in an invalid state
+     * @throws BufferOverflowException If the capacity of the underlying buffer was exceeded
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     B prewriteLong(long l)
-            throws BufferOverflowException, IllegalStateException;
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 }

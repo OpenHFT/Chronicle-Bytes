@@ -21,6 +21,8 @@ import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.io.ClosedIllegalStateException;
+import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.values.IntValue;
 import org.jetbrains.annotations.NotNull;
 
@@ -63,8 +65,9 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      *
      * @param bytes    the Bytes instance to write to.
      * @param capacity the capacity of the array to be written.
-     * @throws IllegalStateException   if an invalid state is encountered.
-     * @throws BufferOverflowException if there's not enough space in the buffer to write the array.
+     * @throws BufferOverflowException If there's not enough space in the buffer to write the array.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static void write(@NotNull Bytes<?> bytes, @NonNegative long capacity)
             throws IllegalStateException, BufferOverflowException {
@@ -92,7 +95,8 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
      * @param bytes  the BytesStore containing the text representation.
      * @param offset the offset at which the text representation starts.
      * @return the length of the array in text format.
-     * @throws IllegalStateException if an invalid state is encountered.
+     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
             throws IllegalStateException {

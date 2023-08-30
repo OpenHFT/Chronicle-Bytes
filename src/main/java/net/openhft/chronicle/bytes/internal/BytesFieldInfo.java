@@ -81,7 +81,7 @@ public class BytesFieldInfo {
             long position = 0;
             int size = 0;
             if (field.getType().isPrimitive()) {
-                FieldGroup fieldGroup = field.getAnnotation(FieldGroup.class);
+                FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
                 if (fieldGroup != null) {
                     prefix = fieldGroup.value();
                     if (prefix.equals(FieldGroup.HEADER)) {
