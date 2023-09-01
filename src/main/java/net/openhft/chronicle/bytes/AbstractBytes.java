@@ -128,19 +128,16 @@ public abstract class AbstractBytes<U>
     public Bytes<U> compact()
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
-        try {
-            long start = start();
-            long readRemaining = readRemaining();
-            if ((readRemaining > 0) && (start < readPosition)) {
-                bytesStore.move(readPosition, start, readRemaining);
-            }
-            readPosition = start;
-            uncheckedWritePosition(start + Math.max(0, readRemaining));
 
-            return this;
-        } catch (IllegalStateException ignored) {
-            return this;
+        long start = start();
+        long readRemaining = readRemaining();
+        if ((readRemaining > 0) && (start < readPosition)) {
+            bytesStore.move(readPosition, start, readRemaining);
         }
+        readPosition = start;
+        uncheckedWritePosition(start + Math.max(0, readRemaining));
+
+        return this;
     }
 
     @Override
