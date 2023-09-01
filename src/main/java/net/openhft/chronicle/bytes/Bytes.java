@@ -994,8 +994,6 @@ public interface Bytes<U> extends
      * <p>
      * This operation is useful to free up space for writing by discarding bytes that have already
      * been read.
-     * <p>
-     * If the underlying Bytes have been released, this does nothing.
      *
      * @return This Bytes object, for method chaining.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
