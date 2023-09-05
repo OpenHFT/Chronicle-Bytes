@@ -22,8 +22,27 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+/**
+ * This class contains JUnit test methods for testing the behavior
+ * of the GuardedNativeBytes class.
+ * <p>
+ * It aims to test various primitive data types and their conversions
+ * using the GuardedNativeBytes class.
+ * </p>
+ */
 public class GuardedNativeBytesTest {
 
+    /**
+     * Tests the reading and writing of various binary primitives.
+     * <p>
+     * This test method performs the following steps:
+     * <ul>
+     *   <li>Writes different types of binary data into a GuardedNativeBytes object.</li>
+     *   <li>Checks the generated hexadecimal string against an expected value.</li>
+     *   <li>Reads the binary data back and checks that it matches the original input.</li>
+     * </ul>
+     * </p>
+     */
     @Test
     public void testBinaryPrimitive() {
         final GuardedNativeBytes<?> bytes = new GuardedNativeBytes(new HexDumpBytes(), 256);
