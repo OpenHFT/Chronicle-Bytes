@@ -138,22 +138,34 @@ public class UncheckedNativeBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> compact() {
-        try {
-            long start = start();
-            long readRemaining = readRemaining();
-            if (readRemaining > 0 && start < readPosition) {
-                bytesStore.move(readPosition, start, readRemaining);
-            }
-            readPosition = start;
-            writePosition = start + Math.max(0, readRemaining);
+    public Bytes<U> compact()
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
 
+        // Get the start position of the buffer
+        long start = start();
+
+        // Get the number of unread bytes in the buffer, ensuring that it is not set to a negative value
+        long readRemaining = Math.max(0, readRemaining());
+
+        // if the space freed is less a than 1/4 the data that would be moved, leave it.
+        if ((readPosition - start) < readRemaining / 4)
             return this;
-        } catch (IllegalStateException ignored) {
-            return this;
+
+        // Check if there are unread bytes and if they're not already at the start of the buffer
+        if (readRemaining > 0 && start < readPosition) {
+            // Move the unread bytes to the start of the buffer
+            bytesStore.move(readPosition, start, readRemaining);
         }
-    }
 
+        // Reset the read position to the start of the buffer
+        readPosition = start;
+
+        // Set the write position to be after the unread bytes
+        writePosition = start + readRemaining;
+
+        // Return this Bytes object to allow for method chaining
+        return this;
+    }
     @NotNull
     @Override
     public Bytes<U> readPosition(@NonNegative long position) {

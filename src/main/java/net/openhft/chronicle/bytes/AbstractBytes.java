@@ -127,16 +127,33 @@ public abstract class AbstractBytes<U>
     @Override
     public Bytes<U> compact()
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
+
+        // Asserts that the current method is thread-safe or that single-threaded checks are disabled
         assert DISABLE_SINGLE_THREADED_CHECK || threadSafetyCheck(true);
 
+        // Get the start position of the buffer
         long start = start();
-        long readRemaining = readRemaining();
-        if ((readRemaining > 0) && (start < readPosition)) {
+
+        // Get the number of unread bytes in the buffer, ensuring that it is not set to a negative value
+        long readRemaining = Math.max(0, readRemaining());
+
+        // if the space freed is less a than 1/4 the data that would be moved, leave it.
+        if ((readPosition - start) < readRemaining / 4)
+            return this;
+
+        // Check if there are unread bytes and if they're not already at the start of the buffer
+        if (readRemaining > 0 && start < readPosition) {
+            // Move the unread bytes to the start of the buffer
             bytesStore.move(readPosition, start, readRemaining);
         }
-        readPosition = start;
-        uncheckedWritePosition(start + Math.max(0, readRemaining));
 
+        // Reset the read position to the start of the buffer
+        readPosition = start;
+
+        // Set the write position to be after the unread bytes
+        uncheckedWritePosition(start + readRemaining);
+
+        // Return this Bytes object to allow for method chaining
         return this;
     }
 
