@@ -22,6 +22,8 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -38,7 +40,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     /**
      * A pool of StringBuilder objects used to construct the interned Strings.
      */
-    private static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
     /**
      * Constructs a new Bit8StringInterner with the specified capacity.
@@ -55,7 +57,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
      * @param cs     the BytesStore object from which to get the String value
      * @param length the length of the string to be interned
      * @return the interned String value
-     * @throws BufferUnderflowException If the BytesStore doesn't have enough remaining capacity
+     * @throws BufferUnderflowException       If the BytesStore doesn't have enough remaining capacity
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -63,9 +65,11 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     @Override
     @NotNull
     protected String getValue(@NotNull BytesStore cs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
-        StringBuilder sb = SBP.acquireStringBuilder();
-        for (int i = 0; i < length; i++)
-            sb.append((char) cs.readUnsignedByte(cs.readPosition() + i));
-        return sb.toString();
+        try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
+            StringBuilder sb = sbTl.get();
+            for (int i = 0; i < length; i++)
+                sb.append((char) cs.readUnsignedByte(cs.readPosition() + i));
+            return sb.toString();
+        }
     }
 }

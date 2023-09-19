@@ -32,6 +32,9 @@ import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.pool.ClassAliasPool;
 import net.openhft.chronicle.core.pool.EnumInterner;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
+import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
 import net.openhft.chronicle.core.util.ByteBuffers;
 import net.openhft.chronicle.core.util.Histogram;
 import net.openhft.chronicle.core.util.StringUtils;
@@ -73,8 +76,17 @@ public
 enum BytesInternal {
 
     ; // none
+    private static final int THREAD_LOCAL_BYTES_POOL_SIZE = Jvm.getInteger("bytesInternal.bytes.instancesPerThread", 2);
     public static final ThreadLocal<ByteBuffer> BYTE_BUFFER_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
     public static final ThreadLocal<ByteBuffer> BYTE_BUFFER2_TL = ThreadLocal.withInitial(() -> ByteBuffer.allocateDirect(0));
+    public static final ScopedThreadLocal<Bytes<?>> BYTES_SCOPED_THREAD_LOCAL = new ScopedThreadLocal<>(
+            () -> {
+                Bytes<?> bbb = Bytes.allocateElasticDirect(256);
+                IOTools.unmonitor(bbb);
+                return bbb;
+            },
+            Bytes::clear,
+            THREAD_LOCAL_BYTES_POOL_SIZE);
     public static final StringInternerBytes SI;
     static final char[] HEXADECIMAL = "0123456789abcdef".toCharArray();
     private static final String INFINITY = "Infinity";
@@ -84,7 +96,7 @@ enum BytesInternal {
     private static final String WAS = " was ";
     private static final String CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS = "Can't parse flexible long without precision loss: ";
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
-    private static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal();
     private static final BytesPool BP = new BytesPool();
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
@@ -2147,8 +2159,10 @@ enum BytesInternal {
                 return null;
             }
         }
-        StringBuilder sb = acquireStringBuilder();
-        return in.readUtf8(sb) ? SI.intern(sb) : null;
+        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            return in.readUtf8(sb) ? SI.intern(sb) : null;
+        }
     }
 
     @Nullable
@@ -2156,16 +2170,40 @@ enum BytesInternal {
             throws BufferUnderflowException, IllegalArgumentException,
             ClosedIllegalStateException, IORuntimeException {
         throwExceptionIfReleased(in);
-        StringBuilder sb = acquireStringBuilder();
-        return in.readUtf8Limited(offset, sb, maxUtf8Len) > 0 ? SI.intern(sb) : null;
+        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            return in.readUtf8Limited(offset, sb, maxUtf8Len) > 0 ? SI.intern(sb) : null;
+        }
     }
 
+    /**
+     * @deprecated Use {@link #acquireStringBuilderScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     public static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
+        try (final ScopedResource<StringBuilder> scopedResource = SBP.get()) {
+            // This is very wrong, it will be cleared if a nested scope acquires it, but equivalent to existing behaviour
+            return scopedResource.get();
+        }
     }
 
+    public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
+        return SBP.get();
+    }
+
+    /**
+     * @deprecated Use {@link #acquireBytesScoped()} instead
+     */
+    @Deprecated(/* To be removed in x.26 */)
     public static Bytes<?> acquireBytes() {
         return BP.acquireBytes();
+    }
+
+    /**
+     * Acquire a scoped, thread-local bytes instance
+     */
+    public static ScopedResource<Bytes<?>> acquireBytesScoped() {
+        return BYTES_SCOPED_THREAD_LOCAL.get();
     }
 
     @Nullable
@@ -2180,8 +2218,10 @@ enum BytesInternal {
                 return null;
             }
         }
-        Bytes<?> bytes = acquireBytes();
-        return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
+        try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            return in.read8bit(bytes) ? SI.intern(bytes, (int) bytes.readRemaining()) : null;
+        }
     }
 
     @Nullable
@@ -2189,9 +2229,11 @@ enum BytesInternal {
             throws ClosedIllegalStateException, ArithmeticException {
         throwExceptionIfReleased(bytes);
         requireNonNull(tester);
-        StringBuilder utfReader = acquireStringBuilder();
-        parseUtf8(bytes, utfReader, tester);
-        return SI.intern(utfReader);
+        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
+            StringBuilder utfReader = stlSb.get();
+            parseUtf8(bytes, utfReader, tester);
+            return SI.intern(utfReader);
+        }
     }
 
     public static void parseUtf8(@NotNull StreamingDataInput bytes, @NotNull Appendable builder,
@@ -2961,7 +3003,7 @@ enum BytesInternal {
      * @return A hexadecimal representation of the buffer content with comments describing the bytes.
      * Each line of the string contains the hexadecimal representation of 16 bytes.
      * @throws BufferUnderflowException    If there is not enough data in the buffer.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      * @throws IllegalArgumentException    If the provided offset or maxLength are negative.
      */
     public static String toHexString(@NotNull final Bytes<?> bytes, @NonNegative long offset, @NonNegative long maxLength)
@@ -3118,10 +3160,12 @@ enum BytesInternal {
     @NotNull
     public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@NotNull StreamingDataInput input, @NotNull Class<E> eClass)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, ClosedIllegalStateException, ArithmeticException {
-        Bytes<?> bytes = acquireBytes();
-        input.read8bit(bytes);
+        try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            input.read8bit(bytes);
 
-        return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
+            return (E) EnumInterner.ENUM_INTERNER.get(eClass).intern(bytes);
+        }
     }
 
     public static void writeFully(@NotNull final RandomDataInput bytes,
@@ -3194,29 +3238,31 @@ enum BytesInternal {
 
     public static Boolean parseBoolean(@NotNull ByteStringParser parser, @NotNull StopCharTester tester)
             throws BufferUnderflowException, ClosedIllegalStateException, ArithmeticException {
-        Bytes<?> sb = acquireBytes();
-        parseUtf8(parser, sb, tester);
-        if (sb.length() == 0)
-            return null;
-        switch (sb.charAt(0)) {
-            case 't':
-            case 'T':
-                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? true : null;
-            case 'y':
-            case 'Y':
-                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? true : null;
-            case '0':
-                return sb.length() == 1 ? false : null;
-            case '1':
-                return sb.length() == 1 ? true : null;
-            case 'f':
-            case 'F':
-                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? false : null;
-            case 'n':
-            case 'N':
-                return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
-            default:
+        try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
+            Bytes<?> sb = stlBytes.get();
+            parseUtf8(parser, sb, tester);
+            if (sb.length() == 0)
                 return null;
+            switch (sb.charAt(0)) {
+                case 't':
+                case 'T':
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "true") ? true : null;
+                case 'y':
+                case 'Y':
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "yes") ? true : null;
+                case '0':
+                    return sb.length() == 1 ? false : null;
+                case '1':
+                    return sb.length() == 1 ? true : null;
+                case 'f':
+                case 'F':
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "false") ? false : null;
+                case 'n':
+                case 'N':
+                    return sb.length() == 1 || StringUtils.equalsCaseIgnore(sb, "no") ? false : null;
+                default:
+                    return null;
+            }
         }
     }
 
@@ -3334,9 +3380,11 @@ enum BytesInternal {
 
     public static String parse8bit(ByteStringParser bsp, StopCharTester stopCharTester)
             throws ClosedIllegalStateException {
-        StringBuilder sb = BytesInternal.acquireStringBuilder();
-        BytesInternal.parse8bit(bsp, sb, stopCharTester);
-        return BytesInternal.SI.intern(sb);
+        try (ScopedResource<StringBuilder> stlSb = acquireStringBuilderScoped()) {
+            StringBuilder sb = stlSb.get();
+            BytesInternal.parse8bit(bsp, sb, stopCharTester);
+            return BytesInternal.SI.intern(sb);
+        }
     }
 
     public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
