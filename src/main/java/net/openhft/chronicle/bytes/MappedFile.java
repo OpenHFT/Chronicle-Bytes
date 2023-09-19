@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -115,12 +116,14 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
             return;
 
         // avoid a GC while trying to memory map.
-        final String message = BytesInternal.acquireStringBuilder()
-                .append("Allocation of ").append(chunk)
-                .append(" chunk in ").append(filename)
-                .append(" took ").append(delayMicros / 1e3).append(" ms.")
-                .toString();
-        Jvm.perf().on(ChunkedMappedFile.class, message);
+        try (ScopedResource<StringBuilder> stlSb = BytesInternal.acquireStringBuilderScoped()) {
+            final String message = stlSb.get()
+                    .append("Allocation of ").append(chunk)
+                    .append(" chunk in ").append(filename)
+                    .append(" took ").append(delayMicros / 1e3).append(" ms.")
+                    .toString();
+            Jvm.perf().on(ChunkedMappedFile.class, message);
+        }
     }
 
     /**
@@ -427,10 +430,10 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
      * @param owner    The owner of the bytes.
      * @param position The position at which the bytes should be acquired.
      * @param bytes    The VanillaBytes object to store the acquired bytes.
-     * @throws IOException                 If an I/O error occurs.
-     * @throws IllegalArgumentException    If an illegal argument is provided.
-     * @throws BufferUnderflowException    If there is not enough data available.
-     * @throws BufferOverflowException     If there is too much data.
+     * @throws IOException                    If an I/O error occurs.
+     * @throws IllegalArgumentException       If an illegal argument is provided.
+     * @throws BufferUnderflowException       If there is not enough data available.
+     * @throws BufferOverflowException        If there is too much data.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */

@@ -24,6 +24,8 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.pool.StringBuilderPool;
+import net.openhft.chronicle.core.scoped.ScopedResource;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferUnderflowException;
@@ -39,7 +41,7 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     /**
      * A pool of {@link StringBuilder} instances, used for efficient string construction.
      */
-    private static final StringBuilderPool SBP = new StringBuilderPool();
+    private static final ScopedResourcePool<StringBuilder> SBP = StringBuilderPool.createThreadLocal(1);
 
     /**
      * Constructs a new UTF8StringInterner with the specified capacity.
@@ -57,8 +59,8 @@ public class UTF8StringInterner extends AbstractInterner<String> {
      * @param cs     the {@link BytesStore} containing the bytes to be converted
      * @param length the number of bytes to read from the {@link BytesStore}
      * @return the resulting UTF-8 encoded string
-     * @throws UTFDataFormatRuntimeException If the bytes are not valid UTF-8 encoded characters
-     * @throws BufferUnderflowException      If the buffer's limits are exceeded
+     * @throws UTFDataFormatRuntimeException  If the bytes are not valid UTF-8 encoded characters
+     * @throws BufferUnderflowException       If the buffer's limits are exceeded
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
@@ -67,11 +69,13 @@ public class UTF8StringInterner extends AbstractInterner<String> {
     @NotNull
     protected String getValue(@NotNull BytesStore cs, @NonNegative int length)
             throws UTFDataFormatRuntimeException, IllegalStateException, BufferUnderflowException {
-        // Acquire a StringBuilder from the pool for efficient string construction
-        StringBuilder sb = SBP.acquireStringBuilder();
-        // Parse the bytes as UTF-8 and append them to the StringBuilder
-        AppendableUtil.parseUtf8(cs, sb, true, length);
-        // Convert the StringBuilder to a string and return it
-        return sb.toString();
+        try (final ScopedResource<StringBuilder> sbTl = SBP.get()) {
+            // Acquire a StringBuilder from the pool for efficient string construction
+            StringBuilder sb = sbTl.get();
+            // Parse the bytes as UTF-8 and append them to the StringBuilder
+            AppendableUtil.parseUtf8(cs, sb, true, length);
+            // Convert the StringBuilder to a string and return it
+            return sb.toString();
+        }
     }
 }

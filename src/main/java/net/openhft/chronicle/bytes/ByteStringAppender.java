@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
+import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.Writer;
@@ -248,10 +249,12 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     @NotNull
     default B append(double d)
             throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        Bytes<?> bytes = BytesInternal.acquireBytes();
-        bytes.append(d);
-        append(bytes);
-        return (B) this;
+        try (ScopedResource<Bytes<?>> stlBytes = BytesInternal.acquireBytesScoped()) {
+            Bytes<?> bytes = stlBytes.get();
+            bytes.append(d);
+            append(bytes);
+            return (B) this;
+        }
     }
 
     /**
