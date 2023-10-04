@@ -34,6 +34,7 @@ import java.lang.reflect.Field;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 
 import static net.openhft.chronicle.bytes.Bytes.MAX_CAPACITY;
@@ -219,6 +220,7 @@ public class NativeBytesStore<U>
     public void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (U) bb;
+        bb.order(ByteOrder.nativeOrder());
         setAddress(Jvm.address(bb));
         this.limit = bb.capacity();
     }
