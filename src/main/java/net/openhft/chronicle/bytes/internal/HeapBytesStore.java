@@ -30,6 +30,7 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -55,6 +56,7 @@ public class HeapBytesStore<U>
         super(false);
         //noinspection unchecked
         this.underlyingObject = (U) byteBuffer;
+        byteBuffer.order(ByteOrder.nativeOrder());
         this.realUnderlyingObject = byteBuffer.array();
         this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
         this.capacity = byteBuffer.capacity();

@@ -256,7 +256,7 @@ bb.writePosition(5);
 bb.write("sentence was overwritten from index 5 using writePosition cursor");
 
 //Prints out: "This sentence was overwritten from index 5 using writePosition cursor"
-System.out.println(by.toString());
+System.out.println(bb.toString());
 
 //Read bb from index 43
 bb.readPosition(43);
@@ -395,7 +395,7 @@ start 0
 
 The standard Java `ByteBuffer` needs to be flipped to switch between reading and writing.
 
-Bytes holds a read position and a write position allowing you to write and immediately read without flipping.
+`Bytes` holds a read position and a write position allowing you to write and immediately read without flipping.
 
 NOTE: The writePosition is the readLimit.
 
