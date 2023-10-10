@@ -18,9 +18,9 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -44,6 +44,7 @@ public interface MappedBytesStoreFactory {
      * @throws ClosedIllegalStateException If the MappedFile has already been released.
      */
     @NotNull
-    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
+    MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException;
+
 }

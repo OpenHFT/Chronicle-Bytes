@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
@@ -49,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
     @Deprecated(/* to be removed in x.26 */)
-    public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
+    public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = (owner, mappedFile1, start1, address1, capacity, safeCapacity, pageSize) -> new MappedBytesStore(owner, mappedFile1, start1, address1, capacity, safeCapacity, pageSize);
     protected final Runnable writeCheck;
     private final MappedFile mappedFile;
     private final long start;
@@ -66,11 +67,11 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param address      The memory address of the mapped data.
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
-    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
+    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
-        super(address, start + capacity, new OS.Unmapper(address, capacity), false);
+        super(address, start + capacity, new OS.Unmapper(address, capacity, pageSize), false);
         this.mappedFile = mappedFile;
         this.start = start;
         this.safeLimit = start + safeCapacity;
@@ -91,11 +92,16 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
      * @return the MappedBytesStore
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
+    public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
+            throws ClosedIllegalStateException {
+        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, pageSize);
+    }
+
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws ClosedIllegalStateException {
-        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity);
+        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, OS.defaultOsPageSize());
     }
 
     static void throwReadOnly() {
