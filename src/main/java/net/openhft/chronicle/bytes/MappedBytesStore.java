@@ -50,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  */
 public class MappedBytesStore extends NativeBytesStore<Void> {
     @Deprecated(/* to be removed in x.26 */)
-    public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = (owner, mappedFile1, start1, address1, capacity, safeCapacity, pageSize) -> new MappedBytesStore(owner, mappedFile1, start1, address1, capacity, safeCapacity, pageSize);
+    public static final @NotNull MappedBytesStoreFactory MAPPED_BYTES_STORE_FACTORY = MappedBytesStore::new;
     protected final Runnable writeCheck;
     private final MappedFile mappedFile;
     private final long start;
