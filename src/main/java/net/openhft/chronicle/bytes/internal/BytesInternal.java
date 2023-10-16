@@ -1145,12 +1145,14 @@ enum BytesInternal {
             int i;
             for (i = 0; i < length; i++) {
                 char c = str.charAt(offset + i);
-                if (c > 0x007F)
+                if (c > 0x007F) {
+                    appendUtf82(bytes, str, offset, length, i);
                     break;
+                }
                 bytes.rawWriteByte((byte) c);
             }
-            appendUtf82(bytes, str, offset, length, i);
         } catch (BufferOverflowException | ClosedIllegalStateException e) {
+            e.printStackTrace();
             throw Jvm.rethrow(e);
         }
     }
@@ -1158,8 +1160,6 @@ enum BytesInternal {
     private static void appendUtf82(@NotNull StreamingDataOutput bytes,
                                     @NotNull CharSequence str, @NonNegative int offset, @NonNegative int length, @NonNegative int i)
             throws IndexOutOfBoundsException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(str);
         for (; i < length; i++) {
             char c = str.charAt(offset + i);
             appendUtf8Char(bytes, c);
@@ -1175,17 +1175,15 @@ enum BytesInternal {
         for (i = 0; i < length; i++) {
             char c = str.charAt(strOffset + i);
             if (c > 0x007F)
-                break;
+                return appendUtf82(out, outOffset, str, strOffset, length, i);
             out.writeByte(outOffset++, (byte) c);
         }
-        return appendUtf82(out, outOffset, str, strOffset, length, i);
+        return outOffset;
     }
 
     private static long appendUtf82(@NotNull RandomDataOutput out, @NonNegative long outOffset,
                                     @NotNull CharSequence str, @NonNegative int strOffset, @NonNegative int length, @NonNegative int i)
             throws IndexOutOfBoundsException, BufferOverflowException, ClosedIllegalStateException {
-        throwExceptionIfReleased(out);
-        throwExceptionIfReleased(str);
         for (; i < length; i++) {
             char c = str.charAt(strOffset + i);
             outOffset = appendUtf8Char(out, outOffset, c);

@@ -145,6 +145,16 @@ public class HeapBytesStore<U>
     }
 
     @Override
+    public long readRemaining() {
+        return capacity;
+    }
+
+    @Override
+    public int length() {
+        return (int) capacity;
+    }
+
+    @Override
     public U underlyingObject() {
         return underlyingObject;
     }

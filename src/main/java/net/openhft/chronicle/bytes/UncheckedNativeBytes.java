@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -339,6 +340,12 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
+    public long realReadRemaining() {
+        long a = bytesStore.realCapacity();
+        return Math.min(a, writePosition) - readPosition;
+    }
+
+    @Override
     public long realWriteRemaining() {
         return writeRemaining();
     }
@@ -424,6 +431,16 @@ public class UncheckedNativeBytes<U>
         } catch (BufferUnderflowException e) {
             return -1;
         }
+    }
+
+    @Override
+    public long readRemaining() {
+        return writePosition - readPosition;
+    }
+
+    @Override
+    public int length() {
+        return (int) Math.min(Integer.MAX_VALUE, readRemaining());
     }
 
     @Override
@@ -914,6 +931,20 @@ public class UncheckedNativeBytes<U>
         if (cs instanceof BytesStore) {
             return write((BytesStore) cs);
         }
+        if (cs instanceof String) {
+            String s = (String) cs;
+            if (StringUtils.getStringCoder(s) == 0) {
+                final byte[] bytes = StringUtils.extractBytes(s);
+                write(bytes, 0, s.length());
+                return this;
+            }
+        }
+        append8bit0(cs);
+
+        return this;
+    }
+
+    private void append8bit0(@NotNull CharSequence cs) {
         int length = cs.length();
         long offset = writeOffsetPositionMoved(length);
         long address = bytesStore.addressForWrite(offset);
@@ -930,8 +961,6 @@ public class UncheckedNativeBytes<U>
             char c = cs.charAt(i);
             memory.writeByte(address + i, (byte) c);
         }
-
-        return this;
     }
 
     @NotNull

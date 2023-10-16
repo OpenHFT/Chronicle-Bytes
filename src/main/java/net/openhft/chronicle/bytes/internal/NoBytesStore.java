@@ -213,6 +213,16 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
+    public long readRemaining() {
+        return 0;
+    }
+
+    @Override
+    public int length() {
+        return 0;
+    }
+
+    @Override
     public byte readByte(@NonNegative long offset) {
         throw throwBUE(offset);
     }
