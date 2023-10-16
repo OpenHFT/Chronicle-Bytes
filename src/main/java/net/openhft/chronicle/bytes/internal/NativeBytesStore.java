@@ -526,8 +526,12 @@ public class NativeBytesStore<U>
         requireNonNull(byteArray);
         Longs.requireNonNegative(offset);
         Longs.requireNonNegative(length);
-        memory.copyMemory(byteArray, offset, address + translate(offsetInRDO), length);
+        rawWrite(offsetInRDO, byteArray, offset, length);
         return this;
+    }
+
+    public void rawWrite(long offsetInRDO, byte[] byteArray, int offset, int length) {
+        memory.copyMemory(byteArray, offset, address + translate(offsetInRDO), length);
     }
 
     @Override
@@ -538,7 +542,7 @@ public class NativeBytesStore<U>
             memoryCopyMemory(Jvm.address(bytes) + offset, address + translate(offsetInRDO), length);
 
         } else {
-            memory.copyMemory(bytes.array(), offset, address + translate(offsetInRDO), length);
+            rawWrite(offsetInRDO, bytes.array(), offset, length);
         }
     }
 

@@ -476,11 +476,11 @@ enum BytesInternal {
         return true;
     }
 
-    private static boolean startsWith(@NotNull final BytesStore a,
-                                      @NotNull final BytesStore b,
-                                      @NonNegative final long aPos,
-                                      @NonNegative final long bPos,
-                                      @NonNegative final long length) {
+    public static boolean startsWith(@NotNull final BytesStore a,
+                                     @NotNull final BytesStore b,
+                                     @NonNegative final long aPos,
+                                     @NonNegative final long bPos,
+                                     @NonNegative final long length) {
         int i;
         for (i = 0; i < length - 7; i += 8) {
             if (a.readLong(aPos + i) != b.readLong(bPos + i))
@@ -575,8 +575,7 @@ enum BytesInternal {
     private static boolean compareUtf8(
             @NotNull RandomDataInput input, @NonNegative long offset, @NonNegative long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException {
-        throwExceptionIfReleased(input);
-        throwExceptionIfReleased(other);
+        // the caller should check args
         if (offset + utfLen > input.realCapacity())
             throw new BufferUnderflowException();
         int i = 0;
@@ -596,8 +595,7 @@ enum BytesInternal {
     private static boolean compareUtf82(
             @NotNull RandomDataInput input, @NonNegative long offset, int charI, @NonNegative long utfLen, @NotNull CharSequence other)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException {
-        throwExceptionIfReleased(input);
-        throwExceptionIfReleased(other);
+        // the caller should check args
         long limit = offset + utfLen;
         while (offset < limit && charI < other.length()) {
             int c = input.readUnsignedByte(offset++);
@@ -1152,7 +1150,6 @@ enum BytesInternal {
                 bytes.rawWriteByte((byte) c);
             }
         } catch (BufferOverflowException | ClosedIllegalStateException e) {
-            e.printStackTrace();
             throw Jvm.rethrow(e);
         }
     }
@@ -1554,8 +1551,7 @@ enum BytesInternal {
                                  @NonNegative long writePosition,
                                  @NonNegative long end)
             throws ClosedIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(sb);
+        // the caller should check args
         try {
             // before
             if (start < bytes.start()) start = bytes.start();
@@ -1584,8 +1580,7 @@ enum BytesInternal {
 
     private static void toString(@NotNull RandomDataInput bytes, @NotNull Appendable sb, @NonNegative long start, @NonNegative long last)
             throws IOException, BufferUnderflowException, ClosedIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(sb);
+        // the caller should check args
         for (long i = start; i < last; i++) {
             sb.append(bytes.printable(i));
         }
@@ -1593,8 +1588,7 @@ enum BytesInternal {
 
     private static void toString(@NotNull RandomDataInput bytes, @NotNull StringBuilder sb)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        requireNonNull(sb);
+        // the caller should check args
         ReferenceOwner toString = temporary("toString");
         bytes.reserve(toString);
         long start = bytes.readPosition();
@@ -2450,11 +2444,9 @@ enum BytesInternal {
         read8bitAndAppend(bytes, builder, tester);
     }
 
-    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
+    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull StringBuilder appendable, @NotNull StopCharTester tester)
             throws ClosedIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(appendable);
-        requireNonNull(tester);
+        // the caller should check args
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c))
@@ -2465,11 +2457,9 @@ enum BytesInternal {
         }
     }
 
-    private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes<?> bytes2, @NotNull StopCharTester tester)
+    public static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes<?> bytes2, @NotNull StopCharTester tester)
             throws BufferOverflowException, ClosedIllegalStateException, ArithmeticException, ThreadingIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(bytes2);
-        requireNonNull(tester);
+        // the caller should check args
         while (true) {
             int c = bytes.readUnsignedByte();
             if (tester.isStopChar(c))
@@ -2482,9 +2472,7 @@ enum BytesInternal {
 
     private static void read8bitAndAppend(@NotNull StreamingDataInput bytes, @NotNull Bytes<?> bytes2, @NotNull StopCharsTester tester)
             throws BufferUnderflowException, BufferOverflowException, ClosedIllegalStateException, ArithmeticException, ThreadingIllegalStateException {
-        throwExceptionIfReleased(bytes);
-        throwExceptionIfReleased(bytes2);
-        requireNonNull(tester);
+        // the caller should check args
         int ch = bytes.readUnsignedByte();
         do {
             int next = bytes.readUnsignedByte();

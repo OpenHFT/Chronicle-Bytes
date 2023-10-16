@@ -28,6 +28,7 @@ import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.util.Longs;
 import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -803,7 +804,7 @@ public class UncheckedNativeBytes<U>
         if (length > writeRemaining())
             throw new BufferOverflowException();
         long offsetInRDO = writeOffsetPositionMoved(length);
-        bytesStore.write(offsetInRDO, byteArray, offset, length);
+        ((NativeBytesStore) bytesStore).rawWrite(offsetInRDO, byteArray, offset, length);
         return this;
     }
 
