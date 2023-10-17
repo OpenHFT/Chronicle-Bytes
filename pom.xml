@@ -76,7 +76,6 @@
         <dependency>
             <groupId>net.openhft</groupId>
             <artifactId>chronicle-core</artifactId>
-            <version>2.24ea27-SNAPSHOT</version>
         </dependency>
 
         <dependency>
