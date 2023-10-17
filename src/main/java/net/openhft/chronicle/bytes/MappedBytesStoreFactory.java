@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
@@ -40,6 +41,26 @@ public interface MappedBytesStoreFactory {
      * @param address      The memory address of the mapped data.
      * @param capacity     The capacity of the mapped data.
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @return The created MappedBytesStore instance.
+     * @throws ClosedIllegalStateException If the MappedFile has already been released.
+     */
+    @Deprecated(/* to be removed in x.26 */)
+    @NotNull
+    default MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
+            throws ClosedIllegalStateException {
+        return create(owner, mappedFile, start, address, capacity, safeCapacity, OS.pageSize());
+    }
+
+    /**
+     * Creates a {@link MappedBytesStore} instance with the given parameters.
+     *
+     * @param owner        The owner of the MappedBytesStore to be created.
+     * @param mappedFile   The MappedFile to be wrapped by the created BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @param pageSize     Page size to use to check alignment
      * @return The created MappedBytesStore instance.
      * @throws ClosedIllegalStateException If the MappedFile has already been released.
      */

@@ -69,6 +69,23 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
+    @Deprecated(/* to be removed in x.26 */)
+    protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
+            throws ClosedIllegalStateException {
+        this(owner, mappedFile, start, address, capacity, safeCapacity, (int) OS.pageSize());
+    }
+    /**
+     * Creates a new MappedBytesStore with the given parameters.
+     *
+     * @param owner        The owner of this MappedBytesStore.
+     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @param pageSize     Page size to use to check alignment
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
         super(address, start + capacity, new OS.Unmapper(address, capacity, pageSize), false);
@@ -94,14 +111,28 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @return the MappedBytesStore
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
-    public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
-            throws ClosedIllegalStateException {
-        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, pageSize);
-    }
-
+    @Deprecated(/* to be removed in x.26 */)
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws ClosedIllegalStateException {
         return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, OS.defaultOsPageSize());
+    }
+
+    /**
+     * Creates a new MappedBytesStore with the given parameters.
+     *
+     * @param owner        The owner of this MappedBytesStore.
+     * @param mappedFile   The MappedFile to be wrapped by this BytesStore.
+     * @param start        The start position within the MappedFile.
+     * @param address      The memory address of the mapped data.
+     * @param capacity     The capacity of the mapped data.
+     * @param safeCapacity The safe capacity of the mapped data. Accessing data beyond the safe capacity might lead to a crash.
+     * @param pageSize     Page size to use to check alignment
+     * @return the MappedBytesStore
+     * @throws ClosedIllegalStateException If the resource has been released or closed.
+     */
+    public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
+            throws ClosedIllegalStateException {
+        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, pageSize);
     }
 
     static void throwReadOnly() {
