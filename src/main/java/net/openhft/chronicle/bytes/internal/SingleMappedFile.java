@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.domestic.ReentrantFileLock;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -78,6 +79,7 @@ public class SingleMappedFile extends MappedFile {
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
                             @NonNegative final long capacity,
+                            @Positive final int pageSize,
                             final boolean readOnly)
             throws IORuntimeException {
         super(file, readOnly);
@@ -94,8 +96,8 @@ public class SingleMappedFile extends MappedFile {
             Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
 
             resizeRafIfTooSmall(capacity);
-            final long address = OS.map(fileChannel, mode, 0, capacity);
-            final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, capacity, capacity);
+            final long address = OS.map(fileChannel, mode, 0, capacity, pageSize);
+            final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, capacity, capacity, pageSize);
             mbs2.syncMode(DEFAULT_SYNC_MODE);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -117,6 +119,13 @@ public class SingleMappedFile extends MappedFile {
         }
     }
 
+    public SingleMappedFile(@NotNull final File file,
+                            @NotNull final RandomAccessFile raf,
+                            @NonNegative final long capacity,
+                            final boolean readOnly)
+            throws IORuntimeException {
+        this(file, raf, capacity, OS.defaultOsPageSize(),readOnly);
+    }
     /**
      * Sets the synchronization mode for the underlying MappedBytesStore
      *

@@ -23,6 +23,7 @@ import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
@@ -46,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
-import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
+import static net.openhft.chronicle.core.util.Longs.*;
 
 /**
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
@@ -59,6 +60,7 @@ public class ChunkedMappedFile extends MappedFile {
     private final FileChannel fileChannel;
     private final long chunkSize;
     private final long overlapSize;
+    private final int pageSize;
     private final List<MappedBytesStore> stores = new ArrayList<>();
     private final long capacity;
     private long[] chunkCount = {0L};
@@ -71,19 +73,43 @@ public class ChunkedMappedFile extends MappedFile {
                              @NonNegative final long capacity,
                              final boolean readOnly)
             throws IORuntimeException {
+        this(file, raf, chunkSize, overlapSize, OS.defaultOsPageSize(), capacity, readOnly);
+    }
+
+    public ChunkedMappedFile(@NotNull final File file,
+                             @NotNull final RandomAccessFile raf,
+                             @NonNegative final long chunkSize,
+                             @NonNegative final long overlapSize,
+                             @Positive final int pageSize,
+                             @NonNegative final long capacity,
+                             final boolean readOnly)
+            throws IORuntimeException {
         super(file, readOnly);
+
+        validateArgs(chunkSize, overlapSize, pageSize, capacity);
 
         this.raf = raf;
         this.fileChannel = raf.getChannel();
-        this.chunkSize = OS.mapAlign(requireNonNegative(chunkSize));
-        this.overlapSize = OS.mapAlign(requireNonNegative(overlapSize));
-        if (this.overlapSize > this.chunkSize)
-            throw new IllegalArgumentException("overlapSize cannot be greater than chunkSize");
         this.capacity = capacity;
+        this.chunkSize = OS.mapAlign(chunkSize, pageSize);
+        this.overlapSize = OS.mapAlign(overlapSize, pageSize);
+        this.pageSize = pageSize;
 
         Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
     }
 
+    private void validateArgs(long chunkSize, long overlapSize, int pageSize, long capacity) {
+        requireNonNegative(chunkSize);
+        requireNonNegative(overlapSize);
+        require(positive(), pageSize);
+        requireNonNegative(capacity);
+        if (this.overlapSize > this.chunkSize)
+            throw new IllegalArgumentException("overlapSize cannot be greater than chunkSize");
+    }
+
+    /**
+     * Not compatible with hugetlbfs
+     */
     public static void warmup() {
         final List<Exception> errorsDuringWarmup = new ArrayList<>();
         ExceptionHandler error = Jvm.error().defaultHandler();
@@ -206,9 +232,9 @@ public class ChunkedMappedFile extends MappedFile {
 
             throwExceptionIfClosed();
 
-            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize);
+            final long address = OS.map(fileChannel, mode, startOfMap, mappedSize, pageSize);
             final MappedBytesStore mbs2 =
-                    mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize);
+                    mappedBytesStoreFactory.create(owner, this, chunk * this.chunkSize, address, mappedSize, this.chunkSize, pageSize);
             mbs2.syncMode(syncMode);
             if (RETAIN)
                 mbs2.reserve(this);

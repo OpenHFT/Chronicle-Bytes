@@ -178,6 +178,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      * @param file        The name of the file to be memory-mapped.
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of overlap of chunks in bytes.
+     * @param pageSize    The custom page size in bytes.
      * @param readOnly    read only is true, read-write if false
      * @return A new MappedBytes instance.
      * @throws FileNotFoundException          If the file does not exist.
@@ -188,14 +189,27 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     public static MappedBytes mappedBytes(@NotNull final File file,
                                           @NonNegative final long chunkSize,
                                           @NonNegative final long overlapSize,
+                                          @NonNegative final int pageSize,
                                           final boolean readOnly)
             throws FileNotFoundException, ClosedIllegalStateException {
-        final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, readOnly);
+        final MappedFile rw = MappedFile.of(file, chunkSize, overlapSize, pageSize, readOnly);
         try {
             return mappedBytes(rw);
         } finally {
             rw.release(INIT);
         }
+    }
+
+    /**
+     * @see  #mappedBytes(File, long, long, int, boolean)
+     */
+    @NotNull
+    public static MappedBytes mappedBytes(@NotNull final File file,
+                                          @NonNegative final long chunkSize,
+                                          @NonNegative final long overlapSize,
+                                          final boolean readOnly)
+            throws FileNotFoundException, ClosedIllegalStateException {
+        return mappedBytes(file, chunkSize, overlapSize, OS.defaultOsPageSize(), readOnly);
     }
 
     /**

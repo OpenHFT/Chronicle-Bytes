@@ -25,6 +25,7 @@ import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
+import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -123,12 +124,25 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     }
 
     /**
-     * Creates and returns a MappedFile instance with the specified file, chunk size, overlap size,
+     * @see #of(File, long, long, int, boolean)
+     */
+    @NotNull
+    public static MappedFile of(@NotNull final File file,
+                                @NonNegative final long chunkSize,
+                                @NonNegative final long overlapSize,
+                                final boolean readOnly)
+            throws FileNotFoundException {
+        return of(file, chunkSize, overlapSize, OS.defaultOsPageSize(), readOnly);
+    }
+
+    /**
+     * Creates and returns a MappedFile instance with the specified file, chunk size, overlap size, pageSize
      * and read-only mode.
      *
      * @param file        The file to be memory-mapped.
      * @param chunkSize   The size of each chunk in bytes.
      * @param overlapSize The size of the overlapping regions between chunks in bytes.
+     * @param pageSize The custom page size in bytes.
      * @param readOnly    If true, the file is opened in read-only mode; if false, it is opened for read-write.
      * @return A new MappedFile instance.
      * @throws FileNotFoundException If the specified file does not exist.
@@ -137,12 +151,12 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     public static MappedFile of(@NotNull final File file,
                                 @NonNegative final long chunkSize,
                                 @NonNegative final long overlapSize,
+                                @Positive final int pageSize,
                                 final boolean readOnly)
             throws FileNotFoundException {
 
         @NotNull RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
-        final long capacity = /*readOnly ? raf.length() : */DEFAULT_CAPACITY;
-        return new ChunkedMappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
+        return new ChunkedMappedFile(file, raf, chunkSize, overlapSize, pageSize, DEFAULT_CAPACITY, readOnly);
     }
 
     /**
