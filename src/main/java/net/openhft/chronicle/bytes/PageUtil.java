@@ -58,7 +58,7 @@ public final class PageUtil {
         }
     }
 
-    private static List<String> readMountInfo(String path) {
+    static List<String> readMountInfo(String path) {
         try {
             return Files.readAllLines(Paths.get(path));
         } catch (IOException e) {
@@ -67,7 +67,7 @@ public final class PageUtil {
         }
     }
 
-    private static int parsePageSize(String mount) {
+    static int parsePageSize(String mount) {
         Matcher matcher = PAGE_SIZE_PATTERN.matcher(mount);
         if (matcher.find())
             try {
@@ -89,14 +89,13 @@ public final class PageUtil {
         return k * 1024;
     }
 
-    private static String parseMountPoint(String line) {
+    static String parseMountPoint(String line) {
         String[] parts = line.split("\\s+");
-        assert parts.length == 10;
         assert parts[4].matches("^\\S+$");
         return parts[4];
     }
 
-    private static void insert(String path, int size) {
+    static void insert(String path, int size) {
         TrieNode curr = root;
         for (String dir : path.split("/")) {
             if (dir.isEmpty()) continue;
@@ -137,10 +136,10 @@ public final class PageUtil {
         return OS.isLinux() && getPageSize(absolutePath) != OS.defaultOsPageSize();
     }
 
-    private static class TrieNode {
-        private boolean isLeaf = false;
-        private final Map<String, TrieNode> childs = new HashMap<>();
+    static class TrieNode {
+        boolean isLeaf = false;
+        final Map<String, TrieNode> childs = new HashMap<>();
 
-        private int pageSize;
+        int pageSize;
     }
 }

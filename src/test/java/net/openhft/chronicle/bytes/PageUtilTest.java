@@ -17,16 +17,19 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import org.junit.jupiter.api.Test;
 
 import java.io.File;
+import java.lang.reflect.Field;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static net.openhft.chronicle.bytes.PageUtil.DEFAULT_HUGE_PAGE_SIZE;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 class PageUtilTest {
@@ -50,5 +53,58 @@ class PageUtilTest {
         assumeTrue(OS.isLinux());
         assumeTrue(Files.exists(Paths.get("/mnt/huge")));
         assertTrue(PageUtil.isHugePage("/mnt/huge"));
+    }
+
+    @Test
+    void readMountInfo() throws Exception {
+        File file = Files.createTempFile("mountinfo", "file").toFile();
+        file.deleteOnExit();
+        List<String> lines = asList(
+                "133 162 253:2 / /home rw,relatime shared:74 - xfs /dev/mapper/rl-home rw,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota",
+                "136 162 253:2 /local /mnt/local rw,relatime shared:74 - xfs /dev/mapper/rl-home rw,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota",
+                "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=2M,size=68719476");
+        Files.write(file.toPath(), lines);
+
+        List<String> result = PageUtil.readMountInfo(file.getAbsolutePath());
+        assertEquals(lines, result);
+    }
+
+    @Test
+    void parseActualPageSize() throws Exception {
+        String line = "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476";
+
+        int result = PageUtil.parsePageSize(line);
+        assertEquals(4 << 20, result);
+    }
+
+    @Test
+    void parseDefaultPageSize() throws Exception {
+        String line = "136 162 253:2 /local /mnt/local rw,relatime shared:74 - xfs /dev/mapper/rl-home rw,seclabel,attr2,inode64,logbufs=8,logbsize=32k,noquota";
+
+        int result = PageUtil.parsePageSize(line);
+        assertEquals(DEFAULT_HUGE_PAGE_SIZE, result);
+    }
+
+    @Test
+    void parseMountPoint() throws Exception {
+        String line = "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476";
+
+        String result = PageUtil.parseMountPoint(line);
+        assertEquals("/mnt/huge", result);
+    }
+
+    @Test
+    void insertTest() throws Exception {
+        int G = 1 << 30;
+        Field field = Jvm.getField(PageUtil.class, "root");
+        field.setAccessible(true);
+        PageUtil.TrieNode root = (PageUtil.TrieNode) field.get(null);
+
+        PageUtil.insert("/mnt/huge", G);
+
+        assertNotNull(root);
+        assertNotNull(root.childs.get("mnt"));
+        assertNotNull(root.childs.get("mnt").childs.get("huge"));
+        assertEquals(G, root.childs.get("mnt").childs.get("huge").pageSize);
     }
 }
