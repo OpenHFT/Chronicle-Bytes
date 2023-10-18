@@ -382,6 +382,11 @@ public class BytesTest extends BytesTestCommon {
             from.compact();
             assertEquals("rld", from.toString());
             assertEquals(0, from.readPosition());
+
+            from.readSkip(from.readRemaining());
+            assertEquals(3, from.readPosition());
+            from.compact();
+            assertEquals(0, from.readPosition());
         } finally {
             postTest(from);
         }

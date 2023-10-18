@@ -990,11 +990,13 @@ public interface Bytes<U> extends
     }
 
     /**
-     * Compacts this Bytes object by moving the read position to the start.
+     * Compacts this Bytes object by moving the readPosition() to the start(),
+     * adjusting the readLimit()/writePosition() appropriately so that the readRemaining() is unchanged.
      * <p>
      * This operation is useful to free up space for writing by discarding bytes that have already
      * been read.
-     *
+     * <p>
+     * NOTE: If the space freed in longs is less than 1/4 the readRemaining in longs, this method does nothing to reduce movement overhead
      *
      * @return This Bytes object, for method chaining.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
