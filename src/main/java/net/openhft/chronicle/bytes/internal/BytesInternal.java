@@ -99,6 +99,7 @@ enum BytesInternal {
     @Deprecated(/* To be removed in x.26 */)
     private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
+    @Deprecated(/* To be removed in x.26 */)
     private static final BytesPool BP = new BytesPool();
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
