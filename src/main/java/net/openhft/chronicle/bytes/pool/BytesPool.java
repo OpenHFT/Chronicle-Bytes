@@ -18,7 +18,10 @@
 package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.scoped.ScopedResourcePool;
+import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -31,8 +34,35 @@ import org.jetbrains.annotations.NotNull;
  * This class is primarily meant to be used in high-performance environments where reducing
  * object creation is crucial.
  */
-@SuppressWarnings("rawtypes")
-public class BytesPool {
+public final class BytesPool {
+
+    private static final int DEFAULT_BYTES_POOL_SIZE_PER_THREAD = Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
+
+    @Deprecated(/* To be removed in x.26 */)
+    public BytesPool() {
+    }
+
+    /**
+     * Create a scoped-thread-local pool of bytes resources
+     *
+     * @return The pool
+     */
+    public static ScopedResourcePool<Bytes<?>> createThreadLocal() {
+        return createThreadLocal(DEFAULT_BYTES_POOL_SIZE_PER_THREAD);
+    }
+
+    /**
+     * Create a scoped-thread-local pool of bytes resources
+     *
+     * @param instancesPerThread The maximum number of instances to retain per thread
+     * @return The pool
+     */
+    public static ScopedResourcePool<Bytes<?>> createThreadLocal(int instancesPerThread) {
+        return new ScopedThreadLocal<>(
+                BytesPool::createBytes,
+                Bytes::clear,
+                instancesPerThread);
+    }
 
     /**
      * Thread-local variable that holds the {@link Bytes} instance for each thread.
@@ -45,7 +75,9 @@ public class BytesPool {
      * added to the pool.
      *
      * @return A {@link Bytes} instance.
+     * @deprecated Use {@link BytesPool#createThreadLocal()} and {@link ScopedResourcePool#get()} instead
      */
+    @Deprecated(/* To be removed in x.26 */)
     public Bytes<?> acquireBytes() {
         Bytes<?> bytes = bytesTL.get();
         if (bytes != null) {
@@ -70,7 +102,7 @@ public class BytesPool {
      * @return A newly created {@link Bytes} instance.
      */
     @NotNull
-    protected Bytes<?> createBytes() {
+    private static Bytes<?> createBytes() {
         Bytes<?> bbb = Bytes.allocateElasticDirect(256);
         IOTools.unmonitor(bbb);
         return bbb;
