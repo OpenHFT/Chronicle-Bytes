@@ -996,7 +996,7 @@ public interface Bytes<U> extends
      * This operation is useful to free up space for writing by discarding bytes that have already
      * been read.
      * <p>
-     * NOTE: If the space freed in longs is less than 1/4 the readRemaining in longs, this method does nothing to reduce movement overhead
+     * NOTE: If the space freed in longs is less than 1/4 the readRemaining, this method does nothing to reduce movement overhead
      *
      * @return This Bytes object, for method chaining.
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
