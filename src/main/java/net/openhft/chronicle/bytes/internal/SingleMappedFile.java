@@ -86,7 +86,7 @@ public class SingleMappedFile extends MappedFile {
 
         this.raf = raf;
         this.fileChannel = raf.getChannel();
-        this.capacity = capacity;
+        this.capacity = OS.mapAlign(capacity, PageUtil.getPageSize(file.getAbsolutePath()));
 
         final MapMode mode = readOnly() ? MapMode.READ_ONLY : MapMode.READ_WRITE;
 
@@ -95,9 +95,9 @@ public class SingleMappedFile extends MappedFile {
         try {
             Jvm.doNotCloseOnInterrupt(getClass(), this.fileChannel);
 
-            resizeRafIfTooSmall(capacity);
-            final long address = OS.map(fileChannel, mode, 0, capacity, pageSize);
-            final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, capacity, capacity, pageSize);
+            resizeRafIfTooSmall(this.capacity);
+            final long address = OS.map(fileChannel, mode, 0, this.capacity, pageSize);
+            final MappedBytesStore mbs2 = MappedBytesStore.create(this, this, 0, address, this.capacity, this.capacity, pageSize);
             mbs2.syncMode(DEFAULT_SYNC_MODE);
 
             final long elapsedNs = System.nanoTime() - beginNs;
@@ -124,7 +124,7 @@ public class SingleMappedFile extends MappedFile {
                             @NonNegative final long capacity,
                             final boolean readOnly)
             throws IORuntimeException {
-        this(file, raf, capacity, OS.defaultOsPageSize(),readOnly);
+        this(file, raf, capacity, PageUtil.getPageSize(file.getAbsolutePath()),readOnly);
     }
     /**
      * Sets the synchronization mode for the underlying MappedBytesStore
