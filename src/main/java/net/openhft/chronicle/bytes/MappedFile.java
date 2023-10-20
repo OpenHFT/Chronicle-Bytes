@@ -134,7 +134,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                                 @NonNegative final long overlapSize,
                                 final boolean readOnly)
             throws FileNotFoundException {
-        return of(file, chunkSize, overlapSize, OS.defaultOsPageSize(), readOnly);
+        return of(file, chunkSize, overlapSize, PageUtil.getPageSize(file.getAbsolutePath()), readOnly);
     }
 
     /**
