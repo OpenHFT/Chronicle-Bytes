@@ -40,7 +40,7 @@ import static java.text.MessageFormat.format;
  */
 public final class PageUtil {
 
-    public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
+    public static final int DEFAULT_HUGE_PAGE_SIZE = 2 << 20;
 
     private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9])+([KkMmGg])");
     private static final TrieNode root = new TrieNode();
@@ -80,13 +80,13 @@ public final class PageUtil {
     }
 
     private static int mult(String s) {
-        int k = 1024;
+        int k = 1 << 10;
         if (s.equalsIgnoreCase("K"))
             return k;
         if (s.equalsIgnoreCase("G"))
-            return k * 1024 * 1024;
+            return k << 20;
 
-        return k * 1024;
+        return k << 10;
     }
 
     static String parseMountPoint(String line) {
