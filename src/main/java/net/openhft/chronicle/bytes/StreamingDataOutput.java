@@ -1280,8 +1280,4 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
         writeStopBit(bytes.readRemaining());
         write(bytes);
     }
-
-    // internal buffer for a byte[]
-    @Deprecated(/* to be removed in x.25 */)
-    byte[] internalNumberBuffer();
 }
