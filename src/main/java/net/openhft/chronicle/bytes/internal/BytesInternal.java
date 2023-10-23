@@ -110,6 +110,7 @@ enum BytesInternal {
     private static final int NEG_ONE = ByteOrder.nativeOrder() == ByteOrder.LITTLE_ENDIAN ? 0x80 : 0x8000;
 
     private static final MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
+    private static final ThreadLocal<byte[]> BYTE_ARRAY_TL = ThreadLocal.withInitial(() -> new byte[20]);
 
 
     static {
@@ -1729,15 +1730,15 @@ enum BytesInternal {
 
     public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
-        byte[] numberBuffer = out.internalNumberBuffer();
-        int len = 0;
+        int digits = 16 - (Long.numberOfLeadingZeros(num) + 3) / 4;
+        digits = Math.max(minDigits, digits);
+        int shift = digits << 2;
         do {
-            int digit = (int) (num & 0xF);
-            num >>>= 4;
-            numberBuffer[len++] = (byte) HEXADECIMAL[digit];
-        } while (--minDigits > 0 || num > 0);
-        for (int i = len - 1; i >= 0; i--)
-            out.rawWriteByte(numberBuffer[i]);
+            int digit = (int) ((num >>> shift) & 0xF);
+            shift -= 4;
+
+            out.rawWriteByte((byte) HEXADECIMAL[digit]);
+        } while (shift >= 0);
     }
 
     public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces)
@@ -1747,7 +1748,7 @@ enum BytesInternal {
             return;
         }
 
-        byte[] numberBuffer = out.internalNumberBuffer();
+        byte[] numberBuffer = BYTE_ARRAY_TL.get();
         int endIndex;
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
@@ -1838,7 +1839,7 @@ enum BytesInternal {
             return;
         }
 
-        byte[] numberBuffer = out.internalNumberBuffer();
+        byte[] numberBuffer = BYTE_ARRAY_TL.get();
         int endIndex;
         if (num < 0) {
             if (num == Long.MIN_VALUE) {
@@ -1903,7 +1904,7 @@ enum BytesInternal {
             out.writeShort((short) (num / 10 + (num % 10 << 8) + '0' * 0x101));
 
         } else {
-            byte[] numberBuffer = out.internalNumberBuffer();
+            byte[] numberBuffer = BYTE_ARRAY_TL.get();
             // Extract digits into the end of the numberBuffer
             int endIndex = appendLong1(numberBuffer, num);
 
