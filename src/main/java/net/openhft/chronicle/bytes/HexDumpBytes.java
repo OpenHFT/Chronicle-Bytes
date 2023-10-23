@@ -66,7 +66,6 @@ public class HexDumpBytes
     private final NativeBytes<Void> base;
     private final Bytes<byte[]> text;
     private final Bytes<byte[]> comment = Bytes.allocateElasticOnHeap(64);
-    private final byte[] internalNumberBuffer = new byte[20];
     private OffsetFormat offsetFormat = null;
     private long startOfLine = 0;
     private int indent = 0;
@@ -1911,12 +1910,6 @@ public class HexDumpBytes
         } finally {
             copyToText(pos);
         }
-    }
-
-    @Deprecated(/* to be removed in x.25 */)
-    @Override
-    public byte[] internalNumberBuffer() {
-        return internalNumberBuffer;
     }
 
     @Override
