@@ -1730,15 +1730,15 @@ enum BytesInternal {
 
     public static void appendBase16(@NotNull ByteStringAppender out, long num, int minDigits)
             throws IllegalArgumentException, BufferOverflowException, ClosedIllegalStateException {
-        int digits = 16 - (Long.numberOfLeadingZeros(num) + 3) / 4;
+        int digits = 16 - Long.numberOfLeadingZeros(num) / 4;
         digits = Math.max(minDigits, digits);
-        int shift = digits << 2;
+        int shift = Math.max(4, digits << 2);
         do {
-            int digit = (int) ((num >>> shift) & 0xF);
             shift -= 4;
+            int digit = (int) ((num >>> shift) & 0xF);
 
             out.rawWriteByte((byte) HEXADECIMAL[digit]);
-        } while (shift >= 0);
+        } while (shift > 0);
     }
 
     public static void appendDecimal(@NotNull ByteStringAppender out, long num, int decimalPlaces)
