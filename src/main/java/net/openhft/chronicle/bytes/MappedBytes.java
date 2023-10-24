@@ -264,15 +264,6 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
     }
 
     /**
-     * Toggles the thread safety check for the mapped bytes. This method is deprecated and will be removed in future versions.
-     *
-     * @param disableThreadSafetyCheck true to disable the thread safety check, false to enable it.
-     * @return the current MappedBytes instance.
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    public abstract MappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck);
-
-    /**
      * Updates the number of chunks in the mapped file.
      *
      * @param chunkCount The new number of chunks.

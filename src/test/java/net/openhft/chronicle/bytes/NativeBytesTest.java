@@ -64,7 +64,7 @@ public class NativeBytesTest extends BytesTestCommon {
         assertTrue(b.readLimit() < b.writeLimit());
 
         Bytes<byte[]> wrap0 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
-        b.writeSome(wrap0);
+        b.write(wrap0);
         assertEquals("Hello World, Have a great day!", b.toString());
         b.releaseLast();
     }
@@ -79,7 +79,7 @@ public class NativeBytesTest extends BytesTestCommon {
         assertTrue(b.readLimit() < b.writeLimit());
 
         Bytes<byte[]> wrap1 = Bytes.wrapForRead("Hello World, Have a great day!".getBytes(ISO_8859_1));
-        b.writeSome(wrap1);
+        b.write(wrap1);
         assertEquals("Hello World, Have a great day!", b.toString());
         b.releaseLast();
     }

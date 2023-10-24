@@ -58,8 +58,6 @@ public abstract class AbstractBytes<U>
         implements Bytes<U>,
         HasUncheckedRandomDataInput,
         DecimalAppender {
-    @Deprecated(/* remove in x.25 */)
-    protected static final boolean DISABLE_THREAD_SAFETY = SingleThreadedChecked.DISABLE_SINGLE_THREADED_CHECK;
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     // if you need to reserve the behaviour of append(double) in x.23
@@ -1527,7 +1525,6 @@ public abstract class AbstractBytes<U>
         return sum & 0xFF;
     }
 
-    @Override
     public boolean isImmutableEmptyByteStore() {
         return bytesStore.capacity() == 0;
     }

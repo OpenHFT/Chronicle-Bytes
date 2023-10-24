@@ -22,10 +22,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 import java.util.Collection;
 
-import static net.openhft.chronicle.bytes.Allocator.*;
+import static net.openhft.chronicle.bytes.Allocator.HEAP;
+import static net.openhft.chronicle.bytes.Allocator.NATIVE;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -56,9 +58,10 @@ public class Bytes2Test extends BytesTestCommon {
         try {
             from.write("Hello World");
 
-            to.writeSome(from);
+            ByteBuffer buffer = from.toTemporaryDirectByteBuffer();
+            to.writeSome(buffer);
             assertEquals("Hello ", to.toString());
-            assertEquals("World", from.toString());
+            assertEquals("Hello World", from.toString());
         } finally {
             from.releaseLast();
             to.releaseLast();
@@ -73,8 +76,8 @@ public class Bytes2Test extends BytesTestCommon {
         from.write("Hello World 0123456789012345678901234567890123456789012345678901234567890123456789");
 
         try {
-            to.writeSome(from);
-            assertTrue("from: " + from, from.toString().startsWith("World "));
+            to.writeSome(from.toTemporaryDirectByteBuffer());
+            assertTrue("from: " + from, from.toString().startsWith("Hello World "));
         } finally {
             from.releaseLast();
             to.releaseLast();

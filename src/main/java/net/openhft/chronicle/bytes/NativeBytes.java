@@ -263,7 +263,7 @@ public class NativeBytes<U>
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative final long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         throwExceptionIfReleased();
         if (endOfBuffer < 0)
             throw new DecoratedBufferOverflowException(endOfBuffer + "< 0");
@@ -361,7 +361,7 @@ public class NativeBytes<U>
 
     @Override
     public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length)
-            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException, ClosedIllegalStateException {
+            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
@@ -375,29 +375,6 @@ public class NativeBytes<U>
         } else {
             return BytesStore.wrap(ByteBuffer.allocate(size));
         }
-    }
-
-    @Override
-    @NotNull
-    public NativeBytes writeSome(@NotNull final Bytes<?> bytes)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        requireNonNull(bytes);
-        ReportUnoptimised.reportOnce();
-
-        long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1 << 20)
-            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-        final long offset = bytes.readPosition();
-        ensureCapacity(writePosition() + length);
-        optimisedWrite(bytes, offset, length);
-        if (length == bytes.readRemaining()) {
-            bytes.clear();
-        } else {
-            bytes.readSkip(length);
-            if (bytes.writePosition() > bytes.realCapacity() / 2)
-                bytes.compact();
-        }
-        return this;
     }
 
     @Override
@@ -423,7 +400,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeByte(final byte i8)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -432,7 +409,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLong(final long i64)
-            throws BufferOverflowException, IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, IllegalStateException {
         final long offset = writeOffsetPositionMoved(8L);
         bytesStore.writeLong(offset, i64);
         return this;

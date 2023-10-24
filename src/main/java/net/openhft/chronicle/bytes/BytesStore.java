@@ -1009,31 +1009,4 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
         return true;
     }
 
-    // Can be removed once RandomDataInput:compareAndSwapInt is removed
-    // To be removed in x.25
-    @SuppressWarnings("deprecation")
-    @Override
-    default boolean compareAndSwapInt(@NonNegative long offset, int expected, int value) throws BufferOverflowException, ClosedIllegalStateException {
-        return ((RandomDataOutput<B>) this).compareAndSwapInt(offset, expected, value);
-    }
-
-    // Can be removed once RandomDataInput:compareAndSwapLong is removed
-    // To be removed in x.25
-    @SuppressWarnings("deprecation")
-    @Override
-    default boolean compareAndSwapLong(@NonNegative long offset, long expected, long value) throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        return ((RandomDataOutput<B>) this).compareAndSwapLong(offset, expected, value);
-    }
-
-    /**
-     * Returns if this ByteStore is an immutable empty ByteStore or if it is backed
-     * by an immutable empty ByteStore.
-     *
-     * @return if immutable empty or backed by such
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    default boolean isImmutableEmptyByteStore() {
-        return capacity() == 0;
-    }
-
 }

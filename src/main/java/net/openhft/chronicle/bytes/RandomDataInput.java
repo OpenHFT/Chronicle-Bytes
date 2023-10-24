@@ -27,9 +27,9 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -58,30 +58,6 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * externally.
  */
 public interface RandomDataInput extends RandomCommon {
-    // TODO Move to an internal class in x.25
-    String[] charToString = createCharToString();
-
-    /**
-     * Creates a lookup table mapping byte values to their corresponding String representations.
-     *
-     * @return a lookup table for byte-to-String conversions.
-     */
-    // TODO Move to an internal class in x.25
-    @NotNull
-    static String[] createCharToString() {
-        @NotNull String[] charToString = new String[256];
-        charToString[0] = "\u0660";
-        for (int i = 1; i < 21; i++)
-            charToString[i] = Character.toString((char) (i + 0x2487));
-        for (int i = ' '; i < 256; i++)
-            charToString[i] = Character.toString((char) i);
-        for (int i = 21; i < ' '; i++)
-            charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
-        for (int i = 0x80; i < 0xA0; i++)
-            charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
-        return charToString;
-    }
-
     /**
      * Reads a volatile int value from the current reading position.
      *
@@ -265,7 +241,7 @@ public interface RandomDataInput extends RandomCommon {
      */
     default String printable(@NonNegative long offset)
             throws BufferUnderflowException, ClosedIllegalStateException {
-        return charToString[readUnsignedByte(offset)];
+        return Chars.charToString[readUnsignedByte(offset)];
     }
 
     /**
@@ -531,70 +507,6 @@ public interface RandomDataInput extends RandomCommon {
     }
 
     /**
-     * Perform a 32-bit CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    boolean compareAndSwapInt(@NonNegative long offset, int expected, int value)
-            throws BufferOverflowException, ClosedIllegalStateException;
-
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    void testAndSetInt(@NonNegative long offset, int expected, int value)
-            throws BufferOverflowException, ClosedIllegalStateException;
-
-    /**
-     * Perform a 64-bit CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
-            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
-
-    /**
-     * Perform a 32-bit float CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
-            throws BufferOverflowException, ClosedIllegalStateException {
-        return compareAndSwapInt(offset, Float.floatToRawIntBits(expected), Float.floatToRawIntBits(value));
-    }
-
-    /**
-     * Perform a 64-bit double CAS at a given offset.
-     *
-     * @param offset   to perform CAS
-     * @param expected value
-     * @param value    to set
-     * @return true, if successful.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     */
-    @Deprecated(/* Use RandomDataOutput instead, to be removed in x.25 */)
-    default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
-            throws BufferOverflowException, ClosedIllegalStateException {
-        return compareAndSwapLong(offset, Double.doubleToRawLongBits(expected), Double.doubleToRawLongBits(value));
-    }
-
-    /**
      * Returns a new BytesStore that is a subsequence of this byte sequence, starting at the specified index and of the specified length.
      *
      * @param start  the start index, inclusive.
@@ -812,6 +724,7 @@ public interface RandomDataInput extends RandomCommon {
         int len = Maths.toUInt31(readRemaining());
 
         ByteBuffer bb = ByteBuffer.allocateDirect(len);
+        bb.order(ByteOrder.nativeOrder());
         copyTo(bb);
         bb.clear();
         return bb;
@@ -867,5 +780,29 @@ public interface RandomDataInput extends RandomCommon {
      */
     default boolean canReadDirect(@NonNegative long length) {
         return isDirectMemory() && readRemaining() >= length;
+    }
+
+    class Chars {
+        public static final String[] charToString = createCharToString();
+
+        /**
+         * Creates a lookup table mapping byte values to their corresponding String representations.
+         *
+         * @return a lookup table for byte-to-String conversions.
+         */
+        @NotNull
+        public static String[] createCharToString() {
+            @NotNull String[] charToString = new String[256];
+            charToString[0] = "\u0660";
+            for (int i = 1; i < 21; i++)
+                charToString[i] = Character.toString((char) (i + 0x2487));
+            for (int i = ' '; i < 256; i++)
+                charToString[i] = Character.toString((char) i);
+            for (int i = 21; i < ' '; i++)
+                charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
+            for (int i = 0x80; i < 0xA0; i++)
+                charToString[i] = "\\u00" + Integer.toHexString(i).toUpperCase();
+            return charToString;
+        }
     }
 }
