@@ -101,11 +101,6 @@ public final class NoBytesStore implements BytesStore {
         return false;
     }
 
-    @Override
-    public boolean reservedBy(ReferenceOwner owner) {
-        return true;
-    }
-
     @NotNull
     @Override
     public RandomDataOutput writeByte(@NonNegative long offset, byte i8) {

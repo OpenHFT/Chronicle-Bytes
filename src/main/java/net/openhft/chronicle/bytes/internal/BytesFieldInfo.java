@@ -18,9 +18,9 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.FieldGroup;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Memory;
+import net.openhft.chronicle.core.util.ClassLocal;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;

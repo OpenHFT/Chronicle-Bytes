@@ -18,7 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 
 import java.io.StringWriter;
