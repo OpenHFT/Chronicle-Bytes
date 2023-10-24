@@ -42,7 +42,7 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
             // resize since the empty bytes is using a shared backing EmptyByteStore.
             bytes.ensureCapacity(1);
             // Make sure we are not using an EmptyByteStore
-            replacedOrRefused = !bytes.isImmutableEmptyByteStore();
+            replacedOrRefused = bytes.capacity() != 0;
         } catch (BufferOverflowException ignored) {
             // This is ok as some of the Bytes objects are not elastic.
             replacedOrRefused = true;

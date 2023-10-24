@@ -762,35 +762,6 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
     }
 
     /**
-     * Writes data from the specified {@code Bytes} object into the output stream. The amount of data written is
-     * the minimum of the remaining data in the {@code Bytes} object and the remaining space in the output stream.
-     * The position of this output stream is updated accordingly, but the read position of the input data is not changed.
-     *
-     * @param bytes the {@code Bytes} object from which data is read.
-     * @return The current StreamingDataOutput instance.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @deprecated use write(bytes) instead and alter the bytes as you intended
-     */
-    @Deprecated(/* to be removed in x.25 */)
-    @NotNull
-    default S writeSome(@NotNull Bytes<?> bytes)
-            throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        long length = Math.min(bytes.readRemaining(), writeRemaining());
-        if (length + writePosition() >= 1 << 20)
-            length = Math.min(bytes.readRemaining(), realCapacity() - writePosition());
-        write(bytes, bytes.readPosition(), length);
-        if (length == bytes.readRemaining()) {
-            bytes.clear();
-        } else {
-            bytes.readSkip(length);
-            if (bytes.writePosition() > bytes.realCapacity() / 2)
-                bytes.compact();
-        }
-        return (S) this;
-    }
-
-    /**
      * Writes the specified number of bytes from the provided {@code RandomDataInput} object into the output stream,
      * starting from the given read offset.
      * The position of this output stream is updated accordingly, but the read position of the input data is not changed.

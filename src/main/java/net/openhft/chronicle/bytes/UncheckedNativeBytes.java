@@ -304,8 +304,7 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
-    // TODO Make private in x.25
-    public long rawCopy(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
+    private long rawCopy(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, IllegalStateException {
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));
         if (len > 0) {

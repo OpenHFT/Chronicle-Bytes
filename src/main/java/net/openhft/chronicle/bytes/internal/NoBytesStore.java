@@ -398,11 +398,6 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean isImmutableEmptyByteStore() {
-        return true;
-    }
-
-    @Override
     public int hashCode() {
         return 0;
     }

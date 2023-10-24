@@ -169,7 +169,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
             final MappedBytesStore mbs = (MappedBytesStore) bytesStore();
             return mbs.lock(offset, maxSize(), shared);
         }
-        return Byteable.super.lock(shared);
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -186,6 +186,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
             final MappedBytesStore mbs = (MappedBytesStore) bytesStore();
             return mbs.tryLock(offset, maxSize(), shared);
         }
-        return Byteable.super.tryLock(shared);
+        throw new UnsupportedOperationException();
     }
 }

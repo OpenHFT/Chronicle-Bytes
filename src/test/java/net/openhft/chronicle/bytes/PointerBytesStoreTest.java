@@ -18,10 +18,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
+import net.openhft.chronicle.bytes.internal.NoBytesStore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class PointerBytesStoreTest extends BytesTestCommon {
 
