@@ -30,12 +30,11 @@ import org.jetbrains.annotations.Nullable;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE_ENDIAN;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 import static net.openhft.chronicle.core.util.StringUtils.*;
-
-import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE_ENDIAN;
 
 /**
  * Bytes to wrap memory mapped data.
@@ -65,7 +64,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     }
 
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile, final String name)
-            throws ClosedIllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(name);
 
         assert mappedFile != null;
@@ -185,7 +184,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
 
     @Override
     public @NotNull Bytes<Void> writeSkip(long bytesToSkip)
-            throws BufferOverflowException, ClosedIllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         // only check up to 128 bytes are real.
         writeCheckOffset(writePosition(), Math.min(128, bytesToSkip));
         // the rest can be lazily allocated.
@@ -216,7 +215,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @NotNull
     @Override
     public Bytes<Void> clear()
-            throws ClosedIllegalStateException, ClosedIllegalStateException {
+            throws ClosedIllegalStateException {
         // Typically, only used at the start of an operation so reject if closed.
         throwExceptionIfClosed();
 
@@ -577,12 +576,6 @@ public abstract class CommonMappedBytes extends MappedBytes {
     @Override
     public boolean isDirectMemory() {
         return true;
-    }
-
-    @Deprecated(/* to be removed in x.25 */)
-    public CommonMappedBytes disableThreadSafetyCheck(boolean disableThreadSafetyCheck) {
-        singleThreadedCheckDisabled(disableThreadSafetyCheck);
-        return this;
     }
 
     public void singleThreadedCheckDisabled(boolean singleThreadedCheckDisabled) {

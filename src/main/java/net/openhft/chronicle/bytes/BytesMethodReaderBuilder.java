@@ -64,22 +64,6 @@ public class BytesMethodReaderBuilder implements MethodReaderBuilder {
     }
 
     /**
-     * Sets the level of logging for unknown methods.
-     * <p>
-     * This method is deprecated and will always return {@code this}, effectively making it a no-op.
-     *
-     * @param warnMissing if {@code true}, warnings will be logged for unknown methods;
-     *                    if {@code false}, debug-level messages will be logged instead
-     * @return the builder instance for method chaining
-     */
-    @Deprecated(/* remove in x.25 */)
-    @Override
-    public MethodReaderBuilder warnMissing(boolean warnMissing) {
-        // always true
-        return this;
-    }
-
-    /**
      * Returns the current MethodEncoderLookup function.
      *
      * @return the current MethodEncoderLookup function

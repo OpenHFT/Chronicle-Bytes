@@ -809,11 +809,6 @@ public class HexDumpBytes
         return base.readUtf8Limited(offset, maxUtf8Len);
     }
 
-    @Deprecated(/* to be removed in x.25 */)
-    public <C extends Appendable & CharSequence> boolean readUTFΔ(@NotNull C sb) throws IORuntimeException, IllegalArgumentException, BufferUnderflowException, IllegalStateException, ArithmeticException {
-        return base.readUtf8(sb);
-    }
-
     @Override
     public boolean read8bit(@NotNull Bytes<?> b) throws BufferUnderflowException, IllegalStateException, BufferOverflowException, ArithmeticException {
         return base.read8bit(b);
@@ -1711,25 +1706,6 @@ public class HexDumpBytes
         }
     }
 
-    @Deprecated(/* to be removed in x.25 */)
-    @NotNull
-    public Bytes<Void> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
-        long pos = base.writePosition();
-        try {
-            if (bs == null) {
-                base.writeStopBit(-1);
-            } else {
-                long offset = bs.readPosition();
-                long readRemaining = Math.min(base.writeRemaining(), bs.readLimit() - offset);
-                base.writeStopBit(readRemaining);
-                base.write(bs, offset, readRemaining);
-            }
-            return this;
-        } finally {
-            copyToText(pos);
-        }
-    }
-
     @NotNull
     @Override
     public Bytes<Void> writeUnsignedByte(int i) throws BufferOverflowException, IllegalStateException, ArithmeticException {
@@ -1812,19 +1788,6 @@ public class HexDumpBytes
         long pos = base.writePosition();
         try {
             base.write(bytes);
-            return this;
-
-        } finally {
-            copyToText(pos);
-        }
-    }
-
-    @NotNull
-    @Override
-    public Bytes<Void> writeSome(@NotNull Bytes<?> bytes) throws IllegalStateException {
-        long pos = base.writePosition();
-        try {
-            base.writeSome(bytes);
             return this;
 
         } finally {

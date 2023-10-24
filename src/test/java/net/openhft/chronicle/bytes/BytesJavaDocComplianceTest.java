@@ -20,7 +20,10 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedBytes;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.core.Jvm;
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestFactory;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 
@@ -145,7 +148,7 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                         if (!(ChunkedMappedBytes.class.isInstance(bytes))) {
                             // Unfortunately, inspecting a ChunkedMappedBytes may change its actualSize(), so no check there
 
-                            if (EmbeddedBytes.class.isInstance(bytes)) {
+                            if (bytes instanceof EmbeddedBytes) {
                                 int foo = 1;
                             }
 
@@ -196,33 +199,32 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
                 NamedConsumer.of(bytes -> bytes.write(1L, (byte[]) null), "write(long, byte[])"),
                 NamedConsumer.of(bytes -> bytes.write((CharSequence) null, 0, 0), "write(CharSequence, int, int)"),
                 NamedConsumer.of(bytes -> bytes.write((CharSequence) null), "write(CharSequence)"),
-                NamedConsumer.of(bytes -> bytes.write(1L, (BytesStore) null, 0L, 0L), "write(long, BytesStore, long, long)"),
-                NamedConsumer.of(bytes -> bytes.write((BytesStore<?, ?>) null, 0L, 0L), "write(BytesStore, long, long)"),
+                NamedConsumer.of(bytes -> bytes.write(1L, null, 0L, 0L), "write(long, BytesStore, long, long)"),
+                NamedConsumer.of(bytes -> bytes.write(null, 0L, 0L), "write(BytesStore, long, long)"),
                 NamedConsumer.of(bytes -> bytes.write((BytesStore<?, ?>) null), "write(BytesStore)"),
                 NamedConsumer.of(bytes -> bytes.write(0L, (BytesStore<?, ?>) null), "write(long, BytesStore)"),
-                NamedConsumer.of(bytes -> bytes.write(0L, (RandomDataInput) null, 0L, 0L), "write(long, RandomDataInput, long, long)"),
+                NamedConsumer.of(bytes -> bytes.write(0L, null, 0L, 0L), "write(long, RandomDataInput, long, long)"),
                 NamedConsumer.of(bytes -> bytes.write((RandomDataInput) null, 0L, 0L), "write(RandomDataInput, long, long)"),
                 NamedConsumer.of(bytes -> bytes.write((RandomDataInput) null), "write(RandomDataInput)"),
                 NamedConsumer.of(bytes -> bytes.write(0, (RandomDataInput) null, 0, 0), "write(long, RandomDataInput, long, long)"),
                 NamedConsumer.of(bytes -> bytes.write8bit((CharSequence) null, 0, 0), "write8bit(CharSequence, int, int)"),
-                NamedConsumer.of(bytes -> bytes.write8bit((String) null, 0, 0), "write8bit(String, int, int)"),
-                NamedConsumer.of(bytes -> bytes.write8bit(0L, (BytesStore) null), "write8bit(long, BytesStore)"),
-                NamedConsumer.of(bytes -> bytes.write8bit(0L, (String) null, 0, 0), "write8bit(long, String, int, int)"),
+                NamedConsumer.of(bytes -> bytes.write8bit(null, 0, 0), "write8bit(String, int, int)"),
+                NamedConsumer.of(bytes -> bytes.write8bit(0L, null), "write8bit(long, BytesStore)"),
+                NamedConsumer.of(bytes -> bytes.write8bit(0L, null, 0, 0), "write8bit(long, String, int, int)"),
                 NamedConsumer.of(bytes -> bytes.writeBigDecimal(null), "writeBigDecimal()"),
                 NamedConsumer.of(bytes -> bytes.writeBigInteger(null), "writeBigInteger()"),
                 NamedConsumer.of(bytes -> bytes.writeHistogram(null), "writeHistogram()"),
-                NamedConsumer.of(bytes -> bytes.writeSome((Bytes<?>) null), "writeSome(Bytes)"),
-                NamedConsumer.of(bytes -> bytes.writeSome((ByteBuffer) null), "writeSome(ByteBuffer)"),
+                NamedConsumer.of(bytes -> bytes.writeSome(null), "writeSome(ByteBuffer)"),
                 NamedConsumer.of(bytes -> bytes.writeEnum((MyEnum) null), "writeEnum()"),
                 // Read operations with reference parameters
 
                 NamedConsumer.of(bytes -> bytes.read((ByteBuffer) null), "read(ByteBuffer)"),
                 NamedConsumer.of(bytes -> bytes.read((Bytes<?>) null), "read(Bytes)"),
-                NamedConsumer.of(bytes -> bytes.read((Bytes<?>) null, 0), "read(Bytes, int)"),
+                NamedConsumer.of(bytes -> bytes.read(null, 0), "read(Bytes, int)"),
                 NamedConsumer.of(bytes -> bytes.read((byte[]) null), "read(byte[], int)"),
                 NamedConsumer.of(bytes -> bytes.read((byte[]) null, 0, 0), "read(byte[], int, int)"),
                 NamedConsumer.of(bytes -> bytes.read((char[]) null, 0, 0), "read(char[], int, int)"),
-                NamedConsumer.of(bytes -> bytes.read(0, (byte[]) null, 0, 0), "read(long, byte[], int, int)"),
+                NamedConsumer.of(bytes -> bytes.read(0, null, 0, 0), "read(long, byte[], int, int)"),
                 NamedConsumer.of(bytes -> bytes.readObject(null), "readObject(Class)"),
                 NamedConsumer.of(bytes -> bytes.readMarshallableLength16(null, null), "readMarshallableLength16(Class, Object)"),
                 NamedConsumer.of(bytes -> bytes.readUtf8Limited(0, null, 0), "readUtf8Limited(long, ACS, int)"),
@@ -242,10 +244,10 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
     private static Stream<NamedConsumer<Bytes<Object>>> provideNullableOperations() {
         return Stream.of(
                 NamedConsumer.of(bytes -> bytes.writeUtf8((CharSequence) null), "writeUtf8(CharSequence)"),
-                NamedConsumer.of(bytes -> bytes.writeUtf8((String) null), "writeUtf8(String)"),
-                NamedConsumer.of(bytes -> bytes.writeUtf8(0L, (CharSequence) null), "writeUtf8(long, CharSequence)"),
-                NamedConsumer.of(bytes -> bytes.writeUtf8Limited(0L, (CharSequence) null, 0), "writeUtf8Limited(long, CharSequence, int)"),
-                NamedConsumer.of(bytes -> bytes.write8bit((String) null), "write8bit(String)"),
+                NamedConsumer.of(bytes -> bytes.writeUtf8(null), "writeUtf8(String)"),
+                NamedConsumer.of(bytes -> bytes.writeUtf8(0L, null), "writeUtf8(long, CharSequence)"),
+                NamedConsumer.of(bytes -> bytes.writeUtf8Limited(0L, null, 0), "writeUtf8Limited(long, CharSequence, int)"),
+                NamedConsumer.of(bytes -> bytes.write8bit(null), "write8bit(String)"),
                 NamedConsumer.of(bytes -> bytes.write8bit((CharSequence) null), "write8bit(CharSequence)")
         );
     }
