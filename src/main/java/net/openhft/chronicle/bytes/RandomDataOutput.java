@@ -761,4 +761,8 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     default long appendAndReturnLength(long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         throw new UnsupportedOperationException();
     }
+
+    @Deprecated(/* to be removed in x.25 */)
+        // internal method to cache a byte[]
+    byte[] internalNumberBuffer();
 }

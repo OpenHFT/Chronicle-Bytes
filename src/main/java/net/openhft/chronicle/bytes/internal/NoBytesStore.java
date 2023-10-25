@@ -355,6 +355,11 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
+    public byte[] internalNumberBuffer() {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
     public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
         requireNonNull(bytesStore);
         requireNonNegative(length);

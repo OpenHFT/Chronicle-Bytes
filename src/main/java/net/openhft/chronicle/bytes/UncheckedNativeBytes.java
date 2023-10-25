@@ -1091,6 +1091,12 @@ public class UncheckedNativeBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    @Deprecated(/* to be removed in x.25 */)
+    @Override
+    public byte[] internalNumberBuffer() {
+        return bytesStore.internalNumberBuffer();
+    }
+
     private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
 
         @Override

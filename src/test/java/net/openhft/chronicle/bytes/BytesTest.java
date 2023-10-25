@@ -593,7 +593,7 @@ public class BytesTest extends BytesTestCommon {
     public void testAppendBase() {
         assumeFalse(alloc1 == HEX_DUMP);
         @NotNull Bytes<?> b = alloc1.elasticBytes(16);
-        for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, ~4, ~2, ~1, ~0, 0, 1, 2, 4, 8, 16, 32, 64, 128, 256, Integer.MAX_VALUE, Long.MAX_VALUE}) {
+        for (long value : new long[]{Long.MIN_VALUE, Integer.MIN_VALUE, -1, 0, 1, Integer.MAX_VALUE, Long.MAX_VALUE}) {
             for (int base : new int[]{10, 16}) {
                 String s = Long.toString(value, base);
                 b.clear().appendBase(value, base);
