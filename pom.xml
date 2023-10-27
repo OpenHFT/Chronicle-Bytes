@@ -395,7 +395,7 @@
         <connection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git</connection>
         <developerConnection>scm:git:git@github.com:OpenHFT/Chronicle-Bytes.git
         </developerConnection>
-        <tag>ea</tag>
+        <tag>release/2.24</tag>
     </scm>
 
     <profiles>
