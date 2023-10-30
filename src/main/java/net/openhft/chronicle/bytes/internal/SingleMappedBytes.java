@@ -75,7 +75,6 @@ public class SingleMappedBytes extends CommonMappedBytes {
 
         try {
             bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) mappedFile.acquireByteStore(this, 0));
-            assert this.bytesStore.reservedBy(this);
 
         } catch (@NotNull IOException e) {
             throw new IORuntimeException(e);

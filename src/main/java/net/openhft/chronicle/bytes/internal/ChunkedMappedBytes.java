@@ -339,7 +339,6 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
                 if (lastActualSize < newBS.maximumLimit)
                     lastActualSize = newBS.maximumLimit;
             }
-            assert newBS.reservedBy(this);
 
         } catch (@NotNull IOException e) {
             throw new IORuntimeException(e);

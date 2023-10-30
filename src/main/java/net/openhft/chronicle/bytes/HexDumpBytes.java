@@ -406,11 +406,6 @@ public class HexDumpBytes
     }
 
     @Override
-    public boolean reservedBy(ReferenceOwner owner) throws IllegalStateException {
-        return base.reservedBy(owner);
-    }
-
-    @Override
     @NotNull
     public Bytes<Void> writeByte(@NonNegative long offset, byte i8) throws BufferOverflowException, IllegalStateException {
         if (offset == base.writePosition())

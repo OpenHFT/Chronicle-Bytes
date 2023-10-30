@@ -18,7 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
+import net.openhft.chronicle.core.util.Mocker;
 import org.junit.Test;
 
 import java.io.StringWriter;
@@ -59,8 +59,7 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
 
             m.myNested(mn2);
 
-            assertEquals("" +
-                    "81 01                                           # myByteable\n" +
+            assertEquals("81 01                                           # myByteable\n" +
                     "   4e                                              # flag\n" +
                     "   01                                              # b\n" +
                     "   02 00                                           # s\n" +
