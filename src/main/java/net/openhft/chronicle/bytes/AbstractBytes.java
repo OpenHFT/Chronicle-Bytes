@@ -1525,7 +1525,7 @@ public abstract class AbstractBytes<U>
         return sum & 0xFF;
     }
 
-    public boolean isImmutableEmptyByteStore() {
+    protected boolean isImmutableEmptyByteStore() {
         return bytesStore.capacity() == 0;
     }
 
