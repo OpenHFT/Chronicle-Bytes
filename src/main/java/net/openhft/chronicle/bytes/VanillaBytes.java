@@ -29,11 +29,9 @@ import net.openhft.chronicle.core.util.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.nio.channels.FileLock;
 
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -733,13 +731,4 @@ public class VanillaBytes<U>
         return (int) (len1 - len2);
     }
 
-    @Override
-    public FileLock lock(boolean shared) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-   public FileLock tryLock(boolean shared) {
-        throw new UnsupportedOperationException();
-    }
 }

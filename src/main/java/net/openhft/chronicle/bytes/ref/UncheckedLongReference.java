@@ -26,10 +26,8 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.io.UnsafeCloseable;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
-import java.nio.channels.FileLock;
 
 /**
  * Represents a reference to a long value stored in bytes. This reference does not perform bounds checks
@@ -190,15 +188,5 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
             this.bytes.release(this);
         this.bytes = null;
         super.performClose();
-    }
-
-    @Override
-    public FileLock lock(boolean shared) throws IOException {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public FileLock tryLock(boolean shared) {
-        throw new UnsupportedOperationException();
     }
 }

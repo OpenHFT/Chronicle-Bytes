@@ -91,7 +91,9 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @throws IOException                   If an error occurs while locking the file
      * @throws UnsupportedOperationException If the underlying implementation does not support file locking
      */
-    FileLock lock(boolean shared) throws IOException;
+    default FileLock lock(boolean shared) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * Attempts to lock the underlying file without blocking.
@@ -101,5 +103,7 @@ public interface Byteable<B extends BytesStore<B, U>, U> {
      * @throws IOException                   If an error occurs while trying to lock the file
      * @throws UnsupportedOperationException If the underlying implementation does not support file locking
      */
-    FileLock tryLock(boolean shared) throws IOException;
+    default FileLock tryLock(boolean shared) throws IOException {
+        throw new UnsupportedOperationException();
+    }
 }
