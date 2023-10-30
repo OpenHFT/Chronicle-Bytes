@@ -138,7 +138,7 @@ enum BytesInternal {
             }
         } catch (Exception e) {
             if (e.getClass().getName().equals("java.lang.reflect.InaccessibleObjectException"))
-                Jvm.warn().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
+                Jvm.debug().on(BytesInternal.class, "Cannot get access to vectorizedMismatch. The following command line args are required: " +
                         "--illegal-access=permit --add-exports java.base/jdk.internal.ref=ALL-UNNAMED --add-exports java.base/jdk.internal.util=ALL-UNNAMED" +
                         ". exception: " + e);
             else
