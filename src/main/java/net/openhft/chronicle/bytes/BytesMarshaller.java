@@ -18,10 +18,10 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.core.ClassLocal;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.io.*;
+import net.openhft.chronicle.core.util.ClassLocal;
 import net.openhft.chronicle.core.util.ObjectUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;

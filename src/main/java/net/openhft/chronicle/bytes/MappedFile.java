@@ -21,7 +21,6 @@ import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.CanonicalPathUtil;
 import net.openhft.chronicle.bytes.internal.ChunkedMappedFile;
 import net.openhft.chronicle.bytes.internal.SingleMappedFile;
-import net.openhft.chronicle.core.CleaningRandomAccessFile;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;

@@ -18,11 +18,11 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Mocker;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.chronicle.core.onoes.ExceptionHandler;
 import net.openhft.chronicle.core.util.IgnoresEverything;
+import net.openhft.chronicle.core.util.Mocker;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 

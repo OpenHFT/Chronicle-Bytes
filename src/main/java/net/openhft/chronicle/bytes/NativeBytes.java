@@ -263,7 +263,7 @@ public class NativeBytes<U>
 
     // the endOfBuffer is the minimum capacity and one byte more than the last addressable byte.
     private void resize(@NonNegative final long endOfBuffer)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfReleased();
         if (endOfBuffer < 0)
             throw new DecoratedBufferOverflowException(endOfBuffer + "< 0");
@@ -361,7 +361,7 @@ public class NativeBytes<U>
 
     @Override
     public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length)
-            throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
+            throws IllegalArgumentException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
             capacity = offset + length;
@@ -400,7 +400,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeByte(final byte i8)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long offset = writeOffsetPositionMoved(1);
         bytesStore.writeByte(offset, i8);
         return this;
@@ -409,7 +409,7 @@ public class NativeBytes<U>
     @NotNull
     @Override
     public Bytes<U> writeLong(final long i64)
-            throws BufferOverflowException, IllegalStateException {
+            throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         final long offset = writeOffsetPositionMoved(8L);
         bytesStore.writeLong(offset, i64);
         return this;
