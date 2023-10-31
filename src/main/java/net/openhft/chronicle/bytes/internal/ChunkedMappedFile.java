@@ -69,7 +69,7 @@ public class ChunkedMappedFile extends MappedFile {
                              @NonNegative final long capacity,
                              final boolean readOnly)
             throws IORuntimeException {
-        this(file, raf, chunkSize, overlapSize, PageUtil.getPageSize(file.getAbsolutePath()), capacity, readOnly);
+        this(file, raf, chunkSize, overlapSize, OS.defaultOsPageSize(), capacity, readOnly);
     }
 
     public ChunkedMappedFile(@NotNull final File file,

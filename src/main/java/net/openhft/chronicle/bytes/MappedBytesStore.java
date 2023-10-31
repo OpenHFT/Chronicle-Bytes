@@ -72,7 +72,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Deprecated(/* to be removed in x.26 */)
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws ClosedIllegalStateException {
-        this(owner, mappedFile, start, address, capacity, safeCapacity, PageUtil.getPageSize(mappedFile.file().getAbsolutePath()));
+        this(owner, mappedFile, start, address, capacity, safeCapacity, (int) OS.pageSize());
     }
     /**
      * Creates a new MappedBytesStore with the given parameters.
@@ -114,7 +114,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Deprecated(/* to be removed in x.26 */)
     public static MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws ClosedIllegalStateException {
-        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, PageUtil.getPageSize(mappedFile.file().getAbsolutePath()));
+        return new MappedBytesStore(owner, mappedFile, start, address, capacity, safeCapacity, OS.defaultOsPageSize());
     }
 
     /**
