@@ -49,7 +49,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             String user = Jvm.getProperty("user.name", "unknown");
             String timeStampDir = Jvm.getProperty("timestamp.dir", OS.TMP);
             final File timeStampPath = new File(timeStampDir, ".time-stamp." + user + ".dat");
-            MappedFile file = MappedFile.ofSingle(timeStampPath, PageUtil.getPageSize(timeStampPath.getAbsolutePath()), false);
+            MappedFile file = MappedFile.ofSingle(timeStampPath, OS.pageSize(), false);
             final Bytes<?> bytes = file.acquireBytesForWrite(this, 0);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             this.bytesStore = bytes.bytesStore();

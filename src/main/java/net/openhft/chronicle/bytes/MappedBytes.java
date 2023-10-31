@@ -209,7 +209,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
                                           @NonNegative final long overlapSize,
                                           final boolean readOnly)
             throws FileNotFoundException, ClosedIllegalStateException {
-        return mappedBytes(file, chunkSize, overlapSize, PageUtil.getPageSize(file.getAbsolutePath()), readOnly);
+        return mappedBytes(file, chunkSize, overlapSize, OS.defaultOsPageSize(), readOnly);
     }
 
     /**

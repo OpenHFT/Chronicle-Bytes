@@ -630,7 +630,7 @@ public class MappedBytesTest extends BytesTestCommon {
     @Test
     public void testEnsureCapacity() throws FileNotFoundException {
         File file = IOTools.createTempFile("ensure");
-        final int chunkSize = 64 * PageUtil.getPageSize(file.getAbsolutePath());
+        final int chunkSize = 256 << 10;
         try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
             final int chunks3 = chunkSize * 3;
             mb.writePosition(chunks3).writeByte((byte) 0);

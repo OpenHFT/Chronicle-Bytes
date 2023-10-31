@@ -17,6 +17,7 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.Positive;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
@@ -47,7 +48,7 @@ public interface MappedBytesStoreFactory {
     @NotNull
     default MappedBytesStore create(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, @NonNegative long address, @NonNegative long capacity, @NonNegative long safeCapacity)
             throws ClosedIllegalStateException {
-        return create(owner, mappedFile, start, address, capacity, safeCapacity, PageUtil.getPageSize(mappedFile.file().getAbsolutePath()));
+        return create(owner, mappedFile, start, address, capacity, safeCapacity, OS.pageSize());
     }
 
     /**
