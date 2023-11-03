@@ -86,7 +86,7 @@ public class ChunkedMappedFile extends MappedFile {
 
         this.raf = raf;
         this.fileChannel = raf.getChannel();
-        this.capacity = capacity;
+        this.capacity = OS.mapAlign(capacity, pageSize);
         this.chunkSize = OS.mapAlign(chunkSize, pageSize);
         this.overlapSize = OS.mapAlign(overlapSize, pageSize);
         this.pageSize = pageSize;
