@@ -421,7 +421,7 @@ public class MappedBytesTest extends BytesTestCommon {
             throws Exception {
         final File tempFile = Files.createTempFile("mapped", "bytes").toFile();
         try (final RandomAccessFile raf = new RandomAccessFile(tempFile, "rw")) {
-            raf.setLength(4096);
+            raf.setLength(PageUtil.getPageSize(tempFile.getAbsolutePath()));
             assertTrue(tempFile.setWritable(false));
             checkShouldBeReadOnly(MappedBytes.readOnly(tempFile));
         }
@@ -449,8 +449,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void interrupted()
-            throws FileNotFoundException {
+    public void interrupted() throws Exception {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
         file.deleteOnExit();
@@ -461,8 +460,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void interruptedSingle()
-            throws FileNotFoundException {
+    public void interruptedSingle() throws Exception {
         Thread.currentThread().interrupt();
         File file = IOTools.createTempFile("interrupted");
         try (MappedBytes mb = MappedBytes.singleMappedBytes(file, 64 << 10)) {
@@ -477,8 +475,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void multiBytes()
-            throws FileNotFoundException {
+    public void multiBytes() throws Exception {
         File tmpfile = IOTools.createTempFile("data.dat");
         try (MappedFile mappedFile = MappedFile.mappedFile(tmpfile, 64 << 10);
              MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
@@ -511,8 +508,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void multiBytesSingle()
-            throws FileNotFoundException {
+    public void multiBytesSingle() throws Exception {
         File tmpfile = IOTools.createTempFile("data.dat");
         try (MappedFile mappedFile = MappedFile.ofSingle(tmpfile, 64 << 10, false);
              MappedBytes original = MappedBytes.mappedBytes(mappedFile)) {
@@ -543,8 +539,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void memoryOverlapRegions()
-            throws FileNotFoundException {
+    public void memoryOverlapRegions() throws Exception {
         String tmpfile = IOTools.createTempFile("memoryOverlapRegions").getAbsolutePath();
         int chunkSize = 256 << 16;
         int overlapSize = 64 << 16;
@@ -628,9 +623,9 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testEnsureCapacity() throws FileNotFoundException {
+    public void testEnsureCapacity() throws Exception {
         File file = IOTools.createTempFile("ensure");
-        final int chunkSize = 256 << 10;
+        final int chunkSize = 64 * PageUtil.getPageSize(file.getAbsolutePath());
         try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
             final int chunks3 = chunkSize * 3;
             mb.writePosition(chunks3).writeByte((byte) 0);
@@ -641,7 +636,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test(expected = DecoratedBufferOverflowException.class)
-    public void testIncreaseCapacityOverMax() throws FileNotFoundException {
+    public void testIncreaseCapacityOverMax() throws Exception {
         File file = IOTools.createTempFile("ensure2");
         final int chunkSize = 256 << 10;
         try (MappedBytes mb = MappedBytes.mappedBytes(file, chunkSize, chunkSize / 4)) {
@@ -651,7 +646,7 @@ public class MappedBytesTest extends BytesTestCommon {
     }
 
     @Test
-    public void testBoundaryUnderflow() throws FileNotFoundException {
+    public void testBoundaryUnderflow() throws Exception {
         File file = IOTools.createTempFile("boundary-underflow");
 
         Bytes slice = null;

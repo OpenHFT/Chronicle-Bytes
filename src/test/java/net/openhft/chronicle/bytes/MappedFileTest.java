@@ -28,7 +28,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TemporaryFolder;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.nio.BufferUnderflowException;
 import java.nio.file.Files;
 
@@ -85,13 +88,14 @@ public class MappedFileTest extends BytesTestCommon {
         /*        assumeFalse(Jvm.isMacArm());*/
 
         final File tmp = IOTools.createTempFile("testReferenceCounts");
-        final int chunkSize;
+        int chunkSize;
         if (OS.isWindows()) {
-            chunkSize = 64 << 10;
+            chunkSize = 64;
         } else if (Jvm.isMacArm()) {
-            chunkSize = 16 << 10;
+            chunkSize = 16;
         } else
-            chunkSize = 4 << 10;
+            chunkSize = 4;
+        chunkSize = chunkSize / 4 * PageUtil.getPageSize(tmp.getAbsolutePath());
 
         try (MappedFile mf = MappedFile.mappedFile(tmp, chunkSize, 0)) {
             assertEquals("refCount: 1", mf.referenceCounts());
@@ -112,8 +116,8 @@ public class MappedFileTest extends BytesTestCommon {
                 Assert.assertFalse(bs.inside(chunkSize - (1 << 10)));
                 Assert.assertFalse(bs.inside(chunkSize - 1));
                 Assert.assertTrue(bs.inside(chunkSize));
-                Assert.assertTrue(bs.inside(chunkSize * 2 - 1));
-                Assert.assertFalse(bs.inside(chunkSize * 2));
+                Assert.assertTrue(bs.inside(chunkSize * 2L - 1));
+                Assert.assertFalse(bs.inside(chunkSize * 2L));
                 try {
                     bytes.readLong(chunkSize - (1 << 10));
                     Assert.fail();
@@ -121,7 +125,7 @@ public class MappedFileTest extends BytesTestCommon {
                     // expected
                 }
                 try {
-                    bytes.readLong(chunkSize * 2 + (1 << 10));
+                    bytes.readLong(chunkSize * 2L + (1 << 10));
                     Assert.fail();
                 } catch (BufferUnderflowException e) {
                     // expected
@@ -178,8 +182,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void interrupted()
-            throws FileNotFoundException {
+    public void interrupted() throws Exception {
         Thread.currentThread().interrupt();
         final String filename = IOTools.createTempFile("interrupted").getAbsolutePath();
         try (MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0)) {
@@ -189,8 +192,7 @@ public class MappedFileTest extends BytesTestCommon {
     }
 
     @Test
-    public void testCreateMappedFile()
-            throws IOException {
+    public void testCreateMappedFile() throws Exception {
         final File file = IOTools.createTempFile("mappedFile");
 
         final MappedFile mappedFile = MappedFile.mappedFile(file, 1024, 256, 256, false);

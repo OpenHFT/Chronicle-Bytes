@@ -306,9 +306,9 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
                                         final boolean readOnly)
             throws IOException {
         final RandomAccessFile raf = new CleaningRandomAccessFile(file, readOnly ? "r" : "rw");
-        // Windows throws an exception when setting the length when you re - open
+        // Windows throws an exception when setting the length when you reopen
         if (raf.length() < capacity)
-            raf.setLength(capacity);
+            raf.setLength(OS.mapAlign(capacity, PageUtil.getPageSize(file.getAbsolutePath())));
         return new ChunkedMappedFile(file, raf, chunkSize, overlapSize, capacity, readOnly);
     }
 

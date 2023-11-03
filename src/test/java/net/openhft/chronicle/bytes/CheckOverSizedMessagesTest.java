@@ -28,6 +28,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
+import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 public class CheckOverSizedMessagesTest extends BytesTestCommon {
@@ -98,6 +99,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     @Test
     public void writeBB4B() {
         try (MappedBytes mb = mbNoOverlap()) {
+            assumeFalse(PageUtil.isHugePage(mb.mappedFile().file().getAbsolutePath()));
             ByteBuffer bb = ByteBuffer.allocate(6000);
             mb.writeLong(4000, -1);
             final BytesStore bs0 = mb.bytesStore();
