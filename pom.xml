@@ -29,7 +29,7 @@
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
-    <version>2.25ea1-SNAPSHOT</version>
+    <version>2.25ea100-SNAPSHOT</version>
     <name>OpenHFT/Chronicle Bytes</name>
     <description>Chronicle-Bytes</description>
     <packaging>bundle</packaging>
