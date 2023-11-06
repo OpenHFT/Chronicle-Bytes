@@ -62,7 +62,7 @@ public final class PageUtil {
         try {
             return Files.readAllLines(Paths.get(path));
         } catch (IOException e) {
-            Jvm.warn().on(PageUtil.class, format("Error reading ''{0}'': {1}", path, e.getMessage()));
+            Jvm.warn().on(PageUtil.class, format("Error reading ''{0}'': {1}", path, e.getMessage()), e);
             return Collections.emptyList();
         }
     }
