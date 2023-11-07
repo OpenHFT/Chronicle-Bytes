@@ -183,6 +183,7 @@ public class MappedFileTest extends BytesTestCommon {
 
     @Test
     public void interrupted() throws Exception {
+        ignoreException("/proc/self/mountinfo");
         Thread.currentThread().interrupt();
         final String filename = IOTools.createTempFile("interrupted").getAbsolutePath();
         try (MappedFile mf = MappedFile.mappedFile(filename, 64 << 10, 0)) {
