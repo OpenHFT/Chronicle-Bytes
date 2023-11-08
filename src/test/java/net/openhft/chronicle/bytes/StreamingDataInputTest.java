@@ -67,7 +67,6 @@ public class StreamingDataInputTest extends BytesTestCommon {
 
     @Test
     public void roundTripWorksOnHeap() {
-        assumeFalse(Jvm.isAzulZing());
         Bytes<?> b = allocator.elasticBytes(32);
         TestObject source = new TestObject(123L, 123, false);
         b.unsafeWriteObject(source, 13);

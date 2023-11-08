@@ -52,7 +52,6 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void triviallyCopyable() {
         assumeTrue(Jvm.is64bit());
-        assumeFalse(Jvm.isAzulZing());
 
         int start = Jvm.objectHeaderSize();
         assertTrue(BytesUtil.isTriviallyCopyable(Nested.class));
@@ -74,7 +73,6 @@ public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void triviallyCopyableB() {
         assumeTrue(Jvm.is64bit());
-        assumeFalse(Jvm.isAzulZing());
 
         int start = Jvm.objectHeaderSize();
 
@@ -105,7 +103,6 @@ public class BytesUtilTest extends BytesTestCommon {
 
     @Test
     public void triviallyCopyable2() {
-        assumeFalse(Jvm.isAzulZing());
         assertFalse(BytesUtil.isTriviallyCopyable(D.class));
         assertTrue(BytesUtil.isTriviallyCopyable(E.class));
         int size2 = 20;

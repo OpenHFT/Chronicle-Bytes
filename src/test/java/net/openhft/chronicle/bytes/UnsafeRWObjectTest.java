@@ -28,18 +28,21 @@ import static org.junit.Assume.assumeTrue;
 public class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
     public void longObjectElasticBuffer() {
-        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
-        assertEquals("[16, 80]", Arrays.toString(BytesUtil.triviallyCopyableRange(BB.class)));
+        assumeTrue(Jvm.is64bit());
+        String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
+        assertEquals(expected0,
+                Arrays.toString(BytesUtil.triviallyCopyableRange(BB.class)));
 
         Bytes<?> directElastic = Bytes.allocateElasticDirect(32);
 
         BB bb1 = new BB(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L);
 
-        directElastic.unsafeWriteObject(bb1, 16, 8 * 8);
+        int offset = Jvm.isAzulZing() ? 8 : 16;
+        directElastic.unsafeWriteObject(bb1, offset, 8 * 8);
 
         BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
 
-        directElastic.unsafeReadObject(bb2, 16, 8 * 8);
+        directElastic.unsafeReadObject(bb2, offset, 8 * 8);
 
         assertEquals(bb1.l0, bb2.l0);
         assertEquals(bb1.l1, bb2.l1);
@@ -55,8 +58,9 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
 
     @Test
     public void shortObject() {
-        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
-        assertEquals("[12, 32]",
+        assumeTrue(Jvm.is64bit());
+        String expected0 = Jvm.isAzulZing() ? "[8, 28]" : "[12, 32]";
+        assertEquals(expected0,
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(AA.class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
@@ -76,13 +80,15 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
 
     @Test
     public void longObject() {
-        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
-        assertEquals("[16, 80]",
+        assumeTrue(Jvm.is64bit());
+        String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
+        assertEquals(expected0,
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(BB.class)));
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         BB bb = new BB(1, 2, 3, 4, 5, 6, 7, 8);
-        bytes.unsafeWriteObject(bb, 16, 8 * 8);
+        int offset = Jvm.isAzulZing() ? 8 : 16;
+        bytes.unsafeWriteObject(bb, offset, 8 * 8);
         String expected = "" +
                 "00000000 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00 ········ ········\n" +
                 "00000010 03 00 00 00 00 00 00 00  04 00 00 00 00 00 00 00 ········ ········\n" +
@@ -91,9 +97,9 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         assertEquals(expected,
                 bytes.toHexString());
         BB b2 = new BB(0, 0, 0, 0, 0, 0, 0, 0);
-        bytes.unsafeReadObject(b2, 16, 8 * 8);
+        bytes.unsafeReadObject(b2, offset, 8 * 8);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
-        bytes2.unsafeWriteObject(b2, 16, 8 * 8);
+        bytes2.unsafeWriteObject(b2, offset, 8 * 8);
         assertEquals(expected,
                 bytes2.toHexString());
 
@@ -102,7 +108,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
 
     @Test
     public void array() {
-        assumeTrue(Jvm.is64bit() && !Jvm.isAzulZing());
+        assumeTrue(Jvm.is64bit());
         assertEquals("[16]",
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(byte[].class)));
