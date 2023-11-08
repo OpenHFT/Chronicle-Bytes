@@ -108,21 +108,6 @@ public enum BytesUtil {
     }
 
     /**
-     * Checks if all the fields in the specified range of the given class are trivially copyable.
-     *
-     * @param clazz  Class to check.
-     * @param offset Start of the field area.
-     * @param length Length of the field area.
-     * @return true if all fields in the range are trivially copyable, false otherwise.
-     */
-    public static boolean isTriviallyCopyable(Class clazz, @NonNegative int offset, @NonNegative int length) {
-        int[] ints = TRIVIALLY_COPYABLE.get(clazz);
-        if (ints.length == 0)
-            return false;
-        return offset >= ints[0] && (ints.length == 1 || offset + length <= ints[1]);
-    }
-
-    /**
      * Helper method to determine if the given class is trivially copyable.
      *
      * @param clazz Class to check.
@@ -168,6 +153,21 @@ public enum BytesUtil {
             }
         }
         return new int[]{min, max};
+    }
+
+    /**
+     * Checks if all the fields in the specified range of the given class are trivially copyable.
+     *
+     * @param clazz  Class to check.
+     * @param offset Start of the field area.
+     * @param length Length of the field area.
+     * @return true if all fields in the range are trivially copyable, false otherwise.
+     */
+    public static boolean isTriviallyCopyable(Class clazz, @NonNegative int offset, @NonNegative int length) {
+        int[] ints = TRIVIALLY_COPYABLE.get(clazz);
+        if (ints.length == 0)
+            return false;
+        return offset >= ints[0] && (ints.length == 1 || offset + length <= ints[1]);
     }
 
     /**
