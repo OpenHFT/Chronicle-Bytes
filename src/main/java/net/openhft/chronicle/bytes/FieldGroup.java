@@ -53,7 +53,7 @@ public @interface FieldGroup {
     /**
      * Special FieldGroup that if it is present, must be at the start but is ignored.
      */
-    @Deprecated(/* doesn't work across OpenJDK and Zing, to be remove din x.27 */)
+    @Deprecated(/* doesn't work across OpenJDK and Zing, to be removed in x.27 */)
     String HEADER = "header";
 
     /**
