@@ -42,6 +42,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.List;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
@@ -167,6 +168,7 @@ public enum BytesUtil {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
+        System.out.printf("isTriviallyCopyable: %s, %s, %s%n", offset, length, Arrays.toString(ints));
         return offset >= ints[0] && (ints.length == 1 || offset + length <= ints[1]);
     }
 

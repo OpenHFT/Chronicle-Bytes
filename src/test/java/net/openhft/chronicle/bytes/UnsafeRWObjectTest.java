@@ -18,12 +18,12 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assume.assumeTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
 public class UnsafeRWObjectTest extends BytesTestCommon {
     @Test
@@ -66,7 +66,6 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(32);
         AA aa = new AA(1, 2, 3);
         bytes.unsafeWriteObject(aa, 4 + 2 * 8);
-        System.out.println("Actual:" + bytes.toHexString());
         String expected = Jvm.isAzulZing()
                 ? "00000000 02 00 00 00 00 00 00 00  00 00 00 00 00 00 08 40 ········ ·······@\n" +
                 "00000010 01 00 00 00                                      ····             \n"
@@ -117,14 +116,10 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(byte[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
         byte[] byteArray = "Hello World.".getBytes();
-        bytes.unsafeWriteObject(byteArray, byteArray.length);
-        System.out.println("Actual:" + bytes.toHexString());
-        String expected = Jvm.isAzulZing()
-                ? "00000000 00 00 00 00 48 65 6c 6c  6f 20 57 6f             ····Hell o Wo    \n"
-                : "00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n";
-        assertEquals(expected, bytes.toHexString());
+        bytes.unsafeWriteObject(byteArray, 16, byteArray.length);
+        assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n", bytes.toHexString());
         byte[] byteArray2 = new byte[byteArray.length];
-        bytes.unsafeReadObject(byteArray2, byteArray.length);
+        bytes.unsafeReadObject(byteArray2, 16, byteArray.length);
         assertEquals("Hello World.", new String(byteArray2));
         bytes.releaseLast();
 
