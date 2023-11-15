@@ -863,7 +863,14 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      */
     default S unsafeWriteObject(Object o, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        return unsafeWriteObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
+        int offset = 0;
+        if (o.getClass().isArray()) {
+            offset += 4;
+            if (Jvm.isAzulZing())
+                offset += 4;
+        }
+        offset += Jvm.objectHeaderSize();
+        return unsafeWriteObject(o, offset, length);
     }
 
     /**

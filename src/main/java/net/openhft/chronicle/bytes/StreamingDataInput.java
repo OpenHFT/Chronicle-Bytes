@@ -832,7 +832,14 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      */
     default void unsafeReadObject(@NotNull Object o, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
+        int offset = 0;
+        if (o.getClass().isArray()) {
+            offset += 4;
+            if (Jvm.isAzulZing())
+                offset += 4;
+        }
+        offset += Jvm.objectHeaderSize();
+        unsafeReadObject(o, offset, length);
     }
 
     /**
@@ -848,7 +855,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(o);
-        assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
+        //assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
         if (isDirectMemory()) {
