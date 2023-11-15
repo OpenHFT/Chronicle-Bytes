@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
 
@@ -110,7 +111,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     }
 
     @Test
-    public void array() {
+    public void arrayByte() {
         assumeTrue(Jvm.is64bit());
         assertEquals("[16]",
                 Arrays.toString(
@@ -123,6 +124,24 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         byte[] byteArray2 = new byte[byteArray.length];
         bytes.unsafeReadObject(byteArray2, byteArray.length);
         assertEquals("Hello World.", new String(byteArray2));
+        bytes.releaseLast();
+
+    }
+
+    @Test
+    public void arrayInt() {
+        assumeTrue(Jvm.is64bit());
+        assertEquals("[16]",
+                Arrays.toString(
+                        BytesUtil.triviallyCopyableRange(int[].class)));
+        Bytes<?> bytes = Bytes.allocateDirect(32);
+        int[] array = new int[] {1, 2, 4, 3};
+        bytes.unsafeWriteObject(array, 4 * 4);
+        assertEquals("00000000 01 00 00 00 02 00 00 00  04 00 00 00 03 00 00 00 ········ ········\n",
+                bytes.toHexString());
+        int[] array2 = new int[array.length];
+        bytes.unsafeReadObject(array2, 4 * 4);
+        assertArrayEquals(array, array2);
         bytes.releaseLast();
 
     }

@@ -39,6 +39,7 @@ import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
+import java.util.Arrays;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -870,6 +871,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
                 offset += 4;
         }
         offset += Jvm.objectHeaderSize();
+        System.out.printf("Writing: %s, %s, %s%n", Arrays.toString(BytesUtil.triviallyCopyableRange(o.getClass())), offset, length);
         return unsafeWriteObject(o, offset, length);
     }
 
