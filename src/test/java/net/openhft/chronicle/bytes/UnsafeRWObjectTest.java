@@ -84,22 +84,23 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     public void longObject() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
+        int[] ints = BytesUtil.triviallyCopyableRange(BB.class);
         assertEquals(expected0,
-                Arrays.toString(
-                        BytesUtil.triviallyCopyableRange(BB.class)));
+                Arrays.toString(ints));
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
-        BB bb = new BB(1, 2, 3, 4, 5, 6, 7, 8);
-        bytes.unsafeWriteObject(bb, 8 * 8);
+        BB bb = new BB(0x2000000000000001L, 0x4000000000000003L, 0x6000000000000005L, 0x8000000000000007L, 0xA000000000000009L, 0xC00000000000000BL, 0xE00000000000000DL, 0x100000000000000FL);
+        bytes.unsafeWriteObject(bb, ints[0], ints[1] - ints[0]);
         String expected = "" +
-                "00000000 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000010 03 00 00 00 00 00 00 00  04 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000020 05 00 00 00 00 00 00 00  06 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000030 07 00 00 00 00 00 00 00  08 00 00 00 00 00 00 00 ········ ········\n";
+                "00000000 01 00 00 00 00 00 00 20  03 00 00 00 00 00 00 40 ·······  ·······@\n" +
+                "00000010 05 00 00 00 00 00 00 60  07 00 00 00 00 00 00 80 ·······` ········\n" +
+                "00000020 09 00 00 00 00 00 00 a0  0b 00 00 00 00 00 00 c0 ········ ········\n" +
+                "00000030 0d 00 00 00 00 00 00 e0  0f 00 00 00 00 00 00 10 ········ ········\n";
         assertEquals(expected, bytes.toHexString());
         BB b2 = new BB(0, 0, 0, 0, 0, 0, 0, 0);
-        bytes.unsafeReadObject(b2, 8 * 8);
+        bytes.unsafeReadObject(b2, ints[0], ints[1] - ints[0]);
+        assertEquals(bb, b2);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
-        bytes2.unsafeWriteObject(b2, 8 * 8);
+        bytes2.unsafeWriteObject(b2, ints[0], ints[1] - ints[0]);
         assertEquals(expected, bytes2.toHexString());
 
         bytes.releaseLast();
@@ -109,22 +110,23 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
     public void doubleObject() {
         assumeTrue(Jvm.is64bit());
         String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
+        int[] ints = BytesUtil.triviallyCopyableRange(DD.class);
         assertEquals(expected0,
-                Arrays.toString(
-                        BytesUtil.triviallyCopyableRange(DD.class)));
+                Arrays.toString(ints));
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
-        DD bb = new DD(1, 2, 3, 4, 5, 6, 7, 8);
-        bytes.unsafeWriteObject(bb, 8 * 8);
+        DD bb = new DD(1.1, 2.2, 3.3, 4.4, 5.5, 6.6, 7.7, 8.8);
+        bytes.unsafeWriteObject(bb, BytesUtil.triviallyCopyableRange(DD.class)[0], 8 * 8);
         String expected = "" +
-                "00000000 00 00 00 00 00 00 f0 3f  00 00 00 00 00 00 00 40 ·······? ·······@\n" +
-                "00000010 00 00 00 00 00 00 08 40  00 00 00 00 00 00 10 40 ·······@ ·······@\n" +
-                "00000020 00 00 00 00 00 00 14 40  00 00 00 00 00 00 18 40 ·······@ ·······@\n" +
-                "00000030 00 00 00 00 00 00 1c 40  00 00 00 00 00 00 20 40 ·······@ ······ @\n";
+                "00000000 9a 99 99 99 99 99 f1 3f  9a 99 99 99 99 99 01 40 ·······? ·······@\n" +
+                "00000010 66 66 66 66 66 66 0a 40  9a 99 99 99 99 99 11 40 ffffff·@ ·······@\n" +
+                "00000020 00 00 00 00 00 00 16 40  66 66 66 66 66 66 1a 40 ·······@ ffffff·@\n" +
+                "00000030 cd cc cc cc cc cc 1e 40  9a 99 99 99 99 99 21 40 ·······@ ······!@\n";
         assertEquals(expected, bytes.toHexString());
         DD b2 = new DD(0, 0, 0, 0, 0, 0, 0, 0);
-        bytes.unsafeReadObject(b2, 8 * 8);
+        bytes.unsafeReadObject(b2, ints[0], ints[1] - ints[0]);
+        assertEquals(bb, b2);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
-        bytes2.unsafeWriteObject(b2, 8 * 8);
+        bytes2.unsafeWriteObject(b2, ints[0], ints[1] - ints[0]);
         assertEquals(expected, bytes2.toHexString());
 
         bytes.releaseLast();
@@ -143,6 +145,8 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                 bytes.toHexString());
         byte[] byteArray2 = new byte[byteArray.length];
         bytes.unsafeReadObject(byteArray2, byteArray.length);
+        assertArrayEquals(byteArray, byteArray2);
+
         assertEquals("Hello World.", new String(byteArray2));
         bytes.releaseLast();
 
@@ -191,6 +195,14 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
             this.l6 = l6;
             this.l7 = l7;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            BB bb = (BB) o;
+            return l0 == bb.l0 && l1 == bb.l1 && l2 == bb.l2 && l3 == bb.l3 && l4 == bb.l4 && l5 == bb.l5 && l6 == bb.l6 && l7 == bb.l7;
+        }
     }
 
     static class DD {
@@ -205,6 +217,14 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
             this.l5 = l5;
             this.l6 = l6;
             this.l7 = l7;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DD dd = (DD) o;
+            return Double.compare(l0, dd.l0) == 0 && Double.compare(l1, dd.l1) == 0 && Double.compare(l2, dd.l2) == 0 && Double.compare(l3, dd.l3) == 0 && Double.compare(l4, dd.l4) == 0 && Double.compare(l5, dd.l5) == 0 && Double.compare(l6, dd.l6) == 0 && Double.compare(l7, dd.l7) == 0;
         }
     }
 }
