@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.util.Arrays;
 
 import static org.junit.Assert.*;
-import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
 @SuppressWarnings("rawtypes")
@@ -53,7 +52,7 @@ public class BytesUtilTest extends BytesTestCommon {
     public void triviallyCopyable() {
         assumeTrue(Jvm.is64bit());
 
-        int start = Jvm.objectHeaderSize();
+        int start = BytesUtil.triviallyCopyableStart(Nested.class);
         assertTrue(BytesUtil.isTriviallyCopyable(Nested.class));
         assertTrue(BytesUtil.isTriviallyCopyable(Nested.class, start, 4));
         assertTrue(BytesUtil.isTriviallyCopyable(SubNested.class));
@@ -74,7 +73,7 @@ public class BytesUtilTest extends BytesTestCommon {
     public void triviallyCopyableB() {
         assumeTrue(Jvm.is64bit());
 
-        int start = Jvm.objectHeaderSize();
+        int start = BytesUtil.triviallyCopyableStart(Nested.class);
 
         assertEquals("[" + start + ", " + (start + 20) + "]", Arrays.toString(BytesUtil.triviallyCopyableRange(A.class)));
         assertTrue(BytesUtil.isTriviallyCopyable(A.class, start, 4 + 2 * 8));
