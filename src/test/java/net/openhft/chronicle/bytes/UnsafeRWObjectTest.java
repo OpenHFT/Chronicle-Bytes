@@ -38,12 +38,11 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
 
         BB bb1 = new BB(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L);
 
-        int offset = Jvm.isAzulZing() ? 8 : 16;
-        directElastic.unsafeWriteObject(bb1, offset, 8 * 8);
+        directElastic.unsafeWriteObject(bb1, 8 * 8);
 
         BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
 
-        directElastic.unsafeReadObject(bb2, offset, 8 * 8);
+        directElastic.unsafeReadObject(bb2, 8 * 8);
 
         assertEquals(bb1.l0, bb2.l0);
         assertEquals(bb1.l1, bb2.l1);
@@ -66,8 +65,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(AA.class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
         AA aa = new AA(1, 2, 3);
-        int offset = Jvm.isAzulZing() ? 8 : 12;
-        bytes.unsafeWriteObject(aa, offset, 4 + 2 * 8);
+        bytes.unsafeWriteObject(aa, 4 + 2 * 8);
         String expected = Jvm.isAzulZing() ?
                 "00000000 02 00 00 00 00 00 00 00  00 00 00 00 00 00 08 40 ········ ·······@\n" +
                 "00000010 01 00 00 00                                      ····             \n"
@@ -75,7 +73,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                 "00000010 00 00 08 40                                      ···@             \n";
         assertEquals(expected, bytes.toHexString());
         AA a2 = new AA(0, 0, 0);
-        bytes.unsafeReadObject(a2, offset, 4 + 2 * 8);
+        bytes.unsafeReadObject(a2, 4 + 2 * 8);
         assertEquals(aa.i, a2.i);
         assertEquals(aa.l, a2.l);
         assertEquals(aa.d, a2.d, 0.0);
@@ -91,21 +89,18 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(BB.class)));
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         BB bb = new BB(1, 2, 3, 4, 5, 6, 7, 8);
-        int offset = Jvm.isAzulZing() ? 8 : 16;
-        bytes.unsafeWriteObject(bb, offset, 8 * 8);
-        String expected = "" +
-                "00000000 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000010 03 00 00 00 00 00 00 00  04 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000020 05 00 00 00 00 00 00 00  06 00 00 00 00 00 00 00 ········ ········\n" +
-                "00000030 07 00 00 00 00 00 00 00  08 00 00 00 00 00 00 00 ········ ········\n";
-        assertEquals(expected,
-                bytes.toHexString());
+        bytes.unsafeWriteObject(bb, 8 * 8);
+        String expected =
+                "00000000 00 00 00 00 01 00 00 00  00 00 00 00 02 00 00 00 ········ ········\n" +
+                "00000010 00 00 00 00 03 00 00 00  00 00 00 00 04 00 00 00 ········ ········\n" +
+                "00000020 00 00 00 00 05 00 00 00  00 00 00 00 06 00 00 00 ········ ········\n" +
+                "00000030 00 00 00 00 07 00 00 00  00 00 00 00 08 00 00 00 ········ ········\n";
+        assertEquals(expected, bytes.toHexString());
         BB b2 = new BB(0, 0, 0, 0, 0, 0, 0, 0);
-        bytes.unsafeReadObject(b2, offset, 8 * 8);
+        bytes.unsafeReadObject(b2, 8 * 8);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
-        bytes2.unsafeWriteObject(b2, offset, 8 * 8);
-        assertEquals(expected,
-                bytes2.toHexString());
+        bytes2.unsafeWriteObject(b2, 8 * 8);
+        assertEquals(expected, bytes2.toHexString());
 
         bytes.releaseLast();
     }
