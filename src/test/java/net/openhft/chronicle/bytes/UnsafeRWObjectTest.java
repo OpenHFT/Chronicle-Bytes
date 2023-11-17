@@ -68,8 +68,8 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         bytes.unsafeWriteObject(aa, 4 + 2 * 8);
         String expected = Jvm.isAzulZing() ?
                 "00000000 02 00 00 00 00 00 00 00  00 00 00 00 00 00 08 40 ········ ·······@\n" +
-                "00000010 01 00 00 00                                      ····             \n"
-                :"00000000 01 00 00 00 02 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
+                        "00000010 01 00 00 00                                      ····             \n"
+                : "00000000 01 00 00 00 02 00 00 00  00 00 00 00 00 00 00 00 ········ ········\n" +
                 "00000010 00 00 08 40                                      ···@             \n";
         assertEquals(expected, bytes.toHexString());
         AA a2 = new AA(0, 0, 0);
@@ -90,13 +90,38 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
         BB bb = new BB(1, 2, 3, 4, 5, 6, 7, 8);
         bytes.unsafeWriteObject(bb, 8 * 8);
-        String expected =
-                "00000000 00 00 00 00 01 00 00 00  00 00 00 00 02 00 00 00 ········ ········\n" +
-                "00000010 00 00 00 00 03 00 00 00  00 00 00 00 04 00 00 00 ········ ········\n" +
-                "00000020 00 00 00 00 05 00 00 00  00 00 00 00 06 00 00 00 ········ ········\n" +
-                "00000030 00 00 00 00 07 00 00 00  00 00 00 00 08 00 00 00 ········ ········\n";
+        String expected = "" +
+                "00000000 01 00 00 00 00 00 00 00  02 00 00 00 00 00 00 00 ········ ········\n" +
+                "00000010 03 00 00 00 00 00 00 00  04 00 00 00 00 00 00 00 ········ ········\n" +
+                "00000020 05 00 00 00 00 00 00 00  06 00 00 00 00 00 00 00 ········ ········\n" +
+                "00000030 07 00 00 00 00 00 00 00  08 00 00 00 00 00 00 00 ········ ········\n";
         assertEquals(expected, bytes.toHexString());
         BB b2 = new BB(0, 0, 0, 0, 0, 0, 0, 0);
+        bytes.unsafeReadObject(b2, 8 * 8);
+        Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
+        bytes2.unsafeWriteObject(b2, 8 * 8);
+        assertEquals(expected, bytes2.toHexString());
+
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void doubleObject() {
+        assumeTrue(Jvm.is64bit());
+        String expected0 = Jvm.isAzulZing() ? "[8, 72]" : "[16, 80]";
+        assertEquals(expected0,
+                Arrays.toString(
+                        BytesUtil.triviallyCopyableRange(DD.class)));
+        Bytes<?> bytes = Bytes.allocateDirect(8 * 8);
+        DD bb = new DD(1, 2, 3, 4, 5, 6, 7, 8);
+        bytes.unsafeWriteObject(bb, 8 * 8);
+        String expected = "" +
+                "00000000 00 00 00 00 00 00 f0 3f  00 00 00 00 00 00 00 40 ·······? ·······@\n" +
+                "00000010 00 00 00 00 00 00 08 40  00 00 00 00 00 00 10 40 ·······@ ·······@\n" +
+                "00000020 00 00 00 00 00 00 14 40  00 00 00 00 00 00 18 40 ·······@ ·······@\n" +
+                "00000030 00 00 00 00 00 00 1c 40  00 00 00 00 00 00 20 40 ·······@ ······ @\n";
+        assertEquals(expected, bytes.toHexString());
+        DD b2 = new DD(0, 0, 0, 0, 0, 0, 0, 0);
         bytes.unsafeReadObject(b2, 8 * 8);
         Bytes<?> bytes2 = Bytes.allocateElasticOnHeap(8 * 8);
         bytes2.unsafeWriteObject(b2, 8 * 8);
@@ -130,7 +155,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                 Arrays.toString(
                         BytesUtil.triviallyCopyableRange(int[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
-        int[] array = new int[] {1, 2, 4, 3};
+        int[] array = new int[]{1, 2, 4, 3};
         bytes.unsafeWriteObject(array, 4 * 4);
         assertEquals("00000000 01 00 00 00 02 00 00 00  04 00 00 00 03 00 00 00 ········ ········\n",
                 bytes.toHexString());
@@ -157,6 +182,21 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
         long l0, l1, l2, l3, l4, l5, l6, l7;
 
         public BB(long l0, long l1, long l2, long l3, long l4, long l5, long l6, long l7) {
+            this.l0 = l0;
+            this.l1 = l1;
+            this.l2 = l2;
+            this.l3 = l3;
+            this.l4 = l4;
+            this.l5 = l5;
+            this.l6 = l6;
+            this.l7 = l7;
+        }
+    }
+
+    static class DD {
+        double l0, l1, l2, l3, l4, l5, l6, l7;
+
+        public DD(double l0, double l1, double l2, double l3, double l4, double l5, double l6, double l7) {
             this.l0 = l0;
             this.l1 = l1;
             this.l2 = l2;
