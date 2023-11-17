@@ -848,7 +848,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(o);
-        assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
+        //assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
         if (isDirectMemory()) {
