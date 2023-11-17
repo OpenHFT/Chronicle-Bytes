@@ -39,7 +39,6 @@ import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 
 import static net.openhft.chronicle.bytes.internal.ReferenceCountedUtil.throwExceptionIfReleased;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
@@ -862,6 +861,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* for removal in x.27 */)
     default S unsafeWriteObject(Object o, @NonNegative int length)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return unsafeWriteObject(o, Jvm.objectHeaderSize(o.getClass()), length);
