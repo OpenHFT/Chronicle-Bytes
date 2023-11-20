@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -833,7 +832,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     @Deprecated(/* for removal in x.27 */)
     default void unsafeReadObject(@NotNull Object o, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        unsafeReadObject(o, Jvm.objectHeaderSize(o.getClass()), length);
+        unsafeReadObject(o, BytesUtil.triviallyCopyableStart(o.getClass()), length);
     }
 
     /**
@@ -849,7 +848,7 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
     default void unsafeReadObject(@NotNull Object o, @NonNegative int offset, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(o);
-        //assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
+        assert BytesUtil.isTriviallyCopyable(o.getClass(), offset, length);
         if (readRemaining() < length)
             throw new BufferUnderflowException();
         if (isDirectMemory()) {
