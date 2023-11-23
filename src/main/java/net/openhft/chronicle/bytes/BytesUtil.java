@@ -115,8 +115,6 @@ public enum BytesUtil {
      * @throws UnsupportedOperationException If running on Azul Zing JVM.
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
-        if (Jvm.isAzulZing())
-            throw new UnsupportedOperationException();
         if (clazz.isArray()) {
             Class componentType = clazz.getComponentType();
             if (componentType.isPrimitive())

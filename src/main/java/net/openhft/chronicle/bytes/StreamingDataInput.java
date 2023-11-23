@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -830,9 +829,10 @@ public interface StreamingDataInput<S extends StreamingDataInput<S>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* for removal in x.27 */)
     default void unsafeReadObject(@NotNull Object o, @NonNegative int length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        unsafeReadObject(o, (o.getClass().isArray() ? 4 : 0) + Jvm.objectHeaderSize(), length);
+        unsafeReadObject(o, BytesUtil.triviallyCopyableStart(o.getClass()), length);
     }
 
     /**
