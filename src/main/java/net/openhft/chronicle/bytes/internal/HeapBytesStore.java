@@ -35,6 +35,7 @@ import java.nio.ByteOrder;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
+import static sun.misc.Unsafe.ARRAY_BYTE_BASE_OFFSET;
 
 /**
  * Wrapper for Heap ByteBuffers and arrays.
@@ -519,7 +520,7 @@ public class HeapBytesStore<U>
         requireNonNegative(length);
         try {
             memory.copyMemory(
-                    byteArray, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+                    byteArray, offset + ARRAY_BYTE_BASE_OFFSET, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
@@ -534,11 +535,11 @@ public class HeapBytesStore<U>
         try {
             assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
             if (bytes.isDirect()) {
-                memory.copyMemory(Jvm.address(bytes), realUnderlyingObject,
+                memory.copyMemory(Jvm.address(bytes) + offset, realUnderlyingObject,
                         this.dataOffset + offsetInRDO, length);
 
             } else {
-                memory.copyMemory(bytes.array(), offset, realUnderlyingObject,
+                memory.copyMemory(bytes.array(), offset + ARRAY_BYTE_BASE_OFFSET, realUnderlyingObject,
                         this.dataOffset + offsetInRDO, length);
             }
         } catch (NullPointerException ifReleased) {
