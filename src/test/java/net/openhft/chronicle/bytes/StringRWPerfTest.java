@@ -27,7 +27,6 @@ public class StringRWPerfTest extends BytesTestCommon {
     public static final String ASCII = "012345678901234567890123456789";
     private Bytes<?> bytes;
 
-
     @Override
     public void afterChecks() {
         if (bytes != null)

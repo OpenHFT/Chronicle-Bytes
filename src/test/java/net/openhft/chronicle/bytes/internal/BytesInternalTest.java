@@ -79,5 +79,4 @@ public class BytesInternalTest extends BytesTestCommon {
         Assert.assertFalse(a.contentEquals(b));
     }
 
-
 }

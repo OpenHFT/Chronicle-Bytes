@@ -152,7 +152,6 @@ public class AppendDoubleBenchmark {
         bytes.append(f);
     }
 
-
     @Benchmark
     public void appendDoubleHeap() {
         double d = nextDouble(bytes2);

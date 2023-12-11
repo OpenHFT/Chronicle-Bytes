@@ -36,7 +36,6 @@ public class ContentEqualsJLBHTest extends BytesTestCommon {
 
     static int size = 1024;
 
-
     private final Bytes<?> left = Bytes.allocateElasticDirect();
     private final Bytes<?> right = Bytes.allocateElasticDirect();
 
@@ -60,7 +59,6 @@ public class ContentEqualsJLBHTest extends BytesTestCommon {
         JLBH jlbh = new JLBH(jlbhOptions);
         jlbh.start();
     }
-
 
     private static class SimpleJLBHTask implements JLBHTask {
 

@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.bytes.pool.BytesPool;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
@@ -111,7 +110,6 @@ enum BytesInternal {
 
     private static final MethodHandle VECTORIZED_MISMATCH_METHOD_HANDLE;
     private static final ThreadLocal<byte[]> BYTE_ARRAY_TL = ThreadLocal.withInitial(() -> new byte[20]);
-
 
     static {
         try {
@@ -258,7 +256,6 @@ enum BytesInternal {
             return null;
         }
     }
-
 
     // Optimise for the common case where the length is 31-bit.
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>

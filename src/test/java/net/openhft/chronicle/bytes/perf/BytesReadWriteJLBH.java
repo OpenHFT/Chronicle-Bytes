@@ -111,7 +111,6 @@ public class BytesReadWriteJLBH implements JLBHTask {
         absoluteRead.sampleNanos(System.nanoTime() - absoluteReadStart);
         expectAmountActioned("read", length, amountRead);
 
-
         // Relative reads
         populateBytes(CharacterEncoding.ASCII);
         bytesImpl.readPosition(0);

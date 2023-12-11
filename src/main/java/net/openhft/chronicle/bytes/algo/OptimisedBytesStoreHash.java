@@ -294,7 +294,6 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
                 ^ agitate(h2) ^ agitate(h3);
     }
 
-
     /**
      * Reads a long from the given address. If the length is less than 8,
      * it reads as many bytes as specified and converts them to a long.

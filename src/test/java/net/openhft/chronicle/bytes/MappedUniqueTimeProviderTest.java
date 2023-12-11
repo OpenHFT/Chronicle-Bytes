@@ -35,7 +35,6 @@ import static org.junit.Assert.assertTrue;
 
 public class MappedUniqueTimeProviderTest extends BytesTestCommon {
 
-
     @Before
     @BeforeEach
     public void threadDump() {
