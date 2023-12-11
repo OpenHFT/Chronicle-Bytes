@@ -92,7 +92,6 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
         }
     }
 
-
     @Override
     public long currentTimeNanos()
             throws IllegalStateException {

@@ -625,7 +625,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     long write8bit(@NonNegative long position, @NotNull String s, @NonNegative int start, @NonNegative int length)
             throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
-
     /**
      * Performs a 32-bit compare-and-swap (CAS) operation at a given offset.
      *
@@ -653,7 +652,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
     void testAndSetInt(@NonNegative long offset, int expected, int value)
             throws BufferOverflowException, ClosedIllegalStateException;
 
-
     /**
      * Performs a 64-bit compare-and-swap (CAS) operation at a given offset.
      *
@@ -667,7 +665,6 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      */
     boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
-
 
     /**
      * Performs a compare-and-swap (CAS) operation for a 32-bit float at the given offset. The CAS

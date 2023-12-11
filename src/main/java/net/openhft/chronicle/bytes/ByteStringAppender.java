@@ -343,7 +343,6 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
         return append8bit(cs, 0, cs.length());
     }
 
-
     /**
      * Appends the ISO-8859-1 representation of the specified BytesStore.
      *

@@ -17,7 +17,9 @@
  */
 package net.openhft.chronicle.bytes.util;
 
-import net.openhft.chronicle.bytes.*;
+import net.openhft.chronicle.bytes.BinaryWireCode;
+import net.openhft.chronicle.bytes.Bytes;
+import net.openhft.chronicle.bytes.BytesTestCommon;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;

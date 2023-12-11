@@ -40,7 +40,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private static final int DEDUPLICATOR = 192;
     private static final int NANOS_PER_MICRO = 1000;
 
-
     private final Bytes<?> bytes;
     private final MappedFile file;
     private final BinaryLongArrayReference values;
@@ -192,7 +191,6 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             Jvm.nanoPause();
         }
     }
-
 
     /**
      * This method returns a unique, monotonically increasing nanosecond timestamp.

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 
 public class Issue523Test extends BytesTestCommon {
 
-
     @Before
     @BeforeEach
     public void threadDump() {

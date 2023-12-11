@@ -71,7 +71,6 @@ public class MappedBytesTest extends BytesTestCommon {
         text = largeTextBuilder.toString();
     }
 
-
     @Before
     @BeforeEach
     public void threadDump() {

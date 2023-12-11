@@ -1269,7 +1269,6 @@ public class BytesTest extends BytesTestCommon {
         bytes.releaseLast();
     }
 
-
     @Test
     public void testAppendReallyBigFloat() {
         int size = 48;
