@@ -42,7 +42,7 @@ public final class PageUtil {
 
     public static final int DEFAULT_HUGE_PAGE_SIZE = 2 * 1024 * 1024;
 
-    private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9])+([KkMmGg])");
+    private static final Pattern PAGE_SIZE_PATTERN = Pattern.compile("pagesize=([0-9]+)([KkMmGg])");
     private static final TrieNode root = new TrieNode();
 
     static {

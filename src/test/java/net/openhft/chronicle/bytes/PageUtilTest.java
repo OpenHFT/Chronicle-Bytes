@@ -20,6 +20,8 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.File;
 import java.lang.reflect.Field;
@@ -69,12 +71,19 @@ class PageUtilTest {
         assertEquals(lines, result);
     }
 
-    @Test
-    void parseActualPageSize() throws Exception {
-        String line = "1110 162 0:61 / /mnt/huge rw,relatime shared:591 - hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476";
-
+    @CsvSource(delimiter = '|',
+            value = {
+                    "hugetlbfs nodev rw,seclabel,pagesize=512K,size=68719476|524288",
+                    "hugetlbfs nodev rw,seclabel,pagesize=2M,size=68719476|2097152",
+                    "hugetlbfs nodev rw,seclabel,pagesize=4M,size=68719476|4194304",
+                    "hugetlbfs nodev rw,seclabel,pagesize=512M,size=68719476|536870912",
+                    "hugetlbfs nodev rw,seclabel,pagesize=1024M,size=68719476|1073741824",
+                    "hugetlbfs nodev rw,seclabel,pagesize=1G,size=68719476|1073741824"
+            })
+    @ParameterizedTest
+    void parseActualPageSize(String line, int expected) {
         int result = PageUtil.parsePageSize(line);
-        assertEquals(4 << 20, result);
+        assertEquals(expected, result);
     }
 
     @Test
