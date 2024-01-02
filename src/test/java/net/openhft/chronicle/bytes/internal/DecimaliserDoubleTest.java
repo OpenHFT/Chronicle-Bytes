@@ -22,6 +22,7 @@ import net.openhft.chronicle.bytes.render.*;
 import net.openhft.chronicle.core.Maths;
 import org.junit.jupiter.api.Test;
 
+import java.math.BigDecimal;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 
@@ -207,5 +208,18 @@ class DecimaliserDoubleTest extends BytesTestCommon {
             assertEquals(-3, exponent);
         };
         assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((double) Long.MIN_VALUE, check));
+    }
+
+    @Test
+    public void testDouble1() {
+        DecimalAppender check = (negative, mantissa, exponent) -> {
+            assertFalse(negative);
+            assertEquals(16666666666666785L, mantissa);
+            assertEquals(17, exponent);
+        };
+        double value = 0.16666666666666785d;
+        assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal(value, check));
+        assertTrue(GeneralDecimaliser.GENERAL.toDecimal(value, check));
+        assertFalse(SimpleDecimaliser.SIMPLE.toDecimal(value, check));
     }
 }
