@@ -801,7 +801,7 @@ enum BytesInternal {
             int count = calculateCount(bytes, sb, utflen, readPosition);
 
             bytes.readSkip(count);
-            setCount(sb, count);
+            sb.setLength(count);
             if (count < utflen) {
                 final long rp0 = bytes.readPosition();
                 parseUtf82Guarded(bytes, sb, utf, utflen, count, rp0);
@@ -872,7 +872,7 @@ enum BytesInternal {
                     chars[count++] = (char) c;
                 }
             }
-            setCount(sb, count);
+            sb.setLength(count);
             if (count < utflen)
                 parseUtf82(bytes, offset + count, offset + utflen, sb, utflen);
             assert bytes.memory != null;
@@ -913,7 +913,7 @@ enum BytesInternal {
                 chars[count++] = (char) c;
             }
         }
-        setCount(sb, count);
+        sb.setLength(count);
         return count;
     }
 
@@ -2278,7 +2278,7 @@ enum BytesInternal {
                     break;
                 if (tester.isStopChar(c)) {
                     bytes.readSkip(i + 1L);
-                    StringUtils.setCount(appendable, i);
+                    appendable.setLength(i);
                     return;
                 }
                 appendable.append((char) c);
@@ -2291,13 +2291,13 @@ enum BytesInternal {
                     break;
                 if (tester.isStopChar(c)) {
                     bytes.readSkip(i + 1L);
-                    StringUtils.setCount(appendable, i);
+                    appendable.setLength(i);
                     return;
                 }
                 chars[i] = (char) c;
             }
         }
-        StringUtils.setCount(appendable, i);
+        appendable.setLength(i);
         bytes.readSkip(i);
         if (i < len) {
             readUtf8_SB2(bytes, appendable, tester);
