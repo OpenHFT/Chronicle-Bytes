@@ -66,6 +66,9 @@ public class SimpleDecimaliser implements Decimaliser {
                 decimalAppender.append(isNegative, mantissa, exponent);
                 return true;
             }
+            // this is over the edge of precision
+            if (mantissa >= 1e15)
+                return false;
             // Increase the factor for the next iteration.
             factor *= 10;
         }
