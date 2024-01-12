@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.bytes.internal.BytesInternal;
 import net.openhft.chronicle.bytes.internal.EmbeddedBytes;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
-import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.SingleThreaded;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
@@ -35,8 +34,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -686,54 +683,29 @@ public interface Bytes<U> extends
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
-                           @NonNegative final long maxLen) throws
-            BufferUnderflowException, IllegalStateException, IllegalArgumentException {
-        requireNonNegative(maxLen);
-        if (buffer.refCount() < 1)
-            // added because something is crashing the JVM
-            return "<unknown>";
-
-        ReferenceOwner toString = ReferenceOwner.temporary("toString");
-        buffer.reserve(toString);
-        try {
-
-            if (buffer.readRemaining() == 0)
-                return "";
-
-            final long length = Math.min(maxLen + 1, buffer.readRemaining());
-
-            @NotNull final StringBuilder builder = new StringBuilder();
-            try {
-                buffer.readWithLength(length, b -> {
-                    while (buffer.readRemaining() > 0) {
-                        if (builder.length() >= maxLen) {
-                            builder.append("...");
-                            break;
-                        }
-                        builder.append((char) buffer.readByte());
-                    }
-                });
-            } catch (Exception e) {
-                builder.append(' ').append(e);
-            }
-            return builder.toString();
-        } finally {
-            buffer.release(toString);
-        }
+                           @NonNegative final long maxLen)
+            throws BufferUnderflowException, IllegalArgumentException {
+        return toString(buffer, buffer.readPosition(), Math.min(maxLen, buffer.readRemaining()));
     }
 
     /**
-     * Creates and returns a String from the bytes of the provided {@code buffer} with the provided {@code length }
-     * staring from the provided {@code offset}.
-     * <p>
-     * The buffer is not modified by this call.
+     * <p>Extracts a string from the provided {@code buffer} starting at the specified {@code position},
+     * and spanning for the specified {@code length} number of characters. The buffer's state
+     * remains unchanged by this method.</p>
      *
-     * @param buffer   the non-null buffer to use
-     * @param position the offset position to create the string from
-     * @param length   the number of characters to include in the string
-     * @return a String extracted from the buffer
-     * @throws NullPointerException     if the provided {@code buffer} is {@code null} or
-     * @throws IllegalArgumentException if the provided {@code position} or provided {@code length} is negative
+     * <p>The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
+     * and constructs a string from these bytes.</p>
+     *
+     * <p>This method supports all characters in the Basic Latin Unicode block, but does not handle the
+     * upper half of ISO-8859-1. For strings using the upper block of ISO-8859-1, use {@link #to8bitString(BytesStore)}</p>
+     *
+     * @param buffer   The buffer to extract the string from. Must not be {@code null}.
+     * @param position The position in the buffer to start extracting the string from.
+     * @param length   The number of characters to include in the extracted string.
+     * @return A string extracted from the buffer.
+     * @throws IllegalArgumentException If the provided {@code position} or {@code length} is negative.
+     * @throws NullPointerException     If the provided {@code buffer} is {@code null}.
+     * @see <a href="https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)" target="_blank">Basic Latin Unicode block</a>
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
