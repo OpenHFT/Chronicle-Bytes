@@ -593,54 +593,19 @@ public interface Bytes<U> extends
     static String toString(@NotNull final Bytes<?> buffer,
                            @NonNegative final long maxLen)
             throws BufferUnderflowException, IllegalArgumentException {
-        requireNonNegative(maxLen);
-        if (buffer.refCount() < 1)
-            // added because something is crashing the JVM
-            return "<unknown>";
-        try {
-            ReferenceOwner toString = ReferenceOwner.temporary("toString");
-            buffer.reserve(toString);
-            try {
-
-                if (buffer.readRemaining() == 0)
-                    return "";
-
-                final long length = Math.min(maxLen + 1, buffer.readRemaining());
-
-                @NotNull final StringBuilder builder = new StringBuilder();
-
-                final long readPosition = buffer.readPosition();
-                try {
-                    buffer.readWithLength(length, b -> {
-                        while (buffer.readRemaining() > 0) {
-                            if (builder.length() >= maxLen) {
-                                builder.append("...");
-                                break;
-                            }
-                            builder.append((char) buffer.readByte());
-                        }
-                    });
-                } catch (Exception e) {
-                    builder.append(' ').append(e);
-                } finally {
-                    buffer.readPosition(readPosition);
-                }
-                return builder.toString();
-            } finally {
-                buffer.release(toString);
-            }
-        } catch (Exception e) {
-            return e.toString();
-        }
+        return toString(buffer, buffer.readPosition(), Math.min(maxLen, buffer.readRemaining()));
     }
 
     /**
-     * Extracts a string from the provided {@code buffer} starting at the specified {@code position},
+     * <p>Extracts a string from the provided {@code buffer} starting at the specified {@code position},
      * and spanning for the specified {@code length} number of characters. The buffer's state
-     * remains unchanged by this method.
-     * <p>
-     * The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
-     * and constructs a string from these bytes.
+     * remains unchanged by this method.</p>
+     *
+     * <p>The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
+     * and constructs a string from these bytes.</p>
+     *
+     * <p>This method supports all characters in the Basic Latin Unicode block, but does not handle the
+     * upper half of ISO-8859-1. For strings using the upper block of ISO-8859-1, use {@link #to8bitString(BytesStore)}</p>
      *
      * @param buffer   The buffer to extract the string from. Must not be {@code null}.
      * @param position The position in the buffer to start extracting the string from.
@@ -648,6 +613,7 @@ public interface Bytes<U> extends
      * @return A string extracted from the buffer.
      * @throws IllegalArgumentException If the provided {@code position} or {@code length} is negative.
      * @throws NullPointerException     If the provided {@code buffer} is {@code null}.
+     * @see <a href="https://en.wikipedia.org/wiki/Basic_Latin_(Unicode_block)" target="_blank">Basic Latin Unicode block</a>
      */
     @NotNull
     static String toString(@NotNull final Bytes<?> buffer,
