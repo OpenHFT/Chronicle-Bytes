@@ -645,18 +645,6 @@ public interface Bytes<U> extends
     }
 
     /**
-     * <p>Extracts a string from the provided {@code bytes}. The store's state
-     * remains unchanged by this method.</p>
-     *
-     * <p>This method supports all characters in the ISO-8859-1 encoding scheme.</p>
-     *
-     * @param bytes BytesStore to extract string from
-     * @return A string extracted from the BytesStore
-     * @throws ClosedIllegalStateException if the BytesStore provided has been previously released
-     */
-    static String to8bitString(@NotNull BytesStore bytes) throws ClosedIllegalStateException { return BytesInternal.to8bitString(bytes); }
-
-    /**
      * Creates and returns a new fix sized wrapper for native (64-bit address)
      * memory with the contents copied from the given {@code bytes} array.
      * <p>
