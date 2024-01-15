@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -50,7 +49,6 @@ public class ISO88591CharsTest {
     @Test
     public void testBytesToStringConversion() {
         Bytes<?> isoBytes = Bytes.wrapForRead(ISO_BYTES);
-        assertEquals(ISO_TEXT, Bytes.to8bitString(isoBytes));
+        assertEquals(ISO_TEXT, isoBytes.to8bitString());
     }
-
 }
