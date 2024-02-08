@@ -2139,16 +2139,23 @@ enum BytesInternal {
         // For up to 18 decimal places, use fast path
         if (decimalPlaces < 18) {
             long factor = Maths.tens(decimalPlaces);
-            double d1 = d; // convert to double
-            boolean neg = d1 < 0; // check for negative
-            d1 = Math.abs(d1); // keep the absolute value
-            final double df = d1 * factor; // scale it by the factor
+            // convert to double
+            double d1 = d;
+            // check for negative
+            boolean neg = d1 < 0;
+            d1 = Math.abs(d1);
+            // scale it by the factor
+            final double df = d1 * factor;
             if (df < 1e15) { // if the result up to 15 significant digits
                 long ldf = (long) df; // truncate as a long
-                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983); // estimate the error in truncating
-                if (residual >= 0.5) // should it round up.
+                // estimate the error in truncating
+                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
+                // should it round up.
+                if (residual >= 0.5)
                     ldf++;
-                if (neg) // restore the sign
+
+                // restore the sign
+                if (neg)
                     ldf = -ldf;
                 long round = ldf;
 
