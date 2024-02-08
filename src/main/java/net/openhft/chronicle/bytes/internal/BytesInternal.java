@@ -47,6 +47,8 @@ import java.io.UTFDataFormatException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -2116,23 +2118,37 @@ enum BytesInternal {
             out.rawWriteByte((byte) '0');
     }
 
+    /**
+     * Appends a formatted double value to a {@link ByteStringAppender} with a specified number of decimal places.
+     * This method provides a high-performance way to append double values, optimizing for cases with up to 18 decimal places and up to 15 significant digits.
+     * For higher precision, it falls back to using {@link BigDecimal}.
+     *
+     * @param bytesStringAppender the {@link ByteStringAppender} to append the formatted double to.
+     * @param d                   the double value to format and append.
+     * @param decimalPlaces       the number of decimal places to use in the formatted output. Must be non-negative.
+     * @throws BufferOverflowException     if there is not enough space left in the {@link ByteStringAppender}.
+     * @throws IllegalArgumentException    if the number of decimal places is negative.
+     * @throws ClosedIllegalStateException if the {@link ByteStringAppender} has been closed.
+     * @throws ArithmeticException         if an error occurs during arithmetic operations.
+     */
     public static void append(@NotNull ByteStringAppender bytesStringAppender, double d, int decimalPlaces)
             throws BufferOverflowException, IllegalArgumentException, ClosedIllegalStateException, ArithmeticException {
         if (decimalPlaces < 0)
-            throw new IllegalArgumentException();
+            throw new IllegalArgumentException("Number of decimal places cannot be negative");
+
+        // For up to 18 decimal places, use fast path
         if (decimalPlaces < 18) {
             long factor = Maths.tens(decimalPlaces);
-            double d1 = d;
-            boolean neg = d1 < 0;
-            d1 = Math.abs(d1);
-            final double df = d1 * factor;
-            if (df < Long.MAX_VALUE) {
-                // changed from java.lang.Math.round(d2) as this was shown up to cause latency
-                long ldf = (long) df;
-                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
-                if (residual >= 0.5)
+            double d1 = d; // convert to double
+            boolean neg = d1 < 0; // check for negative
+            d1 = Math.abs(d1); // keep the absolute value
+            final double df = d1 * factor; // scale it by the factor
+            if (df < 1e15) { // if the result up to 15 significant digits
+                long ldf = (long) df; // truncate as a long
+                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983); // estimate the error in truncating
+                if (residual >= 0.5) // should it round up.
                     ldf++;
-                if (neg)
+                if (neg) // restore the sign
                     ldf = -ldf;
                 long round = ldf;
 
@@ -2146,7 +2162,8 @@ enum BytesInternal {
                 return;
             }
         }
-        bytesStringAppender.append(d);
+        // Fallback to BigDecimal for high precision cases
+        bytesStringAppender.append(BigDecimal.valueOf(d).setScale(decimalPlaces, RoundingMode.HALF_UP));
     }
 
     @Nullable
@@ -2266,7 +2283,7 @@ enum BytesInternal {
 
         @Nullable final NativeBytesStore nb = (NativeBytesStore) bytes.bytesStore();
         int i = 0;
-        final int len = Math.toIntExact(bytes.realReadRemaining());
+        final int len = (int) Math.min(bytes.realReadRemaining(), Integer.MAX_VALUE);
         final long address = nb.address + nb.translate(bytes.readPosition());
         @Nullable final Memory memory = nb.memory;
 
@@ -2370,7 +2387,7 @@ enum BytesInternal {
 
     private static void readUtf81(@NotNull StreamingDataInput bytes, @NotNull Appendable appendable, @NotNull StopCharTester tester)
             throws IOException, BufferUnderflowException, ArithmeticException, ClosedIllegalStateException {
-        int len = Maths.toInt32(bytes.readRemaining());
+        int len = (int) Math.min(bytes.readRemaining(), Integer.MAX_VALUE);
         while (len-- > 0) {
             int c = bytes.rawReadByte() & 0xff;
             if (c >= 128) {
@@ -2778,7 +2795,7 @@ enum BytesInternal {
         long num = 0;
         boolean negative = false;
         int b = in.peekUnsignedByte();
-        while (b >= 0 && b <= ' ') {
+        while (b > 0 && b <= ' ') {
             in.readSkip(1);
             b = in.peekUnsignedByte();
         }
@@ -2879,6 +2896,8 @@ enum BytesInternal {
                 // ignore
                 first = false;
             } else if (!first || b > ' ') {
+                break;
+            } else if (b == 0) {
                 break;
             }
         }
