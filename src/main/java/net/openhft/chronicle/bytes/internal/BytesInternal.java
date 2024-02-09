@@ -2139,37 +2139,39 @@ enum BytesInternal {
             throw new IllegalArgumentException("Number of decimal places cannot be negative");
 
         // For up to 18 decimal places, use fast path
-        if (decimalPlaces < 18) {
-            long factor = Maths.tens(decimalPlaces);
-            // convert to double
-            double d1 = d;
-            // check for negative
-            boolean neg = d1 < 0;
-            d1 = Math.abs(d1);
-            // scale it by the factor
-            final double df = d1 * factor;
-            if (df < 1e15) { // if the result up to 15 significant digits
-                long ldf = (long) df; // truncate as a long
-                // estimate the error in truncating
-                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
-                // should it round up.
-                if (residual >= 0.5)
-                    ldf++;
+        if (decimalPlaces > 18) {
+            bytesStringAppender.append(d);
+            return;
+        }
+        long factor = Maths.tens(decimalPlaces);
+        // convert to double
+        double d1 = d;
+        // check for negative
+        boolean neg = d1 < 0;
+        d1 = Math.abs(d1);
+        // scale it by the factor
+        final double df = d1 * factor;
+        if (df < 1e15) { // if the result up to 15 significant digits
+            long ldf = (long) df; // truncate as a long
+            // estimate the error in truncating
+            final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
+            // should it round up.
+            if (residual >= 0.5)
+                ldf++;
 
-                // restore the sign
-                if (neg)
-                    ldf = -ldf;
-                long round = ldf;
+            // restore the sign
+            if (neg)
+                ldf = -ldf;
+            long round = ldf;
 
-                if (bytesStringAppender.canWriteDirect(20L + decimalPlaces)) {
-                    long address = bytesStringAppender.addressForWritePosition();
-                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
-                    bytesStringAppender.writeSkip(address2 - address);
-                } else {
-                    bytesStringAppender.appendDecimal(round, decimalPlaces);
-                }
-                return;
+            if (bytesStringAppender.canWriteDirect(20L + decimalPlaces)) {
+                long address = bytesStringAppender.addressForWritePosition();
+                long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                bytesStringAppender.writeSkip(address2 - address);
+            } else {
+                bytesStringAppender.appendDecimal(round, decimalPlaces);
             }
+            return;
         }
         // Fallback to BigDecimal for high precision cases
         bytesStringAppender.append(BigDecimal.valueOf(d).setScale(decimalPlaces, RoundingMode.HALF_UP));
