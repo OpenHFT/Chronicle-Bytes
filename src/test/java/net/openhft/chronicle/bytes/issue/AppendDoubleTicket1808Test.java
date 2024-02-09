@@ -123,9 +123,45 @@ public class AppendDoubleTicket1808Test extends BytesTestCommon {
     @Test
     public void appendDoubleRounded16() {
         Bytes bytes = Bytes.allocateElasticOnHeap(64);
-        for (double d : new double[]{0.14, 0.5}) {
+        for (double d : new double[]{0.00014, 0.14, 0.5}) {
             bytes.append(d, 16);
             String s = String.format("%.16f", d);
+            assertEquals(s, bytes.toString());
+            bytes.clear();
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void appendDoubleRounded17() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        for (double d : new double[]{0.00014, 0.5, 2.16, 4.4, 32.2}) {
+            bytes.append(d, 17);
+            String s = String.format("%.17f", d);
+            assertEquals(s, bytes.toString());
+            bytes.clear();
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void appendDoubleRounded18() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        for (double d : new double[]{0.000014, 0.5, 2.16, 4.4, 32.2}) {
+            bytes.append(d, 18);
+            String s = String.format("%.18f", d);
+            assertEquals(s, bytes.toString());
+            bytes.clear();
+        }
+        bytes.releaseLast();
+    }
+
+    @Test
+    public void appendDoubleRounded19Plus() {
+        Bytes bytes = Bytes.allocateElasticOnHeap(64);
+        for (double d : new double[]{0.14, 0.5, 2.16, 4.4, 32.2}) {
+            bytes.append(d, 19);
+            String s = Double.toString(d);
             assertEquals(s, bytes.toString());
             bytes.clear();
         }
