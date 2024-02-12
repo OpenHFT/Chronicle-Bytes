@@ -47,6 +47,8 @@ import java.io.UTFDataFormatException;
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -2141,6 +2143,63 @@ enum BytesInternal {
         appendLong0(out, val2);
         for (int i = 0; i < digits; i++)
             out.rawWriteByte((byte) '0');
+    }
+
+    /**
+     * Appends a formatted double value to a {@link ByteStringAppender} with a specified number of decimal places.
+     * This method provides a high-performance way to append double values, optimizing for cases with up to 18 decimal places and up to 15 significant digits.
+     * For higher precision, it falls back to using {@link BigDecimal}.
+     *
+     * @param bytesStringAppender the {@link ByteStringAppender} to append the formatted double to.
+     * @param d                   the double value to format and append.
+     * @param decimalPlaces       the number of decimal places to use in the formatted output. Must be non-negative.
+     * @throws BufferOverflowException     if there is not enough space left in the {@link ByteStringAppender}.
+     * @throws IllegalArgumentException    if the number of decimal places is negative.
+     * @throws IllegalStateException if the {@link ByteStringAppender} has been closed.
+     * @throws ArithmeticException         if an error occurs during arithmetic operations.
+     */
+    public static void append(@NotNull ByteStringAppender bytesStringAppender, double d, int decimalPlaces)
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
+        if (decimalPlaces < 0)
+            throw new IllegalArgumentException("Number of decimal places cannot be negative");
+
+        // For up to 18 decimal places, use fast path
+        if (decimalPlaces > 18) {
+            bytesStringAppender.append(d);
+            return;
+        }
+        long factor = Maths.tens(decimalPlaces);
+        // convert to double
+        double d1 = d;
+        // check for negative
+        boolean neg = d1 < 0;
+        d1 = Math.abs(d1);
+        // scale it by the factor
+        final double df = d1 * factor;
+        if (df < 1e15) { // if the result up to 15 significant digits
+            long ldf = (long) df; // truncate as a long
+            // estimate the error in truncating
+            final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
+            // should it round up.
+            if (residual >= 0.5)
+                ldf++;
+
+            // restore the sign
+            if (neg)
+                ldf = -ldf;
+            long round = ldf;
+
+            if (bytesStringAppender.canWriteDirect(20L + decimalPlaces)) {
+                long address = bytesStringAppender.addressForWritePosition();
+                long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
+                bytesStringAppender.writeSkip(address2 - address);
+            } else {
+                bytesStringAppender.appendDecimal(round, decimalPlaces);
+            }
+            return;
+        }
+        // Fallback to BigDecimal for high precision cases
+        bytesStringAppender.append(BigDecimal.valueOf(d).setScale(decimalPlaces, RoundingMode.HALF_UP));
     }
 
     @Nullable
