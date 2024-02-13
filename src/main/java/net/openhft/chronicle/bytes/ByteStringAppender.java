@@ -255,41 +255,16 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @param d             to append
      * @param decimalPlaces to always produce
      * @return this
-     * @throws BufferUnderflowException if the capacity of the underlying buffer was exceeded
-     * @throws IORuntimeException       if an error occurred while attempting to resize the underlying buffer
+     * @throws BufferOverflowException        If the capacity of the underlying buffer was exceeded
+     * @throws IORuntimeException             If an error occurred while attempting to resize the underlying buffer
+     * @throws IllegalArgumentException       If the decimalPlaces is negative or too large
+     * @throws IllegalStateException          If the resource has been released or closed, or this resource was accessed by multiple threads in an unsafe way.
      */
     @NotNull
     default B append(double d, int decimalPlaces)
-            throws BufferOverflowException, IllegalArgumentException, IllegalStateException, ArithmeticException {
-        if (decimalPlaces < 0)
-            throw new IllegalArgumentException();
-        if (decimalPlaces < 18) {
-            long factor = Maths.tens(decimalPlaces);
-            double d1 = d;
-            boolean neg = d1 < 0;
-            d1 = Math.abs(d1);
-            final double df = d1 * factor;
-            if (df < Long.MAX_VALUE) {
-                // changed from java.lang.Math.round(d2) as this was shown up to cause latency
-                long ldf = (long) df;
-                final double residual = df - ldf + Math.ulp(d1) * (factor * 0.983);
-                if (residual >= 0.5)
-                    ldf++;
-                if (neg)
-                    ldf = -ldf;
-                long round = ldf;
-
-                if (canWriteDirect(20L + decimalPlaces)) {
-                    long address = addressForWritePosition();
-                    long address2 = UnsafeText.appendBase10d(address, round, decimalPlaces);
-                    writeSkip(address2 - address);
-                } else {
-                    appendDecimal(round, decimalPlaces);
-                }
-                return (B) this;
-            }
-        }
-        return append(d);
+            throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
+        BytesInternal.append(this, d, decimalPlaces);
+        return (B) this;
     }
 
     /**
