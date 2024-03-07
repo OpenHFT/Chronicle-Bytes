@@ -207,7 +207,7 @@ enum BytesInternal {
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 leftObject = heapBytesStore.realUnderlyingObject();
-                leftOffset = heapBytesStore.dataOffset();
+                leftOffset = heapBytesStore.dataOffset() + left.readPosition();
             }
 
             final Object rightObject;
@@ -223,7 +223,7 @@ enum BytesInternal {
 
                 HeapBytesStore heapBytesStore = (HeapBytesStore) bytesStore;
                 rightObject = heapBytesStore.realUnderlyingObject();
-                rightOffset = heapBytesStore.dataOffset();
+                rightOffset = heapBytesStore.dataOffset() + right.readPosition();
             }
 
             final int length = (int) left.realReadRemaining();
