@@ -486,8 +486,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param position to sync with the syncMode()
      */
     public void syncUpTo(long position) {
-        SyncMode syncMode = this.syncMode;
-        syncUpTo(position, syncMode);
+        syncUpTo(position, this.syncMode);
     }
 
     /**
