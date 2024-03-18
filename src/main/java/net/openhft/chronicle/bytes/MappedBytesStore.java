@@ -444,16 +444,24 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         super.performRelease();
     }
 
+    /**
+     * Sync the ByteStore if required.
+     *
+     * @param offset the offset within the ByteStore from the start to sync, offset must be a multiple of 4K
+     * @param length the length to sync, length must be a multiple of 4K
+     * @param syncMode the mode to sync
+     */
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE)
             return;
         long start0 = System.currentTimeMillis();
+        boolean full = offset == 0;
         int ret = PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
         if (ret != 0)
             Jvm.error().on(MappedBytesStore.class, "msync failed, " + PosixAPI.posix().lastErrorStr() + ", ret=" + ret + " " + mappedFile.file() + " " + Long.toHexString(offset) + " " + Long.toHexString(length));
         long time0 = System.currentTimeMillis() - start0;
         if (time0 >= 200)
-            Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
+            Jvm.perf().on(getClass(), "Took " + time0 + " ms to " + syncMode + " " + mappedFile.file() + (full ? " (full)" : ""));
     }
 
     /**
@@ -482,17 +490,20 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         syncUpTo(position, syncMode);
     }
 
+    /**
+     * Synchronise from the last complete page up to this position.
+     *
+     * @param position to sync with the syncMode()
+     * @param syncMode to use
+     */
     public void syncUpTo(long position, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
-        long length = position - start;
-        if (length <= syncLength)
+        long positionFromStart = Math.min(safeLimit, position) - start;
+        if (positionFromStart <= syncLength)
             return;
-        final long maxLength = safeLimit - start;
-        if (length > maxLength)
-            length = maxLength;
         int mask = ~0xFFF;
-        long pageEnd = (length + 0xFFF) & mask;
+        long pageEnd = (positionFromStart + 0xFFF) & mask;
         long syncStart = syncLength & mask;
         final long length2 = pageEnd - syncStart;
         performMsync(syncStart, length2, syncMode);
