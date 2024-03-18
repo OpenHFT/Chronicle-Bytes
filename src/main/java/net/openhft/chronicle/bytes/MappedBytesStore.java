@@ -438,13 +438,14 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     protected void performRelease() {
         if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
-            performMsync(0, safeLimit - start, this.syncMode());
+            performMsync(0, safeLimit - start);
         }
         // must sync before releasing
         super.performRelease();
     }
 
-    private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
+    private void performMsync(@NonNegative long offset, long length) {
+        final SyncMode syncMode = this.syncMode();
         if (syncMode == SyncMode.NONE)
             return;
         long start0 = System.currentTimeMillis();
@@ -478,11 +479,6 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param position to sync with the syncMode()
      */
     public void syncUpTo(long position) {
-        SyncMode syncMode = this.syncMode;
-        syncUpTo(position, syncMode);
-    }
-
-    public void syncUpTo(long position, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long length = position - start;
@@ -495,7 +491,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         long pageEnd = (length + 0xFFF) & mask;
         long syncStart = syncLength & mask;
         final long length2 = pageEnd - syncStart;
-        performMsync(syncStart, length2, syncMode);
+        performMsync(syncStart, length2);
         syncLength = position;
     }
 }
