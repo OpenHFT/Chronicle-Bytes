@@ -497,7 +497,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param syncMode to use
      */
     public void syncUpTo(long position, SyncMode syncMode) {
-        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
+        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0 || !OS.isLinux())
             return;
         long positionFromStart = Math.min(safeLimit, position) - start;
         if (positionFromStart <= syncLength)
