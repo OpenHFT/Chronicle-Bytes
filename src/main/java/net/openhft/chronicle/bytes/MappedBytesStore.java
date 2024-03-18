@@ -74,6 +74,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
             throws ClosedIllegalStateException {
         this(owner, mappedFile, start, address, capacity, safeCapacity, PageUtil.getPageSize(mappedFile.file().getAbsolutePath()));
     }
+
     /**
      * Creates a new MappedBytesStore with the given parameters.
      *
@@ -448,9 +449,11 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         if (syncMode == SyncMode.NONE)
             return;
         long start0 = System.currentTimeMillis();
-        PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
+        int ret = PosixAPI.posix().msync(address + offset, length, syncMode.mSyncFlag());
+        if (ret != 0)
+            Jvm.error().on(MappedBytesStore.class, "msync failed, " + PosixAPI.posix().lastErrorStr() + ", ret=" + ret + " " + mappedFile.file() + " " + Long.toHexString(offset) + " " + Long.toHexString(length));
         long time0 = System.currentTimeMillis() - start0;
-        if (time0 >= 20)
+        if (time0 >= 200)
             Jvm.perf().on(getClass(), "Took " + time0 / 1e3 + " seconds to " + syncMode + " " + mappedFile.file());
     }
 
@@ -484,9 +487,11 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
         final long maxLength = safeLimit - start;
         if (length > maxLength)
             length = maxLength;
-        long pageEnd = (length + 0xFFF) & ~0xFFF;
-        final long length2 = pageEnd - syncLength;
-        performMsync(syncLength, length2);
+        int mask = ~0xFFF;
+        long pageEnd = (length + 0xFFF) & mask;
+        long syncStart = syncLength & mask;
+        final long length2 = pageEnd - syncStart;
+        performMsync(syncStart, length2);
         syncLength = position;
     }
 }
