@@ -374,7 +374,7 @@ public class ChunkedMappedFile extends MappedFile {
         } catch (ClosedByInterruptException cbie) {
             close();
             interrupted = true;
-            throw new IllegalStateException(cbie);
+            throw new ClosedIllegalStateException("FileChannel closed", cbie);
 
         } catch (IOException e) {
             final boolean open = fileChannel.isOpen();
