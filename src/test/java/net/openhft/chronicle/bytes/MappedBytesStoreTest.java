@@ -30,13 +30,14 @@ import java.io.IOException;
 import static org.junit.Assert.*;
 
 public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOwner {
+    public static final int PAGE_SIZE = OS.defaultOsPageSize();
     private MappedFile mappedFile;
     private MappedBytesStore mappedBytesStore;
 
     @Before
     public void setup() throws IOException {
         String filePath = OS.getTarget() + "/test" + System.nanoTime() + ".deleteme";
-        mappedFile = MappedFile.mappedFile(filePath, OS.pageSize(), OS.pageSize());
+        mappedFile = MappedFile.mappedFile(filePath, PAGE_SIZE, PAGE_SIZE);
         mappedBytesStore = mappedFile.acquireByteStore(this, 0);
         new File(filePath).deleteOnExit();
     }
@@ -77,7 +78,7 @@ public class MappedBytesStoreTest extends BytesTestCommon implements ReferenceOw
 
     @Test
     public void testCapacity() {
-        assertEquals("The capacities should match", OS.pageSize() * 2, mappedBytesStore.capacity());
+        assertEquals("The capacities should match", PAGE_SIZE * 2, mappedBytesStore.capacity());
     }
 
     @Test
