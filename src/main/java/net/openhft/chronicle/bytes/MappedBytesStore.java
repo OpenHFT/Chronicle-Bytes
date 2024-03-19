@@ -55,6 +55,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     private final MappedFile mappedFile;
     private final long start;
     private final long safeLimit;
+    private final int pageSize;
     private SyncMode syncMode = MappedFile.DEFAULT_SYNC_MODE;
     private long syncLength = 0;
 
@@ -98,6 +99,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
                 : MappedBytesStore::readWriteOk;
 
         reserveTransfer(INIT, owner);
+        this.pageSize = pageSize;
     }
 
     /**
@@ -447,8 +449,8 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     /**
      * Sync the ByteStore if required.
      *
-     * @param offset the offset within the ByteStore from the start to sync, offset must be a multiple of 4K
-     * @param length the length to sync, length must be a multiple of 4K
+     * @param offset   the offset within the ByteStore from the start to sync, offset must be a multiple of 4K
+     * @param length   the length to sync, length must be a multiple of 4K
      * @param syncMode the mode to sync
      */
     private void performMsync(@NonNegative long offset, long length, SyncMode syncMode) {
@@ -498,14 +500,14 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     public void syncUpTo(long position, SyncMode syncMode) {
         if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0 || !OS.isLinux())
             return;
-        long positionFromStart = Math.min(safeLimit, position) - start;
+        long positionFromStart = Math.min(limit, position) - start;
         if (positionFromStart <= syncLength)
             return;
-        int mask = ~0xFFF;
-        long pageEnd = (positionFromStart + 0xFFF) & mask;
+        int mask = - pageSize;
+        long pageEnd = (positionFromStart + pageSize - 1) & mask;
         long syncStart = syncLength & mask;
         final long length2 = pageEnd - syncStart;
         performMsync(syncStart, length2, syncMode);
-        syncLength = position;
+        syncLength = positionFromStart;
     }
 }
