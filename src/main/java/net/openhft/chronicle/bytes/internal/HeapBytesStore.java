@@ -534,7 +534,7 @@ public class HeapBytesStore<U>
         try {
             assert realUnderlyingObject == null || dataOffset >= (Jvm.is64bit() ? 12 : 8);
             if (bytes.isDirect()) {
-                memory.copyMemory(Jvm.address(bytes), realUnderlyingObject,
+                memory.copyMemory(Jvm.address(bytes) + offset, realUnderlyingObject,
                         this.dataOffset + offsetInRDO, length);
 
             } else {

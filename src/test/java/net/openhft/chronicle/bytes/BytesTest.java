@@ -48,6 +48,7 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Scanner;
+import java.util.concurrent.Callable;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static net.openhft.chronicle.bytes.Allocator.*;
@@ -1370,6 +1371,41 @@ public class BytesTest extends BytesTestCommon {
 
         } finally {
             a.releaseLast();
+        }
+    }
+
+    @Test
+    public void testWriteOnHeap() throws Exception {
+        doTestWrite(() -> ByteBuffer.allocate(128));
+    }
+
+    @Test
+    public void testWriteDirect() throws Exception {
+        doTestWrite(() -> ByteBuffer.allocateDirect(128));
+    }
+
+    private void doTestWrite(Callable<ByteBuffer> generator) throws Exception {
+        final Bytes<?> data = alloc1.elasticBytes(128);
+        try {
+            ByteBuffer buffer = generator.call();
+
+            for (byte c = ' '; c < '`'; c++) {
+                data.writeChar((char) c);
+                buffer.put(c);
+            }
+
+            BytesStore heapBytesStore = data.bytesStore();
+            heapBytesStore.write(16, buffer, 32, 8);
+            for (int i = 0; i < 16; i++)
+                assertEquals(i + ' ', heapBytesStore.readByte(i));
+
+            for (int i = 16; i < 24; i++)
+                assertEquals(i + '0', heapBytesStore.readByte(i));
+
+            for (int i = 24; i < 32; i++)
+                assertEquals(i + ' ', heapBytesStore.readByte(i));
+        } finally {
+            data.releaseLast();
         }
     }
 }

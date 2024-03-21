@@ -221,9 +221,22 @@ public class PrimitiveTest extends BytesTestCommon {
     }
 
     @Test
-    public void testTextPrimitive() {
+    public void testTextPrimitiveByteBuffer() {
+        doTestTextPrimitive(Bytes.elasticHeapByteBuffer(64));
+    }
+
+    @Test
+    public void testTextPrimitiveDirect() {
+        doTestTextPrimitive(Bytes.allocateDirect(64));
+    }
+
+    @Test
+    public void testTextPrimitiveHeap() {
+        doTestTextPrimitive(Bytes.allocateElasticOnHeap(64));
+    }
+
+    private void doTestTextPrimitive(Bytes<?> bytes) {
         assumeFalse(NativeBytes.areNewGuarded());
-        final Bytes<ByteBuffer> bytes = Bytes.elasticHeapByteBuffer(64);
         try {
             bytes.append(true).append('\n');
             bytes.append(1).append('\n');
