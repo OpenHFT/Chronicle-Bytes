@@ -27,6 +27,7 @@ import net.openhft.chronicle.core.io.ClosedIllegalStateException;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import net.openhft.posix.PosixAPI;
+import net.openhft.posix.internal.jnr.WinJNRPosixAPI;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -437,7 +438,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      */
     @Override
     protected void performRelease() {
-        if (address != 0 && syncMode != SyncMode.NONE && OS.isLinux()) {
+        if (address != 0 && syncMode != SyncMode.NONE) {
             performMsync(0, safeLimit - start);
         }
         // must sync before releasing
@@ -479,7 +480,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param position to sync with the syncMode()
      */
     public void syncUpTo(long position) {
-        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0 || !OS.isLinux())
+        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long length = position - start;
         if (length <= syncLength)
