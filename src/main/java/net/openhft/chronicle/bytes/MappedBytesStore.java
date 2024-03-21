@@ -441,7 +441,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
     @Override
     protected void performRelease() {
         if (address != 0 && syncMode != SyncMode.NONE) {
-            performMsync(0, safeLimit - start);
+            performMsync(0, safeLimit - start, syncMode());
         }
         // must sync before releasing
         super.performRelease();
@@ -499,12 +499,12 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param syncMode to use
      */
     public void syncUpTo(long position, SyncMode syncMode) {
-        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0 || !OS.isLinux())
+        if (syncMode == SyncMode.NONE || address == 0 || refCount() <= 0)
             return;
         long positionFromStart = Math.min(limit, position) - start;
         if (positionFromStart <= syncLength)
             return;
-        int mask = - pageSize;
+        int mask = -pageSize;
         long pageEnd = (positionFromStart + pageSize - 1) & mask;
         long syncStart = syncLength & mask;
         final long length2 = pageEnd - syncStart;
