@@ -28,7 +28,6 @@ import java.util.Arrays;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings("rawtypes")
 public class BytesUtilTest extends BytesTestCommon {
     @Test
     public void fromFileInJar()

@@ -131,6 +131,7 @@ public enum BytesUtil {
      * @param fields The fields of the class.
      * @return An array of two integers, where the first element is the minimum offset, and the second element is the maximum offset.
      */
+    @SuppressWarnings("deprecation")
     private static int[] calculateMinMax(final List<Field> fields) {
         int min = 0;
         int max = 0;

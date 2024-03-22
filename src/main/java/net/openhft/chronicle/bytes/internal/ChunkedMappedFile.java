@@ -97,7 +97,7 @@ public class ChunkedMappedFile extends MappedFile {
     private void validateArgs(long chunkSize, long overlapSize, int pageSize, long capacity) {
         requireNonNegative(chunkSize);
         requireNonNegative(overlapSize);
-        require(positive(), pageSize);
+        requirePositive(pageSize);
         requireNonNegative(capacity);
         if (this.overlapSize > this.chunkSize)
             throw new IllegalArgumentException("overlapSize cannot be greater than chunkSize");

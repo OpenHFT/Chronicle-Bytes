@@ -33,7 +33,6 @@ import static org.junit.Assert.assertThrows;
 import static org.junit.Assume.assumeFalse;
 
 public class ByteStringParserTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
     @NotNull
     Bytes<?> bytes = Bytes.elasticByteBuffer();
 
@@ -44,7 +43,6 @@ public class ByteStringParserTest extends BytesTestCommon {
         super.afterChecks();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testParseLong() {
         long expected = 123456789012345678L;
