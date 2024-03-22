@@ -17,8 +17,7 @@
  */
 package net.openhft.chronicle.bytes.internal;
 
-import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.Maths;
+import net.openhft.chronicle.core.*;
 
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.UnsafeMemory.UNSAFE;
@@ -66,8 +65,8 @@ public final class UnsafeText {
         for (int i = 0; i < end; i++, end--) {
             long a1 = start + i;
             long a2 = start + end;
-            byte b1 = UNSAFE.getByte(a1);
-            byte b2 = UNSAFE.getByte(a2);
+            byte b1 = MEMORY.readByte(a1);
+            byte b2 = MEMORY.readByte(a2);
             MEMORY.writeByte(a2, b1);
             MEMORY.writeByte(a1, b2);
         }
@@ -136,7 +135,7 @@ public final class UnsafeText {
         }
         if (exp == 0 && mantissa == 0) {
             MEMORY.writeByte(address, (byte) '0');
-            UNSAFE.putShort(address + 1, (short) ('.' + ('0' << 8)));
+            MEMORY.writeShort(address + 1, (short) ('.' + ('0' << 8)));
             address += 3;
             return address;
 
@@ -168,7 +167,7 @@ public final class UnsafeText {
         sb.setLength(0);
         sb.append(d);
         for (int i = 0; i < sb.length(); i++)
-            UNSAFE.putByte(address++, (byte) sb.charAt(i));
+            MEMORY.writeByte(address++, (byte) sb.charAt(i));
         return address;
     }
 
@@ -228,7 +227,7 @@ public final class UnsafeText {
             value = value / 10;
         }
 
-        UNSAFE.putShort(address, (short) ('0' + ('.' << 8)));
+        MEMORY.writeShort(address, (short) ('0' + ('.' << 8)));
         address += 2;
 
         long addressOfLastNonZero = address + digits;
@@ -242,7 +241,7 @@ public final class UnsafeText {
         } while (value3 > 0);
         while (digits > 0) {
             digits--;
-            UNSAFE.putByte(address + digits, (byte) '0');
+            MEMORY.writeByte(address + digits, (byte) '0');
         }
 
         return addressOfLastNonZero;
@@ -276,7 +275,7 @@ public final class UnsafeText {
                     break;
             }
         } else {
-            UNSAFE.putShort(address, (short) ('.' + ('0' << 8)));
+            MEMORY.writeShort(address, (short) ('.' + ('0' << 8)));
             address += 2;
         }
         return address;
@@ -293,9 +292,9 @@ public final class UnsafeText {
         final int len = bytes.length;
         int i;
         for (i = 0; i < len - 7; i += 8)
-            MEMORY.writeLong(address + i, UNSAFE.getLong(bytes, ARRAY_BYTE_BASE_OFFSET + i));
+            MEMORY.writeLong(address + i, MEMORY.readLong(bytes, ARRAY_BYTE_BASE_OFFSET + i));
         for (; i < len; i++)
-            MEMORY.writeByte(address + i, UNSAFE.getByte(bytes, ARRAY_BYTE_BASE_OFFSET + i));
+            MEMORY.writeByte(address + i, MEMORY.readByte(bytes, ARRAY_BYTE_BASE_OFFSET + i));
         return address + len;
     }
 

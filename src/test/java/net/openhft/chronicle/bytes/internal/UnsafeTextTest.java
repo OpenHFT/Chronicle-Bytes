@@ -18,6 +18,7 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.BytesTestCommon;
+import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.cooler.CoolerTester;
 import net.openhft.chronicle.core.cooler.CpuCoolers;
 import org.junit.Before;
@@ -43,7 +44,7 @@ public class UnsafeTextTest extends BytesTestCommon {
 
     @Test
     public void coolerAppendBase10quick() {
-        long address = UNSAFE.allocateMemory(32);
+        long address = OS.memory().allocate(32);
 
         try {
 
@@ -58,14 +59,14 @@ public class UnsafeTextTest extends BytesTestCommon {
                     .run();
 
             final String memVal = LongStream.range(address, blackhole)
-                    .mapToInt(addr -> UNSAFE.getByte(null, addr))
+                    .mapToInt(addr -> OS.memory().readByte(addr))
                     .mapToObj(c -> (char) c)
                     .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                     .toString();
 
             assertEquals(Long.toString(-Integer.MAX_VALUE), memVal);
         } finally {
-            UNSAFE.freeMemory(address);
+            OS.memory().freeMemory(address, 32);
         }
 
     }
@@ -155,12 +156,13 @@ public class UnsafeTextTest extends BytesTestCommon {
     }
 
     public void testAppendDoubleOnce(double value, String expectedValue) {
-        long address = UNSAFE.allocateMemory(max + 8);
+        int size = max + 8;
+        long address = OS.memory().allocate(size);
         try {
             final String memVal = appendDoubleToString(value, address);
             assertEquals("value; " + value, expectedValue, memVal);
         } finally {
-            UNSAFE.freeMemory(address);
+            OS.memory().freeMemory(address, size);
         }
     }
 
@@ -171,7 +173,8 @@ public class UnsafeTextTest extends BytesTestCommon {
         int runLength = 10_000;
         IntStream.range(0, runLength).parallel().forEach(t -> {
             Random r = new Random();
-            long address = UNSAFE.allocateMemory(max + 8);
+            int size = max + 8;
+            long address = OS.memory().allocate(size);
             long l = r.nextLong() | 1L;
             for (int i = 0; i < 1_000; i++) {
                 // agitate
@@ -188,7 +191,7 @@ public class UnsafeTextTest extends BytesTestCommon {
                 }
             }
             // this is called unless the test is about to die
-            UNSAFE.freeMemory(address);
+            OS.memory().freeMemory(address, size);
         });
     }
 
@@ -196,7 +199,8 @@ public class UnsafeTextTest extends BytesTestCommon {
     public void testSequential() {
         IntStream.range(0, 300).parallel().forEach(t -> {
             // odd numbers have the most precision error
-            long address = UNSAFE.allocateMemory(max + 8);
+            int size = max + 8;
+            long address = OS.memory().allocate(size);
             // double only has 16-17 digits of accuracy so 1 + x/1e15 has 16 digits.
             double n = 1e15;
             for (int i = 1; i < 10_000; i += 2) {
@@ -209,20 +213,20 @@ public class UnsafeTextTest extends BytesTestCommon {
                     assertEquals("" + (d - d2), d, d2, 0);
             }
             // this is called unless the test is about to die
-            UNSAFE.freeMemory(address);
+            OS.memory().freeMemory(address, size);
         });
     }
 
     public String appendDoubleToString(double value, long address) {
-        UNSAFE.putLong(address + max, 0L);
+        OS.memory().writeLong(address + max, 0L);
         final long endAddress = UnsafeText.appendDouble(address, value);
         if (endAddress > address + max)
             fail("value: " + value + " length: " + (endAddress - address));
-        long end = UNSAFE.getLong(address + max);
+        long end = OS.memory().readLong(address + max);
         if (end != 0L)
             fail("Overwrite: " + Long.toHexString(end));
         return LongStream.range(address, endAddress)
-                .mapToInt(addr -> UNSAFE.getByte(null, addr))
+                .mapToInt(addr -> OS.memory().readByte( addr))
                 .mapToObj(c -> (char) c)
                 .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                 .toString();
