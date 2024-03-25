@@ -22,7 +22,13 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>net.openhft</groupId>
+    <parent>
+        <groupId>net.openhft</groupId>
+        <artifactId>java-parent-pom</artifactId>
+        <version>1.25.4</version>
+        <relativePath />
+    </parent>
+
     <artifactId>chronicle-bytes-benchmarks</artifactId>
     <version>2.24ea-SNAPSHOT</version>
     <name>OpenHFT/Chronicle-Bytes/Benchmarks</name>
@@ -175,6 +181,9 @@
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>3.1.0</version>
+                        <configuration>
+                            <classpathScope>test</classpathScope>
+                        </configuration>
                         <executions>
                             <execution>
                                 <id>jmh</id>
@@ -183,14 +192,8 @@
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <classpathScope>test</classpathScope>
-                                    <executable>java</executable>
-                                    <arguments>
-                                        <argument>-classpath</argument>
-                                        <classpath/>
-                                        <argument>org.openjdk.jmh.Main</argument>
-                                        <argument>.*</argument>
-                                    </arguments>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath org.openjdk.jmh.Main .*</commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -200,14 +203,8 @@
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <classpathScope>test</classpathScope>
-                                    <executable>java</executable>
-                                    <arguments>
-                                        <argument>-classpath</argument>
-                                        <classpath/>
-                                        <argument>net.openhft.chronicle.bytes.microbenchmarks.AppendLongCoolerMain</argument>
-                                        <argument>.*</argument>
-                                    </arguments>
+                                    <executable>${java.home}/bin/java</executable>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.microbenchmarks.AppendLongCoolerMain .*</commandlineArgs>
                                 </configuration>
                             </execution>
                             <!-- TODO: BytesCoolerMain, GenParseMain -->
