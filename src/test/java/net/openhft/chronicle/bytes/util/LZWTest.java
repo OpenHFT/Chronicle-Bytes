@@ -40,7 +40,6 @@ public class LZWTest extends BytesTestCommon {
         assertArrayEquals(bytes, bytes2);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testCompressionRatio()
             throws IORuntimeException {

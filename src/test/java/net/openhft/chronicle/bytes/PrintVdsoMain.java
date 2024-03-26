@@ -22,7 +22,6 @@ import org.jetbrains.annotations.NotNull;
 import java.io.*;
 
 public class PrintVdsoMain {
-    @SuppressWarnings("rawtypes")
     public static void main(String[] args)
             throws IOException, IllegalStateException {
         long start = 0;

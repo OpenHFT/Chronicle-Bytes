@@ -354,12 +354,14 @@ public class NativeBytesStore<U>
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException {
         return memory.addLong(address + translate(offset), adding);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException {

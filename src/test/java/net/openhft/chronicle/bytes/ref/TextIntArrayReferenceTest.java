@@ -25,7 +25,6 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 public class TextIntArrayReferenceTest extends BytesTestCommon {
-    @SuppressWarnings("rawtypes")
     @Test
     public void getSetValues() {
         int length = 5 * 12 + 70;
