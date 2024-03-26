@@ -249,7 +249,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws BufferOverflowException     If the offset is out of bounds
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
-    @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapFloat(@NonNegative long offset, float expected, float value)
             throws BufferOverflowException, ClosedIllegalStateException {
@@ -259,7 +258,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
     /**
      * Similar to {@link #compareAndSwapFloat(long, float, float)} but operates on a double value.
      */
-    @SuppressWarnings("deprecation")
     @Override
     default boolean compareAndSwapDouble(@NonNegative long offset, double expected, double value)
             throws BufferOverflowException, ClosedIllegalStateException {

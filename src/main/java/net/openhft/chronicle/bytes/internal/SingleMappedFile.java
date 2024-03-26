@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.io.Closeable.closeQuietly;
  * A memory mapped files which can be randomly accessed in a single chunk. It has no overlapping region to
  * avoid wasting bytes at the end of file.
  */
-@SuppressWarnings({"rawtypes", "unchecked", "restriction"})
+@SuppressWarnings({"rawtypes", "restriction"})
 public class SingleMappedFile extends MappedFile {
     /**
      * The RandomAccessFile for this mapped file

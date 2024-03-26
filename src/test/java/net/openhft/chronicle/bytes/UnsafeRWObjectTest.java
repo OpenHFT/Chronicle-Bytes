@@ -38,11 +38,12 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
 
         BB bb1 = new BB(0L, 1L, 2L, 3L, 4L, 5L, 6L, 7L);
 
-        directElastic.unsafeWriteObject(bb1, 8 * 8);
+        int offset = BytesUtil.triviallyCopyableStart(((Object) bb1).getClass());
+        directElastic.unsafeWriteObject(bb1, offset, 8 * 8);
 
         BB bb2 = new BB(0L, 0L, 0L, 0L, 0L, 0L, 0L, 0L);
 
-        directElastic.unsafeReadObject(bb2, 8 * 8);
+        directElastic.unsafeReadObject(bb2, offset,8 * 8);
 
         assertEquals(bb1.l0, bb2.l0);
         assertEquals(bb1.l1, bb2.l1);
@@ -65,7 +66,8 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(AA.class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
         AA aa = new AA(1, 2, 3);
-        bytes.unsafeWriteObject(aa, 4 + 2 * 8);
+        int offset = BytesUtil.triviallyCopyableStart(((Object) aa).getClass());
+        bytes.unsafeWriteObject(aa, offset, 4 + 2 * 8);
         String expected = Jvm.isAzulZing() ?
                 "00000000 02 00 00 00 00 00 00 00  00 00 00 00 00 00 08 40 ········ ·······@\n" +
                         "00000010 01 00 00 00                                      ····             \n"
@@ -73,7 +75,7 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                 "00000010 00 00 08 40                                      ···@             \n";
         assertEquals(expected, bytes.toHexString());
         AA a2 = new AA(0, 0, 0);
-        bytes.unsafeReadObject(a2, 4 + 2 * 8);
+        bytes.unsafeReadObject(a2, offset, 4 + 2 * 8);
         assertEquals(aa.i, a2.i);
         assertEquals(aa.l, a2.l);
         assertEquals(aa.d, a2.d, 0.0);
@@ -140,11 +142,12 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(byte[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
         byte[] byteArray = "Hello World.".getBytes();
-        bytes.unsafeWriteObject(byteArray, byteArray.length);
+        int offset = BytesUtil.triviallyCopyableStart(((Object) byteArray).getClass());
+        bytes.unsafeWriteObject(byteArray, offset, byteArray.length);
         assertEquals("00000000 48 65 6c 6c 6f 20 57 6f  72 6c 64 2e             Hello Wo rld.    \n",
                 bytes.toHexString());
         byte[] byteArray2 = new byte[byteArray.length];
-        bytes.unsafeReadObject(byteArray2, byteArray.length);
+        bytes.unsafeReadObject(byteArray2, offset, byteArray.length);
         assertArrayEquals(byteArray, byteArray2);
 
         assertEquals("Hello World.", new String(byteArray2));
@@ -160,11 +163,13 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
                         BytesUtil.triviallyCopyableRange(int[].class)));
         Bytes<?> bytes = Bytes.allocateDirect(32);
         int[] array = new int[]{1, 2, 4, 3};
-        bytes.unsafeWriteObject(array, 4 * 4);
+        int offset = BytesUtil.triviallyCopyableStart(((Object) array).getClass());
+        bytes.unsafeWriteObject(array, offset, 4 * 4);
         assertEquals("00000000 01 00 00 00 02 00 00 00  04 00 00 00 03 00 00 00 ········ ········\n",
                 bytes.toHexString());
         int[] array2 = new int[array.length];
-        bytes.unsafeReadObject(array2, 4 * 4);
+        int offset2 = BytesUtil.triviallyCopyableStart(((Object) array2).getClass());
+        bytes.unsafeReadObject(array2, offset2, 4 * 4);
         assertArrayEquals(array, array2);
         bytes.releaseLast();
 

@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.util.Annotations;
 
 import java.lang.reflect.Method;
 import java.nio.BufferOverflowException;
