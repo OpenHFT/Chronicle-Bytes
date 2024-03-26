@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
+import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
