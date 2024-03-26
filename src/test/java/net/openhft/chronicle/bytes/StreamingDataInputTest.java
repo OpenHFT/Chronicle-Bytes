@@ -67,9 +67,10 @@ public class StreamingDataInputTest extends BytesTestCommon {
     public void roundTripWorksOnHeap() {
         Bytes<?> b = allocator.elasticBytes(32);
         TestObject source = new TestObject(123L, 123, false);
-        b.unsafeWriteObject(source, 13);
+        int offset = BytesUtil.triviallyCopyableStart(source.getClass());
+        b.unsafeWriteObject(source, offset, 13);
         TestObject dest = new TestObject();
-        b.unsafeReadObject(dest, 13);
+        b.unsafeReadObject(dest, offset, 13);
         assertEquals(source, dest);
         b.releaseLast();
     }

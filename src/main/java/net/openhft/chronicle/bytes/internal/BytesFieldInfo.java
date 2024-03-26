@@ -63,6 +63,7 @@ public class BytesFieldInfo {
      *
      * @param aClass the class to analyze
      */
+    @SuppressWarnings("deprecation")
     BytesFieldInfo(Class<?> aClass) {
         this.aClass = aClass;
         List<Field> fields = fields(aClass);

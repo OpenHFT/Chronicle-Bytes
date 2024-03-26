@@ -24,7 +24,6 @@ import static org.junit.Assert.fail;
 
 public class AppendableUtilTest extends BytesTestCommon {
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void setLength() {
         StringBuilder sb = new StringBuilder("hello world");
@@ -45,7 +44,6 @@ public class AppendableUtilTest extends BytesTestCommon {
         b.releaseLast();
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void setCharAt() {
         StringBuilder sb = new StringBuilder("hello world");

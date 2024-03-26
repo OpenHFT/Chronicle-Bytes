@@ -18,7 +18,7 @@
 package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Maths;
-import net.openhft.chronicle.core.io.UnsafeText;
+import net.openhft.chronicle.bytes.internal.UnsafeText;
 import org.junit.Test;
 
 import java.util.Random;

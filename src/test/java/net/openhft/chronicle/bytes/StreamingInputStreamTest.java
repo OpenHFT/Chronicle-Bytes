@@ -28,7 +28,6 @@ import static java.nio.charset.StandardCharsets.ISO_8859_1;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings("rawtypes")
 public class StreamingInputStreamTest extends BytesTestCommon {
 
     // https://github.com/OpenHFT/Chronicle-Bytes/issues/48
