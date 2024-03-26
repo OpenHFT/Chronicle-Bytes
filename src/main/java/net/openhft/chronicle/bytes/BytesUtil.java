@@ -136,7 +136,11 @@ public enum BytesUtil {
         int max = 0;
         for (Field field : fields) {
             final FieldGroup fieldGroup = Jvm.findAnnotation(field, FieldGroup.class);
-            if (fieldGroup != null && FieldGroup.HEADER.equals(fieldGroup.value()))
+
+            @SuppressWarnings("deprecation")
+            String header = FieldGroup.HEADER;
+
+            if (fieldGroup != null && header.equals(fieldGroup.value()))
                 continue;
             int start = (int) MEMORY.objectFieldOffset(field);
             int size = sizeOf(field.getType());

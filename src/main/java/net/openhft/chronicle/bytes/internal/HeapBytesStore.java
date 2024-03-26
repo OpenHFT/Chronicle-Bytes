@@ -64,7 +64,6 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(@Nullable byte[] byteArray) {
         super(false);
-        //noinspection unchecked
         this.underlyingObject = (U) byteArray;
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
@@ -507,6 +506,7 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public HeapBytesStore<U> write(@NonNegative final long offsetInRDO,
@@ -527,6 +527,7 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void write(
             @NonNegative long offsetInRDO, @NotNull ByteBuffer bytes, @NonNegative int offset, @NonNegative int length)

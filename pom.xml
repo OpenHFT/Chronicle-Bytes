@@ -18,14 +18,15 @@
     limitations under the License.
 
 -->
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <parent>
         <groupId>net.openhft</groupId>
         <artifactId>java-parent-pom</artifactId>
         <version>1.25.4</version>
-        <relativePath />
+        <relativePath/>
     </parent>
 
     <artifactId>chronicle-bytes</artifactId>
@@ -36,7 +37,7 @@
 
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
-        <compiler.argument>-Xlint:deprecation</compiler.argument>
+        <compiler.argument>-Xlint:deprecation,-options</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <!-- The parent POM defines this plugin and activates it in a profile. Unfortunately this plugin will generate
@@ -242,11 +243,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <compilerArgument>-Xlint:deprecation</compilerArgument>
-                    <source>1.8</source>
-                    <target>1.8</target>
+                    <compilerArgument>-Xlint:deprecation,-options</compilerArgument>
+                    <source>8</source>
+                    <target>8</target>
                     <encoding>UTF-8</encoding>
-                    <!--                    <verbose>true</verbose>-->
+                    <failOnWarning>true</failOnWarning>
                 </configuration>
             </plugin>
             <!--
@@ -406,6 +407,15 @@
 
     <profiles>
         <profile>
+            <id>java9-release8</id>
+            <activation>
+                <jdk>[9,)</jdk>
+            </activation>
+            <properties>
+                <maven.compiler.release>8</maven.compiler.release>
+            </properties>
+        </profile>
+        <profile>
             <id>assertions</id>
             <properties>
                 <zero.cost.assertions>enabled</zero.cost.assertions>
@@ -494,7 +504,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.NativeBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -505,7 +517,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.OnHeapBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -516,7 +530,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ChunkedMappedBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -527,7 +543,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.SingleMappedBytesReadWriteJLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -538,7 +556,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual2JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -549,7 +569,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual20JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -560,7 +582,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual128JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                             <execution>
@@ -571,7 +595,9 @@
                                 </goals>
                                 <configuration>
                                     <executable>${java.home}/bin/java</executable>
-                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH</commandlineArgs>
+                                    <commandlineArgs>${jvm.requiredArgs} -Djvm.resource.tracing=false -classpath
+                                        %classpath net.openhft.chronicle.bytes.perf.ContentEqual8192JLBH
+                                    </commandlineArgs>
                                 </configuration>
                             </execution>
                         </executions>

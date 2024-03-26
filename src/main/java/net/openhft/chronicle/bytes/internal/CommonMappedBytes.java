@@ -41,7 +41,6 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"unchecked"})
 public abstract class CommonMappedBytes extends MappedBytes {
     private final AbstractCloseable closeable = new AbstractCloseable() {
         @Override

@@ -42,7 +42,6 @@ public class GzipTest extends BytesTestCommon {
         assertArrayEquals(bytes, bytes2);
     }
 
-    @SuppressWarnings("rawtypes")
     @Test
     public void testCompressionRatio()
             throws IORuntimeException {

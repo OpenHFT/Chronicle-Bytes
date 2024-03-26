@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.internal.NativeBytesStore;
 import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
+import net.openhft.chronicle.bytes.internal.Unmapper;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
@@ -91,7 +92,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      */
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
-        super(address, start + capacity, new OS.Unmapper(address, capacity, pageSize), false);
+        super(address, start + capacity, new Unmapper(address, capacity, pageSize), false);
         this.mappedFile = mappedFile;
         this.start = start;
         this.safeLimit = start + safeCapacity;
