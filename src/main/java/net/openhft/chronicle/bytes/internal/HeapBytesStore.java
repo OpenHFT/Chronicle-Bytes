@@ -660,9 +660,6 @@ public class HeapBytesStore<U>
         return super.equals(obj);
     }
 
-    @Deprecated(/* to be removed in x.26 */)
-    static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
-
     @Override
     public long appendAndReturnLength(final long writePosition, boolean negative, long mantissa, int exponent, boolean append0) {
         long start = writePosition;

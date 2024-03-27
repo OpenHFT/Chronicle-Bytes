@@ -274,7 +274,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default int addAndGetInt(@NonNegative long offset, int adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetInt(this, offset, adding);
@@ -284,7 +283,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a long value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default long addAndGetLong(@NonNegative long offset, long adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetLong(this, offset, adding);
@@ -294,7 +292,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a float value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default float addAndGetFloat(@NonNegative long offset, float adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetFloat(this, offset, adding);
@@ -304,7 +301,6 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * Similar to {@link #addAndGetInt(long, int)} but operates on a double value.
      */
     @SuppressWarnings("deprecation")
-    @Override
     default double addAndGetDouble(@NonNegative long offset, double adding)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.addAndGetDouble(this, offset, adding);
