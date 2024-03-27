@@ -139,21 +139,6 @@ public class NativeBytes<U>
     }
 
     /**
-     * Creates a new copy of the provided Bytes. This method is deprecated and will be removed in version x.26.
-     *
-     * @param bytes The Bytes to copy.
-     * @return A new instance of BytesStore with the copied Bytes.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
-     * @deprecated This method is to be removed in version x.26.
-     */
-    @Deprecated(/* to be removed in x.26 */)
-    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
-            throws ClosedIllegalStateException {
-        return BytesUtil.copyOf(bytes);
-    }
-
-    /**
      * Adjusts the provided size to align with the operating system's page size.
      *
      * @param size The original size.
