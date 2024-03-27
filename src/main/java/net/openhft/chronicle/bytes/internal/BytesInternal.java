@@ -2207,7 +2207,7 @@ enum BytesInternal {
      */
     @Deprecated(/* To be removed in x.26 */)
     public static StringBuilder acquireStringBuilder() {
-        return SBP.acquireStringBuilder();
+        return new StringBuilder();
     }
 
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
