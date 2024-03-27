@@ -236,19 +236,6 @@
                 </configuration>
             </plugin>
 
-            <!-- used to allow getClass().getPackage().getImplementationVersion() -->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgument>-Xlint:deprecation,-options</compilerArgument>
-                    <source>8</source>
-                    <target>8</target>
-                    <encoding>UTF-8</encoding>
-                    <failOnWarning>true</failOnWarning>
-                </configuration>
-            </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
