@@ -18,7 +18,6 @@
 package net.openhft.chronicle.bytes.internal;
 
 import net.openhft.chronicle.bytes.*;
-import net.openhft.chronicle.bytes.pool.BytesPool;
 import net.openhft.chronicle.bytes.util.DecoratedBufferOverflowException;
 import net.openhft.chronicle.bytes.util.DecoratedBufferUnderflowException;
 import net.openhft.chronicle.bytes.util.StringInternerBytes;
@@ -96,11 +95,7 @@ enum BytesInternal {
     private static final String WAS = " was ";
     private static final String CAN_T_PARSE_FLEXIBLE_LONG_WITHOUT_PRECISION_LOSS = "Can't parse flexible long without precision loss: ";
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
-    @Deprecated(/* To be removed in x.26 */)
-    private static final StringBuilderPool SBP = new StringBuilderPool();
     private static final ScopedResourcePool<StringBuilder> STRING_BUILDER_SCOPED_RESOURCE_POOL = StringBuilderPool.createThreadLocal();
-    @Deprecated(/* To be removed in x.26 */)
-    private static final BytesPool BP = new BytesPool();
     private static final byte[] INFINITY_BYTES = INFINITY.getBytes(ISO_8859_1);
     private static final byte[] NAN_BYTES = NAN.getBytes(ISO_8859_1);
     private static final long MAX_VALUE_DIVIDE_5 = Long.MAX_VALUE / 5;
@@ -2202,24 +2197,8 @@ enum BytesInternal {
         }
     }
 
-    /**
-     * @deprecated Use {@link #acquireStringBuilderScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public static StringBuilder acquireStringBuilder() {
-        return new StringBuilder();
-    }
-
     public static ScopedResource<StringBuilder> acquireStringBuilderScoped() {
         return STRING_BUILDER_SCOPED_RESOURCE_POOL.get();
-    }
-
-    /**
-     * @deprecated Use {@link #acquireBytesScoped()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public static Bytes<?> acquireBytes() {
-        return BP.acquireBytes();
     }
 
     /**

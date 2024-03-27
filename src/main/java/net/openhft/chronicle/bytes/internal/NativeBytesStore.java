@@ -213,28 +213,12 @@ public class NativeBytesStore<U>
         return limit >= length;
     }
 
-    /**
-     * @deprecated use {@link #follow(ByteBuffer)} instead.
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void init(@NotNull ByteBuffer bb, boolean elastic) {
+    private void init(@NotNull ByteBuffer bb, boolean elastic) {
         this.elastic = elastic;
         underlyingObject = (U) bb;
         bb.order(ByteOrder.nativeOrder());
         setAddress(Jvm.address(bb));
         this.limit = bb.capacity();
-    }
-
-    /**
-     * @deprecated use {@link #follow(ByteBuffer)} instead.
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public void uninit() {
-        underlyingObject = null;
-        address = 0;
-        limit = 0;
-        maximumLimit = 0;
-        cleaner = null;
     }
 
     @Override
@@ -352,20 +336,6 @@ public class NativeBytesStore<U>
     public boolean compareAndSwapLong(@NonNegative long offset, long expected, long value)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return memory.compareAndSwapLong(address + translate(offset), expected, value);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public long addAndGetLong(@NonNegative long offset, long adding)
-            throws BufferUnderflowException {
-        return memory.addLong(address + translate(offset), adding);
-    }
-
-    @SuppressWarnings("deprecation")
-    @Override
-    public int addAndGetInt(@NonNegative long offset, int adding)
-            throws BufferUnderflowException {
-        return memory.addInt(address + translate(offset), adding);
     }
 
     public long translate(@NonNegative long offset) {

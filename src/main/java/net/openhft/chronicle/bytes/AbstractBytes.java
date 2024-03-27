@@ -17,10 +17,8 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HasUncheckedRandomDataInput;
-import net.openhft.chronicle.bytes.internal.ReferenceCountedUtil;
-import net.openhft.chronicle.bytes.internal.UncheckedRandomDataInput;
+import net.openhft.chronicle.bytes.internal.UnsafeText;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
 import net.openhft.chronicle.bytes.render.Decimaliser;
@@ -32,7 +30,6 @@ import net.openhft.chronicle.core.Maths;
 import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.UsedViaReflection;
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.core.io.*;
 import net.openhft.chronicle.core.scoped.ScopedResource;
 import org.jetbrains.annotations.NotNull;
@@ -61,12 +58,6 @@ public abstract class AbstractBytes<U>
         DecimalAppender {
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
-    // if you need to reserve the behaviour of append(double) in x.23
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean X_23_APPEND_DOUBLE = Jvm.getBoolean("x.23.append.double", false);
-    @Deprecated(/* to be removed in x.26 */)
-    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
-
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
     // used for debugging
     @UsedViaReflection
@@ -82,7 +73,7 @@ public abstract class AbstractBytes<U>
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    private boolean append0 = APPEND_0;
+    private boolean append0 = Jvm.getBoolean("bytes.append.0", true);
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
@@ -278,9 +269,6 @@ public abstract class AbstractBytes<U>
     @Override
     public @NotNull AbstractBytes<U> append(double d)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
-        if (X_23_APPEND_DOUBLE) {
-            return appendX23(d);
-        }
         if (!decimaliser().toDecimal(d, this))
             append8bit(Double.toString(d));
         return this;
