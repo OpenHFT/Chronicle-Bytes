@@ -689,27 +689,6 @@ public enum BytesUtil {
     }
 
     /**
-     * Rounds up a double value to the nearest multiple of a specified factor.
-     *
-     * @param d      The value to round up.
-     * @param factor The factor.
-     * @return The rounded value.
-     */
-    @Deprecated(/* to be removed in x.26 */)
-    public static long roundNup(double d, long factor) {
-        boolean neg = d < 0;
-        d = Math.abs(d);
-        final double df = d * factor;
-        long ldf = (long) df;
-        final double residual = df - ldf + Math.ulp(d) * (factor * 0.983);
-        if (residual >= 0.5)
-            ldf++;
-        if (neg)
-            ldf = -ldf;
-        return ldf;
-    }
-
-    /**
      * Pads an offset to align it to the nearest multiple of 4.
      *
      * @param from The original offset.

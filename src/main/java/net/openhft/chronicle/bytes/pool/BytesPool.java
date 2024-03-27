@@ -38,10 +38,6 @@ public final class BytesPool {
 
     private static final int DEFAULT_BYTES_POOL_SIZE_PER_THREAD = Jvm.getInteger("chronicle.bytesPool.instancesPerThread", 4);
 
-    @Deprecated(/* To be removed in x.26 */)
-    public BytesPool() {
-    }
-
     /**
      * Create a scoped-thread-local pool of bytes resources
      *
@@ -68,30 +64,6 @@ public final class BytesPool {
      * Thread-local variable that holds the {@link Bytes} instance for each thread.
      */
     final ThreadLocal<Bytes<?>> bytesTL = new ThreadLocal<>();
-
-    /**
-     * Acquires a {@link Bytes} instance from the thread-local pool. If the pool does not
-     * contain a {@link Bytes} instance for the current thread, a new one is created and
-     * added to the pool.
-     *
-     * @return A {@link Bytes} instance.
-     * @deprecated Use {@link BytesPool#createThreadLocal()} and {@link ScopedResourcePool#get()} instead
-     */
-    @Deprecated(/* To be removed in x.26 */)
-    public Bytes<?> acquireBytes() {
-        Bytes<?> bytes = bytesTL.get();
-        if (bytes != null) {
-            try {
-                return bytes.clear();
-            } catch (IllegalStateException e) {
-                // ignored
-            }
-        } else {
-            bytes = createBytes();
-            bytesTL.set(bytes);
-        }
-        return bytes;
-    }
 
     /**
      * Creates a new {@link Bytes} instance.
