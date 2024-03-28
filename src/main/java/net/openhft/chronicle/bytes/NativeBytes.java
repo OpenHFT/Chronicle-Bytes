@@ -29,6 +29,7 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.nio.Buffer;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
@@ -324,7 +325,8 @@ public class NativeBytes<U>
 
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
-            byteBuffer.position(0);
+            //noinspection RedundantCast
+            ((Buffer) byteBuffer).position(0);
             byteBuffer.limit(byteBuffer.capacity());
             byteBuffer.position(position);
         }
