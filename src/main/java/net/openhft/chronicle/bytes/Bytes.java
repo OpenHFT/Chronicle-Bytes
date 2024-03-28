@@ -605,7 +605,7 @@ public interface Bytes<U> extends
      * and constructs a string from these bytes.</p>
      *
      * <p>This method supports all characters in the Basic Latin Unicode block, but does not handle the
-     * upper half of ISO-8859-1. For strings using the upper block of ISO-8859-1, use {@link #to8bitString(BytesStore)}</p>
+     * upper half of ISO-8859-1. For strings using the upper block of ISO-8859-1, use {@link #to8bitString()}</p>
      *
      * @param buffer   The buffer to extract the string from. Must not be {@code null}.
      * @param position The position in the buffer to start extracting the string from.

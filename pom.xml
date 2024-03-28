@@ -37,7 +37,6 @@
 
     <properties>
         <zero.cost.assertions>disabled</zero.cost.assertions>
-        <compiler.argument>-Xlint:deprecation,-options</compiler.argument>
         <sonar.organization>openhft</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
     </properties>
@@ -47,7 +46,7 @@
             <dependency>
                 <groupId>net.openhft</groupId>
                 <artifactId>third-party-bom</artifactId>
-                <version>3.25.2</version>
+                <version>3.26.0-SNAPSHOT</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -231,19 +230,6 @@
                 </configuration>
             </plugin>
 
-            <!-- used to allow getClass().getPackage().getImplementationVersion() -->
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <compilerArgument>-Xlint:deprecation,-options</compilerArgument>
-                    <source>8</source>
-                    <target>8</target>
-                    <encoding>UTF-8</encoding>
-                    <failOnWarning>true</failOnWarning>
-                </configuration>
-            </plugin>
             <!--
                 generate maven dependencies versions file that can be used later
                 to install the right bundle in test phase.
