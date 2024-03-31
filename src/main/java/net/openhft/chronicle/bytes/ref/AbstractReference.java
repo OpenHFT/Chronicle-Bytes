@@ -61,6 +61,7 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     /**
      * Constructor initializes the reference assuming thread safety.
      */
+    @SuppressWarnings("this-escape")
     protected AbstractReference() {
         // assume thread safe.
         singleThreadedCheckDisabled(true);

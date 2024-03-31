@@ -234,7 +234,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return an instance of an empty BytesStore
      */
-    static BytesStore empty() {
+    static <B extends BytesStore<B, T>, T> BytesStore<B, T> empty() {
         return NoBytesStore.NO_BYTES_STORE;
     }
 

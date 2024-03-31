@@ -70,7 +70,7 @@ import static net.openhft.chronicle.core.util.StringUtils.*;
  * Utility methods to support common functionality in this package. This is not intended to be
  * accessed directly.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public
 enum BytesInternal {
 
@@ -253,6 +253,7 @@ enum BytesInternal {
         }
     }
 
+    @SuppressWarnings("unchecked")
     // Optimise for the common case where the length is 31-bit.
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualInt(@NotNull final BytesStore<?, ?> a,
@@ -339,6 +340,7 @@ enum BytesInternal {
         return true;
     }
 
+    @SuppressWarnings("unchecked")
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean contentEqualsLong(@NotNull final BytesStore a,
                               @NotNull final BytesStore b) {
@@ -2208,6 +2210,7 @@ enum BytesInternal {
         return BYTES_SCOPED_THREAD_LOCAL.get();
     }
 
+    @SuppressWarnings("unchecked")
     @Nullable
     public static String read8bit(@NotNull StreamingDataInput in)
             throws BufferUnderflowException, IORuntimeException, ArithmeticException, ClosedIllegalStateException {
@@ -3161,6 +3164,7 @@ enum BytesInternal {
         b.write(dateCache.lastDateStr);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
     public static <E extends Enum<E>, S extends StreamingDataInput<S>> E readEnum(@NotNull StreamingDataInput input, @NotNull Class<E> eClass)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, ClosedIllegalStateException, ArithmeticException {
@@ -3423,5 +3427,10 @@ enum BytesInternal {
         }
 
         return bytesStore;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> T uncheckedCast(Object o) {
+        return (T) o;
     }
 }

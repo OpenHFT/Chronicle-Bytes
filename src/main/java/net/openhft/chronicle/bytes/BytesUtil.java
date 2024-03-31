@@ -44,6 +44,7 @@ import java.nio.ByteOrder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static net.openhft.chronicle.core.io.IOTools.*;
 
@@ -544,8 +545,9 @@ public enum BytesUtil {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
     public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) throws InvalidMarshallableException {
-        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
-                .readMarshallable(marshallable, bytes);
+        BytesMarshaller<?> bytesMarshaller = uncheckedCast(
+                BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass()));
+        bytesMarshaller.readMarshallable(marshallable, bytes);
     }
 
     /**
@@ -562,8 +564,9 @@ public enum BytesUtil {
      */
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
-        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
-                .writeMarshallable(marshallable, bytes);
+        BytesMarshaller<?> bytesMarshaller = uncheckedCast(
+                BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass()));
+        bytesMarshaller.writeMarshallable(marshallable, bytes);
     }
 
     /**

@@ -41,6 +41,7 @@ import java.nio.BufferOverflowException;
  * @see BufferOverflowException
  * @see IllegalStateException
  */
+@SuppressWarnings("unchecked")
 public interface BytesPrepender<B extends BytesPrepender<B>> {
 
     /**

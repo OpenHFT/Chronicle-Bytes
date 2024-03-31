@@ -76,6 +76,7 @@ public class SingleMappedFile extends MappedFile {
      * @param readOnly if the file is read-only.
      * @throws IORuntimeException if any I/O error occurs.
      */
+    @SuppressWarnings("this-escape")
     public SingleMappedFile(@NotNull final File file,
                             @NotNull final RandomAccessFile raf,
                             @NonNegative final long capacity,
@@ -152,7 +153,7 @@ public class SingleMappedFile extends MappedFile {
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore,
+            BytesStore<?,?> oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IllegalArgumentException, ClosedIllegalStateException, ThreadingIllegalStateException {
 
@@ -162,6 +163,7 @@ public class SingleMappedFile extends MappedFile {
         return store;
     }
 
+    @SuppressWarnings("try")
     private void resizeRafIfTooSmall(@NonNegative final long minSize)
             throws IOException {
         Jvm.safepoint();

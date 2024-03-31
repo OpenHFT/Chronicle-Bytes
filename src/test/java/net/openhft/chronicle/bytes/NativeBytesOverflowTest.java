@@ -41,7 +41,7 @@ public class NativeBytesOverflowTest extends BytesTestCommon {
 
     @Test(expected = BufferOverflowException.class)
     public void testExceedWriteLimitGuardedBytes() {
-        Bytes<?> guardedNativeBytes = new GuardedNativeBytes(wrap(ByteBuffer.allocate(128)), 128);
+        Bytes<?> guardedNativeBytes = new GuardedNativeBytes<>(wrap(ByteBuffer.allocate(128)), 128);
         try {
             guardedNativeBytes.writeLimit(2).writePosition(0);
             guardedNativeBytes.writeLong(10L);

@@ -37,6 +37,7 @@ import java.util.Collection;
 import java.util.function.ObjLongConsumer;
 
 import static net.openhft.chronicle.bytes.Bytes.elasticByteBuffer;
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -266,13 +267,13 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 
     @Test
     public void copy() {
-        final BytesStore<?, Void> copy = instance.copy();
+        final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
         assertEquals(instance, copy);
     }
 
     @Test
     public void bytesForRead() {
-        final Bytes<Void> bytes = instance.bytesForRead();
+        final Bytes<Void> bytes = uncheckedCast(instance.bytesForRead());
         try {
             assertEquals(0, bytes.capacity());
             assertEquals(0, bytes.readPosition());

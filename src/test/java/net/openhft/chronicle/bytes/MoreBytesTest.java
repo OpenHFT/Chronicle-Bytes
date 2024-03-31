@@ -291,6 +291,7 @@ public class MoreBytesTest extends BytesTestCommon {
         }
     }
 
+    @SuppressWarnings({"rawtypes"})
     @Test
     public void testReadWithLength()
             throws BufferUnderflowException, IllegalStateException {
