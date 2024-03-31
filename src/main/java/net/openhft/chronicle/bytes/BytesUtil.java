@@ -544,10 +544,10 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @SuppressWarnings("unchecked")
     public static void readMarshallable(@NotNull ReadBytesMarshallable marshallable, BytesIn<?> bytes) throws InvalidMarshallableException {
-        BytesMarshaller<?> bytesMarshaller = uncheckedCast(
-                BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass()));
-        bytesMarshaller.readMarshallable(marshallable, bytes);
+        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
+                .readMarshallable(marshallable, bytes);
     }
 
     /**
@@ -562,11 +562,11 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
+    @SuppressWarnings("unchecked")
     public static void writeMarshallable(@NotNull WriteBytesMarshallable marshallable, BytesOut<?> bytes)
             throws IllegalStateException, BufferOverflowException, ArithmeticException, BufferUnderflowException, InvalidMarshallableException {
-        BytesMarshaller<?> bytesMarshaller = uncheckedCast(
-                BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass()));
-        bytesMarshaller.writeMarshallable(marshallable, bytes);
+        BytesMarshaller.BYTES_MARSHALLER_CL.get(marshallable.getClass())
+                .writeMarshallable(marshallable, bytes);
     }
 
     /**
