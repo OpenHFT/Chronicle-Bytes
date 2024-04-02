@@ -708,7 +708,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public void readWithLength(@NonNegative long length, @NotNull BytesOut<Void> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
+    public void readWithLength(@NonNegative long length, @NotNull BytesOut<?> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
         base.readWithLength(length, bytesOut);
     }
 

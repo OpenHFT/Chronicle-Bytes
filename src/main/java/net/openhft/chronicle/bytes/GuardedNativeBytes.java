@@ -67,7 +67,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     @Override
     public BytesOut<U> writeHexDumpDescription(CharSequence comment) throws IllegalStateException {
         if (bytesStore instanceof HexDumpBytesDescription)
-            ((HexDumpBytesDescription) bytesStore).writeHexDumpDescription(comment);
+            ((HexDumpBytesDescription<?>) bytesStore).writeHexDumpDescription(comment);
         return this;
     }
 

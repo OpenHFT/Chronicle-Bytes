@@ -19,6 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.UnsafeMemory;
 import net.openhft.chronicle.core.io.IORuntimeException;
 import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
@@ -99,7 +100,7 @@ public class StructTest extends BytesTestCommon {
         protected S copy(S s) {
             if (self == null || s.address != this.address) {
                 allocateAndInitialise();
-                MEMORY.copyMemory(s.address, this.address, size);
+                UnsafeMemory.copyMemory(s.address, this.address, size);
             }
             return uncheckedCast(this);
         }

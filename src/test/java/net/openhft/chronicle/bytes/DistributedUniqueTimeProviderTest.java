@@ -29,8 +29,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.stream.IntStream;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
@@ -43,6 +42,7 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
         deleteIfPossible(file);
         file.deleteOnExit();
         try (FileOutputStream fos = new FileOutputStream(file)) {
+            assertNotNull(fos); // avoid warning
         }
     }
 

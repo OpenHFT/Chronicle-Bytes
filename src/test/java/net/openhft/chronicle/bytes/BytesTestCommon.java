@@ -47,6 +47,7 @@ public class BytesTestCommon {
     protected Map<ExceptionKey, Integer> exceptions;
     protected boolean finishedNormally;
 
+    @SuppressWarnings("this-escape")
     public BytesTestCommon() {
         // Allocation of 0 chunk in D:\BuildAgent\work\9605994e6a194885\single-mapped-file21723892241386086929bin took 0.509 ms.
         ignoreException("Allocation of ");

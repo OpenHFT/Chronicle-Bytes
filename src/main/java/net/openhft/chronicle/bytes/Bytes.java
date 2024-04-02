@@ -1215,7 +1215,7 @@ public interface Bytes<U> extends
      * @throws IllegalArgumentException    If the specified {@code length} is negative.
      * @throws NullPointerException        If the provided {@code bytesOut} is null.
      */
-    default void readWithLength(@NonNegative long length, @NotNull BytesOut<U> bytesOut)
+    default void readWithLength(@NonNegative long length, @NotNull BytesOut<?> bytesOut)
             throws BufferUnderflowException, IORuntimeException, BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNegative(length);
         if (length > readRemaining())

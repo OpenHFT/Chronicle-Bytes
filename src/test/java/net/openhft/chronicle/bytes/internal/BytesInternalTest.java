@@ -30,8 +30,8 @@ import java.util.Collection;
 
 @RunWith(Parameterized.class)
 public class BytesInternalTest extends BytesTestCommon {
-    private final Bytes a;
-    private final Bytes b;
+    private final Bytes<?> a;
+    private final Bytes<?> b;
 
     @Parameterized.Parameters
     public static Collection<Object[]> data() {
@@ -46,7 +46,7 @@ public class BytesInternalTest extends BytesTestCommon {
         });
     }
 
-    public BytesInternalTest(Bytes left, Bytes right) {
+    public BytesInternalTest(Bytes<?> left, Bytes<?> right) {
         this.a = left;
         this.b = right;
     }

@@ -44,9 +44,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @RunWith(Parameterized.class)
 public class EmptyBytesStoreTest extends BytesTestCommon {
 
-    private final BytesStore instance;
+    private final BytesStore<?, ?> instance;
 
-    public EmptyBytesStoreTest(String type, BytesStore instance) {
+    public EmptyBytesStoreTest(String type, BytesStore<?,?> instance) {
         this.instance = instance;
     }
 
@@ -439,7 +439,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     @Test
     public void bytesForWrite() {
         try {
-            final Bytes bytes = instance.bytesForWrite();
+            final Bytes<?> bytes = instance.bytesForWrite();
             IOTools.unmonitor(bytes);
             assertThrowsBufferException(() -> bytes.writeSkip(1));
         } catch (UnsupportedOperationException ignored) {
@@ -508,7 +508,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
 //        assertThrows(BufferOverflowException.class, () -> INSTANCE.zeroOut(1, 2));
     }
 
-    public void read(final ObjLongConsumer<BytesStore> getter) {
+    public void read(final ObjLongConsumer<BytesStore<?,?>> getter) {
         assumeFalse(instance instanceof NativeBytesStore);
         assertThrowsBufferException(() -> getter.accept(instance, 0));
         assertThrows(IllegalArgumentException.class, () -> getter.accept(instance, -1));

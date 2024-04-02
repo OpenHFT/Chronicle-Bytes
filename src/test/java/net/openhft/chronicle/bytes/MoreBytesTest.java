@@ -46,7 +46,7 @@ public class MoreBytesTest extends BytesTestCommon {
     @Test
     public void testOneRelease() {
         int count = 0;
-        for (Bytes<?> b : new Bytes[]{
+        Bytes<?>[] bytesArray = {
                 Bytes.allocateDirect(10),
                 Bytes.allocateDirect(new byte[5]),
                 Bytes.allocateElasticDirect(100),
@@ -59,7 +59,8 @@ public class MoreBytesTest extends BytesTestCommon {
                 Bytes.elasticHeapByteBuffer(1),
                 Bytes.allocateElasticOnHeap(),
                 Bytes.allocateElasticOnHeap(1)
-        }) {
+        };
+        for (Bytes<?> b : bytesArray) {
             try {
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.refCount());
                 assertEquals(count + ": " + b.getClass().getSimpleName(), 1, b.bytesStore().refCount());
@@ -298,8 +299,7 @@ public class MoreBytesTest extends BytesTestCommon {
         final Bytes<?> b = Bytes.from("Hello World");
         final Bytes<ByteBuffer> bytesOut = Bytes.elasticByteBuffer();
         try {
-            // Todo: Why is this cast needed?
-            b.readWithLength(2, (Bytes) bytesOut);
+            b.readWithLength(2, bytesOut);
             assertEquals("He", bytesOut.toString());
         } finally {
             b.releaseLast();

@@ -166,7 +166,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharTester);
         else
-            BytesInternal.parse8bit(this, (Bytes) buffer, stopCharTester);
+            BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharTester);
     }
 
     /**
@@ -201,7 +201,7 @@ public interface ByteStringParser<B extends ByteStringParser<B>> extends Streami
         if (buffer instanceof StringBuilder)
             BytesInternal.parse8bit(this, (StringBuilder) buffer, stopCharsTester);
         else
-            BytesInternal.parse8bit(this, (Bytes) buffer, stopCharsTester);
+            BytesInternal.parse8bit(this, (Bytes<?>) buffer, stopCharsTester);
     }
 
     /**
