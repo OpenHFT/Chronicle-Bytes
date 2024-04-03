@@ -122,10 +122,10 @@ class ReentrantFileLockTest extends BytesTestCommon {
             final ReentrantFileLock lock = acquireLock(useTryLock, fileToLock, channel);
             final AtomicLong spawnedThreadId = new AtomicLong();
             Executors.newSingleThreadExecutor().submit(() -> {
-                spawnedThreadId.set(Thread.currentThread().getId());
+                spawnedThreadId.set(Jvm.currentThreadId());
                 assertTrue(lock.isValid());
             }).get();
-            expectException("You're accessing a ReentrantFileLock created by thread " + Thread.currentThread().getId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
+            expectException("You're accessing a ReentrantFileLock created by thread " + Jvm.currentThreadId() + " on thread " + spawnedThreadId.get() + " this can have unexpected results, don't do it.");
         }
     }
 
