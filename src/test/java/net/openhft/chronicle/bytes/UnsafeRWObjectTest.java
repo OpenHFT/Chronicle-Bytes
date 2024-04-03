@@ -208,6 +208,11 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
             BB bb = (BB) o;
             return l0 == bb.l0 && l1 == bb.l1 && l2 == bb.l2 && l3 == bb.l3 && l4 == bb.l4 && l5 == bb.l5 && l6 == bb.l6 && l7 == bb.l7;
         }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
+        }
     }
 
     static class DD {
@@ -230,6 +235,11 @@ public class UnsafeRWObjectTest extends BytesTestCommon {
             if (o == null || getClass() != o.getClass()) return false;
             DD dd = (DD) o;
             return Double.compare(l0, dd.l0) == 0 && Double.compare(l1, dd.l1) == 0 && Double.compare(l2, dd.l2) == 0 && Double.compare(l3, dd.l3) == 0 && Double.compare(l4, dd.l4) == 0 && Double.compare(l5, dd.l5) == 0 && Double.compare(l6, dd.l6) == 0 && Double.compare(l7, dd.l7) == 0;
+        }
+
+        @Override
+        public int hashCode() {
+            throw new UnsupportedOperationException();
         }
     }
 }

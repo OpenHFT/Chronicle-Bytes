@@ -47,7 +47,7 @@ public class BytesTextMethodTesterTest extends BytesTestCommon {
 
     protected void btmttTest(String input, String output)
             throws IOException {
-        BytesTextMethodTester tester = new BytesTextMethodTester<>(
+        BytesTextMethodTester<IBytesMethod> tester = new BytesTextMethodTester<>(
                 input,
                 IBMImpl::new,
                 IBytesMethod.class,

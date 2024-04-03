@@ -47,6 +47,7 @@ public class SubBytes<U> extends VanillaBytes<U> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings("this-escape")
     public SubBytes(@NotNull BytesStore bytesStore, @NonNegative long start, @NonNegative long capacity)
             throws IllegalStateException, IllegalArgumentException, BufferUnderflowException {
         super(bytesStore);

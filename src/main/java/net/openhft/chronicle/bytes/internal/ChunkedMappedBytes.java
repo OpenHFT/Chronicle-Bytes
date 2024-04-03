@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -91,9 +92,9 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
 
             bytesStore.write(wp, byteArray, offset, (int) safeCopySize);
 
-            offset += safeCopySize;
+            offset += (int) safeCopySize;
             wp += safeCopySize;
-            remaining -= safeCopySize;
+            remaining -= (int) safeCopySize;
 
             // move to the next chunk
             bytesStore = acquireNextByteStore0(wp, false);
@@ -333,7 +334,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
         try {
             newBS = mappedFile.acquireByteStore(this, offset, oldBS);
             if (newBS != oldBS) {
-                this.bytesStore((BytesStore<Bytes<Void>, Void>) (BytesStore<?, Void>) newBS);
+                this.bytesStore(uncheckedCast(newBS));
                 if (oldBS != null)
                     oldBS.release(this);
                 if (lastActualSize < newBS.maximumLimit)

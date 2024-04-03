@@ -53,11 +53,11 @@ public class Issue523Test extends BytesTestCommon {
         doTestAppendDoubles(Bytes::allocateElasticDirect);
     }
 
-    public void doTestAppendDoubles(Supplier<Bytes> bytesSupplier) {
+    public void doTestAppendDoubles(Supplier<Bytes<?>> bytesSupplier) {
         Set<String> collect = IntStream.range(0, 1000)
                 .parallel()
                 .mapToObj(i -> {
-                    Bytes bytes = bytesSupplier.get();
+                    Bytes<?> bytes = bytesSupplier.get();
                     try {
                         double ee = 1e6;
                         for (int e = 6; e <= 12; e++) {

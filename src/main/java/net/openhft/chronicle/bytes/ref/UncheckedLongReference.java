@@ -42,7 +42,7 @@ import java.nio.BufferUnderflowException;
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
 
     private BytesStore bytes;
@@ -61,6 +61,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      * @throws ClosedIllegalStateException    If the {@code BytesStore} has already been closed.
      * @throws ThreadingIllegalStateException If this method is called from multiple threads without proper synchronization.
      */
+    @SuppressWarnings("unchecked")
     @NotNull
     public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {

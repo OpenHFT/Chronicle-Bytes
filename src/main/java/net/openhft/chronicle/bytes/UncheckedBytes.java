@@ -32,6 +32,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static java.util.Objects.requireNonNull;
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
@@ -45,7 +46,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown
  * or worse, it can corrupt your data, cause JVM crashes, or produce other undefined behavior.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class UncheckedBytes<U>
         extends AbstractBytes<U> {
     // The underlying Bytes instance this UncheckedBytes wraps around
@@ -58,9 +59,10 @@ public class UncheckedBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings("this-escape")
     public UncheckedBytes(@NotNull Bytes<?> underlyingBytes)
             throws IllegalStateException {
-        super(requireNonNull(underlyingBytes.bytesStore()),
+        super(uncheckedCast(requireNonNull(underlyingBytes.bytesStore())),
                 underlyingBytes.writePosition(),
                 Math.min(underlyingBytes.writeLimit(), underlyingBytes.realCapacity()));
         this.underlyingBytes = underlyingBytes;
@@ -84,7 +86,7 @@ public class UncheckedBytes<U>
         final BytesStore underlying = bytes.bytesStore();
         if (bytesStore != underlying) {
             bytesStore.release(this);
-            this.bytesStore(underlying);
+            this.bytesStore(uncheckedCast(underlying));
             bytesStore.reserve(this);
         }
         readPosition(bytes.readPosition());
@@ -99,7 +101,7 @@ public class UncheckedBytes<U>
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
-            bytesStore(underlyingBytes.bytesStore());
+            bytesStore(uncheckedCast(underlyingBytes.bytesStore()));
         }
     }
 

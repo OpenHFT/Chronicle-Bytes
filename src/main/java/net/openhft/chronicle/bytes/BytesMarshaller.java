@@ -32,6 +32,8 @@ import java.nio.BufferUnderflowException;
 import java.util.*;
 import java.util.function.Supplier;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+
 /**
  * This class is used to marshal objects into bytes and unmarshal them from bytes.
  * The object's fields are read and written in a streaming manner, with the ability
@@ -47,7 +49,7 @@ import java.util.function.Supplier;
  *
  * @param <T> the type of the object to be marshaled.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class BytesMarshaller<T> {
 
     /**
@@ -266,6 +268,7 @@ public class BytesMarshaller<T> {
             o2.writeMarshallable(write);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void setValue(Object o, BytesIn<?> read)
                 throws IORuntimeException, BufferUnderflowException, ClosedIllegalStateException, InvalidMarshallableException, IllegalAccessException {
@@ -326,7 +329,7 @@ public class BytesMarshaller<T> {
     }
 
     static class ObjectArrayFieldAccess extends FieldAccess {
-        Class componentType;
+        Class<?> componentType;
 
         public ObjectArrayFieldAccess(Field field) {
             super(field);
@@ -377,7 +380,7 @@ public class BytesMarshaller<T> {
     static class CollectionFieldAccess extends FieldAccess {
         final Supplier<Collection> collectionSupplier;
         @NotNull
-        private final Class componentType;
+        private final Class<?> componentType;
         private final Class<?> type;
 
         public CollectionFieldAccess(@NotNull Field field) {
@@ -390,7 +393,7 @@ public class BytesMarshaller<T> {
             else if (type == Set.class)
                 collectionSupplier = LinkedHashSet::new;
             else
-                collectionSupplier = () -> ObjectUtils.newInstance((Class<? extends Collection>) type);
+                collectionSupplier = () -> uncheckedCast(ObjectUtils.newInstance(type));
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 @NotNull ParameterizedType pType = (ParameterizedType) genericType;
@@ -423,6 +426,7 @@ public class BytesMarshaller<T> {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, ArithmeticException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, InvalidMarshallableException, IllegalAccessException {
@@ -460,7 +464,7 @@ public class BytesMarshaller<T> {
             else if (type == SortedMap.class || type == NavigableMap.class)
                 collectionSupplier = TreeMap::new;
             else
-                collectionSupplier = () -> ObjectUtils.newInstance((Class<? extends Map>) type);
+                collectionSupplier = () -> uncheckedCast(ObjectUtils.newInstance(type));
             Type genericType = field.getGenericType();
             if (genericType instanceof ParameterizedType) {
                 @NotNull ParameterizedType pType = (ParameterizedType) genericType;
@@ -489,6 +493,7 @@ public class BytesMarshaller<T> {
             }
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void setValue(Object o, BytesIn<?> read)
                 throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, BufferOverflowException, ArithmeticException, IllegalAccessException {

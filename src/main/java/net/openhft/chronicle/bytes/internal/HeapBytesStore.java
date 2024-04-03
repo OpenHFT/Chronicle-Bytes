@@ -32,6 +32,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -54,8 +55,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(@NotNull ByteBuffer byteBuffer) {
         super(false);
-        //noinspection unchecked
-        this.underlyingObject = (U) byteBuffer;
+        this.underlyingObject = uncheckedCast(byteBuffer);
         byteBuffer.order(ByteOrder.nativeOrder());
         this.realUnderlyingObject = byteBuffer.array();
         this.dataOffset = Jvm.arrayByteBaseOffset() + byteBuffer.arrayOffset();
@@ -64,7 +64,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(@Nullable byte[] byteArray) {
         super(false);
-        this.underlyingObject = (U) byteArray;
+        this.underlyingObject = uncheckedCast(byteArray);
         this.realUnderlyingObject = byteArray;
         this.dataOffset = Jvm.arrayByteBaseOffset();
         this.capacity = byteArray == null ? 0 : byteArray.length;
@@ -72,7 +72,7 @@ public class HeapBytesStore<U>
 
     private HeapBytesStore(Object object, long start, long length) {
         super(false);
-        this.underlyingObject = (U) object;
+        this.underlyingObject = uncheckedCast(object);
         this.realUnderlyingObject = object;
         this.dataOffset = Math.toIntExact(start);
         this.capacity = length;
@@ -130,8 +130,9 @@ public class HeapBytesStore<U>
     @NotNull
     @Override
     public BytesStore<HeapBytesStore<U>, U> copy() {
-        if (capacity == 0)
-            return (BytesStore) NoBytesStore.NO_BYTES_STORE;
+        if (capacity == 0) {
+            return uncheckedCast(NoBytesStore.NO_BYTES_STORE);
+        }
         throw new UnsupportedOperationException("todo");
     }
 
@@ -314,6 +315,7 @@ public class HeapBytesStore<U>
         }
     }
 
+    @SuppressWarnings("rawtypes")
     @Override
     public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
         requireNonNull(bs);

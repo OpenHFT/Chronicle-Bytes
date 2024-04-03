@@ -69,6 +69,7 @@ public class MappedBytesStore extends NativeBytesStore<Void> {
      * @param pageSize     Page size to use to check alignment
      * @throws ClosedIllegalStateException If the resource has been released or closed.
      */
+    @SuppressWarnings("this-escape")
     protected MappedBytesStore(ReferenceOwner owner, MappedFile mappedFile, @NonNegative long start, long address, @NonNegative long capacity, @NonNegative long safeCapacity, @Positive int pageSize)
             throws ClosedIllegalStateException {
         super(address, start + capacity, new Unmapper(address, capacity, pageSize), false);

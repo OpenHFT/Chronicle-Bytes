@@ -174,7 +174,7 @@ public class ChunkedMappedFile extends MappedFile {
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore,
+            BytesStore<?,?> oldByteStore,
             @NotNull final MappedBytesStoreFactory mappedBytesStoreFactory)
             throws IOException,
             IllegalArgumentException,
@@ -257,6 +257,7 @@ public class ChunkedMappedFile extends MappedFile {
         this.syncMode = syncMode;
     }
 
+    @SuppressWarnings("try")
     private void resizeRafIfTooSmall(@NonNegative final int chunk)
             throws IOException {
         Jvm.safepoint();

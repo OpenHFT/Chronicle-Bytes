@@ -36,6 +36,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static java.nio.charset.StandardCharsets.ISO_8859_1;
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -53,7 +54,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> The type of the object this Bytes can point to.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
@@ -89,6 +90,7 @@ public class UncheckedNativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings({"unchecked", "this-escape"})
     public UncheckedNativeBytes(@NotNull Bytes<U> underlyingBytes)
             throws IllegalStateException {
         this.underlyingBytes = underlyingBytes;
@@ -106,7 +108,7 @@ public class UncheckedNativeBytes<U>
             throws IllegalArgumentException, IllegalStateException {
         if (desiredCapacity > realCapacity()) {
             underlyingBytes.ensureCapacity(desiredCapacity);
-            bytesStore = underlyingBytes.bytesStore();
+            bytesStore = uncheckedCast(underlyingBytes.bytesStore());
         }
     }
 

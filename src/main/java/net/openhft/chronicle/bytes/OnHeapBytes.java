@@ -26,6 +26,8 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;
     private final boolean elastic;
@@ -49,6 +51,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @SuppressWarnings("this-escape")
     public OnHeapBytes(@NotNull BytesStore<?, ?> bytesStore, boolean elastic)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         super(bytesStore);
@@ -131,8 +134,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        BytesStore<Bytes<byte[]>, byte[]> store =
-                (BytesStore) BytesStore.wrap(new byte[size]);
+        BytesStore<Bytes<byte[]>, byte[]> store = uncheckedCast(BytesStore.wrap(new byte[size]));
         store.reserveTransfer(INIT, this);
 
         BytesStore<Bytes<byte[]>, byte[]> tempStore = this.bytesStore;
@@ -140,4 +142,5 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         this.bytesStore(store);
         tempStore.release(this);
     }
+
 }

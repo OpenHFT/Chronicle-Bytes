@@ -128,7 +128,7 @@ final class BytesReleaseInvariantNonPerformantMethodsTest extends BytesTestCommo
                     assertThrows(ClosedIllegalStateException.class, () -> nc.accept(bytes), name);
 
                     // Unable to check actual size for released MappedBytes
-                    if ((Bytes) bytes instanceof MappedBytes || bytes instanceof EmbeddedBytes)
+                    if ((Bytes<?>) bytes instanceof MappedBytes || bytes instanceof EmbeddedBytes)
                         return;
                     final BytesInitialInfo info = new BytesInitialInfo(bytes);
                     assertEquals(initialInfo.get(), info, name);

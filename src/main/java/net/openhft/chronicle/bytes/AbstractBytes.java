@@ -1427,7 +1427,7 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<Bytes<U>, U> bytesStore() {
         return bytesStore;
     }
 

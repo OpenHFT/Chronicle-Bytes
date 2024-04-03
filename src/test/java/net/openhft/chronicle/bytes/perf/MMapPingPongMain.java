@@ -25,6 +25,8 @@ import net.openhft.chronicle.core.OS;
 import java.io.File;
 import java.io.FileNotFoundException;
 
+import static org.junit.Assert.assertNotNull;
+
 /*
 on the same Ryzen 9 5950X
 Ping pong rate: 5,573,745 ping-pong/second
@@ -58,7 +60,8 @@ public class MMapPingPongMain {
         int to = PONG ? 1 : 0;
         final int count = 20_000_000;
         int lastCPU = Runtime.getRuntime().availableProcessors() - 1;
-        try (AffinityLock lock = USE_AFFINITY ? AffinityLock.acquireLock(PONG ? lastCPU : lastCPU / 2) : null;
+
+        try (AffinityLock ignored = USE_AFFINITY ? AffinityLock.acquireLock(PONG ? lastCPU : lastCPU / 2) : null;
              MappedBytes bytes = MappedBytes.mappedBytes(tmpFile, OS.pageSize())) {
             // wait for the first one
             while (!bytes.compareAndSwapLong(0, from, to))
@@ -73,6 +76,7 @@ public class MMapPingPongMain {
                 long rate = count * 1_000_000_000L / time;
                 System.out.printf("Ping pong rate: %,d ping-pong/second%n", rate);
             }
+            assertNotNull(ignored); // keep compiler happy.
         }
     }
 }

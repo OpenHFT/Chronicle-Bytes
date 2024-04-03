@@ -81,6 +81,7 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
      *
      * @param defaultCapacity the initial capacity of the long array in number of elements.
      */
+    @SuppressWarnings("this-escape")
     public BinaryLongArrayReference(@NonNegative long defaultCapacity) {
         this.length = (defaultCapacity << SHIFT) + VALUES;
         singleThreadedCheckDisabled(true);

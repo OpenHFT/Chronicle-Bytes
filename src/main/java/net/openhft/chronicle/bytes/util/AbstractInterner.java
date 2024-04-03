@@ -31,6 +31,8 @@ import java.nio.BufferUnderflowException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+
 /**
  * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
  * guarantee the return of the same object across different invocations or from different threads, but it
@@ -59,7 +61,7 @@ import java.util.stream.Stream;
  * @param <T> the type of the object being interned
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public abstract class AbstractInterner<T> {
     protected final InternerEntry<T>[] entries;
     protected final int mask;
@@ -75,7 +77,7 @@ public abstract class AbstractInterner<T> {
     protected AbstractInterner(@NonNegative int capacity){
         int n = Maths.nextPower2(capacity, 128);
         shift = Maths.intLog2(n);
-        entries = new InternerEntry[n];
+        entries = uncheckedCast(new InternerEntry[n]);
         mask = n - 1;
     }
 

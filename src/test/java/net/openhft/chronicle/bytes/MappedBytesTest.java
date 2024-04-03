@@ -42,6 +42,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.IntStream;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 
@@ -601,7 +602,8 @@ public class MappedBytesTest extends BytesTestCommon {
                 } catch (IOException ioe) {
                     ioe.printStackTrace();
                     // cause the caller to fail.
-                    ((Queue) tq).add(ioe);
+                    Queue<IOException> q = uncheckedCast(tq);
+                    q.add(ioe);
                 }
             });
             t.start();

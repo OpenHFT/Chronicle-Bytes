@@ -45,7 +45,7 @@ public class GuardedNativeBytesTest {
      */
     @Test
     public void testBinaryPrimitive() {
-        final GuardedNativeBytes<?> bytes = new GuardedNativeBytes(new HexDumpBytes(), 256);
+        final GuardedNativeBytes<?> bytes = new GuardedNativeBytes<>(new HexDumpBytes(), 256);
         try {
             bytes.writeHexDumpDescription("flag").writeBoolean(true);
             bytes.writeHexDumpDescription("s8").writeByte((byte) 1);

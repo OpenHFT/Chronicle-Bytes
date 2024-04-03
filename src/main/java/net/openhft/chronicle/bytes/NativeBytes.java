@@ -35,6 +35,7 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -49,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> This represents the underlying type that the byte buffers are intended to represent.
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class NativeBytes<U>
         extends VanillaBytes<U> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");
@@ -115,6 +116,7 @@ public class NativeBytes<U>
      * @return A new instance of NativeBytes.
      * @throws AssertionError If there's an error during the wrapping process.
      */
+    @SuppressWarnings("unchecked")
     @NotNull
     public static NativeBytes<Void> nativeBytes() {
         return NativeBytes.wrapWithNativeBytes(BytesStore.empty(), Bytes.MAX_CAPACITY);
@@ -165,7 +167,7 @@ public class NativeBytes<U>
             throws ClosedIllegalStateException, IllegalArgumentException {
         requireNonNull(bs);
         return newGuarded
-                ? new GuardedNativeBytes(bs, capacity)
+                ? new GuardedNativeBytes<>(bs, capacity)
                 : new NativeBytes<>(bs, capacity);
     }
 
@@ -316,7 +318,7 @@ public class NativeBytes<U>
         throwExceptionIfReleased();
         @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
-        this.bytesStore(store);
+        this.bytesStore(uncheckedCast(store));
         try {
             tempStore.release(this);
         } catch (IllegalStateException e) {

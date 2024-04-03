@@ -31,6 +31,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE_ENDIAN;
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -62,6 +63,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         this(mappedFile, "");
     }
 
+    @SuppressWarnings("this-escape")
     protected CommonMappedBytes(@NotNull final MappedFile mappedFile, final String name)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         super(name);
@@ -294,7 +296,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
         requireNonNull(s);
         ensureCapacity(writePosition() + length);
         long address = addressForWritePosition();
-        Memory memory = ((MappedBytesStore) bytesStore()).memory;
+        MappedBytesStore mbs = uncheckedCast(bytesStore());
+        Memory memory = mbs.memory;
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);
             int i = 0;

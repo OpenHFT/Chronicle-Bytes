@@ -81,7 +81,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    static BytesStore from(@NotNull BytesStore cs)
+    static <A extends BytesStore<A, B>,B> BytesStore<A,B> from(@NotNull BytesStore<A, B> cs)
             throws ClosedIllegalStateException {
         return cs.copy();
     }
@@ -92,7 +92,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @param cs the String to be converted
      * @return a BytesStore which contains the bytes from the String
      */
-    static BytesStore from(@NotNull String cs) {
+    static BytesStore<?,byte[]> from(@NotNull String cs) {
         return cs.length() == 0 ? empty() : BytesStore.wrap(cs.getBytes(StandardCharsets.ISO_8859_1));
     }
 
@@ -234,7 +234,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return an instance of an empty BytesStore
      */
-    static BytesStore empty() {
+    static <B extends BytesStore<B, T>, T> BytesStore<B, T> empty() {
         return NoBytesStore.NO_BYTES_STORE;
     }
 
