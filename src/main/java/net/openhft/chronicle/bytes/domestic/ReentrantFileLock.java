@@ -81,7 +81,7 @@ public final class ReentrantFileLock extends FileLock {
         this.canonicalPath = canonicalPath;
         this.delegate = fileLock;
         @SuppressWarnings("deprecation")
-        long id = Thread.currentThread().getId();
+        long id = Jvm.currentThreadId();
         this.owningThreadId = id;
         this.counter = 1;
     }
@@ -197,7 +197,7 @@ public final class ReentrantFileLock extends FileLock {
      */
     private void checkThreadAccess() {
         @SuppressWarnings("deprecation")
-        final long currentThreadId = Thread.currentThread().getId();
+        final long currentThreadId = Jvm.currentThreadId();
         if (currentThreadId != owningThreadId) {
             Jvm.error().on(ReentrantFileLock.class, "You're accessing a ReentrantFileLock created by thread " + owningThreadId + " on thread " + currentThreadId + " this can have unexpected results, don't do it.");
         }
