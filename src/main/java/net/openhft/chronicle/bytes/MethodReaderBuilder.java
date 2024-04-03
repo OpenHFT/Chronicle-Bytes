@@ -86,7 +86,7 @@ public interface MethodReaderBuilder {
      * @param predicate the predicate to set
      * @return the builder instance for method chaining
      */
-    default MethodReaderBuilder predicate(Predicate<?> predicate) {
+    default MethodReaderBuilder predicate(Predicate<MethodReader> predicate) {
         return this;
     }
 }
