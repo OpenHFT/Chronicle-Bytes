@@ -134,7 +134,7 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
             Jvm.perf().on(getClass(), "Resizing buffer was " + realCapacity / 1024 + " KB, " +
                     "needs " + (endOfBuffer - realCapacity) + " bytes more, " +
                     "new-size " + size / 1024 + " KB");
-        BytesStore<?, byte[]> store = uncheckedCast(BytesStore.wrap(new byte[size]));
+        BytesStore<Bytes<byte[]>, byte[]> store = uncheckedCast(BytesStore.wrap(new byte[size]));
         store.reserveTransfer(INIT, this);
 
         BytesStore<?, byte[]> tempStore = this.bytesStore;
@@ -142,4 +142,5 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         this.bytesStore(store);
         tempStore.release(this);
     }
+
 }
