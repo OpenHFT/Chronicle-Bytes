@@ -42,7 +42,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParseUTF_SB1()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        @NotNull VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         byte[] bytes2 = new byte[128];
         Arrays.fill(bytes2, (byte) '?');
         bytes.write(bytes2);
@@ -64,7 +64,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParseUTF8_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
@@ -166,7 +166,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParseUTF81_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
@@ -192,7 +192,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParseUTF_SB1_LongString()
             throws UTFDataFormatRuntimeException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
@@ -220,7 +220,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testParse8bit_LongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         byte[] bytes2 = new byte[length];
         Arrays.fill(bytes2, (byte) '!');
@@ -258,7 +258,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testWriteUtf8LongString()
             throws IORuntimeException, BufferUnderflowException {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
@@ -278,7 +278,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testAppendUtf8LongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
@@ -299,7 +299,7 @@ public class BytesInternalTest extends BytesTestCommon {
     public void testAppend8bitLongString()
             throws Exception {
         assumeFalse(GuardedNativeBytes.areNewGuarded());
-        @NotNull VanillaBytes bytes = Bytes.allocateElasticDirect();
+        VanillaBytes<Void> bytes = Bytes.allocateElasticDirect();
         int length = LENGTH;
         StringBuilder sb = new StringBuilder(length);
 
@@ -495,7 +495,7 @@ public class BytesInternalTest extends BytesTestCommon {
         }
     }
 
-    public static void simpleWriteFully1(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput sdo)
+    public static void simpleWriteFully1(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8)
@@ -504,7 +504,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully2(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput sdo)
+    public static void simpleWriteFully2(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 7; i += 8)
@@ -517,7 +517,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully3(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput sdo)
+    public static void simpleWriteFully3(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int i = 0;
         for (; i < length - 7; i += 8)
@@ -530,7 +530,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void simpleWriteFully4(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput sdo)
+    public static void simpleWriteFully4(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         int i = 0;
         for (; i < length - 7; i += 8)
@@ -543,7 +543,7 @@ public class BytesInternalTest extends BytesTestCommon {
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
 
-    public static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput sdo)
+    public static void oldWriteFully(@NotNull RandomDataInput bytes, @NonNegative long offset, long length, @NotNull StreamingDataOutput<?> sdo)
             throws BufferUnderflowException, BufferOverflowException, IllegalStateException {
         long i = 0;
         for (; i < length - 3; i += 4)

@@ -216,12 +216,12 @@ public class BytesTest extends BytesTestCommon {
     public void testCopy() {
         assumeFalse(alloc1 == HEAP_EMBEDDED);
 
-        Bytes<ByteBuffer> bbb = (Bytes) alloc1.fixedBytes(1024);
+        Bytes<?> bbb = alloc1.fixedBytes(1024);
         try {
             for (int i = 'a'; i <= 'z'; i++)
                 bbb.writeUnsignedByte(i);
             bbb.readPositionRemaining(4, 12);
-            BytesStore<Bytes<ByteBuffer>, ByteBuffer> copy = bbb.copy();
+            BytesStore<? extends Bytes<?>, ?> copy = bbb.copy();
             bbb.writeUnsignedByte(10, '0');
             assertEquals("[pos: 0, rlim: 12, wlim: 12, cap: 12 ] efghijklmnop", copy.toDebugString());
             copy.releaseLast();
@@ -468,7 +468,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(4);
+        Bytes<?> bytes = alloc1.fixedBytes(4);
         try {
             bytes.writeInt(-1, 1);
         } finally {
@@ -479,7 +479,7 @@ public class BytesTest extends BytesTestCommon {
     @Test(expected = IllegalArgumentException.class)
     public void testExpectNegativeOffsetAbsoluteWriteOnFixedBytesOfInsufficientCapacityThrowsIllegalArgumentException() {
         assumeFalse(alloc1 == HEX_DUMP);
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(1);
+        Bytes<?> bytes = alloc1.fixedBytes(1);
         try {
             bytes.writeInt(-1, 1);
         } finally {
@@ -897,7 +897,7 @@ public class BytesTest extends BytesTestCommon {
 
     @Test
     public void testParseDoubleReadLimit() {
-        Bytes<ByteBuffer> bytes = (Bytes) alloc1.fixedBytes(52);
+        Bytes<?> bytes = alloc1.fixedBytes(52);
         try {
             final String spaces = "   ";
             bytes.append(spaces).append(1.23);

@@ -56,7 +56,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * for nested data structures or logically grouped data within the byte array.
  */
 
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 
@@ -262,7 +262,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public BytesStore copy() {
+    public BytesStore<Bytes<Void>, Void> copy() throws IllegalStateException {
         throwExceptionIfReleased(this);
         return new HexDumpBytes(base, text);
     }
@@ -708,7 +708,7 @@ public class HexDumpBytes
     }
 
     @Override
-    public void readWithLength(@NonNegative long length, @NotNull BytesOut<Void> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
+    public void readWithLength(@NonNegative long length, @NotNull BytesOut<?> bytesOut) throws BufferUnderflowException, IORuntimeException, IllegalStateException, BufferOverflowException {
         base.readWithLength(length, bytesOut);
     }
 

@@ -30,7 +30,7 @@ import static org.junit.Assert.*;
 public class BooleanReferenceTest extends BytesTestCommon {
     @Test
     public void testBinary() {
-        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(2);
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(2);
         try (@NotNull BinaryBooleanReference ref = new BinaryBooleanReference()) {
             // First value
             byte val1 = (byte) BinaryWireCode.FALSE;
@@ -55,7 +55,7 @@ public class BooleanReferenceTest extends BytesTestCommon {
 
     @Test
     public void testText() {
-        @NotNull BytesStore nbs = BytesStore.nativeStoreWithFixedCapacity(5);
+        BytesStore<?, Void> nbs = BytesStore.nativeStoreWithFixedCapacity(5);
         try (@NotNull TextBooleanReference ref = new TextBooleanReference()) {
 
             // First value

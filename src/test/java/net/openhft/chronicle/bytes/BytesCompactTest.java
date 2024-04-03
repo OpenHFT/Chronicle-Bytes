@@ -33,7 +33,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BytesCompactTest {
 
     final String name;
-    final Bytes bytes;
+    final Bytes<?> bytes;
 
     /**
      * Constructor for parameterized test with name and bytes.
@@ -41,7 +41,7 @@ public class BytesCompactTest {
      * @param name  the name of the test scenario.
      * @param bytes the Bytes instance under test.
      */
-    public BytesCompactTest(String name, Bytes bytes) {
+    public BytesCompactTest(String name, Bytes<?> bytes) {
         this.name = name;
         this.bytes = bytes;
     }

@@ -25,6 +25,7 @@ import java.nio.BufferOverflowException;
  * data into a buffer beyond its capacity.
  */
 public final class DecoratedBufferOverflowException extends BufferOverflowException {
+    private static final long serialVersionUID = 0L;
 
     /**
      * The custom message describing this exception.

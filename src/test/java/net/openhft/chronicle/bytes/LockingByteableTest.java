@@ -87,6 +87,7 @@ public class LockingByteableTest extends BytesTestCommon {
             try (FileLock fl = blr.lock(true)) {
                 blr.lock(false);
                 fail();
+                assertNotNull(fl); // keep compiler happy.
             }
         }
     }
@@ -140,6 +141,7 @@ public class LockingByteableTest extends BytesTestCommon {
             try (FileLock fl = blr.lock(true)) {
                 blr.lock(false);
                 fail();
+                assertNotNull(fl); // keep compiler happy.
             }
         }
     }

@@ -33,6 +33,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
@@ -42,7 +43,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> the type of the underlying object representation
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes"})
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable<Bytes<U>, U>, Comparable<CharSequence> {
@@ -74,7 +75,7 @@ public class VanillaBytes<U>
      */
     protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
-        super(bytesStore, writePosition, writeLimit);
+        super(uncheckedCast(bytesStore), writePosition, writeLimit);
     }
 
     /**
@@ -300,9 +301,9 @@ public class VanillaBytes<U>
             slice.limit((int) readLimit());
             bb.put(slice);
             bb.clear();
-            return (BytesStore) BytesStore.wrap(bb);
+            return uncheckedCast(BytesStore.wrap(bb));
         } else {
-            return (BytesStore) BytesUtil.copyOf(this);
+            return uncheckedCast(BytesUtil.copyOf(this));
         }
     }
 
@@ -364,7 +365,7 @@ public class VanillaBytes<U>
 
     @Override
     @NotNull
-    public VanillaBytes append(@NotNull CharSequence str, @NonNegative int start, @NonNegative int end)
+    public VanillaBytes<U> append(@NotNull CharSequence str, @NonNegative int start, @NonNegative int end)
             throws IndexOutOfBoundsException {
         assert end > start : "end=" + end + ",start=" + start;
         requireNonNull(str);
@@ -399,7 +400,7 @@ public class VanillaBytes<U>
 
     @NotNull
     @Override
-    public VanillaBytes appendUtf8(@NotNull CharSequence str)
+    public VanillaBytes<U> appendUtf8(@NotNull CharSequence str)
             throws BufferOverflowException {
         requireNonNull(str);
         ReportUnoptimised.reportOnce();
@@ -606,7 +607,7 @@ public class VanillaBytes<U>
         if (isDirectMemory() &&
                 bytesStore instanceof VanillaBytes &&
                 bytesStore.isDirectMemory()) {
-            @NotNull VanillaBytes b2 = (VanillaBytes) bytesStore;
+            @NotNull VanillaBytes<U> b2 = uncheckedCast(bytesStore);
             @NotNull NativeBytesStore nbs0 = (NativeBytesStore) this.bytesStore;
             @Nullable NativeBytesStore nbs2 = (NativeBytesStore) b2.bytesStore();
             long i = 0;
@@ -660,10 +661,10 @@ public class VanillaBytes<U>
         int i = 0;
         final int len = end - start;
         for (; i < len - 3; i += 4) {
-            b += memory.readByte(addr + i)
-                    + memory.readByte(addr + i + 1)
-                    + memory.readByte(addr + i + 2)
-                    + memory.readByte(addr + i + 3);
+            b += (byte) (memory.readByte(addr + i)
+                                + memory.readByte(addr + i + 1)
+                                + memory.readByte(addr + i + 2)
+                                + memory.readByte(addr + i + 3));
         }
         for (; i < len; i++) {
             b += memory.readByte(addr + i);

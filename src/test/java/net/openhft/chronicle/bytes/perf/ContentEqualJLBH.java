@@ -26,6 +26,7 @@ import net.openhft.chronicle.jlbh.JLBHOptions;
 import net.openhft.chronicle.jlbh.JLBHTask;
 import net.openhft.chronicle.jlbh.TeamCityHelper;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
@@ -93,7 +94,7 @@ public class ContentEqualJLBH implements JLBHTask {
     }
 
     static Bytes<?> bytesFor(int length) {
-        final Bytes b = Bytes.elasticHeapByteBuffer(length);
+        final Bytes<ByteBuffer> b = Bytes.elasticHeapByteBuffer(length);
         for (int i = 0; i < length; i++) {
             b.append(i % 10);
         }

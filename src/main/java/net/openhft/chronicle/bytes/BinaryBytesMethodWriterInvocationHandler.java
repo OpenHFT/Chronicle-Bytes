@@ -45,7 +45,7 @@ public class BinaryBytesMethodWriterInvocationHandler extends AbstractInvocation
      * @param methodToId A function mapping Methods to corresponding {@link MethodEncoder} instances.
      * @param out        The output stream to which encoded invocations should be written.
      */
-    public BinaryBytesMethodWriterInvocationHandler(Class tClass, Function<Method, MethodEncoder> methodToId, BytesOut<?> out) {
+    public BinaryBytesMethodWriterInvocationHandler(Class<?> tClass, Function<Method, MethodEncoder> methodToId, BytesOut<?> out) {
         super(tClass);
         this.methodToId = methodToId;
         this.out = out;

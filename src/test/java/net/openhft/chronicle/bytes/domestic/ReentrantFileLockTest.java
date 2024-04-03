@@ -201,6 +201,7 @@ class ReentrantFileLockTest extends BytesTestCommon {
                         while (!Thread.currentThread().isInterrupted()) {
                             Jvm.pause(1);
                         }
+                        assertNotNull(lock); // avoid warning
                     }
                 }
             } catch (IOException e) {

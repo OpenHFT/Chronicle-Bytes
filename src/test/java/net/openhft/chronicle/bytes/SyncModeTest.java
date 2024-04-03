@@ -26,6 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.stream.Stream;
 
+import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)
@@ -48,7 +49,7 @@ public class SyncModeTest extends BytesTestCommon {
              MappedBytes bytes = MappedBytes.mappedBytes(mappedFile)) {
             mappedFile.syncMode(syncMode);
             bytes.readLong(0);
-            MappedBytesStore mbs = (MappedBytesStore) (BytesStore) bytes.bytesStore;
+            MappedBytesStore mbs = uncheckedCast(bytes.bytesStore);
             assertEquals(syncMode, mbs.syncMode());
             for (int i = 0; i < 64 << 20; i += 1 << 20) {
                 mbs.syncUpTo(i);

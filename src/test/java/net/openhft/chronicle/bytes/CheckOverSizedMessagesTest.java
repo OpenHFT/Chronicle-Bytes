@@ -55,9 +55,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             RandomDataInput rdi = Bytes.allocateDirect(BYTE6K);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(rdi);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
             rdi.releaseLast();
         }
@@ -67,9 +67,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeByteArray2() {
         try (MappedBytes mb = mbNoOverlap()) {
             byte[] arr = new byte[6 << 10];
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(3 << 10, arr);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -78,9 +78,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeByteArray4() {
         try (MappedBytes mb = mbNoOverlap()) {
             byte[] arr = new byte[6 << 10];
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(4000, arr, 128, 5900);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -89,9 +89,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeBB4() {
         try (MappedBytes mb = mbNoOverlap()) {
             ByteBuffer bb = ByteBuffer.allocate(6000);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(4000, bb, 128, 5800);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -102,7 +102,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
             assumeFalse(PageUtil.isHugePage(mb.mappedFile().file().getAbsolutePath()));
             ByteBuffer bb = ByteBuffer.allocate(6000);
             mb.writeLong(4000, -1);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             try {
                 mb.write(4000, bb, 128, 5900);
                 fail();
@@ -111,7 +111,7 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
                 assertEquals(-1, mb.readLong(4000));
             }
             // didn't actually write
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertSame(bs0, bs2);
         }
     }
@@ -120,10 +120,10 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeRDI4() {
         try (MappedBytes mb = mbNoOverlap()) {
             RandomDataInput rdi = Bytes.allocateDirect(BYTE6K);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(4000, rdi, 128, 5900);
             rdi.releaseLast();
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -133,9 +133,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(4000);
             byte[] arr = new byte[6 << 10];
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(arr, 128, 5900);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -145,9 +145,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
             InputStream is = new ByteArrayInputStream(BYTE6K);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(is);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -155,9 +155,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     @Test
     public void writeBytes2() {
         try (MappedBytes mb = mbNoOverlap()) {
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(4000, Bytes.wrapForRead(BYTE6K));
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -166,9 +166,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeCS() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(new String(BYTE6K, StandardCharsets.US_ASCII));
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -177,9 +177,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeBytes() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(4000);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(Bytes.wrapForRead(BYTE6K));
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -188,10 +188,10 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeByteStore3() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bytes = Bytes.wrapForRead(BYTE6K);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<byte[]>, byte[]> bytes = Bytes.wrapForRead(BYTE6K);
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(bytes, 128L, 5800L);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -200,9 +200,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void writeByteArray() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.write(BYTE6K);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -211,9 +211,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void appendCS() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.append(new String(BYTE6K, StandardCharsets.US_ASCII));
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -222,9 +222,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
     public void appendCS3() {
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.append(new String(BYTE6K, StandardCharsets.US_ASCII), 128, 5800);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -236,9 +236,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
             final byte[] bytes = BYTE6K;
             Arrays.fill(bytes, (byte) '1');
             final String s = new String(bytes, StandardCharsets.US_ASCII);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             mb.append(new BigDecimal(s));
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -248,9 +248,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             in.read(mb);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -260,9 +260,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             in.read(mb, 5900);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -272,9 +272,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             in.parse8bit(mb, StopCharTesters.ALL);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
@@ -284,9 +284,9 @@ public class CheckOverSizedMessagesTest extends BytesTestCommon {
         Bytes<?> in = Bytes.wrapForRead(BYTE6K);
         try (MappedBytes mb = mbNoOverlap()) {
             mb.writePosition(3 << 10);
-            final BytesStore bs0 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs0 = mb.bytesStore();
             in.parseUtf8(mb, StopCharTesters.ALL);
-            final BytesStore bs2 = mb.bytesStore();
+            final BytesStore<Bytes<Void>, Void> bs2 = mb.bytesStore();
             assertNotSame(bs0, bs2);
         }
     }
