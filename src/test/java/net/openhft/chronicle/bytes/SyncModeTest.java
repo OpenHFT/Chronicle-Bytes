@@ -26,7 +26,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.Assert.assertEquals;
 
 @RunWith(Parameterized.class)

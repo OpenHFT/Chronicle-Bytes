@@ -32,7 +32,7 @@ import java.nio.BufferUnderflowException;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
  * This class is used to marshal objects into bytes and unmarshal them from bytes.
