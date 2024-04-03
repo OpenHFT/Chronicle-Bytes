@@ -26,7 +26,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 public class OnHeapBytes extends VanillaBytes<byte[]> {
     public static final int MAX_CAPACITY = Bytes.MAX_HEAP_CAPACITY;

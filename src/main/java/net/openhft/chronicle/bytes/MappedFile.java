@@ -38,7 +38,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 import java.nio.channels.FileLock;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
  * Represents a memory-mapped file that can be randomly accessed in chunks. The file is divided
