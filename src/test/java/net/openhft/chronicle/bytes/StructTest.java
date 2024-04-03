@@ -30,7 +30,7 @@ import java.util.Comparator;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.UnsafeMemory.MEMORY;
 import static org.junit.Assert.assertEquals;
 

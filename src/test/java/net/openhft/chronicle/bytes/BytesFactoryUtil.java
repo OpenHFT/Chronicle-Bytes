@@ -35,7 +35,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static net.openhft.chronicle.bytes.BytesStore.wrap;
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;

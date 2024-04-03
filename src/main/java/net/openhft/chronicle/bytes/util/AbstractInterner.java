@@ -31,7 +31,7 @@ import java.nio.BufferUnderflowException;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
 /**
  * This class provides a caching mechanism that returns a value which matches the decoded bytes. It does not
