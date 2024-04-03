@@ -32,7 +32,7 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static java.util.Objects.requireNonNull;
-import static net.openhft.chronicle.bytes.internal.BytesInternal.uncheckedCast;
+import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.StringUtils.extractBytes;
 import static net.openhft.chronicle.core.util.StringUtils.extractChars;
