@@ -32,6 +32,8 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 
+import static java.util.Objects.nonNull;
+import static net.openhft.chronicle.assertions.AssertUtil.SKIP_ASSERTIONS;
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
@@ -520,8 +522,7 @@ public class HeapBytesStore<U>
         requireNonNegative(offset);
         requireNonNegative(length);
         try {
-            memory.copyMemory(
-                    byteArray, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
+            copyMemory0(offsetInRDO, offset, length, byteArray);
             return this;
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
@@ -541,12 +542,21 @@ public class HeapBytesStore<U>
                         this.dataOffset + offsetInRDO, length);
 
             } else {
-                memory.copyMemory(bytes.array(), offset, realUnderlyingObject,
-                        this.dataOffset + offsetInRDO, length);
+                byte[] src = bytes.array();
+
+                copyMemory0(offsetInRDO, offset, length, src);
             }
         } catch (NullPointerException ifReleased) {
             throwExceptionIfReleased();
             throw ifReleased;
+        }
+    }
+
+    private void copyMemory0(long offsetInRDO, int offset, int length, byte[] src) {
+        if (realUnderlyingObject instanceof byte[]) {
+            memory.copyMemory(src, offset, (byte[]) realUnderlyingObject, Math.toIntExact(this.dataOffset + offsetInRDO - memory.arrayBaseOffset(byte[].class)), length);
+        } else {
+            memory.copyMemory(src, offset, realUnderlyingObject, this.dataOffset + offsetInRDO, length);
         }
     }
 
