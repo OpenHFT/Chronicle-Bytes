@@ -34,7 +34,7 @@ import java.util.Collection;
 
 import static org.junit.Assert.*;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesInternalGuardedTest extends BytesTestCommon {
 

@@ -48,7 +48,7 @@ import java.io.FileNotFoundException;
  * @see MappedFile
  * @see AbstractBytes
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public abstract class MappedBytes extends AbstractBytes<Void> implements Closeable, ManagedCloseable, Syncable {
 
     protected static final boolean TRACE = Jvm.getBoolean("trace.mapped.bytes");

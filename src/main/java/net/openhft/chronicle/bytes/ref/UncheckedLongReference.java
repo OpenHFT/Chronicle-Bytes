@@ -42,7 +42,7 @@ import java.nio.BufferUnderflowException;
  * @see BytesStore
  * @see BinaryLongReference
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
 
     private BytesStore bytes;

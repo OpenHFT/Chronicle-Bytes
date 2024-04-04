@@ -71,7 +71,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * @see BigInteger
  * @see Histogram
  */
-@SuppressWarnings({"unchecked"})
+@SuppressWarnings("unchecked")
 @DontChain
 public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends StreamingCommon<S> {
     int JAVA9_STRING_CODER_LATIN = 0;

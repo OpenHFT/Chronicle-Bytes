@@ -46,7 +46,7 @@ import static net.openhft.chronicle.core.util.StringUtils.extractChars;
  * <p>Warning: Using this class improperly can result in IndexOutOfBoundsException being thrown
  * or worse, it can corrupt your data, cause JVM crashes, or produce other undefined behavior.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class UncheckedBytes<U>
         extends AbstractBytes<U> {
     // The underlying Bytes instance this UncheckedBytes wraps around

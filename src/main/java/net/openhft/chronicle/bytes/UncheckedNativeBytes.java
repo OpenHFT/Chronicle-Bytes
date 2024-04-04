@@ -54,7 +54,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> The type of the object this Bytes can point to.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {

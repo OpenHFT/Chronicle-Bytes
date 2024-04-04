@@ -30,7 +30,7 @@ import java.nio.BufferUnderflowException;
  *
  * @param <U> the type of the BytesStore
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class SubBytes<U> extends VanillaBytes<U> {
     private final long start;
     private final long capacity;

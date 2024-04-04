@@ -56,7 +56,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * for nested data structures or logically grouped data within the byte array.
  */
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class HexDumpBytes
         implements Bytes<Void>, DecimalAppender {
 
