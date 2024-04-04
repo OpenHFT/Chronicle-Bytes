@@ -32,7 +32,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class ByteableReferenceTest extends BytesTestCommon {
 

@@ -49,7 +49,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  *
  * @param <T> the type of the object to be marshaled.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class BytesMarshaller<T> {
 
     /**

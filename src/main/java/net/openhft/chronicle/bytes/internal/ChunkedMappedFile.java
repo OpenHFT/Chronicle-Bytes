@@ -49,7 +49,7 @@ import static net.openhft.chronicle.core.util.Longs.*;
  * A memory mapped files which can be randomly accessed in chunks. It has overlapping regions to
  * avoid wasting bytes at the end of chunks.
  */
-@SuppressWarnings({"restriction"})
+@SuppressWarnings("restriction")
 public class ChunkedMappedFile extends MappedFile {
     @NotNull
     private final RandomAccessFile raf;

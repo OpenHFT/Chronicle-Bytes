@@ -50,7 +50,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> This represents the underlying type that the byte buffers are intended to represent.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class NativeBytes<U>
         extends VanillaBytes<U> {
     private static final boolean BYTES_GUARDED = Jvm.getBoolean("bytes.guarded");

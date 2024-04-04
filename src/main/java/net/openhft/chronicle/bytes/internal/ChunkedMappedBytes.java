@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * <p>
  * NOTE These Bytes are single Threaded as are all Bytes.
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class ChunkedMappedBytes extends CommonMappedBytes {
 
     // assume the mapped file is reserved already.

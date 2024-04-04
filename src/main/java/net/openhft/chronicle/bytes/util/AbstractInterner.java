@@ -61,7 +61,7 @@ import static net.openhft.chronicle.core.Jvm.uncheckedCast;
  * @param <T> the type of the object being interned
  * @author peter.lawrey
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public abstract class AbstractInterner<T> {
     protected final InternerEntry<T>[] entries;
     protected final int mask;

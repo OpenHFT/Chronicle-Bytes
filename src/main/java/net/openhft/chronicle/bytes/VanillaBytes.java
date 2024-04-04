@@ -43,7 +43,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  *
  * @param <U> the type of the underlying object representation
  */
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 public class VanillaBytes<U>
         extends AbstractBytes<U>
         implements Byteable<Bytes<U>, U>, Comparable<CharSequence> {

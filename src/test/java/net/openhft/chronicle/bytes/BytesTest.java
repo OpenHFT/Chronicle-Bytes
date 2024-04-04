@@ -56,7 +56,7 @@ import static org.junit.Assert.*;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
 
-@SuppressWarnings({"rawtypes"})
+@SuppressWarnings("rawtypes")
 @RunWith(Parameterized.class)
 public class BytesTest extends BytesTestCommon {
 
