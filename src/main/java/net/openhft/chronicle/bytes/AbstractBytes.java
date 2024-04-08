@@ -17,7 +17,6 @@
  */
 package net.openhft.chronicle.bytes;
 
-import net.openhft.chronicle.bytes.internal.UnsafeText;
 import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.bytes.internal.migration.HashCodeEqualsUtil;
 import net.openhft.chronicle.bytes.render.DecimalAppender;
@@ -59,6 +58,8 @@ public abstract class AbstractBytes<U>
     private static final boolean BYTES_BOUNDS_UNCHECKED = Jvm.getBoolean("bytes.bounds.unchecked", false);
 
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    @Deprecated(/* to remove in x.28 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
     // used for debugging
     @UsedViaReflection
     private final String name;
@@ -73,7 +74,7 @@ public abstract class AbstractBytes<U>
     private boolean lenient = false;
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    private boolean append0 = Jvm.getBoolean("bytes.append.0", true);
+    private boolean append0 = APPEND_0;
 
     AbstractBytes(@NotNull BytesStore<Bytes<U>, U> bytesStore, @NonNegative long writePosition, @NonNegative long writeLimit)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
