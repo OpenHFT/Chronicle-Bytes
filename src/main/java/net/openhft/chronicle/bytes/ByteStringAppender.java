@@ -278,12 +278,14 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
     /**
      * @return whether floating point add .0 to indicate it is a floating point even if redundant.
      */
+    @Deprecated(/* to remove in x.28 */)
     boolean fpAppend0();
 
     /**
      * @param append0 Does floating point add .0 to indicate it is a floating point even if redundant.
      * @return this
      */
+    @Deprecated(/* to remove in x.28 */)
     B fpAppend0(boolean append0);
 
     /**

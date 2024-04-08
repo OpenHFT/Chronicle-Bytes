@@ -35,7 +35,6 @@ import java.nio.BufferUnderflowException;
 import java.nio.ByteBuffer;
 
 import static net.openhft.chronicle.bytes.BytesStore.nativeStoreWithFixedCapacity;
-import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 
 /**
@@ -318,7 +317,9 @@ public class NativeBytes<U>
         throwExceptionIfReleased();
         @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
-        this.bytesStore(uncheckedCast(store));
+        @SuppressWarnings("unchecked")
+        BytesStore<Bytes<U>, U> bytesStore2 = store;
+        this.bytesStore(bytesStore2);
         try {
             tempStore.release(this);
         } catch (IllegalStateException e) {

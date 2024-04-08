@@ -59,6 +59,8 @@ public class UncheckedNativeBytes<U>
         extends AbstractReferenceCounted
         implements Bytes<U>, HasUncheckedRandomDataInput, DecimalAppender {
     private static final byte[] MIN_VALUE_TEXT = ("" + Long.MIN_VALUE).getBytes(ISO_8859_1);
+    @Deprecated(/* to remove in x.28 */)
+    private static final boolean APPEND_0 = Jvm.getBoolean("bytes.append.0", true);
 
     // The real capacity of the BytesStore this UncheckedNativeBytes operates on
     protected final long capacity;
@@ -81,7 +83,7 @@ public class UncheckedNativeBytes<U>
     // Tracks if the last number read had any digits
     private boolean lastNumberHadDigits = false;
     private Decimaliser decimaliser = StandardDecimaliser.STANDARD;
-    private boolean append0 = Jvm.getBoolean("bytes.append.0", true);
+    private boolean append0 = APPEND_0;
 
     /**
      * Constructs an UncheckedNativeBytes instance by wrapping around the provided Bytes object.

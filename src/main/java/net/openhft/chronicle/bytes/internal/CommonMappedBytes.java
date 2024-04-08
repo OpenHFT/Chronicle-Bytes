@@ -31,7 +31,6 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 import static net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash.IS_LITTLE_ENDIAN;
-import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 import static net.openhft.chronicle.core.util.Ints.requireNonNegative;
 import static net.openhft.chronicle.core.util.Longs.requireNonNegative;
 import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
@@ -298,7 +297,8 @@ public abstract class CommonMappedBytes extends MappedBytes {
         requireNonNull(s);
         ensureCapacity(writePosition() + length);
         long address = addressForWritePosition();
-        MappedBytesStore mbs = uncheckedCast(bytesStore());
+        @SuppressWarnings({"unchecked", "rawtypes"})
+        MappedBytesStore mbs = (MappedBytesStore) (BytesStore) bytesStore();
         Memory memory = mbs.memory;
         if (Jvm.isJava9Plus()) {
             byte[] bytes = extractBytes(s);

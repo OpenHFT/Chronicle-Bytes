@@ -22,7 +22,6 @@ import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
 
 import static net.openhft.chronicle.core.Jvm.uncheckedCast;
 
-
 /**
  * This interface is for additional description to be added to HexDumpBytes
  */
