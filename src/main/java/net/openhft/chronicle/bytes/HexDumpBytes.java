@@ -1374,11 +1374,13 @@ public class HexDumpBytes
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean fpAppend0() {
         return base.fpAppend0();
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Bytes<Void> fpAppend0(boolean append0) {
         base.fpAppend0(append0);
