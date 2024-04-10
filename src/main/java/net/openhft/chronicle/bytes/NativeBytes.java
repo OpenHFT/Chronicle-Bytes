@@ -44,7 +44,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * from the operating system which is on heap. It is also capable of handling memory allocation, resizing,
  * and checking boundaries to prevent overflows.
  * <p>
- * The class can be parameterized with a type <U> which represents the underlying type that the byte buffers
+ * The class can be parameterized with a type &lt;U> which represents the underlying type that the byte buffers
  * are intended to represent. This provides a way to use NativeBytes for any type that can be represented as bytes.
  *
  * @param <U> This represents the underlying type that the byte buffers are intended to represent.
