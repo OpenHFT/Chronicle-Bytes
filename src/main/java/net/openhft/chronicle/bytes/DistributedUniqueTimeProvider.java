@@ -284,6 +284,14 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
+     * A deduplicator to help recognise duplicate timestamps for a hostId
+     */
+    @Deprecated(/* to be removed in x.26 */)
+    public DistributedUniqueTimeDeduplicator deduplicator() {
+        return deduplicator;
+    }
+
+    /**
      * This is a static inner class responsible for holding the singleton instance
      * of the DistributedUniqueTimeProvider with the default hostId.
      * <p>
