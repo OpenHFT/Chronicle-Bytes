@@ -29,9 +29,12 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import java.io.File;
 
 /**
- * Provides unique timestamps across multiple systems by incorporating a host identifier into the timestamp.
+ * Provides unique timestamps across multiple systems by incorporating a host identifier into the timestamp, for microsecond and nanosecond resolution timestamps.
  * This class is particularly useful in distributed systems where clock synchronization and uniqueness
  * across hosts are critical. It implements {@link TimeProvider}.
+ * <p>
+ * NOTE: {@link #currentTimeMillis()} is not unique, it is just a call to the underlying provider as there isn't enough resolution to include the hostId.
+ * <p>
  *
  * Each timestamp generated is guaranteed to be unique across all hosts participating in the system.
  * The class uses a file-based mechanism to ensure that timestamps are not only unique across restarts
