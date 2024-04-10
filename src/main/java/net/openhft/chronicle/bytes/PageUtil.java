@@ -110,7 +110,7 @@ public final class PageUtil {
     /**
      * Returns page size obtained from auto-scanned hugetlbfs mount points
      * or OS default page size for a given absolute file path
-     * @param absolutePath
+     * @param absolutePath file path
      */
     @Positive
     public static int getPageSize(@NotNull String absolutePath) {
@@ -129,8 +129,8 @@ public final class PageUtil {
 
     /**
      * Whether given file is located on hugetlbfs
-     * @param absolutePath
-     * @return
+     * @param absolutePath file path
+     * @return true if file is located on hugetlbfs
      */
     public static boolean isHugePage(@NotNull String absolutePath) {
         return OS.isLinux() && getPageSize(absolutePath) != OS.defaultOsPageSize();

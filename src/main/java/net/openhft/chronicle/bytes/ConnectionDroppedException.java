@@ -26,7 +26,7 @@ import net.openhft.chronicle.core.io.IORuntimeException;
  * declared in a method or constructor's {@code throws} clause if it can be thrown
  * by the execution of the method or constructor and propagate outside the method
  * or constructor boundary.
- * 
+ * <p>
  * TODO Move to network where it is used.
  */
 public class ConnectionDroppedException extends IORuntimeException {
