@@ -1002,11 +1002,13 @@ public class UncheckedNativeBytes<U>
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public boolean fpAppend0() {
         return append0;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public Bytes<U> fpAppend0(boolean append0) {
         this.append0 = append0;
