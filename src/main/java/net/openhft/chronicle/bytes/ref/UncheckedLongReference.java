@@ -30,18 +30,12 @@ import java.nio.BufferOverflowException;
 import java.nio.BufferUnderflowException;
 
 /**
- * Represents a reference to a long value stored in bytes. This reference does not perform bounds checks
- * for performance reasons and should be used carefully.
+ * A class for managing references to long values stored in a {@link BytesStore} without performing bounds checking.
+ * This class is optimized for high performance in scenarios involving off-heap memory or memory-mapped files where bounds checks could impair performance.
  * <p>
- * This class is useful when operating with off-heap memory or memory-mapped file storage, where it is critical
- * to avoid unnecessary bounds checking for performance reasons.
- * <p>
- * This class extends {@link UnsafeCloseable} to provide functionality for safely closing resources.
- *
- * @implSpec Implementations must ensure that all methods are thread-safe.
- * @implNote When Jvm debugging is enabled, an instance of {@link BinaryLongReference} is returned by
- * {@link #create(BytesStore, long, int)} for additional safety. Otherwise, an instance of {@link UncheckedLongReference}
- * is returned for performance.
+ * This class is thread-safe provided that external synchronization is applied. It uses different implementations based on the JVM's debug status:
+ * in debug mode, it uses {@link BinaryLongReference} for safety checks; otherwise, it uses {@link UncheckedLongReference} for better performance.
+ * </p>
  * @see LongReference
  * @see ReferenceOwner
  * @see UnsafeCloseable
@@ -51,24 +45,25 @@ import java.nio.BufferUnderflowException;
 @SuppressWarnings("rawtypes")
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
 
-    private BytesStore bytes;
+    private BytesStore<?, ?> bytes;
 
     /**
-     * Creates an {@code UncheckedLongReference} or {@code BinaryLongReference} depending on JVM debug status.
+     * Factory method to create a {@code UncheckedLongReference} or {@code BinaryLongReference} based on the JVM's debug status.
+     * This method initializes the reference with a specific {@code BytesStore}, offset, and size.
      *
-     * @param bytesStore the {@code BytesStore} to be used for storing the long value.
-     * @param offset     the offset at which the long value is stored.
-     * @param size       the size of the long value in bytes.
-     * @return a new {@code LongReference} instance.
-     * @throws IllegalArgumentException If the size does not match the expected size.
-     * @throws BufferOverflowException  If the operation exceeds the bounds of the buffer.
-     * @throws BufferUnderflowException If the operation exceeds the bounds of the buffer.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytesStore The {@code BytesStore} used to store the long value.
+     * @param offset     The offset within the {@code BytesStore} where the long value starts.
+     * @param size       The size in bytes of the long value (expected to be 8 for a long).
+     * @return a new {@code LongReference} instance appropriate for the JVM debug status.
+     * @throws IllegalArgumentException If the provided size does not match the expected size of a long.
+     * @throws BufferOverflowException  If the offset and size exceed the bounds of the {@code BytesStore}.
+     * @throws BufferUnderflowException If the offset is negative or not within the bounds of the {@code BytesStore}.
+     * @throws ClosedIllegalStateException    If the {@code BytesStore} has already been closed.
+     * @throws ThreadingIllegalStateException If this method is called from multiple threads without proper synchronization.
      */
     @SuppressWarnings("unchecked")
     @NotNull
-    public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
+    public static LongReference create(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
@@ -76,15 +71,15 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
     }
 
     /**
-     * Stores the bytes of the long value reference.
+     * Associates this {@code UncheckedLongReference} with a {@code BytesStore}, specifying where the long value is stored and its length.
      *
-     * @param bytes  the {@code BytesStore} containing the bytes.
-     * @param offset the offset at which the long value is stored.
-     * @param length the length of the bytes in the {@code BytesStore}.
-     * @throws IllegalArgumentException If the length does not match the expected size.
-     * @throws BufferUnderflowException If the operation exceeds the bounds of the buffer.
-     * @throws ClosedIllegalStateException    If the resource has been released or closed.
-     * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
+     * @param bytes  the {@code BytesStore} containing the long value.
+     * @param offset the offset within the {@code BytesStore} where the long value starts.
+     * @param length the length in bytes of the long value (expected to be 8).
+     * @throws IllegalArgumentException If the specified length does not match the expected size of a long.
+     * @throws BufferUnderflowException If the specified length and offset are out of the bounds of the {@code BytesStore}.
+     * @throws ClosedIllegalStateException If this reference or the {@code BytesStore} has been closed.
+     * @throws ThreadingIllegalStateException If this method is accessed by multiple threads without proper synchronization.
      */
     @Override
     public void bytesStore(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
@@ -103,7 +98,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
 
     @NotNull
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, ?> bytesStore() {
         return bytes;
     }
 

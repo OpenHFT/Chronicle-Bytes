@@ -55,7 +55,7 @@ public class NativeBytesStore<U>
     private static final ByteBufferCleanerService CLEANER_SERVICE = CleanerServiceLocator.cleanerService();
 
     static {
-        Class directBB = ByteBuffer.allocateDirect(0).getClass();
+        Class<?> directBB = ByteBuffer.allocateDirect(0).getClass();
         BB_ADDRESS = Jvm.getField(directBB, "address");
         BB_CAPACITY = Jvm.getField(directBB, "capacity");
         BB_ATT = Jvm.getField(directBB, "att");
@@ -621,7 +621,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNegative(position);
         final long length = bs.readRemaining();
         long addressForWrite = addressForWrite(position);
@@ -743,7 +743,7 @@ public class NativeBytesStore<U>
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store)
+    public long copyTo(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException {
         if (store.isDirectMemory())
             return copyToDirect(store);
@@ -751,7 +751,7 @@ public class NativeBytesStore<U>
             return super.copyTo(store);
     }
 
-    public long copyToDirect(@NotNull BytesStore store)
+    public long copyToDirect(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException {
         long toCopy = Math.min(limit, store.safeLimit());
         if (toCopy > 0) {

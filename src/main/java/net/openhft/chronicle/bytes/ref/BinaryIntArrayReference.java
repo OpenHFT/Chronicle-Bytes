@@ -166,7 +166,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
-    public static long peakLength(@NotNull BytesStore bytes, @NonNegative long offset)
+    public static long peakLength(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset)
             throws BufferUnderflowException, IllegalStateException {
         final long capacity = bytes.readLong(offset + CAPACITY);
         assert capacity > 0 : "capacity too small " + capacity;
@@ -181,13 +181,13 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      * @throws ThreadingIllegalStateException if this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    protected void acceptNewBytesStore(@NotNull final BytesStore bytes)
+    protected void acceptNewBytesStore(@NotNull final BytesStore<?, ?> bytes)
             throws IllegalStateException {
-        if (this.bytes != null) {
-            this.bytes.release(this);
+        if (this.bytesStore != null) {
+            this.bytesStore.release(this);
         }
-        this.bytes = bytes;
-        this.bytes.reserve(this);
+        this.bytesStore = bytes;
+        this.bytesStore.reserve(this);
     }
 
     /**
@@ -218,7 +218,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileInt(offset + USED);
+        return bytesStore.readVolatileInt(offset + USED);
     }
 
     /**
@@ -234,7 +234,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeMaxLong(offset + USED, usedAtLeast);
+        bytesStore.writeMaxLong(offset + USED, usedAtLeast);
     }
 
     /**
@@ -251,7 +251,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readInt(VALUES + offset + (index << SHIFT));
+        return bytesStore.readInt(VALUES + offset + (index << SHIFT));
     }
 
     /**
@@ -268,7 +268,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeInt(VALUES + offset + (index << SHIFT), value);
+        bytesStore.writeInt(VALUES + offset + (index << SHIFT), value);
     }
 
     /**
@@ -285,7 +285,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileInt(VALUES + offset + (index << SHIFT));
+        return bytesStore.readVolatileInt(VALUES + offset + (index << SHIFT));
     }
 
     /**
@@ -303,7 +303,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException, BufferOverflowException, IllegalArgumentException {
         throwExceptionIfClosed();
 
-        ((BinaryIntReference) value).bytesStore(bytes, VALUES + offset + (index << SHIFT), 8);
+        ((BinaryIntReference) value).bytesStore(bytesStore, VALUES + offset + (index << SHIFT), 8);
     }
 
     /**
@@ -320,7 +320,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws BufferOverflowException, IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeOrderedInt(VALUES + offset + (index << SHIFT), value);
+        bytesStore.writeOrderedInt(VALUES + offset + (index << SHIFT), value);
     }
 
     /**
@@ -392,7 +392,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         final boolean retainsComments = bytes.retainedHexDumpDescription();
         if (retainsComments)
             bytes.writeHexDumpDescription("BinaryIntArrayReference");
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, ?> bytesStore = bytesStore();
         if (bytesStore == null) {
             long capacity = getCapacity();
             if (retainsComments)
@@ -421,7 +421,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        return bytes == null;
+        return bytesStore == null;
     }
 
     /**
@@ -435,7 +435,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        bytes = null;
+        bytesStore = null;
         offset = 0;
         length = 0;
     }
@@ -447,8 +447,8 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
      */
     @Nullable
     @Override
-    public BytesStore bytesStore() {
-        return bytes;
+    public BytesStore<?, ?> bytesStore() {
+        return bytesStore;
     }
 
     /**
@@ -479,7 +479,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null) {
+        if (bytesStore == null) {
             return "not set";
         }
         StringBuilder sb = new StringBuilder();
@@ -548,7 +548,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
             throws IllegalStateException {
         throwExceptionIfClosedInSetter();
 
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, ?> bytesStore = bytesStore();
         long len = sizeInBytes(arrayLength);
         if (bytesStore == null) {
             this.length = len;
@@ -578,7 +578,7 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
 
         if (value == INT_NOT_COMPLETE && binaryIntArrayReferences != null)
             binaryIntArrayReferences.add(new WeakReference<>(this));
-        return bytes.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
+        return bytesStore.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
     }
 }
 

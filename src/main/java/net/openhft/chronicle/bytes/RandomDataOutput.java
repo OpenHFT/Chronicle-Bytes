@@ -461,7 +461,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws NullPointerException        If the provided BytesStore is null.
      */
     @NotNull
-    default R write(@NonNegative long offsetInRDO, @NotNull BytesStore bytes)
+    default R write(@NonNegative long offsetInRDO, @NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         requireNonNull(bytes);
         return write(offsetInRDO, bytes, bytes.readPosition(), bytes.readRemaining());
@@ -608,7 +608,7 @@ public interface RandomDataOutput<R extends RandomDataOutput<R>> extends RandomC
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long write8bit(@NonNegative long position, @NotNull BytesStore bs) throws ClosedIllegalStateException, ThreadingIllegalStateException;
+    long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) throws ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**
      * Writes a portion of a string to this RandomDataOutput at the given position.

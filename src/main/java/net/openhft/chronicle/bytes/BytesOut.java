@@ -60,7 +60,7 @@ public interface BytesOut<U> extends
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
     @NotNull
-    default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class... additional)
+    default <T> T bytesMethodWriter(@NotNull Class<T> tClass, Class<?>... additional)
             throws IllegalArgumentException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);
         Class[] interfaces = ObjectUtils.addAll(tClass, additional);
@@ -98,7 +98,7 @@ public interface BytesOut<U> extends
      * @throws BufferUnderflowException       If there is not enough data available in the buffer.
      * @throws InvalidMarshallableException   If the object cannot be written due to invalid data.
      */
-    default void writeObject(Class componentType, Object obj)
+    default void writeObject(Class<?>componentType, Object obj)
             throws IllegalArgumentException, BufferOverflowException, ArithmeticException, ClosedIllegalStateException, BufferUnderflowException, InvalidMarshallableException, ThreadingIllegalStateException {
         if (!componentType.isInstance(obj))
             throw new IllegalArgumentException("Cannot serialize " + obj.getClass() + " as an " + componentType);
@@ -112,7 +112,7 @@ public interface BytesOut<U> extends
             return;
         }
         if (obj instanceof BytesStore) {
-            BytesStore bs = (BytesStore) obj;
+            BytesStore<?, ?> bs = (BytesStore) obj;
             writeStopBit(bs.readRemaining());
             write(bs);
             return;

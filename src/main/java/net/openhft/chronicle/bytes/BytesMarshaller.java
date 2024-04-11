@@ -79,7 +79,7 @@ public class BytesMarshaller<T> {
      * @param clazz the class from which to extract fields.
      * @param map   the map in which to store the fields.
      */
-    public static void getAllField(@NotNull Class clazz, @NotNull Map<String, Field> map) {
+    public static void getAllField(@NotNull Class<?> clazz, @NotNull Map<String, Field> map) {
         if (clazz != Object.class)
             getAllField(clazz.getSuperclass(), map);
         for (@NotNull Field field : clazz.getDeclaredFields()) {
@@ -192,7 +192,7 @@ public class BytesMarshaller<T> {
         }
 
         @NotNull
-        static Class extractClass(Type type0) {
+        static Class<?> extractClass(Type type0) {
             if (type0 instanceof Class)
                 return (Class) type0;
             else if (type0 instanceof ParameterizedType)
@@ -291,7 +291,7 @@ public class BytesMarshaller<T> {
         @Override
         protected void getValue(Object o, @NotNull BytesOut<?> write)
                 throws ClosedIllegalStateException, BufferOverflowException, IllegalArgumentException, IllegalAccessException {
-            @NotNull BytesStore bytes;
+            @NotNull BytesStore<?, ?> bytes;
             bytes = (BytesStore) field.get(o);
             if (bytes == null) {
                 BytesInternal.writeStopBitNeg1(write);
@@ -452,9 +452,9 @@ public class BytesMarshaller<T> {
         final Supplier<Map> collectionSupplier;
         private final Class<?> type;
         @NotNull
-        private final Class keyType;
+        private final Class<?> keyType;
         @NotNull
-        private final Class valueType;
+        private final Class<?> valueType;
 
         public MapFieldAccess(@NotNull Field field) {
             super(field);

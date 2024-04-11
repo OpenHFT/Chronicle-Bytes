@@ -46,7 +46,7 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
 @SuppressWarnings("rawtypes")
 public class VanillaBytes<U>
         extends AbstractBytes<U>
-        implements Byteable<Bytes<U>, U>, Comparable<CharSequence> {
+        implements Byteable, Comparable<CharSequence> {
 
     /**
      * Constructor for creating an instance of VanillaBytes with the given BytesStore,
@@ -57,7 +57,7 @@ public class VanillaBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    protected VanillaBytes(@NotNull BytesStore bytesStore)
+    protected VanillaBytes(@NotNull BytesStore<?, ?> bytesStore)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         this(bytesStore, bytesStore.writePosition(), bytesStore.writeLimit());
     }
@@ -73,7 +73,7 @@ public class VanillaBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    protected VanillaBytes(@NotNull BytesStore bytesStore, long writePosition, long writeLimit)
+    protected VanillaBytes(@NotNull BytesStore<?, ?> bytesStore, long writePosition, long writeLimit)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         super(uncheckedCast(bytesStore), writePosition, writeLimit);
     }
@@ -154,7 +154,7 @@ public class VanillaBytes<U>
         return true;
     }
 
-    private static boolean isEqual1(char[] chars, @NotNull BytesStore bytesStore, @NonNegative long readPosition)
+    private static boolean isEqual1(char[] chars, @NotNull BytesStore<?, ?> bytesStore, @NonNegative long readPosition)
             throws BufferUnderflowException {
         for (int i = 0; i < chars.length; i++) {
             int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -165,7 +165,7 @@ public class VanillaBytes<U>
     }
 
     @Java9
-    private static boolean isEqual1(byte[] bytes, byte coder, @NotNull BytesStore bytesStore, @NonNegative long readPosition)
+    private static boolean isEqual1(byte[] bytes, byte coder, @NotNull BytesStore<?, ?> bytesStore, @NonNegative long readPosition)
             throws BufferUnderflowException {
         for (int i = 0; i < bytes.length; i++) {
             int b = bytesStore.readByte(readPosition + i) & 0xFF;
@@ -191,8 +191,9 @@ public class VanillaBytes<U>
         return bytesStore.readVolatileLong(offset);
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    public void bytesStore(final @NotNull BytesStore<Bytes<U>, U> byteStore,
+    public void bytesStore(final @NotNull BytesStore byteStore,
                            final @NonNegative long offset,
                            final @NonNegative long length)
             throws ClosedIllegalStateException, IllegalArgumentException, BufferUnderflowException, ThreadingIllegalStateException {
@@ -204,10 +205,10 @@ public class VanillaBytes<U>
         writeLimit(offset + length);
     }
 
-    private void setBytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore)
+    private void setBytesStore(@NotNull BytesStore<?, U> bytesStore)
             throws ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         if (this.bytesStore != bytesStore) {
-            @Nullable BytesStore oldBS = this.bytesStore;
+            @Nullable BytesStore<?, ?> oldBS = this.bytesStore;
             this.bytesStore(bytesStore);
             bytesStore.reserve(this);
             oldBS.release(this);
@@ -447,7 +448,7 @@ public class VanillaBytes<U>
 
     @Override
     @NotNull
-    public Bytes<U> append8bit(@NotNull BytesStore bs)
+    public Bytes<U> append8bit(@NotNull BytesStore<?, ?> bs)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         long remaining = bs.readLimit() - bs.readPosition();
         return write0(bs, 0L, remaining);
@@ -455,7 +456,7 @@ public class VanillaBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
+    public Bytes<U> write(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         requireNonNull(bytes);
         if ((offset | length) < 0) {
@@ -466,7 +467,7 @@ public class VanillaBytes<U>
     }
 
     @NotNull
-    private VanillaBytes<U> write0(@NotNull BytesStore bytes, @NonNegative long offset, long length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
+    private VanillaBytes<U> write0(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, long length) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         ensureCapacity(writePosition() + length);
         if (length == (int) length) {
             if (bytes.canReadDirect(length) && canWriteDirect(length)) {
@@ -598,7 +599,7 @@ public class VanillaBytes<U>
     }
 
     @Override
-    public boolean equalBytes(@NotNull BytesStore bytesStore, long length)
+    public boolean equalBytes(@NotNull BytesStore<?, ?> bytesStore, long length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         requireNonNull(bytesStore);
         ReportUnoptimised.reportOnce();

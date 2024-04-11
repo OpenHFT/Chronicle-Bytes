@@ -65,7 +65,7 @@ public abstract class AbstractBytes<U>
     private final String name;
     private final UncheckedRandomDataInput uncheckedRandomDataInput = new UncheckedRandomDataInputHolder();
     @NotNull
-    protected BytesStore<Bytes<U>, U> bytesStore;
+    protected BytesStore<?, U> bytesStore;
     protected long readPosition;
     protected long writeLimit;
     protected boolean isPresent;
@@ -936,7 +936,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
-    public @NotNull Bytes<U> write8bit(@Nullable BytesStore bs)
+    public @NotNull Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs)
             throws BufferOverflowException, ClosedIllegalStateException, BufferUnderflowException, ThreadingIllegalStateException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
@@ -951,7 +951,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs)
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (position < start()) {
             if (position < 0)
@@ -1130,7 +1130,7 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> prewrite(@NotNull BytesStore bytes)
+    public Bytes<U> prewrite(@NotNull BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException {
         long offset = prewriteOffsetPositionMoved(bytes.readRemaining());
         bytesStore.write(offset, bytes);
@@ -1430,11 +1430,11 @@ public abstract class AbstractBytes<U>
 
     @NotNull
     @Override
-    public BytesStore<Bytes<U>, U> bytesStore() {
+    public BytesStore<?, U> bytesStore() {
         return bytesStore;
     }
 
-    protected void bytesStore(BytesStore<Bytes<U>, U> bytesStore) {
+    protected void bytesStore(BytesStore<?, U> bytesStore) {
         this.bytesStore = BytesInternal.failIfBytesOnBytes(bytesStore);
     }
 
@@ -1488,7 +1488,7 @@ public abstract class AbstractBytes<U>
     }
 
     @Override
-    public boolean startsWith(@Nullable final BytesStore bytesStore) throws ClosedIllegalStateException {
+    public boolean startsWith(@Nullable final BytesStore<?, ?> bytesStore) throws ClosedIllegalStateException {
         // This class implements HasUncheckedRandomDataInput, so we could potentially use
         // the unchecked version of startsWith
         return bytesStore != null && BytesInternal.startsWithUnchecked(this, bytesStore);

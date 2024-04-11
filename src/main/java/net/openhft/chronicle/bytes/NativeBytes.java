@@ -64,7 +64,7 @@ public class NativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public NativeBytes(@NotNull final BytesStore store, @NonNegative final long capacity)
+    public NativeBytes(@NotNull final BytesStore<?, ?> store, @NonNegative final long capacity)
             throws IllegalArgumentException, ClosedIllegalStateException {
         super(store, 0, capacity);
         this.capacity = capacity;
@@ -77,7 +77,7 @@ public class NativeBytes<U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    public NativeBytes(@NotNull final BytesStore store)
+    public NativeBytes(@NotNull final BytesStore<?, ?> store)
             throws IllegalArgumentException, ClosedIllegalStateException {
         this(store, store.capacity());
     }
@@ -296,14 +296,16 @@ public class NativeBytes<U>
 
     private void resizeHelper(@NonNegative final long size,
                               final boolean isByteBufferBacked) throws ClosedIllegalStateException, ThreadingIllegalStateException {
-        final BytesStore store;
+        final BytesStore<Bytes<U>, U> store;
         int position = 0;
         try {
             if (isByteBufferBacked && size <= MAX_HEAP_CAPACITY) {
                 position = ((ByteBuffer) bytesStore.underlyingObject()).position();
                 store = allocate(size);
             } else {
-                store = BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                @SuppressWarnings("unchecked")
+                BytesStore<Bytes<U>, U> store0 = (BytesStore<Bytes<U>, U>) BytesStore.lazyNativeBytesStoreWithFixedCapacity(size);
+                store = store0;
                 if (referenceCounted.unmonitored())
                     AbstractReferenceCounted.unmonitor(store);
             }
@@ -315,7 +317,7 @@ public class NativeBytes<U>
         }
 
         throwExceptionIfReleased();
-        @Nullable final BytesStore<Bytes<U>, U> tempStore = this.bytesStore;
+        @Nullable final BytesStore<?, U> tempStore = this.bytesStore;
         this.bytesStore.copyTo(store);
         @SuppressWarnings("unchecked")
         BytesStore<Bytes<U>, U> bytesStore2 = store;
@@ -336,21 +338,19 @@ public class NativeBytes<U>
     }
 
     @NotNull
-    private BytesStore allocate(@NonNegative long size) {
-        final BytesStore store;
-        store = allocateNewByteBufferBackedStore(Maths.toInt32(size));
-        return store;
+    private BytesStore<Bytes<U>, U> allocate(@NonNegative long size) {
+        return allocateNewByteBufferBackedStore(Maths.toInt32(size));
     }
 
     @Override
-    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<?, U> bytesStore) {
         if (capacity < bytesStore.capacity())
             capacity = bytesStore.capacity();
         super.bytesStore(bytesStore);
     }
 
     @Override
-    public void bytesStore(@NotNull BytesStore<Bytes<U>, U> byteStore, @NonNegative long offset, @NonNegative long length)
+    public void bytesStore(@NotNull BytesStore byteStore, @NonNegative long offset, @NonNegative long length)
             throws IllegalArgumentException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(byteStore);
         if (capacity < offset + length)
@@ -358,12 +358,13 @@ public class NativeBytes<U>
         super.bytesStore(byteStore, offset, length);
     }
 
+    @SuppressWarnings("unchecked")
     @NotNull
-    private BytesStore allocateNewByteBufferBackedStore(@NonNegative final int size) {
+    private BytesStore<Bytes<U>, U> allocateNewByteBufferBackedStore(@NonNegative final int size) {
         if (isDirectMemory()) {
-            return BytesStore.elasticByteBuffer(size, capacity());
+            return (BytesStore<Bytes<U>, U>) BytesStore.elasticByteBuffer(size, capacity());
         } else {
-            return BytesStore.wrap(ByteBuffer.allocate(size));
+            return (BytesStore<Bytes<U>, U>) BytesStore.wrap(ByteBuffer.allocate(size));
         }
     }
 

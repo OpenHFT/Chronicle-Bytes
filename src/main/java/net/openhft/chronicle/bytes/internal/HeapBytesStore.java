@@ -317,7 +317,7 @@ public class HeapBytesStore<U>
 
     @SuppressWarnings("rawtypes")
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         int length0 = Math.toIntExact(bs.readRemaining());
         position = BytesUtil.writeStopBit(this, position, length0);

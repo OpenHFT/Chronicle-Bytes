@@ -35,7 +35,7 @@ import java.nio.ByteOrder;
  * @see BytesStore
  */
 @SuppressWarnings("rawtypes")
-public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
+public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     /**
      * Singleton instance of VanillaBytesStoreHash.
      */
@@ -77,7 +77,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    public long applyAsLong(@NotNull BytesStore store) {
+    public long applyAsLong(@NotNull BytesStore<?, ?> store) {
         int remaining = Math.toIntExact(store.realReadRemaining());
         try {
             return applyAsLong(store, remaining);
@@ -97,7 +97,7 @@ public enum VanillaBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
+    public long applyAsLong(BytesStore<?, ?> bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long start = bytes.readPosition();
         if (length <= 8) {
             if (length == 0)

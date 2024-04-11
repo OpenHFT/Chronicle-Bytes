@@ -72,7 +72,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
     }
 
     @Override
-    protected void bytesStore(@NotNull BytesStore<Bytes<U>, U> bytesStore) {
+    protected void bytesStore(@NotNull BytesStore<?, U> bytesStore) {
         if (capacity() < bytesStore.capacity())
             capacity = bytesStore.capacity();
         this.bytesStore = bytesStore;
@@ -239,6 +239,7 @@ public class GuardedNativeBytes<U> extends NativeBytes<U> {
                     + " but was " + STRING_FOR_CODE[type & 0xFF]);
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public @NotNull String toHexString() {
         if (bytesStore instanceof Bytes)

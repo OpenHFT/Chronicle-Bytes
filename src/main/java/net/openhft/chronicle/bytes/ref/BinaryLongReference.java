@@ -54,6 +54,7 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * @see BytesStore
  * @see LongReference
  */
+@SuppressWarnings("rawtypes")
 public class BinaryLongReference extends AbstractReference implements LongReference {
     public static final long LONG_NOT_COMPLETE = -1;
 
@@ -102,7 +103,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null) return "bytes is null";
+        if (bytesStore == null) return "bytes is null";
         try {
             return "value: " + getValue();
         } catch (Throwable e) {
@@ -120,7 +121,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     @Override
     public long getValue()
             throws IllegalStateException {
-        return bytes == null ? 0L : bytes.readLong(offset);
+        return bytesStore == null ? 0L : bytesStore.readLong(offset);
     }
 
     /**
@@ -134,7 +135,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public void setValue(long value)
             throws IllegalStateException {
         try {
-            bytes.writeLong(offset, value);
+            bytesStore.writeLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -152,7 +153,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public long getVolatileValue()
             throws IllegalStateException {
         try {
-            return bytes.readVolatileLong(offset);
+            return bytesStore.readVolatileLong(offset);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -170,7 +171,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public void setVolatileValue(long value)
             throws IllegalStateException {
         try {
-            bytes.writeVolatileLong(offset, value);
+            bytesStore.writeVolatileLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -188,7 +189,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public void setOrderedValue(long value)
             throws IllegalStateException {
         try {
-            bytes.writeOrderedLong(offset, value);
+            bytesStore.writeOrderedLong(offset, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -207,7 +208,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public long addValue(long delta)
             throws IllegalStateException {
         try {
-            return bytes.addAndGetLong(offset, delta);
+            return bytesStore.addAndGetLong(offset, delta);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;
@@ -242,7 +243,7 @@ public class BinaryLongReference extends AbstractReference implements LongRefere
     public boolean compareAndSwapValue(long expected, long value)
             throws IllegalStateException {
         try {
-            return bytes.compareAndSwapLong(offset, expected, value);
+            return bytesStore.compareAndSwapLong(offset, expected, value);
         } catch (NullPointerException e) {
             throwExceptionIfClosed();
             throw e;

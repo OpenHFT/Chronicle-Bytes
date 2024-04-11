@@ -815,7 +815,7 @@ public class UncheckedNativeBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> prewrite(@NotNull BytesStore bytes)
+    public Bytes<U> prewrite(@NotNull BytesStore<?, ?> bytes)
             throws IllegalStateException, BufferOverflowException {
         long offsetInRDO = prewriteOffsetPositionMoved(bytes.length());
         bytesStore.write(offsetInRDO, bytes);
@@ -910,7 +910,7 @@ public class UncheckedNativeBytes<U>
 
     @Nullable
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, U> bytesStore() {
         return bytesStore;
     }
 
@@ -954,7 +954,7 @@ public class UncheckedNativeBytes<U>
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException {
         long actualUTF8Length = AppendableUtil.findUtf8Length(chars, offset, length);
         ensureCapacity(writePosition + actualUTF8Length);
-        @NotNull BytesStore nbs = this.bytesStore;
+        @NotNull BytesStore<?, ?> nbs = this.bytesStore;
         long position = ((NativeBytesStore) nbs).appendUtf8(writePosition(), chars, offset, length);
         writePosition(position);
         return this;
@@ -1057,7 +1057,7 @@ public class UncheckedNativeBytes<U>
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         return bytesStore.write8bit(position, bs);
     }
 
@@ -1066,7 +1066,7 @@ public class UncheckedNativeBytes<U>
         return bytesStore.write8bit(position, s, start, length);
     }
 
-    public Bytes<U> write8bit(@Nullable BytesStore bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
+    public Bytes<U> write8bit(@Nullable BytesStore<?, ?> bs) throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         if (bs == null) {
             BytesInternal.writeStopBitNeg1(this);
 

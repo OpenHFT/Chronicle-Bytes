@@ -41,6 +41,7 @@ import static net.openhft.chronicle.bytes.BytesUtil.roundUpTo8ByteAlign;
  * {@code !!atomic { locked: false, value: 0000000000 }}
  * 
  */
+@SuppressWarnings("rawtypes")
 public class TextIntReference extends AbstractReference implements IntValue {
     private static final byte[] template = "!!atomic {  locked: false, value: 0000000000 }".getBytes(ISO_8859_1);
     private static final int FALSE = 'f' | ('a' << 8) | ('l' << 16) | ('s' << 24);
@@ -81,13 +82,13 @@ public class TextIntReference extends AbstractReference implements IntValue {
         try {
             long alignedOffset = roundUpTo8ByteAlign(offset);
             long lockValueOffset = alignedOffset + LOCKED;
-            int lockValue = bytes.readVolatileInt(lockValueOffset);
+            int lockValue = bytesStore.readVolatileInt(lockValueOffset);
             if (lockValue != FALSE && lockValue != TRUE)
                 throw new IllegalStateException("lockValue: " + lockValue);
             while (true) {
-                if (bytes.compareAndSwapInt(lockValueOffset, FALSE, TRUE)) {
+                if (bytesStore.compareAndSwapInt(lockValueOffset, FALSE, TRUE)) {
                     int t = call.getAsInt();
-                    bytes.writeOrderedInt(lockValueOffset, FALSE);
+                    bytesStore.writeOrderedInt(lockValueOffset, FALSE);
                     return t;
                 }
             }
@@ -108,7 +109,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        return withLock(() -> (int) bytes.parseLong(offset + VALUE));
+        return withLock(() -> (int) bytesStore.parseLong(offset + VALUE));
     }
 
     /**
@@ -124,7 +125,7 @@ public class TextIntReference extends AbstractReference implements IntValue {
         throwExceptionIfClosedInSetter();
 
         withLock(() -> {
-            bytes.append(offset + VALUE, value, DIGITS);
+            bytesStore.append(offset + VALUE, value, DIGITS);
             return INT_TRUE;
         });
     }
@@ -151,8 +152,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
         throwExceptionIfClosed();
 
         return withLock(() -> {
-            long value = bytes.parseLong(offset + VALUE) + delta;
-            bytes.append(offset + VALUE, value, DIGITS);
+            long value = bytesStore.parseLong(offset + VALUE) + delta;
+            bytesStore.append(offset + VALUE, value, DIGITS);
             return (int) value;
         });
     }
@@ -171,8 +172,8 @@ public class TextIntReference extends AbstractReference implements IntValue {
         throwExceptionIfClosed();
 
         return withLock(() -> {
-            if (bytes.parseLong(offset + VALUE) == expected) {
-                bytes.append(offset + VALUE, value, DIGITS);
+            if (bytesStore.parseLong(offset + VALUE) == expected) {
+                bytesStore.append(offset + VALUE, value, DIGITS);
                 return INT_TRUE;
             }
             return INT_FALSE;

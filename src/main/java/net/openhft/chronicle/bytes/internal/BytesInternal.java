@@ -191,8 +191,8 @@ enum BytesInternal {
      * The vectorizedMismatch implementation can be optimized efficiently by C2 to obtain an approximate 8x speed up when performing a mismatch on byte[] arrays (of a suitable size to overcome fixed costs).
      * The contract of vectorizedMismatch is simple enough that it can be made an intrinsic (see JDK-8044082) and leverage SIMDs instructions to perform operations up to a width of say 512 bits on supported architectures. Thus even further performance improvements may be possible.
      */
-    private static Boolean java11ContentEqualUsingVectorizedMismatch(@NotNull final BytesStore left,
-                                                                     @NotNull final BytesStore right) {
+    private static Boolean java11ContentEqualUsingVectorizedMismatch(@NotNull final BytesStore<?, ?> left,
+                                                                     @NotNull final BytesStore<?, ?> right) {
         try {
             final Object leftObject;
             final long leftOffset;
@@ -201,7 +201,7 @@ enum BytesInternal {
                 leftObject = null;
                 leftOffset = left.addressForRead(left.readPosition());
             } else {
-                BytesStore bytesStore = left.bytesStore();
+                BytesStore<?, ?> bytesStore = left.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
                     return null;
 
@@ -217,7 +217,7 @@ enum BytesInternal {
                 rightObject = null;
                 rightOffset = right.addressForRead(right.readPosition());
             } else {
-                BytesStore bytesStore = right.bytesStore();
+                BytesStore<?, ?> bytesStore = right.bytesStore();
                 if (!(bytesStore instanceof HeapBytesStore))
                     return null;
 
@@ -342,8 +342,8 @@ enum BytesInternal {
 
     @SuppressWarnings("unchecked")
     static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
-    boolean contentEqualsLong(@NotNull final BytesStore a,
-                              @NotNull final BytesStore b) {
+    boolean contentEqualsLong(@NotNull final BytesStore<?, ?> a,
+                              @NotNull final BytesStore<?, ?> b) {
         final long aLength = a.realReadRemaining();
         final long bLength = b.realReadRemaining();
         if (a instanceof HasUncheckedRandomDataInput && b instanceof HasUncheckedRandomDataInput) {
@@ -362,8 +362,8 @@ enum BytesInternal {
     }
 
     // a >= b here and we also know it is safe to read bLength
-    private static boolean contentEqualsLong(@NotNull final BytesStore a,
-                                             @NotNull final BytesStore b,
+    private static boolean contentEqualsLong(@NotNull final BytesStore<?, ?> a,
+                                             @NotNull final BytesStore<?, ?> b,
                                              @NonNegative final long aLength,
                                              @NonNegative final long bLength) throws ClosedIllegalStateException {
         assert SKIP_ASSERTIONS || aLength >= bLength;
@@ -428,7 +428,7 @@ enum BytesInternal {
         return true;
     }
 
-    public static boolean startsWith(@NotNull BytesStore a, @NotNull BytesStore b)
+    public static boolean startsWith(@NotNull BytesStore<?, ?> a, @NotNull BytesStore<?, ?> b)
             throws ClosedIllegalStateException {
         throwExceptionIfReleased(a);
         throwExceptionIfReleased(b);
@@ -439,9 +439,9 @@ enum BytesInternal {
         return startsWith(a, b, a.readPosition(), b.readPosition(), bRealReadRemaining);
     }
 
-    public static <U extends BytesStore & HasUncheckedRandomDataInput>
+    public static <U extends BytesStore<?, ?> & HasUncheckedRandomDataInput>
     boolean startsWithUnchecked(@NotNull final U a,
-                                @NotNull final BytesStore b) {
+                                @NotNull final BytesStore<?, ?> b) {
         throwExceptionIfReleased(a);
         throwExceptionIfReleased(b);
         final long bRealReadRemaining = b.realReadRemaining();
@@ -487,8 +487,8 @@ enum BytesInternal {
         return true;
     }
 
-    private static boolean startsWith(@NotNull final BytesStore a,
-                                      @NotNull final BytesStore b,
+    private static boolean startsWith(@NotNull final BytesStore<?, ?> a,
+                                      @NotNull final BytesStore<?, ?> b,
                                       @NonNegative final long aPos,
                                       @NonNegative final long bPos,
                                       @NonNegative final long length) {
@@ -1509,7 +1509,7 @@ enum BytesInternal {
         return size == Bytes.MAX_CAPACITY ? "8EiB" : size;
     }
 
-    public static String to8bitString(@NotNull BytesStore bytes) throws ClosedIllegalStateException {
+    public static String to8bitString(@NotNull BytesStore<?, ?> bytes) throws ClosedIllegalStateException {
         final long pos = bytes.readPosition();
         throwExceptionIfReleased(bytes);
         int len = (int) Math.min(Integer.MAX_VALUE, bytes.readRemaining());
@@ -3118,7 +3118,7 @@ enum BytesInternal {
         b.rawWriteByte((byte) (millis % 10 + '0'));
     }
 
-    public static boolean equalBytesAny(@NotNull BytesStore b1, @NotNull BytesStore b2, @NonNegative long readRemaining)
+    public static boolean equalBytesAny(@NotNull BytesStore<?, ?> b1, @NotNull BytesStore<?, ?> b2, @NonNegative long readRemaining)
             throws BufferUnderflowException, ClosedIllegalStateException {
 
         if (Math.min(b1.readRemaining(), b2.readRemaining()) < readRemaining)
@@ -3275,9 +3275,9 @@ enum BytesInternal {
     }
 
     @NotNull
-    public static BytesStore subBytes(RandomDataInput from, @NonNegative long start, @NonNegative long length)
+    public static BytesStore<?, ?> subBytes(RandomDataInput from, @NonNegative long start, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException {
-        @NotNull BytesStore ret;
+        @NotNull BytesStore<?, ?> ret;
         if (from.isDirectMemory()) {
             ret = BytesStore.nativeStore(Math.max(0, length));
         } else {
@@ -3356,24 +3356,24 @@ enum BytesInternal {
             out.writeStopBit(i);
     }
 
-    public static ByteBuffer asByteBuffer(@NotNull BytesStore bytesStore)
+    public static ByteBuffer asByteBuffer(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER_TL, bytesStore);
     }
 
-    public static ByteBuffer asByteBuffer2(@NotNull BytesStore bytesStore)
+    public static ByteBuffer asByteBuffer2(@NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return asByteBuffer(BYTE_BUFFER2_TL, bytesStore);
     }
 
-    private static ByteBuffer asByteBuffer(@NotNull ThreadLocal<ByteBuffer> byteBufferTL, @NotNull BytesStore bytesStore)
+    private static ByteBuffer asByteBuffer(@NotNull ThreadLocal<ByteBuffer> byteBufferTL, @NotNull BytesStore<?, ?> bytesStore)
             throws BufferUnderflowException, ClosedIllegalStateException {
         ByteBuffer byteBuffer = byteBufferTL.get();
         assignBytesStoreToByteBuffer(bytesStore, byteBuffer);
         return byteBuffer;
     }
 
-    public static void assignBytesStoreToByteBuffer(@NotNull BytesStore bytesStore, @NotNull ByteBuffer byteBuffer)
+    public static void assignBytesStoreToByteBuffer(@NotNull BytesStore<?, ?> bytesStore, @NotNull ByteBuffer byteBuffer)
             throws BufferUnderflowException, ClosedIllegalStateException {
         long address = bytesStore.addressForRead(bytesStore.readPosition());
         long capacity = bytesStore.realReadRemaining();
@@ -3382,7 +3382,7 @@ enum BytesInternal {
     }
 
     private static boolean canReadBytesAt(
-            final BytesStore bs, final long offset, final int length) {
+            final BytesStore<?, ?> bs, final long offset, final int length) {
         return bs.readLimit() - offset >= length;
     }
 
@@ -3395,7 +3395,7 @@ enum BytesInternal {
         }
     }
 
-    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
+    public static void copy8bit(BytesStore<?, ?> bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
         throwExceptionIfReleased(bs);
         int length0 = Math.toIntExact(length);
         int i = 0;

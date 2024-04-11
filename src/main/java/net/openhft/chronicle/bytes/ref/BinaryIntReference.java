@@ -54,6 +54,7 @@ import java.nio.BufferUnderflowException;
  * @see BytesStore
  * @see IntValue
  */
+@SuppressWarnings("rawtypes")
 public class BinaryIntReference extends AbstractReference implements IntValue {
     public static final int INT_NOT_COMPLETE = Integer.MIN_VALUE;
 
@@ -100,7 +101,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
     @NotNull
     @Override
     public String toString() {
-        if (bytes == null)
+        if (bytesStore == null)
             return "bytes is null";
         try {
             return "value: " + getValue();
@@ -122,7 +123,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes == null ? 0 : bytes.readInt(offset);
+        return bytesStore == null ? 0 : bytesStore.readInt(offset);
     }
 
     /**
@@ -138,7 +139,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeInt(offset, value);
+        bytesStore.writeInt(offset, value);
     }
 
     /**
@@ -154,7 +155,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.readVolatileInt(offset);
+        return bytesStore.readVolatileInt(offset);
     }
 
     /**
@@ -170,7 +171,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosedInSetter();
 
-        bytes.writeOrderedInt(offset, value);
+        bytesStore.writeOrderedInt(offset, value);
     }
 
     /**
@@ -187,7 +188,7 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        return bytes.addAndGetInt(offset, delta);
+        return bytesStore.addAndGetInt(offset, delta);
     }
 
     /**
@@ -223,6 +224,6 @@ public class BinaryIntReference extends AbstractReference implements IntValue {
             throws IllegalStateException, BufferOverflowException {
         throwExceptionIfClosed();
 
-        return bytes.compareAndSwapInt(offset, expected, value);
+        return bytesStore.compareAndSwapInt(offset, expected, value);
     }
 }

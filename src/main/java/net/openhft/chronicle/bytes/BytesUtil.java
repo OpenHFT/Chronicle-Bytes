@@ -116,7 +116,7 @@ public enum BytesUtil {
      */
     static int[] isTriviallyCopyable0(@NotNull Class<?> clazz) {
         if (clazz.isArray()) {
-            Class componentType = clazz.getComponentType();
+            Class<?>componentType = clazz.getComponentType();
             if (componentType.isPrimitive())
                 return new int[]{MEMORY.arrayBaseOffset(clazz)};
             return NO_INTS;
@@ -167,7 +167,7 @@ public enum BytesUtil {
      * @param length Length of the field area.
      * @return true if all fields in the range are trivially copyable, false otherwise.
      */
-    public static boolean isTriviallyCopyable(Class clazz, @NonNegative int offset, @NonNegative int length) {
+    public static boolean isTriviallyCopyable(Class<?>clazz, @NonNegative int offset, @NonNegative int length) {
         int[] ints = TRIVIALLY_COPYABLE.get(clazz);
         if (ints.length == 0)
             return false;
@@ -180,7 +180,7 @@ public enum BytesUtil {
      * @param clazz Class to get the range for.
      * @return An array of integers representing the range in which the class is trivially copyable.
      */
-    public static int[] triviallyCopyableRange(Class clazz) {
+    public static int[] triviallyCopyableRange(Class<?>clazz) {
         return TRIVIALLY_COPYABLE.get(clazz);
     }
 
@@ -190,7 +190,7 @@ public enum BytesUtil {
      * @param clazz The class to examine.
      * @return The offset of the first byte that is trivially copyable.
      */
-    public static int triviallyCopyableStart(Class clazz) {
+    public static int triviallyCopyableStart(Class<?>clazz) {
         return triviallyCopyableRange(clazz)[0];
     }
 
@@ -201,7 +201,7 @@ public enum BytesUtil {
      * @param clazz The class to examine.
      * @return The length of the trivially copyable data.
      */
-    public static int triviallyCopyableLength(Class clazz) {
+    public static int triviallyCopyableLength(Class<?>clazz) {
         final int[] startEnd = triviallyCopyableRange(clazz);
         return startEnd[1] - startEnd[0];
     }
@@ -462,7 +462,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    public static long writeStopBit(BytesStore bs, @NonNegative long offset, @NonNegative long n)
+    public static long writeStopBit(BytesStore<?, ?> bs, @NonNegative long offset, @NonNegative long n)
             throws IllegalStateException, BufferOverflowException, ClosedIllegalStateException {
         return BytesInternal.writeStopBit(bs, offset, n);
     }
@@ -653,7 +653,7 @@ public enum BytesUtil {
      */
     public static String toDebugString(@NotNull RandomDataInput bytes, @NonNegative long start, @NonNegative long maxLength)
             throws IllegalStateException, BufferUnderflowException {
-        BytesStore bytes2 = bytes.subBytes(start, maxLength);
+        BytesStore<?, ?> bytes2 = bytes.subBytes(start, maxLength);
         return bytes2.toDebugString(maxLength);
     }
 
@@ -666,7 +666,7 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    public static void copy8bit(BytesStore bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
+    public static void copy8bit(BytesStore<?, ?> bs, long addressForWrite, @NonNegative long length) throws ClosedIllegalStateException {
         BytesInternal.copy8bit(bs, addressForWrite, length);
     }
 
@@ -763,15 +763,13 @@ public enum BytesUtil {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    public static BytesStore<Bytes<Void>, Void> copyOf(@NotNull final Bytes<?> bytes)
+    public static Bytes<Void> copyOf(@NotNull final Bytes<?> bytes)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         final long remaining = bytes.readRemaining();
-        if (remaining == 0)
-            return BytesStore.empty();
         final long position = bytes.readPosition();
 
-        final Bytes<Void> bytes2 = Bytes.allocateDirect(remaining);
+        final Bytes<Void> bytes2 = Bytes.allocateDirect(Math.min(1, remaining));
         bytes2.write(bytes, position, remaining);
         return bytes2;
     }
