@@ -73,7 +73,7 @@ public enum AppendableUtil {
      * @throws BufferUnderflowException      If the BytesStore doesn't contain enough data
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
-    public static void parseUtf8(@NotNull BytesStore bs, StringBuilder sb, boolean utf, @NonNegative int length)
+    public static void parseUtf8(@NotNull BytesStore<?, ?> bs, StringBuilder sb, boolean utf, @NonNegative int length)
             throws UTFDataFormatRuntimeException, BufferUnderflowException, ClosedIllegalStateException {
         BytesInternal.parseUtf8(bs, bs.readPosition(), sb, utf, length);
     }

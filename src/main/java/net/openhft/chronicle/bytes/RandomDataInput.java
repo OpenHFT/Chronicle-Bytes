@@ -455,7 +455,7 @@ public interface RandomDataInput extends RandomCommon {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    default BytesStore subBytes(@NonNegative long start, @NonNegative long length)
+    default BytesStore<?, ?> subBytes(@NonNegative long start, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException {
         return BytesInternal.subBytes(this, start, length);
     }

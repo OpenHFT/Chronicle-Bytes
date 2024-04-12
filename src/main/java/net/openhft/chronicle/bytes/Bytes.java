@@ -364,7 +364,7 @@ public interface Bytes<U> extends
     @NotNull
     static Bytes<byte[]> wrapForWrite(byte[] byteArray) {
         requireNonNull(byteArray);
-        final BytesStore bs = BytesStore.wrap(byteArray);
+        final BytesStore<?, byte[]> bs = BytesStore.wrap(byteArray);
         try {
             return bs.bytesForWrite();
         } finally {
@@ -742,7 +742,6 @@ public interface Bytes<U> extends
     }
 
     /**
-     * @inheritDoc <P>
      * If this Bytes {@link #isElastic()} the {@link #realCapacity()} can be
      * lower than the virtual {@link #capacity()}.
      */
@@ -898,7 +897,7 @@ public interface Bytes<U> extends
             throws IllegalStateException, ClosedIllegalStateException, ThreadingIllegalStateException {
         throwExceptionIfReleased(this);
 
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, U> bytesStore = bytesStore();
         assert bytesStore != null : "bytesStore is null";
         return isClear()
                 ? bytesStore.bytesForRead()
@@ -921,7 +920,7 @@ public interface Bytes<U> extends
             throws IllegalStateException, ClosedIllegalStateException {
         throwExceptionIfReleased(this);
 
-        BytesStore bytesStore = bytesStore();
+        BytesStore<?, U> bytesStore = bytesStore();
         assert bytesStore != null : "bytesStore is null";
         return new VanillaBytes<>(bytesStore, writePosition(), writeLimit());
     }
@@ -936,7 +935,7 @@ public interface Bytes<U> extends
      */
     @Override
     @Nullable
-    BytesStore bytesStore();
+    BytesStore<?, U> bytesStore();
 
     /**
      * Compares the contents of this Bytes object with the provided {@code other} string for equality.
@@ -985,7 +984,7 @@ public interface Bytes<U> extends
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    default long copyTo(@NotNull final BytesStore targetByteStore)
+    default long copyTo(@NotNull final BytesStore<?, ?> targetByteStore)
             throws ClosedIllegalStateException {
         return BytesStore.super.copyTo(targetByteStore);
     }
@@ -1132,7 +1131,7 @@ public interface Bytes<U> extends
      * @throws NullPointerException        If the provided {@code source } is {@code null}
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      */
-    default int indexOf(@NotNull BytesStore source, @NonNegative int fromIndex)
+    default int indexOf(@NotNull BytesStore<?, ?> source, @NonNegative int fromIndex)
             throws ClosedIllegalStateException {
         // TODO shouldn't fromIndex be absolute instead of relative
         throwExceptionIfReleased(this);

@@ -294,7 +294,7 @@ public class BytesTest extends BytesTestCommon {
     public void testEqualBytesWithSecondStoreBeingLonger()
             throws IORuntimeException {
 
-        BytesStore store1 = null, store2 = null;
+        BytesStore<?, ?> store1 = null, store2 = null;
         try {
             store1 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N1");
             store2 = alloc1.elasticBytes(64).append("TW-TRSY-20181217-NY572677_3256N15");
@@ -1338,6 +1338,7 @@ public class BytesTest extends BytesTestCommon {
         testAppendDoubleOnce(value, standard, standardFloat, general, expectedDecimal9, false);
     }
 
+    @SuppressWarnings("deprecation")
     private void testAppendDoubleOnce(double value, String standard, String standardFloat, String general, String expectedDecimal9, boolean append0) {
         @NotNull Bytes<?> a = alloc1.elasticBytes(255)
                 .fpAppend0(append0)
@@ -1394,7 +1395,7 @@ public class BytesTest extends BytesTestCommon {
                 buffer.put(c);
             }
 
-            BytesStore heapBytesStore = data.bytesStore();
+            BytesStore<?, ?> heapBytesStore = data.bytesStore();
             heapBytesStore.write(16, buffer, 32, 8);
             for (int i = 0; i < 16; i++)
                 assertEquals(i + ' ', heapBytesStore.readByte(i));

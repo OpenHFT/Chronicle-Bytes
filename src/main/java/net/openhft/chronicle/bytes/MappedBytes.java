@@ -282,7 +282,7 @@ public abstract class MappedBytes extends AbstractBytes<Void> implements Closeab
      */
     @Override
     public void sync() {
-        final BytesStore bs = bytesStore;
+        final BytesStore<?, ?> bs = bytesStore;
         if (bs instanceof MappedBytesStore) {
             MappedBytesStore mbs = (MappedBytesStore) bs;
             mbs.syncUpTo(writePosition());

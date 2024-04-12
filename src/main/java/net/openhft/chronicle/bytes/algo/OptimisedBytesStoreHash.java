@@ -38,7 +38,7 @@ import static net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash.*;
  * depending on the size of the data and architecture of the system.
  */
 @SuppressWarnings("rawtypes")
-public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
+public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore<?,?>> {
     INSTANCE;
 
     public static final Memory MEMORY = OS.memory();
@@ -55,7 +55,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    static long applyAsLong1to7(@NotNull BytesStore store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
+    static long applyAsLong1to7(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
 
         return hash(readIncompleteLong(address, remaining));
@@ -70,7 +70,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    static long applyAsLong8(@NotNull BytesStore store) throws IllegalStateException, BufferUnderflowException {
+    static long applyAsLong8(@NotNull BytesStore<?, ?> store) throws IllegalStateException, BufferUnderflowException {
         final long address = store.addressForRead(store.readPosition());
 
         return hash0(MEMORY.readLong(address), MEMORY.readInt(address + TOP_BYTES));
@@ -105,8 +105,8 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      */
-    static long applyAsLong9to16(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
-        @NotNull final BytesStore bytesStore = store.bytesStore();
+    static long applyAsLong9to16(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
+        @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -139,8 +139,8 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      */
-    static long applyAsLong17to32(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
-        @NotNull final BytesStore bytesStore = store.bytesStore();
+    static long applyAsLong17to32(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
+        @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
 
@@ -173,8 +173,8 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      */
-    public static long applyAsLong32bytesMultiple(@NotNull BytesStore store, @NonNegative int remaining) throws BufferUnderflowException {
-        @NotNull final BytesStore bytesStore = store.bytesStore();
+    public static long applyAsLong32bytesMultiple(@NotNull BytesStore<?, ?> store, @NonNegative int remaining) throws BufferUnderflowException {
+        @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = (long) remaining * K0;
         long h1 = 0;
@@ -217,8 +217,8 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @return A 64-bit hash value.
      * @throws BufferUnderflowException If there is not enough data.
      */
-    public static long applyAsLongAny(@NotNull BytesStore store, @NonNegative long remaining) throws BufferUnderflowException {
-        @NotNull final BytesStore bytesStore = store.bytesStore();
+    public static long applyAsLongAny(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws BufferUnderflowException {
+        @NotNull final BytesStore<?, ?> bytesStore = store.bytesStore();
         final long address = bytesStore.addressForRead(store.readPosition());
         long h0 = remaining * K0;
         long h1 = 0;
@@ -339,7 +339,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @return the hash value.
      */
     @Override
-    public long applyAsLong(@NotNull BytesStore store) {
+    public long applyAsLong(@NotNull BytesStore<?, ?> store) {
         final int remaining = Math.toIntExact(store.realReadRemaining());
         try {
             return applyAsLong(store, remaining);
@@ -359,7 +359,7 @@ public enum OptimisedBytesStoreHash implements BytesStoreHash<BytesStore> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    public long applyAsLong(@NotNull BytesStore store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
+    public long applyAsLong(@NotNull BytesStore<?, ?> store, @NonNegative long remaining) throws IllegalStateException, BufferUnderflowException {
         if (remaining <= 16) {
             if (remaining == 0) {
                 return 0;

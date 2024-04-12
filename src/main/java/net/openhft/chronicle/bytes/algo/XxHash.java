@@ -35,7 +35,7 @@ import java.nio.BufferUnderflowException;
  */
 // Migration of XxHash from Zero-Allocation-Hashing
 @SuppressWarnings("rawtypes")
-public class XxHash implements BytesStoreHash<BytesStore> {
+public class XxHash implements BytesStoreHash<BytesStore<?, ?>> {
     // Primes if treated as unsigned
     private static final long P1 = -7046029288634856825L;
     private static final long P2 = -4417276706812531889L;
@@ -84,7 +84,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long fetch64(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
+    long fetch64(BytesStore<?, ?> bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readLong(off);
     }
 
@@ -98,7 +98,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long fetch32(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
+    long fetch32(BytesStore<?, ?> bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedInt(off);
     }
 
@@ -112,7 +112,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    long fetch8(BytesStore bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
+    long fetch8(BytesStore<?, ?> bytes, @NonNegative long off) throws IllegalStateException, BufferUnderflowException {
         return bytes.readUnsignedByte(off);
     }
 
@@ -125,7 +125,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    public long applyAsLong(BytesStore bytes) {
+    public long applyAsLong(BytesStore<?, ?> bytes) {
         return applyAsLong(bytes, bytes.readRemaining());
     }
 
@@ -140,7 +140,7 @@ public class XxHash implements BytesStoreHash<BytesStore> {
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @Override
-    public long applyAsLong(BytesStore bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
+    public long applyAsLong(BytesStore<?, ?> bytes, @NonNegative long length) throws IllegalStateException, BufferUnderflowException {
         long hash;
         long remaining = length;
         long off = bytes.readPosition();

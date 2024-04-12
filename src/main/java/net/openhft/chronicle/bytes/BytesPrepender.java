@@ -99,7 +99,7 @@ public interface BytesPrepender<B extends BytesPrepender<B>> {
      */
     @SuppressWarnings("rawtypes")
     @NotNull
-    B prewrite(BytesStore bytes)
+    B prewrite(BytesStore<?, ?> bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException;
 
     /**

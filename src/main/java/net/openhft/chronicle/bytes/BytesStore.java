@@ -19,10 +19,7 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.bytes.algo.OptimisedBytesStoreHash;
 import net.openhft.chronicle.bytes.algo.VanillaBytesStoreHash;
-import net.openhft.chronicle.bytes.internal.BytesInternal;
-import net.openhft.chronicle.bytes.internal.HeapBytesStore;
-import net.openhft.chronicle.bytes.internal.NativeBytesStore;
-import net.openhft.chronicle.bytes.internal.NoBytesStore;
+import net.openhft.chronicle.bytes.internal.*;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.io.ClosedIllegalStateException;
@@ -65,7 +62,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    static BytesStore from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
+    static BytesStore<?, ?> from(@NotNull CharSequence cs) throws ClosedIllegalStateException, ThreadingIllegalStateException {
         if (cs.length() == 0)
             return empty();
         if (cs instanceof BytesStore)
@@ -234,8 +231,9 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      *
      * @return an instance of an empty BytesStore
      */
+    @SuppressWarnings("unchecked")
     static <B extends BytesStore<B, T>, T> BytesStore<B, T> empty() {
-        return NoBytesStore.NO_BYTES_STORE;
+        return (BytesStore<B, T>) NoBytesStore.NO_BYTES_STORE;
     }
 
     /**
@@ -447,7 +445,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default long copyTo(@NotNull BytesStore store)
+    default long copyTo(@NotNull BytesStore<?, ?> store)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         requireNonNull(store);
         throwExceptionIfReleased(this);
@@ -591,7 +589,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @return the underlying BytesStore
      */
     @Nullable
-    default BytesStore bytesStore() {
+    default BytesStore<?, ?> bytesStore() {
         return this;
     }
 
@@ -605,7 +603,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
-    default boolean equalBytes(@NotNull BytesStore bytesStore, @NonNegative long length)
+    default boolean equalBytes(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long length)
             throws BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return length == 8 && bytesStore.length() >= 8
                 ? readLong(readPosition()) == bytesStore.readLong(bytesStore.readPosition())
@@ -690,7 +688,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default boolean contentEquals(@Nullable BytesStore bytesStore)
+    default boolean contentEquals(@Nullable BytesStore<?, ?> bytesStore)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return BytesInternal.contentEqual(this, bytesStore);
     }
@@ -703,7 +701,7 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default boolean startsWith(@Nullable BytesStore bytesStore)
+    default boolean startsWith(@Nullable BytesStore<?, ?> bytesStore)
             throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return bytesStore != null && BytesInternal.startsWith(this, bytesStore);
     }

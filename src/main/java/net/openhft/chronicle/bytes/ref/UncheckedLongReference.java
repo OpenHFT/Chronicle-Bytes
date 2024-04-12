@@ -45,7 +45,7 @@ import java.nio.BufferUnderflowException;
 @SuppressWarnings("rawtypes")
 public class UncheckedLongReference extends UnsafeCloseable implements LongReference, ReferenceOwner {
 
-    private BytesStore bytes;
+    private BytesStore<?, ?> bytes;
 
     /**
      * Factory method to create a {@code UncheckedLongReference} or {@code BinaryLongReference} based on the JVM's debug status.
@@ -63,7 +63,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
      */
     @SuppressWarnings("unchecked")
     @NotNull
-    public static LongReference create(@NotNull BytesStore bytesStore, @NonNegative long offset, @NonNegative int size)
+    public static LongReference create(@NotNull BytesStore<?, ?> bytesStore, @NonNegative long offset, @NonNegative int size)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IllegalStateException {
         @NotNull LongReference ref = Jvm.isDebug() ? new BinaryLongReference() : new UncheckedLongReference();
         ref.bytesStore(bytesStore, offset, size);
@@ -98,7 +98,7 @@ public class UncheckedLongReference extends UnsafeCloseable implements LongRefer
 
     @NotNull
     @Override
-    public BytesStore bytesStore() {
+    public BytesStore<?, ?> bytesStore() {
         return bytes;
     }
 

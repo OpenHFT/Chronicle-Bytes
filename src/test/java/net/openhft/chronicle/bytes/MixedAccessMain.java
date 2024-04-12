@@ -30,7 +30,7 @@ public class MixedAccessMain {
         try (MappedBytes mf = MappedBytes.mappedBytes(file,
                 1024 * 1024, OS.pageSize())) {
             mf.writeLong(0);
-            BytesStore<Bytes<Void>, Void> start = mf.bytesStore();
+            BytesStore<?, Void> start = mf.bytesStore();
             start.reserve(ReferenceOwner.TMP);
 
             for (int i = 0; i < 1_000_000; i++) {

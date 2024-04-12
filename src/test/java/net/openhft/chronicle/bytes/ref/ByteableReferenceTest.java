@@ -69,10 +69,10 @@ public class ByteableReferenceTest extends BytesTestCommon {
 
     @Test
     public void shouldMakeReservationOnCurrentStore() {
-        final BytesStore firstStore = BytesStore.nativeStore(64);
+        final BytesStore<?, ?> firstStore = BytesStore.nativeStore(64);
         try {
             firstStore.writeLong(0, 17);
-            final BytesStore secondStore = BytesStore.nativeStore(64);
+            final BytesStore<?, ?> secondStore = BytesStore.nativeStore(64);
             try (AbstractReference byteable = byteableCtor.get()) {
                 secondStore.writeLong(0, 17);
                 final long startCount = firstStore.refCount();

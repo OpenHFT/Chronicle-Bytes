@@ -64,7 +64,7 @@ public class Bit8StringInterner extends AbstractInterner<String> {
     @SuppressWarnings("rawtypes")
     @Override
     @NotNull
-    protected String getValue(@NotNull BytesStore cs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
+    protected String getValue(@NotNull BytesStore<?, ?> cs, @NonNegative int length) throws IllegalStateException, BufferUnderflowException {
         try (ScopedResource<StringBuilder> sbTl = SBP.get()) {
             StringBuilder sb = sbTl.get();
             for (int i = 0; i < length; i++)

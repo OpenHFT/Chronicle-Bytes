@@ -39,6 +39,7 @@ import static net.openhft.chronicle.bytes.HexDumpBytes.MASK;
  * @see BytesStore
  * @see BooleanValue
  */
+@SuppressWarnings("rawtypes")
 public class BinaryBooleanReference extends AbstractReference implements BooleanValue {
 
     private static final byte FALSE = (byte) 0xB0;
@@ -92,7 +93,7 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             throws IllegalStateException, BufferUnderflowException {
         throwExceptionIfClosed();
 
-        byte b = bytes.readByte(offset);
+        byte b = bytesStore.readByte(offset);
         if (b == FALSE)
             return false;
         if (b == TRUE)
@@ -113,6 +114,6 @@ public class BinaryBooleanReference extends AbstractReference implements Boolean
             throws IllegalStateException {
         throwExceptionIfClosed();
 
-        bytes.writeByte(offset, flag ? TRUE : FALSE);
+        bytesStore.writeByte(offset, flag ? TRUE : FALSE);
     }
 }

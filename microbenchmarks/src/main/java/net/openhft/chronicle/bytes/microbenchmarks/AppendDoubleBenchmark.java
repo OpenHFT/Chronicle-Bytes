@@ -114,7 +114,7 @@ public class AppendDoubleBenchmark {
         count = 0;
     }
 
-    private double nextDouble(Bytes bytes) {
+    private double nextDouble(Bytes<?> bytes) {
         size++;
         if (size >= SIZES.length) {
             size = 0;
@@ -126,7 +126,7 @@ public class AppendDoubleBenchmark {
         return d;
     }
 
-    private float nextFloat(Bytes bytes) {
+    private float nextFloat(Bytes<?> bytes) {
         size++;
         if (size >= SIZES.length) {
             size = 0;

@@ -20,9 +20,7 @@ package net.openhft.chronicle.bytes.internal;
 import net.openhft.chronicle.bytes.*;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.IOTools;
-import net.openhft.chronicle.core.io.ReferenceChangeListener;
-import net.openhft.chronicle.core.io.ReferenceOwner;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.nio.BufferOverflowException;
@@ -37,8 +35,8 @@ import static net.openhft.chronicle.core.util.ObjectUtils.requireNonNull;
  * This is a ByteStore which uses no space but could be resized to be larger (by replacing it with a ByteStore with space)
  */
 @SuppressWarnings({"rawtypes", "unchecked"})
-public final class NoBytesStore implements BytesStore {
-    public static final BytesStore NO_BYTES_STORE = new NoBytesStore();
+public final class NoBytesStore implements BytesStore<NoBytesStore, Void> {
+    public static final BytesStore<?, ?> NO_BYTES_STORE = new NoBytesStore();
     public static final long NO_PAGE;
     @NotNull
     public static final Bytes<?> NO_BYTES;
@@ -103,79 +101,79 @@ public final class NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public RandomDataOutput writeByte(@NonNegative long offset, byte i8) {
+    public NoBytesStore writeByte(@NonNegative long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeShort(@NonNegative long offset, short i) {
+    public NoBytesStore writeShort(@NonNegative long offset, short i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeInt(@NonNegative long offset, int i) {
+    public NoBytesStore writeInt(@NonNegative long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedInt(@NonNegative long offset, int i) {
+    public NoBytesStore writeOrderedInt(@NonNegative long offset, int i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeLong(@NonNegative long offset, long i) {
+    public NoBytesStore writeLong(@NonNegative long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeOrderedLong(@NonNegative long offset, long i) {
+    public NoBytesStore writeOrderedLong(@NonNegative long offset, long i) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeFloat(@NonNegative long offset, float d) {
+    public NoBytesStore writeFloat(@NonNegative long offset, float d) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeDouble(@NonNegative long offset, double d) {
+    public NoBytesStore writeDouble(@NonNegative long offset, double d) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileByte(@NonNegative long offset, byte i8) {
+    public NoBytesStore writeVolatileByte(@NonNegative long offset, byte i8) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileShort(@NonNegative long offset, short i16) {
+    public NoBytesStore writeVolatileShort(@NonNegative long offset, short i16) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileInt(@NonNegative long offset, int i32) {
+    public NoBytesStore writeVolatileInt(@NonNegative long offset, int i32) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput writeVolatileLong(@NonNegative long offset, long i64) {
+    public NoBytesStore writeVolatileLong(@NonNegative long offset, long i64) {
         throw new UnsupportedOperationException();
     }
 
     @NotNull
     @Override
-    public RandomDataOutput write(@NonNegative final long offsetInRDO,
+    public NoBytesStore write(@NonNegative final long offsetInRDO,
                                   final byte[] byteArray,
                                   @NonNegative final int offset,
                                   @NonNegative final int length) {
@@ -197,7 +195,7 @@ public final class NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public RandomDataOutput write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length) {
+    public NoBytesStore write(@NonNegative long writeOffset, @NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length) {
         requireNonNegative(writeOffset);
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(readOffset);
@@ -273,12 +271,12 @@ public final class NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public BytesStore copy() {
+    public NoBytesStore copy() {
         return this;
     }
 
     @Override
-    public @NotNull Bytes<?> bytesForRead() throws IllegalStateException {
+    public @NotNull Bytes<Void> bytesForRead() throws ClosedIllegalStateException, ThreadingIllegalStateException {
         return VanillaBytes.wrap(this);
     }
 
@@ -303,7 +301,7 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long copyTo(@NotNull BytesStore store) {
+    public long copyTo(@NotNull BytesStore<?, ?> store) {
         requireNonNull(store);
         // nothing to copy.
         return 0L;
@@ -316,7 +314,7 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
-    public long write8bit(@NonNegative long position, @NotNull BytesStore bs) {
+    public long write8bit(@NonNegative long position, @NotNull BytesStore<?, ?> bs) {
         requireNonNull(bs);
         requireNonNegative(position);
         throw new BufferOverflowException();
@@ -350,7 +348,7 @@ public final class NoBytesStore implements BytesStore {
     }
 
     @Override
-    public boolean equalBytes(@NotNull BytesStore bytesStore, long length) {
+    public boolean equalBytes(@NotNull BytesStore<?, ?> bytesStore, long length) {
         requireNonNull(bytesStore);
         requireNonNegative(length);
         return length == 0;
@@ -383,7 +381,7 @@ public final class NoBytesStore implements BytesStore {
 
     @NotNull
     @Override
-    public Bytes<?> bytesForWrite() {
+    public Bytes<Void> bytesForWrite() {
         throw new UnsupportedOperationException("todo");
     }
 

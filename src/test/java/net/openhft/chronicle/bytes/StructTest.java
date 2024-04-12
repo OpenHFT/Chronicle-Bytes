@@ -41,7 +41,7 @@ public class StructTest extends BytesTestCommon {
      */
     static abstract class Struct<S extends Struct<S>> {
         protected Bytes<?> self;
-        protected final Bytes<?> bytes;
+        protected final Bytes<Void> bytes;
         private final int size;
         protected long address;
 
@@ -129,7 +129,9 @@ public class StructTest extends BytesTestCommon {
         protected void initialise(final long address) {
             assert address != 0;
 
-            ((PointerBytesStore) bytes.bytesStore()).set(address, size);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            PointerBytesStore store = (PointerBytesStore) (BytesStore) bytes.bytesStore();
+            store.set(address, size);
             bytes.readPosition(0);
             bytes.writePosition(size);
             this.address = bytes.addressForWrite(0);
@@ -461,7 +463,9 @@ public class StructTest extends BytesTestCommon {
                 IOTools.unmonitor(name);
             }
 
-            ((PointerBytesStore) name.bytesStore()).set(address + NAME, NAME_SIZE);
+            @SuppressWarnings({"unchecked", "rawtypes"})
+            PointerBytesStore store = (PointerBytesStore) (BytesStore) name.bytesStore();
+            store.set(address + NAME, NAME_SIZE);
             nameStr = null;
         }
 

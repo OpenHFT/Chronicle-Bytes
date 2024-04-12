@@ -103,8 +103,7 @@ public interface RingBufferReader extends RingBufferReaderStats, Closeable {
      *
      * @return The backing {@link BytesStore} instance.
      */
-    @SuppressWarnings("rawtypes")
-    BytesStore byteStore();
+    BytesStore<?, ?> byteStore();
 
     /**
      * Adjusts the reader's position to just past the end of the Ring Buffer, effectively making it read any new data that gets written.

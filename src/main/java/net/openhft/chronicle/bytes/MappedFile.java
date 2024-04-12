@@ -374,7 +374,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     public MappedBytesStore acquireByteStore(
             ReferenceOwner owner,
             @NonNegative final long position,
-            BytesStore oldByteStore)
+            BytesStore<?, ?> oldByteStore)
             throws IOException, IllegalStateException {
         return acquireByteStore(owner, position, oldByteStore, MappedBytesStore::new);
     }

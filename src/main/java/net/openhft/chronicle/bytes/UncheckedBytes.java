@@ -83,7 +83,7 @@ public class UncheckedBytes<U>
     public void setBytes(@NotNull Bytes<?> bytes)
             throws IllegalStateException {
         requireNonNull(bytes);
-        final BytesStore underlying = bytes.bytesStore();
+        final BytesStore<?, ?> underlying = bytes.bytesStore();
         if (bytesStore != underlying) {
             bytesStore.release(this);
             this.bytesStore(uncheckedCast(underlying));
@@ -223,7 +223,7 @@ public class UncheckedBytes<U>
 
     @NotNull
     @Override
-    public Bytes<U> write(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
+    public Bytes<U> write(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, IllegalArgumentException, IllegalStateException, BufferUnderflowException {
         ReferenceCountedUtil.throwExceptionIfReleased(bytes);
         requireNonNegative(offset);
@@ -261,7 +261,7 @@ public class UncheckedBytes<U>
         return this;
     }
 
-    long rawCopy(@NotNull BytesStore bytes, @NonNegative long offset, @NonNegative long length)
+    long rawCopy(@NotNull BytesStore<?, ?> bytes, @NonNegative long offset, @NonNegative long length)
             throws BufferOverflowException, IllegalStateException, BufferUnderflowException {
         requireNonNull(bytes);
         long len = Math.min(writeRemaining(), Math.min(bytes.capacity() - offset, length));

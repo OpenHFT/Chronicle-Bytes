@@ -355,7 +355,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default B append8bit(@NotNull BytesStore bs)
+    default B append8bit(@NotNull BytesStore<?, ?> bs)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, ThreadingIllegalStateException {
         return write(bs, 0L, bs.readRemaining());
     }
@@ -416,7 +416,7 @@ public interface ByteStringAppender<B extends ByteStringAppender<B>> extends Str
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way.
      */
-    default B append8bit(@NotNull BytesStore bs, @NonNegative long start, @NonNegative long end)
+    default B append8bit(@NotNull BytesStore<?, ?> bs, @NonNegative long start, @NonNegative long end)
             throws IllegalArgumentException, BufferOverflowException, BufferUnderflowException, IndexOutOfBoundsException, ClosedIllegalStateException, ThreadingIllegalStateException {
         assert end > start : "end=" + end + ",start=" + start;
         return write(bs, start, end - start);

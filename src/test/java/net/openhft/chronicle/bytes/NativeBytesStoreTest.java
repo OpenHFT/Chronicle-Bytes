@@ -196,7 +196,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
     public void testAppendUtf8() {
         final String hi = "Hello World";
         final char[] chars = hi.toCharArray();
-        final NativeBytesStore<?> nbs = NativeBytesStore.nativeStore(chars.length);
+        final NativeBytesStore<Void> nbs = NativeBytesStore.nativeStore(chars.length);
         try {
             nbs.appendUtf8(0, chars, 0, chars.length);
             assertEquals(hi, nbs.toString());
@@ -221,10 +221,11 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked"})
     @Test
     public void perfCheckSum()
             throws IORuntimeException {
-        final NativeBytesStore<?>[] nbs = {
+        final NativeBytesStore[] nbs = {
                 NativeBytesStore.nativeStoreWithFixedCapacity(140),
                 NativeBytesStore.nativeStoreWithFixedCapacity(149),
                 NativeBytesStore.nativeStoreWithFixedCapacity(159),
@@ -232,7 +233,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
         };
         try {
             final Random rand = new Random();
-            for (NativeBytesStore<?> nb : nbs) {
+            for (NativeBytesStore<Void> nb : nbs) {
                 final byte[] bytes = new byte[(int) nb.capacity()];
                 rand.nextBytes(bytes);
                 nb.write(0, bytes);
@@ -242,7 +243,7 @@ public class NativeBytesStoreTest extends BytesTestCommon {
                 int runs = 10000000;
                 final long start = System.nanoTime();
                 for (int i = 0; i < runs; i += 4) {
-                    for (NativeBytesStore<?> nb : nbs) {
+                    for (NativeBytesStore<Void> nb : nbs) {
                         bcs = nb.byteCheckSum();
                         if (bcs < 0 || bcs > 255)
                             throw new AssertionError();
