@@ -29,9 +29,16 @@ import net.openhft.chronicle.core.values.LongArrayValues;
 import java.io.File;
 
 /**
- * A TimeProvider implementation that ensures unique timestamps across multiple systems using a predefined hostId.
- * It extends SimpleCloseable and implements TimeProvider to provide functionality for managing the timestamps.
- * This class manages unique timestamp distribution across different hosts/systems.
+ * Provides unique timestamps across multiple systems by incorporating a host identifier into the timestamp, for microsecond and nanosecond resolution timestamps.
+ * This class is particularly useful in distributed systems where clock synchronization and uniqueness
+ * across hosts are critical. It implements {@link TimeProvider}.
+ * <p>
+ * NOTE: {@link #currentTimeMillis()} is not unique, it is just a call to the underlying provider as there isn't enough resolution to include the hostId.
+ * <p>
+ *
+ * Each timestamp generated is guaranteed to be unique across all hosts participating in the system.
+ * The class uses a file-based mechanism to ensure that timestamps are not only unique across restarts
+ * but also across different JVM instances.
  */
 public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
 
@@ -47,6 +54,13 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     private TimeProvider provider = SystemTimeProvider.INSTANCE;
     private int hostId;
 
+    /**
+     * Constructs a {@link DistributedUniqueTimeProvider} for a specified hostId.
+     * This constructor initializes a file-based backend which is used to store and deduplicate timestamps.
+     *
+     * @param hostId    the identifier for the host, must be non-negative
+     * @param unmonitor if true, disables the monitoring of the file and byte stores used internally
+     */
     private DistributedUniqueTimeProvider(@NonNegative int hostId, boolean unmonitor) {
         hostId(hostId);
         try {
@@ -66,14 +80,22 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
-     * Returns an instance of DistributedUniqueTimeProvider.
+     * Provides a singleton instance of DistributedUniqueTimeProvider using the default hostId.
+     * This method is thread-safe and uses lazy initialization.
      *
-     * @return the single instance of DistributedUniqueTimeProvider
+     * @return the single, shared instance of DistributedUniqueTimeProvider
      */
     public static DistributedUniqueTimeProvider instance() {
         return DistributedUniqueTimeProviderHolder.INSTANCE;
     }
 
+    /**
+     * Creates a new instance of DistributedUniqueTimeProvider for a specified hostId.
+     * This is useful in scenarios where multiple instances are required, each with a different hostId.
+     *
+     * @param hostId the host identifier for which the time provider is to be created, must be non-negative
+     * @return a new instance of DistributedUniqueTimeProvider configured with the given hostId
+     */
     public static DistributedUniqueTimeProvider forHostId(@NonNegative int hostId) {
         return new DistributedUniqueTimeProvider(hostId, false);
     }
@@ -105,6 +127,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         bytes.release(this);
         file.releaseLast();
     }
+
     /**
      * Sets the hostId of the DistributedUniqueTimeProvider. The hostId is used to
      * create unique timestamps across different hosts.
@@ -116,7 +139,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     public DistributedUniqueTimeProvider hostId(@NonNegative int hostId) {
         // Check if the provided hostId is negative and throw an exception if it is
         if (hostId < 0)
-            throw new IllegalArgumentException("Invalid hostId: " + hostId);
+            throw new IllegalArgumentException("Host ID must be non-negative but was: " + hostId);
 
         // Assign the provided hostId modulo the maximum number of host IDs
         // to ensure it's within the valid range
@@ -142,6 +165,11 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
     }
 
     /**
+     * NOTE: Calls to this method do not produce unique timestamps, rather just calls the underlying provider.
+     * <p>
+     *     Use {@link #currentTimeMicros()} or {@link #currentTimeNanos()} to generate unique timestamps,
+     *     or use {@link net.openhft.chronicle.core.time.UniqueMicroTimeProvider#currentTimeMillis()} to generate unique timestamps.
+     * <p>
      * @return Ordinary millisecond timestamp
      */
     @Override

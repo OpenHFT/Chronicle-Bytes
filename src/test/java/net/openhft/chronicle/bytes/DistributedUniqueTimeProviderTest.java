@@ -19,20 +19,37 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.time.LongTime;
-import net.openhft.chronicle.core.time.TimeProvider;
+import net.openhft.chronicle.core.time.*;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.IntStream;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
+
+    private DistributedUniqueTimeProvider timeProvider;
+    private SetTimeProvider setTimeProvider;
+
+    @Before
+    public void setUp() {
+        timeProvider = DistributedUniqueTimeProvider.instance();
+        setTimeProvider = new SetTimeProvider(SystemTimeProvider.INSTANCE.currentTimeNanos());
+        timeProvider.provider(setTimeProvider);
+    }
 
     static volatile long blackHole;
 
@@ -48,10 +65,9 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeMicros() {
-        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long last = 0;
         for (int i = 0; i < 100_000; i++) {
-            long time = tp.currentTimeMicros();
+            long time = timeProvider.currentTimeMicros();
             assertTrue(time > last);
             assertEquals(LongTime.toMicros(time), time);
             last = time;
@@ -60,12 +76,11 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeMicrosPerf() {
-        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = tp.currentTimeMicros();
+                blackHole = ((TimeProvider) timeProvider).currentTimeMicros();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
@@ -75,12 +90,11 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanosPerf() {
-        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long start = System.currentTimeMillis(), end;
         int count = 0;
         do {
             for (int i = 0; i < 1000; i++)
-                blackHole = tp.currentTimeNanos();
+                blackHole = ((TimeProvider) timeProvider).currentTimeNanos();
             count += 1000;
         } while ((end = System.currentTimeMillis()) < start + 500);
         long rate = 1000L * count / (end - start);
@@ -90,13 +104,12 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void currentTimeNanos() {
-        TimeProvider tp = DistributedUniqueTimeProvider.instance();
-        long start = tp.currentTimeNanos();
+        long start = ((TimeProvider) timeProvider).currentTimeNanos();
         long last = start;
         int count = 0;
         long runTime = Jvm.isArm() ? 3_000_000_000L : 500_000_000L;
         for (; ; ) {
-            long now = tp.currentTimeNanos();
+            long now = ((TimeProvider) timeProvider).currentTimeNanos();
             assertEquals(LongTime.toNanos(now), now);
             if (now > start + runTime)
                 break;
@@ -140,12 +153,152 @@ public class DistributedUniqueTimeProviderTest extends BytesTestCommon {
 
     @Test
     public void testMonotonicallyIncreasing() {
-        TimeProvider tp = DistributedUniqueTimeProvider.instance();
         long last = 0;
         for (int i = 0; i < 10_000; i++) {
-            long now = DistributedUniqueTimeProvider.timestampFor(tp.currentTimeNanos());
+            long now = DistributedUniqueTimeProvider.timestampFor(((TimeProvider) timeProvider).currentTimeNanos());
             assertTrue(now > last);
             last = now;
+        }
+    }
+
+    @Test
+    public void shouldProvideUniqueTimeAcrossThreadsMicros() throws InterruptedException {
+        final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
+        final int numberOfThreads = 50;
+        final int factor = 50;
+        final int iterationsPerThread = 500;
+        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        final CountDownLatch latch = new CountDownLatch(numberOfThreads * factor);
+
+        for (int i = 0; i < numberOfThreads * factor; i++) {
+            executor.execute(() -> {
+                try {
+                    List<Long> threadTimeSet = new ArrayList<>(iterationsPerThread);
+                    long lastTimestamp = 0;
+                    for (int j = 0; j < iterationsPerThread; j++) {
+
+                        // there could be a race condition for the next two methods, but it shouldn't matter for this test
+                        setTimeProvider.advanceNanos(j);
+                        long currentTimeMicros = timeProvider.currentTimeMicros();
+
+                        threadTimeSet.add(currentTimeMicros);
+                        assertTrue("Timestamps should always increase", currentTimeMicros > lastTimestamp);
+                        lastTimestamp = currentTimeMicros;
+                    }
+                    allGeneratedTimestamps.addAll(threadTimeSet);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
+
+        assertEquals("All timestamps across all threads and iterations should be unique",
+                numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size());
+    }
+
+    @Test
+    public void shouldProvideUniqueTimeAcrossThreadsNanos() throws InterruptedException {
+        final Set<Long> allGeneratedTimestamps = ConcurrentHashMap.newKeySet();
+        final int numberOfThreads = 50;
+        final int factor = 50;
+        final int iterationsPerThread = 500;
+        final ExecutorService executor = Executors.newFixedThreadPool(numberOfThreads);
+        final CountDownLatch latch = new CountDownLatch(numberOfThreads * factor);
+
+        for (int i = 0; i < numberOfThreads * factor; i++) {
+            executor.execute(() -> {
+                try {
+                    List<Long> threadTimeSet = new ArrayList<>(iterationsPerThread);
+                    long lastTimestamp = 0;
+                    for (int j = 0; j < iterationsPerThread; j++) {
+
+                        // there could be a race condition for the next two methods, but it shouldn't matter for this test
+                        setTimeProvider.advanceNanos(j);
+                        long currentTimeNanos = timeProvider.currentTimeNanos();
+
+                        threadTimeSet.add(currentTimeNanos);
+                        assertTrue("Timestamps should always be increasing", currentTimeNanos > lastTimestamp);
+                        lastTimestamp = currentTimeNanos;
+                    }
+                    allGeneratedTimestamps.addAll(threadTimeSet);
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executor.shutdown();
+
+        assertEquals("All timestamps across all threads and iterations should be unique",
+                numberOfThreads * iterationsPerThread * factor, allGeneratedTimestamps.size());
+    }
+
+    @Test
+    public void shouldAdvanceTimeWhenExceedingCallsPerSecond() {
+        final int iterations = 1_000_001;
+        long lastTimeMicros = 0;
+
+        for (int i = 0; i < iterations; i++) {
+            setTimeProvider.advanceNanos(i);
+            long currentTimeMicros = timeProvider.currentTimeMicros();
+            assertTrue("Each timestamp must be greater than the last", currentTimeMicros > lastTimeMicros);
+            lastTimeMicros = currentTimeMicros;
+        }
+    }
+
+    @Test
+    public void currentTimeMillisShouldBeCorrect() {
+        int iterations = 1_000;
+        long lastTimeMillis = 0;
+        final long startTimeMillis = setTimeProvider.currentTimeMillis();
+
+        for (int i = 0; i < iterations; i++) {
+            setTimeProvider.advanceNanos(i);
+            long currentTimeMillis = timeProvider.currentTimeMillis();
+            assertTrue(currentTimeMillis >= startTimeMillis);
+            assertTrue(currentTimeMillis <= startTimeMillis + iterations);
+            assertTrue("Millisecond timestamps must increase or be the same", currentTimeMillis >= lastTimeMillis);
+            lastTimeMillis = currentTimeMillis;
+        }
+    }
+
+    @Test
+    public void currentTimeMicrosShouldBeCorrect() {
+        long lastTimeMicros = 0;
+
+        for (int i = 0; i < 4_000; i++) {
+            setTimeProvider.advanceNanos(i);
+            long currentTimeMicros = timeProvider.currentTimeMicros();
+            assertTrue("Microsecond timestamps must increase", currentTimeMicros > lastTimeMicros);
+            lastTimeMicros = currentTimeMicros;
+        }
+    }
+
+    @Test
+    public void currentTimeMicrosShouldBeCorrectBackwards() {
+        long lastTimeMicros = 0;
+
+        for (int i = 0; i < 4_000; i++) {
+            setTimeProvider.advanceNanos(-i);
+            long currentTimeMicros = timeProvider.currentTimeMicros();
+            assertTrue("Microsecond timestamps must increase", currentTimeMicros > lastTimeMicros);
+            lastTimeMicros = currentTimeMicros;
+        }
+    }
+
+    @Test
+    public void currentTimeNanosShouldBeCorrect() {
+        long lastTimeNanos = 0;
+
+        for (int i = 0; i < 4_000; i++) {
+            setTimeProvider.advanceNanos(i);
+            long currentTimeNanos = timeProvider.currentTimeNanos();
+            assertTrue("Nanosecond timestamps should increase", currentTimeNanos > lastTimeNanos);
+            lastTimeNanos = currentTimeNanos / 1000;
         }
     }
 }
