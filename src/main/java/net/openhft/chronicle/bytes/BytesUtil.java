@@ -769,7 +769,7 @@ public enum BytesUtil {
         final long remaining = bytes.readRemaining();
         final long position = bytes.readPosition();
 
-        final Bytes<Void> bytes2 = Bytes.allocateDirect(Math.min(1, remaining));
+        final Bytes<Void> bytes2 = Bytes.allocateDirect(Math.max(1, remaining));
         bytes2.write(bytes, position, remaining);
         return bytes2;
     }
