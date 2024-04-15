@@ -21,36 +21,36 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.core.values.TwoLongValue;
 
 /**
- * Represents a reference to two {@code long} values stored in bytes, providing mechanisms for getting, setting,
- * and manipulating them with various memory ordering effects.
+ * Interface defining a reference to two {@code long} values stored in off-heap memory or memory-mapped files,
+ * facilitating direct, efficient manipulation of these values with support for various memory ordering semantics.
  * <p>
- * This interface extends {@link net.openhft.chronicle.core.values.TwoLongValue} to add the ability to back
- * the two long values with a {@link net.openhft.chronicle.bytes.Bytes} store. This is used for off-heap memory
- * or memory-mapped file storage.
+ * This interface extends {@link net.openhft.chronicle.core.values.TwoLongValue}, which provides the basic
+ * operations for interacting with two separate {@code long} values, and implements {@link net.openhft.chronicle.bytes.Byteable}
+ * to allow these values to be backed directly by a {@link net.openhft.chronicle.bytes.Bytes} storage mechanism.
  * <p>
- * Concrete implementations of this interface are responsible for managing the storage and retrieval mechanisms
- * of the two {@code long} values in byte format.
+ * Implementations must handle the storage and retrieval of these two long values, ensuring that operations
+ * on them respect the semantics of memory ordering prescribed by their method signatures. This interface
+ * is particularly useful in low-latency environments where operations directly on raw memory are necessary.
  * <p>
- * Notable methods inherited from {@link net.openhft.chronicle.core.values.TwoLongValue} include:
+ * Key methods inherited from {@link net.openhft.chronicle.core.values.TwoLongValue} include:
  * <ul>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#getValue2()} - Retrieves the second {@code long} value.</li>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#setValue2(long)} - Sets the second {@code long} value.</li>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#getVolatileValue2()} - Retrieves the second {@code long} value with volatile semantics.</li>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#setVolatileValue2(long)} - Sets the second {@code long} value with volatile semantics.</li>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#addValue2(long)} - Atomically adds the given amount to the second {@code long} value.</li>
- *     <li>{@link net.openhft.chronicle.core.values.TwoLongValue#compareAndSwapValue2(long, long)} - Atomically sets the second {@code long} value if it is equal to the expected value.</li>
+ *     <li>{@code getValue2()}, {@code setValue2(long)} - Access and update the second {@code long} value.</li>
+ *     <li>{@code getVolatileValue2()}, {@code setVolatileValue2(long)} - Volatile read and write operations on the second {@code long} value.</li>
+ *     <li>{@code addValue2(long)} - Atomically adds to the second {@code long} value.</li>
+ *     <li>{@code compareAndSwapValue2(long, long)} - Attempts to set the second {@code long} value if it matches an expected value.</li>
  * </ul>
  * <p>
- * Additionally, as an implementation of {@link Byteable}, the classes implementing this interface must provide
- * mechanisms to back the two long values with byte storage.
+ * The methods {@code getValue()} and {@code setValue(long)} from {@link net.openhft.chronicle.core.values.LongValue}
+ * apply to the first {@code long} value, providing a consistent interface for operations on both values.
  * <p>
- * Implementations can also include additional behaviors or optimizations not specified in this interface.
+ * Implementations of this interface should ensure thread safety and proper synchronization to maintain consistency
+ * across threads, especially in multi-threaded environments. Additional optimizations and behaviors may be
+ * implemented but are not mandated by this interface.
+ * <p>
+ * This documentation should be paired with specific class-level details in concrete implementations to guide
+ * developers on the expected performance characteristics and operational specifics.
  *
  * @author Peter Lawrey
- * @apiNote The {@link net.openhft.chronicle.core.values.TwoLongValue#getValue()} and {@link net.openhft.chronicle.core.values.TwoLongValue#setValue(long)} methods
- * inherited from {@link net.openhft.chronicle.core.values.LongValue} are applicable to the first {@code long} value.
- * @implSpec Implementations must ensure that all methods are thread-safe and that changes to the values are correctly
- * synchronized across threads.
  * @see net.openhft.chronicle.bytes.Byteable
  * @see net.openhft.chronicle.core.values.TwoLongValue
  */
