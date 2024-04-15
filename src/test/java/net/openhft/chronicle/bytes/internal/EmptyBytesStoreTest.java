@@ -270,6 +270,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     public void copy() {
         final BytesStore<?, Void> copy = uncheckedCast(instance.copy());
         assertEquals(instance, copy);
+        copy.releaseLast();
     }
 
     @Test
