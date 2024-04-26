@@ -25,6 +25,7 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
@@ -109,4 +110,49 @@ public class Bytes3Test extends BytesTestCommon {
         assertTrue(bytes.isClear());
     }
 
+    @Test
+    public void appendSubstring() {
+        doAppend(ByteStringAppender::append);
+    }
+
+    private void doAppend(BiConsumer<Bytes, CharSequence> append) {
+        if (forRead) return;
+        bytes = supplier.get();
+        append.accept(bytes, "Hello World".substring(1, 6));
+        // binary format
+        if (bytes.peekUnsignedByte() == 5)
+            bytes.readSkip(1);
+        assertEquals("ello ", bytes.toString());
+        bytes.clear();
+        append.accept(bytes, "Oh, Hello World".split(" ")[1]);
+        // binary format
+        if (bytes.peekUnsignedByte() == 5)
+            bytes.readSkip(1);
+        assertEquals("Hello", bytes.toString());
+    }
+
+    @Test
+    public void append8bitSubstring() {
+        doAppend(ByteStringAppender::append8bit);
+    }
+
+    @Test
+    public void appendUtf8Substring() {
+        doAppend(ByteStringAppender::appendUtf8);
+    }
+
+    @Test
+    public void writeSubstring() {
+        doAppend(ByteStringAppender::write);
+    }
+
+    @Test
+    public void write8bitSubstring() {
+        doAppend(ByteStringAppender::write8bit);
+    }
+
+    @Test
+    public void writeUtf8Substring() {
+        doAppend(ByteStringAppender::writeUtf8);
+    }
 }
