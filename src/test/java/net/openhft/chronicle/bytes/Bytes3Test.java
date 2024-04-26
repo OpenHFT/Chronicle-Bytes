@@ -17,10 +17,16 @@
  */
 package net.openhft.chronicle.bytes;
 
+import net.openhft.chronicle.core.Jvm;
+import net.openhft.chronicle.core.OS;
+import net.openhft.chronicle.core.util.ThrowingSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
@@ -34,6 +40,7 @@ import static org.junit.Assert.*;
 @RunWith(Parameterized.class)
 public class Bytes3Test extends BytesTestCommon {
 
+    private static final String TMP_FILE = OS.getTarget() + "/Bytes3Test-deleteme";
     private final Supplier<Bytes<?>> supplier;
     private final boolean forRead;
     private Bytes<?> bytes;
@@ -54,7 +61,14 @@ public class Bytes3Test extends BytesTestCommon {
                 {"Bytes.wrapForRead(ByteBuffer.allocateDirect(200))", (Supplier<Bytes<?>>) () -> Bytes.wrapForRead(ByteBuffer.allocateDirect(260))},
                 {"Bytes.wrapForWrite(ByteBuffer.allocateDirect(200))", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(ByteBuffer.allocateDirect(260))},
                 {"Bytes.wrapForRead(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForRead(new byte[1024])},
-                {"Bytes.wrapForWrite(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(new byte[1024])}
+                {"Bytes.wrapForWrite(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(new byte[1024])},
+                {"MappedBytes.mappedBytes(64K)", (Supplier<Bytes<?>>) () -> {
+                    try {
+                        return MappedBytes.mappedBytes(TMP_FILE, 64 << 10);
+                    } catch (FileNotFoundException e) {
+                        throw Jvm.rethrow(e);
+                    }
+                }}
         });
     }
 
@@ -63,6 +77,7 @@ public class Bytes3Test extends BytesTestCommon {
         if (bytes != null)
             bytes.releaseLast();
         super.afterChecks();
+        new File(TMP_FILE).deleteOnExit();
     }
 
     @Test
@@ -149,6 +164,26 @@ public class Bytes3Test extends BytesTestCommon {
     @Test
     public void write8bitSubstring() {
         doAppend(ByteStringAppender::write8bit);
+    }
+
+    @Test
+    public void write8bitSubstringBounded() {
+        doAppend((b, s) -> b.write8bit((CharSequence) s, 0, s.length()));
+    }
+
+    @Test
+    public void write8bitFromBytes() {
+        doAppend((b, s) -> b.write8bit(Bytes.from("[" + s + "]"), 1, s.length()));
+    }
+
+    @Test
+    public void writeFromBytes() {
+        doAppend((b, s) -> b.write(Bytes.from("[" + s + "]"), 1L, s.length()));
+    }
+
+    @Test
+    public void writeFromBytes2() {
+        doAppend((b, s) -> b.write((CharSequence) Bytes.from("[" + s + "]"), 1, s.length()));
     }
 
     @Test
