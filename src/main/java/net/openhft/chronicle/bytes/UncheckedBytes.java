@@ -254,7 +254,7 @@ public class UncheckedBytes<U>
         for (int i = 0; i < length; i++) {
             char c = cs.charAt(i);
             if (c > 255) c = '?';
-            writeByte(offset, (byte) c);
+            writeByte(offset++, (byte) c);
         }
         return this;
     }
