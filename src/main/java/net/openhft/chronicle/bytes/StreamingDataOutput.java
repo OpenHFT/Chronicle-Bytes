@@ -776,6 +776,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
     @NotNull
+    @Deprecated(/* to be removed in x.27, use write(BytesStore, long, long) */)
     default S write(@NotNull RandomDataInput bytes, @NonNegative long readOffset, @NonNegative long length)
             throws BufferOverflowException, BufferUnderflowException, ClosedIllegalStateException, IllegalArgumentException, ThreadingIllegalStateException {
         BytesInternal.writeFully(bytes, readOffset, length, this);

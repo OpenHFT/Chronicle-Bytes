@@ -19,16 +19,15 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.util.ThrowingSupplier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.BiConsumer;
@@ -62,6 +61,7 @@ public class Bytes3Test extends BytesTestCommon {
                 {"Bytes.wrapForWrite(ByteBuffer.allocateDirect(200))", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(ByteBuffer.allocateDirect(260))},
                 {"Bytes.wrapForRead(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForRead(new byte[1024])},
                 {"Bytes.wrapForWrite(new byte[1024])", (Supplier<Bytes<?>>) () -> Bytes.wrapForWrite(new byte[1024])},
+                {"new HexDumpBytes()", (Supplier<Bytes<?>>) HexDumpBytes::new},
                 {"MappedBytes.mappedBytes(64K)", (Supplier<Bytes<?>>) () -> {
                     try {
                         return MappedBytes.mappedBytes(TMP_FILE, 64 << 10);
@@ -125,11 +125,6 @@ public class Bytes3Test extends BytesTestCommon {
         assertTrue(bytes.isClear());
     }
 
-    @Test
-    public void appendSubstring() {
-        doAppend(ByteStringAppender::append);
-    }
-
     private void doAppend(BiConsumer<Bytes, CharSequence> append) {
         if (forRead) return;
         bytes = supplier.get();
@@ -147,13 +142,44 @@ public class Bytes3Test extends BytesTestCommon {
     }
 
     @Test
+    public void appendSubstring() {
+        doAppend(ByteStringAppender::append);
+    }
+
+    @Test
+    public void appendBytesBounded() {
+        doAppend((b, s) -> b.append(Bytes.from("[" + s + "]"), 1, s.length() + 1));
+    }
+
+    @Test
+    public void appendStringBounded() {
+        doAppend((b, s) -> b.append("[" + s + "]", 1, s.length() + 1));
+    }
+
+    @Test
     public void append8bitSubstring() {
         doAppend(ByteStringAppender::append8bit);
     }
 
     @Test
-    public void appendUtf8Substring() {
-        doAppend(ByteStringAppender::appendUtf8);
+    public void append8bitString() {
+        doAppend((b, s) -> b.append8bit(s.toString()));
+    }
+
+    @Test
+    public void append8bitFromBytes() {
+        doAppend((b, s) -> b.append8bit(Bytes.from(s)));
+    }
+
+
+    @Test
+    public void append8bitFromBytesBounded() {
+        doAppend((b, s) -> b.append8bit(Bytes.from("[" + s + "]"), 1L, s.length() + 1));
+    }
+
+    @Test
+    public void append8bitStringBounded() {
+        doAppend((b, s) -> b.append8bit("[" + s + "]", 1, s.length() + 1));
     }
 
     @Test
@@ -162,22 +188,17 @@ public class Bytes3Test extends BytesTestCommon {
     }
 
     @Test
-    public void write8bitSubstring() {
-        doAppend(ByteStringAppender::write8bit);
-    }
-
-    @Test
-    public void write8bitSubstringBounded() {
-        doAppend((b, s) -> b.write8bit((CharSequence) s, 0, s.length()));
-    }
-
-    @Test
-    public void write8bitFromBytes() {
-        doAppend((b, s) -> b.write8bit(Bytes.from("[" + s + "]"), 1, s.length()));
-    }
-
-    @Test
     public void writeFromBytes() {
+        doAppend((b, s) -> b.write(Bytes.from(s)));
+    }
+
+    @Test
+    public void writeByteArray() {
+        doAppend((b, s) -> b.write(s.toString().getBytes(StandardCharsets.US_ASCII)));
+    }
+
+    @Test
+    public void writeFromBytesBounded() {
         doAppend((b, s) -> b.write(Bytes.from("[" + s + "]"), 1L, s.length()));
     }
 
@@ -187,7 +208,53 @@ public class Bytes3Test extends BytesTestCommon {
     }
 
     @Test
+    public void appendUtf8Substring() {
+        doAppend(ByteStringAppender::appendUtf8);
+    }
+
+    @Test
+    public void write8bitSubstring() {
+        doAppend(ByteStringAppender::write8bit);
+    }
+
+    @Test
+    public void write8bitSubstring2() {
+        doAppend((b, s) -> b.write8bit(s.toString()));
+    }
+
+    @Test
+    public void write8bitSubstringBounded() {
+        doAppend((b, s) -> b.write8bit(s, 0, s.length()));
+    }
+
+    @Test
+    public void write8bitFromBytes() {
+        doAppend((b, s) -> b.write8bit(Bytes.from(s)));
+    }
+
+    @Test
+    public void write8bitFromBytesBounded() {
+        doAppend((b, s) -> b.write8bit(Bytes.from("[" + s + "]"), 1, s.length()));
+    }
+
+    @Test
+    public void write8bitStringBounded() {
+        doAppend((b, s) -> b.write8bit("[" + s + "]", 1, s.length()));
+    }
+
+    @Test
     public void writeUtf8Substring() {
         doAppend(ByteStringAppender::writeUtf8);
+    }
+
+
+    @Test
+    public void writeUtf8Substring2() {
+        doAppend((b, s) -> b.writeUtf8(s.toString()));
+    }
+
+    @Test
+    public void writeUtf8FromBytes() {
+        doAppend((b, s) -> b.writeUtf8(Bytes.from(s)));
     }
 }
