@@ -334,6 +334,7 @@ public class UncheckedBytes<U>
                     break ascii;
                 bytesStore.writeByte(wp++, (byte) c);
             }
+            uncheckedWritePosition(wp);
             return this;
         }
         for (; i < length; i++) {
