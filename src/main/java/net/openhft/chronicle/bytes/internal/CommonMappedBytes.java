@@ -243,9 +243,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         requireNonNegative(length);
         throwExceptionIfClosed();
 
-        if (bytes instanceof BytesStore)
-            write(bytes, offset, length);
-        else if (length == 8)
+        if (length == 8)
             writeLong(bytes.readLong(offset));
         else if (length > 0)
             BytesInternal.writeFully(bytes, offset, length, this);

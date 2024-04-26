@@ -254,7 +254,7 @@ public class UncheckedBytes<U>
         for (int i = 0; i < length; i++) {
             char c = cs.charAt(i);
             if (c > 255) c = '?';
-            writeByte(offset, (byte) c);
+            writeByte(offset++, (byte) c);
         }
         return this;
     }
@@ -334,6 +334,7 @@ public class UncheckedBytes<U>
                     break ascii;
                 bytesStore.writeByte(wp++, (byte) c);
             }
+            uncheckedWritePosition(wp);
             return this;
         }
         for (; i < length; i++) {
