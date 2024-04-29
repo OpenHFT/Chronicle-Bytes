@@ -837,6 +837,7 @@ public abstract class AbstractBytes<U>
         return this;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     @NotNull
     public Bytes<U> write(@NotNull final RandomDataInput bytes)

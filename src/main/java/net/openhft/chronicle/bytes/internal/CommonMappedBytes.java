@@ -232,6 +232,7 @@ public abstract class CommonMappedBytes extends MappedBytes {
         mappedFile.release(this);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     @NotNull
     public Bytes<Void> write(@NotNull final RandomDataInput bytes,

@@ -1766,6 +1766,7 @@ public class HexDumpBytes
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull RandomDataInput bytes) throws IllegalStateException, BufferOverflowException {
@@ -1791,6 +1792,7 @@ public class HexDumpBytes
         }
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<Void> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length) throws BufferOverflowException, BufferUnderflowException, IllegalStateException, IllegalArgumentException {

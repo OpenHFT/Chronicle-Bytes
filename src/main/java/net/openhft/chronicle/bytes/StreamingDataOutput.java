@@ -694,6 +694,7 @@ public interface StreamingDataOutput<S extends StreamingDataOutput<S>> extends S
      * @throws ClosedIllegalStateException    If the resource has been released or closed.
      * @throws ThreadingIllegalStateException If this resource was accessed by multiple threads in an unsafe way
      */
+    @Deprecated(/* to be removed in x.27, use write(BytesStore) */)
     @NotNull
     default S write(@NotNull RandomDataInput bytes)
             throws BufferOverflowException, ClosedIllegalStateException, ThreadingIllegalStateException {

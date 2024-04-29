@@ -207,6 +207,7 @@ public class UncheckedBytes<U>
         return readPosition;
     }
 
+    @SuppressWarnings("deprecation")
     @NotNull
     @Override
     public Bytes<U> write(@NotNull RandomDataInput bytes, @NonNegative long offset, @NonNegative long length)

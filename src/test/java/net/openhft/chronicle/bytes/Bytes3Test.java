@@ -35,6 +35,7 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.*;
 
+@SuppressWarnings({"rawtypes", "unchecked"})
 @RunWith(Parameterized.class)
 public class Bytes3Test extends BytesTestCommon {
 

@@ -39,6 +39,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 /**
  * Tests if certain methods with constraints on primitive method parameters work as expected.
  */
+@SuppressWarnings("deprecation")
 final class BytesPrimitiveParameterTest { // too hard to ensure resources are released
 
     private static final String SILLY_NAME = "Tryggve";
