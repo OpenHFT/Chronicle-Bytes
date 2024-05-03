@@ -368,15 +368,6 @@
 
     <profiles>
         <profile>
-            <id>java9-release8</id>
-            <activation>
-                <jdk>[9,)</jdk>
-            </activation>
-            <properties>
-                <maven.compiler.release>8</maven.compiler.release>
-            </properties>
-        </profile>
-        <profile>
             <id>assertions</id>
             <properties>
                 <zero.cost.assertions>enabled</zero.cost.assertions>

@@ -571,7 +571,7 @@ public abstract class MappedFile extends AbstractCloseableReferenceCounted {
     /**
      * This finalize() is used to detect when a component is not released deterministically. It is not required to be run, but provides a warning
      */
-    @SuppressWarnings("removal")
+    @SuppressWarnings({"removal", "deprecation"})
     @Override
     protected void finalize()
             throws Throwable {

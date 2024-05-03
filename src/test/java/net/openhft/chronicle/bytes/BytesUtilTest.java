@@ -142,6 +142,7 @@ public class BytesUtilTest extends BytesTestCommon {
         assertTrue(BytesUtil.equals(a, aa));
     }
 
+    @SuppressWarnings("removal")
     @Test
     public void equals_equivalentObjects() {
         // Intentional boxing to create two equivalent but distinct objects
