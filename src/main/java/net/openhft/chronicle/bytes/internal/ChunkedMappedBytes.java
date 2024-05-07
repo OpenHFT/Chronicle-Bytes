@@ -343,7 +343,7 @@ public class ChunkedMappedBytes extends CommonMappedBytes {
             assert newBS.reservedBy(this);
 
         } catch (@NotNull IOException e) {
-            throw new IORuntimeException(e);
+            throw new IORuntimeException(String.format("Failed to acquireByteStore start: 0x%X offset: 0x%X safeLimit: 0x%X", start(), offset, safeLimit()), e);
         }
         if (set) {
             try {
