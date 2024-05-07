@@ -37,5 +37,4 @@ public final class HashCodeEqualsUtil {
             bytes.release(owner);
         }
     }
-
 }

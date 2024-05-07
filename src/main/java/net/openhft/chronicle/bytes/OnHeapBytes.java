@@ -142,5 +142,4 @@ public class OnHeapBytes extends VanillaBytes<byte[]> {
         this.bytesStore(store);
         tempStore.release(this);
     }
-
 }

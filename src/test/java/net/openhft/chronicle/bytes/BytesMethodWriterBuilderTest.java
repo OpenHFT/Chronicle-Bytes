@@ -147,6 +147,5 @@ public class BytesMethodWriterBuilderTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-
     }
 }

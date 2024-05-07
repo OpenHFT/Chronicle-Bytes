@@ -48,5 +48,4 @@ class ReferenceCountedUtilTest extends BytesTestCommon {
         bytes.releaseLast();
         assertThrows(ClosedIllegalStateException.class, () -> method.accept(bytes));
     }
-
 }

@@ -93,5 +93,4 @@ public class StopBitTest extends BytesTestCommon {
             b.releaseLast();
         }
     }
-
 }

@@ -198,7 +198,6 @@ final class BytesFactoryUtil {
         public String name() {
             return name;
         }
-
     }
 
     private static final class ThrowingConsumerWrapper<O, T extends Throwable> implements Consumer<O> {

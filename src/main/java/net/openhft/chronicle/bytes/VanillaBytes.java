@@ -734,5 +734,4 @@ public class VanillaBytes<U>
         }
         return (int) (len1 - len2);
     }
-
 }

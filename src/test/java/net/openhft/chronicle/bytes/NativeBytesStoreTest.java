@@ -162,7 +162,6 @@ public class NativeBytesStoreTest extends BytesTestCommon {
             enc.releaseLast();
             dec.releaseLast();
         }
-
     }
 
     @Test

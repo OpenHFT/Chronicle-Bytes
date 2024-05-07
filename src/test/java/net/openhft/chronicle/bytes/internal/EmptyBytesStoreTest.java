@@ -541,5 +541,5 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
         }
         throw new AssertionFailedError("expected Buffer*Exception");
     }
-
 }
+

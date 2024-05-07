@@ -448,4 +448,3 @@ public class BinaryLongArrayReference extends AbstractReference implements Bytea
         return bytesStore.compareAndSwapLong(VALUES + offset + (index << SHIFT), expected, value);
     }
 }
-

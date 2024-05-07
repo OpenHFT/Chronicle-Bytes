@@ -68,7 +68,6 @@ public class UnsafeTextTest extends BytesTestCommon {
         } finally {
             OS.memory().freeMemory(address, 32);
         }
-
     }
 
     @Test
@@ -231,5 +230,4 @@ public class UnsafeTextTest extends BytesTestCommon {
                 .reduce(new StringBuilder(), StringBuilder::append, StringBuilder::append)
                 .toString();
     }
-
 }

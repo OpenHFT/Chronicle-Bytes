@@ -66,5 +66,4 @@ public final class ReferenceCountedUtil {
             requireNonNull(object);
         }
     }
-
 }

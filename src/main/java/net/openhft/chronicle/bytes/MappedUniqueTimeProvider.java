@@ -120,5 +120,4 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
     private boolean casLastTimeStored(final long expected, final long value) {
         return ((RandomDataOutput<?>) bytesStore).compareAndSwapLong(LAST_TIME, expected, value);
     }
-
 }

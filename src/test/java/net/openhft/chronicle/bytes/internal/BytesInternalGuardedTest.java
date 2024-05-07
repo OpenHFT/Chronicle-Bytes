@@ -184,5 +184,4 @@ public class BytesInternalGuardedTest extends BytesTestCommon {
 
         bytes.releaseLast();
     }
-
 }

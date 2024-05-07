@@ -206,3 +206,4 @@ class DecimaliserFloatTest extends BytesTestCommon {
         assertTrue(UsesBigDecimal.USES_BIG_DECIMAL.toDecimal((float) Long.MIN_VALUE, check));
     }
 }
+

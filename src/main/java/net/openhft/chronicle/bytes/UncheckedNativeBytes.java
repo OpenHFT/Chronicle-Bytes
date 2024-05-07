@@ -1124,5 +1124,4 @@ public class UncheckedNativeBytes<U>
             return bytesStore.readLong(offset);
         }
     }
-
 }

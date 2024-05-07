@@ -347,5 +347,4 @@ public class UncheckedBytes<U>
         uncheckedWritePosition(wp);
         return this;
     }
-
 }

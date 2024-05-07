@@ -581,4 +581,3 @@ public class BinaryIntArrayReference extends AbstractReference implements Byteab
         return bytesStore.compareAndSwapInt(VALUES + offset + (index << SHIFT), expected, value);
     }
 }
-

@@ -551,5 +551,5 @@ public class BytesInternalTest extends BytesTestCommon {
         for (; i < length; i++)
             sdo.rawWriteByte(bytes.readByte(offset + i));
     }
-
 }
+

@@ -83,4 +83,3 @@ public class ContentEqualsJLBHTest extends BytesTestCommon {
         }
     }
 }
-

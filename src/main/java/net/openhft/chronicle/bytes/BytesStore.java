@@ -1000,5 +1000,4 @@ public interface BytesStore<B extends BytesStore<B, U>, U>
                 return false;
         return true;
     }
-
 }

@@ -140,7 +140,6 @@ enum BytesInternal {
         } finally {
             VECTORIZED_MISMATCH_METHOD_HANDLE = vectorizedMismatchMethodHandle;
         }
-
     }
 
     public static boolean contentEqual(@Nullable final BytesStore<?, ?> a,

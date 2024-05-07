@@ -261,5 +261,4 @@ final class BytesJavaDocComplianceTest extends BytesTestCommon {
         final BytesInitialInfo actualInfo = new BytesInitialInfo(bytes);
         assertEquals(expectedInfo, actualInfo, createCommand);
     }
-
 }

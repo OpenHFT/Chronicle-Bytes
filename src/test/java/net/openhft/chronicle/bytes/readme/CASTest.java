@@ -68,6 +68,5 @@ public class CASTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-
     }
 }

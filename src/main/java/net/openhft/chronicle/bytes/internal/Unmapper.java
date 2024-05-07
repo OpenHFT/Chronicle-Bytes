@@ -23,7 +23,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 
-
 public final class Unmapper implements Runnable {
     private final long size;
 

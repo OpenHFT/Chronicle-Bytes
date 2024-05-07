@@ -189,7 +189,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override
@@ -249,7 +248,6 @@ public class TextLongArrayReference extends AbstractReference implements Byteabl
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override

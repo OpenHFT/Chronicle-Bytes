@@ -65,5 +65,4 @@ final class Issue384ReplaceByteStoreOnEmptyArrayTest extends BytesTestCommon {
                 )
                 .map(b -> Arguments.of(b.getClass().getSimpleName() + (b.isElastic() ? " Elastic" : " Fixed"), b));
     }
-
 }

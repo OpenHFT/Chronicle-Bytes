@@ -181,4 +181,3 @@ public class BytesMethodReader extends SimpleCloseable implements MethodReader {
         return this;
     }
 }
-

@@ -174,7 +174,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override
@@ -227,7 +226,6 @@ public class TextIntArrayReference extends AbstractReference implements Byteable
             throwExceptionIfClosed();
             throw e;
         }
-
     }
 
     @Override

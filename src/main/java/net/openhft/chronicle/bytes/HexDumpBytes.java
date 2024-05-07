@@ -1944,5 +1944,4 @@ public class HexDumpBytes
             reader.close();
         }
     }
-
 }

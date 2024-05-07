@@ -62,7 +62,6 @@ public class StringsTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-
     }
 
     @Test

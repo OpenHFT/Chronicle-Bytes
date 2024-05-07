@@ -616,7 +616,6 @@ public class BytesMarshallableTest extends BytesTestCommon {
         } finally {
             bytes.releaseLast();
         }
-
     }
 
     @Test

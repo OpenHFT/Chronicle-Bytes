@@ -126,7 +126,6 @@ public class UsesBigDecimal implements Decimaliser {
                     decimalAppender.append(l < 0, Math.abs(l), exp);
                     return true;
                 }
-
             }
         } catch (ArithmeticException | IllegalAccessException ae) {
             // Fall back in case of exception.
