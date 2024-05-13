@@ -331,9 +331,10 @@ public class NativeBytes<U>
         if (this.bytesStore.underlyingObject() instanceof ByteBuffer) {
             @Nullable final ByteBuffer byteBuffer = (ByteBuffer) this.bytesStore.underlyingObject();
             //noinspection RedundantCast
-            ((Buffer) byteBuffer).position(0);
-            byteBuffer.limit(byteBuffer.capacity());
-            byteBuffer.position(position);
+            Buffer buffer = byteBuffer;
+            buffer.position(0);
+            buffer.limit(byteBuffer.capacity());
+            buffer.position(position);
         }
     }
 
