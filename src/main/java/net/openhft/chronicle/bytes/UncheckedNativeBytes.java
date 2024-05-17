@@ -1090,6 +1090,12 @@ public class UncheckedNativeBytes<U>
         return uncheckedRandomDataInput;
     }
 
+    @Override
+    public void unmonitor() {
+        super.unmonitor();
+        Monitorable.unmonitor(bytesStore);
+    }
+
     private final class UncheckedRandomDataInputHolder implements UncheckedRandomDataInput {
 
         @Override

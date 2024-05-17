@@ -1535,6 +1535,12 @@ public abstract class AbstractBytes<U>
         return (int) read(readPosition(), bytes, 0, bytes.length);
     }
 
+    @Override
+    public void unmonitor() {
+        super.unmonitor();
+        Monitorable.unmonitor(bytesStore);
+    }
+
     static final class ReportUnoptimised {
         static {
             Jvm.reportUnoptimised();
