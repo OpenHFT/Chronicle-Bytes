@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes;
 
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
-import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -75,7 +74,7 @@ public class MappedBytesEdgeTest extends BytesTestCommon {
     }
 
     static Bytes unmonitored(Bytes bytes) {
-        IOTools.unmonitor(bytes);
+        Bytes.unmonitor(bytes);
         return bytes;
     }
 

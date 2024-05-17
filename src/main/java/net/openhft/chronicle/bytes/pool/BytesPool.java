@@ -19,7 +19,6 @@ package net.openhft.chronicle.bytes.pool;
 
 import net.openhft.chronicle.bytes.Bytes;
 import net.openhft.chronicle.core.Jvm;
-import net.openhft.chronicle.core.io.IOTools;
 import net.openhft.chronicle.core.scoped.ScopedResourcePool;
 import net.openhft.chronicle.core.scoped.ScopedThreadLocal;
 import org.jetbrains.annotations.NotNull;
@@ -104,7 +103,7 @@ public final class BytesPool {
     @NotNull
     private static Bytes<?> createBytes() {
         Bytes<?> bbb = Bytes.allocateElasticDirect(256);
-        IOTools.unmonitor(bbb);
+        Bytes.unmonitor(bbb);
         return bbb;
     }
 }

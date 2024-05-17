@@ -54,7 +54,7 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             this.bytesStore = bytes.bytesStore();
             IOTools.unmonitor(file);
-            IOTools.unmonitor(bytes);
+            Bytes.unmonitor(bytes);
         } catch (Exception ioe) {
             throw new IORuntimeException(ioe);
         }

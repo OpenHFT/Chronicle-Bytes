@@ -67,7 +67,7 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
             if (unmonitor) IOTools.unmonitor(file);
             bytes = file.acquireBytesForWrite(this, 0);
-            if (unmonitor) IOTools.unmonitor(bytes);
+            if (unmonitor) Bytes.unmonitor(bytes);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
             if (unmonitor) IOTools.unmonitor(values);

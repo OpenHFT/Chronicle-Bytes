@@ -83,7 +83,7 @@ enum BytesInternal {
     public static final ScopedThreadLocal<Bytes<?>> BYTES_SCOPED_THREAD_LOCAL = new ScopedThreadLocal<>(
             () -> {
                 Bytes<?> bbb = Bytes.allocateElasticDirect(256);
-                IOTools.unmonitor(bbb);
+                Bytes.unmonitor(bbb);
                 return bbb;
             },
             Bytes::clear,

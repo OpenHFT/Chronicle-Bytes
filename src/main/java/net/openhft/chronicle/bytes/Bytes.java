@@ -692,6 +692,16 @@ public interface Bytes<U> extends
     }
 
     /**
+     * Stops the monitoring of the specified Bytes.
+     *
+     * @param bytes the bytes to stop monitoring
+     */
+    static void unmonitor(Bytes<?> bytes) {
+        IOTools.unmonitor(bytes.bytesStore());
+        IOTools.unmonitor(bytes);
+    }
+
+    /**
      * Creates and returns a new Bytes which is optionally unchecked as indicated by the provided {@code unchecked}.
      * <p>
      * This allows bounds checks to be turned off.

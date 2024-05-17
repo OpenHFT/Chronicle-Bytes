@@ -77,7 +77,7 @@ public class HexDumpBytes
     public HexDumpBytes() {
         base = Bytes.allocateElasticDirect(256);
         // as it's use for diagnostics and tests rather than production.
-        IOTools.unmonitor(base);
+        Bytes.unmonitor(base);
         text = Bytes.allocateElasticOnHeap(1024);
     }
 

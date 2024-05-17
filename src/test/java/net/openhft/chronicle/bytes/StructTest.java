@@ -20,7 +20,6 @@ package net.openhft.chronicle.bytes;
 import net.openhft.affinity.Affinity;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
 import org.junit.Test;
 
 import java.nio.BufferOverflowException;
@@ -55,7 +54,7 @@ public class StructTest extends BytesTestCommon {
         protected Struct(int size) {
             this.size = size;
             bytes = new NativeBytes<>(new PointerBytesStore(), size);
-            IOTools.unmonitor(bytes);
+            Bytes.unmonitor(bytes);
             allocateAndInitialise();
         }
 
@@ -68,7 +67,7 @@ public class StructTest extends BytesTestCommon {
         protected Struct(int size, long address) {
             this.size = size;
             bytes = new NativeBytes<>(new PointerBytesStore(), size);
-            IOTools.unmonitor(bytes);
+            Bytes.unmonitor(bytes);
             initialise(address);
         }
 
@@ -145,7 +144,7 @@ public class StructTest extends BytesTestCommon {
         private void allocateAndInitialise() {
             if (self == null) {
                 self = Bytes.allocateDirect(size);
-                IOTools.unmonitor(self);
+                Bytes.unmonitor(self);
                 initialise(self.addressForWrite(0));
             }
         }
@@ -456,7 +455,7 @@ public class StructTest extends BytesTestCommon {
 
             if (name == null) {
                 name = new NativeBytes<>(new PointerBytesStore(), NAME_SIZE);
-                IOTools.unmonitor(name);
+                Bytes.unmonitor(name);
             }
 
             ((PointerBytesStore) name.bytesStore()).set(address + NAME, NAME_SIZE);

@@ -439,7 +439,7 @@ public class EmptyBytesStoreTest extends BytesTestCommon {
     public void bytesForWrite() {
         try {
             final Bytes bytes = instance.bytesForWrite();
-            IOTools.unmonitor(bytes);
+            Bytes.unmonitor(bytes);
             assertThrowsBufferException(() -> bytes.writeSkip(1));
         } catch (UnsupportedOperationException ignored) {
 
