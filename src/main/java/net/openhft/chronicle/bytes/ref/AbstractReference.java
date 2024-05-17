@@ -21,10 +21,7 @@ import net.openhft.chronicle.bytes.Byteable;
 import net.openhft.chronicle.bytes.BytesStore;
 import net.openhft.chronicle.bytes.MappedBytesStore;
 import net.openhft.chronicle.core.annotation.NonNegative;
-import net.openhft.chronicle.core.io.AbstractCloseable;
-import net.openhft.chronicle.core.io.Closeable;
-import net.openhft.chronicle.core.io.ClosedIllegalStateException;
-import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -187,5 +184,11 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
             return mbs.tryLock(offset, maxSize(), shared);
         }
         throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public void unmonitor() {
+        super.unmonitor();
+        Monitorable.unmonitor(bytes);
     }
 }

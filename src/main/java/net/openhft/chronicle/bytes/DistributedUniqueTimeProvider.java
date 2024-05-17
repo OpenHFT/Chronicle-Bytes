@@ -40,7 +40,7 @@ import java.io.File;
  * The class uses a file-based mechanism to ensure that timestamps are not only unique across restarts
  * but also across different JVM instances.
  */
-public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider {
+public class DistributedUniqueTimeProvider extends SimpleCloseable implements TimeProvider, Monitorable {
 
     static final int HOST_IDS = 100;
     private static final int LAST_TIME = 128;
@@ -65,17 +65,17 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
         hostId(hostId);
         try {
             file = MappedFile.ofSingle(new File(BytesUtil.TIME_STAMP_PATH), OS.pageSize(), false);
-            if (unmonitor) IOTools.unmonitor(file);
             bytes = file.acquireBytesForWrite(this, 0);
-            if (unmonitor) IOTools.unmonitor(bytes);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             values = new BinaryLongArrayReference(HOST_IDS);
-            if (unmonitor) IOTools.unmonitor(values);
             values.bytesStore(bytes, DEDUPLICATOR, HOST_IDS * 8L + 16L);
             deduplicator = new VanillaDistributedUniqueTimeDeduplicator(values);
 
         } catch (Exception ioe) {
             throw new IORuntimeException(ioe);
+        } finally {
+            if (unmonitor)
+                unmonitor();
         }
     }
 
@@ -281,6 +281,13 @@ public class DistributedUniqueTimeProvider extends SimpleCloseable implements Ti
             // modified the 'LAST_TIME' field), pause for a short period before retrying
             Jvm.nanoPause();
         }
+    }
+
+    @Override
+    public void unmonitor() {
+        Monitorable.unmonitor(file);
+        Monitorable.unmonitor(bytes);
+        Monitorable.unmonitor(values);
     }
 
     /**

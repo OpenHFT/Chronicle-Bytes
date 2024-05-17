@@ -20,7 +20,7 @@ package net.openhft.chronicle.bytes;
 import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.IOTools;
+import net.openhft.chronicle.core.io.Monitorable;
 import net.openhft.chronicle.core.io.ReferenceOwner;
 import net.openhft.chronicle.core.time.SystemTimeProvider;
 import net.openhft.chronicle.core.time.TimeProvider;
@@ -53,8 +53,8 @@ public enum MappedUniqueTimeProvider implements TimeProvider, ReferenceOwner {
             final Bytes<?> bytes = file.acquireBytesForWrite(this, 0);
             bytes.append8bit("&TSF\nTime stamp file used for sharing a unique id\n");
             this.bytesStore = bytes.bytesStore();
-            IOTools.unmonitor(file);
-            IOTools.unmonitor(bytes);
+            Monitorable.unmonitor(file);
+            Monitorable.unmonitor(bytes);
         } catch (Exception ioe) {
             throw new IORuntimeException(ioe);
         }

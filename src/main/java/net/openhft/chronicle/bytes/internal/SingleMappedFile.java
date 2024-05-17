@@ -23,10 +23,7 @@ import net.openhft.chronicle.core.Jvm;
 import net.openhft.chronicle.core.OS;
 import net.openhft.chronicle.core.annotation.NonNegative;
 import net.openhft.chronicle.core.annotation.Positive;
-import net.openhft.chronicle.core.io.ClosedIllegalStateException;
-import net.openhft.chronicle.core.io.IORuntimeException;
-import net.openhft.chronicle.core.io.ReferenceOwner;
-import net.openhft.chronicle.core.io.ThreadingIllegalStateException;
+import net.openhft.chronicle.core.io.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -403,5 +400,11 @@ public class SingleMappedFile extends MappedFile {
     @Override
     public MappedBytes createBytesFor() {
         return new SingleMappedBytes(this);
+    }
+
+    @Override
+    public void unmonitor() {
+        super.unmonitor();
+        Monitorable.unmonitor(store);
     }
 }
