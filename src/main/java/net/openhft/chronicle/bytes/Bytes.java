@@ -599,10 +599,10 @@ public interface Bytes<U> extends
     /**
      * <p>Extracts a string from the provided {@code buffer} starting at the specified {@code position},
      * and spanning for the specified {@code length} number of characters. The buffer's state
-     * remains unchanged by this method.</p>
+     * remains unchanged by this method.
      *
      * <p>The method reads {@code length} bytes from the {@code buffer}, starting at {@code position},
-     * and constructs a string from these bytes.</p>
+     * and constructs a string from these bytes.
      *
      * <p>This method supports all characters in the Basic Latin Unicode block, but does not handle the
      * upper half of ISO-8859-1. For strings using the upper block of ISO-8859-1, use {@link #to8bitString()}</p>

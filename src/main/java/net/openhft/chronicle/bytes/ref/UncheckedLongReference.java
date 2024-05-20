@@ -35,7 +35,7 @@ import java.nio.BufferUnderflowException;
  * <p>
  * This class is thread-safe provided that external synchronization is applied. It uses different implementations based on the JVM's debug status:
  * in debug mode, it uses {@link BinaryLongReference} for safety checks; otherwise, it uses {@link UncheckedLongReference} for better performance.
- * </p>
+ *
  * @see LongReference
  * @see ReferenceOwner
  * @see UnsafeCloseable
