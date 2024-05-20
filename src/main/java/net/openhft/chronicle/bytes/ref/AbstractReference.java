@@ -190,6 +190,6 @@ public abstract class AbstractReference extends AbstractCloseable implements Byt
     @Override
     public void unmonitor() {
         super.unmonitor();
-        Monitorable.unmonitor(bytes);
+        Monitorable.unmonitor(bytesStore);
     }
 }
